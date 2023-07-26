@@ -34,6 +34,7 @@ const GeneralBuildingSettings = () => {
     const { bldgId } = useParams();
     const [selectedTimezone, setSelectedTimezone] = useState({});
     const [isEditing, setIsEditing] = useState(false);
+    const userPrefTImeZone = UserStore.useState((s) => s.timeFormat);
 
     const [generalDateTimeData, setGeneralDateTimeData] = useState({});
     const [checked, setChecked] = useState(generalDateTimeData.time_format);
@@ -52,7 +53,7 @@ const GeneralBuildingSettings = () => {
     const [buildingAddress, setBuildingAddress] = useState({});
     const [buildingOperatingHours, setBuildingOperatingHours] = useState({});
     const [textLocation, settextLocation] = useState('');
-    const [timeZone, setTimeZone] = useState('');
+    const [timeZone, setTimeZone] = useState('12');
     const [loadButton, setLoadButton] = useState(false);
     const [switchPhrase, setSwitchPhrace] = useState({
         mon: false,
@@ -457,13 +458,10 @@ const GeneralBuildingSettings = () => {
     };
 
     useEffect(() => {
-        if (bldgData?.time_format) {
-            setTimeZone('24');
-        }
-        if (!bldgData?.time_format) {
-            setTimeZone('12');
-        }
-    }, [bldgData]);
+        if (!userPrefTImeZone) return;
+        const time_zone = userPrefTImeZone.split('h')[0];
+        setTimeZone(time_zone);
+    }, [userPrefTImeZone]);
 
     useEffect(() => {
         fetchBuildingType();
@@ -1043,50 +1041,6 @@ const GeneralBuildingSettings = () => {
                                             className="w-100"
                                             value={buildingDetails?.timezone ? buildingDetails?.timezone : ''}
                                             disabled
-                                        />
-                                    )}
-                                </div>
-                            </div>
-
-                            <Brick sizeInRem={1} />
-
-                            <div className="row d-flex align-items-center">
-                                <div className="col">
-                                    <Typography.Subheader size={Typography.Sizes.md}>
-                                        Use 24-hour Clock
-                                    </Typography.Subheader>
-                                </div>
-                                <div className="col">
-                                    {userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
-                                        <Switch
-                                            onChange={(e) => {
-                                                handleDateTimeSwitch();
-
-                                                if (e) {
-                                                    setTimeZone('24');
-                                                    localStorage.setItem('generaltimeZone', '24');
-                                                }
-
-                                                if (!e) {
-                                                    setTimeZone('12');
-                                                    localStorage.setItem('generaltimeZone', '12');
-                                                }
-                                            }}
-                                            checked={buildingDetails.time_format}
-                                            onColor={colorPalette.datavizBlue600}
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                            className="react-switch"
-                                        />
-                                    ) : (
-                                        <Switch
-                                            onChange={() => {}}
-                                            checked={buildingDetails.time_format}
-                                            onColor={colorPalette.datavizBlue600}
-                                            className="react-switch"
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
                                         />
                                     )}
                                 </div>

@@ -351,6 +351,7 @@ const Accounts = () => {
             name: 'Energy Used kWh',
             accessor: 'total_usage',
             callbackValue: renderEnergy,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Actions',
@@ -358,6 +359,7 @@ const Accounts = () => {
             callbackValue: renderActions,
         },
     ];
+
     const pageListSizes = [
         {
             label: '20 Rows',

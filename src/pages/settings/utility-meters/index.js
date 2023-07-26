@@ -57,7 +57,7 @@ const UtilityMeters = () => {
     const [isDataFetching, setIsDataFetching] = useState(false);
     const [utilityMetersData, setUtilityMetersData] = useState([]);
 
-    // For Delete Utility Meter
+    // For Delete Utility Monitor
     const [deleteId, setDeleteId] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteModal, setShowDelete] = useState(false);
@@ -113,8 +113,8 @@ const UtilityMeters = () => {
                         s.notificationMessage = response?.message
                             ? response?.message
                             : res
-                            ? 'Unable to delete Utility Meter.'
-                            : 'Unable to delete Utility Meter due to Internal Server Error!.';
+                            ? 'Unable to delete Utility Monitor.'
+                            : 'Unable to delete Utility Monitor due to Internal Server Error!.';
                         s.notificationType = 'error';
                     });
                 }
@@ -127,7 +127,7 @@ const UtilityMeters = () => {
                 setIsDeleting(false);
                 UserStore.update((s) => {
                     s.showNotification = true;
-                    s.notificationMessage = 'Unable to delete Utility Meter.';
+                    s.notificationMessage = 'Unable to delete Utility Monitor.';
                     s.notificationType = 'error';
                 });
             });
@@ -148,7 +148,7 @@ const UtilityMeters = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/utility-meters/single/${bldgId}/${row?.id}`,
+                    pathname: `/settings/utility-monitors/single/${bldgId}/${row?.id}`,
                 }}>
                 <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
                     {row?.mac_address ? convertToMac(row?.mac_address) : ''}
@@ -209,8 +209,8 @@ const UtilityMeters = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'Utility Meters',
-                    path: '/settings/utility-meters',
+                    label: 'Utility Monitors',
+                    path: '/settings/utility-monitors',
                     active: true,
                 },
             ];
@@ -235,7 +235,7 @@ const UtilityMeters = () => {
                 <Col lg={12}>
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <Typography.Header size={Typography.Sizes.lg}>Utility Meters</Typography.Header>
+                            <Typography.Header size={Typography.Sizes.lg}>Utility Monitors</Typography.Header>
                         </div>
                         {userPermission?.user_role === 'admin' ||
                         userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ? (

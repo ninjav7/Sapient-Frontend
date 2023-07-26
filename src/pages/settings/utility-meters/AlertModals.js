@@ -11,10 +11,10 @@ const DeleteModal = (props) => {
     return (
         <Modal show={showModal} onHide={closeModal} centered backdrop="static" keyboard={false}>
             <Modal.Body className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>Delete Utility Meter</Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>Delete Utility Monitor</Typography.Header>
                 <Brick sizeInRem={1.5} />
                 <Typography.Body size={Typography.Sizes.lg}>
-                    Are you sure you want to delete the Utility Meter?
+                    Are you sure you want to delete the Utility Monitor?
                 </Typography.Body>
             </Modal.Body>
             <Modal.Footer className="pb-4 pr-4">

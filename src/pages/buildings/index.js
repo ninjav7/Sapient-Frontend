@@ -14,7 +14,8 @@ import {
     fetchBuilidingHourly,
     fetchEnergyConsumption,
     fetchEndUseByBuilding,
-    getEnergyConsumptionByType,
+    fetchEnergyConsumptionByEquipType,
+    fetchEnergyConsumptionBySpaceType,
 } from '../buildings/services';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -98,11 +99,13 @@ const BuildingOverview = () => {
     const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
 
     const [equipTypeData, setEquipTypeData] = useState([]);
-    const [totalBldgUsage, setTotalBldgUsage] = useState(0);
+    const [spaceTypeData, setSpaceTypeData] = useState([]);
 
     const [isFetchingEquipType, setFetchingEquipType] = useState(false);
-    const [spaceTypeData, setSpaceTypeData] = useState([]);
     const [isFetchingSpaceType, setFetchingSpaceType] = useState(false);
+
+    const [totalBldgUsageByEquipType, setTotalBldgUsageByEquipType] = useState(0);
+    const [totalBldgUsageBySpaceType, setTotalBldgUsageBySpaceType] = useState(0);
 
     //EquipChartModel
     const [equipmentFilter, setEquipmentFilter] = useState({});
@@ -375,18 +378,21 @@ const BuildingOverview = () => {
             });
     };
 
-    const fetchEnergyConsumptionByType = async (time_zone) => {
+    const getEnergyConsumptionByEquipType = async (time_zone) => {
         setFetchingEquipType(true);
+
         const payload = {
             bldg_id: bldgId,
             date_from: encodeURIComponent(new Date(startDate).toISOString()),
             date_to: encodeURIComponent(new Date(endDate).toISOString()),
             tz_info: time_zone,
         };
-        await getEnergyConsumptionByType(payload)
+
+        await fetchEnergyConsumptionByEquipType(payload)
             .then((res) => {
                 const response = res?.data;
-                if (response?.data?.total_building_usage) setTotalBldgUsage(response?.data?.total_building_usage);
+                if (response?.data?.total_building_usage)
+                    setTotalBldgUsageByEquipType(response?.data?.total_building_usage);
                 if (response?.success && response?.data?.equipment_type_usage.length !== 0) {
                     setEquipTypeData(response?.data?.equipment_type_usage);
                 }
@@ -394,6 +400,31 @@ const BuildingOverview = () => {
             })
             .catch(() => {
                 setFetchingEquipType(false);
+            });
+    };
+
+    const getEnergyConsumptionBySpaceType = async (time_zone) => {
+        setFetchingSpaceType(true);
+
+        const payload = {
+            bldg_id: bldgId,
+            date_from: encodeURIComponent(new Date(startDate).toISOString()),
+            date_to: encodeURIComponent(new Date(endDate).toISOString()),
+            tz_info: time_zone,
+        };
+
+        await fetchEnergyConsumptionBySpaceType(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.data?.total_building_usage)
+                    setTotalBldgUsageBySpaceType(response?.data?.total_building_usage);
+                if (response?.success && response?.data?.space_type_usage.length !== 0) {
+                    setSpaceTypeData(response?.data?.space_type_usage);
+                }
+                setFetchingSpaceType(false);
+            })
+            .catch(() => {
+                setFetchingSpaceType(false);
             });
     };
 
@@ -432,7 +463,8 @@ const BuildingOverview = () => {
         builidingEquipmentsData(time_zone);
         buildingHourlyData(time_zone);
         buildingConsumptionChart(time_zone);
-        fetchEnergyConsumptionByType(time_zone);
+        getEnergyConsumptionByEquipType(time_zone);
+        getEnergyConsumptionBySpaceType(time_zone);
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
@@ -598,18 +630,18 @@ const BuildingOverview = () => {
                             subTitle="Office-Hours and After-Hours Energy Used"
                             isFetching={isFetchingEquipType}
                             rows={equipTypeData}
-                            totalBldgUsage={totalBldgUsage}
+                            totalBldgUsage={totalBldgUsageByEquipType}
                         />
                     </div>
-                    {/* Commented below component as part of ticket PLT-1083 */}
-                    {/* <div className="mt-4">
+                    <div className="mt-4">
                         <EnergyConsumptionChart
                             title="Energy Consumption by Space Type"
                             subTitle="Office-Hours and After-Hours Energy Used"
-                            isFetching={isFetchingEquipType}
+                            isFetching={isFetchingSpaceType}
                             rows={spaceTypeData}
+                            totalBldgUsage={totalBldgUsageBySpaceType}
                         />
-                    </div> */}
+                    </div>
                 </div>
             </div>
 

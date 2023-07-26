@@ -166,7 +166,7 @@ const ConfigureTab = (props) => {
         return (
             <div>
                 <UncontrolledTooltip placement="bottom" target={'tooltip-for-location'}>
-                    {`Utility meters are associated with the building by default. If this is a sub-meter or tenant metering application, please select a location from the dropdown.`}
+                    {`Utility Monitors are associated with the building by default. If this is a sub-meter or tenant metering application, please select a location from the dropdown.`}
                 </UncontrolledTooltip>
 
                 <button type="button" className="tooltip-button" id={'tooltip-for-location'}>
@@ -487,8 +487,8 @@ const EditUtilitySensor = (props) => {
                             s.notificationMessage = response?.message
                                 ? response?.message
                                 : res
-                                ? 'Unable to update utility meter sensor.'
-                                : 'Unable to utility meter sensor due to Internal Server Error!.';
+                                ? 'Unable to update Utility Monitor sensor.'
+                                : 'Unable to Utility Monitor sensor due to Internal Server Error!.';
                             s.notificationType = 'error';
                         });
                     }

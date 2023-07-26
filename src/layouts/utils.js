@@ -1,7 +1,7 @@
 export const deviceConfigRoutes = [
     '/settings/active-devices/single',
     '/settings/smart-meters/single',
-    '/settings/utility-meters/single',
+    '/settings/utility-monitors/single',
 ];
 
 export const secondaryNavBarNotRequiredRoutes = ['/login', '/super-user'];

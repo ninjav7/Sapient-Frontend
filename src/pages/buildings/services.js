@@ -5,7 +5,8 @@ import {
     getEnergyConsumption,
     energyEndUseInfo,
     portfolioOverall,
-    buildingEnergyConsumption,
+    energyConsumptionByEquipmentType,
+    energyConsumptionBySpaceType,
 } from '../../services/Network';
 
 export function fetchOverallBldgData(bldgId, payload) {
@@ -32,7 +33,12 @@ export function fetchEnergyConsumption(bldgId, payload) {
     return axiosInstance.post(`${getEnergyConsumption}${params}`, payload).then((res) => res);
 }
 
-export function getEnergyConsumptionByType(obj) {
+export function fetchEnergyConsumptionByEquipType(obj) {
     const params = `?building_id=${obj?.bldg_id}&date_from=${obj?.date_from}&date_to=${obj?.date_to}&timezone=${obj?.tz_info}`;
-    return axiosInstance.get(`${buildingEnergyConsumption}${params}`).then((res) => res);
+    return axiosInstance.get(`${energyConsumptionByEquipmentType}${params}`).then((res) => res);
+}
+
+export function fetchEnergyConsumptionBySpaceType(obj) {
+    const params = `?building_id=${obj?.bldg_id}&date_from=${obj?.date_from}&date_to=${obj?.date_to}&timezone=${obj?.tz_info}`;
+    return axiosInstance.get(`${energyConsumptionBySpaceType}${params}`).then((res) => res);
 }

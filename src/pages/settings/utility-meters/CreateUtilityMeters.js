@@ -61,7 +61,7 @@ const CreateUtilityMeters = (props) => {
 
     const redirectUserToUtilityMeterPage = (deviceId) => {
         history.push({
-            pathname: `/settings/utility-meters/single/${bldgId}/${deviceId}`,
+            pathname: `/settings/utility-monitors/single/${bldgId}/${deviceId}`,
         });
     };
 
@@ -116,8 +116,8 @@ const CreateUtilityMeters = (props) => {
                                 s.notificationMessage = response?.message
                                     ? response?.message
                                     : res
-                                    ? 'Unable to create Utility Meter.'
-                                    : 'Unable to create Utility Meter due to Internal Server Error!.';
+                                    ? 'Unable to create Utility Monitor.'
+                                    : 'Unable to create Utility Monitor due to Internal Server Error!.';
                                 s.notificationType = 'error';
                             });
                         }
@@ -135,7 +135,7 @@ const CreateUtilityMeters = (props) => {
         <>
             <div className="d-flex">
                 <Button
-                    label={isProcessing ? 'Adding Utility Meter ...' : 'Add Utility Meter'}
+                    label={isProcessing ? 'Adding Utility Monitor ...' : 'Add Utility Monitor'}
                     size={Button.Sizes.md}
                     type={Button.Type.primary}
                     icon={<PlusSVG />}
@@ -145,7 +145,7 @@ const CreateUtilityMeters = (props) => {
             </div>
             <Modal show={modal} onHide={handleModalClose} backdrop="static" keyboard={false} centered>
                 <div className="p-4">
-                    <Typography.Header size={Typography.Sizes.lg}>Add Utility Meter</Typography.Header>
+                    <Typography.Header size={Typography.Sizes.lg}>Add Utility Monitor</Typography.Header>
 
                     <Brick sizeInRem={2} />
 
