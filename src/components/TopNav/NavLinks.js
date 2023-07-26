@@ -51,7 +51,7 @@ const NavLinks = () => {
         '/settings/panels',
         '/settings/active-devices',
         '/settings/smart-meters',
-        '/settings/utility-meters',
+        '/settings/utility-monitors',
     ];
 
     const handleEnergyClick = () => {

@@ -15,14 +15,14 @@ export const configRoutes = [
     '/settings/panels',
     '/settings/active-devices',
     '/settings/smart-meters',
-    '/settings/utility-meters',
+    '/settings/utility-monitors',
 ];
 
 export const configChildRoutes = [
     '/settings/panels/edit-panel',
     '/settings/active-devices/single/',
     '/settings/smart-meters/single/',
-    '/settings/utility-meters/single/',
+    '/settings/utility-monitors/single/',
     '/settings/active-devices/provision',
 ];
 

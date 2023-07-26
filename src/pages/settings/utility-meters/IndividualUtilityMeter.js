@@ -66,8 +66,8 @@ const DeleteUtility = (props) => {
                         s.notificationMessage = response?.message
                             ? response?.message
                             : res
-                            ? 'Unable to delete Utility Meter.'
-                            : 'Unable to delete Utility Meter due to Internal Server Error!.';
+                            ? 'Unable to delete Utility Monitor.'
+                            : 'Unable to delete Utility Monitor due to Internal Server Error!.';
                         s.notificationType = 'error';
                     });
                 }
@@ -80,7 +80,7 @@ const DeleteUtility = (props) => {
                 setIsDeleting(false);
                 UserStore.update((s) => {
                     s.showNotification = true;
-                    s.notificationMessage = 'Unable to delete Utility Meter.';
+                    s.notificationMessage = 'Unable to delete Utility Monitor.';
                     s.notificationType = 'error';
                 });
             });
@@ -92,7 +92,7 @@ const DeleteUtility = (props) => {
                 <Col lg={12}>
                     <DangerZone
                         title="Danger Zone"
-                        labelButton="Delete Utility Meter"
+                        labelButton="Delete Utility Monitor"
                         iconButton={<DeleteSVG />}
                         onClickButton={() => {
                             setDeleteId(utilityMeterObj?.id);
@@ -179,8 +179,8 @@ const Sensors = (props) => {
                                 {isPulseWeightVisible && (
                                     <Badge
                                         text={`${record?.pulse_weight} Pulse Weight`}
-                                        className="utility-meter-badge font-weight-bold"
-                                        typographyClassName="utility-meter-badge"
+                                        className="utility-monitors-badge font-weight-bold"
+                                        typographyClassName="utility-monitors-badge"
                                     />
                                 )}
                             </div>
@@ -225,7 +225,7 @@ const DeviceHeader = (props) => {
         <div className="passive-header-wrapper d-flex justify-content-between">
             <div className="d-flex flex-column justify-content-between">
                 <Typography.Subheader size={Typography.Sizes.md} style={{ color: colorPalette.primaryGray500 }}>
-                    Utility Metering Device
+                    Utility Monitoring Device
                 </Typography.Subheader>
                 <div className="d-flex align-items-center">
                     <Typography.Header size={Typography.Sizes.md} className="mr-2">
@@ -343,8 +343,8 @@ const EditUtilityMeter = (props) => {
                                 s.notificationMessage = response?.message
                                     ? response?.message
                                     : res
-                                    ? 'Unable to update Utility Meter.'
-                                    : 'Unable to update Utility Meter due to Internal Server Error!.';
+                                    ? 'Unable to update Utility Monitor.'
+                                    : 'Unable to update Utility Monitor due to Internal Server Error!.';
                                 s.notificationType = 'error';
                             });
                         }
@@ -369,7 +369,7 @@ const EditUtilityMeter = (props) => {
     return (
         <Modal show={editUtilityModal} onHide={handleModalClose} backdrop="static" keyboard={false} centered>
             <div className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>Edit Utility Meter</Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>Edit Utility Monitor</Typography.Header>
 
                 <Brick sizeInRem={2} />
 
@@ -582,7 +582,7 @@ const IndividualUtilityMeter = () => {
     const [isFetchingLocations, setFetchingLocations] = useState(false);
 
     const redirectToMainPage = () => {
-        history.push({ pathname: `/settings/utility-meters/${bldgId}` });
+        history.push({ pathname: `/settings/utility-monitors/${bldgId}` });
     };
 
     const fetchUtilityMeter = async (bldg_id, device_id) => {
@@ -638,15 +638,15 @@ const IndividualUtilityMeter = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'Utility Meters',
-                    path: `/settings/utility-meters/${bldgId}`,
+                    label: 'Utility Monitors',
+                    path: `/settings/utility-monitors/${bldgId}`,
                     active: false,
                 },
             ];
             if (device_name) {
                 newList.push({
                     label: device_name,
-                    path: '/settings/utility-meters/single',
+                    path: '/settings/utility-monitors/single',
                     active: true,
                 });
             }
