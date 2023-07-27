@@ -22,6 +22,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { buildingData } from '../../store/globalState';
+import { UserStore } from '../../store/UserStore';
 import BuildingKPIs from './BuildingKPIs';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
 import HourlyAvgConsumption from './HourlyAvgConsumption';
@@ -48,6 +49,7 @@ const BuildingOverview = () => {
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
+    const userPrefUnits = UserStore.useState((s) => s.unit);
 
     const [overallBldgData, setOverallBldgData] = useState({
         total_building: 0,
@@ -505,7 +507,7 @@ const BuildingOverview = () => {
             <Header title="Building Overview" type="page" />
 
             <div className="mt-4 mb-4">
-                <BuildingKPIs daysCount={daysCount} overalldata={overallBldgData} />
+                <BuildingKPIs daysCount={daysCount} overalldata={overallBldgData} userPrefUnits={userPrefUnits} />
             </div>
 
             <div className="bldg-page-grid-style">

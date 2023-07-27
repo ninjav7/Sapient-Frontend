@@ -4,10 +4,11 @@ import { percentageHandler } from '../../utils/helper';
 import { KPILabeled, KPI_UNITS } from '../../sharedComponents/KPIs';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import { formatConsumptionValue } from '../../helpers/helpers';
+import { UNITS } from '../../constants/units';
 
 import '../portfolio/PortfolioKPIs.scss';
 
-const BuildingKPIs = ({ overalldata = {}, daysCount = 0 }) => {
+const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
     return (
         <div className={`portfolioKPIs-wrapper`}>
             <KPILabeled
@@ -32,17 +33,21 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0 }) => {
             />
 
             <KPILabeled
-                title="Average Consumption / sq. ft."
+                title={`Average Consumption / ${userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`}`}
                 value={formatConsumptionValue(overalldata?.average_energy_density?.now / 1000, 2)}
                 badgePrecentage={percentageHandler(
                     overalldata?.average_energy_density?.now,
                     overalldata?.average_energy_density?.old
                 )}
-                unit={KPI_UNITS.KWH_SQ_FT}
+                unit={`${userPrefUnits === 'si' ? `${UNITS.KWH}/${UNITS.SQ_M}` : `${UNITS.KWH}/${UNITS.SQ_FT}`}`}
                 tooltipText={
                     daysCount > 1
-                        ? `Average Consumption / sq. ft. of this building for the past ${daysCount} days.`
-                        : `Average Consumption / sq. ft. of this building for the past ${daysCount} day.`
+                        ? `Average Consumption / ${
+                              userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`
+                          } of this building for the past ${daysCount} days.`
+                        : `Average Consumption / ${
+                              userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`
+                          } of this building for the past ${daysCount} day.`
                 }
                 tooltipId="avg-bld-dnty"
                 type={
