@@ -720,6 +720,7 @@ const PlugRule = () => {
                 const snackbarTitle = notificationUnlinkedData(rulesToUnLink.sensor_id.length, currentData.name);
 
                 openSnackbar({ ...snackbarTitle, type: Notification.Types.success, duration: 5000 });
+                setIsSetInitiallySocketsCountLinked(false);
                 fetchLinkedSocketRules();
                 fetchLinkedSocketIds();
                 fetchUnLinkedSocketRules();
@@ -2524,15 +2525,17 @@ const PlugRule = () => {
                             ]}
                             handleButtonClick={handlerClick}
                         />
-                        <Button
-                            onClick={() => handleClickConfirmSelection(socketsTab)}
-                            className="sub-button"
-                            label={'Confirm selection'}
-                            disabled={isConfirmButtonDisabled}
-                            size={Button.Sizes.lg}
-                            type={Button.Type.primary}>
-                            Confirm selection
-                        </Button>
+                        {!isViewer && (
+                            <Button
+                                onClick={() => handleClickConfirmSelection(socketsTab)}
+                                className="sub-button"
+                                label={'Confirm selection'}
+                                disabled={isConfirmButtonDisabled}
+                                size={Button.Sizes.lg}
+                                type={Button.Type.primary}>
+                                Confirm selection
+                            </Button>
+                        )}
                     </div>
                     {currentData.building_id ? (
                         <div>
@@ -2602,6 +2605,7 @@ const PlugRule = () => {
                                     customCheckAll={() => (
                                         <Checkbox
                                             label=""
+                                            disabled={isViewer}
                                             type="checkbox"
                                             id="vehicle1"
                                             name="vehicle1"
@@ -2625,6 +2629,7 @@ const PlugRule = () => {
                                                 setSensorIdNow(record?.id);
                                                 handleRuleStateChangeUnlink(e.target.value, record);
                                             }}
+                                            disabled={isViewer}
                                         />
                                     )}
                                     onPageSize={setPageSizeLinked}
@@ -2711,6 +2716,7 @@ const PlugRule = () => {
                                             label=""
                                             type="checkbox"
                                             id="vehicle1"
+                                            disabled={isViewer}
                                             name="vehicle1"
                                             checked={checkedAllToLink}
                                             onChange={() => selectAllRowsSensors(!checkedAllToLink)}
@@ -2732,6 +2738,7 @@ const PlugRule = () => {
                                                 setSensorIdNow(record?.id);
                                                 handleRuleLinkStateChange(e.target.value, record);
                                             }}
+                                            disabled={isViewer}
                                         />
                                     )}
                                     onPageSize={setPageSizeUnlinked}
