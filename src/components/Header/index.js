@@ -48,9 +48,8 @@ const Header = ({ type, title }) => {
     };
 
     useEffect(() => {
-        if (startDate === null || endDate === null) {
-            return;
-        }
+        if (startDate === null || endDate === null) return;
+
         const setCustomDate = (dates) => {
             setRangeDate([moment(dates[0]), moment(dates[1])]);
 

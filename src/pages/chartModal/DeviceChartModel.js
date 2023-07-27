@@ -45,8 +45,8 @@ const DeviceChartModel = ({
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [dropDown, setDropDown] = useState('dropdown-menu dropdown-menu-right');
 
