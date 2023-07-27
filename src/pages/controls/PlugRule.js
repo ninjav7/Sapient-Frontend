@@ -33,6 +33,7 @@ import {
     timePicker15MinutesIntervalOption12HourFormat,
 } from '../../constants/time';
 import { daysOfWeekFull } from '../../constants/days';
+import { buildingData } from '../../store/globalState';
 
 import moment from 'moment';
 
@@ -160,9 +161,9 @@ const PlugRule = () => {
     const isLoadingRef = useRef(false);
     const { ruleId } = useParams();
     const { download } = useCSVDownload();
-    const bldgTimeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const [bldgTimeZone, setBldgTimeZone] = useState(null);
+    const [buildingListData] = useAtom(buildingData);
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
-    const [buildingListData, setBuildingListData] = useState([]);
     const [buildingListDataNotFormatted, setBuildingListDataNotFormatted] = useState([]);
     const [isChangedRuleDetails, setIsChangedRuleDetails] = useState(false);
     const [estimatedEnergySavings, setEstimatedEnergySavings] = useState(0);
@@ -310,7 +311,13 @@ const PlugRule = () => {
     const [totalItemsLinked, setTotalItemsLinked] = useState(0);
     const [totalItemsUnlinked, setTotalItemsUnlinked] = useState(0);
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
-
+    useEffect(() => {
+        buildingListData.forEach((el) => {
+            if (el.building_id === activeBuildingId) {
+                setBldgTimeZone(el.timezone);
+            }
+        });
+    }, [buildingListData, activeBuildingId]);
     useEffect(() => {
         const preparedScheduleDataCopy = preparedScheduleData ? [...preparedScheduleData] : [];
         const workingDaysPerCondition = {};
@@ -356,16 +363,6 @@ const PlugRule = () => {
     const formatBuildingListData = (data) => {
         return data.map((el) => {
             return { value: el.building_id, label: el.building_name };
-        });
-    };
-
-    const getBuildingData = async () => {
-        await fetchBuildingsList(false).then((res) => {
-            let data = res.data;
-            setBuildingListDataNotFormatted(data);
-            const formattedData = formatBuildingListData(data);
-
-            setBuildingListData(formattedData);
         });
     };
 
@@ -417,7 +414,6 @@ const PlugRule = () => {
     }, [preparedScheduleData, currentData]);
     useEffect(() => {
         generateHours();
-        getBuildingData();
         if (ruleId == 'create-plug-rule') {
             setIsCreateRuleMode(true);
         } else {
@@ -527,6 +523,8 @@ const PlugRule = () => {
     const [sensorTypeFilterStringLinked, setSensorTypeFilterStringLinked] = useState('');
     const [countUnlinkedSockets, setCountUnlinkedSockets] = useState(null);
     const [countLinkedSockets, setCountLinkedSockets] = useState(0);
+    const [isSetInitiallySocketsCountLinked, setIsSetInitiallySocketsCountLinked] = useState(false);
+    const [isSetInitiallySocketsCountUnlinked, setIsSetInitiallySocketsCountUnlinked] = useState(false);
     const [assignedRuleFilterStringUnlinked, setAssignedRuleFilterStringUnlinked] = useState('');
     const [assignedRuleFilterStringLinked, setAssignedRuleFilterStringLinked] = useState('');
     const [tagsFilterStringUnlinked, setTagsFilterStringUnlinked] = useState('');
@@ -722,6 +720,7 @@ const PlugRule = () => {
                 const snackbarTitle = notificationUnlinkedData(rulesToUnLink.sensor_id.length, currentData.name);
 
                 openSnackbar({ ...snackbarTitle, type: Notification.Types.success, duration: 5000 });
+                setIsSetInitiallySocketsCountLinked(false);
                 fetchLinkedSocketRules();
                 fetchLinkedSocketIds();
                 fetchUnLinkedSocketRules();
@@ -1127,7 +1126,10 @@ const PlugRule = () => {
                 setUnlinkedSocketRuleSuccess(res.status);
 
                 let unLinkedData = [];
-                setCountUnlinkedSockets(response?.total_data);
+                if (!isSetInitiallySocketsCountUnlinked) {
+                    setCountUnlinkedSockets(response?.total_data);
+                    setIsSetInitiallySocketsCountUnlinked(true);
+                }
 
                 setUnlinkedSocketsTabData(response?.data);
                 setTotalItemsUnlinked(response?.total_data);
@@ -1262,7 +1264,10 @@ const PlugRule = () => {
                 }
                 setSelectedInitialyIds(linkedIds || []);
                 setLinkedSocketsTabData(response.data);
-                setCountLinkedSockets(response.total_data);
+                if (!isSetInitiallySocketsCountLinked) {
+                    setCountLinkedSockets(response.total_data);
+                    setIsSetInitiallySocketsCountLinked(true);
+                }
                 setTotalItemsLinked(response?.total_data);
             })
             .catch((error) => {});
@@ -1318,6 +1323,7 @@ const PlugRule = () => {
         locationTypeFilterString,
         locationTypeFilterString,
         sensorTypeFilterStringLinked,
+        macTypeFilterStringLinked,
         floorTypeFilterStringLinked,
         spaceTypeFilterStringLinked,
         assignedRuleFilterStringLinked,
@@ -1611,12 +1617,12 @@ const PlugRule = () => {
         isLoadingUnlinkedRef.current = true;
         await getFiltersForSensorsRequest({
             activeBuildingId,
-            macTypeFilterStringUnlinked,
-            equipmentTypeFilterStringUnlinked,
-            sensorTypeFilterStringUnlinked,
-            floorTypeFilterStringUnlinked,
-            spaceTypeFilterStringUnlinked,
-            spaceTypeTypeFilterStringUnlinked,
+            macTypeFilterString: macTypeFilterStringUnlinked,
+            equipmentTypeFilterString: equipmentTypeFilterStringUnlinked,
+            sensorTypeFilterString: sensorTypeFilterStringUnlinked,
+            floorTypeFilterString: floorTypeFilterStringUnlinked,
+            spaceTypeFilterString: spaceTypeFilterStringUnlinked,
+            spaceTypeTypeFilterString: spaceTypeTypeFilterStringUnlinked,
             isGetOnlyLinked: false,
             plugRuleId: ruleId,
         }).then((filters) => {
@@ -1747,12 +1753,12 @@ const PlugRule = () => {
         isLoadingLinkedRef.current = true;
         await getFiltersForSensorsRequest({
             activeBuildingId,
-            macTypeFilterStringLinked,
-            equipmentTypeFilterStringLinked,
-            sensorTypeFilterStringLinked,
-            floorTypeFilterStringLinked,
-            spaceTypeFilterStringLinked,
-            spaceTypeTypeFilterStringLinked,
+            macTypeFilterString: macTypeFilterStringLinked,
+            equipmentTypeFilterString: equipmentTypeFilterStringLinked,
+            sensorTypeFilterString: sensorTypeFilterStringLinked,
+            floorTypeFilterString: floorTypeFilterStringLinked,
+            spaceTypeFilterString: spaceTypeFilterStringLinked,
+            spaceTypeTypeFilterString: spaceTypeTypeFilterStringLinked,
             isGetOnlyLinked: true,
             plugRuleId: ruleId,
         }).then((filters) => {
@@ -2346,7 +2352,7 @@ const PlugRule = () => {
                     <span
                         className={selectedTab === 1 ? 'mr-3 single-plug-rule-tab-active' : 'mr-3 single-plug-rule-tab'}
                         onClick={() => setSelectedTab(1)}>
-                        Sockets ({totalSocket})
+                        Sockets ({countLinkedSockets})
                     </span>
                 </div>
             </div>
@@ -2465,7 +2471,7 @@ const PlugRule = () => {
                                         },
                                     ]}
                                     unitInfo={{
-                                        title: 'Estimated Energy Savings',
+                                        title: 'Estimated Annual Energy Savings',
                                         unit: UNITS.KWH,
                                         value: estimatedEnergySavings,
                                     }}
@@ -2519,15 +2525,17 @@ const PlugRule = () => {
                             ]}
                             handleButtonClick={handlerClick}
                         />
-                        <Button
-                            onClick={() => handleClickConfirmSelection(socketsTab)}
-                            className="sub-button"
-                            label={'Confirm selection'}
-                            disabled={isConfirmButtonDisabled}
-                            size={Button.Sizes.lg}
-                            type={Button.Type.primary}>
-                            Confirm selection
-                        </Button>
+                        {!isViewer && (
+                            <Button
+                                onClick={() => handleClickConfirmSelection(socketsTab)}
+                                className="sub-button"
+                                label={'Confirm selection'}
+                                disabled={isConfirmButtonDisabled}
+                                size={Button.Sizes.lg}
+                                type={Button.Type.primary}>
+                                Confirm selection
+                            </Button>
+                        )}
                     </div>
                     {currentData.building_id ? (
                         <div>
@@ -2550,7 +2558,7 @@ const PlugRule = () => {
                                     onDownload={() => handleDownloadCsvLinkedTab()}
                                     onStatus={setSelectedRuleFilter}
                                     rows={linkedSocketsTabData}
-                                    searchResultRows={currentRowSearched()}
+                                    searchResultRows={linkedSocketsTabData}
                                     headers={[
                                         {
                                             name: 'Equipment Type',
@@ -2597,6 +2605,7 @@ const PlugRule = () => {
                                     customCheckAll={() => (
                                         <Checkbox
                                             label=""
+                                            disabled={isViewer}
                                             type="checkbox"
                                             id="vehicle1"
                                             name="vehicle1"
@@ -2620,6 +2629,7 @@ const PlugRule = () => {
                                                 setSensorIdNow(record?.id);
                                                 handleRuleStateChangeUnlink(e.target.value, record);
                                             }}
+                                            disabled={isViewer}
                                         />
                                     )}
                                     onPageSize={setPageSizeLinked}
@@ -2657,7 +2667,7 @@ const PlugRule = () => {
                                     onDownload={() => handleDownloadCsvUnlinkedTab()}
                                     onStatus={setSelectedRuleFilter}
                                     rows={unlinkedSocketsTabData}
-                                    searchResultRows={currentRowSearched()}
+                                    searchResultRows={unlinkedSocketsTabData}
                                     headers={[
                                         {
                                             name: 'Equipment Type',
@@ -2706,6 +2716,7 @@ const PlugRule = () => {
                                             label=""
                                             type="checkbox"
                                             id="vehicle1"
+                                            disabled={isViewer}
                                             name="vehicle1"
                                             checked={checkedAllToLink}
                                             onChange={() => selectAllRowsSensors(!checkedAllToLink)}
@@ -2727,6 +2738,7 @@ const PlugRule = () => {
                                                 setSensorIdNow(record?.id);
                                                 handleRuleLinkStateChange(e.target.value, record);
                                             }}
+                                            disabled={isViewer}
                                         />
                                     )}
                                     onPageSize={setPageSizeUnlinked}

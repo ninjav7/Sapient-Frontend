@@ -108,9 +108,9 @@ export function getFiltersForSensorsRequest(args) {
                     mac_address: args.macTypeFilterString
                         ? encodeURI(args.macTypeFilterString?.join('+'))
                         : args.macTypeFilterString,
-                    equipment_types: args.equpimentTypeFilterString
-                        ? encodeURI(args.equpimentTypeFilterString?.join('+'))
-                        : args.equpimentTypeFilterString,
+                    equipment_types: args.equipmentTypeFilterString
+                        ? encodeURI(args.equipmentTypeFilterString?.join('+'))
+                        : args.equipmentTypeFilterString,
                     sensor_number: args.sensorTypeFilterString
                         ? encodeURI(args.sensorTypeFilterString?.join('+'))
                         : args.sensorTypeFilterString,
