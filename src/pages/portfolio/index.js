@@ -26,6 +26,7 @@ import colors from '../../assets/scss/_colors.scss';
 import { UNITS } from '../../constants/units';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import { UserStore } from '../../store/UserStore';
 
 const PortfolioOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -37,6 +38,8 @@ const PortfolioOverview = () => {
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
+
+    const userPrefUnits = UserStore.useState((s) => s.unit);
 
     const [overalldata, setOveralldata] = useState({
         total_building: 0,
@@ -226,7 +229,7 @@ const PortfolioOverview = () => {
                                 daysCount={daysCount}
                                 totalBuilding={buildingsEnergyConsume.length}
                                 overalldata={overalldata}
-                                isKPIsLoading={isKPIsLoading}
+                                userPrefUnits={userPrefUnits}
                             />
                         </div>
                     </Row>
