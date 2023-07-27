@@ -337,8 +337,8 @@ const BuildingOverview = () => {
 
     const fetchWeatherData = async (time_zone) => {
         const payload = {
-            date_from: encodeURIComponent(new Date(startDate).toISOString()),
-            date_to: encodeURIComponent(new Date(endDate).toISOString()),
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
             tz_info: time_zone,
             bldg_id: bldgId,
         };
@@ -385,8 +385,8 @@ const BuildingOverview = () => {
 
         const payload = {
             bldg_id: bldgId,
-            date_from: encodeURIComponent(new Date(startDate).toISOString()),
-            date_to: encodeURIComponent(new Date(endDate).toISOString()),
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
             tz_info: time_zone,
         };
 
@@ -410,8 +410,8 @@ const BuildingOverview = () => {
 
         const payload = {
             bldg_id: bldgId,
-            date_from: encodeURIComponent(new Date(startDate).toISOString()),
-            date_to: encodeURIComponent(new Date(endDate).toISOString()),
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
             tz_info: time_zone,
         };
 

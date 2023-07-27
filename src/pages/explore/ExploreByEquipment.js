@@ -1454,8 +1454,8 @@ const ExploreByEquipment = () => {
 
     const handleWeatherChart = async () => {
         let params = `?building_id=${bldgId}&consumption=${selectedConsumption}&timezone=${timeZone}&date_from=${encodeURIComponent(
-            new Date(startDate).toISOString()
-        )}&date_to=${encodeURIComponent(new Date(endDate).toISOString())}`;
+            startDate
+        )}&date_to=${encodeURIComponent(endDate)}`;
         await fetchWeatherData(params)
             .then((res) => {
                 const response = res?.data;

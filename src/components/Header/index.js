@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { convertToUserLocalTime, customOptions } from './utils';
+import { customOptions } from './utils';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 import '../../pages/portfolio/style.scss';
 import TimeFrameSelector from '../../sharedComponents/timeFrameSelector/TimeFrameSelector';
+import { convertToUserLocalTime } from '../../helpers/helpers';
 
 const Header = ({ type, title }) => {
     const filterPeriod = DateRangeStore.useState((s) => s.filterPeriod);

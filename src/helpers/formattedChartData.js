@@ -1,5 +1,8 @@
 //High Charts Date Range
-export const fetchDateRange = (startDate, endDate) => {
+export const fetchDateRange = (startDateStr, endDateStr) => {
+    const startDate = new Date(startDateStr); // Convert startDateStr to a Date object
+    const endDate = new Date(endDateStr); // Convert endDateStr to a Date object
+
     let sdf = new Date(
         `${startDate.getFullYear()}-${
             startDate.getMonth() < 9 ? `0${startDate.getMonth() + 1}` : startDate.getMonth() + 1

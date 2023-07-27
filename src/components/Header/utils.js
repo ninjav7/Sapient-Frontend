@@ -11,16 +11,3 @@ export const customOptions = [
     { label: 'Year to Date', value: 'Year to Date', moment: () => [moment().startOf('year'), moment()] },
     { label: 'Custom', value: 'Custom' },
 ];
-
-export const convertToUserLocalTime = (UTCtime) => {
-    // Parse the UTC time string using Moment.js
-    const utcMoment = moment.utc(UTCtime);
-
-    // Convert to the user's local timezone
-    const localMoment = utcMoment.local();
-
-    // Format the local time in ISO format (YYYY-MM-DDTHH:mm:ss.sssZ)
-    const isoFormat = localMoment.format();
-
-    return isoFormat;
-};
