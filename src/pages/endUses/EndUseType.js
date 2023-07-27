@@ -29,8 +29,8 @@ const EndUseType = () => {
     const { bldgId } = useParams();
 
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const [buildingListData] = useAtom(buildingData);
     const [isPlugOnly, setIsPlugOnly] = useState(false);

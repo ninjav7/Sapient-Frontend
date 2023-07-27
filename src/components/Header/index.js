@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
-import { Row, Col } from 'reactstrap';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { customOptions } from './utils';
+import { convertToUserLocalTime, customOptions } from './utils';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 import '../../pages/portfolio/style.scss';
@@ -16,31 +15,35 @@ const Header = ({ type, title }) => {
 
     // On Custom Date Change from Calender
     const onCustomDateChange = ({ startDate, endDate }) => {
-        if (startDate === null || endDate === null) {
-            return;
-        }
+        if (startDate === null || endDate === null) return;
+
+        const start_date = convertToUserLocalTime(startDate);
+        const end_date = convertToUserLocalTime(endDate);
 
         localStorage.setItem('filterPeriod', 'Custom');
-        localStorage.setItem('startDate', startDate);
-        localStorage.setItem('endDate', endDate);
+        localStorage.setItem('startDate', start_date);
+        localStorage.setItem('endDate', end_date);
 
         DateRangeStore.update((s) => {
             s.filterPeriod = 'Custom';
-            s.startDate = startDate;
-            s.endDate = endDate;
+            s.startDate = start_date;
+            s.endDate = end_date;
         });
     };
 
     // On DateFilter Change
     const onDateFilterChange = (rangeDate, period) => {
+        const startDate = convertToUserLocalTime(rangeDate[0]);
+        const endDate = convertToUserLocalTime(rangeDate[1]);
+
         localStorage.setItem('filterPeriod', period?.value);
-        localStorage.setItem('startDate', rangeDate[0]);
-        localStorage.setItem('endDate', rangeDate[1]);
+        localStorage.setItem('startDate', startDate);
+        localStorage.setItem('endDate', endDate);
 
         DateRangeStore.update((s) => {
             s.filterPeriod = period?.value;
-            s.startDate = rangeDate[0];
-            s.endDate = rangeDate[1];
+            s.startDate = startDate;
+            s.endDate = endDate;
         });
     };
 

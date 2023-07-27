@@ -45,8 +45,8 @@ const BuildingOverview = () => {
 
     const history = useHistory();
 
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [overallBldgData, setOverallBldgData] = useState({
