@@ -829,7 +829,7 @@ const GeneralBuildingSettings = () => {
                                             labelSize={Typography.Sizes.md}
                                             className="w-100"
                                             inputClassName="custom-input-field"
-                                            value={buildingDetails?.square_footage}
+                                            value={Math.round(buildingDetails?.square_footage)}
                                         />
                                     ) : (
                                         <Inputs
