@@ -116,6 +116,7 @@ const Provision = () => {
 
     const [linkedAccount, setLinkedAccount] = useState([]);
     const [readyData, setReadyData] = useState([]);
+    const [totalReadyData, setTotalReadyData] = useState(0);
     const [progressData, setProgressData] = useState([]);
     const [total, setTotal] = useState([]);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -332,8 +333,7 @@ const Provision = () => {
 
     const getKasaDevices = async (details, path) => {
         setIsAddProcessing(true);
-        let ready = [];
-        let progress = [];
+
         const sorting = deviceSortBy.method &&
             deviceSortBy.name && {
                 order_by: deviceSortBy.name === undefined ? 'device_mac' : deviceSortBy.name,
@@ -350,16 +350,21 @@ const Provision = () => {
             details
         )
             .then((res) => {
-                res.data.data.forEach((ele) => {
-                    if (ele.action === 1) {
-                        ready.push(ele);
-                    } else {
-                        progress.push(ele);
-                    }
-                });
-                if (path === true) setCheckFind(false);
-                setReadyData(ready);
-                setProgressData(progress);
+                const response = res?.data;
+                if (response?.success && response?.data.length !== 0) {
+                    let ready = [];
+                    let progress = [];
+
+                    response.data.forEach((ele) => {
+                        ele.action === 1 ? ready.push(ele) : progress.push(ele);
+                    });
+
+                    if (path) setCheckFind(false);
+                    if (response?.total_data) setTotalReadyData(response?.total_data);
+
+                    setReadyData(ready);
+                    setProgressData(progress);
+                }
                 setIsAddProcessing(false);
             })
             .catch((error) => {
@@ -690,7 +695,7 @@ const Provision = () => {
                         onStatus={setSelectedStatus}
                         buttonGroupFilterOptions={[
                             { label: `Available (${progressData.length})` },
-                            { label: `Completed (${readyData.length})` },
+                            { label: `Completed (${totalReadyData})` },
                             { label: 'Existing Devices' },
                         ]}
                         rows={currentRowDevices()}
@@ -702,7 +707,7 @@ const Provision = () => {
                         pageSize={devicePageSize}
                         onPageSize={setDevicePageSize}
                         totalCount={(() => {
-                            return deviceTotalItems;
+                            return totalReadyData;
                         })()}
                     />
                 </Col>
