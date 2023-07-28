@@ -19,8 +19,8 @@ import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 const TimeOfDay = () => {
     const { bldgId } = useParams();
     const [buildingListData] = useAtom(buildingData);
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const [lineChartData, setLineChartData] = useState([]);

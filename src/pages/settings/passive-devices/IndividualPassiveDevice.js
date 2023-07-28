@@ -38,8 +38,8 @@ import Sensors from './Sensors';
 const IndividualPassiveDevice = () => {
     const [userPermission] = useAtom(userPermissionData);
 
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     let history = useHistory();

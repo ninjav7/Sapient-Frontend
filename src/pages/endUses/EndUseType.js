@@ -29,8 +29,8 @@ const EndUseType = () => {
     const { bldgId } = useParams();
 
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const [buildingListData] = useAtom(buildingData);
     const [isPlugOnly, setIsPlugOnly] = useState(false);
@@ -151,8 +151,8 @@ const EndUseType = () => {
 
     const fetchWeatherData = async (time_zone) => {
         const payload = {
-            date_from: encodeURIComponent(new Date(startDate).toISOString()),
-            date_to: encodeURIComponent(new Date(endDate).toISOString()),
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
             tz_info: time_zone,
             bldg_id: bldgId,
         };

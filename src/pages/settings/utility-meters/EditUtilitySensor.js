@@ -30,8 +30,8 @@ import './styles.scss';
 const MetricsTab = (props) => {
     const { utilityMeterObj, sensorObj, bldgId } = props;
 
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
 
     const [metric, setMetric] = useState(pulseChartMetrics);
     const [fetchingChartData, setFetchingChartData] = useState(false);

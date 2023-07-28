@@ -52,15 +52,16 @@ const SkeletonLoading = () => (
 
 const CompareBuildings = () => {
     const [buildingsData, setBuildingsData] = useState([]);
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const [sortBy, setSortBy] = useState({});
     const history = useHistory();
     const { download } = useCSVDownload();
     const [search, setSearch] = useState('');
     const [topEnergyDensity, setTopEnergyDensity] = useState();
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
-    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
+
     const [isLoadingBuildingData, setIsLoadingBuildingData] = useState(false);
     let entryPoint = '';
     let top = '';

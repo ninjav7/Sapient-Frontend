@@ -3,17 +3,27 @@ import moment from 'moment';
 export const formatConsumptionValue = (value, fixed) =>
     value.toLocaleString(undefined, { maximumFractionDigits: fixed });
 
+export const convertToUserLocalTime = (UTCtime) => {
+    // Parse the UTC time string using Moment.js
+    const utcMoment = moment.utc(UTCtime);
+    // Convert to the user's local timezone
+    const localMoment = utcMoment.local();
+    // Format the local time in ISO format (YYYY-MM-DDTHH:mm:ss.sssZ)
+    const isoFormat = localMoment.format();
+    return isoFormat;
+};
+
 export const handleDateFormat = (customDate, dateType) => {
     if (dateType === 'startDate' && customDate === null) {
         let startDate = new Date();
         startDate.setDate(startDate.getDate() - 6);
-        return startDate;
+        return convertToUserLocalTime(startDate);
     }
 
     if (dateType === 'endDate' && customDate === null) {
         let endDate = new Date();
         endDate.setDate(endDate.getDate());
-        return endDate;
+        return convertToUserLocalTime(endDate);
     }
 
     let dt = new Date(customDate).toISOString();
