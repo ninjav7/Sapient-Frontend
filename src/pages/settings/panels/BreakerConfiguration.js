@@ -1183,8 +1183,6 @@ const BreakerConfiguration = ({
         fetchSensorsChartData(sensorsList, selectedConsumption, startDate, endDate);
     }, [sensorsList, startDate, endDate, selectedConsumption]);
 
-    console.log('SSR parentBreakerObj => ', parentBreakerObj);
-
     return (
         <React.Fragment>
             <Modal
