@@ -86,60 +86,6 @@ const ActiveDevices = () => {
     const [hardWareString, setHardWareString] = useState([]);
     const [filterOptions, setFilterOptions] = useState([]);
 
-    useEffect(() => {
-        const fetchActiveDeviceData = async () => {
-            const sorting = sortBy.method &&
-                sortBy.name && {
-                    order_by: sortBy.name === undefined ? 'identifier' : sortBy.name,
-                    sort_by: sortBy.method === undefined ? 'ace' : sortBy.method,
-                };
-            let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
-            let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
-            let sensorSelected = encodeURIComponent(sensorString.join('+'));
-            let firmwareSelected = encodeURIComponent(firmWareString.join('+'));
-            let hardwareSelected = encodeURIComponent(hardWareString.join('+'));
-            setIsDeviceProcessing(true);
-            setActiveDeviceData([]);
-            await getActiveDeviceData(
-                pageNo,
-                pageSize,
-                bldgId,
-                search,
-                deviceStatus,
-                {
-                    ...sorting,
-                },
-                macAddressSelected,
-                deviceModelSelected,
-                sensorSelected,
-                firmwareSelected,
-                hardwareSelected
-            )
-                .then((res) => {
-                    let response = res.data;
-                    setActiveDeviceData(response.data);
-                    setTotalItems(response?.total_data);
-                    setIsDeviceProcessing(false);
-                })
-                .catch(() => {
-                    setIsDeviceProcessing(false);
-                });
-        };
-        fetchActiveDeviceData();
-    }, [
-        search,
-        sortBy,
-        pageNo,
-        pageSize,
-        deviceStatus,
-        bldgId,
-        deviceIdFilterString,
-        deviceModelString,
-        sensorString,
-        firmWareString,
-        hardWareString,
-    ]);
-
     const getFilters = async () => {
         let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
         let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
@@ -270,10 +216,66 @@ const ActiveDevices = () => {
                     },
                 },
             ];
-
             setFilterOptions(filterOptionsFetched);
         });
     };
+
+    const fetchActiveDeviceData = async () => {
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name === undefined ? 'identifier' : sortBy.name,
+                sort_by: sortBy.method === undefined ? 'ace' : sortBy.method,
+            };
+        let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
+        let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
+        let sensorSelected = encodeURIComponent(sensorString.join('+'));
+        let firmwareSelected = encodeURIComponent(firmWareString.join('+'));
+        let hardwareSelected = encodeURIComponent(hardWareString.join('+'));
+
+        setIsDeviceProcessing(true);
+        setActiveDeviceData([]);
+
+        await getActiveDeviceData(
+            pageNo,
+            pageSize,
+            bldgId,
+            search,
+            deviceStatus,
+            {
+                ...sorting,
+            },
+            macAddressSelected,
+            deviceModelSelected,
+            sensorSelected,
+            firmwareSelected,
+            hardwareSelected
+        )
+            .then((res) => {
+                const response = res?.data;
+                if (response?.data.length !== 0) setActiveDeviceData(response?.data);
+                if (response?.total_data) setTotalItems(response?.total_data);
+                setIsDeviceProcessing(false);
+            })
+            .catch(() => {
+                setIsDeviceProcessing(false);
+            });
+    };
+
+    useEffect(() => {
+        fetchActiveDeviceData();
+    }, [
+        search,
+        sortBy,
+        pageNo,
+        pageSize,
+        deviceStatus,
+        bldgId,
+        deviceIdFilterString,
+        deviceModelString,
+        sensorString,
+        firmWareString,
+        hardWareString,
+    ]);
 
     useEffect(() => {
         getFilters();
@@ -420,7 +422,7 @@ const ActiveDevices = () => {
         },
         {
             name: 'Sensors',
-            accessor: 'sensor_count',
+            accessor: 'sensor_number',
             callbackValue: renderDeviceSensors,
             onSort: (method, name) => setSortBy({ method, name }),
         },
