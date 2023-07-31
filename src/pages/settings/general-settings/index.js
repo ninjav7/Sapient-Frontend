@@ -6,11 +6,13 @@ import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
 import { useParams } from 'react-router-dom';
 import { BaseUrl, generalBldgDelete } from '../../../services/Network';
-import { BuildingStore, BuildingListStore } from '../../../store/BuildingStore';
-import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { UserStore } from '../../../store/UserStore';
 import { ComponentStore } from '../../../store/ComponentStore';
+import { BuildingListStore } from '../../../store/BuildingStore';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
 import { buildingData } from '../../../store/globalState';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 import TimezoneSelect from 'react-timezone-select';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
@@ -18,14 +20,14 @@ import Inputs from '../../../sharedComponents/form/input/Input';
 import Select from '../../../sharedComponents/form/select';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import Brick from '../../../sharedComponents/brick';
+import { convertToFootage, convertToMeters, handleUnitConverstion } from './utils';
+import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { updateGeneralBuildingChange, updateBuildingTypes } from './services';
 import OperatingHours from './OperatingHours';
 import '../../../sharedComponents/form/select/style.scss';
 import '../style.css';
 import './styles.scss';
-import { UserStore } from '../../../store/UserStore';
-import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 
 const GeneralBuildingSettings = () => {
     let cookies = new Cookies();
@@ -34,9 +36,10 @@ const GeneralBuildingSettings = () => {
     const { bldgId } = useParams();
     const [selectedTimezone, setSelectedTimezone] = useState({});
     const [isEditing, setIsEditing] = useState(false);
+    const userPrefTimeZone = UserStore.useState((s) => s.timeFormat);
+    const userPrefUnits = UserStore.useState((s) => s.unit);
 
     const [generalDateTimeData, setGeneralDateTimeData] = useState({});
-    const [checked, setChecked] = useState(generalDateTimeData.time_format);
     const [render, setRender] = useState(false);
     const [activeToggle, setActiveToggle] = useState(false);
     const [weekToggle, setWeekToggle] = useState({});
@@ -52,7 +55,7 @@ const GeneralBuildingSettings = () => {
     const [buildingAddress, setBuildingAddress] = useState({});
     const [buildingOperatingHours, setBuildingOperatingHours] = useState({});
     const [textLocation, settextLocation] = useState('');
-    const [timeZone, setTimeZone] = useState('');
+    const [timeZone, setTimeZone] = useState('12');
     const [loadButton, setLoadButton] = useState(false);
     const [switchPhrase, setSwitchPhrace] = useState({
         mon: false,
@@ -166,11 +169,16 @@ const GeneralBuildingSettings = () => {
         const params = `/${bldgId}`;
         let bldgData = {};
         bldgData.info = buildingDetails;
-        if (bldgData.info.square_footage === '') {
-            bldgData.info.square_footage = 0;
+
+        // Handle Square Footage / Meter change with converstion check and fix
+        if (bldgData.info.square_footage === '') bldgData.info.square_footage = 0;
+
+        if (userPrefUnits === 'si' && bldgData.info.square_footage !== '') {
+            bldgData.info.square_footage = Number(convertToFootage(bldgData.info.square_footage));
         } else {
             bldgData.info.square_footage = Number(bldgData.info.square_footage);
         }
+
         bldgData.address = buildingAddress;
         bldgData.operating_hours = operationTime.operating_hours;
 
@@ -221,6 +229,16 @@ const GeneralBuildingSettings = () => {
 
     const [buildingListData] = useAtom(buildingData);
 
+    const handleTotalAreaOfBldg = (building_size) => {
+        let value;
+        if (building_size === 0) {
+            value = 0;
+        } else {
+            value = handleUnitConverstion(building_size, userPrefUnits);
+        }
+        return value;
+    };
+
     const fetchBuildingData = async () => {
         let fixing = true;
 
@@ -237,7 +255,7 @@ const GeneralBuildingSettings = () => {
                     name: data.building_name,
                     building_type: data.building_type,
                     building_type_id: data.building_type_id,
-                    square_footage: data.building_size === 0 ? '' : data.building_size,
+                    square_footage: handleTotalAreaOfBldg(data.building_size),
                     active: data.active,
                     timezone: data.timezone,
                     time_format: data.time_format,
@@ -457,13 +475,21 @@ const GeneralBuildingSettings = () => {
     };
 
     useEffect(() => {
-        if (bldgData?.time_format) {
-            setTimeZone('24');
-        }
-        if (!bldgData?.time_format) {
-            setTimeZone('12');
-        }
-    }, [bldgData]);
+        if (!userPrefTimeZone) return;
+        const time_zone = userPrefTimeZone.split('h')[0];
+        setTimeZone(time_zone);
+    }, [userPrefTimeZone]);
+
+    useEffect(() => {
+        if (!buildingDetails?.square_footage || !userPrefUnits) return;
+
+        let obj = Object.assign({}, buildingDetails);
+
+        if (userPrefUnits === 'si') obj.square_footage = convertToMeters(obj?.square_footage);
+        if (userPrefUnits === 'imp') obj.square_footage = convertToFootage(obj?.square_footage);
+
+        setBuildingDetails(obj);
+    }, [userPrefUnits]);
 
     useEffect(() => {
         fetchBuildingType();
@@ -783,25 +809,27 @@ const GeneralBuildingSettings = () => {
                             <div className="row">
                                 <div className="col">
                                     <Typography.Subheader size={Typography.Sizes.md}>
-                                        Square Footage
+                                        {userPrefUnits === `si` ? `Square Meters` : `Square Footage`}
                                     </Typography.Subheader>
                                     <Brick sizeInRem={0.25} />
                                     <Typography.Body size={Typography.Sizes.sm}>
-                                        The total square footage of this building
+                                        {userPrefUnits === `si`
+                                            ? `The total square meters of this building`
+                                            : `The total square footage of this building`}
                                     </Typography.Body>
                                 </div>
                                 <div className="col d-flex align-items-center">
                                     {userPermission?.user_role === 'admin' ||
                                     userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
-                                        <Inputs
+                                        <InputTooltip
                                             type="number"
-                                            placeholder="Enter Square Footage"
                                             onChange={(e) => {
                                                 handleBldgSettingChanges('square_footage', e.target.value);
-                                                localStorage.setItem('generalSquareFootage', e.target.value);
                                             }}
+                                            labelSize={Typography.Sizes.md}
                                             className="w-100"
-                                            value={buildingDetails?.square_footage}
+                                            inputClassName="custom-input-field"
+                                            value={Math.round(buildingDetails?.square_footage)}
                                         />
                                     ) : (
                                         <Inputs
@@ -1043,50 +1071,6 @@ const GeneralBuildingSettings = () => {
                                             className="w-100"
                                             value={buildingDetails?.timezone ? buildingDetails?.timezone : ''}
                                             disabled
-                                        />
-                                    )}
-                                </div>
-                            </div>
-
-                            <Brick sizeInRem={1} />
-
-                            <div className="row d-flex align-items-center">
-                                <div className="col">
-                                    <Typography.Subheader size={Typography.Sizes.md}>
-                                        Use 24-hour Clock
-                                    </Typography.Subheader>
-                                </div>
-                                <div className="col">
-                                    {userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
-                                        <Switch
-                                            onChange={(e) => {
-                                                handleDateTimeSwitch();
-
-                                                if (e) {
-                                                    setTimeZone('24');
-                                                    localStorage.setItem('generaltimeZone', '24');
-                                                }
-
-                                                if (!e) {
-                                                    setTimeZone('12');
-                                                    localStorage.setItem('generaltimeZone', '12');
-                                                }
-                                            }}
-                                            checked={buildingDetails.time_format}
-                                            onColor={colorPalette.datavizBlue600}
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                            className="react-switch"
-                                        />
-                                    ) : (
-                                        <Switch
-                                            onChange={() => {}}
-                                            checked={buildingDetails.time_format}
-                                            onColor={colorPalette.datavizBlue600}
-                                            className="react-switch"
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
                                         />
                                     )}
                                 </div>

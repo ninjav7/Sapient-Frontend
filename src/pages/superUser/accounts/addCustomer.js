@@ -101,7 +101,7 @@ const CreateCustomer = ({
                     labelSize={Typography.Sizes.md}
                 />
 
-                <Brick sizeInRem={1.5} />
+                <Brick sizeInRem={2.5} />
 
                 <div className="d-flex justify-content-between w-100">
                     <Button

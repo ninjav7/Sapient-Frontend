@@ -82,8 +82,8 @@ const ExploreByBuildings = () => {
     const [buildingIdSelection] = useAtom(selectedBuilding);
     const [totalBuildingId] = useAtom(totalSelectionBuildingId);
 
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
 
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);

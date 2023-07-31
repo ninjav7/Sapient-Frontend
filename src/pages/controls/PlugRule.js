@@ -5,8 +5,10 @@ import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import Switch from 'react-switch';
 import { useAtom } from 'jotai';
 import classNames from 'classnames';
+import { BuildingStore } from '../../store/BuildingStore';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { ButtonGroup } from '../../sharedComponents/buttonGroup';
 import { ComponentStore } from '../../store/ComponentStore';
 import Button from '../../sharedComponents/button/Button';
 import { Spinner } from 'reactstrap';
@@ -31,6 +33,7 @@ import {
     timePicker15MinutesIntervalOption12HourFormat,
 } from '../../constants/time';
 import { daysOfWeekFull } from '../../constants/days';
+import { buildingData } from '../../store/globalState';
 
 import moment from 'moment';
 
@@ -141,28 +144,50 @@ const notificationCreateData = {
 const notificationUpdatedData = {
     title: 'Rule has been updated',
 };
+const notificationLinkedData = (count, name) => {
+    return {
+        title: `${count} ${count == 1 ? 'socket has' : 'sockets have'} been linked to ${name}`,
+    };
+};
+const notificationUnlinkedData = (count, name) => {
+    return {
+        title: `${count} ${count == 1 ? 'socket has' : 'sockets have'} been unlinked from ${name} `,
+    };
+};
 
 const PlugRule = () => {
+    const isLoadingLinkedRef = useRef(false);
+    const isLoadingUnlinkedRef = useRef(false);
     const isLoadingRef = useRef(false);
     const { ruleId } = useParams();
     const { download } = useCSVDownload();
-
+    const [bldgTimeZone, setBldgTimeZone] = useState(null);
+    const [buildingListData] = useAtom(buildingData);
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
-    const [buildingListData, setBuildingListData] = useState([]);
     const [buildingListDataNotFormatted, setBuildingListDataNotFormatted] = useState([]);
     const [isChangedRuleDetails, setIsChangedRuleDetails] = useState(false);
     const [estimatedEnergySavings, setEstimatedEnergySavings] = useState(0);
-    const [isChangedSockets, setIsChangedSockets] = useState(false);
+    const [isChangedSocketsLinked, setIsChangedSocketsLinked] = useState(false);
+    const [isChangedSocketsUnlinked, setIsChangedSocketsUnlinked] = useState(false);
+    const [listSocketsIds, setListSocketsIds] = useState([]);
+    const [isUnsavedChanges, setIsUnsavedChanges] = useState(false);
     const [isDisabledSaveButton, setIsDisabledSaveButton] = useState(true);
     const [isFetchedPlugRulesData, setIsFetchedPlugRulesData] = useState(false);
-    const [equipmentTypeFilterString, setEquipmentTypeFilterString] = useState('');
+    const [equipmentTypeFilterStringUnlinked, setEquipmentTypeFilterStringUnlinked] = useState('');
+    const [equipmentTypeFilterStringLinked, setEquipmentTypeFilterStringLinked] = useState('');
     const searchTouchedRef = useRef(false);
-    const [search, setSearch] = useState('');
+    const [searchLinked, setSearchLinked] = useState('');
+    const [searchUnlinked, setSearchUnlinked] = useState('');
     const [openSnackbar] = useNotification();
     const [rulesToUnLink, setRulesToUnLink] = useState({
         rule_id: '',
         sensor_id: [],
     });
+    const [rulesToLink, setRulesToLink] = useState({
+        rule_id: '',
+        sensor_id: [],
+    });
+
     const [userPermission] = useAtom(userPermissionData);
     const isViewer = userPermission?.user_role === 'member';
 
@@ -189,10 +214,6 @@ const PlugRule = () => {
     const [showDeleteConditionModal, setShowDeleteConditionModal] = useState(false);
     const [currentScheduleIdToDelete, setCurrentScheduleIdToDelete] = useState();
 
-    const [rulesToLink, setRulesToLink] = useState({
-        rule_id: '',
-        sensor_id: [],
-    });
     const [socketsToReassign, setSocketsToReassign] = useState({});
     const [checkedAllReassignSockets, setCheckedAllReassignSockets] = useState(false);
     const [buildingError, setBuildingError] = useState({ text: '' });
@@ -209,14 +230,22 @@ const PlugRule = () => {
     const [linkedRuleData, setLinkedRuleData] = useState([]);
     const [unLinkedRuleData, setUnLinkedRuleData] = useState([]);
     const [allSensors, setAllSensors] = useState([]);
-    const [allUnlinkedRuleAdded, setAllUnlinkedRuleAdded] = useState([]);
+    const [socketsTab, setSocketsTab] = useState(0);
+    const [linkedSocketsTabData, setLinkedSocketsTabData] = useState([]);
+    const [unlinkedSocketsTabData, setUnlinkedSocketsTabData] = useState([]);
+
     const [isDeletting, setIsDeletting] = useState(false);
     const [allData, setAllData] = useState([]);
     const [allLinkedRuleData, setAllLinkedRuleData] = useState([]);
+    const [pageSizeLinked, setPageSizeLinked] = useState(20);
+    const [pageSizeUnlinked, setPageSizeUnlinked] = useState(20);
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
+    const [pageNoLinked, setPageNoLinked] = useState(1);
+    const [pageNoUnlinked, setPageNoUnlinked] = useState(1);
     const [totalSocket, setTotalSocket] = useState(0);
-    const [checkedAll, setCheckedAll] = useState(false);
+    const [checkedAllToUnlink, setCheckedToUnlinkAll] = useState(false);
+    const [checkedAllToLink, setCheckedAllToLink] = useState(false);
     const [options, setOptions] = useState([]);
     const [macOptions, setMacOptions] = useState([]);
     const [locationOptions, setLocationOptions] = useState([]);
@@ -265,17 +294,30 @@ const PlugRule = () => {
             },
         },
     ]);
-    const initialSortingState = { name: '', method: 'ace' };
+    const initialSortingState = { name: 'equipment_type_name', method: 'ace' };
     const [hoursNew, setHoursNew] = useState([]);
 
-    const [selectedIds, setSelectedIds] = useState([]);
+    const [selectedInitialyIds, setSelectedInitialyIds] = useState([]);
+    const [selectedIdsToUnlink, setSelectedIdsToUnlink] = useState([]);
+    const [selectedIdsToLink, setSelectedIdsToLink] = useState([]);
+    const [showConfirmSelectionToUnlink, setShowConfirmSelectionToUnlink] = useState(false);
+    const [showConfirmSelectionToLink, setShowConfirmSelectionToLink] = useState(false);
     const [fetchedSelectedIds, setFetchedSelectedIds] = useState([]);
-    const [sortBy, setSortBy] = useState(initialSortingState);
+    const [sortByLinkedTab, setSortByLinkedTab] = useState(initialSortingState);
+    const [sortByUnlinkedTab, setSortByUnlinkedTab] = useState(initialSortingState);
 
     const [allSearchData, setAllSearchData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
+    const [totalItemsLinked, setTotalItemsLinked] = useState(0);
+    const [totalItemsUnlinked, setTotalItemsUnlinked] = useState(0);
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
-
+    useEffect(() => {
+        buildingListData.forEach((el) => {
+            if (el.building_id === activeBuildingId) {
+                setBldgTimeZone(el.timezone);
+            }
+        });
+    }, [buildingListData, activeBuildingId]);
     useEffect(() => {
         const preparedScheduleDataCopy = preparedScheduleData ? [...preparedScheduleData] : [];
         const workingDaysPerCondition = {};
@@ -295,7 +337,7 @@ const PlugRule = () => {
         }
 
         setConditionDisabledDays(disabledDays);
-        if (selectedIds.length) {
+        if (selectedInitialyIds.length) {
             fetchEstimateSensorSavings();
         }
     }, [preparedScheduleData]);
@@ -321,16 +363,6 @@ const PlugRule = () => {
     const formatBuildingListData = (data) => {
         return data.map((el) => {
             return { value: el.building_id, label: el.building_name };
-        });
-    };
-
-    const getBuildingData = async () => {
-        await fetchBuildingsList(false).then((res) => {
-            let data = res.data;
-            setBuildingListDataNotFormatted(data);
-            const formattedData = formatBuildingListData(data);
-
-            setBuildingListData(formattedData);
         });
     };
 
@@ -382,7 +414,6 @@ const PlugRule = () => {
     }, [preparedScheduleData, currentData]);
     useEffect(() => {
         generateHours();
-        getBuildingData();
         if (ruleId == 'create-plug-rule') {
             setIsCreateRuleMode(true);
         } else {
@@ -455,10 +486,9 @@ const PlugRule = () => {
     };
 
     const [lineChartData, setLineChartData] = useState(initialLineChartData());
-
     const getGraphData = async () => {
-        if (selectedIds.length) {
-            await getGraphDataRequest(selectedIds, currentData.id).then((res) => {
+        if (selectedInitialyIds.length) {
+            await getGraphDataRequest(selectedInitialyIds, currentData.id).then((res) => {
                 if (res && res?.data.length) {
                     const formattedData = formatAverageData(res.data);
                     let response = [{ name: `Average Energy demand`, data: formattedData }];
@@ -471,34 +501,59 @@ const PlugRule = () => {
         if (currentData?.building_id?.length && currentData?.building_id !== 'create-plug-rule') {
             setActiveBuildingId(currentData.building_id);
             fetchLinkedSocketRules();
+            fetchLinkedSocketIds();
         }
     }, [currentData.building_id]);
 
-    const [equpimentTypeFilterString, setEqupimentTypeFilterString] = useState('');
-
-    const [macTypeFilterString, setMacTypeFilterString] = useState('');
+    const [macTypeFilterStringUnlinked, setMacTypeFilterStringUnlinked] = useState('');
+    const [macTypeFilterStringLinked, setMacTypeFilterStringLinked] = useState('');
 
     const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
 
-    const [floorTypeFilterString, setFloorTypeFilterString] = useState('');
-    const [spaceTypeFilterString, setSpaceTypeFilterString] = useState('');
-    const [spaceTypeTypeFilterString, setSpaceTypeTypeFilterString] = useState('');
+    const [floorTypeFilterStringUnlinked, setFloorTypeFilterStringUnlinked] = useState('');
+    const [floorTypeFilterStringLinked, setFloorTypeFilterStringLinked] = useState('');
+    const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = useState(true);
+    const [spaceTypeFilterStringUnlinked, setSpaceTypeFilterStringUnlinked] = useState('');
+    const [spaceTypeFilterStringLinked, setSpaceTypeFilterStringLinked] = useState('');
 
-    const [sensorTypeFilterString, setSensorTypeFilterString] = useState('');
-    const [assignedRuleFilterString, setAssignedRuleFilterString] = useState('');
-    const [tagsFilterString, setTagsFilterString] = useState('');
-    const [lastUsedDataFilterString, setLastUsedDataFilterString] = useState('');
+    const [spaceTypeTypeFilterStringUnlinked, setSpaceTypeTypeFilterStringUnlinked] = useState('');
+    const [spaceTypeTypeFilterStringLinked, setSpaceTypeTypeFilterStringLinked] = useState('');
+
+    const [sensorTypeFilterStringUnlinked, setSensorTypeFilterStringUnlinked] = useState('');
+    const [sensorTypeFilterStringLinked, setSensorTypeFilterStringLinked] = useState('');
+    const [countUnlinkedSockets, setCountUnlinkedSockets] = useState(null);
+    const [countLinkedSockets, setCountLinkedSockets] = useState(0);
+    const [isSetInitiallySocketsCountLinked, setIsSetInitiallySocketsCountLinked] = useState(false);
+    const [isSetInitiallySocketsCountUnlinked, setIsSetInitiallySocketsCountUnlinked] = useState(false);
+    const [assignedRuleFilterStringUnlinked, setAssignedRuleFilterStringUnlinked] = useState('');
+    const [assignedRuleFilterStringLinked, setAssignedRuleFilterStringLinked] = useState('');
+    const [tagsFilterStringUnlinked, setTagsFilterStringUnlinked] = useState('');
+    const [tagsFilterStringLinked, setTagsFilterStringLinked] = useState('');
+    const [lastUsedDataFilterStringUnlinked, setLastUsedDataFilterStringUnlinked] = useState('');
+    const [lastUsedDataFilterStringLinked, setLastUsedDataFilterStringLinked] = useState('');
 
     const [sensorsIdNow, setSensorIdNow] = useState('');
     const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
     const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
+
     useEffect(() => {
-        if (selectedIds.length) {
+        if (selectedInitialyIds.length) {
             getGraphData();
             fetchEstimateSensorSavings();
         }
-    }, [selectedIds]);
+    }, [selectedInitialyIds]);
 
+    useEffect(() => {
+        if (selectedIdsToUnlink.length) {
+            setShowConfirmSelectionToUnlink(true);
+        }
+    }, [selectedIdsToUnlink]);
+
+    useEffect(() => {
+        if (selectedIdsToLink.length) {
+            setShowConfirmSelectionToLink(true);
+        }
+    }, [selectedIdsToLink]);
     const handleSwitchChange = () => {
         let obj = currentData;
         obj.is_active = !currentData.is_active;
@@ -506,12 +561,12 @@ const PlugRule = () => {
         setIsChangedRuleDetails(true);
     };
     useEffect(() => {
-        if (isChangedSockets || isChangedRuleDetails) {
+        if (isChangedRuleDetails) {
             setIsDisabledSaveButton(false);
         } else {
             setIsDisabledSaveButton(true);
         }
-    }, [isChangedRuleDetails, isChangedSockets]);
+    }, [isChangedRuleDetails, isChangedSocketsUnlinked, isChangedSocketsLinked]);
 
     const handleCurrentDataChange = (key, value) => {
         let obj = Object.assign({}, currentData);
@@ -638,15 +693,20 @@ const PlugRule = () => {
                 return listToRemoveForReassign.indexOf(val) == -1;
             });
         } else {
-            listOfsocketsToReassign = rulesToLink.sensor_id;
+            listOfsocketsToReassign = [...rulesToLink.sensor_id, ...listSocketsIds];
         }
-
         listOfsocketsToReassign &&
             (await reassignSensorsToRuleRequest({
                 rule_id: ruleId,
                 building_id: activeBuildingId,
                 sensor_id: listOfsocketsToReassign,
-            }).then((res) => {}));
+            }).then((res) => {
+                const snackbarTitle = notificationLinkedData(listOfsocketsToReassign.length, currentData.name);
+                openSnackbar({ ...snackbarTitle, type: Notification.Types.success, duration: 5000 });
+                fetchUnLinkedSocketRules();
+                setCheckedAllToLink(false);
+                selectedIdsToLink([]);
+            }));
     };
 
     const updateSocketUnlink = async () => {
@@ -656,7 +716,15 @@ const PlugRule = () => {
         setIsProcessing(true);
 
         await unlinkSocketRequest(rulesToUnLink)
-            .then((res) => {})
+            .then((res) => {
+                const snackbarTitle = notificationUnlinkedData(rulesToUnLink.sensor_id.length, currentData.name);
+
+                openSnackbar({ ...snackbarTitle, type: Notification.Types.success, duration: 5000 });
+                setIsSetInitiallySocketsCountLinked(false);
+                fetchLinkedSocketRules();
+                fetchLinkedSocketIds();
+                fetchUnLinkedSocketRules();
+            })
             .catch((error) => {});
 
         setIsProcessing(false);
@@ -725,53 +793,80 @@ const PlugRule = () => {
         setSocketsToReassign(newSocketsToReassign);
     };
 
-    const handleRuleStateChange = (value, rule) => {
-        if (value === 'true') {
-            if (checkedAll) {
-                setCheckedAll(false);
-            }
-            let linkedData = [...linkedRuleData];
-            let unLinkedData = [...unLinkedRuleData];
-            let newLinkedData = linkedData.filter((el) => el.id !== rule.id);
-            rule.linked_rule = false;
-            unLinkedData.push(rule);
-            setLinkedRuleData(newLinkedData);
-            setUnLinkedRuleData(unLinkedData);
+    const handleClickConfirmSelection = (tabId) => {
+        if (tabId == 0) {
+            isChangedSocketsLinked && updateSocketUnlink();
+        } else {
+            handleSaveClicked();
+        }
 
-            let recordToUnLink = rulesToUnLink;
-            recordToUnLink.rule_id = currentData.id;
-            recordToUnLink.sensor_id.push(rule.id);
-            setRulesToUnLink(recordToUnLink);
-            let recordToLink = rulesToLink;
-            let newRecordToLink = recordToLink.sensor_id.filter((el) => el !== rule.id);
-            recordToLink.sensor_id = newRecordToLink;
+        setIsUnsavedChanges(false);
+    };
+    const handleClickConfirmSelectionToUnlink = () => {
+        handleSaveClicked();
+        setIsUnsavedChanges(true);
+        setShowConfirmSelectionToUnlink(false);
+    };
+
+    const handleClickConfirmSelectionToLink = () => {
+        handleSaveClicked();
+        setIsUnsavedChanges(true);
+        setShowConfirmSelectionToLink(false);
+    };
+
+    const handleRuleLinkStateChange = (value, rule) => {
+        if (value === 'false') {
+            if (checkedAllToLink) {
+                setCheckedToUnlinkAll(false);
+            }
+            let recordToLink = { ...rulesToLink };
+            recordToLink.rule_id = currentData.id;
+            recordToLink.sensor_id = [...recordToLink.sensor_id, rule.id];
+            setRulesToLink(recordToLink);
+            setTotalSocket((totalCount) => ++totalCount);
+        }
+
+        if (value === 'true') {
+            if (allSensors.length - selectedInitialyIds.length == 0) {
+                setCheckedToUnlinkAll(true);
+            }
+
+            let recordToLink = { ...rulesToLink };
+            recordToLink.rule_id = currentData.id;
+            recordToLink.sensor_id.filter((el) => el.id !== rule.id);
+
             setRulesToLink(recordToLink);
 
             setTotalSocket((totalCount) => --totalCount);
         }
 
+        const isAdding = value === 'false';
+
+        setSelectedIdsToLink((prevState) => {
+            return isAdding ? [...prevState, rule.id] : prevState.filter((sensorId) => sensorId !== rule.id);
+        });
+        setIsChangedSocketsUnlinked(true);
+    };
+    const handleRuleStateChangeUnlink = (value, rule) => {
+        if (value === 'true') {
+            if (checkedAllToUnlink) {
+                setCheckedToUnlinkAll(false);
+            }
+            let recordToUnLink = { ...rulesToUnLink };
+            recordToUnLink.rule_id = currentData.id;
+            recordToUnLink.sensor_id.push(rule.id);
+            setRulesToUnLink(recordToUnLink);
+            setTotalSocket((totalCount) => --totalCount);
+        }
+
         if (value === 'false') {
-            if (allSensors.length - selectedIds.length == 0) {
-                setCheckedAll(true);
+            if (allSensors.length - selectedInitialyIds.length == 0) {
+                setCheckedToUnlinkAll(true);
             }
 
-            let linkedData = [...linkedRuleData];
-            let unLinkedData = [...unLinkedRuleData];
-            let newUnLinkedData = unLinkedData.filter((el) => el.id !== rule.id);
-            rule.linked_rule = true;
-            linkedData.push(rule);
-            setLinkedRuleData(linkedData);
-            setUnLinkedRuleData(newUnLinkedData);
-
-            let recordToLink = rulesToLink;
-            recordToLink.rule_id = currentData.id;
-            recordToLink.sensor_id.push(rule.id);
-
-            setRulesToLink(recordToLink);
-
             let recordToUnLink = rulesToUnLink;
-            let newRecordToUnLink = recordToUnLink.sensor_id.filter((el) => el !== rule.id);
-            recordToUnLink.sensor_id = newRecordToUnLink;
+            recordToUnLink.rule_id = currentData.id;
+            recordToUnLink.sensor_id.push(rule.id);
 
             setRulesToUnLink(recordToUnLink);
 
@@ -780,10 +875,10 @@ const PlugRule = () => {
 
         const isAdding = value === 'false';
 
-        setSelectedIds((prevState) => {
-            return isAdding ? [...prevState, rule.id] : prevState.filter((sensorId) => sensorId !== rule.id);
+        setSelectedIdsToUnlink((prevState) => {
+            return isAdding ? prevState.filter((sensorId) => sensorId !== rule.id) : [...prevState, rule.id];
         });
-        setIsChangedSockets(true);
+        setIsChangedSocketsLinked(true);
     };
 
     const updatePlugRuleData = async () => {
@@ -804,6 +899,7 @@ const PlugRule = () => {
             .then((res) => {
                 setIsProcessing(false);
                 setPageRefresh(!pageRefresh);
+                openSnackbar({ ...notificationUpdatedData, type: Notification.Types.success, duration: 5000 });
             })
             .catch((error) => {
                 setIsProcessing(false);
@@ -811,15 +907,18 @@ const PlugRule = () => {
     };
 
     const fetchEstimateSensorSavings = async () => {
+        const res = [];
         const formattedSchedule = currentData?.action?.map((action) => {
             const { action_day, action_time, action_type, ...rest } = action;
             const preparedActionDays = action_day.map((day) => {
                 return daysOfWeekFull[day];
             });
-            return { action_time, action_type, action_days: preparedActionDays };
+            if (action_time) {
+                res.push({ action_time, action_type, action_days: preparedActionDays });
+            }
         });
 
-        await getEstimateSensorSavingsRequst(formattedSchedule, selectedIds, ruleId).then((res) => {
+        await getEstimateSensorSavingsRequst(res, selectedInitialyIds, ruleId).then((res) => {
             setEstimatedEnergySavings(res.data);
         });
     };
@@ -849,22 +948,65 @@ const PlugRule = () => {
             addOptions();
         }
     }, [allData]);
-    const headerProps = [
+    const headerPropsLinkedTab = [
         {
             name: 'Equipment Type',
             accessor: 'equipment_type_name',
             callbackValue: renderEquipType,
-            onSort: (method, name) => setSortBy({ method, name }),
+            onSort: (method, name) => setSortByLinkedTab({ method, name }),
         },
         {
             name: 'Location',
             accessor: 'equipment_link_location',
             callbackValue: renderLocation,
+            onSort: (method, name) => setSortByLinkedTab({ method, name }),
         },
         {
             name: 'Space Type',
             accessor: 'space_type',
-            onSort: (method, name) => setSortBy({ method, name }),
+            onSort: (method, name) => setSortByLinkedTab({ method, name }),
+        },
+        {
+            name: 'MAC Address',
+            accessor: 'device_link',
+        },
+        {
+            name: 'Sensors',
+            accessor: 'sensor_count',
+        },
+        {
+            name: 'Assigned Rule',
+            accessor: 'assigned_rule',
+            callbackValue: renderAssignRule,
+        },
+        {
+            name: 'Tags',
+            accessor: 'tags',
+            callbackValue: renderTagCell,
+        },
+        {
+            name: 'Last Data',
+            accessor: 'last_data',
+            callbackValue: renderLastUsedCell,
+        },
+    ];
+    const headerPropsUnlinkedTab = [
+        {
+            name: 'Equipment Type',
+            accessor: 'equipment_type_name',
+            callbackValue: renderEquipType,
+            onSort: (method, name) => setSortByUnlinkedTab({ method, name }),
+        },
+        {
+            name: 'Location',
+            accessor: 'equipment_link_location',
+            callbackValue: renderLocation,
+            onSort: (method, name) => setSortByUnlinkedTab({ method, name }),
+        },
+        {
+            name: 'Space Type',
+            accessor: 'space_type',
+            onSort: (method, name) => setSortByUnlinkedTab({ method, name }),
         },
         {
             name: 'MAC Address',
@@ -937,35 +1079,46 @@ const PlugRule = () => {
         removeMacDuplicates();
     }, [macOptions]);
 
+    const fetchLinkedSocketIds = async () => {
+        activeBuildingId &&
+            listLinkSocketRulesRequest(ruleId, activeBuildingId).then((res) => {
+                const { sensor_id } = res.data.data;
+                setListSocketsIds(sensor_id);
+            });
+    };
+
     const fetchUnLinkedSocketRules = async () => {
-        const sorting = sortBy.method &&
-            sortBy.name && {
-                order_by: sortBy.name,
-                sort_by: sortBy.method,
+        const sorting = sortByUnlinkedTab.method &&
+            sortByUnlinkedTab.name && {
+                order_by: sortByUnlinkedTab.name,
+                sort_by: sortByUnlinkedTab.method,
             };
 
-        isLoadingRef.current = true;
+        isLoadingUnlinkedRef.current = true;
 
         activeBuildingId &&
             (await getUnlinkedSocketRules(
-                pageSize,
-                pageNo,
+                pageSizeUnlinked,
+                pageNoUnlinked,
                 activeBuildingId,
-                equpimentTypeFilterString,
-                macTypeFilterString,
+                equipmentTypeFilterStringUnlinked,
+                macTypeFilterStringUnlinked,
                 locationTypeFilterString,
-                sensorTypeFilterString,
-                floorTypeFilterString,
-                spaceTypeFilterString,
-                spaceTypeTypeFilterString,
-                assignedRuleFilterString,
-                tagsFilterString,
+                sensorTypeFilterStringUnlinked,
+                floorTypeFilterStringUnlinked,
+                spaceTypeFilterStringUnlinked,
+                spaceTypeTypeFilterStringUnlinked,
+                assignedRuleFilterStringUnlinked,
+                tagsFilterStringUnlinked,
                 true,
                 {
                     ...sorting,
-                }
+                },
+                false,
+                ruleId,
+                searchUnlinked
             ).then((res) => {
-                isLoadingRef.current = false;
+                isLoadingUnlinkedRef.current = false;
 
                 let response = res.data;
                 setAllSensors(response?.data);
@@ -973,116 +1126,214 @@ const PlugRule = () => {
                 setUnlinkedSocketRuleSuccess(res.status);
 
                 let unLinkedData = [];
-                _.uniqBy(response, 'id').forEach((record) => {
-                    record.linked_rule = false;
-                    unLinkedData.push(record);
-                });
+                if (!isSetInitiallySocketsCountUnlinked) {
+                    setCountUnlinkedSockets(response?.total_data);
+                    setIsSetInitiallySocketsCountUnlinked(true);
+                }
 
-                setUnLinkedRuleData(unLinkedData);
-                setAllUnlinkedRuleAdded((el) => [...el, '1']);
-                setTotalItems(response?.total_data);
+                setUnlinkedSocketsTabData(response?.data);
+                setTotalItemsUnlinked(response?.total_data);
             }));
     };
 
-    const handleDownloadCsv = async () => {
-        const sorting = sortBy.method &&
-            sortBy.name && {
-                order_by: sortBy.name,
-                sort_by: sortBy.method,
+    const handleDownloadCsvLinkedTab = async () => {
+        const sorting = sortByLinkedTab.method &&
+            sortByLinkedTab.name && {
+                order_by: sortByLinkedTab.name,
+                sort_by: sortByLinkedTab.method,
             };
 
         await getUnlinkedSocketRules(
-            pageSize,
-            pageNo,
+            pageSizeLinked,
+            pageNoLinked,
             activeBuildingId,
-            equpimentTypeFilterString,
-            macTypeFilterString,
+            equipmentTypeFilterStringLinked,
+            macTypeFilterStringLinked,
             locationTypeFilterString,
-            sensorTypeFilterString,
-            floorTypeFilterString,
-            spaceTypeFilterString,
-            spaceTypeTypeFilterString,
-            assignedRuleFilterString,
-            tagsFilterString,
+            sensorTypeFilterStringLinked,
+            floorTypeFilterStringLinked,
+            spaceTypeFilterStringLinked,
+            spaceTypeTypeFilterStringLinked,
+            assignedRuleFilterStringLinked,
+            tagsFilterStringLinked,
             false,
             {
                 ...sorting,
-            }
+            },
+            true,
+            ruleId,
+            searchLinked
         )
             .then((res) => {
                 let responseData = res?.data;
                 download(
                     `Sockets${new Date().toISOString().split('T')[0]}`,
-                    getSocketsForPlugRulePageTableCSVExport(responseData.data, headerProps)
+                    getSocketsForPlugRulePageTableCSVExport(responseData.data, headerPropsLinkedTab)
                 );
             })
             .catch((error) => {});
     };
 
-    const fetchLinkedSocketRules = async () => {
-        await listLinkSocketRulesRequest(ruleId, currentData.building_id, sortBy)
-            .then((res) => {
-                let response = res.data;
-                let linkedData = [];
+    const handleDownloadCsvUnlinkedTab = async () => {
+        const sorting = sortByUnlinkedTab.method &&
+            sortByUnlinkedTab.name && {
+                order_by: sortByUnlinkedTab.name,
+                sort_by: sortByUnlinkedTab.method,
+            };
 
-                if (res.statusText === 'OK') {
-                    Array.isArray(res.data.data.sensor_id) && setTotalSocket(res.data.data.sensor_id.length);
+        await getUnlinkedSocketRules(
+            pageSizeUnlinked,
+            pageNoUnlinked,
+            activeBuildingId,
+            equipmentTypeFilterStringUnlinked,
+            macTypeFilterStringUnlinked,
+            locationTypeFilterString,
+            sensorTypeFilterStringUnlinked,
+            floorTypeFilterStringUnlinked,
+            spaceTypeFilterStringUnlinked,
+            spaceTypeTypeFilterStringUnlinked,
+            assignedRuleFilterStringUnlinked,
+            tagsFilterStringUnlinked,
+            false,
+            {
+                ...sorting,
+            },
+            false,
+            ruleId,
+            searchUnlinked
+        )
+            .then((res) => {
+                let responseData = res?.data;
+                download(
+                    `Sockets${new Date().toISOString().split('T')[0]}`,
+                    getSocketsForPlugRulePageTableCSVExport(responseData.data, headerPropsUnlinkedTab)
+                );
+            })
+            .catch((error) => {});
+    };
+    useEffect(() => {
+        fetchLinkedSocketRules();
+    }, [searchLinked]);
+    useEffect(() => {
+        fetchUnLinkedSocketRules();
+    }, [searchUnlinked]);
+
+    const fetchLinkedSocketRules = async () => {
+        const sorting = sortByLinkedTab.method &&
+            sortByLinkedTab.name && {
+                order_by: sortByLinkedTab.name,
+                sort_by: sortByLinkedTab.method,
+            };
+        isLoadingLinkedRef.current = true;
+
+        await getUnlinkedSocketRules(
+            pageSizeLinked,
+            pageNoLinked,
+            activeBuildingId,
+            equipmentTypeFilterStringLinked,
+            macTypeFilterStringLinked,
+            locationTypeFilterString,
+            sensorTypeFilterStringLinked,
+            floorTypeFilterStringLinked,
+            spaceTypeFilterStringLinked,
+            spaceTypeTypeFilterStringLinked,
+            assignedRuleFilterStringLinked,
+            tagsFilterStringLinked,
+            true,
+            {
+                ...sorting,
+            },
+            true,
+            ruleId,
+            searchLinked
+        )
+            .then((res) => {
+                isLoadingLinkedRef.current = false;
+                let response = res.data;
+                let linkedIds = [];
+
+                if (res.success) {
+                    setTotalSocket(response.total_data);
                 }
 
-                setSelectedIds(response.data.sensor_id || []);
-                setFetchedSelectedIds(response.data.sensor_id || []);
-
-                response.data.sensor_id.forEach((record) => {
-                    record.linked_rule = true;
-                    linkedData.push(record);
+                response.data.forEach((record) => {
+                    linkedIds.push(record.id);
                 });
-
-                setLinkedRuleData(linkedData);
+                if (response.data.length > 0) {
+                    setCheckedToUnlinkAll(true);
+                }
+                setSelectedInitialyIds(linkedIds || []);
+                setLinkedSocketsTabData(response.data);
+                if (!isSetInitiallySocketsCountLinked) {
+                    setCountLinkedSockets(response.total_data);
+                    setIsSetInitiallySocketsCountLinked(true);
+                }
+                setTotalItemsLinked(response?.total_data);
             })
             .catch((error) => {});
     };
 
     useEffect(() => {
-        const selectedSensors = [...selectedIds]
-            .map((id) => allSensors.find((sensor) => sensor.id === id))
-            .map((sensor) => ({ ...sensor, linked_rule: true }));
-
-        setRulesToLink((prevState) => ({ ...prevState, sensor_id: selectedIds }));
-        setLinkedRuleData(selectedSensors);
-    }, [allData.length, allSensors?.length]);
-
-    useEffect(() => {
         unLinkedRuleData.length > 0 &&
-            setUnLinkedRuleData((olState) => olState.filter((sensor) => !selectedIds.includes(sensor.id)));
-    }, [selectedIds.length, selectedIds.length, unLinkedRuleData.length]);
+            setUnLinkedRuleData((olState) => olState.filter((sensor) => !selectedInitialyIds.includes(sensor.id)));
+    }, [selectedInitialyIds.length, selectedInitialyIds.length, unLinkedRuleData.length]);
 
     useEffect(() => {
         if (ruleId === null) {
             return;
         }
         if (activeBuildingId?.length) {
-            fetchFiltersForSensors();
+            fetchFiltersForSensorsUnlinked();
+            fetchUnLinkedSocketRules();
         }
-
-        fetchUnLinkedSocketRules();
-        fetchLinkedSocketRules();
     }, [
         ruleId,
         currentData.name,
         activeBuildingId,
-        equpimentTypeFilterString,
-        macTypeFilterString,
+        equipmentTypeFilterStringUnlinked,
+        macTypeFilterStringUnlinked,
         locationTypeFilterString,
-        sensorTypeFilterString,
-        floorTypeFilterString,
-        spaceTypeFilterString,
-        assignedRuleFilterString,
-        tagsFilterString,
-        spaceTypeTypeFilterString,
-        sortBy.method,
-        sortBy.name,
-        pageNo,
-        pageSize,
+        locationTypeFilterString,
+        sensorTypeFilterStringUnlinked,
+        floorTypeFilterStringUnlinked,
+        spaceTypeFilterStringUnlinked,
+        assignedRuleFilterStringUnlinked,
+        tagsFilterStringUnlinked,
+        spaceTypeTypeFilterStringUnlinked,
+        sortByUnlinkedTab.method,
+        sortByUnlinkedTab.name,
+        pageNoUnlinked,
+        pageNoUnlinked,
+        pageSizeUnlinked,
+    ]);
+
+    useEffect(() => {
+        if (ruleId === null) {
+            return;
+        }
+        if (activeBuildingId?.length) {
+            fetchFiltersForSensorsLinked();
+            fetchLinkedSocketRules();
+        }
+    }, [
+        ruleId,
+        currentData.name,
+        activeBuildingId,
+        equipmentTypeFilterStringLinked,
+        locationTypeFilterString,
+        locationTypeFilterString,
+        sensorTypeFilterStringLinked,
+        macTypeFilterStringLinked,
+        floorTypeFilterStringLinked,
+        spaceTypeFilterStringLinked,
+        assignedRuleFilterStringLinked,
+        tagsFilterStringLinked,
+        spaceTypeTypeFilterStringLinked,
+        sortByLinkedTab.method,
+        sortByLinkedTab.name,
+        pageNoLinked,
+        pageNoLinked,
+        pageSizeLinked,
     ]);
 
     useEffect(() => {
@@ -1096,51 +1347,90 @@ const PlugRule = () => {
 
         setAllLinkedRuleData(allRuleData);
     }, [linkedRuleData, unLinkedRuleData]);
-    const currentRow = () => {
-        if (selectedRuleFilter === 0) {
-            return allSensors;
-        }
-        if (selectedRuleFilter === 1) {
-            //@TODO Here should be all the data, stored somewhere, const selectedItems = [{} .... {}];
-            // and show when user selected but switched page
-            return selectedIds.reduce((acc, id) => {
-                const foundSelectedSensor = allSensors.find((sensor) => sensor.id === id);
-                if (foundSelectedSensor) {
-                    acc.push(foundSelectedSensor);
-                }
-                return acc;
-            }, []);
-        }
 
-        return allSensors.filter(({ id }) => !selectedIds.find((sensorId) => sensorId === id));
-    };
-
-    const selectAllRowsSensors = async (checkedAll) => {
-        const sorting = sortBy.method &&
-            sortBy.name && {
-                order_by: sortBy.name,
-                sort_by: sortBy.method,
+    const selectAllRowsSensorsLinkedData = async (checkedAllToUnlink) => {
+        const sorting = sortByLinkedTab.method &&
+            sortByLinkedTab.name && {
+                order_by: sortByLinkedTab.name,
+                sort_by: sortByLinkedTab.method,
             };
+        isLoadingLinkedRef.current = true;
 
-        if (checkedAll) {
+        if (checkedAllToUnlink) {
             activeBuildingId &&
                 (await getUnlinkedSocketRules(
-                    pageSize,
-                    pageNo,
+                    pageSizeLinked,
+                    pageNoLinked,
                     activeBuildingId,
-                    equpimentTypeFilterString,
-                    macTypeFilterString,
+                    equipmentTypeFilterStringLinked,
+                    macTypeFilterStringLinked,
                     locationTypeFilterString,
-                    sensorTypeFilterString,
-                    floorTypeFilterString,
-                    spaceTypeFilterString,
-                    spaceTypeTypeFilterString,
-                    assignedRuleFilterString,
-                    tagsFilterString,
+                    sensorTypeFilterStringLinked,
+                    floorTypeFilterStringLinked,
+                    spaceTypeFilterStringLinked,
+                    spaceTypeTypeFilterStringLinked,
+                    assignedRuleFilterStringLinked,
+                    tagsFilterStringLinked,
                     false,
                     {
                         ...sorting,
-                    }
+                    },
+                    true,
+                    ruleId,
+                    searchLinked
+                ).then((res) => {
+                    isLoadingLinkedRef.current = false;
+
+                    let response = res.data;
+                    const preparedIdofSockets = [];
+                    _.cloneDeep(_.uniqBy(response.data, 'id')).forEach((socket) => {
+                        preparedIdofSockets.push(socket.id);
+                    });
+                    setRulesToUnLink((prevState) => ({
+                        ...prevState,
+                        sensor_id: preparedIdofSockets,
+                    }));
+
+                    setTotalSocket(response.total_data);
+                }));
+        } else {
+            setRulesToUnLink({ rule_id: ruleId, sensor_id: listSocketsIds });
+            setTotalSocket(0);
+            setSelectedIdsToUnlink(listSocketsIds);
+            isLoadingLinkedRef.current = false;
+        }
+        setIsChangedSocketsLinked(true);
+        setCheckedToUnlinkAll(checkedAllToUnlink);
+    };
+
+    const selectAllRowsSensors = async (checkedAllToLink) => {
+        const sorting = sortByUnlinkedTab.method &&
+            sortByUnlinkedTab.name && {
+                order_by: sortByUnlinkedTab.name,
+                sort_by: sortByUnlinkedTab.method,
+            };
+        if (checkedAllToLink) {
+            activeBuildingId &&
+                (await getUnlinkedSocketRules(
+                    pageSizeUnlinked,
+                    pageNoUnlinked,
+                    activeBuildingId,
+                    equipmentTypeFilterStringUnlinked,
+                    macTypeFilterStringUnlinked,
+                    locationTypeFilterString,
+                    sensorTypeFilterStringUnlinked,
+                    floorTypeFilterStringUnlinked,
+                    spaceTypeFilterStringUnlinked,
+                    spaceTypeTypeFilterStringUnlinked,
+                    assignedRuleFilterStringUnlinked,
+                    tagsFilterStringUnlinked,
+                    false,
+                    {
+                        ...sorting,
+                    },
+                    false,
+                    ruleId,
+                    searchUnlinked
                 ).then((res) => {
                     isLoadingRef.current = false;
 
@@ -1153,7 +1443,8 @@ const PlugRule = () => {
                         ...prevState,
                         sensor_id: preparedIdofSockets,
                     }));
-
+                    setSelectedIdsToLink(preparedIdofSockets);
+                    setCheckedAllToLink(true);
                     setTotalSocket(response.total_data);
                 }));
         } else {
@@ -1163,11 +1454,11 @@ const PlugRule = () => {
             });
             setRulesToUnLink({ rule_id: ruleId, sensor_id: idOfSelectedSockets });
             setRulesToLink([]);
-            setSelectedIds([]);
+            setSelectedInitialyIds([]);
             setTotalSocket(0);
         }
-        setIsChangedSockets(true);
-        setCheckedAll(checkedAll);
+        setIsChangedSocketsUnlinked(true);
+        setCheckedToUnlinkAll(checkedAllToUnlink);
     };
 
     const currentRowSearched = () => {
@@ -1177,7 +1468,7 @@ const PlugRule = () => {
         if (selectedRuleFilter === 1) {
             //@TODO Here should be all the data, stored somewhere, const selectedItems = [{} .... {}];
             // and show when user selected but switched page
-            return selectedIds.reduce((acc, id) => {
+            return selectedInitialyIds.reduce((acc, id) => {
                 const foundSelectedSensor = allSearchData.find((sensor) => sensor.id === id);
                 if (foundSelectedSensor) {
                     acc.push(foundSelectedSensor);
@@ -1186,7 +1477,7 @@ const PlugRule = () => {
             }, []);
         }
 
-        return allSearchData.filter(({ id }) => !selectedIds.find((sensorId) => sensorId === id));
+        return allSearchData.filter(({ id }) => !selectedInitialyIds.find((sensorId) => sensorId === id));
     };
 
     const renderTagCell = (row) => {
@@ -1213,17 +1504,19 @@ const PlugRule = () => {
     const handleContinueAndSaveClick = async () => {
         Promise.allSettled([
             isChangedRuleDetails && updatePlugRuleData(),
-            isChangedSockets && reassignSensorsToRule(),
-            isChangedSockets && updateSocketUnlink(),
+            isChangedSocketsUnlinked && reassignSensorsToRule(),
+            // isChangedSockets && updateSocketUnlink(),
         ]).then((value) => {
             handleCloseSocketsModal(true);
             fetchUnLinkedSocketRules();
-            fetchFiltersForSensors();
+            fetchFiltersForSensorsUnlinked();
+            fetchFiltersForSensorsLinked();
             fetchLinkedSocketRules();
+            fetchLinkedSocketIds();
             fetchPlugRuleDetail();
-            openSnackbar({ ...notificationUpdatedData, type: Notification.Types.success, duration: 5000 });
             setIsChangedRuleDetails(false);
-            setIsChangedSockets(false);
+            setIsChangedSocketsUnlinked(false);
+            setIsChangedSocketsLinked(false);
         });
     };
 
@@ -1282,19 +1575,24 @@ const PlugRule = () => {
             }
         } else {
             Promise.allSettled([
-                isChangedSockets && updateSocketUnlink(),
-                isChangedSockets && reassignSensorsToRule(),
+                // isChangedSockets && updateSocketUnlink(),
+                isChangedSocketsUnlinked && reassignSensorsToRule(),
                 isChangedRuleDetails && updatePlugRuleData(),
             ]).then((value) => {
-                openSnackbar({ ...notificationUpdatedData, type: Notification.Types.success, duration: 5000 });
+                setRulesToLink({ ruleId: '', sensor_id: [] });
+                setRulesToUnLink({ ruleId: '', sensor_id: [] });
                 setIsChangedRuleDetails(false);
-                setIsChangedSockets(false);
+                setIsChangedSocketsUnlinked(false);
+                setIsChangedSocketsLinked(false);
                 fetchUnLinkedSocketRules();
-                fetchFiltersForSensors();
                 fetchLinkedSocketRules();
+                fetchLinkedSocketIds();
+                fetchFiltersForSensorsUnlinked();
+                fetchFiltersForSensorsLinked();
                 fetchPlugRuleDetail();
             });
         }
+        setIsUnsavedChanges(false);
     };
 
     const renderAssignRule = useCallback(
@@ -1312,17 +1610,21 @@ const PlugRule = () => {
         return childrenTemplate(location.join(' - '));
     }, []);
 
-    const [filterOptions, setFilterOptions] = useState([]);
-    const fetchFiltersForSensors = async () => {
-        isLoadingRef.current = true;
+    const [filterOptionsUnlinked, setFilterOptionsUnlinked] = useState([]);
+    const [filterOptionsLinked, setFilterOptionsLinked] = useState([]);
+
+    const fetchFiltersForSensorsUnlinked = async () => {
+        isLoadingUnlinkedRef.current = true;
         await getFiltersForSensorsRequest({
             activeBuildingId,
-            macTypeFilterString,
-            equpimentTypeFilterString,
-            sensorTypeFilterString,
-            floorTypeFilterString,
-            spaceTypeFilterString,
-            spaceTypeTypeFilterString,
+            macTypeFilterString: macTypeFilterStringUnlinked,
+            equipmentTypeFilterString: equipmentTypeFilterStringUnlinked,
+            sensorTypeFilterString: sensorTypeFilterStringUnlinked,
+            floorTypeFilterString: floorTypeFilterStringUnlinked,
+            spaceTypeFilterString: spaceTypeFilterStringUnlinked,
+            spaceTypeTypeFilterString: spaceTypeTypeFilterStringUnlinked,
+            isGetOnlyLinked: false,
+            plugRuleId: ruleId,
         }).then((filters) => {
             const filterOptions = filters.data?.length ? filters.data[0] : filters.data;
             const filterOptionsFetched = !_.isEmpty(filterOptions)
@@ -1336,9 +1638,9 @@ const PlugRule = () => {
                               value: filterItem.equipment_type_id,
                               label: filterItem.equipment_type_name,
                           })),
-                          onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
+                          onClose: (options) => filterHandler(setEquipmentTypeFilterStringUnlinked, options),
                           onDelete: () => {
-                              setEqupimentTypeFilterString('');
+                              setEquipmentTypeFilterStringUnlinked('');
                           },
                       },
                       {
@@ -1350,8 +1652,8 @@ const PlugRule = () => {
                               value: filterItem.floor_id,
                               label: filterItem.floor_name,
                           })),
-                          onClose: (options) => filterHandler(setFloorTypeFilterString, options),
-                          onDelete: () => setFloorTypeFilterString(''),
+                          onClose: (options) => filterHandler(setFloorTypeFilterStringUnlinked, options),
+                          onDelete: () => setFloorTypeFilterStringUnlinked(''),
                       },
                       {
                           label: 'Space',
@@ -1362,8 +1664,8 @@ const PlugRule = () => {
                               value: filterItem.space_id,
                               label: filterItem.space_name,
                           })),
-                          onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
-                          onDelete: () => setSpaceTypeFilterString(''),
+                          onClose: (options) => filterHandler(setSpaceTypeFilterStringUnlinked, options),
+                          onDelete: () => setSpaceTypeFilterStringUnlinked(''),
                       },
                       {
                           label: 'Space Type',
@@ -1374,8 +1676,8 @@ const PlugRule = () => {
                               value: filterItem.space_type_id,
                               label: filterItem.space_type_name,
                           })),
-                          onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
-                          onDelete: () => setSpaceTypeTypeFilterString(''),
+                          onClose: (options) => filterHandler(setSpaceTypeTypeFilterStringUnlinked, options),
+                          onDelete: () => setSpaceTypeTypeFilterStringUnlinked(''),
                       },
                       {
                           label: 'MAC Address',
@@ -1386,9 +1688,9 @@ const PlugRule = () => {
                               value: filterItem,
                               label: filterItem,
                           })),
-                          onClose: (options) => filterHandler(setMacTypeFilterString, options),
+                          onClose: (options) => filterHandler(setMacTypeFilterStringUnlinked, options),
                           onDelete: () => {
-                              setMacTypeFilterString('');
+                              setMacTypeFilterStringUnlinked('');
                           },
                       },
                       {
@@ -1400,8 +1702,8 @@ const PlugRule = () => {
                               value: filterItem,
                               label: filterItem,
                           })),
-                          onClose: (options) => filterHandler(setSensorTypeFilterString, options),
-                          onDelete: () => setSensorTypeFilterString(''),
+                          onClose: (options) => filterHandler(setSensorTypeFilterStringUnlinked, options),
+                          onDelete: () => setSensorTypeFilterStringUnlinked(''),
                       },
                       {
                           label: 'Assigned rule',
@@ -1412,8 +1714,8 @@ const PlugRule = () => {
                               value: filterItem.plug_rule_id,
                               label: filterItem.plug_rule_name,
                           })),
-                          onClose: (options) => filterHandler(setAssignedRuleFilterString, options),
-                          onDelete: () => setAssignedRuleFilterString(''),
+                          onClose: (options) => filterHandler(setAssignedRuleFilterStringUnlinked, options),
+                          onDelete: () => setAssignedRuleFilterStringUnlinked(''),
                       },
                       {
                           label: 'Tags',
@@ -1424,8 +1726,8 @@ const PlugRule = () => {
                               value: filterItem,
                               label: filterItem,
                           })),
-                          onClose: (options) => filterHandler(setTagsFilterString, options),
-                          onDelete: () => setTagsFilterString(''),
+                          onClose: (options) => filterHandler(setTagsFilterStringUnlinked, options),
+                          onDelete: () => setTagsFilterStringUnlinked(''),
                       },
                       {
                           label: 'Last used data',
@@ -1436,15 +1738,151 @@ const PlugRule = () => {
                               value: filterItem,
                               label: filterItem,
                           })),
-                          onClose: (options) => filterHandler(setLastUsedDataFilterString, options),
-                          onDelete: () => setLastUsedDataFilterString(''),
+                          onClose: (options) => filterHandler(setLastUsedDataFilterStringUnlinked, options),
+                          onDelete: () => setLastUsedDataFilterStringUnlinked(''),
                       },
                   ]
                 : [];
-            setFilterOptions(filterOptionsFetched);
+            setFilterOptionsUnlinked(filterOptionsFetched);
         });
 
-        isLoadingRef.current = false;
+        isLoadingUnlinkedRef.current = false;
+    };
+
+    const fetchFiltersForSensorsLinked = async () => {
+        isLoadingLinkedRef.current = true;
+        await getFiltersForSensorsRequest({
+            activeBuildingId,
+            macTypeFilterString: macTypeFilterStringLinked,
+            equipmentTypeFilterString: equipmentTypeFilterStringLinked,
+            sensorTypeFilterString: sensorTypeFilterStringLinked,
+            floorTypeFilterString: floorTypeFilterStringLinked,
+            spaceTypeFilterString: spaceTypeFilterStringLinked,
+            spaceTypeTypeFilterString: spaceTypeTypeFilterStringLinked,
+            isGetOnlyLinked: true,
+            plugRuleId: ruleId,
+        }).then((filters) => {
+            const filterOptions = filters.data?.length ? filters.data[0] : filters.data;
+            const filterOptionsFetched = !_.isEmpty(filterOptions)
+                ? [
+                      {
+                          label: 'Equipment Type',
+                          value: 'equipmentType',
+                          placeholder: 'All Equipment Types',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.equipment_type.map((filterItem) => ({
+                              value: filterItem.equipment_type_id,
+                              label: filterItem.equipment_type_name,
+                          })),
+                          onClose: (options) => filterHandler(setEquipmentTypeFilterStringLinked, options),
+                          onDelete: () => {
+                              setEquipmentTypeFilterStringLinked('');
+                          },
+                      },
+                      {
+                          label: 'Floor',
+                          value: 'floor',
+                          placeholder: 'All Floors',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_floor.map((filterItem) => ({
+                              value: filterItem.floor_id,
+                              label: filterItem.floor_name,
+                          })),
+                          onClose: (options) => filterHandler(setFloorTypeFilterStringLinked, options),
+                          onDelete: () => setFloorTypeFilterStringLinked(''),
+                      },
+                      {
+                          label: 'Space',
+                          value: 'space',
+                          placeholder: 'All Spaces',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_space.map((filterItem) => ({
+                              value: filterItem.space_id,
+                              label: filterItem.space_name,
+                          })),
+                          onClose: (options) => filterHandler(setSpaceTypeFilterStringLinked, options),
+                          onDelete: () => setSpaceTypeFilterStringLinked(''),
+                      },
+                      {
+                          label: 'Space Type',
+                          value: 'spaceType',
+                          placeholder: 'All Space Types',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_space_type.map((filterItem) => ({
+                              value: filterItem.space_type_id,
+                              label: filterItem.space_type_name,
+                          })),
+                          onClose: (options) => filterHandler(setSpaceTypeTypeFilterStringLinked, options),
+                          onDelete: () => setSpaceTypeTypeFilterStringLinked(''),
+                      },
+                      {
+                          label: 'MAC Address',
+                          value: 'macAddresses',
+                          placeholder: 'All Mac addresses',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.mac_address.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setMacTypeFilterStringLinked, options),
+                          onDelete: () => {
+                              setMacTypeFilterStringLinked('');
+                          },
+                      },
+                      {
+                          label: 'Sensors',
+                          value: 'sensor_count',
+                          placeholder: 'All Sensors',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.sensor_count.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setSensorTypeFilterStringLinked, options),
+                          onDelete: () => setSensorTypeFilterStringLinked(''),
+                      },
+                      {
+                          label: 'Assigned rule',
+                          value: 'assigned_rule',
+                          placeholder: 'All assigned rule',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.assigned_rule.map((filterItem) => ({
+                              value: filterItem.plug_rule_id,
+                              label: filterItem.plug_rule_name,
+                          })),
+                          onClose: (options) => filterHandler(setAssignedRuleFilterStringLinked, options),
+                          onDelete: () => setAssignedRuleFilterStringLinked(''),
+                      },
+                      {
+                          label: 'Tags',
+                          value: 'tags',
+                          placeholder: 'All tags',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.tags.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setTagsFilterStringLinked, options),
+                          onDelete: () => setTagsFilterStringLinked(''),
+                      },
+                      {
+                          label: 'Last used data',
+                          value: 'last_used_data',
+                          placeholder: 'All last used data',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.last_used_data.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setLastUsedDataFilterStringLinked, options),
+                          onDelete: () => setLastUsedDataFilterStringLinked(''),
+                      },
+                  ]
+                : [];
+            setFilterOptionsLinked(filterOptionsFetched);
+        });
+
+        isLoadingLinkedRef.current = false;
     };
 
     const getAvailableActionType = (anotherSelectedValue) => {
@@ -1580,10 +2018,10 @@ const PlugRule = () => {
                     firstOnDay = index;
                     firstOnTime = dayOfWeek.turnOn;
                 }
-                const copyTurnOffTime = dayOfWeek.turnOff;
-                const copyTurnOnTime = dayOfWeek.turnOn;
-                const convertedCurrentOffTime = copyTurnOffTime.replace(':', ',');
-                const convertedNextOnTime = copyTurnOnTime.replace(':', ',');
+                const copyTurnOffTime = dayOfWeek?.turnOff;
+                const copyTurnOnTime = dayOfWeek?.turnOn;
+                const convertedCurrentOffTime = copyTurnOffTime && copyTurnOffTime.replace(':', ',');
+                const convertedNextOnTime = copyTurnOnTime && copyTurnOnTime.replace(':', ',');
 
                 if (convertedCurrentOffTime > convertedNextOnTime) {
                     isLastOffAction = true;
@@ -1765,6 +2203,7 @@ const PlugRule = () => {
         }
         return dateArray;
     }
+
     const checkIfDayInOffRange = (day, result) => {
         let offDayArray = [];
         result.forEach((el) => {
@@ -1805,6 +2244,11 @@ const PlugRule = () => {
         });
         setOffHoursPlots(offPeriods);
     };
+
+    const handlerClick = useCallback((id) => {
+        setSocketsTab(id);
+    }, []);
+
     const buildingIdProps = {
         label: 'Choose building',
         defaultValue: currentData.building_id || localStorage.getItem('buildingId'),
@@ -1820,6 +2264,27 @@ const PlugRule = () => {
     if (buildingError?.text?.length) {
         buildingIdProps.error = buildingError;
     }
+    const confirmButtonDisabledState = () => {
+        let res = false;
+        if (socketsTab == 0) {
+            if (isChangedSocketsLinked) {
+                res = false;
+            } else {
+                res = true;
+            }
+        } else if (socketsTab == 1) {
+            if (isChangedSocketsUnlinked) {
+                res = false;
+            } else {
+                res = true;
+            }
+        }
+        setIsConfirmButtonDisabled(res);
+    };
+
+    useEffect(() => {
+        confirmButtonDisabledState();
+    }, [socketsTab, isChangedSocketsLinked, isChangedSocketsUnlinked]);
     return (
         <>
             <div className="single-plug-rule-container">
@@ -1830,10 +2295,7 @@ const PlugRule = () => {
                         </div>
                         <div>
                             <span className="plug-rule-device-name">{currentData.name}</span>
-                            <span className="plug-rule-device-timezone">
-                                {' '}
-                                TimeZone- {localStorage.getItem('timeZone')}
-                            </span>
+                            <span className="plug-rule-device-timezone"> TimeZone- {bldgTimeZone}</span>
                         </div>
                     </div>
                     <div className="plug-rule-right-flex">
@@ -1890,7 +2352,7 @@ const PlugRule = () => {
                     <span
                         className={selectedTab === 1 ? 'mr-3 single-plug-rule-tab-active' : 'mr-3 single-plug-rule-tab'}
                         onClick={() => setSelectedTab(1)}>
-                        Sockets ({totalSocket})
+                        Sockets ({countLinkedSockets})
                     </span>
                 </div>
             </div>
@@ -2009,7 +2471,7 @@ const PlugRule = () => {
                                         },
                                     ]}
                                     unitInfo={{
-                                        title: 'Estimated Energy Savings',
+                                        title: 'Estimated Annual Energy Savings',
                                         unit: UNITS.KWH,
                                         value: estimatedEnergySavings,
                                     }}
@@ -2051,110 +2513,251 @@ const PlugRule = () => {
                     )}
                 </>
             )}
-
             {selectedTab === 1 && (
                 <div className="plug-rule-body">
-                    {currentData.building_id ? (
-                        <DataTableWidget
-                            isLoading={isLoadingRef.current}
-                            isLoadingComponent={<SkeletonLoading />}
-                            id="sockets-plug-rules"
-                            onSearch={(query) => {
-                                setPageNo(1);
-                                setSearch(query);
-                            }}
-                            filterOptions={filterOptions}
-                            buttonGroupFilterOptions={[
-                                { label: 'All' },
-                                { label: 'Selected' },
-                                { label: 'Unselected' },
+                    <div className="plug-rule-body-header">
+                        <ButtonGroup
+                            noPadding={true}
+                            currentButtonId={socketsTab}
+                            buttons={[
+                                { label: `Linked (${countLinkedSockets})` },
+                                { label: `Unlinked (${countUnlinkedSockets && countUnlinkedSockets})` },
                             ]}
-                            onDownload={() => handleDownloadCsv()}
-                            onStatus={setSelectedRuleFilter}
-                            rows={currentRow()}
-                            searchResultRows={currentRowSearched()}
-                            filterOptions={filterOptions}
-                            headers={[
-                                {
-                                    name: 'Equipment Type',
-                                    accessor: 'equipment_type_name',
-                                    callbackValue: renderEquipType,
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: 'Location',
-                                    accessor: 'equipment_link_location',
-                                    callbackValue: renderLocation,
-                                },
-                                {
-                                    name: 'Space Type',
-                                    accessor: 'space_type',
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: 'MAC Address',
-                                    accessor: 'device_link',
-                                },
-                                {
-                                    name: 'Sensors',
-                                    accessor: 'sensor_count',
-                                },
-                                {
-                                    name: 'Assigned Rule',
-                                    accessor: 'assigned_rule',
-                                    callbackValue: renderAssignRule,
-                                },
-                                {
-                                    name: 'Tags',
-                                    accessor: 'tags',
-                                    callbackValue: renderTagCell,
-                                },
-                                {
-                                    name: 'Last Data',
-                                    accessor: 'last_data',
-                                    callbackValue: renderLastUsedCell,
-                                },
-                            ]}
-                            onCheckboxRow={alert}
-                            customCheckAll={() => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="vehicle1"
-                                    name="vehicle1"
-                                    checked={checkedAll}
-                                    onChange={() => selectAllRowsSensors(!checkedAll)}
-                                />
-                            )}
-                            customCheckboxForCell={(record) => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="socket_rule"
-                                    name="socket_rule"
-                                    checked={selectedIds.includes(record?.id) || checkedAll}
-                                    value={selectedIds.includes(record?.id) || checkedAll ? true : false}
-                                    onChange={(e) => {
-                                        setSensorIdNow(record?.id);
-                                        handleRuleStateChange(e.target.value, record);
-                                    }}
-                                />
-                            )}
-                            onPageSize={setPageSize}
-                            onChangePage={setPageNo}
-                            pageSize={pageSize}
-                            currentPage={pageNo}
-                            totalCount={(() => {
-                                if (search) {
-                                    return totalItemsSearched;
-                                }
-                                if (selectedRuleFilter === 0) {
-                                    return totalItems;
-                                }
-
-                                return 0;
-                            })()}
+                            handleButtonClick={handlerClick}
                         />
+                        {!isViewer && (
+                            <Button
+                                onClick={() => handleClickConfirmSelection(socketsTab)}
+                                className="sub-button"
+                                label={'Confirm selection'}
+                                disabled={isConfirmButtonDisabled}
+                                size={Button.Sizes.lg}
+                                type={Button.Type.primary}>
+                                Confirm selection
+                            </Button>
+                        )}
+                    </div>
+                    {currentData.building_id ? (
+                        <div>
+                            <div className={classNames({ isHide: socketsTab == 1 })}>
+                                <DataTableWidget
+                                    isLoading={isLoadingLinkedRef.current}
+                                    isLoadingComponent={<SkeletonLoading />}
+                                    id="sockets-plug-rules"
+                                    onSearch={(query) => {
+                                        setPageNoLinked(1);
+                                        setSearchLinked(query);
+                                    }}
+                                    hideStatusFilter={true}
+                                    filterOptions={filterOptionsLinked}
+                                    buttonGroupFilterOptions={[
+                                        { label: 'All' },
+                                        { label: 'Selected' },
+                                        { label: 'Unselected' },
+                                    ]}
+                                    onDownload={() => handleDownloadCsvLinkedTab()}
+                                    onStatus={setSelectedRuleFilter}
+                                    rows={linkedSocketsTabData}
+                                    searchResultRows={linkedSocketsTabData}
+                                    headers={[
+                                        {
+                                            name: 'Equipment Type',
+                                            accessor: 'equipment_type_name',
+                                            callbackValue: renderEquipType,
+                                            onSort: (method, name) => setSortByLinkedTab({ method, name }),
+                                        },
+                                        {
+                                            name: 'Location',
+                                            accessor: 'equipment_link_location',
+                                            callbackValue: renderLocation,
+                                            onSort: (method, name) => setSortByLinkedTab({ method, name }),
+                                        },
+                                        {
+                                            name: 'Space Type',
+                                            accessor: 'space_type',
+                                            onSort: (method, name) => setSortByLinkedTab({ method, name }),
+                                        },
+                                        {
+                                            name: 'MAC Address',
+                                            accessor: 'device_link',
+                                        },
+                                        {
+                                            name: 'Sensors',
+                                            accessor: 'sensor_count',
+                                        },
+                                        {
+                                            name: 'Assigned Rule',
+                                            accessor: 'assigned_rule',
+                                            callbackValue: renderAssignRule,
+                                        },
+                                        {
+                                            name: 'Tags',
+                                            accessor: 'tags',
+                                            callbackValue: renderTagCell,
+                                        },
+                                        {
+                                            name: 'Last Data',
+                                            accessor: 'last_data',
+                                            callbackValue: renderLastUsedCell,
+                                        },
+                                    ]}
+                                    onCheckboxRow={alert}
+                                    customCheckAll={() => (
+                                        <Checkbox
+                                            label=""
+                                            disabled={isViewer}
+                                            type="checkbox"
+                                            id="vehicle1"
+                                            name="vehicle1"
+                                            checked={checkedAllToUnlink}
+                                            onChange={() => selectAllRowsSensorsLinkedData(!checkedAllToUnlink)}
+                                        />
+                                    )}
+                                    customCheckboxForCell={(record) => (
+                                        <Checkbox
+                                            label=""
+                                            type="checkbox"
+                                            id="socket_rule"
+                                            name="socket_rule"
+                                            checked={!selectedIdsToUnlink.includes(record?.id) || checkedAllToUnlink}
+                                            value={
+                                                !selectedIdsToUnlink.includes(record?.id) || checkedAllToUnlink
+                                                    ? true
+                                                    : false
+                                            }
+                                            onChange={(e) => {
+                                                setSensorIdNow(record?.id);
+                                                handleRuleStateChangeUnlink(e.target.value, record);
+                                            }}
+                                            disabled={isViewer}
+                                        />
+                                    )}
+                                    onPageSize={setPageSizeLinked}
+                                    onChangePage={setPageNoLinked}
+                                    pageSize={pageSizeLinked}
+                                    currentPage={pageNoLinked}
+                                    totalCount={(() => {
+                                        if (searchLinked) {
+                                            return totalItemsSearched;
+                                        }
+                                        if (selectedRuleFilter === 0) {
+                                            return totalItemsLinked;
+                                        }
+
+                                        return 0;
+                                    })()}
+                                />
+                            </div>
+                            <div className={classNames({ isHide: socketsTab == 0 })}>
+                                <DataTableWidget
+                                    isLoading={isLoadingUnlinkedRef.current}
+                                    isLoadingComponent={<SkeletonLoading />}
+                                    id="sockets-plug-rules"
+                                    onSearch={(query) => {
+                                        setPageNoUnlinked(1);
+                                        setSearchUnlinked(query);
+                                    }}
+                                    hideStatusFilter={true}
+                                    filterOptions={filterOptionsUnlinked}
+                                    buttonGroupFilterOptions={[
+                                        { label: 'All' },
+                                        { label: 'Selected' },
+                                        { label: 'Unselected' },
+                                    ]}
+                                    onDownload={() => handleDownloadCsvUnlinkedTab()}
+                                    onStatus={setSelectedRuleFilter}
+                                    rows={unlinkedSocketsTabData}
+                                    searchResultRows={unlinkedSocketsTabData}
+                                    headers={[
+                                        {
+                                            name: 'Equipment Type',
+                                            accessor: 'equipment_type_name',
+                                            callbackValue: renderEquipType,
+                                            onSort: (method, name) => setSortByUnlinkedTab({ method, name }),
+                                        },
+                                        {
+                                            name: 'Location',
+                                            accessor: 'equipment_link_location',
+                                            callbackValue: renderLocation,
+                                            onSort: (method, name) => setSortByUnlinkedTab({ method, name }),
+                                        },
+                                        {
+                                            name: 'Space Type',
+                                            accessor: 'space_type',
+                                            onSort: (method, name) => setSortByUnlinkedTab({ method, name }),
+                                        },
+                                        {
+                                            name: 'MAC Address',
+                                            accessor: 'device_link',
+                                        },
+                                        {
+                                            name: 'Sensors',
+                                            accessor: 'sensor_count',
+                                        },
+                                        {
+                                            name: 'Assigned Rule',
+                                            accessor: 'assigned_rule',
+                                            callbackValue: renderAssignRule,
+                                        },
+                                        {
+                                            name: 'Tags',
+                                            accessor: 'tags',
+                                            callbackValue: renderTagCell,
+                                        },
+                                        {
+                                            name: 'Last Data',
+                                            accessor: 'last_data',
+                                            callbackValue: renderLastUsedCell,
+                                        },
+                                    ]}
+                                    onCheckboxRow={alert}
+                                    customCheckAll={() => (
+                                        <Checkbox
+                                            label=""
+                                            type="checkbox"
+                                            id="vehicle1"
+                                            disabled={isViewer}
+                                            name="vehicle1"
+                                            checked={checkedAllToLink}
+                                            onChange={() => selectAllRowsSensors(!checkedAllToLink)}
+                                        />
+                                    )}
+                                    customCheckboxForCell={(record) => (
+                                        <Checkbox
+                                            label=""
+                                            type="checkbox"
+                                            id="socket_rule"
+                                            name="socket_rule"
+                                            checked={selectedIdsToLink.includes(record?.id) || checkedAllToLink}
+                                            value={
+                                                selectedIdsToLink.includes(record?.id) || checkedAllToLink
+                                                    ? true
+                                                    : false
+                                            }
+                                            onChange={(e) => {
+                                                setSensorIdNow(record?.id);
+                                                handleRuleLinkStateChange(e.target.value, record);
+                                            }}
+                                            disabled={isViewer}
+                                        />
+                                    )}
+                                    onPageSize={setPageSizeUnlinked}
+                                    onChangePage={setPageNoUnlinked}
+                                    pageSize={pageSizeUnlinked}
+                                    currentPage={pageNoUnlinked}
+                                    totalCount={(() => {
+                                        if (searchUnlinked) {
+                                            return totalItemsSearched;
+                                        }
+                                        if (selectedRuleFilter === 0) {
+                                            return totalItemsUnlinked;
+                                        }
+
+                                        return 0;
+                                    })()}
+                                />
+                            </div>
+                        </div>
                     ) : (
                         <div className="sockets-no-selected-building">
                             <Typography.Subheader size={Typography.Sizes.md}>
@@ -2198,7 +2801,6 @@ const PlugRule = () => {
                     />
                 </Modal.Footer>
             </Modal>
-
             <Modal
                 show={showDeleteConditionModal}
                 onHide={() => setShowDeleteConditionModal(false)}
@@ -2232,7 +2834,6 @@ const PlugRule = () => {
                     />
                 </Modal.Footer>
             </Modal>
-
             <Modal
                 show={showSocketsModal}
                 onHide={() => handleCloseSocketsModal()}

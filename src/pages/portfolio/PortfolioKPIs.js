@@ -4,10 +4,11 @@ import { percentageHandler } from '../../utils/helper';
 import { KPIBasic, KPILabeled, KPI_UNITS } from '../../sharedComponents/KPIs';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import { formatConsumptionValue } from '../../helpers/helpers';
+import { UNITS } from '../../constants/units';
 
 import './PortfolioKPIs.scss';
 
-const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0 }, isKPIsLoading) => {
+const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0, userPrefUnits }) => {
     return (
         <>
             <div className="portfolioKPIs-wrapper ml-2">
@@ -35,17 +36,21 @@ const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0 }, i
                 />
 
                 <KPILabeled
-                    title="Average Consumption / sq. ft."
+                    title={`Average Consumption / ${userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`}`}
                     value={formatConsumptionValue(overalldata.average_energy_density.now / 1000, 2)}
                     badgePrecentage={percentageHandler(
                         overalldata.average_energy_density.now,
                         overalldata.average_energy_density.old
                     )}
-                    unit={KPI_UNITS.KWH_SQ_FT}
+                    unit={`${userPrefUnits === 'si' ? `${UNITS.KWH}/${UNITS.SQ_M}` : `${UNITS.KWH}/${UNITS.SQ_FT}`}`}
                     tooltipText={
                         daysCount > 1
-                        ? `Energy density (kWh / sq. ft) across all your buildings for the past ${daysCount} days.`
-                        : `Energy density (kWh / sq. ft) across all your buildings for the past ${daysCount} day.`
+                            ? `Energy density (kWh / ${
+                                  userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`
+                              }) across all your buildings for the past ${daysCount} days.`
+                            : `Energy density (kWh / ${
+                                  userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`
+                              }) across all your buildings for the past ${daysCount} day.`
                     }
                     tooltipId="avg-eng-dnty"
                     type={

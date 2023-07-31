@@ -1,4 +1,4 @@
-export const BaseUrl = 'https://sapient-dev.azurewebsites.net';
+export const BaseUrl = 'https://sapient-dev-service.stacksapien.com';
 
 // Auth
 export const signin = '/api/user_role/user/signin';
@@ -24,6 +24,8 @@ export const builidingOverview = '/api/energy/building/overview';
 export const builidingAlerts = '/api/energy/building/alerts';
 export const builidingPeak = '/api/energy/building/peak';
 export const builidingEquipments = '/api/energy/building/equipment';
+export const energyConsumptionByEquipmentType = '/api/v2/metrics/equipmenttype';
+export const energyConsumptionBySpaceType = '/api/v2/metrics/spacetype';
 
 // time of day
 export const builidingHourly = '/api/energy/time_of_day/hourly';
@@ -92,6 +94,12 @@ export const updateActivePassiveDevice = '/api/config/devices/update_device';
 //search active and Smart Meter
 export const searchDevices = '/api/config/devices/search_by_devices';
 export const lastUsedEquimentDevice = '/api/config/equipments_details/equipments_last_used';
+
+// utility-monitors
+export const createUtilityMeter = '/api/v2/config/device/utility/create';
+export const getUtilityMeters = '/api/v2/config/device/utility/get';
+export const updateUtilityMeters = '/api/v2/config/device/utility/update';
+export const deleteUtilityMeters = '/api/v2/config/device/utility/delete';
 
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';
@@ -179,6 +187,7 @@ export const peakEquipUsage = '/api/energy/peak_demand/equipment';
 
 // sensors list
 export const listSensor = '/api/config/sensor/list_sensor';
+export const updateSensor = '/api/v2/sensor/update_sensor';
 
 // plug rules
 export const listPlugRules = '/api/energy/plug_rule/all-plug-rules';
@@ -201,3 +210,10 @@ export const linkSocket = '/api/user_role/plug_rule/link_socket';
 
 // weather api
 export const getWeather = '/api/weather/';
+
+// V2 API's
+export const listCts = '/api/v2/config/sensor/get-cts';
+export const getUtilityMeterSensor = '/api/v2/config/sensor/get';
+export const updateSensorV2 = '/api/v2/config/sensor/update';
+export const signinV2 = '/api/v2/user/user/signin';
+export const updateUserProfile = '/api/v2/user/user/profile';

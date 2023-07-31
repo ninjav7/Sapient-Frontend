@@ -8,7 +8,7 @@ import { isUserAuthenticated, isSuperUserAuthenticated } from '../helpers/authUt
 
 // settings
 import General from '../pages/settings/general-settings';
-import UtilityBills from '../pages/settings/utilityBills';
+import UtilityMeters from '../pages/settings/utility-meters';
 import Layout from '../pages/settings/layout';
 import Equipment from '../pages/settings/equipment/Equipment';
 import EquipmentTypes from '../pages/settings/equipment-type';
@@ -19,24 +19,25 @@ import Provision from '../pages/settings/active-devices/provision';
 import PassiveDevices from '../pages/settings/passive-devices';
 import IndividualPassiveDevice from '../pages/settings/passive-devices/IndividualPassiveDevice';
 import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
-import Gateways from '../pages/settings/gateways';
 import AccountSettings from '../pages/settings/account-settings';
 import Buildings from '../pages/settings/buildings';
 import Users from '../pages/settings/users';
 import UserProfile from '../pages/settings/users/UserProfile';
-import Roles from '../pages/settings/roles';
 import SingleRole from '../pages/settings/roles/SingleRole';
 import SingleRoleNew from '../pages/settings/roles/SingleRoleNew';
+import IndividualUtilityMeter from '../pages/settings/utility-meters/IndividualUtilityMeter';
 
 // controls
 const PlugRule = React.lazy(() => import('../pages/controls/PlugRule'));
 const PlugRules = React.lazy(() => import('../pages/controls/PlugRules'));
+
 // auth
 const Login = React.lazy(() => import('../pages/auth/Login'));
 const Logout = React.lazy(() => import('../pages/auth/Logout'));
 const ForgetPassword = React.lazy(() => import('../pages/auth/ForgetPassword'));
 const UpdatePassword = React.lazy(() => import('../pages/auth/UpdatePassword'));
 const VerifyAccount = React.lazy(() => import('../pages/auth/VerifyAccount'));
+
 // dashboard
 const Dashboard = React.lazy(() => import('../pages/dashboard'));
 
@@ -52,9 +53,6 @@ const Portfolio = React.lazy(() => import('../pages/portfolio'));
 
 // building
 const Building = React.lazy(() => import('../pages/buildings'));
-
-// peakDemand
-const PeakDemand = React.lazy(() => import('../pages/peakDemand'));
 
 // endUses
 const EndUses = React.lazy(() => import('../pages/endUses'));
@@ -109,39 +107,6 @@ const rootRoute = {
         ),
     route: PrivateRoute,
     visibility: true,
-};
-
-// pages
-const pagesRoutes = {
-    path: '/pages',
-    name: 'Pages',
-    header: 'Custom',
-    icon: FeatherIcon.FileText,
-    children: [
-        {
-            path: '/pages/error-404',
-            name: 'Error 404',
-            component: Error404,
-            route: Route,
-        },
-        {
-            path: '/pages/error-500',
-            name: 'Error 500',
-            component: Error500,
-            route: Route,
-        },
-    ],
-};
-
-// charts
-const chartRoutes = {
-    path: '/charts',
-    name: 'Charts',
-    component: Charts,
-    icon: FeatherIcon.PieChart,
-    roles: ['Admin'],
-    route: PrivateRoute,
-    visibility: false,
 };
 
 // portfolio
@@ -249,14 +214,6 @@ const settingsRoutes = {
             visibility: true,
             parent: 'building-settings',
         },
-        // {
-        //     path: '/settings/utility-bills',
-        //     name: 'Utility Bills',
-        //     component: UtilityBills,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'building-settings',
-        // },
         {
             path: '/settings/panels/edit-panel/:bldgId/:panelType/:panelId',
             name: 'Edit Panel',
@@ -313,15 +270,22 @@ const settingsRoutes = {
             visibility: true,
             parent: 'building-settings',
         },
-        // PLT-492: Hide Role Page
-        // {
-        //     path: '/settings/gateways',
-        //     name: 'Gateways',
-        //     component: Gateways,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'building-settings',
-        // },
+        {
+            path: '/settings/utility-monitors/single/:bldgId/:deviceId',
+            name: 'Single Utility Monitor',
+            component: IndividualUtilityMeter,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'building-settings',
+        },
+        {
+            path: '/settings/utility-monitors/:bldgId',
+            name: 'Utility Monitors',
+            component: UtilityMeters,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'building-settings',
+        },
         {
             path: '/settings/account',
             name: 'General',
@@ -346,7 +310,6 @@ const settingsRoutes = {
             visibility: false,
             parent: 'account',
         },
-
         {
             path: '/settings/users',
             name: 'Users',
@@ -355,7 +318,6 @@ const settingsRoutes = {
             visibility: true,
             parent: 'account',
         },
-
         {
             path: '/settings/roles/config',
             name: 'Create Role',
@@ -372,15 +334,6 @@ const settingsRoutes = {
             visibility: false,
             parent: 'account',
         },
-
-        // {
-        //     path: '/settings/roles',
-        //     name: 'Roles',
-        //     component: Roles,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'account',
-        // },
         {
             path: '/settings/equipment-types',
             name: 'Equipment Types',
@@ -542,7 +495,7 @@ const authRoutes = {
 
 // admin
 const adminRoutes = {
-    path: '/super-user',
+    path: '/super-user/accounts',
     name: 'Admin',
     visibility: true,
     children: [
@@ -570,18 +523,9 @@ const flattenRoutes = (routes) => {
 };
 
 // All routes
-const allRoutes = [
-    rootRoute,
-    chartRoutes,
-    portfolioRoutes,
-    settingsRoutes,
-    controlRoutes,
-    exploreRoutes,
-    adminRoutes,
-    authRoutes,
-];
+const allRoutes = [rootRoute, portfolioRoutes, settingsRoutes, controlRoutes, exploreRoutes, adminRoutes, authRoutes];
 
-const authProtectedRoutes = [portfolioRoutes, settingsRoutes, controlRoutes, exploreRoutes, chartRoutes];
+const authProtectedRoutes = [portfolioRoutes, settingsRoutes, controlRoutes, exploreRoutes, adminRoutes];
 
 const allFlattenRoutes = flattenRoutes(allRoutes);
 export { allRoutes, authProtectedRoutes, allFlattenRoutes };

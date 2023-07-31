@@ -52,8 +52,8 @@ const EquipChartModal = ({
 
     const history = useHistory();
 
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);

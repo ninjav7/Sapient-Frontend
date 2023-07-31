@@ -6,13 +6,13 @@ import { accountRoutes, configRoutes, portfolioRoutes, configChildRoutes } from 
 import { buildingData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import SecondaryNavBar from '../../sharedComponents/secondaryNavBar/SecondaryNavBar';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
+import SecondaryNavBar from '../../sharedComponents/secondaryNavBar/SecondaryNavBar';
 import { ReactComponent as BuildingSVG } from '../../sharedComponents/assets/icons/building-icon.svg';
 import { ReactComponent as PortfolioSVG } from '../../sharedComponents/assets/icons/portfolio-icon.svg';
 
 import './style.scss';
-import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const SecondaryTopNavBar = () => {
     const location = useLocation();
@@ -128,6 +128,8 @@ const SecondaryTopNavBar = () => {
                     if (path.includes('active-devices'))
                         redirectToEndpoint(`/settings/active-devices/${record?.value}`);
                     if (path.includes('smart-meters')) redirectToEndpoint(`/settings/smart-meters/${record?.value}`);
+                    if (path.includes('utility-monitors'))
+                        redirectToEndpoint(`/settings/utility-monitors/${record?.value}`);
                     return;
                 }
             });
@@ -206,7 +208,7 @@ const SecondaryTopNavBar = () => {
 
     return (
         <React.Fragment>
-            <div className="buidling-switcher-container w-100 secondary-nav-style">
+            <div className="fixed-secondary-nav buidling-switcher-container secondary-nav-style w-100">
                 <SecondaryNavBar
                     onChangeBuilding={(e) => handleBldgSwitcherChange(e.value)}
                     buildings={buildingsList}

@@ -32,6 +32,9 @@
         overflow-y: scroll;
     }
 }
+.unsaved-changes {
+    color: #b42318 !important;
+}
 
 .spacing {
     margin: 10px;
@@ -269,6 +272,15 @@
 
 .plug-rule-body {
     padding: 12px 45px;
+    .isHide {
+        display: none;
+    }
+    .plug-rule-body-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
     .plug-rule-body-container {
         display: flex;
         column-gap: 32px;

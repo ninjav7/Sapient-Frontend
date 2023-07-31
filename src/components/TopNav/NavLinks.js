@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import { useAtom } from 'jotai';
+
 import { useLocation, useHistory } from 'react-router-dom';
 import { authProtectedRoutes } from '../../routes/index';
+import { configChildRoutes } from '../SecondaryTopNavBar/utils';
+
+import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import { userPermissionData, buildingData } from '../../store/globalState';
+
+import { ReactComponent as User } from '../../assets/icon/user.svg';
 import { ReactComponent as Toggleon } from '../../assets/icon/toggleon.svg';
 import { ReactComponent as Telescope } from '../../assets/icon/telescope.svg';
 import { ReactComponent as Circlebolt } from '../../assets/icon/circle-bolt.svg';
-import { useAtom } from 'jotai';
-import { userPermissionData, buildingData } from '../../store/globalState';
-import { BuildingStore } from '../../store/BuildingStore';
-import { configChildRoutes } from '../SecondaryTopNavBar/utils';
-import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+
+import './styles.scss';
 
 const NavLinks = () => {
     const location = useLocation();
@@ -45,6 +51,7 @@ const NavLinks = () => {
         '/settings/panels',
         '/settings/active-devices',
         '/settings/smart-meters',
+        '/settings/utility-monitors',
     ];
 
     const handleEnergyClick = () => {
@@ -231,7 +238,7 @@ const NavLinks = () => {
     }, [userPermission]);
 
     return (
-        <div className="top-nav-routes-list">
+        <div className="top-nav-routes-list d-flex align-items-center">
             {authProtectedRoutes
                 .filter(
                     (item) =>
@@ -240,41 +247,53 @@ const NavLinks = () => {
                         item?.name !== userPermisionBuildingControl
                 )
                 .map((item, index) => {
-                    const Icon = item.icon || null;
-                    if (!item.visibility) {
-                        return;
+                    if (!item.visibility) return;
+                    if (item.name === 'Admin' && location.pathname !== '/super-user/accounts') return;
+
+                    let className = '';
+
+                    // For SuperUser Route no split is required
+                    if (item.name === 'Admin') {
+                        className = 'active';
+                    } else {
+                        const str1 = item.path.split('/')[1];
+                        const str2 = location.pathname.split('/')[1];
+                        const active = str1.localeCompare(str2);
+                        className = active === 0 ? 'active' : '';
                     }
 
-                    let str1 = item.path.split('/')[1];
-                    let str2 = location.pathname.split('/')[1];
-                    let active = str1.localeCompare(str2);
-                    let className = active === 0 ? 'active' : '';
+                    const routeName = item?.name === 'Admin' ? 'Accounts' : item?.name;
 
                     return (
                         <div
                             key={index}
-                            className={`navbar-head-container mouse-pointer ${className}`}
+                            className={`d-flex align-items-center mouse-pointer navbar-head-container ${className}`}
                             onClick={() => {
                                 handleSideNavChange(item.name);
                                 handlePathChange(item.path);
                             }}>
                             <div className="d-flex align-items-center">
                                 {item.name === 'Energy' && (
-                                    <div className={`font-icon-style ${className}`}>
-                                        <Circlebolt />
+                                    <div>
+                                        <Circlebolt className={`navbar-icons-style ${className}`} />
                                     </div>
                                 )}
                                 {item.name === 'Control' && (
-                                    <div className={`font-icon-style ${className}`}>
-                                        <Toggleon />
+                                    <div>
+                                        <Toggleon className={`navbar-icons-style ${className}`} />
                                     </div>
                                 )}
                                 {item.name === 'Explore' && (
-                                    <div className={`font-icon-style ${className}`}>
-                                        <Telescope />
+                                    <div>
+                                        <Telescope className={`navbar-icons-style ${className}`} />
                                     </div>
                                 )}
-                                <div className={`navbar-heading ${className}`}>{item.name}</div>
+                                {item.name === 'Admin' && (
+                                    <div>
+                                        <User className={`navbar-icons-style ${className}`} width={18} height={19} />
+                                    </div>
+                                )}
+                                <div className={`navbar-heading ml-2 ${className}`}>{routeName}</div>
                             </div>
                         </div>
                     );

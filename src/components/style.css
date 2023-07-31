@@ -272,13 +272,6 @@
     flex-direction: row;
 }
 
-.energy-logo-style {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 0.75rem;
-}
-
 .energy-logo-link-style:hover path {
     fill: white;
 }
@@ -297,12 +290,6 @@
     padding: 2rem;
     height: 100%;
     background-color: #ffffff;
-}
-.top-nav-routes-list {
-    display: flex;
-    flex-direction: row;
-    gap: 1.5rem;
-    align-items: center;
 }
 
 .custom-icon-style {
@@ -329,13 +316,6 @@
 .navbar-head-container:hover {
     background: radial-gradient(55.59% 55.59% at 50% 91.96%, rgba(77, 83, 237, 0.27) 0%, rgba(16, 24, 40, 0) 100%);
     border-bottom: 0.125rem solid #6172f3;
-}
-
-div.navbar-head-container:hover .font-icon-style {
-    color: white !important;
-}
-div.navbar-head-container:hover .navbar-heading {
-    color: white !important;
 }
 
 .navbar-icon-container-active {
@@ -402,10 +382,16 @@ div.navbar-icon-container:hover .other-font-icon-style {
 .font-icon-style.active {
     color: white !important;
 }
+.font-icon-style.active svg path {
+    fill: white !important;
+}
 
 .font-icon-style {
     color: grey !important;
     margin-right: 0.4375rem;
+}
+.font-icon-style svg path {
+    fill: grey !important;
 }
 .font-icon-style svg {
     font-size: 0.9375rem;

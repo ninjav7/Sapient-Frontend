@@ -109,8 +109,8 @@ const ExploreByEquipment = () => {
 
     const bldgName = BuildingStore.useState((s) => s.BldgName);
 
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const [isExploreFilterLoading, setIsExploreFilterLoading] = useState(false);
@@ -1454,8 +1454,8 @@ const ExploreByEquipment = () => {
 
     const handleWeatherChart = async () => {
         let params = `?building_id=${bldgId}&consumption=${selectedConsumption}&timezone=${timeZone}&date_from=${encodeURIComponent(
-            new Date(startDate).toISOString()
-        )}&date_to=${encodeURIComponent(new Date(endDate).toISOString())}`;
+            startDate
+        )}&date_to=${encodeURIComponent(endDate)}`;
         await fetchWeatherData(params)
             .then((res) => {
                 const response = res?.data;

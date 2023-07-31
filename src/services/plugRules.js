@@ -108,9 +108,9 @@ export function getFiltersForSensorsRequest(args) {
                     mac_address: args.macTypeFilterString
                         ? encodeURI(args.macTypeFilterString?.join('+'))
                         : args.macTypeFilterString,
-                    equipment_types: args.equpimentTypeFilterString
-                        ? encodeURI(args.equpimentTypeFilterString?.join('+'))
-                        : args.equpimentTypeFilterString,
+                    equipment_types: args.equipmentTypeFilterString
+                        ? encodeURI(args.equipmentTypeFilterString?.join('+'))
+                        : args.equipmentTypeFilterString,
                     sensor_number: args.sensorTypeFilterString
                         ? encodeURI(args.sensorTypeFilterString?.join('+'))
                         : args.sensorTypeFilterString,
@@ -123,6 +123,8 @@ export function getFiltersForSensorsRequest(args) {
                     space_type_id: args.spaceTypeTypeFilterString
                         ? encodeURI(args.spaceTypeTypeFilterString?.join('+'))
                         : args.spaceTypeTypeFilterString,
+                    assigned_rule: args?.isGetOnlyLinked ? args?.plugRuleId : 'other',
+                    plug_rule_id: !args?.isGetOnlyLinked ? args?.plugRuleId : null,
                 },
                 _.identity
             ),
@@ -146,7 +148,10 @@ export function getUnlinkedSocketRules(
     assignedRuleFilterString,
     tagsFilterString,
     withPagination,
-    getParams
+    getParams,
+    isGetOnlyLinked,
+    plugRuleId,
+    sensor_search
 ) {
     let params = '';
     if (withPagination) {
@@ -165,6 +170,7 @@ export function getUnlinkedSocketRules(
         .get(`${getListSensorsForBuildings}${params}`, {
             params: _.pickBy(
                 {
+                    sensor_search: encodeURI(sensor_search),
                     floor_id: floorTypeFilterString
                         ? encodeURI(floorTypeFilterString?.join('+'))
                         : floorTypeFilterString,
@@ -188,6 +194,8 @@ export function getUnlinkedSocketRules(
                     sensor_number: sensorTypeFilterString
                         ? encodeURI(sensorTypeFilterString?.join('+'))
                         : sensorTypeFilterString,
+                    assigned_rule: isGetOnlyLinked ? plugRuleId : 'other',
+                    plug_rule_id: !isGetOnlyLinked ? plugRuleId : null,
                     ...getParams,
                 },
                 _.identity

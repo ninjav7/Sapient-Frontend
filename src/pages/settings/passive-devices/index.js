@@ -274,7 +274,7 @@ const PassiveDevices = () => {
     const renderDeviceStatus = (row) => {
         return (
             <StatusBadge
-                text={row?.status ? 'Online' : 'Office'}
+                text={row?.status ? 'Online' : 'Offine'}
                 type={row?.status ? StatusBadge.Type.success : StatusBadge.Type.error}
                 icon={row?.status ? <WifiSVG /> : <WifiSlashSVG />}
             />
