@@ -483,7 +483,7 @@ const BuildingOverview = () => {
         buildingConsumptionChart(time_zone);
         getEnergyConsumptionByEquipType(time_zone);
         getEnergyConsumptionBySpaceType(time_zone);
-    }, [startDate, endDate, bldgId]);
+    }, [startDate, endDate, bldgId, userPrefUnits]);
 
     useEffect(() => {
         if (isWeatherChartVisible && bldgId) {
@@ -491,13 +491,6 @@ const BuildingOverview = () => {
             fetchWeatherData(bldgObj?.timezone);
         }
     }, [isWeatherChartVisible, startDate, endDate]);
-
-    useEffect(() => {
-        if (!bldgId) return;
-
-        const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
-        if (bldgObj?.timezone) buildingOverallData(bldgObj?.timezone);
-    }, [userPrefUnits]);
 
     useEffect(() => {
         updateBreadcrumbStore();

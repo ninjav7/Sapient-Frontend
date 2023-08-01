@@ -187,7 +187,7 @@ const PortfolioOverview = () => {
         portfolioOverallData();
         portfolioEndUsesData();
         energyConsumptionData();
-    }, [startDate, endDate]);
+    }, [startDate, endDate, userPrefUnits]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
