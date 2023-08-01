@@ -301,7 +301,6 @@ const Buildings = () => {
         await fetchBuildingList(search, sort_by, ordered_by, sqftAPIFlag)
             .then((res) => {
                 const data = res?.data;
-                console.log('SSR data => ', data);
                 data.length !== 0 &&
                     data.forEach((el) => {
                         el.building_size = Math.round(handleUnitConverstion(el?.building_size, user_pref_units));
