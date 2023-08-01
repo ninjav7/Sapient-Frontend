@@ -186,7 +186,7 @@ const BuildingOverview = () => {
         const payload = apiRequestBody(startDate, endDate, time_zone);
         await fetchOverallBldgData(bldgId, payload)
             .then((res) => {
-                setOverallBldgData(res.data);
+                if (res?.data) setOverallBldgData(res?.data);
             })
             .catch((error) => {});
     };
@@ -430,6 +430,22 @@ const BuildingOverview = () => {
             });
     };
 
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Building Overview',
+                    path: '/energy/building/overview',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'buildings';
+        });
+    };
+
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
             const xaxisObj = xaxisLabelsCount(days_count);
@@ -477,21 +493,13 @@ const BuildingOverview = () => {
     }, [isWeatherChartVisible, startDate, endDate]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Building Overview',
-                        path: '/energy/building/overview',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'buildings';
-            });
-        };
+        if (!bldgId) return;
+
+        const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+        if (bldgObj?.timezone) buildingOverallData(bldgObj?.timezone);
+    }, [userPrefUnits]);
+
+    useEffect(() => {
         updateBreadcrumbStore();
     }, []);
 

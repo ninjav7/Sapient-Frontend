@@ -109,7 +109,7 @@ const PortfolioOverview = () => {
             let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchPortfolioOverall(payload)
                 .then((res) => {
-                    setOveralldata(res.data);
+                    if (res?.data) setOveralldata(res?.data);
                     setIsKPIsLoading(false);
                 })
                 .catch((error) => {

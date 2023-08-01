@@ -701,9 +701,12 @@ const PlugRule = () => {
                 building_id: activeBuildingId,
                 sensor_id: listOfsocketsToReassign,
             }).then((res) => {
-                const snackbarTitle = notificationLinkedData(listOfsocketsToReassign.length, currentData.name);
+                setIsSetInitiallySocketsCountLinked(false);
+                const snackbarTitle = notificationLinkedData(rulesToLink.sensor_id.length, currentData.name);
                 openSnackbar({ ...snackbarTitle, type: Notification.Types.success, duration: 5000 });
                 fetchUnLinkedSocketRules();
+                fetchLinkedSocketRules();
+                fetchLinkedSocketIds();
                 setCheckedAllToLink(false);
                 selectedIdsToLink([]);
             }));
@@ -1083,7 +1086,7 @@ const PlugRule = () => {
         activeBuildingId &&
             listLinkSocketRulesRequest(ruleId, activeBuildingId).then((res) => {
                 const { sensor_id } = res.data.data;
-                setListSocketsIds(sensor_id);
+                setListSocketsIds(sensor_id || []);
             });
     };
 
@@ -1264,10 +1267,10 @@ const PlugRule = () => {
                 }
                 setSelectedInitialyIds(linkedIds || []);
                 setLinkedSocketsTabData(response.data);
-                if (!isSetInitiallySocketsCountLinked) {
-                    setCountLinkedSockets(response.total_data);
-                    setIsSetInitiallySocketsCountLinked(true);
-                }
+                // if (!isSetInitiallySocketsCountLinked) {
+                setCountLinkedSockets(response.total_data);
+                setIsSetInitiallySocketsCountLinked(true);
+                // }
                 setTotalItemsLinked(response?.total_data);
             })
             .catch((error) => {});
