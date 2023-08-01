@@ -37,7 +37,7 @@ const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0, use
 
                 <KPILabeled
                     title={`Average Consumption / ${userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`}`}
-                    value={formatConsumptionValue(overalldata.average_energy_density.now / 1000, 2)}
+                    value={formatConsumptionValue(overalldata?.average_energy_density?.now / 1000, 2)}
                     badgePrecentage={percentageHandler(
                         overalldata.average_energy_density.now,
                         overalldata.average_energy_density.old
