@@ -334,6 +334,7 @@ const EquipChartModal = ({
                         return {
                             label: el?.equipment_type,
                             value: el?.equipment_id,
+                            end_use_name: el?.end_use_name,
                         };
                     });
 
@@ -667,7 +668,13 @@ const EquipChartModal = ({
                                                 <Brick sizeInRem={0.25} />
                                                 <Select
                                                     placeholder="Select Equipment Type"
-                                                    options={equipmentTypeData}
+                                                    options={
+                                                        equipData?.device_type === 'active'
+                                                            ? equipmentTypeData.filter(
+                                                                  (el) => el?.end_use_name === 'Plug'
+                                                              )
+                                                            : equipmentTypeData
+                                                    }
                                                     currentValue={equipmentTypeData.filter(
                                                         (option) => option.value === equipData?.equipments_type_id
                                                     )}
