@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { percentageHandler } from '../../utils/helper';
-import { handleUnitConverstion } from '../settings/general-settings/utils';
 
 import { KPILabeled, KPI_UNITS } from '../../sharedComponents/KPIs';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
@@ -10,17 +9,6 @@ import { UNITS } from '../../constants/units';
 import '../portfolio/PortfolioKPIs.scss';
 
 const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
-    const [averageConsumptionVal, setAverageConsumptionVal] = useState(0);
-
-    useEffect(() => {
-        if (overalldata?.average_energy_density?.now && userPrefUnits) {
-            let energyVal = overalldata?.average_energy_density?.now / 1000;
-            setAverageConsumptionVal(handleUnitConverstion(energyVal, userPrefUnits));
-        } else {
-            setAverageConsumptionVal(0);
-        }
-    }, [overalldata, userPrefUnits]);
-
     return (
         <div className={`portfolioKPIs-wrapper`}>
             <KPILabeled
@@ -46,7 +34,7 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
 
             <KPILabeled
                 title={`Average Consumption / ${userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`}`}
-                value={formatConsumptionValue(averageConsumptionVal, 2)}
+                value={formatConsumptionValue(overalldata?.average_energy_density?.now / 1000, 2)}
                 badgePrecentage={percentageHandler(
                     overalldata?.average_energy_density?.now,
                     overalldata?.average_energy_density?.old
