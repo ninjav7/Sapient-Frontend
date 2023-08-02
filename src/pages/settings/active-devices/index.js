@@ -89,12 +89,15 @@ const ActiveDevices = () => {
     const getFilters = async () => {
         let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
         let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
+        let sensorSelected = encodeURIComponent(sensorString.join('+'));
         let firmwareSelected = encodeURIComponent(firmWareString.join('+'));
         let hardwareSelected = encodeURIComponent(hardWareString.join('+'));
+
         const filters = await fetchActiveFilter({
             bldgId,
             macAddressSelected,
             deviceModelSelected,
+            sensorSelected,
             firmwareSelected,
             hardwareSelected,
         });
