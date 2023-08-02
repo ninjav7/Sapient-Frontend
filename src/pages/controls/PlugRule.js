@@ -1129,10 +1129,8 @@ const PlugRule = () => {
                 setUnlinkedSocketRuleSuccess(res.status);
 
                 let unLinkedData = [];
-                if (!isSetInitiallySocketsCountUnlinked) {
-                    setCountUnlinkedSockets(response?.total_data);
-                    setIsSetInitiallySocketsCountUnlinked(true);
-                }
+                setCountUnlinkedSockets(response?.total_data);
+                setIsSetInitiallySocketsCountUnlinked(true);
 
                 setUnlinkedSocketsTabData(response?.data);
                 setTotalItemsUnlinked(response?.total_data);
@@ -2009,31 +2007,51 @@ const PlugRule = () => {
         }
     };
     const getFirstLastOffPeriodDayAndTime = (week) => {
-        let isLastOffAction = false;
-        let firstOnDay, firstOnTime;
-        let isSetFirstDay = false;
-        let lastOffTime = '';
-        let lastOffDay = 0;
-        week?.length &&
-            week.forEach((dayOfWeek, index) => {
-                if (dayOfWeek.turnOn && !isSetFirstDay) {
-                    isSetFirstDay = true;
-                    firstOnDay = index;
-                    firstOnTime = dayOfWeek.turnOn;
-                }
-                const copyTurnOffTime = dayOfWeek?.turnOff;
-                const copyTurnOnTime = dayOfWeek?.turnOn;
-                const convertedCurrentOffTime = copyTurnOffTime && copyTurnOffTime.replace(':', ',');
-                const convertedNextOnTime = copyTurnOnTime && copyTurnOnTime.replace(':', ',');
-
-                if (convertedCurrentOffTime > convertedNextOnTime) {
+        let firstOnDay,
+            firstOnTime,
+            isLastOffAction = false,
+            lastOffTime = '',
+            lastOffDay = null;
+        if (week?.length) {
+            const copyWeekReverse = [...week];
+            copyWeekReverse.length = 7;
+            const reverseWeek = copyWeekReverse.reverse();
+            const copyWeek = [...week];
+            copyWeek.length = 7;
+            for (let i = 0; i < (reverseWeek || []).length; i++) {
+                const currentDay = reverseWeek[i];
+                if (currentDay?.turnOn && !isLastOffAction) break;
+                if (!currentDay || !currentDay?.turnOff) continue;
+                if (currentDay?.turnOff) {
                     isLastOffAction = true;
-                    lastOffDay = index;
-                    lastOffTime = copyTurnOffTime;
-                } else {
-                    isLastOffAction = false;
+                    lastOffDay = reverseWeek.length - i - 1;
+                    lastOffTime = currentDay.turnOff;
+                    const arrayToSearch = reverseWeek.slice(i + 1);
+                    if (
+                        arrayToSearch.findIndex((nextDay) => nextDay?.turnOn) <
+                        arrayToSearch.findIndex((nextDay) => nextDay?.turnOff)
+                    ) {
+                        break;
+                    }
                 }
-            });
+            }
+
+            for (let i = 0; i < (copyWeek || []).length; i++) {
+                const currentDay = copyWeek[i];
+
+                if (!currentDay || !currentDay?.turnOn) continue;
+                if (currentDay?.turnOn && !firstOnDay) {
+                    firstOnDay = i;
+                    firstOnTime = currentDay.turnOn;
+                    break;
+                }
+            }
+
+            if (typeof firstOnDay !== 'number') {
+                firstOnDay = lastOffDay;
+                firstOnTime = lastOffTime;
+            }
+        }
         return { isLastOffAction, lastOffDay, lastOffTime, firstOnDay, firstOnTime };
     };
     const getSoonestOnDateWithTime = (currentOff, week) => {
@@ -2118,25 +2136,28 @@ const PlugRule = () => {
         for (let i = 0; i < weekWithSchedule.length; i++) {
             let currentOff = weekWithSchedule[i]?.turnOff;
             let currentOffDay = i;
-
             let nextOn;
             let nextOnDay;
-            if (i === weekWithSchedule.length - 1) {
-                nextOn = weekWithSchedule[0]?.turnOn;
-                nextOnDay = weekWithSchedule.length - 1;
-            } else {
-                for (let j = i; j < weekWithSchedule.length; j++) {
-                    if (weekWithSchedule[j]?.turnOn) {
-                        if (weekWithSchedule[j]?.turnOn >= weekWithSchedule[j]?.turnOff) {
-                            nextOnDay = j;
-                            nextOn = weekWithSchedule[j]?.turnOn;
-                            break;
-                        } else {
-                            nextOnDay = j + 1;
-                            if (weekWithSchedule[j + 1]) {
-                                nextOn = weekWithSchedule[j + 1]?.turnOn;
+            if (weekWithSchedule[i] !== undefined) {
+                if (i === weekWithSchedule.length - 1) {
+                    nextOn = weekWithSchedule[0]?.turnOn;
+                    nextOnDay = weekWithSchedule.length - 1;
+                } else {
+                    for (let j = i; j < weekWithSchedule.length; j++) {
+                        if (weekWithSchedule[j]?.turnOn) {
+                            if (weekWithSchedule[j]?.turnOn >= weekWithSchedule[j]?.turnOff) {
+                                nextOnDay = j;
+                                nextOn = weekWithSchedule[j]?.turnOn;
+                                break;
+                            } else {
+                                if (weekWithSchedule[j + 1]?.turnOn) {
+                                    nextOnDay = j + 1;
+                                    if (weekWithSchedule[j + 1]) {
+                                        nextOn = weekWithSchedule[j + 1]?.turnOn;
+                                    }
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
                 }
@@ -2476,7 +2497,7 @@ const PlugRule = () => {
                                     unitInfo={{
                                         title: 'Estimated Annual Energy Savings',
                                         unit: UNITS.KWH,
-                                        value: estimatedEnergySavings,
+                                        value: Math.round(estimatedEnergySavings),
                                     }}
                                     chartProps={{
                                         tooltip: {
