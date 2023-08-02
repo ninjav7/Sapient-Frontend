@@ -217,3 +217,4 @@ export const getUtilityMeterSensor = '/api/v2/config/sensor/get';
 export const updateSensorV2 = '/api/v2/config/sensor/update';
 export const signinV2 = '/api/v2/user/user/signin';
 export const updateUserProfile = '/api/v2/user/user/profile';
+export const generalBuildingDetailV2 = '/api/v2/building/building_details';
