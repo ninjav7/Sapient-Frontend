@@ -63,6 +63,7 @@ export function fetchActiveFilter(args) {
                     building_id: args.bldgId,
                     mac_address: args.macAddressSelected,
                     device_model: args.deviceModelSelected,
+                    sensor_numbe: args.sensorSelected,
                     firmware_version: args.firmwareSelected,
                     hardware_version: args.hardWareSelected,
                 },

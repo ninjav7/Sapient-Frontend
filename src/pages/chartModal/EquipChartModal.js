@@ -446,7 +446,8 @@ const EquipChartModal = ({
                                     </div>
                                 </div>
                                 <div className="d-flex">
-                                    {equipData?.device_type === 'active' && (
+                                    {/* Commented below code as part of Ticket PLT-1373: Hide "Turn Off" button on equipment modal */}
+                                    {/* {equipData?.device_type === 'active' && (
                                         <div>
                                             <Button
                                                 label="Turn Off"
@@ -455,7 +456,7 @@ const EquipChartModal = ({
                                                 className="mr-4"
                                             />
                                         </div>
-                                    )}
+                                    )} */}
 
                                     <div>
                                         <Button
@@ -1076,7 +1077,9 @@ const EquipChartModal = ({
                                                         size={Typography.Sizes.lg}
                                                         Type={Typography.Types.Light}
                                                         className="modal-right-card-title">
-                                                        Power Strip - Socket 2
+                                                        {equipData?.device_model === 'KP115'
+                                                            ? `Smart Plug - Socket 1`
+                                                            : ``}
                                                     </Typography.Subheader>
 
                                                     <Button
