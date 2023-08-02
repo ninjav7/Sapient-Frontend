@@ -446,7 +446,8 @@ const EquipChartModal = ({
                                     </div>
                                 </div>
                                 <div className="d-flex">
-                                    {equipData?.device_type === 'active' && (
+                                    {/* Commented below code as part of Ticket PLT-1373: Hide "Turn Off" button on equipment modal */}
+                                    {/* {equipData?.device_type === 'active' && (
                                         <div>
                                             <Button
                                                 label="Turn Off"
@@ -455,7 +456,7 @@ const EquipChartModal = ({
                                                 className="mr-4"
                                             />
                                         </div>
-                                    )}
+                                    )} */}
 
                                     <div>
                                         <Button
