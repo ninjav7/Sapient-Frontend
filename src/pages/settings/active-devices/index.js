@@ -263,6 +263,7 @@ const ActiveDevices = () => {
 
     useEffect(() => {
         fetchActiveDeviceData();
+        getFilters();
     }, [
         search,
         sortBy,
@@ -276,10 +277,6 @@ const ActiveDevices = () => {
         firmWareString,
         hardWareString,
     ]);
-
-    useEffect(() => {
-        getFilters();
-    }, [bldgId]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
