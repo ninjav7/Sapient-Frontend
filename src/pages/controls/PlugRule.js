@@ -125,10 +125,10 @@ const formatAverageData = (data) => {
     data.forEach((el) => {
         const today = moment();
         const from_date = today.startOf('week').startOf('isoWeek');
-        if (el.dayOfWeek === 'Sunday') {
-            from_date.day(el.dayOfWeek).add(1, 'weeks');
+        if (el.day_of_week === 'Sunday') {
+            from_date.day(el.day_of_week).add(1, 'weeks');
         } else {
-            from_date.day(el.dayOfWeek);
+            from_date.day(el.day_of_week);
         }
         const formattedHourFromBackend = el.hour.split(':');
         const timeWithHours = from_date.set('hour', formattedHourFromBackend[0]);
