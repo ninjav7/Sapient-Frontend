@@ -1077,7 +1077,9 @@ const EquipChartModal = ({
                                                         size={Typography.Sizes.lg}
                                                         Type={Typography.Types.Light}
                                                         className="modal-right-card-title">
-                                                        Power Strip - Socket 2
+                                                        {equipData?.device_model === 'KP115'
+                                                            ? `Smart Plug - Socket 1`
+                                                            : ``}
                                                     </Typography.Subheader>
 
                                                     <Button
