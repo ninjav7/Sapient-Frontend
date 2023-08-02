@@ -708,7 +708,7 @@ const PlugRule = () => {
                 fetchLinkedSocketRules();
                 fetchLinkedSocketIds();
                 setCheckedAllToLink(false);
-                selectedIdsToLink([]);
+                setSelectedIdsToLink([]);
             }));
     };
 
@@ -720,6 +720,7 @@ const PlugRule = () => {
 
         await unlinkSocketRequest(rulesToUnLink)
             .then((res) => {
+                setSelectedIdsToUnlink([]);
                 const snackbarTitle = notificationUnlinkedData(rulesToUnLink.sensor_id.length, currentData.name);
 
                 openSnackbar({ ...snackbarTitle, type: Notification.Types.success, duration: 5000 });
@@ -1263,6 +1264,7 @@ const PlugRule = () => {
                 if (response.data.length > 0) {
                     setCheckedToUnlinkAll(true);
                 }
+                setCheckedToUnlinkAll(false);
                 setSelectedInitialyIds(linkedIds || []);
                 setLinkedSocketsTabData(response.data);
                 // if (!isSetInitiallySocketsCountLinked) {
