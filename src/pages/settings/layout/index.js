@@ -162,7 +162,9 @@ const Layout = () => {
                 handleModalClose={handleModalClose}
                 handleDeleteAlertShow={handleDeleteAlertShow}
                 onClickForAllItems={onClickForAllItems}
+                setModalShow={setModalShow}
             />
+
             <DeleteModal
                 show={showDeleteAlert}
                 modalType={modalType}
