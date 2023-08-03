@@ -38,6 +38,8 @@ const Layout = () => {
     const [modalType, setModalType] = useState('');
 
     const [modalShow, setModalShow] = useState(false);
+    const handleModalOpen = () => setModalShow(true);
+
     const [modelToShow, setModelToShow] = useState(1);
     const [modalSpaceShow, setModalSpaceShow] = useState(false);
     const [spaceBody, setSpaceBody] = useState({
@@ -132,24 +134,34 @@ const Layout = () => {
             });
     };
 
+    const handleModalClose = () => {
+        setModalShow(false);
+        setEditFloor(false);
+        setTypeId('');
+        setModalType('');
+        setFloorName('');
+        setSpaceName('');
+        setCurrentFloorId('');
+        setCurrentSpaceId('');
+    };
+
     return (
         <React.Fragment>
             <EditFloorModal
-                editFloor={editFloor}
                 show={modalShow}
-                floorName={floorName}
-                setModalShow={setModalShow}
-                handleDeleteAlertShow={handleDeleteAlertShow}
+                typeId={typeId}
+                editFloor={editFloor}
                 modalType={modalType}
-                currentFloorId={currentFloorId}
-                currentSpaceId={currentSpaceId}
+                floorName={floorName}
                 spaceName={spaceName}
                 parentSpace={parentSpace}
-                typeId={typeId}
-                getFloorsFunc={getFloorsFunc}
-                onClickForAllItems={onClickForAllItems}
+                currentFloorId={currentFloorId}
+                currentSpaceId={currentSpaceId}
                 selectedData={selectedData}
-                onHide={() => setModalShow(false)}
+                getFloorsFunc={getFloorsFunc}
+                handleModalClose={handleModalClose}
+                handleDeleteAlertShow={handleDeleteAlertShow}
+                onClickForAllItems={onClickForAllItems}
             />
             <DeleteModal
                 show={showDeleteAlert}
@@ -181,7 +193,7 @@ const Layout = () => {
                             userPermission?.permissions?.permissions?.account_buildings_permission?.edit
                                 ? (args) => {
                                       if (args?.bdId !== undefined && args?.bdId !== '') {
-                                          setModalShow(true);
+                                          handleModalOpen();
                                           setEditFloor(false);
                                           setModalType('floor');
                                           setCurrentFloorId('');
@@ -191,7 +203,7 @@ const Layout = () => {
                                           setParentSpace('');
                                           setTypeId('');
                                       } else if (args?.floor_id !== undefined && args?.floor_id !== '') {
-                                          setModalShow(true);
+                                          handleModalOpen();
                                           setEditFloor(false);
                                           setModalType('spaces');
                                           setCurrentFloorId(args?.floor_id);
@@ -201,7 +213,7 @@ const Layout = () => {
                                           setParentSpace('');
                                           setTypeId('');
                                       } else {
-                                          setModalShow(true);
+                                          handleModalOpen();
                                           setEditFloor(false);
                                           setModalType('spaces');
                                           setCurrentFloorId(args?.parents);
@@ -220,7 +232,7 @@ const Layout = () => {
                                 ? (args) => {
                                       if (args?.bdId === undefined)
                                           if (args?.floor_id !== undefined && args?.floor_id !== '') {
-                                              setModalShow(true);
+                                              handleModalOpen();
                                               setEditFloor(true);
                                               setModalType('floor');
                                               setCurrentFloorId(args?.floor_id);
@@ -230,7 +242,7 @@ const Layout = () => {
                                               setParentSpace('');
                                               setTypeId('');
                                           } else {
-                                              setModalShow(true);
+                                              handleModalOpen();
                                               setEditFloor(true);
                                               setModalType('spaces');
                                               setCurrentFloorId(args?.parents);
@@ -248,7 +260,7 @@ const Layout = () => {
                             userPermission?.permissions?.permissions?.account_buildings_permission?.edit
                                 ? (args) => {
                                       if (args?.floor_id !== undefined && args?.floor_id !== '') {
-                                          setModalShow(true);
+                                          handleModalOpen();
                                           setEditFloor(true);
                                           setModalType('floor');
                                           setCurrentFloorId(args?.floor_id);
@@ -258,7 +270,7 @@ const Layout = () => {
                                           setParentSpace('');
                                           setTypeId('');
                                       } else {
-                                          setModalShow(true);
+                                          handleModalOpen();
                                           setEditFloor(true);
                                           setModalType('spaces');
                                           setFloorName('');

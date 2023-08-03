@@ -86,7 +86,7 @@ const EditFloorModal = (props) => {
         let params = `?building_id=${bldgId}`;
         await addFloors(params, apiBody)
             .then((res) => {
-                props.onHide();
+                props.handleModalClose();
                 setLoading(false);
                 setFloorModal(true);
                 props.getFloorsFunc();
@@ -102,7 +102,7 @@ const EditFloorModal = (props) => {
         const params = `?floor_id=${props?.currentFloorId}`;
         await updateFloors(params, floorNameApi)
             .then((res) => {
-                props.onHide();
+                props.handleModalClose();
                 setLoading(false);
                 setFloorModal(true);
                 props.getFloorsFunc();
@@ -117,7 +117,7 @@ const EditFloorModal = (props) => {
         await addSpace(params, spaceBody)
             .then((res) => {
                 setLoading(false);
-                props.onHide();
+                props.handleModalClose();
                 setFloorModal(true);
                 props.getFloorsFunc();
                 props.onClickForAllItems(props.selectedData);
@@ -131,7 +131,7 @@ const EditFloorModal = (props) => {
         const params = `?space_id=${props?.currentSpaceId}`;
         await updateSpaces(params, spaceBody)
             .then((res) => {
-                props.onHide();
+                props.handleModalClose();
                 setLoading(false);
                 setFloorModal(true);
                 props.getFloorsFunc();
@@ -143,9 +143,13 @@ const EditFloorModal = (props) => {
     };
     const [deletingFloor, setDeletingFloor] = useAtom(deleteFloor);
 
+    // const onModalClose = () => {
+
+    // }
+
     return (
         <>
-            <Modal {...props} centered dialogClassName="floor-space-container-style">
+            <Modal backdrop="static" keyboard={false} size="md" centered {...props}>
                 <div className="p-4">
                     {props.editFloor && props?.modalType === 'floor' ? (
                         <Typography.Header size={Typography.Sizes.lg}>Edit Floor</Typography.Header>
@@ -191,7 +195,7 @@ const EditFloorModal = (props) => {
                                 style={{ marginTop: '20px' }}
                                 onClick={() => {
                                     props.handleDeleteAlertShow();
-                                    props.onHide();
+                                    props.handleModalClose();
                                 }}>
                                 <span
                                     onClick={() => {}}
@@ -300,7 +304,7 @@ const EditFloorModal = (props) => {
                                 style={{ marginTop: '20px' }}
                                 onClick={() => {
                                     props.handleDeleteAlertShow();
-                                    props.onHide();
+                                    props.handleModalClose();
                                 }}>
                                 <span
                                     onClick={() => {}}
@@ -326,7 +330,7 @@ const EditFloorModal = (props) => {
                             size={Button.Sizes.lg}
                             type={Button.Type.secondaryGrey}
                             className="btnstyle"
-                            onClick={props.onHide}
+                            onClick={props.handleModalClose}
                         />
 
                         <Button
