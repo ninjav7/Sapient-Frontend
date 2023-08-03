@@ -1,23 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import Modal from 'react-bootstrap/Modal';
 import { useAtom } from 'jotai';
-import { Input } from 'reactstrap';
-import { closedEditFloorModal, deleteFloor, floorList } from '../../../store/globalState';
+import Modal from 'react-bootstrap/Modal';
+import { closedEditFloorModal } from '../../../store/globalState';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { floorIdState } from '../../../store/globalState';
-import { Cookies } from 'react-cookie';
-import Delete from '../../../assets/images/delete.png';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import Select from '../../../sharedComponents/form/select';
+import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { addSpace, addFloors, fetchSpaceTypes, updateSpaces, updateFloors } from './services';
 import './style.css';
 
 const EditFloorModal = (props) => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
+    const { handleModalClose, setModalShow } = props;
+
     const [loading, setLoading] = useState(false);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -86,7 +84,7 @@ const EditFloorModal = (props) => {
         let params = `?building_id=${bldgId}`;
         await addFloors(params, apiBody)
             .then((res) => {
-                props.onHide();
+                handleModalClose();
                 setLoading(false);
                 setFloorModal(true);
                 props.getFloorsFunc();
@@ -102,7 +100,7 @@ const EditFloorModal = (props) => {
         const params = `?floor_id=${props?.currentFloorId}`;
         await updateFloors(params, floorNameApi)
             .then((res) => {
-                props.onHide();
+                handleModalClose();
                 setLoading(false);
                 setFloorModal(true);
                 props.getFloorsFunc();
@@ -117,7 +115,7 @@ const EditFloorModal = (props) => {
         await addSpace(params, spaceBody)
             .then((res) => {
                 setLoading(false);
-                props.onHide();
+                handleModalClose();
                 setFloorModal(true);
                 props.getFloorsFunc();
                 props.onClickForAllItems(props.selectedData);
@@ -131,7 +129,7 @@ const EditFloorModal = (props) => {
         const params = `?space_id=${props?.currentSpaceId}`;
         await updateSpaces(params, spaceBody)
             .then((res) => {
-                props.onHide();
+                handleModalClose();
                 setLoading(false);
                 setFloorModal(true);
                 props.getFloorsFunc();
@@ -141,79 +139,79 @@ const EditFloorModal = (props) => {
                 setLoading(false);
             });
     };
-    const [deletingFloor, setDeletingFloor] = useAtom(deleteFloor);
 
     return (
         <>
-            <Modal {...props} centered dialogClassName="floor-space-container-style">
+            <Modal backdrop="static" keyboard={false} size="md" centered {...props}>
                 <div className="p-4">
-                    {props.editFloor && props?.modalType === 'floor' ? (
-                        <Typography.Header size={Typography.Sizes.lg}>Edit Floor</Typography.Header>
-                    ) : !props.editFloor && props?.modalType === 'floor' ? (
-                        <Typography.Header size={Typography.Sizes.lg}>Add Floor</Typography.Header>
-                    ) : props?.modalType === 'spaces' && !props.editFloor ? (
-                        <Typography.Header size={Typography.Sizes.lg}>Add Spaces</Typography.Header>
-                    ) : props?.modalType === 'spaces' && props.editFloor ? (
-                        <Typography.Header size={Typography.Sizes.lg}>Edit Spaces</Typography.Header>
-                    ) : null}
+                    <Typography.Header size={Typography.Sizes.lg}>
+                        {props.editFloor && props?.modalType === 'floor' ? (
+                            <Typography.Header size={Typography.Sizes.lg}>Edit Floor</Typography.Header>
+                        ) : !props.editFloor && props?.modalType === 'floor' ? (
+                            <Typography.Header size={Typography.Sizes.lg}>Add Floor</Typography.Header>
+                        ) : props?.modalType === 'spaces' && !props.editFloor ? (
+                            <Typography.Header size={Typography.Sizes.lg}>Add Spaces</Typography.Header>
+                        ) : props?.modalType === 'spaces' && props.editFloor ? (
+                            <Typography.Header size={Typography.Sizes.lg}>Edit Spaces</Typography.Header>
+                        ) : null}
+                    </Typography.Header>
+
                     <Brick sizeInRem={2} />
 
                     {props.editFloor && props.modalType === 'floor' ? (
                         <>
                             <div>
-                                <Typography.Body size={Typography.Sizes.md}>Name</Typography.Body>
+                                <Typography.Body size={Typography.Sizes.md}>{`Name`}</Typography.Body>
+                                <Brick sizeInRem={0.25} />
                                 <InputTooltip
-                                    className="mb-3 font-weight-bold"
                                     placeholder="Enter Name"
-                                    labelSize={Typography.Sizes.md}
-                                    value={floorsName}
                                     onChange={(e) => {
                                         setApiBody({ ...apiBody, name: e.target.value });
                                         setFloorName(e.target.value);
                                     }}
+                                    labelSize={Typography.Sizes.md}
+                                    value={floorsName}
                                 />
                             </div>
-                            <div>
-                                <Typography.Body size={Typography.Sizes.md}>Type</Typography.Body>
 
+                            <Brick sizeInRem={1.25} />
+
+                            <div>
+                                <Typography.Body size={Typography.Sizes.md}>{`Type`}</Typography.Body>
+                                <Brick sizeInRem={0.25} />
                                 <InputTooltip
-                                    className="mb-3 font-weight-bold"
-                                    placeholder="Enter Name"
+                                    placeholder="Select Type"
                                     labelSize={Typography.Sizes.md}
-                                    value={'Floor'}
                                     disabled={true}
+                                    value={'Floor'}
                                 />
-                                <Typography.Body size={Typography.Sizes.md}>
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Body size={Typography.Sizes.sm}>
                                     Only Floors can be at the building root
                                 </Typography.Body>
                             </div>
-                            <div
-                                style={{ marginTop: '20px' }}
-                                onClick={() => {
-                                    props.handleDeleteAlertShow();
-                                    props.onHide();
-                                }}>
-                                <span
-                                    onClick={() => {}}
-                                    style={{
-                                        backgroundColor: '#fdebea',
-                                        padding: '10px 15px',
-                                        borderRadius: '10px',
-                                        marginTop: '20px',
-                                        cursor: 'pointer',
-                                    }}>
-                                    <img src={Delete} alt="delete" style={{ width: '20px' }} />
-                                    <span style={{ color: '#df4544', marginLeft: '10px' }}>Delete Floor</span>
-                                </span>
+
+                            <Brick sizeInRem={1.25} />
+
+                            <div className="d-flex align-items-center">
+                                <Button
+                                    label="Delete Floor"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryDistructive}
+                                    onClick={() => {
+                                        setModalShow(false);
+                                        props.handleDeleteAlertShow();
+                                    }}
+                                    icon={<DeleteSVG />}
+                                />
                             </div>
                         </>
                     ) : !props.editFloor && props.modalType === 'floor' ? (
                         <>
                             <div>
-                                <Typography.Body size={Typography.Sizes.md}>Name</Typography.Body>
-
+                                <Typography.Body size={Typography.Sizes.md}>{`Name`}</Typography.Body>
+                                <Brick sizeInRem={0.25} />
                                 <InputTooltip
-                                    className="mb-3 font-weight-bold"
                                     placeholder="Enter Name"
                                     labelSize={Typography.Sizes.md}
                                     value={floorsName}
@@ -223,37 +221,44 @@ const EditFloorModal = (props) => {
                                     }}
                                 />
                             </div>
-                            <div>
-                                <Typography.Body size={Typography.Sizes.md}>Type</Typography.Body>
 
+                            <Brick sizeInRem={1.25} />
+
+                            <div>
+                                <Typography.Body size={Typography.Sizes.md}>{`Type`}</Typography.Body>
+                                <Brick sizeInRem={0.25} />
                                 <InputTooltip
-                                    className="mb-3 font-weight-bold"
                                     placeholder="Enter Name"
                                     labelSize={Typography.Sizes.md}
-                                    value={'Floor'}
                                     disabled={true}
+                                    value={'Floor'}
                                 />
-                                <Typography.Body size={Typography.Sizes.md}>
-                                    Only Floors can be at the building root
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Body size={Typography.Sizes.sm}>
+                                    {`Only Floors can be at the building root`}
                                 </Typography.Body>
                             </div>
                         </>
                     ) : props.modalType === 'spaces' && !props.editFloor ? (
                         <>
                             <div>
-                                <Typography.Body size={Typography.Sizes.md}>Name</Typography.Body>
+                                <Typography.Body size={Typography.Sizes.md}>{`Name`}</Typography.Body>
+                                <Brick sizeInRem={0.25} />
                                 <InputTooltip
-                                    className="mb-3 font-weight-bold"
                                     placeholder="Enter Name"
-                                    labelSize={Typography.Sizes.md}
                                     onChange={(e) => {
                                         setSpaceName(e.target.value);
                                         setSpaceBody({ ...spaceBody, name: e.target.value });
                                     }}
+                                    labelSize={Typography.Sizes.md}
                                 />
                             </div>
+
+                            <Brick sizeInRem={1.25} />
+
                             <div>
-                                <Typography.Body size={Typography.Sizes.md}>Type</Typography.Body>
+                                <Typography.Body size={Typography.Sizes.md}>{`Type`}</Typography.Body>
+                                <Brick sizeInRem={0.25} />
                                 <Select
                                     name="select"
                                     placeholder="Select Type"
@@ -265,13 +270,15 @@ const EditFloorModal = (props) => {
                                     isSearchable={true}
                                 />
                             </div>
+
+                            <Brick sizeInRem={0.5} />
                         </>
                     ) : props.editFloor && props.modalType === 'spaces' ? (
                         <>
                             <div>
-                                <Typography.Body size={Typography.Sizes.md}>Name</Typography.Body>
+                                <Typography.Body size={Typography.Sizes.md}>{`Name`}</Typography.Body>
+                                <Brick sizeInRem={0.25} />
                                 <InputTooltip
-                                    className="mb-3 font-weight-bold"
                                     placeholder="Enter Name"
                                     labelSize={Typography.Sizes.md}
                                     value={spaceName}
@@ -281,9 +288,12 @@ const EditFloorModal = (props) => {
                                     }}
                                 />
                             </div>
-                            <div>
-                                <Typography.Body size={Typography.Sizes.md}>Type</Typography.Body>
 
+                            <Brick sizeInRem={1.25} />
+
+                            <div>
+                                <Typography.Body size={Typography.Sizes.md}>{`Type`}</Typography.Body>
+                                <Brick sizeInRem={0.25} />
                                 <Select
                                     name="select"
                                     placeholder="Select Type"
@@ -296,44 +306,40 @@ const EditFloorModal = (props) => {
                                     isSearchable={true}
                                 />
                             </div>
-                            <div
-                                style={{ marginTop: '20px' }}
-                                onClick={() => {
-                                    props.handleDeleteAlertShow();
-                                    props.onHide();
-                                }}>
-                                <span
-                                    onClick={() => {}}
-                                    style={{
-                                        backgroundColor: '#fdebea',
-                                        padding: '10px 15px',
-                                        borderRadius: '10px',
-                                        marginTop: '20px',
-                                        cursor: 'pointer',
-                                    }}>
-                                    <img src={Delete} alt="delete" style={{ width: '20px' }} />
-                                    <span style={{ color: '#df4544', marginLeft: '10px' }}>Delete Spaces</span>
-                                </span>
+
+                            <Brick sizeInRem={1.25} />
+
+                            <div className="d-flex align-items-center">
+                                <Button
+                                    label="Delete Spaces"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryDistructive}
+                                    onClick={() => {
+                                        setModalShow(false);
+                                        props.handleDeleteAlertShow();
+                                    }}
+                                    icon={<DeleteSVG />}
+                                />
                             </div>
                         </>
                     ) : null}
 
-                    <Brick sizeInRem={2.5} />
+                    <Brick sizeInRem={1.5} />
 
                     <div className="d-flex justify-content-between w-100">
                         <Button
                             label="Cancel"
                             size={Button.Sizes.lg}
                             type={Button.Type.secondaryGrey}
-                            className="btnstyle"
-                            onClick={props.onHide}
+                            className="w-100"
+                            onClick={handleModalClose}
                         />
 
                         <Button
                             label={loading ? 'Saving...' : 'Save'}
                             size={Button.Sizes.lg}
                             type={Button.Type.primary}
-                            className="btnstyle"
+                            className="w-100"
                             disabled={loading}
                             onClick={() => {
                                 if (props.editFloor && props?.modalType === 'floor') {
@@ -352,7 +358,7 @@ const EditFloorModal = (props) => {
                         />
                     </div>
 
-                    <Brick sizeInRem={1} />
+                    <Brick sizeInRem={0.25} />
                 </div>
             </Modal>
         </>

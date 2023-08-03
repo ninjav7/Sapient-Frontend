@@ -1,24 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import { useAtom } from 'jotai';
-import { Input, Label, Spinner } from 'reactstrap';
-import { closeEditSpaceModal, floorState, floorStaticId, reloadSpaces, spacesList } from '../../../store/globalState';
-import { Cookies } from 'react-cookie';
-import { BuildingStore } from '../../../store/BuildingStore';
-import { BaseUrl, createSpace } from '../../../services/Network';
-import axios from 'axios';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
-import './style.css';
 import { removeFloor, removeSpace } from './services';
+import './style.css';
 
 const DeleteModal = (props) => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
-
     const [loading, setLoading] = useState(false);
 
     const DeleteFloorsFunc = async () => {
@@ -35,6 +23,7 @@ const DeleteModal = (props) => {
                 setLoading(false);
             });
     };
+
     const DeleteSpacesFunc = async () => {
         setLoading(true);
         let params = `?space_id=${props?.currentSpaceId}`;
@@ -50,6 +39,7 @@ const DeleteModal = (props) => {
                 setLoading(false);
             });
     };
+
     return (
         <>
             <Modal {...props} centered dialogClassName="floor-space-container-style">

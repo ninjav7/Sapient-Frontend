@@ -1,5 +1,5 @@
 export const startIntervalOption12 = [
-    { label: '00:00 AM', value: '00:00' },
+    { label: '12:00 AM', value: '00:00' },
     { label: '1:00 AM', value: '01:00' },
     { label: '2:00 AM', value: '02:00' },
     { label: '3:00 AM', value: '03:00' },
@@ -49,7 +49,7 @@ export const endIntervalOption12 = [
     { label: '9:00 PM', value: '21:00' },
     { label: '10:00 PM', value: '22:00' },
     { label: '11:00 PM', value: '23:00' },
-    { label: '00:00 AM', value: '00:00' },
+    { label: '12:00 AM', value: '00:00' },
 ];
 
 export const startIntervalOption24 = [

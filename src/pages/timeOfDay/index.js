@@ -2,26 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useParams } from 'react-router-dom';
 import Header from '../../components/Header';
+import { UserStore } from '../../store/UserStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours } from '../timeOfDay/services';
-import EndUseTotals from './EndUseTotals';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
+import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours } from '../timeOfDay/services';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import EndUseTotals from './EndUseTotals';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
 import { apiRequestBody } from '../../helpers/helpers';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import Brick from '../../sharedComponents/brick';
 import { buildingData } from '../../store/globalState';
 import './style.css';
-import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const TimeOfDay = () => {
     const { bldgId } = useParams();
     const [buildingListData] = useAtom(buildingData);
+
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [lineChartData, setLineChartData] = useState([]);
 
@@ -713,6 +716,7 @@ const TimeOfDay = () => {
                     showRouteBtn={false}
                     labelsPosition={'top'}
                     className={'h-100'}
+                    timeFormat={userPrefTimeFormat}
                 />
             </div>
 
