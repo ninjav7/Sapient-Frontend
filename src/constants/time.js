@@ -99,10 +99,10 @@ export const timePicker15MinutesIntervalOption24HourFormat = [
 ];
 
 export const timePicker15MinutesIntervalOption12HourFormat = [
-    { label: '0:00 AM', value: '00:00' },
-    { label: '0:15 AM', value: '00:15' },
-    { label: '0:30 AM', value: '00:30' },
-    { label: '0:45 AM', value: '00:45' },
+    { label: '12:00 AM', value: '00:00' },
+    { label: '12:15 AM', value: '00:15' },
+    { label: '12:30 AM', value: '00:30' },
+    { label: '12:45 AM', value: '00:45' },
     { label: '1:00 AM', value: '01:00' },
     { label: '1:15 AM', value: '01:15' },
     { label: '1:30 AM', value: '01:30' },

@@ -18,6 +18,7 @@ import { ConditionGroup } from '../../sharedComponents/conditionGroup';
 import { useNotification } from '../../sharedComponents/notification/useNotification';
 import { Notification } from '../../sharedComponents/notification/Notification';
 import colors from '../../assets/scss/_colors.scss';
+import { UserStore } from '../../store/UserStore';
 import { fetchBuildingsList } from '../../services/buildings';
 import { UNITS } from '../../constants/units';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
@@ -164,7 +165,6 @@ const PlugRule = () => {
     const [bldgTimeZone, setBldgTimeZone] = useState(null);
     const [buildingListData] = useAtom(buildingData);
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
-    const [buildingListDataNotFormatted, setBuildingListDataNotFormatted] = useState([]);
     const [isChangedRuleDetails, setIsChangedRuleDetails] = useState(false);
     const [estimatedEnergySavings, setEstimatedEnergySavings] = useState(0);
     const [isChangedSocketsLinked, setIsChangedSocketsLinked] = useState(false);
@@ -187,7 +187,9 @@ const PlugRule = () => {
         rule_id: '',
         sensor_id: [],
     });
-
+const { timeFormat } = UserStore.useState((s) => ({
+    timeFormat: s.timeFormat,
+}));
     const [userPermission] = useAtom(userPermissionData);
     const isViewer = userPermission?.user_role === 'member';
 
@@ -318,6 +320,13 @@ const PlugRule = () => {
             }
         });
     }, [buildingListData, activeBuildingId]);
+    const preparedBuildingListData = () => {
+        const copyBuildingListData = [...buildingListData];
+        const res = copyBuildingListData.map((el) => {
+            return { label: el.building_name, value: el.building_id };
+        });
+        return res;
+    };
     useEffect(() => {
         const preparedScheduleDataCopy = preparedScheduleData ? [...preparedScheduleData] : [];
         const workingDaysPerCondition = {};
@@ -342,12 +351,9 @@ const PlugRule = () => {
         }
     }, [preparedScheduleData]);
     useEffect(() => {
-        const Is24HoursFormat = buildingListDataNotFormatted.find(
-            (el) => el.building_id == currentData.building_id
-        )?.time_format;
+        const Is24HoursFormat = timeFormat=='24h';
         setIs24Format(Is24HoursFormat);
-    }, [currentData, buildingListDataNotFormatted]);
-
+    }, [currentData, buildingListData]);
     const groupedCurrentDataById = (actions) => {
         return (
             actions &&
@@ -2416,7 +2422,7 @@ const PlugRule = () => {
                                                         handleCurrentDataChange('building_id', event.value);
                                                     }}
                                                     isDisabled={true}
-                                                    options={buildingListData}
+                                                    options={preparedBuildingListData()}
                                                 />
                                             )}
                                         </div>
