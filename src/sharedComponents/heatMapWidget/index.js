@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Typography from '../typography';
 import PropTypes from 'prop-types';
 import Button from '../button/Button';
@@ -7,6 +7,7 @@ import { ReactComponent as Download } from '../assets/icons/download.svg';
 import HeatMapChart from './HeatMapChart';
 import { getHeatMapCSVExport } from '../helpers/chartsExport';
 import Brick from '../brick';
+import { TwelveHourTimeList, TwentyFourHourTimeList } from './utils';
 import './style.scss';
 
 const ICON_SIZES = {
@@ -44,8 +45,9 @@ const HeatMapWidget = ({
     labelsPosition = 'bottom',
     toolTipUnit = 'kWh',
     toolTipTitle = 'Energy Usage by Hour',
+    timeFormat = '12h',
 }) => {
-    const options = {
+    const [options, setOptions] = useState({
         chart: {
             type: 'heatmap',
             toolbar: {
@@ -208,32 +210,7 @@ const HeatMapWidget = ({
             },
             tickAmount: 12,
             tickPlacement: 'between',
-            categories: [
-                '12AM',
-                '1AM',
-                '2AM',
-                '3AM',
-                '4AM',
-                '5AM',
-                '6AM',
-                '7AM',
-                '8AM',
-                '9AM',
-                '10AM',
-                '11AM',
-                '12PM',
-                '1PM',
-                '2PM',
-                '3PM',
-                '4PM',
-                '5PM',
-                '6PM',
-                '7PM',
-                '8PM',
-                '9PM',
-                '10PM',
-                '11PM',
-            ],
+            categories: TwelveHourTimeList,
             position: `${labelsPosition}`,
         },
         tooltip: {
@@ -264,7 +241,19 @@ const HeatMapWidget = ({
                         </div>`;
             },
         },
-    };
+    });
+
+    useEffect(() => {
+        if (!timeFormat) return;
+        const updatedOptions = {
+            ...options,
+            xaxis: {
+                ...options.xaxis,
+                categories: timeFormat === '12h' ? TwelveHourTimeList : TwentyFourHourTimeList,
+            },
+        };
+        setOptions(updatedOptions);
+    }, [timeFormat]);
 
     return (
         <div className={`heatmap-chart-widget-wrapper ${className}`}>
@@ -339,6 +328,7 @@ HeatMapWidget.propTypes = {
     labelsPostion: PropTypes.string,
     toolTipUnit: PropTypes.string,
     toolTipTitle: PropTypes.string,
+    timeFormat: PropTypes.string,
 };
 
 export default HeatMapWidget;

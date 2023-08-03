@@ -256,3 +256,46 @@ export const getBuildingName = (buildingListData, id) => {
 
     return buildingName;
 };
+
+// Below Helper function is for HeatMap time convertion
+export const convertTimeTo24HourFormat = (data) => {
+    const timeRegex = /(\d+)([AP]M)/;
+
+    return data.map((item) => {
+        const timeMatch = item.x.match(timeRegex);
+        if (timeMatch) {
+            let hour = parseInt(timeMatch[1]);
+            const period = timeMatch[2];
+
+            if (period === 'PM' && hour !== 12) {
+                hour += 12;
+            } else if (period === 'AM' && hour === 12) {
+                hour = 0;
+            }
+
+            item.x = hour.toString().padStart(2, '0') + ':00';
+        }
+        return item;
+    });
+};
+
+// Below Helper function is for HeatMap time convertion
+export const convertTimeTo12HourFormat = (data) => {
+    return data.map((item) => {
+        let [hour, minute] = item.x.split(':');
+        hour = parseInt(hour);
+        let period = 'AM';
+
+        if (hour === 0) {
+            hour = 12;
+        } else if (hour === 12) {
+            period = 'PM';
+        } else if (hour > 12) {
+            hour -= 12;
+            period = 'PM';
+        }
+
+        item.x = hour.toString().padStart(2) + period;
+        return item;
+    });
+};

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -49,7 +48,9 @@ const BuildingOverview = () => {
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
+
     const userPrefUnits = UserStore.useState((s) => s.unit);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [overallBldgData, setOverallBldgData] = useState({
         total_building: 0,
@@ -163,7 +164,7 @@ const BuildingOverview = () => {
                     let obj = {
                         link: '#',
                         id: record?.equipment_id,
-                        label: record?.equipment_name,
+                        label: record?.equipment_name ? record?.equipment_name : `-`,
                         value: Math.round(record?.energy_consumption.now / 1000),
                         unit: UNITS.KWH,
                         badgePercentage: percentageHandler(
@@ -453,14 +454,14 @@ const BuildingOverview = () => {
             setXAxisObj(xaxisObj);
         };
 
-        const getFormattedChartDates = (days_count) => {
-            const date_format = xaxisLabelsFormat(days_count);
+        const getFormattedChartDates = (days_count, timeFormat) => {
+            const date_format = xaxisLabelsFormat(days_count, timeFormat);
             setDateFormat(date_format);
         };
 
         getXaxisForDaysSelected(daysCount);
-        getFormattedChartDates(daysCount);
-    }, [daysCount]);
+        getFormattedChartDates(daysCount, userPrefTimeFormat);
+    }, [daysCount, userPrefTimeFormat]);
 
     useEffect(() => {
         if (startDate === null || endDate === null) return;
@@ -565,6 +566,7 @@ const BuildingOverview = () => {
                                 pageType="building"
                                 handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
                                 showRouteBtn={true}
+                                timeFormat={userPrefTimeFormat}
                             />
                         </>
                     ) : (
@@ -581,6 +583,7 @@ const BuildingOverview = () => {
                                 pageType="building"
                                 handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
                                 showRouteBtn={true}
+                                timeFormat={userPrefTimeFormat}
                             />
 
                             <div className="mt-4">

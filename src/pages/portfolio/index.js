@@ -17,9 +17,7 @@ import PortfolioKPIs from './PortfolioKPIs';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
-import './style.scss';
 import { apiRequestBody } from '../../helpers/helpers';
-import { BuildingStore } from '../../store/BuildingStore';
 import Brick from '../../sharedComponents/brick';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import colors from '../../assets/scss/_colors.scss';
@@ -27,6 +25,7 @@ import { UNITS } from '../../constants/units';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { UserStore } from '../../store/UserStore';
+import './style.scss';
 
 const PortfolioOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -40,6 +39,7 @@ const PortfolioOverview = () => {
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefUnits = UserStore.useState((s) => s.unit);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [overalldata, setOveralldata] = useState({
         total_building: 0,
@@ -92,14 +92,14 @@ const PortfolioOverview = () => {
             setXAxisObj(xaxisObj);
         };
 
-        const getFormattedChartDates = (days_count) => {
-            const date_format = xaxisLabelsFormat(days_count);
+        const getFormattedChartDates = (days_count, timeFormat) => {
+            const date_format = xaxisLabelsFormat(days_count, timeFormat);
             setDateFormat(date_format);
         };
 
         getXaxisForDaysSelected(daysCount);
-        getFormattedChartDates(daysCount);
-    }, [daysCount]);
+        getFormattedChartDates(daysCount, userPrefTimeFormat);
+    }, [daysCount, userPrefTimeFormat]);
 
     useEffect(() => {
         if (startDate === null || endDate === null) return;

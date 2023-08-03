@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
+import { UserStore } from '../../store/UserStore';
 import { apiRequestBody, formatConsumptionValue } from '../../helpers/helpers';
 import { UNITS } from '../../constants/units';
 import EndUsesKPIs from '../../sharedComponents/endUsesKPIs/EndUsesKPIs';
@@ -19,10 +20,10 @@ import { KPI_UNITS } from '../../sharedComponents/KPIs';
 import colors from '../../assets/scss/_colors.scss';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
-import './style.css';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
 import { getWeatherData } from '../../services/weather';
+import './style.css';
 
 const EndUseType = () => {
     const { endUseType } = useParams();
@@ -32,6 +33,8 @@ const EndUseType = () => {
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+
     const [buildingListData] = useAtom(buildingData);
     const [isPlugOnly, setIsPlugOnly] = useState(false);
 
@@ -201,14 +204,14 @@ const EndUseType = () => {
             setXAxisObj(xaxisObj);
         };
 
-        const getFormattedChartDates = (days_count) => {
-            const date_format = xaxisLabelsFormat(days_count);
+        const getFormattedChartDates = (days_count, timeFormat) => {
+            const date_format = xaxisLabelsFormat(days_count, timeFormat);
             setDateFormat(date_format);
         };
 
         getXaxisForDaysSelected(daysCount);
-        getFormattedChartDates(daysCount);
-    }, [daysCount]);
+        getFormattedChartDates(daysCount, userPrefTimeFormat);
+    }, [daysCount, userPrefTimeFormat]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
