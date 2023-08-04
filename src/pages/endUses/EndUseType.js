@@ -210,14 +210,14 @@ const EndUseType = () => {
             setXAxisObj(xaxisObj);
         };
 
-        const getFormattedChartDates = (days_count, timeFormat) => {
-            const date_format = xaxisLabelsFormat(days_count, timeFormat);
+        const getFormattedChartDates = (days_count, timeFormat, dateFormat) => {
+            const date_format = xaxisLabelsFormat(days_count, timeFormat, dateFormat);
             setDateFormat(date_format);
         };
 
         getXaxisForDaysSelected(daysCount);
-        getFormattedChartDates(daysCount, userPrefTimeFormat);
-    }, [daysCount, userPrefTimeFormat]);
+        getFormattedChartDates(daysCount, userPrefTimeFormat, userPrefDateFormat);
+    }, [daysCount, userPrefTimeFormat, userPrefDateFormat]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
