@@ -110,6 +110,11 @@ const SecondaryTopNavBar = () => {
             return;
         }
 
+        if(path.includes('control/plug-rules')){
+            redirectToEndpoint(`/control/plug-rules`);
+            return;
+        }
+
         if (accountRoutes.includes(path)) {
             redirectToEndpoint(`/settings/general/${record?.value}`);
             return;
