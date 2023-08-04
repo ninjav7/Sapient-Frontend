@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
+import moment from 'moment';
 import { useAtom } from 'jotai';
 import { Spinner, UncontrolledTooltip } from 'reactstrap';
 import Skeleton from 'react-loading-skeleton';
@@ -16,12 +17,10 @@ import Select from '../../../sharedComponents/form/select';
 import { fetchDateRange } from '../../../helpers/formattedChartData';
 import Header from '../../../components/Header';
 import { DateRangeStore } from '../../../store/DateRangeStore';
-import { lineChartMock } from './mock';
 import { convertToMac, shadowChartMetrics, pulseChartMetrics } from './utils';
-import { apiRequestBody, compareObjData } from '../../../helpers/helpers';
-import { updateUtilitySensorServices } from './services';
+import { compareObjData } from '../../../helpers/helpers';
+import { getSensorGraphDataForUtilityMonitors, updateUtilitySensorServices } from './services';
 import { UserStore } from '../../../store/UserStore';
-import { getSensorGraphData } from '../passive-devices/services';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 import { formatSensorHeading } from './helper';
@@ -34,8 +33,9 @@ const MetricsTab = (props) => {
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
     const [metric, setMetric] = useState(pulseChartMetrics);
-    const [fetchingChartData, setFetchingChartData] = useState(false);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const [sensorChartData, setSensorChartData] = useState([]);
+    const [fetchingChartData, setFetchingChartData] = useState(false);
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
@@ -48,16 +48,132 @@ const MetricsTab = (props) => {
         setSelectedConsumptionLabel(obj?.Consumption);
     };
 
+    const getRequiredConsumptionLabel = (value) => {
+        let label = '';
+        metric.map((m) => {
+            if (m?.value === value) label = m?.label;
+            return m;
+        });
+        return label;
+    };
+
     const fetchSensorsChartData = async (selected_consmption, start_date, end_date, sensor_obj) => {
         if (!sensor_obj?.id) return;
 
         setFetchingChartData(true);
+        setSensorChartData([]);
 
-        const payload = apiRequestBody(start_date, end_date, timeZone);
-        const params = `?sensor_id=${sensor_obj?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
+        const payload = {
+            sensor_id: sensor_obj?.id,
+            bldg_id: bldgId,
+            date_from: encodeURIComponent(start_date),
+            date_to: encodeURIComponent(end_date),
+            tz_info: timeZone,
+            selected_metric: encodeURIComponent(selected_consmption),
+        };
 
-        await getSensorGraphData(params, payload)
+        await getSensorGraphDataForUtilityMonitors(payload)
             .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    if (response?.data.length > 0) {
+                        const responseData = response?.data;
+                        let recordToInsert = [];
+
+                        if (!(selected_consmption === 'current' || selected_consmption === 'voltage')) {
+                            let formattedData = [];
+                            responseData.map((el) => {
+                                if (el?.data === '') {
+                                    formattedData.push({ x: moment.utc(new Date(el?.time_stamp)), y: null });
+                                } else {
+                                    formattedData.push({ x: new Date(el?.time_stamp).getTime(), y: el?.data });
+                                }
+                            });
+                            recordToInsert = [
+                                {
+                                    data: formattedData,
+                                    name: getRequiredConsumptionLabel(selected_consmption),
+                                },
+                            ];
+                        } else {
+                            if (selected_consmption === 'current') {
+                                const firstList = {
+                                    data: [],
+                                    name: `Amps_A`,
+                                };
+                                const secondList = {
+                                    data: [],
+                                    name: `Amps_B`,
+                                };
+                                const thirdList = {
+                                    data: [],
+                                    name: `Amps_C`,
+                                };
+
+                                responseData.map((el) => {
+                                    if (el?.data === '') {
+                                        firstList.data.push({ x: moment.utc(new Date(el?.time_stamp)), y: null });
+                                        secondList.data.push({ x: moment.utc(new Date(el?.time_stamp)), y: null });
+                                        thirdList.data.push({ x: moment.utc(new Date(el?.time_stamp)), y: null });
+                                    } else {
+                                        firstList.data.push({
+                                            x: new Date(el?.time_stamp).getTime(),
+                                            y: el?.data?.Amps_A,
+                                        });
+                                        secondList.data.push({
+                                            x: new Date(el?.time_stamp).getTime(),
+                                            y: el?.data?.Amps_B,
+                                        });
+                                        thirdList.data.push({
+                                            x: new Date(el?.time_stamp).getTime(),
+                                            y: el?.data?.Amps_C,
+                                        });
+                                    }
+                                });
+
+                                recordToInsert = [firstList, secondList, thirdList];
+                            }
+                            if (selected_consmption === 'voltage') {
+                                const firstList = {
+                                    data: [],
+                                    name: `Volts_A_N`,
+                                };
+                                const secondList = {
+                                    data: [],
+                                    name: `Volts_B_N`,
+                                };
+                                const thirdList = {
+                                    data: [],
+                                    name: `Volts_C_N`,
+                                };
+
+                                responseData.map((el) => {
+                                    if (el?.data === '') {
+                                        firstList.data.push({ x: moment.utc(new Date(el?.time_stamp)), y: null });
+                                        secondList.data.push({ x: moment.utc(new Date(el?.time_stamp)), y: null });
+                                        thirdList.data.push({ x: moment.utc(new Date(el?.time_stamp)), y: null });
+                                    } else {
+                                        firstList.data.push({
+                                            x: new Date(el?.time_stamp).getTime(),
+                                            y: el?.data?.Volts_A_N,
+                                        });
+                                        secondList.data.push({
+                                            x: new Date(el?.time_stamp).getTime(),
+                                            y: el?.data?.Volts_B_N,
+                                        });
+                                        thirdList.data.push({
+                                            x: new Date(el?.time_stamp).getTime(),
+                                            y: el?.data?.Volts_C_N,
+                                        });
+                                    }
+                                });
+
+                                recordToInsert = [firstList, secondList, thirdList];
+                            }
+                        }
+                        setSensorChartData(recordToInsert);
+                    }
+                }
                 setFetchingChartData(false);
             })
             .catch(() => {
@@ -145,7 +261,7 @@ const MetricsTab = (props) => {
                                     subTitle={''}
                                     tooltipUnit={selectedUnit}
                                     tooltipLabel={selectedConsumptionLabel}
-                                    data={lineChartMock}
+                                    data={sensorChartData}
                                     dateRange={fetchDateRange(startDate, endDate)}
                                 />
                             </div>

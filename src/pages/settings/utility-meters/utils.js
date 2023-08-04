@@ -30,8 +30,8 @@ export const shadowChartMetrics = [
 
 export const pulseChartMetrics = [
     { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
-    { value: 'pulse_count', label: 'Pulse Count', unit: 'pulse_count', Consumption: 'Pulse Count' },
-    { value: 'total_pulse', label: 'Total Pulses', unit: 'total_pulse', Consumption: 'Total Pulses' },
+    { value: 'pulse count', label: 'Pulse Count', unit: '', Consumption: 'Pulse Count' },
+    { value: 'total pulses', label: 'Total Pulses', unit: '', Consumption: 'Total Pulses' },
 ];
 
 // Convert to Alpha Numeric

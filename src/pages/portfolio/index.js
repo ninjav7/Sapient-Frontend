@@ -39,6 +39,7 @@ const PortfolioOverview = () => {
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefUnits = UserStore.useState((s) => s.unit);
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [overalldata, setOveralldata] = useState({
@@ -82,7 +83,12 @@ const PortfolioOverview = () => {
     };
 
     const toolTipFormatter = ({ value }) => {
-        return daysCount >= 182 ? moment.utc(value).format(`MMM 'YY`) : moment.utc(value).format(`MMM D 'YY @ hh:mm A`);
+        const time_format = userPrefTimeFormat === `24h` ? `HH:mm` : `hh:mm A`;
+        const date_format = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM 'YY` : `MMM D 'YY`;
+
+        return daysCount >= 182
+            ? moment.utc(value).format(`MMM 'YY`)
+            : moment.utc(value).format(`${date_format} @ ${time_format}`);
     };
 
     useEffect(() => {
@@ -92,14 +98,14 @@ const PortfolioOverview = () => {
             setXAxisObj(xaxisObj);
         };
 
-        const getFormattedChartDates = (days_count, timeFormat) => {
-            const date_format = xaxisLabelsFormat(days_count, timeFormat);
+        const getFormattedChartDates = (days_count, timeFormat, dateFormat) => {
+            const date_format = xaxisLabelsFormat(days_count, timeFormat, dateFormat);
             setDateFormat(date_format);
         };
 
         getXaxisForDaysSelected(daysCount);
-        getFormattedChartDates(daysCount, userPrefTimeFormat);
-    }, [daysCount, userPrefTimeFormat]);
+        getFormattedChartDates(daysCount, userPrefTimeFormat, userPrefDateFormat);
+    }, [daysCount, userPrefTimeFormat, userPrefDateFormat]);
 
     useEffect(() => {
         if (startDate === null || endDate === null) return;
