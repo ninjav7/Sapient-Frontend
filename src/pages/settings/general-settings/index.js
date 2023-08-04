@@ -984,7 +984,7 @@ const GeneralBuildingSettings = () => {
                                         <Inputs
                                             type="text"
                                             label="State"
-                                            placeholder="Select State"
+                                            placeholder="Enter State"
                                             onChange={(e) => {
                                                 handleBldgSettingChanges('state', e.target.value);
                                                 localStorage.setItem(
