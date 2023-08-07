@@ -7,6 +7,7 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
+import { UserStore } from '../../../store/UserStore';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
@@ -54,6 +55,9 @@ const SkeletonLoading = () => (
 const Users = () => {
     const [userPermission] = useAtom(userPermissionData);
     const { download } = useCSVDownload();
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     // Add User Modal
     const [addUserModal, setAddUserModal] = useState(false);
@@ -226,8 +230,10 @@ const Users = () => {
     const handleLastActiveDate = (last_login) => {
         let dt = '';
         if (isValidDate(new Date(last_login)) && last_login != null) {
-            let last_dt = new Date(last_login);
-            dt = moment.utc(last_dt).format(`MMM D 'YY @ hh:mm A`);
+            const last_dt = new Date(last_login);
+            const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
+            const timeFormat = userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`;
+            dt = moment.utc(last_dt).format(`${dateFormat} 'YY @ ${timeFormat}`);
         } else {
             dt = 'Never';
         }
@@ -284,7 +290,7 @@ const Users = () => {
                             return record;
                         });
                         download(
-                            `Users_${new Date().toISOString().split('T')[0]}`,
+                            `Users_List_${new Date().toISOString().split('T')[0]}`,
                             getUsersTableCSVExport(updatedUsersList, tableHeader, handleLastActiveDate)
                         );
                     }
