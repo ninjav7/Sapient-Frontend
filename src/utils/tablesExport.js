@@ -198,35 +198,41 @@ export const getBuildingsTableCSVExport = (tableData, columns) => {
     return csv;
 };
 
-export const getCompareBuildingTableCSVExport = (tableData, columns, topEnergyDensity) => {
+export const getCompareBuildingTableCSVExport = (tableData, columns) => {
     let dataToExport = [];
 
     tableData.forEach((tableRow, index) => {
         let arr = [];
         for (let i = 0; i <= columns.length - 1; i++) {
             switch (columns[i].accessor) {
+                case 'building_name':
+                    const formattedBldgName = `${tableRow?.building_name}`;
+                    arr.push(formattedBldgName);
+                    break;
+                case 'energy_density':
+                    const preparedEnergyDestiny = `${tableRow.energy_density.toFixed(2)} kWh${
+                        columns[i].name.split(`Average Consumption`)[1]
+                    }`;
+                    arr.push(preparedEnergyDestiny);
+                    break;
                 case 'total_consumption':
-                    const preparedConsumption = parseInt(tableRow.total_consumption / 1000);
+                    const preparedConsumption = Math.round(tableRow.total_consumption / 1000);
                     arr.push(`${preparedConsumption} kWh`);
                     break;
-                case 'energy_consumption':
+                case 'change':
                     const diffPercentage = percentageHandler(
-                        tableRow.energy_consumption.now,
-                        tableRow.energy_consumption.old
+                        tableRow?.energy_consumption.now,
+                        tableRow?.energy_consumption.old
                     );
                     {
-                        tableRow.energy_consumption.now >= tableRow.energy_consumption.old
+                        tableRow?.energy_consumption.now >= tableRow?.energy_consumption.old
                             ? arr.push(`+${diffPercentage}%`)
                             : arr.push(`-${diffPercentage}%`);
                     }
                     break;
-                case 'energy_density':
-                    const preparedEnergyDestiny = `${tableRow.energy_density.toFixed(2)} kWh / sq. ft.`;
-                    arr.push(preparedEnergyDestiny);
-                    break;
                 case 'square_footage':
-                    const squareFootage = formatConsumptionValue(tableRow.square_footage);
-                    arr.push(squareFootage);
+                    const squareFootage = tableRow.square_footage;
+                    arr.push(`${squareFootage} ${columns[i].name}`);
                     break;
                 default:
                     arr.push(tableRow[columns[i].accessor]);
