@@ -45,7 +45,7 @@ import Header from '../../../components/Header';
 import { fetchDateRange } from '../../../helpers/formattedChartData';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import { getSensorGraphData } from '../passive-devices/services';
-import { apiRequestBody } from '../../../helpers/helpers';
+import { apiRequestBody, dateTimeFormatForHighChart } from '../../../helpers/helpers';
 import { Spinner } from 'reactstrap';
 import './breaker-config-styles.scss';
 
@@ -74,6 +74,8 @@ const BreakerConfiguration = ({
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const defaultErrorObj = {
         rated_amps: null,
@@ -1921,6 +1923,14 @@ const BreakerConfiguration = ({
                                             tooltipLabel={selectedConsumptionLabel}
                                             data={sensorChartData}
                                             dateRange={fetchDateRange(startDate, endDate)}
+                                            chartProps={{
+                                                tooltip: {
+                                                    xDateFormat: dateTimeFormatForHighChart(
+                                                        userPrefDateFormat,
+                                                        userPrefTimeFormat
+                                                    ),
+                                                },
+                                            }}
                                         />
                                     </div>
                                 )}

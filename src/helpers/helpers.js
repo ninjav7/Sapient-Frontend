@@ -299,3 +299,13 @@ export const convertTimeTo12HourFormat = (data) => {
         return item;
     });
 };
+
+export const dateTimeFormatForHighChart = (date_format, time_format) => {
+    return time_format === `12h`
+        ? date_format === `DD-MM-YYYY`
+            ? `%e %b '%y @ %I:%M %p`
+            : `%b %e '%y @ %I:%M %p`
+        : date_format === `DD-MM-YYYY`
+        ? `%e %b '%y @ %H:%M`
+        : `%b %e '%y @ %H:%M`;
+};

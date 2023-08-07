@@ -18,6 +18,7 @@ import moment from 'moment';
 import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
+import { UserStore } from '../../store/UserStore';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import Header from '../../components/Header';
@@ -25,7 +26,7 @@ import { formatConsumptionValue } from '../../helpers/explorehelpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
 import '../../sharedComponents/typography/style.scss';
-import { apiRequestBody, compareObjData } from '../../helpers/helpers';
+import { apiRequestBody, compareObjData, dateTimeFormatForHighChart } from '../../helpers/helpers';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
@@ -35,9 +36,8 @@ import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/attached.svg';
 import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
-import './styles.scss';
 import '../settings/passive-devices/styles.scss';
-import { UserStore } from '../../store/UserStore';
+import './styles.scss';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -54,6 +54,9 @@ const EquipChartModal = ({
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
@@ -622,6 +625,14 @@ const EquipChartModal = ({
                                                 tooltipLabel={selectedConsumptionLabel}
                                                 data={deviceData}
                                                 dateRange={fetchDateRange(startDate, endDate)}
+                                                chartProps={{
+                                                    tooltip: {
+                                                        xDateFormat: dateTimeFormatForHighChart(
+                                                            userPrefDateFormat,
+                                                            userPrefTimeFormat
+                                                        ),
+                                                    },
+                                                }}
                                             />
                                         </div>
                                     )}

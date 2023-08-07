@@ -187,9 +187,9 @@ const PlugRule = () => {
         rule_id: '',
         sensor_id: [],
     });
-const { timeFormat } = UserStore.useState((s) => ({
-    timeFormat: s.timeFormat,
-}));
+    const { timeFormat } = UserStore.useState((s) => ({
+        timeFormat: s.timeFormat,
+    }));
     const [userPermission] = useAtom(userPermissionData);
     const isViewer = userPermission?.user_role === 'member';
 
@@ -351,7 +351,7 @@ const { timeFormat } = UserStore.useState((s) => ({
         }
     }, [preparedScheduleData]);
     useEffect(() => {
-        const Is24HoursFormat = timeFormat=='24h';
+        const Is24HoursFormat = timeFormat == '24h';
         setIs24Format(Is24HoursFormat);
     }, [currentData, buildingListData]);
     const groupedCurrentDataById = (actions) => {

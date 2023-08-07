@@ -11,7 +11,7 @@ import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import EndUseTotals from './EndUseTotals';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
-import { apiRequestBody } from '../../helpers/helpers';
+import { apiRequestBody, dateTimeFormatForHighChart } from '../../helpers/helpers';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import Brick from '../../sharedComponents/brick';
 import { buildingData } from '../../store/globalState';
@@ -24,6 +24,7 @@ const TimeOfDay = () => {
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [lineChartData, setLineChartData] = useState([]);
@@ -730,6 +731,11 @@ const TimeOfDay = () => {
                 data={lineChartData}
                 tooltipUnit={metric[0].unit}
                 tooltipLabel={metric[0].label}
+                chartProps={{
+                    tooltip: {
+                        xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
+                    },
+                }}
             />
         </React.Fragment>
     );

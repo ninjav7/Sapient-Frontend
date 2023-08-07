@@ -18,7 +18,7 @@ import { fetchDateRange } from '../../../helpers/formattedChartData';
 import Header from '../../../components/Header';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import { convertToMac, shadowChartMetrics, pulseChartMetrics } from './utils';
-import { compareObjData } from '../../../helpers/helpers';
+import { compareObjData, dateTimeFormatForHighChart } from '../../../helpers/helpers';
 import { getSensorGraphDataForUtilityMonitors, updateUtilitySensorServices } from './services';
 import { UserStore } from '../../../store/UserStore';
 import { BuildingStore } from '../../../store/BuildingStore';
@@ -31,6 +31,9 @@ const MetricsTab = (props) => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [metric, setMetric] = useState(pulseChartMetrics);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
@@ -263,6 +266,14 @@ const MetricsTab = (props) => {
                                     tooltipLabel={selectedConsumptionLabel}
                                     data={sensorChartData}
                                     dateRange={fetchDateRange(startDate, endDate)}
+                                    chartProps={{
+                                        tooltip: {
+                                            xDateFormat: dateTimeFormatForHighChart(
+                                                userPrefDateFormat,
+                                                userPrefTimeFormat
+                                            ),
+                                        },
+                                    }}
                                 />
                             </div>
                         )}
