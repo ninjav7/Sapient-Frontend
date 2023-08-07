@@ -232,7 +232,6 @@ export const getUsersTableCSVExport = (tableData, columns, handleLastActiveDate)
 
                 case 'last_login':
                     const userLastLogin = tableRow['last_login'];
-                    console.log('SSR userLastLogin => ', userLastLogin);
                     const data = userLastLogin ? handleLastActiveDate(userLastLogin) : `Never`;
                     arr.push(`${data}`);
                     break;
