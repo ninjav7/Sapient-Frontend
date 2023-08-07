@@ -1,5 +1,6 @@
+import moment from 'moment';
 import { percentageHandler } from '../utils/helper';
-import { formatConsumptionValue, getBuildingName } from '../helpers/helpers';
+import { getBuildingName } from '../helpers/helpers';
 
 export const getTableHeadersList = (record) => {
     let arr = [];
@@ -179,6 +180,61 @@ export const getBuildingsTableCSVExport = (tableData, columns) => {
                 case 'building_size':
                     const size = tableRow['building_size'];
                     arr.push(`${size} ${columns[i].name}`);
+                    break;
+
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
+export const getUsersTableCSVExport = (tableData, columns, handleLastActiveDate) => {
+    let dataToExport = [];
+
+    tableData.forEach((tableRow, index) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'name':
+                    const userName = tableRow['name'];
+                    arr.push(`${userName}`);
+                    break;
+
+                case 'email':
+                    const userEmail = tableRow['email'];
+                    arr.push(`${userEmail}`);
+                    break;
+
+                case 'role':
+                    const userRole =
+                        tableRow?.role === '' || tableRow?.permissions.length === 0
+                            ? '-'
+                            : tableRow?.permissions[0]?.permission_name;
+                    arr.push(`${userRole}`);
+                    break;
+
+                case 'status':
+                    const userStatus = tableRow['status'];
+                    arr.push(`${userStatus}`);
+                    break;
+
+                case 'last_login':
+                    const userLastLogin = tableRow['last_login'];
+                    console.log('SSR userLastLogin => ', userLastLogin);
+                    const data = userLastLogin ? handleLastActiveDate(userLastLogin) : `Never`;
+                    arr.push(`${data}`);
                     break;
 
                 default:

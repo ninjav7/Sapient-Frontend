@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
-import { useHistory, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { fetchMemberUserList, fetchUserFilters } from './service';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -19,6 +19,8 @@ import { ReactComponent as InactiveSVG } from '../../../assets/icon/ban.svg';
 import { ReactComponent as ActiveSVG } from '../../../assets/icon/circle-check.svg';
 import { ReactComponent as PendingSVG } from '../../../assets/icon/clock.svg';
 import { pageListSizes } from '../../../helpers/helpers';
+import { getUsersTableCSVExport } from '../../../utils/tablesExport';
+import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import Brick from '../../../sharedComponents/brick';
 import AddUser from './AddUser';
 import '../style.css';
@@ -50,8 +52,8 @@ const SkeletonLoading = () => (
 );
 
 const Users = () => {
-    const history = useHistory();
     const [userPermission] = useAtom(userPermissionData);
+    const { download } = useCSVDownload();
 
     // Add User Modal
     const [addUserModal, setAddUserModal] = useState(false);
@@ -171,22 +173,6 @@ const Users = () => {
             .catch((error) => {});
     };
 
-    useEffect(() => {
-        getUsersList();
-    }, [userSearchInfo, sortBy, pageNo, pageSize, permissionRoleIds, selectedStatus]);
-
-    useEffect(() => {
-        getUserFilterData();
-    }, [userSearchInfo]);
-
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [pageNo, pageSize]);
-
-    useEffect(() => {
-        updateBreadcrumbStore();
-    }, []);
-
     const currentRow = () => {
         return userData;
     };
@@ -237,16 +223,91 @@ const Users = () => {
         return d instanceof Date && !isNaN(d);
     }
 
-    const renderLastActive = (row) => {
+    const handleLastActiveDate = (last_login) => {
         let dt = '';
-        if (isValidDate(new Date(row?.last_login)) && row?.last_login != null) {
-            let last_dt = new Date(row?.last_login);
+        if (isValidDate(new Date(last_login)) && last_login != null) {
+            let last_dt = new Date(last_login);
             dt = moment.utc(last_dt).format(`MMM D 'YY @ hh:mm A`);
         } else {
             dt = 'Never';
         }
-        return <Typography.Body size={Typography.Sizes.md}>{dt}</Typography.Body>;
+        return dt;
     };
+
+    const renderLastActive = (row) => {
+        const data = handleLastActiveDate(row?.last_login);
+        return <Typography.Body size={Typography.Sizes.md}>{data}</Typography.Body>;
+    };
+
+    const tableHeader = [
+        {
+            name: 'Name',
+            accessor: 'name',
+            callbackValue: renderName,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Email',
+            accessor: 'email',
+            callbackValue: renderEmail,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Role',
+            accessor: 'role',
+            callbackValue: renderRole,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Status',
+            accessor: 'status',
+            callbackValue: renderStatus,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Last Active',
+            accessor: 'last_login',
+            callbackValue: renderLastActive,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+    ];
+
+    const handleDownloadCsv = async () => {
+        await fetchMemberUserList()
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    if (response?.data?.data.length > 0) {
+                        const data = response?.data?.data;
+                        const updatedUsersList = data.map((record) => {
+                            record.status = handleStatusCheck(record);
+                            return record;
+                        });
+                        download(
+                            `Users_${new Date().toISOString().split('T')[0]}`,
+                            getUsersTableCSVExport(updatedUsersList, tableHeader, handleLastActiveDate)
+                        );
+                    }
+                }
+            })
+            .catch((e) => {});
+    };
+
+    useEffect(() => {
+        getUsersList();
+    }, [userSearchInfo, sortBy, pageNo, pageSize, permissionRoleIds, selectedStatus]);
+
+    useEffect(() => {
+        getUserFilterData();
+    }, [userSearchInfo]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pageNo, pageSize]);
+
+    useEffect(() => {
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>
@@ -298,38 +359,7 @@ const Users = () => {
                         }}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
-                        headers={[
-                            {
-                                name: 'Name',
-                                accessor: 'name',
-                                callbackValue: renderName,
-                                onSort: (method, name) => setSortBy({ method, name }),
-                            },
-                            {
-                                name: 'Email',
-                                accessor: 'email',
-                                callbackValue: renderEmail,
-                                onSort: (method, name) => setSortBy({ method, name }),
-                            },
-                            {
-                                name: 'Role',
-                                accessor: 'role',
-                                callbackValue: renderRole,
-                                onSort: (method, name) => setSortBy({ method, name }),
-                            },
-                            {
-                                name: 'Status',
-                                accessor: 'status',
-                                callbackValue: renderStatus,
-                                onSort: (method, name) => setSortBy({ method, name }),
-                            },
-                            {
-                                name: 'Last Active',
-                                accessor: 'last_login',
-                                callbackValue: renderLastActive,
-                                onSort: (method, name) => setSortBy({ method, name }),
-                            },
-                        ]}
+                        headers={tableHeader}
                         currentPage={pageNo}
                         onChangePage={setPageNo}
                         pageSize={pageSize}
@@ -337,6 +367,7 @@ const Users = () => {
                             setPageNo(1);
                             setPageSize(currentPageSize);
                         }}
+                        onDownload={() => handleDownloadCsv()}
                         pageListSizes={pageListSizes}
                         totalCount={(() => {
                             return totalItems;
