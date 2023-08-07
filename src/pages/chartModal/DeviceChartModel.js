@@ -8,7 +8,7 @@ import { Cookies } from 'react-cookie';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import Header from '../../components/Header';
-import { apiRequestBody, dateTimeFormatForHighChart } from '../../helpers/helpers';
+import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
@@ -231,6 +231,12 @@ const DeviceChartModel = ({
                         chartProps={{
                             tooltip: {
                                 xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
+                            },
+                            xAxis: {
+                                type: 'datetime',
+                                labels: {
+                                    format: formatXaxisForHighCharts(daysCount, userPrefDateFormat, userPrefTimeFormat),
+                                },
                             },
                         }}
                     />

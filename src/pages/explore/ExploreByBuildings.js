@@ -13,7 +13,7 @@ import { selectedBuilding, totalSelectionBuildingId } from '../../store/globalSt
 import { useAtom } from 'jotai';
 import { timeZone } from '../../utils/helper';
 import Header from '../../components/Header';
-import { apiRequestBody, dateTimeFormatForHighChart } from '../../helpers/helpers';
+import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 import Brick from '../../sharedComponents/brick';
@@ -83,6 +83,7 @@ const ExploreByBuildings = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
@@ -923,6 +924,16 @@ const ExploreByBuildings = () => {
                                 chartProps={{
                                     tooltip: {
                                         xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
+                                    },
+                                    xAxis: {
+                                        type: 'datetime',
+                                        labels: {
+                                            format: formatXaxisForHighCharts(
+                                                daysCount,
+                                                userPrefDateFormat,
+                                                userPrefTimeFormat
+                                            ),
+                                        },
                                     },
                                 }}
                             />

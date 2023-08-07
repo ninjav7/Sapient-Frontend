@@ -18,7 +18,7 @@ import Header from '../../components/Header';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { buildingData, selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
-import { apiRequestBody, dateTimeFormatForHighChart } from '../../helpers/helpers';
+import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 import Brick from '../../sharedComponents/brick';
@@ -107,6 +107,7 @@ const ExploreByEquipment = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
@@ -1533,6 +1534,10 @@ const ExploreByEquipment = () => {
                             },
                             xAxis: {
                                 gridLineWidth: 0,
+                                type: 'datetime',
+                                labels: {
+                                    format: formatXaxisForHighCharts(daysCount, userPrefDateFormat, userPrefTimeFormat),
+                                },
                             },
                             yAxis: [
                                 {

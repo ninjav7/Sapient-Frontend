@@ -26,7 +26,12 @@ import { formatConsumptionValue } from '../../helpers/explorehelpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
 import '../../sharedComponents/typography/style.scss';
-import { apiRequestBody, compareObjData, dateTimeFormatForHighChart } from '../../helpers/helpers';
+import {
+    apiRequestBody,
+    compareObjData,
+    dateTimeFormatForHighChart,
+    formatXaxisForHighCharts,
+} from '../../helpers/helpers';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
@@ -54,6 +59,7 @@ const EquipChartModal = ({
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
@@ -631,6 +637,16 @@ const EquipChartModal = ({
                                                             userPrefDateFormat,
                                                             userPrefTimeFormat
                                                         ),
+                                                    },
+                                                    xAxis: {
+                                                        type: 'datetime',
+                                                        labels: {
+                                                            format: formatXaxisForHighCharts(
+                                                                daysCount,
+                                                                userPrefDateFormat,
+                                                                userPrefTimeFormat
+                                                            ),
+                                                        },
                                                     },
                                                 }}
                                             />

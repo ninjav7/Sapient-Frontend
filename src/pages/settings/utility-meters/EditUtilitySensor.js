@@ -18,7 +18,7 @@ import { fetchDateRange } from '../../../helpers/formattedChartData';
 import Header from '../../../components/Header';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import { convertToMac, shadowChartMetrics, pulseChartMetrics } from './utils';
-import { compareObjData, dateTimeFormatForHighChart } from '../../../helpers/helpers';
+import { compareObjData, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../../helpers/helpers';
 import { getSensorGraphDataForUtilityMonitors, updateUtilitySensorServices } from './services';
 import { UserStore } from '../../../store/UserStore';
 import { BuildingStore } from '../../../store/BuildingStore';
@@ -31,6 +31,7 @@ const MetricsTab = (props) => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
@@ -272,6 +273,16 @@ const MetricsTab = (props) => {
                                                 userPrefDateFormat,
                                                 userPrefTimeFormat
                                             ),
+                                        },
+                                        xAxis: {
+                                            type: 'datetime',
+                                            labels: {
+                                                format: formatXaxisForHighCharts(
+                                                    daysCount,
+                                                    userPrefDateFormat,
+                                                    userPrefTimeFormat
+                                                ),
+                                            },
                                         },
                                     }}
                                 />

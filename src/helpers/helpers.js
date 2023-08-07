@@ -206,6 +206,81 @@ export const xaxisFilters = (daysCount, timezone) => {
     }
 };
 
+export const formatXaxisForHighCharts = (daysCount, dateFormat, timeFormat) => {
+    // Up to and including 1 day
+    if (daysCount === 1) {
+        return timeFormat === `12h` ? '{value:%I:%M %p}' : '{value:%H:%M}';
+    }
+
+    // Up to and including 3 days
+    else if (daysCount >= 2 && daysCount <= 3) {
+        let value = '';
+        if (dateFormat === `DD-MM-YYYY`) {
+            if (timeFormat === `12h`) {
+                value = '{value:%d/%m %I:%M %p}';
+            } else {
+                value = '{value:%d/%m %H:%M}';
+            }
+        } else {
+            if (timeFormat === `12h`) {
+                value = '{value:%m/%d %I:%M %p}';
+            } else {
+                value = '{value:%m/%d %H:%M}';
+            }
+        }
+        return value;
+    }
+
+    // Up to and including 7 days
+    else if (daysCount >= 4 && daysCount <= 7) {
+        let value = '';
+        if (dateFormat === `DD-MM-YYYY`) {
+            if (timeFormat === `12h`) {
+                value = '{value:%d/%m %I:%M %p}';
+            } else {
+                value = '{value:%d/%m %H:%M}';
+            }
+        } else {
+            if (timeFormat === `12h`) {
+                value = '{value:%m/%d %I:%M %p}';
+            } else {
+                value = '{value:%m/%d %H:%M}';
+            }
+        }
+        return value;
+    }
+
+    // Up to and including 14 days
+    else if (daysCount >= 8 && daysCount <= 14) {
+        return dateFormat === 'DD-MM-YYYY' ? '{value:%d/%m}' : '{value:%m/%d}';
+    }
+
+    // Up to and including 30 days
+    else if (daysCount >= 15 && daysCount <= 30) {
+        return dateFormat === 'DD-MM-YYYY' ? '{value:%d/%m}' : '{value:%m/%d}';
+    }
+
+    // Up to and including 3 Months
+    else if (daysCount >= 31 && daysCount <= 90) {
+        return dateFormat === 'DD-MM-YYYY' ? '{value:%d/%m}' : '{value:%m/%d}';
+    }
+
+    // Up to and including 6 Months
+    else if (daysCount >= 91 && daysCount <= 181) {
+        return dateFormat === 'DD-MM-YYYY' ? '{value:%d/%m}' : '{value:%m/%d}';
+    }
+
+    // >6 Months
+    else if (daysCount >= 182) {
+        return '{value:%b}';
+    }
+
+    // Default if not any
+    else {
+        return dateFormat === 'DD-MM-YYYY' ? '{value:%d/%m}' : '{value:%m/%d}';
+    }
+};
+
 export const convertDateTime = (timestamp, timeZone) => {
     return moment.utc(timestamp).clone().tz(timeZone);
 };
