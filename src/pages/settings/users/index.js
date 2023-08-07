@@ -70,6 +70,10 @@ const Users = () => {
     const [filterOptions, setFilterOptions] = useState([]);
     const [permissionRoleIds, setPermissionRoleIds] = useState([]);
 
+    const handleStatusCheck = (record) => {
+        return (record.status = record?.is_verified ? (record?.is_active ? 'Active' : 'Inactive') : 'Pending');
+    };
+
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
@@ -89,6 +93,7 @@ const Users = () => {
     const getUsersList = async () => {
         const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'name' : sortBy.name;
         const sort_by = sortBy.method === undefined || sortBy.method === null ? 'ace' : sortBy.method;
+
         setIsUserDataFetched(true);
         let roleIds = encodeURIComponent(permissionRoleIds.join('+'));
 
@@ -106,15 +111,25 @@ const Users = () => {
             params += `&permission_role_id=${roleIds}`;
         }
 
+        setUserData([]);
+
         await fetchMemberUserList(params)
             .then((res) => {
-                let response = res?.data;
-                setUserData(response?.data?.data);
-                setTotalItems(response?.data?.total_users);
+                const response = res?.data;
+                if (response?.success) {
+                    if (response?.data?.data.length > 0) {
+                        const data = response?.data?.data;
+                        const updatedUsersList = data.map((record) => {
+                            record.status = handleStatusCheck(record);
+                            return record;
+                        });
+                        setUserData(updatedUsersList);
+                    }
+                    if (response?.data?.total_users) setTotalItems(response?.data?.total_users);
+                }
                 setIsUserDataFetched(false);
             })
             .catch((error) => {
-                setUserData([]);
                 setIsUserDataFetched(false);
             });
     };
@@ -197,20 +212,18 @@ const Users = () => {
     };
 
     const renderStatus = (row) => {
-        const status = row?.is_verified ? (row?.is_active ? 'Active' : 'Inactive') : 'Pending';
-
         return (
             <Button
-                label={status}
+                label={row?.status}
                 size={Button.Sizes.lg}
                 type={Button.Type.secondary}
                 icon={
-                    (status === 'Active' && <ActiveSVG />) ||
-                    (status === 'Inactive' && <InactiveSVG />) ||
-                    (status === 'Pending' && <PendingSVG />)
+                    (row?.status === 'Active' && <ActiveSVG />) ||
+                    (row?.status === 'Inactive' && <InactiveSVG />) ||
+                    (row?.status === 'Pending' && <PendingSVG />)
                 }
                 iconAlignment={Button.IconAlignment.left}
-                className={`status-container ${status.toLowerCase()}-btn`}
+                className={`status-container ${row?.status.toLowerCase()}-btn`}
                 disabled
             />
         );
@@ -305,14 +318,14 @@ const Users = () => {
                                 onSort: (method, name) => setSortBy({ method, name }),
                             },
                             {
-                                name: 'status',
+                                name: 'Status',
                                 accessor: 'status',
                                 callbackValue: renderStatus,
                                 onSort: (method, name) => setSortBy({ method, name }),
                             },
                             {
                                 name: 'Last Active',
-                                accessor: 'last_active',
+                                accessor: 'last_login',
                                 callbackValue: renderLastActive,
                                 onSort: (method, name) => setSortBy({ method, name }),
                             },
