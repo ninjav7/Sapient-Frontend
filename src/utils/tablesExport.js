@@ -178,7 +178,7 @@ export const getBuildingsTableCSVExport = (tableData, columns) => {
 
                 case 'building_size':
                     const size = tableRow['building_size'];
-                    arr.push(`${size} Sq.Ft.`);
+                    arr.push(`${size} ${columns[i].name}`);
                     break;
 
                 default:
