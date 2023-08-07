@@ -279,7 +279,8 @@ const Users = () => {
     ];
 
     const handleDownloadCsv = async () => {
-        await fetchMemberUserList()
+        const params = `?timezone=${timeZone}`;
+        await fetchMemberUserList(params)
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
