@@ -228,7 +228,7 @@ const CompareBuildings = () => {
     };
 
     const handleDownloadCsv = async () => {
-        download('Compare_Buildings', getCompareBuildingTableCSVExport(buildingsData, tableHeader, topEnergyDensity));
+        download('Compare_Buildings', getCompareBuildingTableCSVExport(buildingsData, tableHeader));
     };
 
     const updateBreadcrumbStore = () => {

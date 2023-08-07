@@ -276,7 +276,7 @@ const Buildings = () => {
         setMaxSqftVal(filterData?.building_size_max);
     };
 
-    const handleDownloadCsv = async () => {
+    const handleDownloadCsv = async (user_pref_units) => {
         const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
         const search = '';
@@ -284,6 +284,10 @@ const Buildings = () => {
         await fetchBuildingList(search, sort_by, ordered_by)
             .then((res) => {
                 const responseData = res.data;
+                responseData.length !== 0 &&
+                    responseData.forEach((el) => {
+                        el.building_size = Math.round(handleUnitConverstion(el?.building_size, user_pref_units));
+                    });
                 download(
                     `Buildings_${new Date().toISOString().split('T')[0]}`,
                     getBuildingsTableCSVExport(responseData, tableHeader)
@@ -478,7 +482,7 @@ const Buildings = () => {
                         onStatus={[]}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
-                        onDownload={() => handleDownloadCsv()}
+                        onDownload={() => handleDownloadCsv(userPrefUnits)}
                         filterOptions={filterOptions}
                         headers={tableHeader}
                         filters={filtersValues}
