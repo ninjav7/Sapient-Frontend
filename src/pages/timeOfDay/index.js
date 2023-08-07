@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
+import Highcharts from 'highcharts';
 import { useParams } from 'react-router-dom';
 import Header from '../../components/Header';
 import { UserStore } from '../../store/UserStore';
@@ -114,6 +115,8 @@ const TimeOfDay = () => {
 
         const dailyUsageByHour = async () => {
             const payload = apiRequestBody(startDate, endDate, time_zone);
+            setLineChartData([]);
+
             await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
                     const response = res?.data;
@@ -733,7 +736,17 @@ const TimeOfDay = () => {
                 tooltipLabel={metric[0].label}
                 chartProps={{
                     tooltip: {
-                        xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
+                        xDateFormat: userPrefTimeFormat === `12h` ? `Time: %I:%M %p` : `Time: %H:%M`,
+                    },
+                    xAxis: {
+                        labels: {
+                            formatter: function (val) {
+                                return Highcharts.dateFormat(
+                                    userPrefTimeFormat === `12h` ? `%I:%M %p` : `%H:%M`,
+                                    val.value
+                                );
+                            },
+                        },
                     },
                 }}
             />
