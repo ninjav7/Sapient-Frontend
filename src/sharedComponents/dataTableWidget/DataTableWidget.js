@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import {Button} from '../button';
+import { Button } from '../button';
 import { Table } from '../table';
 import { DropDownIcon } from '../dropDowns/dropDownButton';
 import Typography from '../typography';
@@ -114,6 +114,7 @@ const DataTableWidget = (props) => {
 
     const handlePageSize = (pageSize) => {
         setPageSize(pageSize);
+        handlePageChange(1); // PLT-1392: Pagination fixes on size change
         props.onPageSize(pageSize);
     };
 
