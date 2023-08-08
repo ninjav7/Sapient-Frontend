@@ -286,7 +286,8 @@ const PlugRules = () => {
                     setSkeletonLoading(false);
                 }
                 let response = res.data;
-                setPlugRuleData(response.data);
+                console.log("response.data34232",response);
+                setPlugRuleData(response?.data||[]);
                 let onlineData = [];
                 let offlineData = [];
                 response.data.forEach((record) => {
@@ -449,6 +450,7 @@ const PlugRules = () => {
         }
         return newPlugRuleData;
     };
+    console.log("plugRuleData234",plugRuleData);
     const currentRow = () => {
         let newPlugRuleData = [];
 
@@ -463,6 +465,7 @@ const PlugRules = () => {
         if (selectedTab === 2) {
             newPlugRuleData = formatRows(offlinePlugRuleData);
         }
+        console.log("newPlugRuleData324",newPlugRuleData);
         return newPlugRuleData;
     };
 

@@ -69,6 +69,10 @@ const ExploreBuildingPeak = React.lazy(() => import('../pages/peakDemand/Explore
 const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
 const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
 
+//carbon
+const CarbonOverview = React.lazy(() => import('../pages/carbon/CarbonOverview'));
+
+
 //superUser
 const Accounts = React.lazy(() => import('../pages/superUser/accounts'));
 const UpdateAuth = React.lazy(() => import('../pages/auth/updateAuth'));
@@ -163,6 +167,14 @@ const portfolioRoutes = {
             route: PrivateRoute,
             visibility: true,
             parent: 'buildings',
+        },
+        {
+            path: '/carbon/overview',
+            name: 'End Uses',
+            component: CarbonOverview,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'carbon',
         },
         {
             path: '/energy/time-of-day/:bldgId',
@@ -346,6 +358,23 @@ const settingsRoutes = {
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
 };
+const carbonRoutes = {
+        path: '/carbon/overview',
+        name: 'Carbon',
+        visibility: true,
+        children: [
+            {
+                path: '/carbon/overview',
+                name: 'Carbon',
+                component: CarbonOverview,
+                route: PrivateRoute,
+                parent: 'carbon',
+                visibility: true,
+            },
+        ],
+        icon: FeatherIcon.ToggleRight,
+        roles: ['Admin'],
+    };
 
 const exploreRoutes = {
     path: '/explore-page/by-buildings',
@@ -525,7 +554,7 @@ const flattenRoutes = (routes) => {
 // All routes
 const allRoutes = [rootRoute, portfolioRoutes, settingsRoutes, controlRoutes, exploreRoutes, adminRoutes, authRoutes];
 
-const authProtectedRoutes = [portfolioRoutes, settingsRoutes, controlRoutes, exploreRoutes, adminRoutes];
+const authProtectedRoutes = [portfolioRoutes, settingsRoutes, controlRoutes, exploreRoutes,carbonRoutes, adminRoutes];
 
 const allFlattenRoutes = flattenRoutes(allRoutes);
 export { allRoutes, authProtectedRoutes, allFlattenRoutes };

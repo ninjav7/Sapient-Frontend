@@ -283,6 +283,11 @@ const NavLinks = () => {
                                         <Toggleon className={`navbar-icons-style ${className}`} />
                                     </div>
                                 )}
+                                {item.name === 'Carbon' && (
+                                    <div>
+                                        <Toggleon className={`navbar-icons-style ${className}`} />
+                                    </div>
+                                )}
                                 {item.name === 'Explore' && (
                                     <div>
                                         <Telescope className={`navbar-icons-style ${className}`} />
