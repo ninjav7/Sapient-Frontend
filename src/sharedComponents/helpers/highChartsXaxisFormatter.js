@@ -64,7 +64,7 @@ export const xaxisLabelsFormat = (daysCount, time_format = `12h`, date_format = 
     const dateFormat = date_format === `DD-MM-YYYY` ? `DD/MM` : `MM/DD`;
 
     // Up to and including 1 day
-    if (daysCount === 1) return time_format;
+    if (daysCount === 1) return timeFormat;
 
     // Up to and including 3 days
     if (daysCount >= 2 && daysCount <= 3) return `${dateFormat} ${timeFormat}`;
