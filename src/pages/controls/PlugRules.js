@@ -8,7 +8,6 @@ import { ReactComponent as PlusSVG } from '../../assets/icon/plus.svg';
 import { Cookies } from 'react-cookie';
 import Modal from 'react-bootstrap/Modal';
 import { fetchPlugRules, updatePlugRuleRequest, createPlugRuleRequest } from '../../services/plugRules';
-import axios from 'axios';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import { BaseUrl, assignSensorsToRule } from '../../services/Network';
@@ -17,7 +16,6 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import './style.scss';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import { buildingData } from '../../store/globalState';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import Typography from '../../sharedComponents/typography';
 import Brick from '../../sharedComponents/brick';
@@ -36,76 +34,6 @@ const buttonGroupFilterOptions = [
     { label: 'Active', icon: <ActiveSVG className="bg-grey" /> },
     { label: 'Inactive', icon: <InactiveSVG className="bg-grey" /> },
 ];
-const PlugRuleTable = ({ plugRuleData, skeletonLoading }) => {
-    const history = useHistory();
-
-    const redirectToPlugRulePage = (ruleId) => {
-        history.push({
-            pathname: `/control/plug-rules/${ruleId}`,
-        });
-    };
-    return (
-        <Card>
-            <CardBody>
-                <Table className="mb-0 bordered table-hover">
-                    <thead>
-                        <tr className="mouse-pointer">
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Days</th>
-                            <th>Socket Count</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    {skeletonLoading ? (
-                        <tbody>
-                            <SkeletonTheme color="#202020" height={35}>
-                                <tr>
-                                    <th>
-                                        <Skeleton count={5} />
-                                    </th>
-
-                                    <th>
-                                        <Skeleton count={5} />
-                                    </th>
-
-                                    <th>
-                                        <Skeleton count={5} />
-                                    </th>
-
-                                    <th>
-                                        <Skeleton count={5} />
-                                    </th>
-                                </tr>
-                            </SkeletonTheme>
-                        </tbody>
-                    ) : (
-                        <tbody>
-                            {plugRuleData.map((record, index) => {
-                                return (
-                                    <tr key={index} className="mouse-pointer">
-                                        <td
-                                            className="font-weight-bold panel-name"
-                                            onClick={() => {
-                                                redirectToPlugRulePage(record.id);
-                                            }}>
-                                            {record.name}
-                                        </td>
-                                        <td className="font-weight-bold">
-                                            {record.description === '' ? '-' : record.description}
-                                        </td>
-                                        <td className="font-weight-bold">{record.days ? record.days : '-'}</td>
-                                        <td className="font-weight-bold">{record.sensors_count}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    )}
-                </Table>
-            </CardBody>
-        </Card>
-    );
-};
 
 const PlugRules = () => {
     let cookies = new Cookies();
@@ -136,6 +64,8 @@ const PlugRules = () => {
     const [pageRefresh, setPageRefresh] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const initialSortingState = { name: 'name', method: 'ace' };
+    const [sortBy, setSort] = useState(initialSortingState);
     const initialBuildingValue = bldgId !== 'portfolio' ? bldgId : '';
     const [createRuleData, setCreateRuleData] = useState({
         building_id: initialBuildingValue,
@@ -149,10 +79,6 @@ const PlugRules = () => {
             return { ...prev, building_id: initialBuildingValue };
         });
     }, [bldgId]);
-
-    const [currentData, setCurrentData] = useState({});
-
-    const [modelRefresh, setModelRefresh] = useState(false);
 
     const [plugRuleData, setPlugRuleData] = useState([]);
     const [onlinePlugRuleData, setOnlinePlugRuleData] = useState([]);
@@ -198,18 +124,6 @@ const PlugRules = () => {
         }
     };
 
-    const updatePlugRuleData = async () => {
-        setIsProcessing(true);
-        await updatePlugRuleRequest(createRuleData)
-            .then((res) => {
-                setIsProcessing(false);
-                setPageRefresh(!pageRefresh);
-            })
-            .catch((error) => {
-                setIsProcessing(false);
-            });
-    };
-
     const getBuildingData = async () => {
         await fetchBuildingsList(false).then((res) => {
             let data = res.data;
@@ -217,32 +131,6 @@ const PlugRules = () => {
 
             setBuildingListData(formattedData);
         });
-    };
-
-    const updateSocketLink = async () => {
-        if (rulesToLink.sensor_id.length === 0) {
-            return;
-        }
-        try {
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            setIsProcessing(true);
-
-            await axios
-                .post(`${BaseUrl}${assignSensorsToRule}`, rulesToLink, {
-                    headers: header,
-                })
-                .then((res) => {});
-
-            setIsProcessing(false);
-            setPageRefresh(!pageRefresh);
-        } catch (error) {
-            setIsProcessing(false);
-        }
     };
 
     // Building List Data Globally
@@ -273,6 +161,8 @@ const PlugRules = () => {
         const searchParams = {
             params: {
                 rule_search: search,
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
             },
         };
 
@@ -308,7 +198,7 @@ const PlugRules = () => {
 
     useEffect(() => {
         fetchPlugRuleData();
-    }, [activeBuildingId, search]);
+    }, [activeBuildingId, search, sortBy.method, sortBy.name]);
 
     const history = useHistory();
 
@@ -425,12 +315,12 @@ const PlugRules = () => {
     };
 
     const headerProps = [
-        { name: 'Name', accessor: 'name' },
-        { name: 'Description', accessor: 'description' },
+        { name: 'Name', accessor: 'name', onSort: (method, name) => setSort({ method, name }) },
+        { name: 'Description', accessor: 'description', onSort: (method, name) => setSort({ method, name }) },
         { name: 'Building', accessor: 'buildings' },
         { name: 'Status', accessor: 'status', callbackValue: renderStatus },
         { name: 'Days', accessor: 'days' },
-        { name: 'Socket Count', accessor: 'sensors_count' },
+        { name: 'Socket Count', accessor: 'sensors_count', onSort: (method, name) => setSort({ method, name }) },
     ];
 
     const dataForCSV = () => {
