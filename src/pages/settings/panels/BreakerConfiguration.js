@@ -47,6 +47,7 @@ import { DateRangeStore } from '../../../store/DateRangeStore';
 import { getSensorGraphData } from '../passive-devices/services';
 import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../../helpers/helpers';
 import { Spinner } from 'reactstrap';
+import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import './breaker-config-styles.scss';
 
 const BreakerConfiguration = ({
@@ -1211,7 +1212,7 @@ const BreakerConfiguration = ({
                                 {firstBreakerObj?.breaker_type === 3 &&
                                     `Breakers ${firstBreakerObj?.breaker_number}, ${secondBreakerObj?.breaker_number}, ${thirdBreakerObj?.breaker_number}`}
                             </Typography.Header>
-                            <div className="d-flex justify-content-start mouse-pointer ">
+                            <div className="d-flex justify-content-start mouse-pointer">
                                 {isEditingMode && (
                                     <Typography.Subheader
                                         size={Typography.Sizes.md}
@@ -1230,6 +1231,24 @@ const BreakerConfiguration = ({
                                     onClick={() => setActiveTab('metrics')}>
                                     {`Metrics`}
                                 </Typography.Subheader>
+                                {parentBreakerObj?.flag && parentBreakerObj?.flag.length !== 0 && (
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}
+                                        className={`typography-wrapper ml-4 ${
+                                            activeTab === 'issues' ? 'active-tab-style' : ''
+                                        }`}
+                                        onClick={() => setActiveTab('issues')}>
+                                        <div className="d-flex justify-content-center">
+                                            {`Issues`}
+                                            <StatusBadge
+                                                text={`${parentBreakerObj?.flag.length}`}
+                                                type={StatusBadge.Type.warning}
+                                                className="flag-count-container ml-1 mb-1"
+                                                textStyle="flag-count-text"
+                                            />
+                                        </div>
+                                    </Typography.Subheader>
+                                )}
                             </div>
                         </div>
                         <div className="d-flex">

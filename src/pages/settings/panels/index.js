@@ -143,6 +143,11 @@ const Panels = () => {
         )
             .then((res) => {
                 const responseData = res?.data;
+                if (responseData.data && responseData.data.length !== 0) {
+                    responseData.data.forEach((record) => {
+                        record.bldg_id = bldgId;
+                    });
+                }
                 setPanelsData(responseData?.data);
                 setTotalItems(responseData?.total_data);
                 setDataFetching(false);
@@ -154,7 +159,7 @@ const Panels = () => {
 
     const handleClick = (el) => {
         history.push({
-            pathname: `/settings/panels/edit-panel/${bldgId}/${el?.panel_type}/${el?.panel_id}`,
+            pathname: `/settings/panels/edit-panel/${el?.bldg_id}/${el?.panel_type}/${el?.panel_id}`,
         });
     };
 
@@ -180,7 +185,7 @@ const Panels = () => {
                 fetchPanelsDataWithFilter();
                 if (response?.success) {
                     history.push({
-                        pathname: `/settings/panels`,
+                        pathname: `/settings/panels/${bldgId}`,
                     });
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -227,7 +232,7 @@ const Panels = () => {
 
     const renderPanelName = (row) => {
         return (
-            <Link to={`/settings/panels/edit-panel/${bldgId}/${row?.panel_type}/${row?.panel_id}`}>
+            <Link to={`/settings/panels/edit-panel/${row?.bldg_id}/${row?.panel_type}/${row?.panel_id}`}>
                 <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
                     {row?.panel_name === '' ? '-' : row?.panel_name}
                 </div>
