@@ -86,10 +86,22 @@ const ActiveDevices = () => {
     const [hardWareString, setHardWareString] = useState([]);
     const [filterOptions, setFilterOptions] = useState([]);
 
+    const modifySensorFilter = (fractions) => {
+        const numerators = [];
+
+        for (let fraction of fractions) {
+            const parts = fraction.split('/');
+            const numerator = parseInt(parts[0]);
+            numerators.push(numerator);
+        }
+
+        return numerators.join('+');
+    };
+
     const getFilters = async () => {
         let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
         let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
-        let sensorSelected = encodeURIComponent(sensorString.join('+'));
+        let sensorSelected = modifySensorFilter(sensorString);
         let firmwareSelected = encodeURIComponent(firmWareString.join('+'));
         let hardwareSelected = encodeURIComponent(hardWareString.join('+'));
 
@@ -163,7 +175,7 @@ const ActiveDevices = () => {
                         if (opt.length !== 0) {
                             let sensors = [];
                             for (let i = 0; i < opt.length; i++) {
-                                sensors.push(opt[i].value.split(`/`)[0]);
+                                sensors.push(opt[i].value);
                             }
                             setSensorString(sensors);
                         }
