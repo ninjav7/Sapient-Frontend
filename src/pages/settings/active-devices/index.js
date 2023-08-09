@@ -342,7 +342,7 @@ const ActiveDevices = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/active-devices/single/${row.bldg_id}/${row.equipments_id}`,
+                    pathname: `/settings/active-devices/single/${bldgId}/${row.equipments_id}`,
                 }}>
                 <a>{row.identifier}</a>
             </Link>
