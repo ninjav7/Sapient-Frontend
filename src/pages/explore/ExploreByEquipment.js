@@ -1522,6 +1522,8 @@ const ExploreByEquipment = () => {
                         chartProps={{
                             navigator: {
                                 outlineWidth: 0,
+                                adaptToUpdatedData: false,
+                                stickToMax: true,
                             },
                             plotOptions: {
                                 series: {
