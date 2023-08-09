@@ -18,6 +18,7 @@ import { ConditionGroup } from '../../sharedComponents/conditionGroup';
 import { useNotification } from '../../sharedComponents/notification/useNotification';
 import { Notification } from '../../sharedComponents/notification/Notification';
 import colors from '../../assets/scss/_colors.scss';
+import { UserStore } from '../../store/UserStore';
 import { fetchBuildingsList } from '../../services/buildings';
 import { UNITS } from '../../constants/units';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
@@ -125,10 +126,10 @@ const formatAverageData = (data) => {
     data.forEach((el) => {
         const today = moment();
         const from_date = today.startOf('week').startOf('isoWeek');
-        if (el.dayOfWeek === 'Sunday') {
-            from_date.day(el.dayOfWeek).add(1, 'weeks');
+        if (el.day_of_week === 'Sunday') {
+            from_date.day(el.day_of_week).add(1, 'weeks');
         } else {
-            from_date.day(el.dayOfWeek);
+            from_date.day(el.day_of_week);
         }
         const formattedHourFromBackend = el.hour.split(':');
         const timeWithHours = from_date.set('hour', formattedHourFromBackend[0]);
@@ -164,7 +165,6 @@ const PlugRule = () => {
     const [bldgTimeZone, setBldgTimeZone] = useState(null);
     const [buildingListData] = useAtom(buildingData);
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
-    const [buildingListDataNotFormatted, setBuildingListDataNotFormatted] = useState([]);
     const [isChangedRuleDetails, setIsChangedRuleDetails] = useState(false);
     const [estimatedEnergySavings, setEstimatedEnergySavings] = useState(0);
     const [isChangedSocketsLinked, setIsChangedSocketsLinked] = useState(false);
@@ -187,7 +187,9 @@ const PlugRule = () => {
         rule_id: '',
         sensor_id: [],
     });
-
+    const { timeFormat } = UserStore.useState((s) => ({
+        timeFormat: s.timeFormat,
+    }));
     const [userPermission] = useAtom(userPermissionData);
     const isViewer = userPermission?.user_role === 'member';
 
@@ -318,6 +320,13 @@ const PlugRule = () => {
             }
         });
     }, [buildingListData, activeBuildingId]);
+    const preparedBuildingListData = () => {
+        const copyBuildingListData = [...buildingListData];
+        const res = copyBuildingListData.map((el) => {
+            return { label: el.building_name, value: el.building_id };
+        });
+        return res;
+    };
     useEffect(() => {
         const preparedScheduleDataCopy = preparedScheduleData ? [...preparedScheduleData] : [];
         const workingDaysPerCondition = {};
@@ -342,12 +351,9 @@ const PlugRule = () => {
         }
     }, [preparedScheduleData]);
     useEffect(() => {
-        const Is24HoursFormat = buildingListDataNotFormatted.find(
-            (el) => el.building_id == currentData.building_id
-        )?.time_format;
+        const Is24HoursFormat = timeFormat == '24h';
         setIs24Format(Is24HoursFormat);
-    }, [currentData, buildingListDataNotFormatted]);
-
+    }, [currentData, buildingListData]);
     const groupedCurrentDataById = (actions) => {
         return (
             actions &&
@@ -701,11 +707,14 @@ const PlugRule = () => {
                 building_id: activeBuildingId,
                 sensor_id: listOfsocketsToReassign,
             }).then((res) => {
-                const snackbarTitle = notificationLinkedData(listOfsocketsToReassign.length, currentData.name);
+                setIsSetInitiallySocketsCountLinked(false);
+                const snackbarTitle = notificationLinkedData(rulesToLink.sensor_id.length, currentData.name);
                 openSnackbar({ ...snackbarTitle, type: Notification.Types.success, duration: 5000 });
                 fetchUnLinkedSocketRules();
+                fetchLinkedSocketRules();
+                fetchLinkedSocketIds();
                 setCheckedAllToLink(false);
-                selectedIdsToLink([]);
+                setSelectedIdsToLink([]);
             }));
     };
 
@@ -717,6 +726,7 @@ const PlugRule = () => {
 
         await unlinkSocketRequest(rulesToUnLink)
             .then((res) => {
+                setSelectedIdsToUnlink([]);
                 const snackbarTitle = notificationUnlinkedData(rulesToUnLink.sensor_id.length, currentData.name);
 
                 openSnackbar({ ...snackbarTitle, type: Notification.Types.success, duration: 5000 });
@@ -1083,7 +1093,7 @@ const PlugRule = () => {
         activeBuildingId &&
             listLinkSocketRulesRequest(ruleId, activeBuildingId).then((res) => {
                 const { sensor_id } = res.data.data;
-                setListSocketsIds(sensor_id);
+                setListSocketsIds(sensor_id || []);
             });
     };
 
@@ -1126,10 +1136,8 @@ const PlugRule = () => {
                 setUnlinkedSocketRuleSuccess(res.status);
 
                 let unLinkedData = [];
-                if (!isSetInitiallySocketsCountUnlinked) {
-                    setCountUnlinkedSockets(response?.total_data);
-                    setIsSetInitiallySocketsCountUnlinked(true);
-                }
+                setCountUnlinkedSockets(response?.total_data);
+                setIsSetInitiallySocketsCountUnlinked(true);
 
                 setUnlinkedSocketsTabData(response?.data);
                 setTotalItemsUnlinked(response?.total_data);
@@ -1262,12 +1270,13 @@ const PlugRule = () => {
                 if (response.data.length > 0) {
                     setCheckedToUnlinkAll(true);
                 }
+                setCheckedToUnlinkAll(false);
                 setSelectedInitialyIds(linkedIds || []);
                 setLinkedSocketsTabData(response.data);
-                if (!isSetInitiallySocketsCountLinked) {
-                    setCountLinkedSockets(response.total_data);
-                    setIsSetInitiallySocketsCountLinked(true);
-                }
+                // if (!isSetInitiallySocketsCountLinked) {
+                setCountLinkedSockets(response.total_data);
+                setIsSetInitiallySocketsCountLinked(true);
+                // }
                 setTotalItemsLinked(response?.total_data);
             })
             .catch((error) => {});
@@ -2006,31 +2015,51 @@ const PlugRule = () => {
         }
     };
     const getFirstLastOffPeriodDayAndTime = (week) => {
-        let isLastOffAction = false;
-        let firstOnDay, firstOnTime;
-        let isSetFirstDay = false;
-        let lastOffTime = '';
-        let lastOffDay = 0;
-        week?.length &&
-            week.forEach((dayOfWeek, index) => {
-                if (dayOfWeek.turnOn && !isSetFirstDay) {
-                    isSetFirstDay = true;
-                    firstOnDay = index;
-                    firstOnTime = dayOfWeek.turnOn;
-                }
-                const copyTurnOffTime = dayOfWeek?.turnOff;
-                const copyTurnOnTime = dayOfWeek?.turnOn;
-                const convertedCurrentOffTime = copyTurnOffTime && copyTurnOffTime.replace(':', ',');
-                const convertedNextOnTime = copyTurnOnTime && copyTurnOnTime.replace(':', ',');
-
-                if (convertedCurrentOffTime > convertedNextOnTime) {
+        let firstOnDay,
+            firstOnTime,
+            isLastOffAction = false,
+            lastOffTime = '',
+            lastOffDay = null;
+        if (week?.length) {
+            const copyWeekReverse = [...week];
+            copyWeekReverse.length = 7;
+            const reverseWeek = copyWeekReverse.reverse();
+            const copyWeek = [...week];
+            copyWeek.length = 7;
+            for (let i = 0; i < (reverseWeek || []).length; i++) {
+                const currentDay = reverseWeek[i];
+                if (currentDay?.turnOn && !isLastOffAction) break;
+                if (!currentDay || !currentDay?.turnOff) continue;
+                if (currentDay?.turnOff) {
                     isLastOffAction = true;
-                    lastOffDay = index;
-                    lastOffTime = copyTurnOffTime;
-                } else {
-                    isLastOffAction = false;
+                    lastOffDay = reverseWeek.length - i - 1;
+                    lastOffTime = currentDay.turnOff;
+                    const arrayToSearch = reverseWeek.slice(i + 1);
+                    if (
+                        arrayToSearch.findIndex((nextDay) => nextDay?.turnOn) <
+                        arrayToSearch.findIndex((nextDay) => nextDay?.turnOff)
+                    ) {
+                        break;
+                    }
                 }
-            });
+            }
+
+            for (let i = 0; i < (copyWeek || []).length; i++) {
+                const currentDay = copyWeek[i];
+
+                if (!currentDay || !currentDay?.turnOn) continue;
+                if (currentDay?.turnOn && !firstOnDay) {
+                    firstOnDay = i;
+                    firstOnTime = currentDay.turnOn;
+                    break;
+                }
+            }
+
+            if (typeof firstOnDay !== 'number') {
+                firstOnDay = lastOffDay;
+                firstOnTime = lastOffTime;
+            }
+        }
         return { isLastOffAction, lastOffDay, lastOffTime, firstOnDay, firstOnTime };
     };
     const getSoonestOnDateWithTime = (currentOff, week) => {
@@ -2115,25 +2144,28 @@ const PlugRule = () => {
         for (let i = 0; i < weekWithSchedule.length; i++) {
             let currentOff = weekWithSchedule[i]?.turnOff;
             let currentOffDay = i;
-
             let nextOn;
             let nextOnDay;
-            if (i === weekWithSchedule.length - 1) {
-                nextOn = weekWithSchedule[0]?.turnOn;
-                nextOnDay = weekWithSchedule.length - 1;
-            } else {
-                for (let j = i; j < weekWithSchedule.length; j++) {
-                    if (weekWithSchedule[j]?.turnOn) {
-                        if (weekWithSchedule[j]?.turnOn >= weekWithSchedule[j]?.turnOff) {
-                            nextOnDay = j;
-                            nextOn = weekWithSchedule[j]?.turnOn;
-                            break;
-                        } else {
-                            nextOnDay = j + 1;
-                            if (weekWithSchedule[j + 1]) {
-                                nextOn = weekWithSchedule[j + 1]?.turnOn;
+            if (weekWithSchedule[i] !== undefined) {
+                if (i === weekWithSchedule.length - 1) {
+                    nextOn = weekWithSchedule[0]?.turnOn;
+                    nextOnDay = weekWithSchedule.length - 1;
+                } else {
+                    for (let j = i; j < weekWithSchedule.length; j++) {
+                        if (weekWithSchedule[j]?.turnOn) {
+                            if (weekWithSchedule[j]?.turnOn >= weekWithSchedule[j]?.turnOff) {
+                                nextOnDay = j;
+                                nextOn = weekWithSchedule[j]?.turnOn;
+                                break;
+                            } else {
+                                if (weekWithSchedule[j + 1]?.turnOn) {
+                                    nextOnDay = j + 1;
+                                    if (weekWithSchedule[j + 1]) {
+                                        nextOn = weekWithSchedule[j + 1]?.turnOn;
+                                    }
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
                 }
@@ -2390,7 +2422,7 @@ const PlugRule = () => {
                                                         handleCurrentDataChange('building_id', event.value);
                                                     }}
                                                     isDisabled={true}
-                                                    options={buildingListData}
+                                                    options={preparedBuildingListData()}
                                                 />
                                             )}
                                         </div>
@@ -2473,7 +2505,7 @@ const PlugRule = () => {
                                     unitInfo={{
                                         title: 'Estimated Annual Energy Savings',
                                         unit: UNITS.KWH,
-                                        value: estimatedEnergySavings,
+                                        value: Math.round(estimatedEnergySavings),
                                     }}
                                     chartProps={{
                                         tooltip: {

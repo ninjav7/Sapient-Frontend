@@ -14,14 +14,11 @@ import { ComponentStore } from '../../store/ComponentStore';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { useParams } from 'react-router-dom';
 import EquipChartModal from '../chartModal/EquipChartModal';
-import './style.css';
-import 'moment-timezone';
-import moment from 'moment';
 import Header from '../../components/Header';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { buildingData, selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
-import { apiRequestBody } from '../../helpers/helpers';
+import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 import Brick from '../../sharedComponents/brick';
@@ -30,15 +27,14 @@ import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 import Typography from '../../sharedComponents/typography';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
-import Button from '../../sharedComponents/button/Button';
 import { fetchDateRange } from '../../helpers/formattedChartData';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import Select from '../../sharedComponents/form/select';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { LOW_MED_HIGH } from '../../sharedComponents/common/charts/modules/contants';
-import colors from '../../assets/scss/_colors.scss';
-import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
+import { UserStore } from '../../store/UserStore';
+import './style.css';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -111,7 +107,10 @@ const ExploreByEquipment = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [isExploreFilterLoading, setIsExploreFilterLoading] = useState(false);
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
@@ -1535,6 +1534,10 @@ const ExploreByEquipment = () => {
                             },
                             xAxis: {
                                 gridLineWidth: 0,
+                                type: 'datetime',
+                                labels: {
+                                    format: formatXaxisForHighCharts(daysCount, userPrefDateFormat, userPrefTimeFormat),
+                                },
                             },
                             yAxis: [
                                 {
@@ -1551,6 +1554,9 @@ const ExploreByEquipment = () => {
                                     gridLineWidth: 0,
                                 },
                             ],
+                            tooltip: {
+                                xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
+                            },
                         }}
                     />
                 </div>

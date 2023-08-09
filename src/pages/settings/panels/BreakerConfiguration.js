@@ -45,7 +45,7 @@ import Header from '../../../components/Header';
 import { fetchDateRange } from '../../../helpers/formattedChartData';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import { getSensorGraphData } from '../passive-devices/services';
-import { apiRequestBody } from '../../../helpers/helpers';
+import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../../helpers/helpers';
 import { Spinner } from 'reactstrap';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import './breaker-config-styles.scss';
@@ -74,7 +74,10 @@ const BreakerConfiguration = ({
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const defaultErrorObj = {
         rated_amps: null,
@@ -1940,6 +1943,24 @@ const BreakerConfiguration = ({
                                             tooltipLabel={selectedConsumptionLabel}
                                             data={sensorChartData}
                                             dateRange={fetchDateRange(startDate, endDate)}
+                                            chartProps={{
+                                                tooltip: {
+                                                    xDateFormat: dateTimeFormatForHighChart(
+                                                        userPrefDateFormat,
+                                                        userPrefTimeFormat
+                                                    ),
+                                                },
+                                                xAxis: {
+                                                    type: 'datetime',
+                                                    labels: {
+                                                        format: formatXaxisForHighCharts(
+                                                            daysCount,
+                                                            userPrefDateFormat,
+                                                            userPrefTimeFormat
+                                                        ),
+                                                    },
+                                                },
+                                            }}
                                         />
                                     </div>
                                 )}

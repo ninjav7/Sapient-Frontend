@@ -72,7 +72,6 @@ const DataTable = ({
             searchResultRows={buildingsData}
             onDownload={handleDownloadCsv}
             headers={tableHeader}
-            disableColumnDragging={true}
             buttonGroupFilterOptions={[]}
             totalCount={() => {
                 if (search) {
@@ -105,18 +104,6 @@ const CompareBuildings = () => {
     let entryPoint = '';
     let top = '';
 
-    const renderEnergyDensity = (row) => {
-        return (
-            <>
-                <Typography.Body size={Typography.Sizes.sm}>
-                    {`${(row?.energy_density / 1000).toFixed(2)} ${row?.energy_density_units}`}
-                </Typography.Body>
-                <Brick sizeInRem={0.375} />
-                <TinyBarChart percent={getAverageValue(row.energy_density, 0, top)} />
-            </>
-        );
-    };
-
     const renderName = (row) => {
         return (
             <>
@@ -138,11 +125,22 @@ const CompareBuildings = () => {
         );
     };
 
+    const renderEnergyDensity = (row) => {
+        return (
+            <>
+                <Typography.Body size={Typography.Sizes.sm}>
+                    {`${formatConsumptionValue(row?.energy_density, 2)} ${row?.energy_density_units}`}
+                </Typography.Body>
+                <Brick sizeInRem={0.375} />
+                <TinyBarChart percent={getAverageValue(row.energy_density, 0, top)} />
+            </>
+        );
+    };
+
     const renderTotalConsumption = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {parseInt(row.total_consumption / 1000)}
-                {` kWh`}
+                {`${formatConsumptionValue(Math.round(row.total_consumption / 1000))} ${UNITS.KWH}`}
             </Typography.Body>
         );
     };
@@ -217,6 +215,7 @@ const CompareBuildings = () => {
                 response.length !== 0 &&
                     response.forEach((el) => {
                         el.square_footage = Math.round(handleUnitConverstion(el.square_footage, userPrefUnits));
+                        el.energy_density = el?.energy_density / 1000;
                         el.energy_density_units = `${userPrefUnits === 'si' ? `kWh / sq. m.` : `kWh / sq. ft.`}`;
                     });
                 setTopEnergyDensity(topVal);
@@ -229,7 +228,7 @@ const CompareBuildings = () => {
     };
 
     const handleDownloadCsv = async () => {
-        download('Compare_Buildings', getCompareBuildingTableCSVExport(buildingsData, tableHeader, topEnergyDensity));
+        download('Compare_Buildings', getCompareBuildingTableCSVExport(buildingsData, tableHeader));
     };
 
     const updateBreadcrumbStore = () => {

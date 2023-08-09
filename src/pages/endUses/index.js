@@ -7,6 +7,8 @@ import { percentageHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
+import { UserStore } from '../../store/UserStore';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { apiRequestBody } from '../../helpers/helpers';
 import { TopEndUsesWidget } from '../../sharedComponents/topEndUsesWidget';
 import { UNITS } from '../../constants/units';
@@ -19,7 +21,6 @@ import Brick from '../../sharedComponents/brick';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { buildingData } from '../../store/globalState';
 import './style.css';
-import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const EndUsesPage = () => {
     const history = useHistory();
@@ -31,6 +32,9 @@ const EndUsesPage = () => {
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
+
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
 
     const [endUsesData, setEndUsesData] = useState([]);
     const [topEndUsesData, setTopEndUsesData] = useState([]);
@@ -212,14 +216,14 @@ const EndUsesPage = () => {
             setXAxisObj(xaxisObj);
         };
 
-        const getFormattedChartDates = (days_count) => {
-            const date_format = xaxisLabelsFormat(days_count);
+        const getFormattedChartDates = (days_count, timeFormat, dateFormat) => {
+            const date_format = xaxisLabelsFormat(days_count, timeFormat, dateFormat);
             setDateFormat(date_format);
         };
 
         getXaxisForDaysSelected(daysCount);
-        getFormattedChartDates(daysCount);
-    }, [daysCount]);
+        getFormattedChartDates(daysCount, userPrefTimeFormat, userPrefDateFormat);
+    }, [daysCount, userPrefTimeFormat, userPrefDateFormat]);
 
     useEffect(() => {
         updateBreadcrumbStore();

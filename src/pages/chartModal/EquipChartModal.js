@@ -18,6 +18,7 @@ import moment from 'moment';
 import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
+import { UserStore } from '../../store/UserStore';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import Header from '../../components/Header';
@@ -25,7 +26,12 @@ import { formatConsumptionValue } from '../../helpers/explorehelpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
 import '../../sharedComponents/typography/style.scss';
-import { apiRequestBody, compareObjData } from '../../helpers/helpers';
+import {
+    apiRequestBody,
+    compareObjData,
+    dateTimeFormatForHighChart,
+    formatXaxisForHighCharts,
+} from '../../helpers/helpers';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
@@ -35,9 +41,8 @@ import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/attached.svg';
 import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
-import './styles.scss';
 import '../settings/passive-devices/styles.scss';
-import { UserStore } from '../../store/UserStore';
+import './styles.scss';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -54,6 +59,10 @@ const EquipChartModal = ({
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
@@ -334,6 +343,7 @@ const EquipChartModal = ({
                         return {
                             label: el?.equipment_type,
                             value: el?.equipment_id,
+                            end_use_name: el?.end_use_name,
                         };
                     });
 
@@ -445,7 +455,8 @@ const EquipChartModal = ({
                                     </div>
                                 </div>
                                 <div className="d-flex">
-                                    {equipData?.device_type === 'active' && (
+                                    {/* Commented below code as part of Ticket PLT-1373: Hide "Turn Off" button on equipment modal */}
+                                    {/* {equipData?.device_type === 'active' && (
                                         <div>
                                             <Button
                                                 label="Turn Off"
@@ -454,7 +465,7 @@ const EquipChartModal = ({
                                                 className="mr-4"
                                             />
                                         </div>
-                                    )}
+                                    )} */}
 
                                     <div>
                                         <Button
@@ -620,6 +631,24 @@ const EquipChartModal = ({
                                                 tooltipLabel={selectedConsumptionLabel}
                                                 data={deviceData}
                                                 dateRange={fetchDateRange(startDate, endDate)}
+                                                chartProps={{
+                                                    tooltip: {
+                                                        xDateFormat: dateTimeFormatForHighChart(
+                                                            userPrefDateFormat,
+                                                            userPrefTimeFormat
+                                                        ),
+                                                    },
+                                                    xAxis: {
+                                                        type: 'datetime',
+                                                        labels: {
+                                                            format: formatXaxisForHighCharts(
+                                                                daysCount,
+                                                                userPrefDateFormat,
+                                                                userPrefTimeFormat
+                                                            ),
+                                                        },
+                                                    },
+                                                }}
                                             />
                                         </div>
                                     )}
@@ -667,7 +696,13 @@ const EquipChartModal = ({
                                                 <Brick sizeInRem={0.25} />
                                                 <Select
                                                     placeholder="Select Equipment Type"
-                                                    options={equipmentTypeData}
+                                                    options={
+                                                        equipData?.device_type === 'active'
+                                                            ? equipmentTypeData.filter(
+                                                                  (el) => el?.end_use_name === 'Plug'
+                                                              )
+                                                            : equipmentTypeData
+                                                    }
                                                     currentValue={equipmentTypeData.filter(
                                                         (option) => option.value === equipData?.equipments_type_id
                                                     )}
@@ -1069,7 +1104,9 @@ const EquipChartModal = ({
                                                         size={Typography.Sizes.lg}
                                                         Type={Typography.Types.Light}
                                                         className="modal-right-card-title">
-                                                        Power Strip - Socket 2
+                                                        {equipData?.device_model === 'KP115'
+                                                            ? `Smart Plug - Socket 1`
+                                                            : ``}
                                                     </Typography.Subheader>
 
                                                     <Button

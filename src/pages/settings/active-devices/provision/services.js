@@ -8,9 +8,9 @@ import {
     addToSystem,
 } from '../../../../services/Network';
 
-export function fetchKasaDevices(devicePageNo, devicePageSize, bldgId, devicesearch, getParams, payload) {
+export function fetchKasaDevices(devicePageNo, devicePageSize, bldgId, devicesearch, getParams, payload, statusType) {
     const searchData = encodeURIComponent(devicesearch);
-    let params = `?building_id=${bldgId}&device_search=${searchData}&page_size=${devicePageSize}&page_no=${devicePageNo}`;
+    let params = `?building_id=${bldgId}&device_search=${searchData}&page_size=${devicePageSize}&page_no=${devicePageNo}&status_type=${statusType}`;
     if (getParams.order_by && getParams.sort_by) {
         params += `&ordered_by=${getParams.order_by}&sort_by=${getParams.sort_by}`;
     }

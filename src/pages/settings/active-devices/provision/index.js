@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useAtom } from 'jotai';
+import { useParams } from 'react-router-dom';
 import { Row, Col, Alert, Spinner } from 'reactstrap';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+
 import {
     fetchKasaDevices,
     fetchKasaAccounts,
@@ -8,15 +12,12 @@ import {
     getInsertKasaDevices,
     insertToSystem,
 } from './services';
-import { useAtom } from 'jotai';
-import { useParams } from 'react-router-dom';
+
 import { buildingData } from '../../../../store/globalState';
 import { updateBuildingStore } from '../../../../helpers/updateBuildingStore';
 import { BreadcrumbStore } from '../../../../store/BreadcrumbStore';
-import { BuildingStore } from '../../../../store/BuildingStore';
-import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import { ComponentStore } from '../../../../store/ComponentStore';
-import '../style.css';
+
 import { ReactComponent as CircleCheckSVG } from '../../../../assets/icon/circle-check.svg';
 import { ReactComponent as LinkSVG } from '../../../../assets/icon/link.svg';
 import { ReactComponent as LinkSlashSVG } from '../../../../assets/icon/link-slash.svg';
@@ -24,15 +25,19 @@ import { ReactComponent as MagnifyingGlassSVG } from '../../../../assets/icon/ma
 import { ReactComponent as CircleXmarkSVG } from '../../../../assets/icon/circle-xmark.svg';
 import { ReactComponent as SignalStreamSVG } from '../../../../assets/icon/signal-stream.svg';
 import { ReactComponent as ClockSVG } from '../../../../assets/icon/clock.svg';
-import 'react-loading-skeleton/dist/skeleton.css';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import { DataTableWidget } from '../../../../sharedComponents/dataTableWidget';
+
 import Brick from '../../../../sharedComponents/brick';
 import Typography from '../../../../sharedComponents/typography';
-import colorPalette from '../../../../assets/scss/_colors.scss';
+import { DataTableWidget } from '../../../../sharedComponents/dataTableWidget';
+
 import LinkModal from './LinkModal';
 import UnLinkModal from './UnLinkModal';
 import FindDevicesModal from './FindDevicesModal';
+
+import colorPalette from '../../../../assets/scss/_colors.scss';
+import 'react-loading-skeleton/dist/skeleton.css';
+import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
+import '../style.css';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -97,30 +102,35 @@ const DevicesSkeletonLoading = () => (
 const Provision = () => {
     //New Integrations
     const [totalItems, setTotalItems] = useState(0);
-    const [deviceTotalItems, setDeviceTotalItems] = useState(0);
+
     // Modal states
     const [showlink, setShowLink] = useState(false);
     const [checkFind, setCheckFind] = useState(true);
     const [showUnlink, setShowUnLink] = useState(false);
     const [showFind, setShowFind] = useState(false);
     const [checkedEmailFind, setCheckedEmailFind] = useState([]);
+
     const handleLinkClose = () => {
         setShowLink(false);
         setError(false);
     };
+
     const handleUnLinkClose = () => {
         setShowUnLink(false);
         setError(false);
     };
+
     const handleFindClose = () => setShowFind(false);
 
     const [linkedAccount, setLinkedAccount] = useState([]);
-    const [readyData, setReadyData] = useState([]);
     const [totalReadyData, setTotalReadyData] = useState(0);
-    const [progressData, setProgressData] = useState([]);
-    const [total, setTotal] = useState([]);
     const [isProcessing, setIsProcessing] = useState(false);
+
+    const [availableDevices, setAvailableDevices] = useState(0);
+    const [existingDevices, setExistingDevices] = useState(0);
     const [isAddProcessing, setIsAddProcessing] = useState(false);
+    const [kasaDevicesList, setKasaDevicesList] = useState([]);
+
     const [selectedStatus, setSelectedStatus] = useState(0);
     const [auth, setAuth] = useState('');
     const { bldgId } = useParams();
@@ -180,8 +190,10 @@ const Provision = () => {
         }
     };
     useEffect(() => {
-        if (Object.entries(selectedAccount).length !== 0) getKasaDevices(selectedAccount, true);
-    }, [selectedAccount, devicePageNo, devicePageSize, devicesearch, deviceSortBy]);
+        if (Object.entries(selectedAccount).length !== 0)
+            getKasaDevices(selectedAccount, true, selectedStatus === 0 ? 'Found' : 'Completed');
+    }, [selectedAccount, devicePageNo, devicePageSize, devicesearch, deviceSortBy, selectedStatus]);
+
     const handleAuthorize = async (email, password) => {
         let authData = {
             username: email,
@@ -322,7 +334,6 @@ const Provision = () => {
                     Socket: socket,
                     Remaining_Capacity: capy,
                 };
-                setTotal(arr);
                 setIsProcessing(false);
                 setKasaDevices(kDevices);
             })
@@ -331,14 +342,16 @@ const Provision = () => {
             });
     };
 
-    const getKasaDevices = async (details, path) => {
+    const getKasaDevices = async (details, path, statusType = 'Found') => {
         setIsAddProcessing(true);
+        setKasaDevicesList([]);
 
         const sorting = deviceSortBy.method &&
             deviceSortBy.name && {
                 order_by: deviceSortBy.name === undefined ? 'device_mac' : deviceSortBy.name,
                 sort_by: deviceSortBy.method === undefined ? 'ace' : deviceSortBy.method,
             };
+
         await fetchKasaDevices(
             devicePageNo,
             devicePageSize,
@@ -347,23 +360,19 @@ const Provision = () => {
             {
                 ...sorting,
             },
-            details
+            details,
+            statusType
         )
             .then((res) => {
                 const response = res?.data;
-                if (response?.success && response?.data.length !== 0) {
-                    let ready = [];
-                    let progress = [];
-
-                    response.data.forEach((ele) => {
-                        ele.action === 1 ? ready.push(ele) : progress.push(ele);
-                    });
-
+                if (response?.success) {
                     if (path) setCheckFind(false);
-                    if (response?.total_data) setTotalReadyData(response?.total_data);
-
-                    setReadyData(ready);
-                    setProgressData(progress);
+                    if (response?.data.length > 0) setKasaDevicesList(response?.data);
+                    if (response?.found) setAvailableDevices(+response?.found);
+                    if (response?.completed) setExistingDevices(+response?.completed);
+                    statusType === 'Found'
+                        ? setTotalReadyData(response?.found)
+                        : setTotalReadyData(response?.completed);
                 }
                 setIsAddProcessing(false);
             })
@@ -424,9 +433,7 @@ const Provision = () => {
 
     //Linked Devices
     const currentRowDevices = () => {
-        if (selectedStatus === 0) return progressData;
-        else if (selectedStatus === 1) return readyData;
-        else if (selectedStatus === 2) return progressData;
+        return kasaDevicesList;
     };
 
     const renderStatus = (row) => {
@@ -692,11 +699,13 @@ const Provision = () => {
                             setDevicePageNo(1);
                             setDeviceSearch(query);
                         }}
-                        onStatus={setSelectedStatus}
+                        onStatus={(value) => {
+                            setDevicePageNo(1);
+                            setSelectedStatus(value);
+                        }}
                         buttonGroupFilterOptions={[
-                            { label: `Available (${progressData.length})` },
-                            { label: `Completed (${totalReadyData})` },
-                            { label: 'Existing Devices' },
+                            { label: `Available (${availableDevices})` },
+                            { label: `Existing Devices (${existingDevices})` },
                         ]}
                         rows={currentRowDevices()}
                         disableColumnDragging={true}

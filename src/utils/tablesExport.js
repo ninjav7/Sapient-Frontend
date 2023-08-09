@@ -1,5 +1,6 @@
+import moment from 'moment';
 import { percentageHandler } from '../utils/helper';
-import { formatConsumptionValue, getBuildingName } from '../helpers/helpers';
+import { getBuildingName } from '../helpers/helpers';
 
 export const getTableHeadersList = (record) => {
     let arr = [];
@@ -178,7 +179,7 @@ export const getBuildingsTableCSVExport = (tableData, columns) => {
 
                 case 'building_size':
                     const size = tableRow['building_size'];
-                    arr.push(`${size} Sq.Ft.`);
+                    arr.push(`${size} ${columns[i].name}`);
                     break;
 
                 default:
@@ -198,35 +199,95 @@ export const getBuildingsTableCSVExport = (tableData, columns) => {
     return csv;
 };
 
-export const getCompareBuildingTableCSVExport = (tableData, columns, topEnergyDensity) => {
+export const getUsersTableCSVExport = (tableData, columns, handleLastActiveDate) => {
+    let dataToExport = [];
+
+    tableData.forEach((tableRow, index) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'name':
+                    const userName = tableRow['name'];
+                    arr.push(`${userName}`);
+                    break;
+
+                case 'email':
+                    const userEmail = tableRow['email'];
+                    arr.push(`${userEmail}`);
+                    break;
+
+                case 'role':
+                    const userRole =
+                        tableRow?.role === '' || tableRow?.permissions.length === 0
+                            ? '-'
+                            : tableRow?.permissions[0]?.permission_name;
+                    arr.push(`${userRole}`);
+                    break;
+
+                case 'status':
+                    const userStatus = tableRow['status'];
+                    arr.push(`${userStatus}`);
+                    break;
+
+                case 'last_login':
+                    const userLastLogin = tableRow['last_login'];
+                    const data = userLastLogin ? handleLastActiveDate(userLastLogin) : `Never`;
+                    arr.push(`${data}`);
+                    break;
+
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
+export const getCompareBuildingTableCSVExport = (tableData, columns) => {
     let dataToExport = [];
 
     tableData.forEach((tableRow, index) => {
         let arr = [];
         for (let i = 0; i <= columns.length - 1; i++) {
             switch (columns[i].accessor) {
+                case 'building_name':
+                    const formattedBldgName = `${tableRow?.building_name}`;
+                    arr.push(formattedBldgName);
+                    break;
+                case 'energy_density':
+                    const preparedEnergyDestiny = `${tableRow.energy_density.toFixed(2)} kWh${
+                        columns[i].name.split(`Average Consumption`)[1]
+                    }`;
+                    arr.push(preparedEnergyDestiny);
+                    break;
                 case 'total_consumption':
-                    const preparedConsumption = parseInt(tableRow.total_consumption / 1000);
+                    const preparedConsumption = Math.round(tableRow.total_consumption / 1000);
                     arr.push(`${preparedConsumption} kWh`);
                     break;
-                case 'energy_consumption':
+                case 'change':
                     const diffPercentage = percentageHandler(
-                        tableRow.energy_consumption.now,
-                        tableRow.energy_consumption.old
+                        tableRow?.energy_consumption.now,
+                        tableRow?.energy_consumption.old
                     );
                     {
-                        tableRow.energy_consumption.now >= tableRow.energy_consumption.old
+                        tableRow?.energy_consumption.now >= tableRow?.energy_consumption.old
                             ? arr.push(`+${diffPercentage}%`)
                             : arr.push(`-${diffPercentage}%`);
                     }
                     break;
-                case 'energy_density':
-                    const preparedEnergyDestiny = `${tableRow.energy_density.toFixed(2)} kWh / sq. ft.`;
-                    arr.push(preparedEnergyDestiny);
-                    break;
                 case 'square_footage':
-                    const squareFootage = formatConsumptionValue(tableRow.square_footage);
-                    arr.push(squareFootage);
+                    const squareFootage = tableRow.square_footage;
+                    arr.push(`${squareFootage} ${columns[i].name}`);
                     break;
                 default:
                     arr.push(tableRow[columns[i].accessor]);

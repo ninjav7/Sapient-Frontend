@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -49,7 +48,10 @@ const BuildingOverview = () => {
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
+
     const userPrefUnits = UserStore.useState((s) => s.unit);
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [overallBldgData, setOverallBldgData] = useState({
         total_building: 0,
@@ -121,7 +123,12 @@ const BuildingOverview = () => {
     };
 
     const toolTipFormatter = ({ value }) => {
-        return daysCount >= 182 ? moment.utc(value).format(`MMM 'YY`) : moment.utc(value).format(`MMM D 'YY @ hh:mm A`);
+        const time_format = userPrefTimeFormat === `24h` ? `HH:mm` : `hh:mm A`;
+        const date_format = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM 'YY` : `MMM D 'YY`;
+
+        return daysCount >= 182
+            ? moment.utc(value).format(`MMM 'YY`)
+            : moment.utc(value).format(`${date_format} @ ${time_format}`);
     };
 
     const fetchTrendBadgeType = (now, old) => {
@@ -163,7 +170,7 @@ const BuildingOverview = () => {
                     let obj = {
                         link: '#',
                         id: record?.equipment_id,
-                        label: record?.equipment_name,
+                        label: record?.equipment_name ? record?.equipment_name : `-`,
                         value: Math.round(record?.energy_consumption.now / 1000),
                         unit: UNITS.KWH,
                         badgePercentage: percentageHandler(
@@ -186,7 +193,7 @@ const BuildingOverview = () => {
         const payload = apiRequestBody(startDate, endDate, time_zone);
         await fetchOverallBldgData(bldgId, payload)
             .then((res) => {
-                setOverallBldgData(res.data);
+                if (res?.data) setOverallBldgData(res?.data);
             })
             .catch((error) => {});
     };
@@ -430,6 +437,22 @@ const BuildingOverview = () => {
             });
     };
 
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Building Overview',
+                    path: '/energy/building/overview',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'buildings';
+        });
+    };
+
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
             const xaxisObj = xaxisLabelsCount(days_count);
@@ -437,14 +460,14 @@ const BuildingOverview = () => {
             setXAxisObj(xaxisObj);
         };
 
-        const getFormattedChartDates = (days_count) => {
-            const date_format = xaxisLabelsFormat(days_count);
+        const getFormattedChartDates = (days_count, timeFormat, dateFormat) => {
+            const date_format = xaxisLabelsFormat(days_count, timeFormat, dateFormat);
             setDateFormat(date_format);
         };
 
         getXaxisForDaysSelected(daysCount);
-        getFormattedChartDates(daysCount);
-    }, [daysCount]);
+        getFormattedChartDates(daysCount, userPrefTimeFormat, userPrefDateFormat);
+    }, [daysCount, userPrefTimeFormat, userPrefDateFormat]);
 
     useEffect(() => {
         if (startDate === null || endDate === null) return;
@@ -467,7 +490,7 @@ const BuildingOverview = () => {
         buildingConsumptionChart(time_zone);
         getEnergyConsumptionByEquipType(time_zone);
         getEnergyConsumptionBySpaceType(time_zone);
-    }, [startDate, endDate, bldgId]);
+    }, [startDate, endDate, bldgId, userPrefUnits]);
 
     useEffect(() => {
         if (isWeatherChartVisible && bldgId) {
@@ -477,21 +500,6 @@ const BuildingOverview = () => {
     }, [isWeatherChartVisible, startDate, endDate]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Building Overview',
-                        path: '/energy/building/overview',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'buildings';
-            });
-        };
         updateBreadcrumbStore();
     }, []);
 
@@ -564,6 +572,7 @@ const BuildingOverview = () => {
                                 pageType="building"
                                 handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
                                 showRouteBtn={true}
+                                timeFormat={userPrefTimeFormat}
                             />
                         </>
                     ) : (
@@ -580,6 +589,7 @@ const BuildingOverview = () => {
                                 pageType="building"
                                 handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
                                 showRouteBtn={true}
+                                timeFormat={userPrefTimeFormat}
                             />
 
                             <div className="mt-4">

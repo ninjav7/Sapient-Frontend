@@ -644,7 +644,7 @@ const GeneralBuildingSettings = () => {
         <React.Fragment>
             <Row>
                 <Col lg={12}>
-                    <div className="d-flex justify-content-between">
+                    <div className="d-flex justify-content-between align-items-center">
                         <div>
                             <Typography.Header size={Typography.Sizes.lg}>General Building Settings</Typography.Header>
                         </div>
@@ -984,7 +984,7 @@ const GeneralBuildingSettings = () => {
                                         <Inputs
                                             type="text"
                                             label="State"
-                                            placeholder="Select State"
+                                            placeholder="Enter State"
                                             onChange={(e) => {
                                                 handleBldgSettingChanges('state', e.target.value);
                                                 localStorage.setItem(
@@ -1011,8 +1011,8 @@ const GeneralBuildingSettings = () => {
                                     userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
                                         <Inputs
                                             type="string"
-                                            label="Zip"
-                                            placeholder="Enter Zip Code"
+                                            label="Postal Code"
+                                            placeholder="Enter Postal Code"
                                             onChange={(e) => {
                                                 handleBldgSettingChanges('zip_code', e.target.value);
                                                 localStorage.setItem('generalZipCode', e.target.value);

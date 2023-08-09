@@ -4,6 +4,7 @@ import {
     deleteUtilityMeters,
     getUtilityMeters,
     getUtilityMeterSensor,
+    sensorUsageData,
     updateSensorV2,
     updateUtilityMeters,
 } from '../../../services/Network';
@@ -45,4 +46,9 @@ export function getUtilitySensorsList(bldgId, deviceId) {
 
 export function updateUtilitySensorServices(params, payload) {
     return axiosInstance.post(`${updateSensorV2}${params}`, payload).then((res) => res);
+}
+
+export function getSensorGraphDataForUtilityMonitors(payload) {
+    let params = `/${payload?.sensor_id}?building_id=${payload?.bldg_id}&date_from=${payload?.date_from}&date_to=${payload?.date_to}&timezone=${payload?.tz_info}&metric=${payload?.selected_metric}`;
+    return axiosInstance.get(`${sensorUsageData}${params}`).then((res) => res);
 }

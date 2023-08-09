@@ -1,27 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
+import Highcharts from 'highcharts';
 import { useParams } from 'react-router-dom';
 import Header from '../../components/Header';
+import { UserStore } from '../../store/UserStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours } from '../timeOfDay/services';
-import EndUseTotals from './EndUseTotals';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
+import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours } from '../timeOfDay/services';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import EndUseTotals from './EndUseTotals';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
-import { apiRequestBody } from '../../helpers/helpers';
+import { apiRequestBody, dateTimeFormatForHighChart } from '../../helpers/helpers';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import Brick from '../../sharedComponents/brick';
 import { buildingData } from '../../store/globalState';
 import './style.css';
-import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const TimeOfDay = () => {
     const { bldgId } = useParams();
     const [buildingListData] = useAtom(buildingData);
+
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [lineChartData, setLineChartData] = useState([]);
 
@@ -110,6 +115,8 @@ const TimeOfDay = () => {
 
         const dailyUsageByHour = async () => {
             const payload = apiRequestBody(startDate, endDate, time_zone);
+            setLineChartData([]);
+
             await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
                     const response = res?.data;
@@ -713,6 +720,7 @@ const TimeOfDay = () => {
                     showRouteBtn={false}
                     labelsPosition={'top'}
                     className={'h-100'}
+                    timeFormat={userPrefTimeFormat}
                 />
             </div>
 
@@ -726,6 +734,21 @@ const TimeOfDay = () => {
                 data={lineChartData}
                 tooltipUnit={metric[0].unit}
                 tooltipLabel={metric[0].label}
+                chartProps={{
+                    tooltip: {
+                        xDateFormat: userPrefTimeFormat === `12h` ? `Time: %I:%M %p` : `Time: %H:%M`,
+                    },
+                    xAxis: {
+                        labels: {
+                            formatter: function (val) {
+                                return Highcharts.dateFormat(
+                                    userPrefTimeFormat === `12h` ? `%I:%M %p` : `%H:%M`,
+                                    val.value
+                                );
+                            },
+                        },
+                    },
+                }}
             />
         </React.Fragment>
     );

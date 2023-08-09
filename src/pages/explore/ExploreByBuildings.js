@@ -11,12 +11,9 @@ import { useHistory } from 'react-router-dom';
 import { BuildingStore } from '../../store/BuildingStore';
 import { selectedBuilding, totalSelectionBuildingId } from '../../store/globalState';
 import { useAtom } from 'jotai';
-import './style.css';
-import 'moment-timezone';
-import moment from 'moment';
 import { timeZone } from '../../utils/helper';
 import Header from '../../components/Header';
-import { apiRequestBody } from '../../helpers/helpers';
+import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 import Brick from '../../sharedComponents/brick';
@@ -29,6 +26,8 @@ import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import { UserStore } from '../../store/UserStore';
+import './style.css';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -84,6 +83,10 @@ const ExploreByBuildings = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
@@ -918,6 +921,21 @@ const ExploreByBuildings = () => {
                                 tooltipLabel="Energy Consumption"
                                 data={seriesData}
                                 dateRange={fetchDateRange(startDate, endDate)}
+                                chartProps={{
+                                    tooltip: {
+                                        xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
+                                    },
+                                    xAxis: {
+                                        type: 'datetime',
+                                        labels: {
+                                            format: formatXaxisForHighCharts(
+                                                daysCount,
+                                                userPrefDateFormat,
+                                                userPrefTimeFormat
+                                            ),
+                                        },
+                                    },
+                                }}
                             />
                         </>
                     )}

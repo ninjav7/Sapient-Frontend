@@ -1,7 +1,8 @@
 import React from 'react';
+import moment from 'moment';
 import PropTypes from 'prop-types';
 import { UNITS } from '../../../constants/units';
-import moment from 'moment';
+import { UserStore } from '../../../store/UserStore';
 import StackedColumnChart from '../../../sharedComponents/stackedColumnChart/StackedColumnChart';
 import './style.scss';
 
@@ -36,12 +37,20 @@ const EndUsesTypeWidget = ({
     dateFormat,
     daysCount,
 }) => {
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+
     const formatXaxis = ({ value }) => {
         return moment.utc(value).format(`${dateFormat}`);
     };
 
     const toolTipFormatter = ({ value }) => {
-        return daysCount >= 182 ? moment.utc(value).format(`MMM 'YY`) : moment.utc(value).format(`MMM D 'YY @ hh:mm A`);
+        const time_format = userPrefTimeFormat === `24h` ? `HH:mm` : `hh:mm A`;
+        const date_format = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM 'YY` : `MMM D 'YY`;
+
+        return daysCount >= 182
+            ? moment.utc(value).format(`MMM 'YY`)
+            : moment.utc(value).format(`${date_format} @ ${time_format}`);
     };
 
     return (
