@@ -1034,9 +1034,7 @@ const EditPanel = () => {
 
                 response.forEach((record) => {
                     if (record?.type === '') record.type = 'equipment';
-                    // Configuration check is done on UI until Backend validation gets fixed
-                    // record.breaker_custom_state = fetchBreakerType(record);
-                    // record.status = fetchBreakerStatus(record);
+                    record.breaker_custom_state = fetchBreakerType(record);
 
                     // Note - Apms set as undefined to restricts Amps reading to be displayed if its 0A
                     if (record?.rated_amps === 0 || !record?.rated_amps) record.rated_amps = undefined;
