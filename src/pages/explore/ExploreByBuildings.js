@@ -920,7 +920,7 @@ const ExploreByBuildings = () => {
                                 tooltipUnit="KWh"
                                 tooltipLabel="Energy Consumption"
                                 data={seriesData}
-                                dateRange={fetchDateRange(startDate, endDate)}
+                                // dateRange={fetchDateRange(startDate, endDate)}
                                 chartProps={{
                                     tooltip: {
                                         xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),

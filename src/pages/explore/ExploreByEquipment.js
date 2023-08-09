@@ -1507,7 +1507,7 @@ const ExploreByEquipment = () => {
                         tooltipUnit={selectedUnit}
                         tooltipLabel={selectedConsumptionLabel}
                         data={seriesData}
-                        dateRange={fetchDateRange(startDate, endDate)}
+                        // dateRange={fetchDateRange(startDate, endDate)}
                         temperatureSeries={weatherData}
                         series={weatherSeries}
                         withTemp={isWeatherChartVisible}
