@@ -156,7 +156,7 @@ const ActiveDevices = () => {
                     filterType: FILTER_TYPES.MULTISELECT,
                     filterOptions: filterOptions.sensor_number.map((filterItem) => ({
                         value: filterItem,
-                        label: filterItem.split(`&%`)[0],
+                        label: filterItem,
                     })),
                     onClose: (options) => {
                         let opt = options;
