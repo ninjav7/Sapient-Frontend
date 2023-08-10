@@ -630,7 +630,7 @@ const EquipChartModal = ({
                                                 tooltipUnit={selectedUnit}
                                                 tooltipLabel={selectedConsumptionLabel}
                                                 data={deviceData}
-                                                dateRange={fetchDateRange(startDate, endDate)}
+                                                // dateRange={fetchDateRange(startDate, endDate)}
                                                 chartProps={{
                                                     tooltip: {
                                                         xDateFormat: dateTimeFormatForHighChart(

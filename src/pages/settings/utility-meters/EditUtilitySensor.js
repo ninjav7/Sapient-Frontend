@@ -266,7 +266,7 @@ const MetricsTab = (props) => {
                                     tooltipUnit={selectedUnit}
                                     tooltipLabel={selectedConsumptionLabel}
                                     data={sensorChartData}
-                                    dateRange={fetchDateRange(startDate, endDate)}
+                                    // dateRange={fetchDateRange(startDate, endDate)}
                                     chartProps={{
                                         tooltip: {
                                             xDateFormat: dateTimeFormatForHighChart(
