@@ -9,40 +9,22 @@ import { UNITS } from '../../constants/units';
 import './PortfolioKPIs.scss';
 
 const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0, userPrefUnits }) => {
+    console.log("totalBuilding",totalBuilding);
+    console.log("overalldata",overalldata);
+    console.log("userPrefUnits",userPrefUnits);
     return (
         <>
             <div className="portfolioKPIs-wrapper ml-2">
                 <KPIBasic title="Total Buildings" value={totalBuilding} />
 
                 <KPILabeled
-                    title="Total Consumption"
-                    value={formatConsumptionValue(overalldata.total_consumption.now / 1000, 0)}
+                    title={`Total Carbon Emissions`}
+                    value={formatConsumptionValue(overalldata?.total_carbon_emissions?.now / 1000, 2)}
                     badgePrecentage={percentageHandler(
-                        overalldata.total_consumption.now,
-                        overalldata.total_consumption.old
+                        overalldata.total_carbon_emissions.now,
+                        overalldata.total_carbon_emissions.old
                     )}
-                    unit={KPI_UNITS.KWH}
-                    tooltipText={
-                        daysCount > 1
-                            ? `Total energy consumption across all your buildings for the past ${daysCount} days.`
-                            : `Total energy consumption across all your buildings for the past ${daysCount} day.`
-                    }
-                    tooltipId="total-eng-cnsmp"
-                    type={
-                        overalldata.total_consumption.now >= overalldata.total_consumption.old
-                            ? TRENDS_BADGE_TYPES.UPWARD_TREND
-                            : TRENDS_BADGE_TYPES.DOWNWARD_TREND
-                    }
-                />
-
-                <KPILabeled
-                    title={`Average Consumption / ${userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`}`}
-                    value={formatConsumptionValue(overalldata?.average_energy_density?.now / 1000, 2)}
-                    badgePrecentage={percentageHandler(
-                        overalldata.average_energy_density.now,
-                        overalldata.average_energy_density.old
-                    )}
-                    unit={`${userPrefUnits === 'si' ? `${UNITS.KWH}/${UNITS.SQ_M}` : `${UNITS.KWH}/${UNITS.SQ_FT}`}`}
+                    unit={`${UNITS.ibs}/${UNITS.mwh}`}
                     tooltipText={
                         daysCount > 1
                             ? `Energy density (kWh / ${
@@ -52,9 +34,9 @@ const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0, use
                                   userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`
                               }) across all your buildings for the past ${daysCount} day.`
                     }
-                    tooltipId="avg-eng-dnty"
+                    tooltipId="total-carbon-emissions"
                     type={
-                        overalldata.average_energy_density.now >= overalldata.average_energy_density.old
+                        overalldata.total_carbon_emissions.now >= overalldata.total_carbon_emissions.old
                             ? TRENDS_BADGE_TYPES.UPWARD_TREND
                             : TRENDS_BADGE_TYPES.DOWNWARD_TREND
                     }

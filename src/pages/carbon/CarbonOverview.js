@@ -75,37 +75,6 @@ const SkeletonLoading = () => (
         </tr>
     </SkeletonTheme>
 );
-
-const DataTable = ({
-    tableHeader,
-    isLoadingBuildingData,
-    buildingsData,
-    search,
-    handleDownloadCsv,
-    setSearch,
-    totalItemsSearched,
-}) => {
-    return (
-        <DataTableWidget
-            isLoading={isLoadingBuildingData}
-            isLoadingComponent={<SkeletonLoading />}
-            id="compare-building"
-            onSearch={(query) => setSearch(query)}
-            rows={buildingsData}
-            searchResultRows={buildingsData}
-            onDownload={handleDownloadCsv}
-            headers={tableHeader}
-            buttonGroupFilterOptions={[]}
-            totalCount={() => {
-                if (search) {
-                    return totalItemsSearched;
-                }
-                return 0;
-            }}
-        />
-    );
-};
-
 const CarbonOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
@@ -127,32 +96,32 @@ const CarbonOverview = () => {
         {
             name: 'Name',
             accessor: 'building_name',
-            callbackValue: renderName,
+            callbackValue: (row) => renderName(row),
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: `Average Consumption / ${userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`}`,
             accessor: 'energy_density',
-            callbackValue: renderEnergyDensity,
+            callbackValue: (row) => renderEnergyDensity(row),
 
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Total Consumption',
             accessor: 'total_consumption',
-            callbackValue: renderTotalConsumption,
+            callbackValue: (row) => renderTotalConsumption(row),
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: '% Change',
             accessor: 'change',
-            callbackValue: renderChangeEnergy,
+            callbackValue: (row) => renderChangeEnergy(row),
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: `${userPrefUnits === 'si' ? `Sq. M.` : `Sq. Ft.`}`,
             accessor: 'square_footage',
-            callbackValue: renderSquareFootage,
+            callbackValue: (row) => renderSquareFootage(row),
             onSort: (method, name) => setSortBy({ method, name }),
         },
     ]);
@@ -174,16 +143,26 @@ const CarbonOverview = () => {
             now: 0,
             old: 0,
         },
-        average_energy_density: {
-            now: 0,
-            old: 0,
+        total_carbon_emissions: {
+            now: 10,
+            old: 8,
         },
         yearly_electric_eui: {
             now: 0,
             old: 0,
         },
     });
-
+    useEffect(() => {
+        if (userPrefUnits) {
+            let newHeaderList = tableHeader;
+            newHeaderList.forEach((record) => {
+                if (record?.accessor === 'building_size') {
+                    record.name = `${userPrefUnits === 'si' ? `Sq. M.` : `Sq. Ft.`}`;
+                }
+            });
+            setTableHeader(newHeaderList);
+        }
+    }, [userPrefUnits]);
     const [isKPIsLoading, setIsKPIsLoading] = useState(false);
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
@@ -266,18 +245,18 @@ const CarbonOverview = () => {
     useEffect(() => {
         if (startDate === null || endDate === null) return;
 
-        const portfolioOverallData = async () => {
-            setIsKPIsLoading(true);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchPortfolioOverall(payload)
-                .then((res) => {
-                    if (res?.data) setOveralldata(res?.data);
-                    setIsKPIsLoading(false);
-                })
-                .catch((error) => {
-                    setIsKPIsLoading(false);
-                });
-        };
+        // const portfolioOverallData = async () => {
+        //     setIsKPIsLoading(true);
+        //     let payload = apiRequestBody(startDate, endDate, timeZone);
+        //     await fetchPortfolioOverall(payload)
+        //         .then((res) => {
+        //             if (res?.data) setOveralldata(res?.data);
+        //             setIsKPIsLoading(false);
+        //         })
+        //         .catch((error) => {
+        //             setIsKPIsLoading(false);
+        //         });
+        // };
 
         const portfolioEndUsesData = async () => {
             setIsEnergyConsumptionChartLoading(true);
@@ -346,7 +325,7 @@ const CarbonOverview = () => {
         };
 
         portfolioBuilidingsData();
-        portfolioOverallData();
+        // portfolioOverallData();
         portfolioEndUsesData();
         energyConsumptionData();
     }, [startDate, endDate, userPrefUnits]);
@@ -357,7 +336,7 @@ const CarbonOverview = () => {
                 let newList = [
                     {
                         label: 'Carbon Overview',
-                        path: '/carbon/overview',
+                        path: '/carbon/portfolio/overview',
                         active: true,
                     },
                 ];
@@ -385,7 +364,7 @@ const CarbonOverview = () => {
                     onClick={() => {
                         updateBuildingStore(row.building_id, row.building_name, row.timezone);
                         history.push({
-                            pathname: `/energy/building/overview/${row.building_id}`,
+                            pathname: `/carbon//overview/${row.building_id}`,
                         });
                     }}>
                     {row.building_name !== '' ? row.building_name : '-'}
@@ -405,7 +384,7 @@ const CarbonOverview = () => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {`${formatConsumptionValue(row?.energy_density, 2)} ${row?.energy_density_units}`}
+                    {Math.round(row?.energy_density)} {row?.energy_density_units}
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
                 <TinyBarChart percent={getAverageValue(row.energy_density, 0, top)} />
@@ -416,7 +395,7 @@ const CarbonOverview = () => {
     const renderTotalConsumption = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {`${formatConsumptionValue(Math.round(row.total_consumption / 1000))} ${UNITS.KWH}`}
+                {Math.round(row.total_consumption / 1000)} {UNITS.KWH}
             </Typography.Body>
         );
     };
@@ -438,9 +417,9 @@ const CarbonOverview = () => {
             </div>
         );
     };
-console.log("buildingsData324432",buildingsData);
+
     const renderSquareFootage = (row) => {
-        return <div>{formatConsumptionValue(row.square_footage)}</div>;
+        return <div>{row.square_footage}</div>;
     };
 
     return (
@@ -464,17 +443,25 @@ console.log("buildingsData324432",buildingsData);
 
                     <Brick sizeInRem={1.5} />
                     <Row>
-                        <DataTable
-                            tableHeader={tableHeader}
-                            isLoadingBuildingData={isLoadingBuildingData}
-                            buildingsData={buildingsData}
-                            search={search}
-                            sortBy={sortBy}
-                            handleDownloadCsv={handleDownloadCsv}
-                            setSearch={setSearch}
-                            setSortBy={setSortBy}
-                            totalItemsSearched={totalItemsSearched}
-                        />
+                        <Col xl={12}>
+                            <DataTableWidget
+                                isLoading={isLoadingBuildingData}
+                                isLoadingComponent={<SkeletonLoading />}
+                                id="carbon-compare-building"
+                                onSearch={(query) => setSearch(query)}
+                                rows={buildingsData}
+                                searchResultRows={buildingsData}
+                                onDownload={handleDownloadCsv}
+                                headers={tableHeader}
+                                buttonGroupFilterOptions={[]}
+                                totalCount={() => {
+                                    if (search) {
+                                        return totalItemsSearched;
+                                    }
+                                    return 0;
+                                }}
+                            />
+                        </Col>
                     </Row>
                 </>
             ) : (

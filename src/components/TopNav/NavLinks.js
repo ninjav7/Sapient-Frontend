@@ -4,6 +4,7 @@ import { useAtom } from 'jotai';
 import { useLocation, useHistory } from 'react-router-dom';
 import { authProtectedRoutes } from '../../routes/index';
 import { configChildRoutes } from '../SecondaryTopNavBar/utils';
+import { ReactComponent as CarbonCo2 } from '../../assets/icon/carbon.svg';
 
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -285,7 +286,7 @@ const NavLinks = () => {
                                 )}
                                 {item.name === 'Carbon' && (
                                     <div>
-                                        <Toggleon className={`navbar-icons-style ${className}`} />
+                                        <CarbonCo2 className={`navbar-icons-style ${className}`} />
                                     </div>
                                 )}
                                 {item.name === 'Explore' && (

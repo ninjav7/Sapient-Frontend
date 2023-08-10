@@ -189,7 +189,7 @@ export const Filters = ({
 
     return (
         <div className="data-table-widget-filters">
-            {widgetProps.onSearch && <Input iconUrl={SearchSVG} onChange={handleSearchChange} placeHolder="Search" />}
+            {widgetProps.onSearch && <Input iconUrl={SearchSVG} onChange={handleSearchChange} placeholder="Search" />}
 
             {filterOptions && (
                 <Select.Multi

@@ -2,6 +2,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Route } from 'react-router-dom';
 import * as FeatherIcon from 'react-feather';
+import { ReactComponent as CarbonCo2 } from '../assets/icon/carbon.svg';
 
 //User Auth
 import { isUserAuthenticated, isSuperUserAuthenticated } from '../helpers/authUtils';
@@ -169,7 +170,7 @@ const portfolioRoutes = {
             parent: 'buildings',
         },
         {
-            path: '/carbon/overview',
+            path: '/carbon/portfolio/overview',
             name: 'End Uses',
             component: CarbonOverview,
             route: PrivateRoute,
@@ -359,12 +360,12 @@ const settingsRoutes = {
     roles: ['Admin'],
 };
 const carbonRoutes = {
-        path: '/carbon/overview',
+        path: '/carbon/portfolio/overview',
         name: 'Carbon',
         visibility: true,
         children: [
             {
-                path: '/carbon/overview',
+                path: '/carbon/portfolio/overview',
                 name: 'Carbon',
                 component: CarbonOverview,
                 route: PrivateRoute,
@@ -372,7 +373,7 @@ const carbonRoutes = {
                 visibility: true,
             },
         ],
-        icon: FeatherIcon.ToggleRight,
+        icon: <CarbonCo2/>,
         roles: ['Admin'],
     };
 
