@@ -2020,7 +2020,7 @@ const PlugRule = () => {
             isLastOffAction = false,
             lastOffTime = '',
             lastOffDay = null;
-        if (week?.length) {
+        if (!_.isEmpty(week)) {
             const copyWeekReverse = [...week];
             copyWeekReverse.length = 7;
             const reverseWeek = copyWeekReverse.reverse();
@@ -2028,7 +2028,14 @@ const PlugRule = () => {
             copyWeek.length = 7;
             for (let i = 0; i < (reverseWeek || []).length; i++) {
                 const currentDay = reverseWeek[i];
-                if (currentDay?.turnOn && !isLastOffAction) break;
+                if (currentDay?.turnOn && !isLastOffAction) {
+                    if (currentDay?.turnOn < currentDay?.turnOff) {
+                        isLastOffAction = true;
+                        lastOffDay = reverseWeek.length - i - 1;
+                        lastOffTime = currentDay.turnOff;
+                    }
+                    break;
+                }
                 if (!currentDay || !currentDay?.turnOff) continue;
                 if (currentDay?.turnOff) {
                     isLastOffAction = true;
