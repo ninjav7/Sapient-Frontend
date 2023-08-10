@@ -330,7 +330,9 @@ export const getPlugRulesTableCSVExport = (tableData, columns, buildingList) => 
                     arr.push(days.join(' '));
                     break;
                 case 'buildings':
-                    const buildingName = getBuildingName(buildingList, tableRow.buildings[0]?.building_id);
+                    const buildingName = tableRow.buildings
+                        ? getBuildingName(buildingList, tableRow.buildings[0]?.building_id)
+                        : '';
                     arr.push(buildingName);
                     break;
                 default:
