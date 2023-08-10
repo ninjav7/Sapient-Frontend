@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Row, Col } from 'reactstrap';
-import {
-    fetchExploreEquipmentList,
-    fetchExploreEquipmentChart,
-    fetchExploreFilter,
-    fetchWeatherData,
-} from '../explore/services';
+import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../explore/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -32,7 +27,6 @@ import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import Select from '../../sharedComponents/form/select';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-import { LOW_MED_HIGH } from '../../sharedComponents/common/charts/modules/contants';
 import { UserStore } from '../../store/UserStore';
 import './style.css';
 
@@ -112,7 +106,6 @@ const ExploreByEquipment = () => {
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
-    const [isExploreFilterLoading, setIsExploreFilterLoading] = useState(false);
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
     const [seriesData, setSeriesData] = useState([]);
     let entryPoint = '';
@@ -145,15 +138,13 @@ const ExploreByEquipment = () => {
     const [currentButtonId, setCurrentButtonId] = useState(0);
     const [isopened, setIsOpened] = useState(false);
     const [filtersValues, setFiltersValues] = useState({});
-    const [weatherSeries, setWeatherSeries] = useState([]);
+
     const [exploreTableData, setExploreTableData] = useState([]);
-    const [tempState, setTempState] = useState(false);
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
     const [selectedAllEquipmentId, setSelectedAllEquipmentId] = useState([]);
-    const [weatherStat, setWeatherStat] = useState({});
     const metric = [
         { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy Consumption' },
         { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power Consumption' },
@@ -162,9 +153,6 @@ const ExploreByEquipment = () => {
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
-    const [weatherData, setWeatherData] = useState(null);
-    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
-
     useEffect(() => {
         entryPoint = 'entered';
     }, []);
@@ -188,7 +176,6 @@ const ExploreByEquipment = () => {
                 selectedFilters: [],
             });
             setSeriesData([]);
-            setWeatherSeries([]);
             setConAPIFlag('');
             setPerAPIFlag('');
             setSelectedIds([]);
@@ -224,7 +211,6 @@ const ExploreByEquipment = () => {
                 arr.push(selectedIds[i]);
             }
             setSeriesData([]);
-            setWeatherSeries([]);
             setSelectedAllEquipmentId(arr);
         } else {
             setSelectedEquipmentId('');
@@ -269,7 +255,6 @@ const ExploreByEquipment = () => {
                     if (entryPoint === 'entered') {
                         totalEquipmentId.length = 0;
                         setSeriesData([]);
-                        setWeatherSeries([]);
                     }
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
                     topCon.current = responseData.data[0].consumption.now;
@@ -377,10 +362,6 @@ const ExploreByEquipment = () => {
                 return item.id !== equip?.equipment_id;
             });
             setSeriesData(arr1);
-            let arr2 = weatherSeries.filter(function (item) {
-                return item.id !== equip?.equipment_id;
-            });
-            setWeatherSeries(arr2);
             setEquipIdNow('');
             setDevice_type('');
         }
@@ -441,7 +422,7 @@ const ExploreByEquipment = () => {
 
     useEffect(() => {
         (async () => {
-            setIsExploreFilterLoading(true);
+            setIsExploreDataLoading(true);
             const filters = await fetchExploreFilter(bldgId, startDate, endDate, timeZone, [], [], [], [], 0, 0, '');
 
             if (filters?.data?.data !== null) {
@@ -484,7 +465,7 @@ const ExploreByEquipment = () => {
                 set_maxPerValue(0);
             }
 
-            setIsExploreFilterLoading(false);
+            setIsExploreDataLoading(false);
         })();
     }, [startDate, endDate, bldgId]);
 
@@ -1138,10 +1119,8 @@ const ExploreByEquipment = () => {
                     legendName = arr[0].equipment_name + ' - ' + sg;
                 }
                 let NulledData = [];
-                let WeatherDataarr = [];
                 if (selectedConsumption === 'rmsCurrentMilliAmps') {
                     NulledData = seriesData;
-                    WeatherDataarr = weatherSeries;
                     for (let i = 0; i < data.length; i++) {
                         let sensorData = [];
                         data[i].data.map((ele) => {
@@ -1159,19 +1138,11 @@ const ExploreByEquipment = () => {
                             data: sensorData,
                             id: arr[0].equipment_id,
                         };
-                        let rcdToIns = {
-                            name: `${legendName} - Sensor ${data[i].sensor_name}`,
-                            data: sensorData,
-                            id: arr[0].equipment_id,
-                            type: 'line',
-                            lineWidth: 2,
-                            showInLegend: true,
-                        };
-                        WeatherDataarr.push(rcdToIns);
+
                         NulledData.push(recordToInsert);
                     }
+
                     setSeriesData(NulledData);
-                    setWeatherSeries(WeatherDataarr);
                 } else {
                     data.map((ele) => {
                         if (ele?.consumption === '') {
@@ -1185,17 +1156,7 @@ const ExploreByEquipment = () => {
                         data: NulledData,
                         id: arr[0].equipment_id,
                     };
-                    let rcdToIns = {
-                        name: `${legendName}`,
-                        data: NulledData,
-                        id: arr[0].equipment_id,
-                        type: 'line',
-                        lineWidth: 2,
-                        showInLegend: true,
-                    };
-
                     setSeriesData([...seriesData, recordToInsert]);
-                    setWeatherSeries([...weatherSeries, rcdToIns]);
                 }
 
                 setSelectedEquipmentId('');
@@ -1203,12 +1164,7 @@ const ExploreByEquipment = () => {
             })
             .catch((error) => {});
     };
-    useEffect(() => {
-        if (weatherSeries.length > 0) {
-            let check = weatherSeries.filter((serie) => serie.type === LOW_MED_HIGH);
-            if (check.length === 0) weatherSeries.push(weatherStat);
-        }
-    }, [weatherSeries]);
+
     useEffect(() => {
         if (selectedEquipmentId === '') {
             return;
@@ -1235,16 +1191,10 @@ const ExploreByEquipment = () => {
         arr1 = seriesData.filter(function (item) {
             return item.id !== removeEquipmentId;
         });
-        let arr2 = [];
-        arr2 = weatherSeries.filter(function (item) {
-            return item.id !== removeEquipmentId;
-        });
         setSeriesData(arr1);
-        setWeatherSeries(arr2);
     }, [removeEquipmentId]);
 
     const dataarr = [];
-    const weatherdataarr = [];
     let ct = 0;
 
     const fetchExploreAllChartData = async (id) => {
@@ -1290,21 +1240,12 @@ const ExploreByEquipment = () => {
                             data: sensorData,
                             id: arr[0].equipment_id,
                         };
-                        let rcdToIns = {
-                            name: `${legendName} - Sensor ${data[i].sensor_name}`,
-                            data: sensorData,
-                            id: arr[0].equipment_id,
-                            type: 'line',
-                            lineWidth: 2,
-                            showInLegend: true,
-                        };
+
                         dataarr.push(recordToInsert);
-                        weatherdataarr.push(rcdToIns);
                     }
 
                     if (selectedIds.length === ct) {
                         setSeriesData(dataarr);
-                        setWeatherSeries(weatherdataarr);
                         ct = 0;
                     }
                 } else {
@@ -1319,21 +1260,10 @@ const ExploreByEquipment = () => {
                         name: legendName,
                         data: NulledData,
                         id: arr[0].equipment_id,
-                        type: 'line',
-                    };
-                    let rcdToIns = {
-                        name: `${legendName}`,
-                        data: NulledData,
-                        id: arr[0].equipment_id,
-                        type: 'line',
-                        lineWidth: 2,
-                        showInLegend: true,
                     };
                     dataarr.push(recordToInsert);
-                    weatherdataarr.push(rcdToIns);
                     if (selectedIds.length === dataarr.length) {
                         setSeriesData(dataarr);
-                        setWeatherSeries(weatherdataarr);
                     }
                 }
             })
@@ -1361,7 +1291,6 @@ const ExploreByEquipment = () => {
         }
         if (allEquipmentData.length === exploreTableData.length) {
             setSeriesData(allEquipmentData);
-            setWeatherSeries(allEquipmentData);
         }
     }, [allEquipmentData]);
 
@@ -1445,40 +1374,6 @@ const ExploreByEquipment = () => {
         window.scrollTo(0, 0);
     }, [pageNo, pageSize]);
 
-    useEffect(() => {
-        if (isWeatherChartVisible && bldgId) {
-            handleWeatherChart();
-        }
-    }, [isWeatherChartVisible]);
-
-    const handleWeatherChart = async () => {
-        let params = `?building_id=${bldgId}&consumption=${selectedConsumption}&timezone=${timeZone}&date_from=${encodeURIComponent(
-            startDate
-        )}&date_to=${encodeURIComponent(endDate)}`;
-        await fetchWeatherData(params)
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    const tempData = [];
-                    response.forEach((record) => {
-                        tempData.push([record?.min_temp, record?.temp, record?.max_temp]);
-                    });
-                    if (tempData.length !== 0) {
-                        let obj = {};
-                        obj['pointStart'] = new Date(startDate).getTime();
-                        obj['pointInterval'] = 16 * 3600 * 1000;
-                        obj['data'] = tempData;
-                        setWeatherData(obj);
-                    }
-                } else {
-                    setWeatherData(null);
-                }
-            })
-            .catch((error) => {
-                setWeatherData(null);
-            });
-    };
-
     return (
         <>
             <Row className="ml-2 mr-2 explore-filters-style">
@@ -1508,22 +1403,11 @@ const ExploreByEquipment = () => {
                         tooltipLabel={selectedConsumptionLabel}
                         data={seriesData}
                         // dateRange={fetchDateRange(startDate, endDate)}
-                        temperatureSeries={weatherData}
-                        series={weatherSeries}
-                        withTemp={isWeatherChartVisible}
-                        upperLegendsProps={{
-                            weather: {
-                                onClick: ({ event, props, withTemp }) => {
-                                    setWeatherChartVisibility(withTemp);
-                                },
-                                isAlwaysShown: false,
-                            },
-                        }}
                         chartProps={{
                             navigator: {
                                 outlineWidth: 0,
-                                adaptToUpdatedData: false,
-                                stickToMax: true,
+                                // adaptToUpdatedData: false,
+                                // stickToMax: true,
                             },
                             plotOptions: {
                                 series: {
