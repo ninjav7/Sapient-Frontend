@@ -267,7 +267,7 @@ const ActiveDevices = () => {
         )
             .then((res) => {
                 const response = res?.data;
-                if (response?.data.length !== 0) setActiveDeviceData(response?.data);
+                if (response?.data) setActiveDeviceData(response?.data);
                 if (response?.total_data) setTotalItems(response?.total_data);
                 setIsDeviceProcessing(false);
             })
@@ -317,7 +317,7 @@ const ActiveDevices = () => {
     }, []);
 
     useEffect(() => {
-        if (bldgId && buildingListData.length !== 0) {
+        if (bldgId && buildingListData && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             if (bldgObj?.building_id)
                 updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
