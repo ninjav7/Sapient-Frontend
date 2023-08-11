@@ -7,6 +7,8 @@ import Typography from '../../sharedComponents/typography';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { FormGroup, Button } from 'reactstrap';
 import { ReactComponent as Exclamation } from '../../assets/icon/circleExclamation.svg';
+import { Notification } from '../../sharedComponents/notification';
+import Brick from '../../sharedComponents/brick';
 
 const LinkExpired = (props) => {
     const history = useHistory();
@@ -24,9 +26,7 @@ const LinkExpired = (props) => {
     }, []);
 
     useEffect(() => {
-        if (redirectToLogin) {
-            history.push('/account/login');
-        }
+        if (redirectToLogin) history.push('/account/login');
     }, [redirectToLogin]);
 
     return (
@@ -41,31 +41,34 @@ const LinkExpired = (props) => {
                                         <LogoSVG className="logoDesign" />
                                     </a>
                                     <Typography.Header size={Typography.Sizes.sm} className="text-muted">
-                                        Expired Link
+                                        {`Expired Link`}
                                     </Typography.Header>
                                 </div>
                                 <>
-                                    <div className="errorBlock">
-                                        <Typography.Subheader size={Typography.Sizes.md} className="errorText">
-                                            <Exclamation /> &nbsp;&nbsp; Link Expired
-                                        </Typography.Subheader>
-                                    </div>
+                                    <Notification
+                                        type={Notification.Types.error}
+                                        component={Notification.ComponentTypes.alert}
+                                        title={`Link Expired`}
+                                        isShownCloseBtn={false}
+                                    />
 
-                                    <Typography.Subheader size={Typography.Sizes.md} className="text-mute mt-4">
-                                        The link that led you here is expired. Please contact your Portfolio
-                                        Administrator to have a new one sent.
+                                    <Brick sizeInRem={2} />
+
+                                    <Typography.Subheader size={Typography.Sizes.md} className="text-mute">
+                                        {`The link that re-directed you this page has expired. Please contact your Portfolio
+                                        Administrator to request a fresh link.`}
                                     </Typography.Subheader>
 
-                                    <FormGroup className="form-group mt-5 pt-4 mb-0 text-center">
-                                        <Button
-                                            color="primary"
-                                            className="btn-block"
-                                            onClick={async () => {
-                                                setRedirectToLogin(true);
-                                            }}>
-                                            Return to Login
-                                        </Button>
-                                    </FormGroup>
+                                    <Brick sizeInRem={2} />
+
+                                    <Button
+                                        color="primary"
+                                        className="btn-block"
+                                        onClick={async () => {
+                                            setRedirectToLogin(true);
+                                        }}>
+                                        {`Return to Login`}
+                                    </Button>
                                 </>
                             </Col>
                         </>
