@@ -5,7 +5,6 @@ import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import Switch from 'react-switch';
 import { useAtom } from 'jotai';
 import classNames from 'classnames';
-import { BuildingStore } from '../../store/BuildingStore';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ButtonGroup } from '../../sharedComponents/buttonGroup';
@@ -19,7 +18,6 @@ import { useNotification } from '../../sharedComponents/notification/useNotifica
 import { Notification } from '../../sharedComponents/notification/Notification';
 import colors from '../../assets/scss/_colors.scss';
 import { UserStore } from '../../store/UserStore';
-import { fetchBuildingsList } from '../../services/buildings';
 import { UNITS } from '../../constants/units';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { getSocketsForPlugRulePageTableCSVExport } from '../../utils/tablesExport';
@@ -429,7 +427,7 @@ const PlugRule = () => {
         if (!isFetchedPlugRulesData) {
             fetchPlugRulesData();
         }
-    }, [currentData.name, isFetchedPlugRulesData]);
+    }, [isFetchedPlugRulesData]);
 
     useEffect(() => {
         updateBreadcrumbStore();
@@ -1225,53 +1223,53 @@ const PlugRule = () => {
                 sort_by: sortByLinkedTab.method,
             };
         isLoadingLinkedRef.current = true;
+        activeBuildingId &&
+            (await getUnlinkedSocketRules(
+                pageSizeLinked,
+                pageNoLinked,
+                activeBuildingId,
+                equipmentTypeFilterStringLinked,
+                macTypeFilterStringLinked,
+                locationTypeFilterString,
+                sensorTypeFilterStringLinked,
+                floorTypeFilterStringLinked,
+                spaceTypeFilterStringLinked,
+                spaceTypeTypeFilterStringLinked,
+                assignedRuleFilterStringLinked,
+                tagsFilterStringLinked,
+                true,
+                {
+                    ...sorting,
+                },
+                true,
+                ruleId,
+                searchLinked
+            )
+                .then((res) => {
+                    isLoadingLinkedRef.current = false;
+                    let response = res.data;
+                    let linkedIds = [];
 
-        await getUnlinkedSocketRules(
-            pageSizeLinked,
-            pageNoLinked,
-            activeBuildingId,
-            equipmentTypeFilterStringLinked,
-            macTypeFilterStringLinked,
-            locationTypeFilterString,
-            sensorTypeFilterStringLinked,
-            floorTypeFilterStringLinked,
-            spaceTypeFilterStringLinked,
-            spaceTypeTypeFilterStringLinked,
-            assignedRuleFilterStringLinked,
-            tagsFilterStringLinked,
-            true,
-            {
-                ...sorting,
-            },
-            true,
-            ruleId,
-            searchLinked
-        )
-            .then((res) => {
-                isLoadingLinkedRef.current = false;
-                let response = res.data;
-                let linkedIds = [];
+                    if (res.success) {
+                        setTotalSocket(response.total_data);
+                    }
 
-                if (res.success) {
-                    setTotalSocket(response.total_data);
-                }
-
-                response.data.forEach((record) => {
-                    linkedIds.push(record.id);
-                });
-                if (response.data.length > 0) {
-                    setCheckedToUnlinkAll(true);
-                }
-                setCheckedToUnlinkAll(false);
-                setSelectedInitialyIds(linkedIds || []);
-                setLinkedSocketsTabData(response.data);
-                // if (!isSetInitiallySocketsCountLinked) {
-                setCountLinkedSockets(response.total_data);
-                setIsSetInitiallySocketsCountLinked(true);
-                // }
-                setTotalItemsLinked(response?.total_data);
-            })
-            .catch((error) => {});
+                    response.data.forEach((record) => {
+                        linkedIds.push(record.id);
+                    });
+                    if (response.data.length > 0) {
+                        setCheckedToUnlinkAll(true);
+                    }
+                    setCheckedToUnlinkAll(false);
+                    setSelectedInitialyIds(linkedIds || []);
+                    setLinkedSocketsTabData(response.data);
+                    // if (!isSetInitiallySocketsCountLinked) {
+                    setCountLinkedSockets(response.total_data);
+                    setIsSetInitiallySocketsCountLinked(true);
+                    // }
+                    setTotalItemsLinked(response?.total_data);
+                })
+                .catch((error) => {}));
     };
 
     useEffect(() => {
@@ -1288,12 +1286,9 @@ const PlugRule = () => {
             fetchUnLinkedSocketRules();
         }
     }, [
-        ruleId,
-        currentData.name,
         activeBuildingId,
         equipmentTypeFilterStringUnlinked,
         macTypeFilterStringUnlinked,
-        locationTypeFilterString,
         locationTypeFilterString,
         sensorTypeFilterStringUnlinked,
         floorTypeFilterStringUnlinked,
@@ -1307,7 +1302,6 @@ const PlugRule = () => {
         pageNoUnlinked,
         pageSizeUnlinked,
     ]);
-
     useEffect(() => {
         if (ruleId === null) {
             return;
@@ -1317,8 +1311,6 @@ const PlugRule = () => {
             fetchLinkedSocketRules();
         }
     }, [
-        ruleId,
-        currentData.name,
         activeBuildingId,
         equipmentTypeFilterStringLinked,
         locationTypeFilterString,
