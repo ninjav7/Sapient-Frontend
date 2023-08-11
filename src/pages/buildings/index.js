@@ -15,6 +15,7 @@ import {
     fetchEndUseByBuilding,
     fetchEnergyConsumptionByEquipType,
     fetchEnergyConsumptionBySpaceType,
+    fetchEnergyConsumptionByFloor,
 } from '../buildings/services';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -104,12 +105,15 @@ const BuildingOverview = () => {
 
     const [equipTypeData, setEquipTypeData] = useState([]);
     const [spaceTypeData, setSpaceTypeData] = useState([]);
+    const [floorData, setFloorData] = useState([]);
 
     const [isFetchingEquipType, setFetchingEquipType] = useState(false);
     const [isFetchingSpaceType, setFetchingSpaceType] = useState(false);
+    const [isFetchingFloor, setFetchingFloor] = useState(false);
 
     const [totalBldgUsageByEquipType, setTotalBldgUsageByEquipType] = useState(0);
     const [totalBldgUsageBySpaceType, setTotalBldgUsageBySpaceType] = useState(0);
+    const [totalBldgUsageByFloor, setTotalBldgUsageByFloor] = useState(0);
 
     //EquipChartModel
     const [equipmentFilter, setEquipmentFilter] = useState({});
@@ -437,6 +441,31 @@ const BuildingOverview = () => {
             });
     };
 
+    const getEnergyConsumptionByFloor = async (time_zone) => {
+        setFetchingFloor(true);
+
+        const payload = {
+            bldg_id: bldgId,
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: time_zone,
+        };
+
+        await fetchEnergyConsumptionByFloor(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.data?.total_building_usage)
+                    setTotalBldgUsageByFloor(response?.data?.total_building_usage);
+                if (response?.success && response?.data?.space_type_usage.length !== 0) {
+                    setFloorData(response?.data?.space_type_usage);
+                }
+                setFetchingFloor(false);
+            })
+            .catch(() => {
+                setFetchingFloor(false);
+            });
+    };
+
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
@@ -490,6 +519,7 @@ const BuildingOverview = () => {
         buildingConsumptionChart(time_zone);
         getEnergyConsumptionByEquipType(time_zone);
         getEnergyConsumptionBySpaceType(time_zone);
+        getEnergyConsumptionByFloor(time_zone);
     }, [startDate, endDate, bldgId, userPrefUnits]);
 
     useEffect(() => {
@@ -652,6 +682,15 @@ const BuildingOverview = () => {
                             isFetching={isFetchingSpaceType}
                             rows={spaceTypeData}
                             totalBldgUsage={totalBldgUsageBySpaceType}
+                        />
+                    </div>
+                    <div className="mt-4">
+                        <EnergyConsumptionChart
+                            title="Energy Consumption by Floor"
+                            subTitle="Office-Hours and After-Hours Energy Used"
+                            isFetching={isFetchingFloor}
+                            rows={floorData}
+                            totalBldgUsage={totalBldgUsageByFloor}
                         />
                     </div>
                 </div>
