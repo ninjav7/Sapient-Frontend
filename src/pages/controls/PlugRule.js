@@ -287,7 +287,7 @@ const PlugRule = () => {
             },
         },
     ]);
-    const initialSortingState = { name: 'equipment_type_name', method: 'ace' };
+    const initialSortingState = { name: '', method: '' };
     const [hoursNew, setHoursNew] = useState([]);
 
     const [selectedInitialyIds, setSelectedInitialyIds] = useState([]);
@@ -474,7 +474,7 @@ const PlugRule = () => {
                     from_date.day(el);
                 }
                 timeWithHours = from_date.set({ hour: i, minute: 0 });
-                res.push({ x: timeWithHours, y: 0 });
+                res.push({ x: moment.utc(timeWithHours).unix() * 1000, y: 0 });
             }
         });
         let response = [{ name: `Average Energy demand`, data: res }];
