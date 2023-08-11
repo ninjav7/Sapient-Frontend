@@ -200,7 +200,7 @@ const ForgetPassword = () => {
                                             <Brick sizeInRem={emailError ? 1.25 : 1.75} />
 
                                             <Button className="sub-button" color="primary" onClick={handleValidSubmit}>
-                                                {isLoading ? `Resetting ...` : `Reset Password`}
+                                                {isLoading ? `Resetting Password ...` : `Reset Password`}
                                             </Button>
                                         </form>
                                     </>

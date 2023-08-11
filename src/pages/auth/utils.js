@@ -7,3 +7,8 @@ export const TermsAndConditionDescription3 = `Please take the time to review the
 export const TermsAndConditionDescription4 = `To accept the terms and conditions and proceed with creating your account, simply check the designated box below. By doing so, you confirm that you have read and understood our terms and conditions and agree to abide by them. Your acceptance signifies your commitment to maintaining a safe and respectful environment for all users of our website.`;
 
 export const TermsAndConditionDescription5 = `Thank you for taking the time to review and accept our terms and conditions. We look forward to having you as a valued member of our online community!`;
+
+export const compareStrings = (str1, str2) => {
+    const result = str1.localeCompare(str2);
+    return result === 0 ? true : false;
+};
