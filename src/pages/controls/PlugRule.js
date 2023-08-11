@@ -124,17 +124,8 @@ const indexOfDay = {
 const formatAverageData = (data) => {
     const res = [];
     data.forEach((el) => {
-        const today = moment();
-        const from_date = today.startOf('week').startOf('isoWeek');
-        if (el.day_of_week === 'Sunday') {
-            from_date.day(el.day_of_week).add(1, 'weeks');
-        } else {
-            from_date.day(el.day_of_week);
-        }
-        const formattedHourFromBackend = el.hour.split(':');
-        const timeWithHours = from_date.set('hour', formattedHourFromBackend[0]);
-
-        res.push({ x: timeWithHours.unix() * 1000, y: el.consumption });
+        const today = moment.utc(el.time_stamp);
+        res.push({ x: today.unix() * 1000, y: el.consumption });
     });
     return res;
 };
@@ -497,6 +488,7 @@ const PlugRule = () => {
             await getGraphDataRequest(selectedInitialyIds, currentData.id).then((res) => {
                 if (res && res?.data.length) {
                     const formattedData = formatAverageData(res.data);
+                    setRawLineChartData(res.data);
                     let response = [{ name: `Average Energy demand`, data: formattedData }];
                     setLineChartData(response);
                 }
@@ -513,7 +505,7 @@ const PlugRule = () => {
 
     const [macTypeFilterStringUnlinked, setMacTypeFilterStringUnlinked] = useState('');
     const [macTypeFilterStringLinked, setMacTypeFilterStringLinked] = useState('');
-
+    const [rawLineChartData, setRawLineChartData] = useState([]);
     const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
 
     const [floorTypeFilterStringUnlinked, setFloorTypeFilterStringUnlinked] = useState('');
@@ -2102,10 +2094,9 @@ const PlugRule = () => {
             });
         return res;
     };
-
     const getDateRange = () => {
-        const minDate = moment().startOf('isoweek');
-        const maxDate = moment().endOf('isoweek');
+        const minDate = moment.utc(rawLineChartData[0]?.time_stamp);
+        const maxDate = moment.utc(rawLineChartData[rawLineChartData?.length - 1]?.time_stamp);
         maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
         minDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
         return {
