@@ -456,8 +456,8 @@ const BuildingOverview = () => {
                 const response = res?.data;
                 if (response?.data?.total_building_usage)
                     setTotalBldgUsageByFloor(response?.data?.total_building_usage);
-                if (response?.success && response?.data?.space_type_usage.length !== 0) {
-                    setFloorData(response?.data?.space_type_usage);
+                if (response?.success && response?.data?.floor_usage.length !== 0) {
+                    setFloorData(response?.data?.floor_usage);
                 }
                 setFetchingFloor(false);
             })
