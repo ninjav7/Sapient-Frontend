@@ -26,6 +26,8 @@ import Button from '../../sharedComponents/button/Button';
 import colorPalette from '../../assets/scss/_colors.scss';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 import TermsAndConditions from './terms-conditions/TermsAndConditions';
+import { compareStrings } from './utils';
+import { Notification } from '../../sharedComponents/notification';
 import './auth.scss';
 
 const Confirm = (props) => {
@@ -35,6 +37,8 @@ const Confirm = (props) => {
     const [passwordResetSuccessful, setPasswordResetSuccessful] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [titleText, setTitleText] = useState('Set New Password');
+    const [updateStatus, setUpdateStatus] = useState('');
+    const [detailMessage, setDetailMessage] = useState('');
     const [showReset, setShowReset] = useState(false);
     const [redirectToLogin, setRedirectToLogin] = useState(false);
     const [matchError, setMatchError] = useState(false);
@@ -90,23 +94,28 @@ const Confirm = (props) => {
     const checkLinkValidityFunc = async () => {
         try {
             setIsLoading(true);
-            let headers = {
+            const headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                Authorization: `Bearer ${props.match.params.token}`,
+                Authorization: `Bearer ${props?.match?.params?.token}`,
             };
             await axios.get(`${BaseUrl}${checkLinkValidity}`, { headers }).then((res) => {
-                let response = res.data;
-                if (response.success === false) {
-                    history.push('/account/link-expired');
-                } else {
-                }
+                const response = res?.data;
+                if (!response.success) history.push('/account/link-expired');
                 setIsLoading(false);
             });
         } catch (error) {
             history.push('/account/link-expired');
             setIsLoading(false);
         }
+    };
+
+    const notifyUser = (notifyType, notifyMessage) => {
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = notifyMessage;
+            s.notificationType = notifyType;
+        });
     };
 
     const handleValidSubmit = async () => {
@@ -126,7 +135,7 @@ const Confirm = (props) => {
             }
             try {
                 setIsLoading(true);
-                let headers = {
+                const headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                     Authorization: `Bearer ${props.match.params.token}`,
@@ -142,19 +151,26 @@ const Confirm = (props) => {
                         { headers }
                     )
                     .then((res) => {
-                        let response = res.data;
-                        if (response.success === false) {
-                            UserStore.update((s) => {
-                                s.showNotification = true;
-                                s.notificationMessage = response?.message;
-                                s.notificationType = 'error';
-                            });
-                        } else {
-                            setPasswordResetSuccessful(true);
+                        const response = res?.data;
+                        let message = '';
+                        if (response?.success) {
                             setTitleText('Success');
-                            setShowReset(true);
+                            message = response?.message ? response?.message : `Password set successfully!`;
+                            notifyUser(Notification.Types.success, message);
+                            setDetailMessage(`You have successfully set your password. You may now log in to the
+                            Sapient Energy Portal.`);
+                        } else {
+                            setTitleText('Failed');
+                            message = response?.message ? response?.message : `Failed to update password.`;
+                            notifyUser(Notification.Types.error, message);
+                            setDetailMessage(
+                                `Password Change Failed: Unfortunately, we were unable to update your password. Please make another attempt or reach out to Administrator for assistance.`
+                            );
                         }
                         setIsLoading(false);
+                        setUpdateStatus(message);
+                        setPasswordResetSuccessful(true);
+                        setShowReset(true);
                     });
             } catch (error) {
                 setIsLoading(false);
@@ -238,14 +254,9 @@ const Confirm = (props) => {
     }, [charErr, numberErr, lowerCaseErr, upperCaseErr, specialCharErr]);
 
     useEffect(() => {
-        if (cpassword.length >= 8) {
-            if (cpassword === password) {
-                setMatchErr('success');
-            } else {
-                setMatchErr('error');
-            }
-        }
-    }, [cpassword]);
+        compareStrings(password, cpassword) ? setMatchErr(`success`) : setMatchErr(`error`);
+    }, [password, cpassword]);
+
     const handleLogout = () => {
         ComponentStore.update((s) => {
             s.parent = '';
@@ -277,30 +288,33 @@ const Confirm = (props) => {
                                         </div>
                                         {showReset ? (
                                             <>
-                                                <div className="successBlock">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        className="successText">
-                                                        <Check /> &nbsp;&nbsp; Password Set
-                                                    </Typography.Subheader>
-                                                </div>
-                                                <Typography.Subheader
-                                                    size={Typography.Sizes.md}
-                                                    className="text-mute mt-4">
-                                                    You have successfully set your password. You may now log in to the
-                                                    Sapient Energy Portal.
+                                                <Notification
+                                                    type={
+                                                        titleText === 'Success'
+                                                            ? Notification.Types.success
+                                                            : Notification.Types.error
+                                                    }
+                                                    component={Notification.ComponentTypes.alert}
+                                                    title={updateStatus}
+                                                    isShownCloseBtn={false}
+                                                />
+
+                                                <Brick sizeInRem={2} />
+
+                                                <Typography.Subheader size={Typography.Sizes.md} className="text-mute">
+                                                    {detailMessage}
                                                 </Typography.Subheader>
 
-                                                <FormGroup className="form-group mt-5 pt-4 mb-0 text-center">
-                                                    <Button
-                                                        label={'Go to Login'}
-                                                        size={Button.Sizes.lg}
-                                                        type={Button.Type.primary}
-                                                        className="sub-button"
-                                                        onClick={async () => {
-                                                            setRedirectToLogin(true);
-                                                        }}></Button>
-                                                </FormGroup>
+                                                <Brick sizeInRem={2} />
+
+                                                <Button
+                                                    label={'Go to Login'}
+                                                    size={Button.Sizes.lg}
+                                                    type={Button.Type.primary}
+                                                    className="sub-button"
+                                                    onClick={async () => {
+                                                        setRedirectToLogin(true);
+                                                    }}></Button>
                                             </>
                                         ) : (
                                             <>
@@ -572,32 +586,42 @@ const Confirm = (props) => {
                                                     <div className="columnField ml-3">
                                                         <div className="rowField">
                                                             <div className="mr-2">
-                                                                {matchErr == '' ? (
+                                                                {cpassword === '' ? (
                                                                     <CheckMinusMark
                                                                         className="mt-2"
                                                                         style={{ height: '1.2rem', width: '1.2rem' }}
                                                                     />
-                                                                ) : matchErr === 'success' ? (
-                                                                    <Check
-                                                                        className="mt-2"
-                                                                        style={{ height: '1.2rem', width: '1.2rem' }}
-                                                                    />
                                                                 ) : (
-                                                                    <CheckXmark
-                                                                        className="mt-2"
-                                                                        style={{ height: '1.2rem', width: '1.2rem' }}
-                                                                    />
+                                                                    <>
+                                                                        {matchErr === 'success' ? (
+                                                                            <Check
+                                                                                className="mt-2"
+                                                                                style={{
+                                                                                    height: '1.2rem',
+                                                                                    width: '1.2rem',
+                                                                                }}
+                                                                            />
+                                                                        ) : (
+                                                                            <CheckXmark
+                                                                                className="mt-2"
+                                                                                style={{
+                                                                                    height: '1.2rem',
+                                                                                    width: '1.2rem',
+                                                                                }}
+                                                                            />
+                                                                        )}
+                                                                    </>
                                                                 )}
                                                             </div>
                                                             <div>
                                                                 <Typography.Subheader
                                                                     size={Typography.Sizes.md}
                                                                     className={`mt-2 ${
-                                                                        matchErr === 'error'
+                                                                        matchErr === 'error' && cpassword !== ''
                                                                             ? `text-mute-error`
                                                                             : `text-mute`
                                                                     }`}>
-                                                                    {matchErr === 'error'
+                                                                    {matchErr === 'error' && cpassword !== ''
                                                                         ? `Error: Password must match`
                                                                         : `Password must match`}
                                                                 </Typography.Subheader>
