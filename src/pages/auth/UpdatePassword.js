@@ -110,6 +110,14 @@ const Confirm = (props) => {
         }
     };
 
+    const notifyUser = (notifyType, notifyMessage) => {
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = notifyMessage;
+            s.notificationType = notifyType;
+        });
+    };
+
     const handleValidSubmit = async () => {
         let ct = 0;
         if (password === '') {
@@ -147,14 +155,16 @@ const Confirm = (props) => {
                         let message = '';
                         if (response?.success) {
                             setTitleText('Success');
-                            message = response?.message ? response?.message : `Password has been successfully set!`;
+                            message = response?.message ? response?.message : `Password set successfully!`;
+                            notifyUser(Notification.Types.success, message);
                             setDetailMessage(`You have successfully set your password. You may now log in to the
                             Sapient Energy Portal.`);
                         } else {
                             setTitleText('Failed');
                             message = response?.message ? response?.message : `Failed to update password.`;
+                            notifyUser(Notification.Types.error, message);
                             setDetailMessage(
-                                `Password Change Failed: Unfortunately, we were unable to update your password. Please contact with Administrator for assistance.`
+                                `Password Change Failed: Unfortunately, we were unable to update your password. Please make another attempt or reach out to Administrator for assistance.`
                             );
                         }
                         setIsLoading(false);
