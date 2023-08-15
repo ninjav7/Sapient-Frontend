@@ -45,8 +45,9 @@ const LineChart = (props) => {
         isLoadingData,
         unitInfo,
         chartProps,
+        customDownloadCsvHandler,
     } = props;
-    
+
     useEffect(() => {
         const handleResize = () => {
             const width = wrapperRef.current?.offsetWidth;
@@ -78,7 +79,11 @@ const LineChart = (props) => {
     };
 
     const downloadCSV = () => {
-        chartComponentRef.current.chart.downloadCSV();
+        if (customDownloadCsvHandler) {
+            customDownloadCsvHandler();
+        } else {
+            chartComponentRef.current.chart.downloadCSV();
+        }
     };
 
     const downloadPNG = () => {
