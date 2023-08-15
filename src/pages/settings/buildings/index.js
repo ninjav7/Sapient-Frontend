@@ -284,14 +284,15 @@ const Buildings = () => {
         await fetchBuildingList(search, sort_by, ordered_by)
             .then((res) => {
                 const responseData = res.data;
-                responseData.length !== 0 &&
+                if (responseData && responseData.length !== 0) {
                     responseData.forEach((el) => {
                         el.building_size = Math.round(handleUnitConverstion(el?.building_size, user_pref_units));
                     });
-                download(
-                    `Buildings_${new Date().toISOString().split('T')[0]}`,
-                    getBuildingsTableCSVExport(responseData, tableHeader)
-                );
+                    download(
+                        `Buildings_${new Date().toISOString().split('T')[0]}`,
+                        getBuildingsTableCSVExport(responseData, tableHeader)
+                    );
+                }
             })
             .catch((error) => {});
     };

@@ -624,7 +624,7 @@ const IndividualUtilityMeter = () => {
         await getUtilitySensorsList(bldg_id, device_id)
             .then((res) => {
                 const response = res?.data;
-                if (response?.success && response?.data.length !== 0) {
+                if (response?.success && response?.data) {
                     setSensorsList(response?.data);
                 }
                 setFetchingSensors(false);

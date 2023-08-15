@@ -212,18 +212,20 @@ const MetricsTab = (props) => {
                             </Typography.Subheader>
                         </div>
 
-                        <div className="w-50">
-                            <Typography.Subheader className="gray-550" size={Typography.Sizes.md}>
-                                {`Peak kW YTD`}
-                            </Typography.Subheader>
-                            <Brick sizeInRem={0.25} />
-                            <Typography.Header className="d-inline-block mr-1" size={Typography.Sizes.lg}>
-                                {`194`}
-                            </Typography.Header>
-                            <Typography.Subheader className="d-inline-block" size={Typography.Sizes.sm}>
-                                <span>{`kWh @ 9/23 14:24`}</span>
-                            </Typography.Subheader>
-                        </div>
+                        {utilityMeterObj?.device_type !== `pulse counter` && (
+                            <div className="w-50">
+                                <Typography.Subheader className="gray-550" size={Typography.Sizes.md}>
+                                    {`Peak kW YTD`}
+                                </Typography.Subheader>
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Header className="d-inline-block mr-1" size={Typography.Sizes.lg}>
+                                    {`194`}
+                                </Typography.Header>
+                                <Typography.Subheader className="d-inline-block" size={Typography.Sizes.sm}>
+                                    <span>{`kWh @ 9/23 14:24`}</span>
+                                </Typography.Subheader>
+                            </div>
+                        )}
                     </div>
 
                     <Brick sizeInRem={2} />
@@ -266,7 +268,7 @@ const MetricsTab = (props) => {
                                     tooltipUnit={selectedUnit}
                                     tooltipLabel={selectedConsumptionLabel}
                                     data={sensorChartData}
-                                    dateRange={fetchDateRange(startDate, endDate)}
+                                    // dateRange={fetchDateRange(startDate, endDate)}
                                     chartProps={{
                                         tooltip: {
                                             xDateFormat: dateTimeFormatForHighChart(

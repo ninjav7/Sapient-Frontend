@@ -211,8 +211,8 @@ export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel
             ordinal: false,
             gridLineWidth: plotBands ? 0 : 1,
             alternateGridColor: plotBands ? undefined : colors.primaryGray100,
-            max: dateRange.maxDate,
-            min: dateRange.minDate,
+            max: dateRange?.maxDate,
+            min: dateRange?.minDate,
             type: 'datetime',
             labels: {
                 format: '{value: %e %b `%y}',

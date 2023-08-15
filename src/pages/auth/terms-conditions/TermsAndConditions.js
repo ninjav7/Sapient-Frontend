@@ -22,7 +22,7 @@ const TermsAndConditions = (props) => {
         const contentHeight = Math.round(modalBody?.scrollHeight);
         const clientHeight = Math.round(modalBody?.clientHeight);
 
-        const isBottom = scrollPosition + clientHeight >= contentHeight;
+        const isBottom = scrollPosition + clientHeight + 10 >= contentHeight;
         setIsScrolledToBottom(isBottom);
     };
 

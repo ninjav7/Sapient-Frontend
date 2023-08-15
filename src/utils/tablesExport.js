@@ -160,6 +160,23 @@ export const getSocketsForPlugRulePageTableCSVExport = (tableData, columns) => {
     });
     return csv;
 };
+export const getAverageEnergyDemandCSVExport = (chartData, columns) => {
+    let dataToExport = [];
+    chartData.forEach((tableRow, index) => {
+        let arr = [];
+        for (let i = 0; i <= columns.length - 1; i++) {
+            arr.push(tableRow[columns[i].accessor]);
+        }
+        dataToExport.push(arr);
+    });
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
 
 export const getBuildingsTableCSVExport = (tableData, columns) => {
     let dataToExport = [];
@@ -330,7 +347,9 @@ export const getPlugRulesTableCSVExport = (tableData, columns, buildingList) => 
                     arr.push(days.join(' '));
                     break;
                 case 'buildings':
-                    const buildingName = getBuildingName(buildingList, tableRow.buildings[0]?.building_id);
+                    const buildingName = tableRow.buildings
+                        ? getBuildingName(buildingList, tableRow.buildings[0]?.building_id)
+                        : '';
                     arr.push(buildingName);
                     break;
                 default:

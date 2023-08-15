@@ -86,10 +86,22 @@ const ActiveDevices = () => {
     const [hardWareString, setHardWareString] = useState([]);
     const [filterOptions, setFilterOptions] = useState([]);
 
+    const modifySensorFilter = (fractions) => {
+        const numerators = [];
+
+        for (let fraction of fractions) {
+            const parts = fraction.split('/');
+            const numerator = parseInt(parts[0]);
+            numerators.push(numerator);
+        }
+
+        return numerators.join('+');
+    };
+
     const getFilters = async () => {
         let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
         let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
-        let sensorSelected = encodeURIComponent(sensorString.join('+'));
+        let sensorSelected = modifySensorFilter(sensorString);
         let firmwareSelected = encodeURIComponent(firmWareString.join('+'));
         let hardwareSelected = encodeURIComponent(hardWareString.join('+'));
 
@@ -255,7 +267,7 @@ const ActiveDevices = () => {
         )
             .then((res) => {
                 const response = res?.data;
-                if (response?.data.length !== 0) setActiveDeviceData(response?.data);
+                if (response?.data) setActiveDeviceData(response?.data);
                 if (response?.total_data) setTotalItems(response?.total_data);
                 setIsDeviceProcessing(false);
             })
@@ -305,7 +317,7 @@ const ActiveDevices = () => {
     }, []);
 
     useEffect(() => {
-        if (bldgId && buildingListData.length !== 0) {
+        if (bldgId && buildingListData && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             if (bldgObj?.building_id)
                 updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);

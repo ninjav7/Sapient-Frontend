@@ -5,7 +5,6 @@ import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import Switch from 'react-switch';
 import { useAtom } from 'jotai';
 import classNames from 'classnames';
-import { BuildingStore } from '../../store/BuildingStore';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ButtonGroup } from '../../sharedComponents/buttonGroup';
@@ -19,10 +18,9 @@ import { useNotification } from '../../sharedComponents/notification/useNotifica
 import { Notification } from '../../sharedComponents/notification/Notification';
 import colors from '../../assets/scss/_colors.scss';
 import { UserStore } from '../../store/UserStore';
-import { fetchBuildingsList } from '../../services/buildings';
 import { UNITS } from '../../constants/units';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
-import { getSocketsForPlugRulePageTableCSVExport } from '../../utils/tablesExport';
+import { getSocketsForPlugRulePageTableCSVExport, getAverageEnergyDemandCSVExport } from '../../utils/tablesExport';
 import { userPermissionData } from '../../store/globalState';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useHistory, useParams } from 'react-router-dom';
@@ -124,17 +122,8 @@ const indexOfDay = {
 const formatAverageData = (data) => {
     const res = [];
     data.forEach((el) => {
-        const today = moment();
-        const from_date = today.startOf('week').startOf('isoWeek');
-        if (el.day_of_week === 'Sunday') {
-            from_date.day(el.day_of_week).add(1, 'weeks');
-        } else {
-            from_date.day(el.day_of_week);
-        }
-        const formattedHourFromBackend = el.hour.split(':');
-        const timeWithHours = from_date.set('hour', formattedHourFromBackend[0]);
-
-        res.push({ x: timeWithHours.unix() * 1000, y: el.consumption });
+        const today = moment.utc(el.time_stamp);
+        res.push({ x: today.unix() * 1000, y: el.consumption });
     });
     return res;
 };
@@ -296,7 +285,7 @@ const PlugRule = () => {
             },
         },
     ]);
-    const initialSortingState = { name: 'equipment_type_name', method: 'ace' };
+    const initialSortingState = { name: '', method: '' };
     const [hoursNew, setHoursNew] = useState([]);
 
     const [selectedInitialyIds, setSelectedInitialyIds] = useState([]);
@@ -305,6 +294,7 @@ const PlugRule = () => {
     const [showConfirmSelectionToUnlink, setShowConfirmSelectionToUnlink] = useState(false);
     const [showConfirmSelectionToLink, setShowConfirmSelectionToLink] = useState(false);
     const [fetchedSelectedIds, setFetchedSelectedIds] = useState([]);
+    const [dateRangeAverageData, setDateRangeAverageData] = useState({});
     const [sortByLinkedTab, setSortByLinkedTab] = useState(initialSortingState);
     const [sortByUnlinkedTab, setSortByUnlinkedTab] = useState(initialSortingState);
 
@@ -417,7 +407,7 @@ const PlugRule = () => {
     };
     useEffect(() => {
         calculateOffHoursPlots();
-    }, [preparedScheduleData, currentData]);
+    }, [preparedScheduleData, currentData, rawLineChartData, lineChartData, dateRangeAverageData]);
     useEffect(() => {
         generateHours();
         if (ruleId == 'create-plug-rule') {
@@ -438,7 +428,7 @@ const PlugRule = () => {
         if (!isFetchedPlugRulesData) {
             fetchPlugRulesData();
         }
-    }, [currentData.name, isFetchedPlugRulesData]);
+    }, [isFetchedPlugRulesData]);
 
     useEffect(() => {
         updateBreadcrumbStore();
@@ -483,7 +473,7 @@ const PlugRule = () => {
                     from_date.day(el);
                 }
                 timeWithHours = from_date.set({ hour: i, minute: 0 });
-                res.push({ x: timeWithHours, y: 0 });
+                res.push({ x: moment.utc(timeWithHours).unix() * 1000, y: 0 });
             }
         });
         let response = [{ name: `Average Energy demand`, data: res }];
@@ -492,17 +482,6 @@ const PlugRule = () => {
     };
 
     const [lineChartData, setLineChartData] = useState(initialLineChartData());
-    const getGraphData = async () => {
-        if (selectedInitialyIds.length) {
-            await getGraphDataRequest(selectedInitialyIds, currentData.id).then((res) => {
-                if (res && res?.data.length) {
-                    const formattedData = formatAverageData(res.data);
-                    let response = [{ name: `Average Energy demand`, data: formattedData }];
-                    setLineChartData(response);
-                }
-            });
-        }
-    };
     useEffect(() => {
         if (currentData?.building_id?.length && currentData?.building_id !== 'create-plug-rule') {
             setActiveBuildingId(currentData.building_id);
@@ -513,7 +492,7 @@ const PlugRule = () => {
 
     const [macTypeFilterStringUnlinked, setMacTypeFilterStringUnlinked] = useState('');
     const [macTypeFilterStringLinked, setMacTypeFilterStringLinked] = useState('');
-
+    const [rawLineChartData, setRawLineChartData] = useState([]);
     const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
 
     const [floorTypeFilterStringUnlinked, setFloorTypeFilterStringUnlinked] = useState('');
@@ -542,11 +521,26 @@ const PlugRule = () => {
     const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
     const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
 
+    const getGraphData = async () => {
+        if (selectedInitialyIds.length) {
+            await getGraphDataRequest(selectedInitialyIds, currentData.id).then((res) => {
+                if (res && res?.data) {
+                    const formattedData = formatAverageData(res.data);
+                    setRawLineChartData(res.data);
+                    let response = [{ name: `Average Energy demand`, data: formattedData }];
+                    getDateRange(res.data);
+                    setLineChartData(response);
+                }
+            });
+        }
+    };
+
     useEffect(() => {
         if (selectedInitialyIds.length) {
             getGraphData();
             fetchEstimateSensorSavings();
         }
+        getDateRange([]);
     }, [selectedInitialyIds]);
 
     useEffect(() => {
@@ -958,6 +952,22 @@ const PlugRule = () => {
             addOptions();
         }
     }, [allData]);
+
+    const averageEnergyDemandExportHeader = [
+        {
+            name: 'Day of week',
+            accessor: 'day_of_week',
+        },
+        {
+            name: 'Hour',
+            accessor: 'hour',
+        },
+        {
+            name: 'Energy',
+            accessor: 'consumption',
+        },
+    ];
+
     const headerPropsLinkedTab = [
         {
             name: 'Equipment Type',
@@ -1233,53 +1243,53 @@ const PlugRule = () => {
                 sort_by: sortByLinkedTab.method,
             };
         isLoadingLinkedRef.current = true;
+        activeBuildingId &&
+            (await getUnlinkedSocketRules(
+                pageSizeLinked,
+                pageNoLinked,
+                activeBuildingId,
+                equipmentTypeFilterStringLinked,
+                macTypeFilterStringLinked,
+                locationTypeFilterString,
+                sensorTypeFilterStringLinked,
+                floorTypeFilterStringLinked,
+                spaceTypeFilterStringLinked,
+                spaceTypeTypeFilterStringLinked,
+                assignedRuleFilterStringLinked,
+                tagsFilterStringLinked,
+                true,
+                {
+                    ...sorting,
+                },
+                true,
+                ruleId,
+                searchLinked
+            )
+                .then((res) => {
+                    isLoadingLinkedRef.current = false;
+                    let response = res.data;
+                    let linkedIds = [];
 
-        await getUnlinkedSocketRules(
-            pageSizeLinked,
-            pageNoLinked,
-            activeBuildingId,
-            equipmentTypeFilterStringLinked,
-            macTypeFilterStringLinked,
-            locationTypeFilterString,
-            sensorTypeFilterStringLinked,
-            floorTypeFilterStringLinked,
-            spaceTypeFilterStringLinked,
-            spaceTypeTypeFilterStringLinked,
-            assignedRuleFilterStringLinked,
-            tagsFilterStringLinked,
-            true,
-            {
-                ...sorting,
-            },
-            true,
-            ruleId,
-            searchLinked
-        )
-            .then((res) => {
-                isLoadingLinkedRef.current = false;
-                let response = res.data;
-                let linkedIds = [];
+                    if (res.success) {
+                        setTotalSocket(response.total_data);
+                    }
 
-                if (res.success) {
-                    setTotalSocket(response.total_data);
-                }
-
-                response.data.forEach((record) => {
-                    linkedIds.push(record.id);
-                });
-                if (response.data.length > 0) {
-                    setCheckedToUnlinkAll(true);
-                }
-                setCheckedToUnlinkAll(false);
-                setSelectedInitialyIds(linkedIds || []);
-                setLinkedSocketsTabData(response.data);
-                // if (!isSetInitiallySocketsCountLinked) {
-                setCountLinkedSockets(response.total_data);
-                setIsSetInitiallySocketsCountLinked(true);
-                // }
-                setTotalItemsLinked(response?.total_data);
-            })
-            .catch((error) => {});
+                    response.data.forEach((record) => {
+                        linkedIds.push(record.id);
+                    });
+                    if (response.data.length > 0) {
+                        setCheckedToUnlinkAll(true);
+                    }
+                    setCheckedToUnlinkAll(false);
+                    setSelectedInitialyIds(linkedIds || []);
+                    setLinkedSocketsTabData(response.data);
+                    // if (!isSetInitiallySocketsCountLinked) {
+                    setCountLinkedSockets(response.total_data);
+                    setIsSetInitiallySocketsCountLinked(true);
+                    // }
+                    setTotalItemsLinked(response?.total_data);
+                })
+                .catch((error) => {}));
     };
 
     useEffect(() => {
@@ -1296,12 +1306,9 @@ const PlugRule = () => {
             fetchUnLinkedSocketRules();
         }
     }, [
-        ruleId,
-        currentData.name,
         activeBuildingId,
         equipmentTypeFilterStringUnlinked,
         macTypeFilterStringUnlinked,
-        locationTypeFilterString,
         locationTypeFilterString,
         sensorTypeFilterStringUnlinked,
         floorTypeFilterStringUnlinked,
@@ -1315,7 +1322,6 @@ const PlugRule = () => {
         pageNoUnlinked,
         pageSizeUnlinked,
     ]);
-
     useEffect(() => {
         if (ruleId === null) {
             return;
@@ -1325,8 +1331,6 @@ const PlugRule = () => {
             fetchLinkedSocketRules();
         }
     }, [
-        ruleId,
-        currentData.name,
         activeBuildingId,
         equipmentTypeFilterStringLinked,
         locationTypeFilterString,
@@ -2014,13 +2018,21 @@ const PlugRule = () => {
             return null;
         }
     };
+
+    const handleDownloadCsvAverageEnergyDemand = () => {
+        download(
+            `Average Energy Demand-${new Date().toISOString().split('T')[0]}`,
+            getAverageEnergyDemandCSVExport(rawLineChartData, averageEnergyDemandExportHeader)
+        );
+    };
+
     const getFirstLastOffPeriodDayAndTime = (week) => {
         let firstOnDay,
             firstOnTime,
             isLastOffAction = false,
             lastOffTime = '',
             lastOffDay = null;
-        if (week?.length) {
+        if (!_.isEmpty(week)) {
             const copyWeekReverse = [...week];
             copyWeekReverse.length = 7;
             const reverseWeek = copyWeekReverse.reverse();
@@ -2028,7 +2040,22 @@ const PlugRule = () => {
             copyWeek.length = 7;
             for (let i = 0; i < (reverseWeek || []).length; i++) {
                 const currentDay = reverseWeek[i];
-                if (currentDay?.turnOn && !isLastOffAction) break;
+                if (currentDay?.turnOn && !isLastOffAction) {
+                    if (currentDay?.turnOn < currentDay?.turnOff) {
+                        isLastOffAction = true;
+                        lastOffDay = reverseWeek.length - i - 1;
+                        lastOffTime = currentDay.turnOff;
+                    }
+                    break;
+                }
+                if (currentDay?.turnOn && isLastOffAction) {
+                    if (currentDay?.turnOn < currentDay?.turnOff) {
+                        isLastOffAction = true;
+                        lastOffDay = reverseWeek.length - i - 1;
+                        lastOffTime = currentDay.turnOff;
+                    }
+                    break;
+                }
                 if (!currentDay || !currentDay?.turnOff) continue;
                 if (currentDay?.turnOff) {
                     isLastOffAction = true;
@@ -2095,16 +2122,26 @@ const PlugRule = () => {
             });
         return res;
     };
-
-    const getDateRange = () => {
-        const minDate = moment().startOf('isoweek');
-        const maxDate = moment().endOf('isoweek');
-        maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
-        minDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-        return {
-            maxDate: maxDate.unix() * 1000,
-            minDate: minDate.unix() * 1000,
-        };
+    const getDateRange = (rawLineChartData) => {
+        if (!_.isEmpty(rawLineChartData)) {
+            const minDate = moment.utc(rawLineChartData[0].time_stamp);
+            const maxDate = moment.utc(rawLineChartData[rawLineChartData.length - 1].time_stamp);
+            maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
+            minDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+            setDateRangeAverageData({
+                maxDate: maxDate.unix() * 1000,
+                minDate: minDate.unix() * 1000,
+            });
+        } else {
+            const minDate = moment().utc().startOf('isoweek');
+            const maxDate = moment().utc().endOf('isoweek');
+            maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
+            minDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+            setDateRangeAverageData({
+                maxDate: maxDate.unix() * 1000,
+                minDate: minDate.unix() * 1000,
+            });
+        }
     };
     const calculateOffHoursPlots = () => {
         let weekWithSchedule = [];
@@ -2222,7 +2259,7 @@ const PlugRule = () => {
         }
         const theSameDayOffLater = getOffPeriodsForOffTimeLater(weekWithSchedule);
         result.push(...theSameDayOffLater);
-        getOffperiodsWithRealDate(result, getDateRange());
+        getOffperiodsWithRealDate(result);
     };
 
     function getDatesInRange(startDate, stopDate) {
@@ -2246,7 +2283,8 @@ const PlugRule = () => {
         return offDayArray;
     };
 
-    const getOffperiodsWithRealDate = (result, dateRange) => {
+    const getOffperiodsWithRealDate = (result) => {
+        const dateRange = dateRangeAverageData;
         const maxdateString = new Date(dateRange.maxDate);
         const mindateString = new Date(dateRange.minDate);
         const rangeDates = getDatesInRange(mindateString, maxdateString);
@@ -2263,9 +2301,9 @@ const PlugRule = () => {
                     } else if (weekDayOffSchedule?.nextOnDay < weekDayOffSchedule?.currentOffDay) {
                         timeDiff = 6 - weekDayOffSchedule?.currentOffDay + weekDayOffSchedule?.nextOnDay + 1;
                     }
-                    const nextTurnOnDay = moment(day, 'YYYY-MM-DD').add(timeDiff, 'days').format('YYYY-MM-DD');
-                    const from = moment(day + ' ' + weekDayOffSchedule?.currentOffTime).unix();
-                    const to = moment(nextTurnOnDay + ' ' + weekDayOffSchedule?.nextOnTime).unix();
+                    const nextTurnOnDay = moment.utc(day, 'YYYY-MM-DD').add(timeDiff, 'days').format('YYYY-MM-DD');
+                    const from = moment.utc(day + ' ' + weekDayOffSchedule?.currentOffTime).unix();
+                    const to = moment.utc(nextTurnOnDay + ' ' + weekDayOffSchedule?.nextOnTime).unix();
                     offPeriods.push({
                         type: LineChart.PLOT_BANDS_TYPE.off_hours,
                         from: from * 1000,
@@ -2486,9 +2524,12 @@ const PlugRule = () => {
                                             stops: [[1, 'rgba(255,255,255,.01)']],
                                         },
                                     }))}
-                                    dateRange={getDateRange()}
+                                    dateRange={dateRangeAverageData}
                                     height={200}
                                     plotBands={offHoursPlots}
+                                    customDownloadCsvHandler={() => {
+                                        handleDownloadCsvAverageEnergyDemand();
+                                    }}
                                     title={'Average Energy Demand'}
                                     subTitle={'Last 2 Weeks'}
                                     plotBandsLegends={[
@@ -2509,7 +2550,7 @@ const PlugRule = () => {
                                     }}
                                     chartProps={{
                                         tooltip: {
-                                            xDateFormat: is24Format ? '%A, %H:%M' : '%A, %I:%M %p',
+                                            // xDateFormat: is24Format ? '%A, %H:%M' : '%A, %I:%M %p',
                                         },
                                         xAxis: {
                                             labels: {

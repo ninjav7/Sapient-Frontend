@@ -37,6 +37,7 @@ import { DangerZone } from '../../../sharedComponents/dangerZone';
 import DeletePanel from './DeletePanel';
 import UngroupAlert from './UngroupAlert';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import './styles.scss';
 
 const EditPanel = () => {
@@ -462,11 +463,11 @@ const EditPanel = () => {
 
                         if (
                             (sourceBreakerObj?.type === 'equipment' &&
-                                sourceBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured) ||
+                                sourceBreakerObj?.breaker_state !== Breaker.Type.notConfigured) ||
                             (targetBreakerObj?.type === 'equipment' &&
-                                targetBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured) ||
+                                targetBreakerObj?.breaker_state !== Breaker.Type.notConfigured) ||
                             (thirdBreakerObj?.type === 'equipment' &&
-                                thirdBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured)
+                                thirdBreakerObj?.breaker_state !== Breaker.Type.notConfigured)
                         ) {
                             const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because only an unconfigured breaker may be grouped with Unlabeled breaker. `;
                             setAlertMessage(alertMsg);
@@ -509,11 +510,11 @@ const EditPanel = () => {
                     if (uniqueBreakerTypes.length === 2 && uniqueBreakerTypes.includes('equipment')) {
                         if (
                             (sourceBreakerObj?.type === 'equipment' &&
-                                sourceBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured) ||
+                                sourceBreakerObj?.breaker_state !== Breaker.Type.notConfigured) ||
                             (targetBreakerObj?.type === 'equipment' &&
-                                targetBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured) ||
+                                targetBreakerObj?.breaker_state !== Breaker.Type.notConfigured) ||
                             (thirdBreakerObj?.type === 'equipment' &&
-                                thirdBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured)
+                                thirdBreakerObj?.breaker_state !== Breaker.Type.notConfigured)
                         ) {
                             const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because only unconfigured breaker can be grouped together.`;
                             setAlertMessage(alertMsg);
@@ -549,9 +550,9 @@ const EditPanel = () => {
                         sourceBreakerObj?.type === 'equipment'
                     ) {
                         const breakersState = [
-                            sourceBreakerObj?.breaker_custom_state,
-                            targetBreakerObj?.breaker_custom_state,
-                            thirdBreakerObj?.breaker_custom_state,
+                            sourceBreakerObj?.breaker_state,
+                            targetBreakerObj?.breaker_state,
+                            thirdBreakerObj?.breaker_state,
                         ];
 
                         // When all 3 breakers are of not-configured state
@@ -835,7 +836,7 @@ const EditPanel = () => {
                 // When source breaker is of type equipment and in not configured state
                 if (
                     sourceBreakerObj?.type === 'equipment' &&
-                    sourceBreakerObj?.breaker_custom_state === Breaker.Type.notConfigured
+                    sourceBreakerObj?.breaker_state === Breaker.Type.notConfigured
                 ) {
                     setIsLoading(true);
                     setLinking(true);
@@ -846,7 +847,7 @@ const EditPanel = () => {
                 // When target breaker is of type equipment and in not configured state
                 if (
                     targetBreakerObj?.type === 'equipment' &&
-                    targetBreakerObj?.breaker_custom_state === Breaker.Type.notConfigured
+                    targetBreakerObj?.breaker_state === Breaker.Type.notConfigured
                 ) {
                     setIsLoading(true);
                     setLinking(true);
@@ -896,7 +897,7 @@ const EditPanel = () => {
 
                     if (
                         sourceBreakerObj?.type === 'equipment' &&
-                        sourceBreakerObj?.breaker_custom_state === Breaker.Type.notConfigured
+                        sourceBreakerObj?.breaker_state === Breaker.Type.notConfigured
                     ) {
                         setIsLoading(true);
                         setLinking(true);
@@ -920,7 +921,7 @@ const EditPanel = () => {
 
                     if (
                         targetBreakerObj?.type === 'equipment' &&
-                        targetBreakerObj?.breaker_custom_state === Breaker.Type.notConfigured
+                        targetBreakerObj?.breaker_state === Breaker.Type.notConfigured
                     ) {
                         setIsLoading(true);
                         setLinking(true);
@@ -1033,9 +1034,7 @@ const EditPanel = () => {
 
                 response.forEach((record) => {
                     if (record?.type === '') record.type = 'equipment';
-                    // Configuration check is done on UI until Backend validation gets fixed
                     record.breaker_custom_state = fetchBreakerType(record);
-                    record.status = fetchBreakerStatus(record);
 
                     // Note - Apms set as undefined to restricts Amps reading to be displayed if its 0A
                     if (record?.rated_amps === 0 || !record?.rated_amps) record.rated_amps = undefined;
@@ -1248,8 +1247,16 @@ const EditPanel = () => {
     return (
         <React.Fragment>
             <div className="d-flex justify-content-between">
-                <div>
-                    <Typography.Header size={Typography.Sizes.lg}>Edit Panel</Typography.Header>
+                <div className="d-flex align-items-center ">
+                    <Typography.Header size={Typography.Sizes.lg}>{originalPanelObj?.panel_name}</Typography.Header>
+                    {originalPanelObj?.flag_count && originalPanelObj?.flag_count !== 0 ? (
+                        <StatusBadge
+                            text={`${originalPanelObj?.flag_count}`}
+                            type={StatusBadge.Type.warning}
+                            className="flag-container ml-2"
+                            textStyle="flag-text"
+                        />
+                    ) : null}
                 </div>
                 {isPanelFetched ? (
                     <Skeleton count={1} height={35} width={135} />
@@ -1401,7 +1408,7 @@ const EditPanel = () => {
                     if (breakerObj) openBreakerConfigModal();
                 }}
                 callBackBreakerProps={({ breakerProps, breakerData }) => {
-                    const type = fetchBreakerType(breakerData);
+                    const type = breakerData?.breaker_state;
                     const equipmentName = breakerData?.equipment_links[0]?.name;
                     const status = breakerData?.status;
                     const isLoading = breakerData?.id === breakerUpdateId;

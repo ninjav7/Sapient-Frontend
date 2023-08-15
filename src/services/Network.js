@@ -26,6 +26,7 @@ export const builidingPeak = '/api/energy/building/peak';
 export const builidingEquipments = '/api/energy/building/equipment';
 export const energyConsumptionByEquipmentType = '/api/v2/metrics/equipmenttype';
 export const energyConsumptionBySpaceType = '/api/v2/metrics/spacetype';
+export const energyConsumptionByFloor = '/api/v2/metrics/floor';
 
 // time of day
 export const builidingHourly = '/api/energy/time_of_day/hourly';
