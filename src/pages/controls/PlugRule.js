@@ -225,7 +225,7 @@ const PlugRule = () => {
     const [linkedSocketsTabData, setLinkedSocketsTabData] = useState([]);
     const [unlinkedSocketsTabData, setUnlinkedSocketsTabData] = useState([]);
 
-    const [isDeletting, setIsDeletting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [allData, setAllData] = useState([]);
     const [allLinkedRuleData, setAllLinkedRuleData] = useState([]);
     const [pageSizeLinked, setPageSizeLinked] = useState(20);
@@ -449,7 +449,7 @@ const PlugRule = () => {
     };
 
     const deletePlugRule = async () => {
-        setIsDeletting(true);
+        setIsDeleting(true);
         await deletePlugRuleRequest(ruleId).then((res) => {
             if (res.status) {
                 history.push({
@@ -2550,7 +2550,7 @@ const PlugRule = () => {
                                     }}
                                     chartProps={{
                                         tooltip: {
-                                            // xDateFormat: is24Format ? '%A, %H:%M' : '%A, %I:%M %p',
+                                            xDateFormat: is24Format ? '%A, %H:%M' : '%A, %I:%M %p',
                                         },
                                         xAxis: {
                                             labels: {
@@ -2865,7 +2865,7 @@ const PlugRule = () => {
                         onClick={() => setShowDeleteModal(false)}
                     />
                     <Button
-                        label={isDeletting ? 'Deletting' : 'Delete'}
+                        label={isDeleting ? 'Deleting' : 'Delete'}
                         size={Button.Sizes.lg}
                         type={Button.Type.primaryDistructive}
                         onClick={() => {
@@ -2898,7 +2898,7 @@ const PlugRule = () => {
                     />
 
                     <Button
-                        label={isDeletting ? 'Deletting' : 'Delete'}
+                        label={isDeleting ? 'Deleting' : 'Delete'}
                         size={Button.Sizes.lg}
                         type={Button.Type.primaryDistructive}
                         onClick={() => {
