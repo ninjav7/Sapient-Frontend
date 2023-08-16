@@ -8,7 +8,7 @@ import {
     getExploreFilter,
     getWeather,
 } from '../../services/Network';
-import { convertToFootage } from '../settings/general-settings/utils';
+import { convertToFootage, convertToMeters, handleUnitConverstion } from '../settings/general-settings/utils';
 
 //Explore By Building
 export function fetchExploreBuildingList(
@@ -42,8 +42,8 @@ export function fetchExploreBuildingList(
         };
     if (sqftAPIFlag !== '')
         obj['sq_ft_range'] = {
-            gte: userPrefUnits === 'si' ? parseInt(convertToFootage(minSqftValue)) : minSqftValue,
-            lte: userPrefUnits === 'si' ? parseInt(convertToFootage(maxSqftValue)) : maxSqftValue,
+            gte: minSqftValue,
+            lte: maxSqftValue,
         };
     if (selectedBuildingType.length !== 0) obj['building_type'] = selectedBuildingType;
     return axiosInstance.post(`${getExploreBuildingList}${params}`, obj).then((res) => {

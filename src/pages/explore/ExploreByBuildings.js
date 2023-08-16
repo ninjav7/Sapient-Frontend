@@ -189,8 +189,7 @@ const ExploreByBuildings = () => {
                 let responseData = res?.data;
                 if (responseData.length !== 0) {
                     responseData.forEach((el) => {
-                        el.square_footage = Math.round(handleUnitConverstion(el.square_footage, userPrefUnits));
-                        el.square_footage_units = `${userPrefUnits === 'si' ? `Sq.M.` : `Sq.Ft.`}`;
+                        el.user_pref_units = userPrefUnits;
                     });
                 }
                 setAllBuildingList(responseData);
@@ -205,19 +204,22 @@ const ExploreByBuildings = () => {
                     return false;
                 });
                 setBuildingTypeList(uniqueBuildingTypes);
+                const squareFootage = Math.round(handleUnitConverstion(responseData[0].square_footage, userPrefUnits));
                 let topConsumption = responseData[0].consumption.now;
                 let bottomConsumption = responseData[0].consumption.now;
                 let topChange = responseData[0].consumption.change;
                 let bottomChange = responseData[0].consumption.change;
-                let topSqft = responseData[0].square_footage;
-                let bottomSqft = responseData[0].square_footage;
+                let topSqft = squareFootage;
+                let bottomSqft = squareFootage;
                 responseData.map((ele) => {
                     if (Number(ele.consumption.now) > topConsumption) topConsumption = ele.consumption.now;
                     if (Number(ele.consumption.now) < bottomConsumption) bottomConsumption = ele.consumption.now;
                     if (Number(ele.consumption.change) > topChange) topChange = ele.consumption.change;
                     if (Number(ele.consumption.change) < bottomChange) bottomChange = ele.consumption.change;
-                    if (Number(ele.square_footage) > topSqft) topSqft = ele.square_footage;
-                    if (Number(ele.square_footage) < bottomSqft) bottomSqft = ele.square_footage;
+                    if (Number(ele.square_footage) > topSqft)
+                        topSqft = Math.round(handleUnitConverstion(ele.square_footage, userPrefUnits));
+                    if (Number(ele.square_footage) < bottomSqft)
+                        bottomSqft = Math.round(handleUnitConverstion(ele.square_footage, userPrefUnits));
                 });
                 top = topConsumption / 1000;
                 bottom = bottomConsumption / 1000;
@@ -613,8 +615,7 @@ const ExploreByBuildings = () => {
                 let responseData = res?.data;
                 if (responseData.length !== 0) {
                     responseData.forEach((el) => {
-                        el.square_footage = Math.round(handleUnitConverstion(el.square_footage, userPrefUnits));
-                        el.square_footage_units = `${userPrefUnits === 'si' ? `Sq.M.` : `Sq.Ft.`}`;
+                        el.user_pref_units = userPrefUnits;
                     });
                 }
 
@@ -678,10 +679,9 @@ const ExploreByBuildings = () => {
     };
 
     const renderSquareFootage = (row) => {
-        return (
-            <Typography.Body
-                size={Typography.Sizes.sm}>{`${row?.square_footage} ${row?.square_footage_units}`}</Typography.Body>
-        );
+        const value = Math.round(handleUnitConverstion(row?.square_footage, row?.user_pref_units));
+        const unit = `${row?.user_pref_units === `si` ? `Sq.M.` : `Sq.Ft.`}`;
+        return <Typography.Body size={Typography.Sizes.sm}>{`${value} ${unit}`}</Typography.Body>;
     };
 
     const renderConsumption = (row) => {
