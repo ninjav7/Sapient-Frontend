@@ -4,11 +4,9 @@ import { fetchExploreBuildingList, fetchExploreBuildingChart } from '../explore/
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { fetchDateRange } from '../../helpers/formattedChartData';
-import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { useHistory } from 'react-router-dom';
-import { BuildingStore } from '../../store/BuildingStore';
 import { selectedBuilding, totalSelectionBuildingId } from '../../store/globalState';
 import { useAtom } from 'jotai';
 import { timeZone } from '../../utils/helper';
@@ -27,6 +25,7 @@ import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { UserStore } from '../../store/UserStore';
+import { handleUnitConverstion } from '../settings/general-settings/utils';
 import './style.css';
 
 const SkeletonLoading = () => (
@@ -60,9 +59,6 @@ const SkeletonLoading = () => (
 );
 
 const ExploreByBuildings = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
     const isLoadingRef = useRef(false);
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
@@ -85,6 +81,7 @@ const ExploreByBuildings = () => {
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
+    const userPrefUnits = UserStore.useState((s) => s.unit);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
@@ -120,6 +117,7 @@ const ExploreByBuildings = () => {
     const [isopened, setIsOpened] = useState(false);
     const [topVal, setTopVal] = useState(0);
     const [bottomVal, setBottomVal] = useState(0);
+    const [shouldRender, setShouldRender] = useState(true);
 
     useEffect(() => {
         entryPoint = 'entered';
@@ -180,14 +178,20 @@ const ExploreByBuildings = () => {
             selectedBuildingType,
             conAPIFlag,
             perAPIFlag,
-            sqftAPIFlag
+            sqftAPIFlag,
+            userPrefUnits
         )
             .then((res) => {
                 if (entryPoint === 'entered') {
                     totalBuildingId.length = 0;
                     setSeriesData([]);
                 }
-                let responseData = res.data;
+                let responseData = res?.data;
+                if (responseData.length !== 0) {
+                    responseData.forEach((el) => {
+                        el.user_pref_units = userPrefUnits;
+                    });
+                }
                 setAllBuildingList(responseData);
                 setTotalItems(responseData.length);
                 const uniqueIds = [];
@@ -200,19 +204,25 @@ const ExploreByBuildings = () => {
                     return false;
                 });
                 setBuildingTypeList(uniqueBuildingTypes);
+                const squareFootage =
+                    userPrefUnits === `si`
+                        ? Math.round(handleUnitConverstion(responseData[0].square_footage, userPrefUnits))
+                        : responseData[0].square_footage;
                 let topConsumption = responseData[0].consumption.now;
                 let bottomConsumption = responseData[0].consumption.now;
                 let topChange = responseData[0].consumption.change;
                 let bottomChange = responseData[0].consumption.change;
-                let topSqft = responseData[0].square_footage;
-                let bottomSqft = responseData[0].square_footage;
+                let topSqft = squareFootage;
+                let bottomSqft = squareFootage;
                 responseData.map((ele) => {
                     if (Number(ele.consumption.now) > topConsumption) topConsumption = ele.consumption.now;
                     if (Number(ele.consumption.now) < bottomConsumption) bottomConsumption = ele.consumption.now;
                     if (Number(ele.consumption.change) > topChange) topChange = ele.consumption.change;
                     if (Number(ele.consumption.change) < bottomChange) bottomChange = ele.consumption.change;
-                    if (Number(ele.square_footage) > topSqft) topSqft = ele.square_footage;
-                    if (Number(ele.square_footage) < bottomSqft) bottomSqft = ele.square_footage;
+                    if (Number(ele.square_footage) > topSqft)
+                        topSqft = Math.round(handleUnitConverstion(ele.square_footage, userPrefUnits));
+                    if (Number(ele.square_footage) < bottomSqft)
+                        bottomSqft = Math.round(handleUnitConverstion(ele.square_footage, userPrefUnits));
                 });
                 top = topConsumption / 1000;
                 bottom = bottomConsumption / 1000;
@@ -261,7 +271,17 @@ const ExploreByBuildings = () => {
         else {
             filterexploreDataFetch();
         }
-    }, [startDate, endDate, sortBy.method, sortBy.name, conAPIFlag, perAPIFlag, sqftAPIFlag, selectedBuildingType]);
+    }, [
+        startDate,
+        endDate,
+        sortBy.method,
+        sortBy.name,
+        conAPIFlag,
+        perAPIFlag,
+        sqftAPIFlag,
+        selectedBuildingType,
+        userPrefUnits,
+    ]);
 
     useEffect(() => {
         if (
@@ -367,14 +387,14 @@ const ExploreByBuildings = () => {
                     },
                 },
                 {
-                    label: 'Square Footage',
+                    label: `${userPrefUnits === 'si' ? `Square Meter` : `Square Footage`}`,
                     value: 'square_footage',
-                    placeholder: 'All Square Footage',
+                    placeholder: `All ${userPrefUnits === 'si' ? `Square Meter` : `Square Footage`}`,
                     filterType: FILTER_TYPES.RANGE_SELECTOR,
                     filterOptions: [minSqftValue, maxSqftValue],
                     componentProps: {
-                        prefix: ' sq.ft.',
-                        title: 'Square Footage',
+                        prefix: ` ${userPrefUnits === 'si' ? `sq.m.` : `sq.ft.`}`,
+                        title: `${userPrefUnits === 'si' ? `Square Meter` : `Square Footage`}`,
                         min: bottomSquareFootage,
                         max: topSquareFootage + 1,
                         range: [minSqftValue, maxSqftValue],
@@ -417,7 +437,7 @@ const ExploreByBuildings = () => {
             ];
             setFilterOptions(filterOptionsFetched);
         }
-    }, [minConValue, maxConValue, minPerValue, maxPerValue, minSqftValue, maxSqftValue]);
+    }, [minConValue, maxConValue, minPerValue, maxPerValue, minSqftValue, maxSqftValue, userPrefUnits]);
 
     useEffect(() => {
         if (perAPIFlag !== '') {
@@ -591,10 +611,17 @@ const ExploreByBuildings = () => {
             selectedBuildingType,
             conAPIFlag,
             perAPIFlag,
-            sqftAPIFlag
+            sqftAPIFlag,
+            userPrefUnits
         )
             .then((res) => {
-                let responseData = res.data;
+                let responseData = res?.data;
+                if (responseData.length !== 0) {
+                    responseData.forEach((el) => {
+                        el.user_pref_units = userPrefUnits;
+                    });
+                }
+
                 setAllBuildingList(responseData);
                 setTotalItems(responseData.length);
                 setTopEnergyConsumption(responseData[0].consumption.now);
@@ -655,7 +682,9 @@ const ExploreByBuildings = () => {
     };
 
     const renderSquareFootage = (row) => {
-        return <Typography.Body size={Typography.Sizes.sm}>{row.square_footage} Sq.Ft.</Typography.Body>;
+        const value = Math.round(handleUnitConverstion(row?.square_footage, row?.user_pref_units));
+        const unit = `${row?.user_pref_units === `si` ? `Sq.M.` : `Sq.Ft.`}`;
+        return <Typography.Body size={Typography.Sizes.sm}>{`${value} ${unit}`}</Typography.Body>;
     };
 
     const renderConsumption = (row) => {
@@ -715,7 +744,8 @@ const ExploreByBuildings = () => {
                 selectedBuildingType,
                 conAPIFlag,
                 perAPIFlag,
-                sqftAPIFlag
+                sqftAPIFlag,
+                userPrefUnits
             )
                 .then((res) => {
                     if (entryPoint === 'entered') {
@@ -736,6 +766,57 @@ const ExploreByBuildings = () => {
         search && fetchAllData();
     }, [search, startDate, endDate, sortBy.method, sortBy.name]);
 
+    const handleBuildingStateChange = (value, build) => {
+        if (value === 'true') {
+            let arr1 = seriesData.filter(function (item) {
+                return item.id !== build?.building_id;
+            });
+            setSeriesData(arr1);
+            setBuildIdNow('');
+        }
+        if (value === 'false') {
+            setBuildIdNow(build?.building_id);
+        }
+        const isAdding = value === 'false';
+        setSelectedIds((prevState) => {
+            return isAdding
+                ? [...prevState, build.building_id]
+                : prevState.filter((buildId) => buildId !== build.building_id);
+        });
+    };
+
+    const [tableHeader, setTableHeader] = useState([
+        {
+            name: 'Name',
+            accessor: 'building_name',
+            callbackValue: renderBuildingName,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Energy Consumption',
+            accessor: 'consumption',
+            callbackValue: renderConsumption,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: '% Change',
+            accessor: 'change',
+            callbackValue: renderPerChange,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Square Footage',
+            accessor: 'square_footage',
+            callbackValue: renderSquareFootage,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Building Type',
+            accessor: 'building_type',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+    ]);
+
     const handleDownloadCsv = async () => {
         const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
@@ -755,36 +836,31 @@ const ExploreByBuildings = () => {
             [],
             '',
             '',
-            ''
+            '',
+            userPrefUnits
         )
             .then((res) => {
                 let responseData = res?.data;
                 download(
                     `Explore_By_Building_${new Date().toISOString().split('T')[0]}`,
-                    getExploreByBuildingTableCSVExport(responseData, headerProps)
+                    getExploreByBuildingTableCSVExport(responseData, tableHeader, userPrefUnits)
                 );
             })
             .catch((error) => {});
     };
 
-    const handleBuildingStateChange = (value, build) => {
-        if (value === 'true') {
-            let arr1 = seriesData.filter(function (item) {
-                return item.id !== build?.building_id;
+    useEffect(() => {
+        if (userPrefUnits) {
+            let newHeaderList = tableHeader;
+            newHeaderList.forEach((record) => {
+                if (record?.accessor === 'square_footage') {
+                    record.name = `${userPrefUnits === 'si' ? `Square Meter` : `Square Footage`}`;
+                }
             });
-            setSeriesData(arr1);
-            setBuildIdNow('');
+            setTableHeader(newHeaderList);
+            setShouldRender((prev) => !prev); // This is set to trigger re-render for DataTableWidget component
         }
-        if (value === 'false') {
-            setBuildIdNow(build?.building_id);
-        }
-        const isAdding = value === 'false';
-        setSelectedIds((prevState) => {
-            return isAdding
-                ? [...prevState, build.building_id]
-                : prevState.filter((buildId) => buildId !== build.building_id);
-        });
-    };
+    }, [userPrefUnits]);
 
     useEffect(() => {
         if (buildIdNow) {
@@ -870,38 +946,6 @@ const ExploreByBuildings = () => {
         setSeriesData(allBuildingData);
     }, [allBuildingData]);
 
-    const headerProps = [
-        {
-            name: 'Name',
-            accessor: 'building_name',
-            callbackValue: renderBuildingName,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Energy Consumption',
-            accessor: 'consumption',
-            callbackValue: renderConsumption,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: '% Change',
-            accessor: 'change',
-            callbackValue: renderPerChange,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Square Footage',
-            accessor: 'square_footage',
-            callbackValue: renderSquareFootage,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Building Type',
-            accessor: 'building_type',
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-    ];
-
     return (
         <>
             <Row className="ml-2 mr-2 explore-filters-style">
@@ -961,7 +1005,7 @@ const ExploreByBuildings = () => {
                             searchResultRows={currentRowSearched()}
                             filterOptions={filterOptions}
                             onDownload={() => handleDownloadCsv()}
-                            headers={headerProps}
+                            headers={tableHeader}
                             customCheckAll={() => (
                                 <Checkbox
                                     label=""
