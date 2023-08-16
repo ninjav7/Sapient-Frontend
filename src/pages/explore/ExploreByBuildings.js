@@ -178,7 +178,8 @@ const ExploreByBuildings = () => {
             selectedBuildingType,
             conAPIFlag,
             perAPIFlag,
-            sqftAPIFlag
+            sqftAPIFlag,
+            userPrefUnits
         )
             .then((res) => {
                 if (entryPoint === 'entered') {
@@ -203,7 +204,10 @@ const ExploreByBuildings = () => {
                     return false;
                 });
                 setBuildingTypeList(uniqueBuildingTypes);
-                const squareFootage = Math.round(handleUnitConverstion(responseData[0].square_footage, userPrefUnits));
+                const squareFootage =
+                    userPrefUnits === `si`
+                        ? Math.round(handleUnitConverstion(responseData[0].square_footage, userPrefUnits))
+                        : responseData[0].square_footage;
                 let topConsumption = responseData[0].consumption.now;
                 let bottomConsumption = responseData[0].consumption.now;
                 let topChange = responseData[0].consumption.change;
@@ -607,7 +611,8 @@ const ExploreByBuildings = () => {
             selectedBuildingType,
             conAPIFlag,
             perAPIFlag,
-            sqftAPIFlag
+            sqftAPIFlag,
+            userPrefUnits
         )
             .then((res) => {
                 let responseData = res?.data;
@@ -739,7 +744,8 @@ const ExploreByBuildings = () => {
                 selectedBuildingType,
                 conAPIFlag,
                 perAPIFlag,
-                sqftAPIFlag
+                sqftAPIFlag,
+                userPrefUnits
             )
                 .then((res) => {
                     if (entryPoint === 'entered') {
@@ -830,13 +836,14 @@ const ExploreByBuildings = () => {
             [],
             '',
             '',
-            ''
+            '',
+            userPrefUnits
         )
             .then((res) => {
                 let responseData = res?.data;
                 download(
                     `Explore_By_Building_${new Date().toISOString().split('T')[0]}`,
-                    getExploreByBuildingTableCSVExport(responseData, tableHeader)
+                    getExploreByBuildingTableCSVExport(responseData, tableHeader, userPrefUnits)
                 );
             })
             .catch((error) => {});
