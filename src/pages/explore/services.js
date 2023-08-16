@@ -8,6 +8,7 @@ import {
     getExploreFilter,
     getWeather,
 } from '../../services/Network';
+import { convertToFootage } from '../settings/general-settings/utils';
 
 //Explore By Building
 export function fetchExploreBuildingList(
@@ -24,7 +25,8 @@ export function fetchExploreBuildingList(
     selectedBuildingType,
     conAPIFlag,
     perAPIFlag,
-    sqftAPIFlag
+    sqftAPIFlag,
+    userPrefUnits
 ) {
     let params = `?consumption=energy&search_by_name=${search}&ordered_by=${order_by}&sort_by=${sort_by}`;
     let obj = { ...dateTimeData };
@@ -40,8 +42,8 @@ export function fetchExploreBuildingList(
         };
     if (sqftAPIFlag !== '')
         obj['sq_ft_range'] = {
-            gte: minSqftValue,
-            lte: maxSqftValue,
+            gte: userPrefUnits === 'si' ? parseInt(convertToFootage(minSqftValue)) : minSqftValue,
+            lte: userPrefUnits === 'si' ? parseInt(convertToFootage(maxSqftValue)) : maxSqftValue,
         };
     if (selectedBuildingType.length !== 0) obj['building_type'] = selectedBuildingType;
     return axiosInstance.post(`${getExploreBuildingList}${params}`, obj).then((res) => {
