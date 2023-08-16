@@ -828,7 +828,7 @@ const BreakerConfiguration = ({
 
                 if (response.length !== 0) {
                     response.forEach((record) => {
-                        record.label = record?.name;
+                        record.label = `${record?.name} (${record?.rated_amps} Amps)`;
                         record.value = record?.id;
                         record.isDisabled = record?.breaker_id !== '';
                         record?.breaker_id !== '' ? linkedSensor.push(record) : unlinkedSensor.push(record);
