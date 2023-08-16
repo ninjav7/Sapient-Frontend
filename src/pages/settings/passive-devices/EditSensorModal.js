@@ -108,12 +108,16 @@ const EditSensorModal = (props) => {
             .then((res) => {
                 const response = res?.data;
                 if (response?.success && response?.data.length !== 0) {
-                    let data = response?.data;
-                    data.forEach((el) => {
+                    const customObj = response?.data.find((el) => el?.model === 'Custom');
+                    const sortedList = response?.data
+                        .filter((el) => el?.model !== 'Custom')
+                        .sort((a, b) => a?.rated_amps - b?.rated_amps);
+                    sortedList.push(customObj);
+                    sortedList.forEach((el) => {
                         el.label = el?.model;
                         el.value = el?._id;
                     });
-                    setCTSensorsList(data);
+                    setCTSensorsList(sortedList);
                 }
             })
             .catch(() => {});
