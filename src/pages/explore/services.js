@@ -8,7 +8,6 @@ import {
     getExploreFilter,
     getWeather,
 } from '../../services/Network';
-import { convertToFootage, convertToMeters, handleUnitConverstion } from '../settings/general-settings/utils';
 
 //Explore By Building
 export function fetchExploreBuildingList(
@@ -25,8 +24,7 @@ export function fetchExploreBuildingList(
     selectedBuildingType,
     conAPIFlag,
     perAPIFlag,
-    sqftAPIFlag,
-    userPrefUnits
+    sqftAPIFlag
 ) {
     let params = `?consumption=energy&search_by_name=${search}&ordered_by=${order_by}&sort_by=${sort_by}`;
     let obj = { ...dateTimeData };

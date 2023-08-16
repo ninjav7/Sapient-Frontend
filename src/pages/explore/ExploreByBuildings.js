@@ -178,8 +178,7 @@ const ExploreByBuildings = () => {
             selectedBuildingType,
             conAPIFlag,
             perAPIFlag,
-            sqftAPIFlag,
-            userPrefUnits
+            sqftAPIFlag
         )
             .then((res) => {
                 if (entryPoint === 'entered') {
@@ -608,8 +607,7 @@ const ExploreByBuildings = () => {
             selectedBuildingType,
             conAPIFlag,
             perAPIFlag,
-            sqftAPIFlag,
-            userPrefUnits
+            sqftAPIFlag
         )
             .then((res) => {
                 let responseData = res?.data;
@@ -741,8 +739,7 @@ const ExploreByBuildings = () => {
                 selectedBuildingType,
                 conAPIFlag,
                 perAPIFlag,
-                sqftAPIFlag,
-                userPrefUnits
+                sqftAPIFlag
             )
                 .then((res) => {
                     if (entryPoint === 'entered') {
@@ -833,8 +830,7 @@ const ExploreByBuildings = () => {
             [],
             '',
             '',
-            '',
-            userPrefUnits
+            ''
         )
             .then((res) => {
                 let responseData = res?.data;
