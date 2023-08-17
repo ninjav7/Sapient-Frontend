@@ -464,7 +464,7 @@ const PlugRule = () => {
 
         data.forEach((el) => {
             for (let i = 0; i <= 23; i++) {
-                const today = moment();
+                const today = moment().utc();
                 const from_date = today.startOf('week').startOf('isoWeek');
                 let timeWithHours = '';
                 if (el === 'Sunday') {
@@ -2124,22 +2124,22 @@ const PlugRule = () => {
     };
     const getDateRange = (rawLineChartData) => {
         if (!_.isEmpty(rawLineChartData)) {
-            const minDate = moment.utc(rawLineChartData[0].time_stamp);
-            const maxDate = moment.utc(rawLineChartData[rawLineChartData.length - 1].time_stamp);
+            const minDate = moment.utc(rawLineChartData[0].time_stamp).startOf('isoweek');
+            const maxDate = moment.utc(rawLineChartData[rawLineChartData.length - 1].time_stamp).endOf('isoweek');
             maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
-            minDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+            minDate.set({ hour: 0, minute: 0, second: 1, millisecond: 0 });
             setDateRangeAverageData({
-                maxDate: maxDate.unix() * 1000,
                 minDate: minDate.unix() * 1000,
+                maxDate: maxDate.unix() * 1000,
             });
         } else {
             const minDate = moment().utc().startOf('isoweek');
             const maxDate = moment().utc().endOf('isoweek');
             maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
-            minDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+            minDate.set({ hour: 0, minute: 1, second: 0, millisecond: 0 });
             setDateRangeAverageData({
-                maxDate: maxDate.unix() * 1000,
                 minDate: minDate.unix() * 1000,
+                maxDate: maxDate.unix() * 1000,
             });
         }
     };
