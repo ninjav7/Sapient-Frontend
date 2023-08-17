@@ -75,6 +75,90 @@ const SkeletonLoading = () => (
         </tr>
     </SkeletonTheme>
 );
+
+const SingularityWidget = () => {
+    useEffect(() => {
+        // Install Singularity on the webpage
+        (function (window, document) {
+            if (window.singularity) console.error('singularity embed already included');
+            window.singularity = {};
+            const m = ['init', 'chart', 'debug'];
+            window.singularity._c = [];
+            m.forEach(
+                (me) =>
+                    (window.singularity[me] = function () {
+                        window.singularity._c.push([me, arguments]);
+                    })
+            );
+            const elt = document.createElement('script');
+            elt.type = 'text/javascript';
+            elt.async = true;
+            elt.src = 'https://js.singularity.energy/widget/shim.js';
+            const before = document.getElementsByTagName('script')[0];
+            before.parentNode.insertBefore(elt, before);
+        })(window, document, undefined);
+
+        // Initialize the Singularity widget with your public ID
+        window.singularity.init('eb096e746b');
+                 window.singularity.chart({
+                containerId: 'element-id-for-singularity-chart',
+                width: 800,
+                height: 440,
+                title: "Today's carbon intensity comparison",
+                style: { fontFamily: 'sans-serif' },
+                series: [
+                    {
+                        timeframe: 'realtime',
+                        data: {
+                            type: 'carbon_intensity',
+                            source: 'ISONE',
+                        },
+                        name: 'New England (ISONE)',
+                    },
+                    {
+                        timeframe: 'realtime',
+                        data: {
+                            type: 'carbon_intensity',
+                            source: 'NYISO',
+                        },
+                        name: 'New York (NYISO)',
+                    },
+                    {
+                        timeframe: 'realtime',
+                        data: {
+                            type: 'carbon_intensity',
+                            source: 'CAISO',
+                        },
+                        name: 'California (CAISO)',
+                    },
+                ],
+                chart: {
+                    yAxis: {
+                        gridLineColor: 'rgba(200,200,200, 0.2)',
+                        title: { text: 'lbs CO2 per MWh' },
+                    },
+                    time: { useUTC: false },
+                    legend: { enabled: true },
+                    tooltip: {
+                        dateFormat: {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                        },
+                        yLabel: 'lbs/MWh',
+                    },
+                },
+            });
+   
+    }, [window?.singularity]);
+    return (
+        <div>
+            <div id="element-id-for-singularity-chart"></div>
+        </div>
+    );
+};
+
 const CarbonOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
@@ -463,6 +547,7 @@ const CarbonOverview = () => {
                             />
                         </Col>
                     </Row>
+                    <SingularityWidget />
                 </>
             ) : (
                 <div>You don't have the permission to view this page</div>
