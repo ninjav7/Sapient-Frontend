@@ -1682,9 +1682,18 @@ const BreakerConfiguration = ({
                                                         name="select"
                                                         isSearchable={true}
                                                         options={firstSensorList}
-                                                        currentValue={firstSensorList.filter(
-                                                            (option) => option.value === firstBreakerObj?.sensor_link
-                                                        )}
+                                                        currentValue={firstSensorList
+                                                            .map((el) => ({
+                                                                ...el,
+                                                                label:
+                                                                    el.value === firstBreakerObj?.sensor_link
+                                                                        ? el.label.split(` (`)[0]
+                                                                        : el.label,
+                                                            }))
+                                                            .filter(
+                                                                (option) =>
+                                                                    option.value === firstBreakerObj?.sensor_link
+                                                            )}
                                                         onChange={(e) => {
                                                             handleBreakerConfigChange('sensor_link', e.value, 'first');
                                                             handleSensorChange(firstBreakerObj?.sensor_link, e.value);
@@ -1781,10 +1790,18 @@ const BreakerConfiguration = ({
                                                             name="select"
                                                             isSearchable={true}
                                                             options={secondSensorList}
-                                                            currentValue={secondSensorList.filter(
-                                                                (option) =>
-                                                                    option.value === secondBreakerObj?.sensor_link
-                                                            )}
+                                                            currentValue={secondSensorList
+                                                                .map((el) => ({
+                                                                    ...el,
+                                                                    label:
+                                                                        el.value === secondBreakerObj?.sensor_link
+                                                                            ? el.label.split(` (`)[0]
+                                                                            : el.label,
+                                                                }))
+                                                                .filter(
+                                                                    (option) =>
+                                                                        option.value === secondBreakerObj?.sensor_link
+                                                                )}
                                                             onChange={(e) => {
                                                                 handleBreakerConfigChange(
                                                                     'sensor_link',
@@ -1888,10 +1905,18 @@ const BreakerConfiguration = ({
                                                             name="select"
                                                             isSearchable={true}
                                                             options={thirdSensorList}
-                                                            currentValue={thirdSensorList.filter(
-                                                                (option) =>
-                                                                    option.value === thirdBreakerObj?.sensor_link
-                                                            )}
+                                                            currentValue={thirdSensorList
+                                                                .map((el) => ({
+                                                                    ...el,
+                                                                    label:
+                                                                        el.value === thirdBreakerObj?.sensor_link
+                                                                            ? el.label.split(` (`)[0]
+                                                                            : el.label,
+                                                                }))
+                                                                .filter(
+                                                                    (option) =>
+                                                                        option.value === thirdBreakerObj?.sensor_link
+                                                                )}
                                                             onChange={(e) => {
                                                                 handleBreakerConfigChange(
                                                                     'sensor_link',
