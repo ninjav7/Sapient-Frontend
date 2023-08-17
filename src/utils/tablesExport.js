@@ -1,6 +1,6 @@
-import moment from 'moment';
 import { percentageHandler } from '../utils/helper';
 import { getBuildingName } from '../helpers/helpers';
+import { handleUnitConverstion } from '../pages/settings/general-settings/utils';
 
 export const getTableHeadersList = (record) => {
     let arr = [];
@@ -90,7 +90,7 @@ export const getExploreByEquipmentTableCSVExport = (tableData, columns) => {
     return csv;
 };
 
-export const getExploreByBuildingTableCSVExport = (tableData, columns) => {
+export const getExploreByBuildingTableCSVExport = (tableData, columns, userPrefUnits) => {
     let dataToExport = [];
     tableData.forEach((tableRow, index) => {
         let arr = [];
@@ -101,20 +101,24 @@ export const getExploreByBuildingTableCSVExport = (tableData, columns) => {
                     const search = ',';
                     const replaceWith = ' ';
                     const result = name.split(search).join(replaceWith);
-
                     arr.push(result);
                     break;
+
                 case 'consumption':
                     const consumption = tableRow['consumption'];
                     arr.push(`${consumption.now / 1000} kWh`);
                     break;
+
                 case 'change':
                     const change = tableRow['consumption'];
                     arr.push(`${change.change} %`);
                     break;
+
                 case 'square_footage':
                     const square_footage = tableRow['square_footage'];
-                    arr.push(`${square_footage} Sq.Ft.`);
+                    const unit = userPrefUnits === 'si' ? `Sq.M.` : `Sq.Ft.`;
+                    const value = Math.round(handleUnitConverstion(square_footage, userPrefUnits));
+                    arr.push(`${value} ${unit}`);
                     break;
 
                 default:

@@ -24,7 +24,8 @@ export function fetchExploreBuildingList(
     selectedBuildingType,
     conAPIFlag,
     perAPIFlag,
-    sqftAPIFlag
+    sqftAPIFlag,
+    userPrefUnits
 ) {
     let params = `?consumption=energy&search_by_name=${search}&ordered_by=${order_by}&sort_by=${sort_by}`;
     let obj = { ...dateTimeData };
