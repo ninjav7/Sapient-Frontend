@@ -3,12 +3,13 @@
 .breaker-basic-config {
     display: grid;
     grid-template-columns: 0.6fr 2.2fr 2.2fr;
-    gap: 2rem;
+    gap: 1rem;
 }
 
 .breaker-main-config {
     display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
+    // grid-template-columns: 1fr 1fr; - Before PLT-1440 - Breaker Configration Division
+    grid-template-columns: 1fr 1fr;
     gap: 2rem;
 }
 
@@ -54,6 +55,16 @@
     line-height: 1rem !important;
 }
 
-.custom-space-between{
-    gap: 0.5rem;
+.custom-space-between {
+    gap: 1rem;
+}
+
+.configured-breaker-style {
+    display: grid;
+    grid-template-columns: 1.5fr 1.5fr 0.5fr;
+}
+
+.unconfigured-breaker-style {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
