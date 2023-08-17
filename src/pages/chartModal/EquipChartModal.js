@@ -550,7 +550,13 @@ const EquipChartModal = ({
                                                                 .utc(ytdData?.ytd_peak?.time_stamp)
                                                                 .clone()
                                                                 .tz(timeZone)
-                                                                .format('MM/DD  H:mm')}`}
+                                                                .format(
+                                                                    `MM/DD ${
+                                                                        userPrefTimeFormat === `12h`
+                                                                            ? `hh:mm A`
+                                                                            : `HH:mm`
+                                                                    }`
+                                                                )}`}
                                                         </span>
                                                     ) : (
                                                         <span className="ytd-unit">kW</span>
