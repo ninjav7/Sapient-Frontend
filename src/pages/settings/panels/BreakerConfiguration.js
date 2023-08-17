@@ -1643,7 +1643,7 @@ const BreakerConfiguration = ({
                                                     <Brick sizeInRem={0.25} />
                                                     <Select
                                                         id="exampleSelect"
-                                                        placeholder="Select Device ID Name"
+                                                        placeholder="Select Device"
                                                         name="select"
                                                         isSearchable={true}
                                                         options={passiveDevicesListOne}
@@ -1672,7 +1672,7 @@ const BreakerConfiguration = ({
                                                         <Brick sizeInRem={0.25} />
                                                         <Select
                                                             id="exampleSelect"
-                                                            placeholder="Select Sensor Number"
+                                                            placeholder="Select Sensor"
                                                             name="select"
                                                             isSearchable={true}
                                                             options={firstSensorList}
@@ -1735,7 +1735,7 @@ const BreakerConfiguration = ({
                                                         <Brick sizeInRem={0.25} />
                                                         <Select
                                                             id="exampleSelect"
-                                                            placeholder="Select Device ID Name"
+                                                            placeholder="Select Device"
                                                             name="select"
                                                             isSearchable={true}
                                                             options={passiveDevicesListTwo}
@@ -1772,7 +1772,7 @@ const BreakerConfiguration = ({
                                                         <Brick sizeInRem={0.25} />
                                                         <Select
                                                             id="exampleSelect"
-                                                            placeholder="Select Sensor Number"
+                                                            placeholder="Select Sensor"
                                                             name="select"
                                                             isSearchable={true}
                                                             options={secondSensorList}
@@ -1820,7 +1820,7 @@ const BreakerConfiguration = ({
                                                         <Brick sizeInRem={0.25} />
                                                         <Select
                                                             id="exampleSelect"
-                                                            placeholder="Select Device ID Name"
+                                                            placeholder="Select Device"
                                                             name="select"
                                                             isSearchable={true}
                                                             options={passiveDevicesListThree}
@@ -1857,7 +1857,7 @@ const BreakerConfiguration = ({
                                                         <Brick sizeInRem={0.25} />
                                                         <Select
                                                             id="exampleSelect"
-                                                            placeholder="Select Sensor Number"
+                                                            placeholder="Select Sensor"
                                                             name="select"
                                                             isSearchable={true}
                                                             options={thirdSensorList}
