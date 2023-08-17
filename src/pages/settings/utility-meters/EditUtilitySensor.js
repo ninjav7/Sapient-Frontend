@@ -18,8 +18,13 @@ import { fetchDateRange } from '../../../helpers/formattedChartData';
 import Header from '../../../components/Header';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import { convertToMac, shadowChartMetrics, pulseChartMetrics } from './utils';
-import { compareObjData, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../../helpers/helpers';
-import { getSensorGraphDataForUtilityMonitors, updateUtilitySensorServices } from './services';
+import {
+    compareObjData,
+    dateTimeFormatForHighChart,
+    formatConsumptionValue,
+    formatXaxisForHighCharts,
+} from '../../../helpers/helpers';
+import { getSensorGraphDataForUtilityMonitors, getSensorMetricYtdData, updateUtilitySensorServices } from './services';
 import { UserStore } from '../../../store/UserStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
@@ -39,6 +44,7 @@ const MetricsTab = (props) => {
     const [metric, setMetric] = useState(pulseChartMetrics);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [sensorChartData, setSensorChartData] = useState([]);
+    const [sensorYtdData, setSensorYtdData] = useState({});
     const [fetchingChartData, setFetchingChartData] = useState(false);
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
@@ -185,9 +191,33 @@ const MetricsTab = (props) => {
             });
     };
 
+    const fetchSensorsYtdData = async (start_date, end_date, sensor_obj) => {
+        if (!sensor_obj?.id) return;
+
+        const payload = {
+            sensor_id: sensor_obj?.id,
+            bldg_id: bldgId,
+            date_from: encodeURIComponent(start_date),
+            date_to: encodeURIComponent(end_date),
+            tz_info: timeZone,
+            metric: `energy`,
+        };
+
+        await getSensorMetricYtdData(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) setSensorYtdData(response?.data);
+            })
+            .catch(() => {});
+    };
+
     useEffect(() => {
         fetchSensorsChartData(selectedConsumption, startDate, endDate, sensorObj);
     }, [startDate, endDate, selectedConsumption, sensorObj]);
+
+    useEffect(() => {
+        fetchSensorsYtdData(startDate, endDate, sensorObj);
+    }, [startDate, endDate, sensorObj]);
 
     useEffect(() => {
         if (!utilityMeterObj?.id) return;
@@ -205,7 +235,7 @@ const MetricsTab = (props) => {
                             </Typography.Subheader>
                             <Brick sizeInRem={0.25} />
                             <Typography.Header className="d-inline-block mr-1" size={Typography.Sizes.lg}>
-                                {`84,223`}
+                                {sensorYtdData?.sum ? formatConsumptionValue(sensorYtdData?.sum / 1000, 0) : 0}
                             </Typography.Header>
                             <Typography.Subheader className="d-inline-block" size={Typography.Sizes.sm}>
                                 <span> {`kWh`} </span>
@@ -219,10 +249,22 @@ const MetricsTab = (props) => {
                                 </Typography.Subheader>
                                 <Brick sizeInRem={0.25} />
                                 <Typography.Header className="d-inline-block mr-1" size={Typography.Sizes.lg}>
-                                    {`194`}
+                                    {sensorYtdData?.peak?.consumption
+                                        ? formatConsumptionValue(sensorYtdData?.peak?.consumption / 1000, 0)
+                                        : 0}
                                 </Typography.Header>
                                 <Typography.Subheader className="d-inline-block" size={Typography.Sizes.sm}>
-                                    <span>{`kWh @ 9/23 14:24`}</span>
+                                    <span>
+                                        {sensorYtdData?.peak?.time_stamp
+                                            ? `kWh @ ${moment
+                                                  .utc(sensorYtdData?.peak?.time_stamp)
+                                                  .clone()
+                                                  .tz(timeZone)
+                                                  .format(
+                                                      `MM/DD ${userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`}`
+                                                  )}`
+                                            : `kWh`}
+                                    </span>
                                 </Typography.Subheader>
                             </div>
                         )}
