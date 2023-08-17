@@ -5,6 +5,7 @@ import {
     getUtilityMeters,
     getUtilityMeterSensor,
     sensorUsageData,
+    sensorUsageDataForUtilityMonitor,
     updateSensorV2,
     updateUtilityMeters,
 } from '../../../services/Network';
@@ -49,6 +50,11 @@ export function updateUtilitySensorServices(params, payload) {
 }
 
 export function getSensorGraphDataForUtilityMonitors(payload) {
-    let params = `/${payload?.sensor_id}?building_id=${payload?.bldg_id}&date_from=${payload?.date_from}&date_to=${payload?.date_to}&timezone=${payload?.tz_info}&metric=${payload?.selected_metric}`;
+    const params = `/${payload?.sensor_id}?building_id=${payload?.bldg_id}&date_from=${payload?.date_from}&date_to=${payload?.date_to}&timezone=${payload?.tz_info}&metric=${payload?.selected_metric}`;
     return axiosInstance.get(`${sensorUsageData}${params}`).then((res) => res);
+}
+
+export function getSensorMetricYtdData(payload) {
+    const params = `?building_id=${payload?.bldg_id}&sensor_id=${payload?.sensor_id}&date_from=${payload?.date_from}&date_to=${payload?.date_to}&timezone=${payload?.tz_info}&metric=${payload?.metric}`;
+    return axiosInstance.get(`${sensorUsageDataForUtilityMonitor}${params}`).then((res) => res);
 }
