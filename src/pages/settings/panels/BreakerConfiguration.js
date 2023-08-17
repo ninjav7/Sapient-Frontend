@@ -1632,8 +1632,11 @@ const BreakerConfiguration = ({
                                                 {firstBreakerObj?.name}
                                             </Typography.Subheader>
                                             <Brick sizeInRem={1} />
-                                            <div className="d-flex justify-content-between">
-                                                <div className="w-100 mr-4">
+                                            <div className="w-100 d-flex justify-content-between custom-space-between">
+                                                <div
+                                                    style={{ width: '60%' }}
+                                                    // className="w-100"
+                                                >
                                                     <Typography.Body size={Typography.Sizes.md}>
                                                         Device ID
                                                     </Typography.Body>
@@ -1661,30 +1664,54 @@ const BreakerConfiguration = ({
                                                         }
                                                     />
                                                 </div>
-                                                <div className="w-100">
-                                                    <Typography.Body size={Typography.Sizes.md}>
-                                                        Sensor #
-                                                    </Typography.Body>
-                                                    <Brick sizeInRem={0.25} />
-                                                    <Select
-                                                        id="exampleSelect"
-                                                        placeholder="Select Sensor Number"
-                                                        name="select"
-                                                        isSearchable={true}
-                                                        options={firstSensorList}
-                                                        currentValue={firstSensorList.filter(
-                                                            (option) => option.value === firstBreakerObj?.sensor_link
-                                                        )}
-                                                        onChange={(e) => {
-                                                            handleBreakerConfigChange('sensor_link', e.value, 'first');
-                                                            handleSensorChange(firstBreakerObj?.sensor_link, e.value);
-                                                        }}
-                                                        className="basic-single"
-                                                        isDisabled={
-                                                            firstBreakerObj?.type === 'unwired' ||
-                                                            firstBreakerObj?.type === 'blank'
-                                                        }
-                                                    />
+                                                <div className="w-100 d-flex justify-content-between custom-space-between">
+                                                    <div>
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Sensor #
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <Select
+                                                            id="exampleSelect"
+                                                            placeholder="Select Sensor Number"
+                                                            name="select"
+                                                            isSearchable={true}
+                                                            options={firstSensorList}
+                                                            currentValue={firstSensorList.filter(
+                                                                (option) =>
+                                                                    option.value === firstBreakerObj?.sensor_link
+                                                            )}
+                                                            onChange={(e) => {
+                                                                handleBreakerConfigChange(
+                                                                    'sensor_link',
+                                                                    e.value,
+                                                                    'first'
+                                                                );
+                                                                handleSensorChange(
+                                                                    firstBreakerObj?.sensor_link,
+                                                                    e.value
+                                                                );
+                                                            }}
+                                                            className="basic-single"
+                                                            isDisabled={
+                                                                firstBreakerObj?.type === 'unwired' ||
+                                                                firstBreakerObj?.type === 'blank'
+                                                            }
+                                                        />
+                                                    </div>
+                                                    {firstBreakerObj?.sensor_link && (
+                                                        <div className="w-25">
+                                                            <Typography.Body size={Typography.Sizes.md}>
+                                                                Amps
+                                                            </Typography.Body>
+                                                            <Brick sizeInRem={0.25} />
+                                                            <InputTooltip
+                                                                type="number"
+                                                                labelSize={Typography.Sizes.md}
+                                                                value={1000}
+                                                                disabled={true}
+                                                            />
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                             <Brick sizeInRem={firstBreakerObj?.breaker_type !== 3 ? 1 : 0.25} />
