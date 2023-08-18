@@ -85,7 +85,6 @@ const MetricsTab = (props) => {
         await getSensorGraphDataForUtilityMonitors(payload)
             .then((res) => {
                 const response = res?.data;
-                console.log('SSR res?.data => ', res?.data);
                 if (response?.success) {
                     if (response?.data.length > 0) {
                         const responseData = response?.data;
@@ -182,7 +181,6 @@ const MetricsTab = (props) => {
                             }
                         }
                         setSensorChartData(recordToInsert);
-                        console.log('SSR recordToInsert => ', recordToInsert);
                     }
                 }
                 setFetchingChartData(false);
