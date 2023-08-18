@@ -256,7 +256,7 @@ const MetricsTab = (props) => {
                                             : 0}
                                     </Typography.Header>
                                     <Typography.Subheader size={Typography.Sizes.sm}>
-                                        <span> {`kWh`} </span>
+                                        <span> {`kW`} </span>
                                     </Typography.Subheader>
                                 </div>
                                 <Brick sizeInRem={0.15} />
@@ -266,7 +266,11 @@ const MetricsTab = (props) => {
                                             .utc(sensorYtdData?.peak?.time_stamp)
                                             .clone()
                                             .tz(timeZone)
-                                            .format(`MM/DD ${userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`}`)}`}
+                                            .format(
+                                                `${userPrefDateFormat === `DD-MM-YYYY` ? `DD/MM` : `MM/DD`} ${
+                                                    userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`
+                                                }`
+                                            )}`}
                                 </Typography.Subheader>
                             </div>
                         )}
