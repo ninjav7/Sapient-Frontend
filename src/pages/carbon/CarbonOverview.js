@@ -6,7 +6,7 @@ import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { formatConsumptionValue } from '../../helpers/helpers';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import { Badge } from '../../sharedComponents/badge';
-import { fetchCompareBuildings } from '../../services/compareBuildings';
+import { fetchCompareBuildings, getCarbonBuildingChartData } from '../../services/compareBuildings';
 import { getCompareBuildingTableCSVExport } from '../../utils/tablesExport';
 
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
@@ -99,64 +99,61 @@ const SingularityWidget = () => {
         })(window, document, undefined);
 
         // Initialize the Singularity widget with your public ID
+        // window?.singularity?.authorize("2a5154fe73f74442a36c2cd6267ab602");
+
         window.singularity.init('eb096e746b');
-                 window.singularity.chart({
-                containerId: 'element-id-for-singularity-chart',
-                width: 800,
-                height: 440,
-                title: "Today's carbon intensity comparison",
-                style: { fontFamily: 'sans-serif' },
-                series: [
-                    {
-                        timeframe: 'realtime',
-                        data: {
-                            type: 'carbon_intensity',
-                            source: 'ISONE',
-                        },
-                        name: 'New England (ISONE)',
+        window.singularity.chart({
+            containerId: 'element-id-for-singularity-chart',
+            width: '800',
+            height: '440',
+            title: "Today's carbon intensity comparison",
+            style: { fontFamily: 'sans-serif' },
+            series: [
+                {
+                    timeframe: 'realtime',
+                    data: {
+                        type: 'carbon_intensity',
+                        source: 'ISONE',
                     },
-                    {
-                        timeframe: 'realtime',
-                        data: {
-                            type: 'carbon_intensity',
-                            source: 'NYISO',
-                        },
-                        name: 'New York (NYISO)',
-                    },
-                    {
-                        timeframe: 'realtime',
-                        data: {
-                            type: 'carbon_intensity',
-                            source: 'CAISO',
-                        },
-                        name: 'California (CAISO)',
-                    },
-                ],
-                chart: {
-                    yAxis: {
-                        gridLineColor: 'rgba(200,200,200, 0.2)',
-                        title: { text: 'lbs CO2 per MWh' },
-                    },
-                    time: { useUTC: false },
-                    legend: { enabled: true },
-                    tooltip: {
-                        dateFormat: {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                        },
-                        yLabel: 'lbs/MWh',
-                    },
+                    name: 'New England (ISONE)',
                 },
-            });
-   
-    }, [window?.singularity]);
-    return (
-        <div>
-            <div id="element-id-for-singularity-chart"></div>
-        </div>
-    );
+                {
+                    timeframe: 'realtime',
+                    data: {
+                        type: 'carbon_intensity',
+                        source: 'NYISO',
+                    },
+                    name: 'New York (NYISO)',
+                },
+                {
+                    timeframe: 'realtime',
+                    data: {
+                        type: 'carbon_intensity',
+                        source: 'CAISO',
+                    },
+                    name: 'California (CAISO)',
+                },
+            ],
+            chart: {
+                yAxis: {
+                    gridLineColor: 'rgba(200,200,200, 0.2)',
+                    title: { text: 'lbs CO2 per MWh' },
+                },
+                time: { useUTC: false },
+                legend: { enabled: true },
+                tooltip: {
+                    dateFormat: {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                    },
+                    yLabel: 'lbs/MWh',
+                },
+            },
+        });
+    }, []);
+    return <div id="element-id-for-singularity-chart"></div>;
 };
 
 const CarbonOverview = () => {
@@ -483,6 +480,16 @@ const CarbonOverview = () => {
             </Typography.Body>
         );
     };
+    const fetchCarbonData = async () => {
+        buildingsData.length &&
+            (await getCarbonBuildingChartData(buildingsData[0].building_id).then((res) => {
+                console.log('RES', res);
+            }));
+    };
+    useEffect(() => {
+        fetchCarbonData();
+    }, [buildingsData]);
+    console.log('buildingsData', buildingsData);
 
     const renderChangeEnergy = (row) => {
         return (
