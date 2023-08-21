@@ -28,7 +28,6 @@ const TopNav = () => {
     const [userPermissionDataNow, setUserPermissionDataNow] = useAtom(userPermissionData);
     const pageRefresh = BuildingListStore.useState((s) => s.fetchBuildingList);
     const IS_PLUG_ONLY = BuildingStore.useState((s) => s.isPlugOnly);
-    console.log('SSR IS_PLUG_ONLY => ', IS_PLUG_ONLY);
 
     const [activeBldgList, setActiveBldgList] = useState(false);
 
