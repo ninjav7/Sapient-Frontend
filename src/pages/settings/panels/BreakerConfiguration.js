@@ -847,6 +847,11 @@ const BreakerConfiguration = ({
             .catch(() => {});
     };
 
+    const findSensorAmpsForBreaker = (sensorsList, sensorId) => {
+        const sensorObj = sensorsList.find((el) => el?.id === sensorId);
+        return sensorObj?.rated_amps ? sensorObj?.rated_amps : 0;
+    };
+
     const fetchMetadata = async () => {
         await getMetadataRequest(bldgId)
             .then((res) => {
@@ -1486,8 +1491,8 @@ const BreakerConfiguration = ({
                                             {/* Create Equipment  */}
                                             <Tabs.Item eventKey="create-equip" title="Create Equipment">
                                                 <div className="p-default">
-                                                    <div className="d-flex justify-content-between">
-                                                        <div className="w-100 mr-4">
+                                                    <div className="d-flex justify-content-between custom-space-between">
+                                                        <div className="w-100">
                                                             <Typography.Body size={Typography.Sizes.md}>
                                                                 Name
                                                             </Typography.Body>
@@ -1537,8 +1542,8 @@ const BreakerConfiguration = ({
                                                         </div>
                                                     </div>
                                                     <Brick sizeInRem={1.5} />
-                                                    <div className="d-flex justify-content-between">
-                                                        <div className="w-100 mr-4">
+                                                    <div className="d-flex justify-content-between custom-space-between">
+                                                        <div className="w-100">
                                                             <Typography.Body size={Typography.Sizes.md}>
                                                                 Equipment Type
                                                             </Typography.Body>
@@ -1632,15 +1637,20 @@ const BreakerConfiguration = ({
                                                 {firstBreakerObj?.name}
                                             </Typography.Subheader>
                                             <Brick sizeInRem={1} />
-                                            <div className="d-flex justify-content-between">
-                                                <div className="w-100 mr-4">
+                                            <div
+                                                className={`custom-space-between ${
+                                                    firstBreakerObj?.sensor_link
+                                                        ? `configured-breaker-style`
+                                                        : `unconfigured-breaker-style`
+                                                }`}>
+                                                <div className="w-100">
                                                     <Typography.Body size={Typography.Sizes.md}>
                                                         Device ID
                                                     </Typography.Body>
                                                     <Brick sizeInRem={0.25} />
                                                     <Select
                                                         id="exampleSelect"
-                                                        placeholder="Select Device ID Name"
+                                                        placeholder="Select Device"
                                                         name="select"
                                                         isSearchable={true}
                                                         options={passiveDevicesListOne}
@@ -1668,13 +1678,22 @@ const BreakerConfiguration = ({
                                                     <Brick sizeInRem={0.25} />
                                                     <Select
                                                         id="exampleSelect"
-                                                        placeholder="Select Sensor Number"
+                                                        placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
                                                         options={firstSensorList}
-                                                        currentValue={firstSensorList.filter(
-                                                            (option) => option.value === firstBreakerObj?.sensor_link
-                                                        )}
+                                                        currentValue={firstSensorList
+                                                            .map((el) => ({
+                                                                ...el,
+                                                                label:
+                                                                    el.value === firstBreakerObj?.sensor_link
+                                                                        ? el.label.split(` (`)[0]
+                                                                        : el.label,
+                                                            }))
+                                                            .filter(
+                                                                (option) =>
+                                                                    option.value === firstBreakerObj?.sensor_link
+                                                            )}
                                                         onChange={(e) => {
                                                             handleBreakerConfigChange('sensor_link', e.value, 'first');
                                                             handleSensorChange(firstBreakerObj?.sensor_link, e.value);
@@ -1686,6 +1705,23 @@ const BreakerConfiguration = ({
                                                         }
                                                     />
                                                 </div>
+                                                {firstBreakerObj?.sensor_link && (
+                                                    <div className="w-100">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Amps
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <InputTooltip
+                                                            type="number"
+                                                            labelSize={Typography.Sizes.md}
+                                                            value={findSensorAmpsForBreaker(
+                                                                firstSensorList,
+                                                                firstBreakerObj?.sensor_link
+                                                            )}
+                                                            disabled={true}
+                                                        />
+                                                    </div>
+                                                )}
                                             </div>
                                             <Brick sizeInRem={firstBreakerObj?.breaker_type !== 3 ? 1 : 0.25} />
                                             <hr />
@@ -1700,15 +1736,20 @@ const BreakerConfiguration = ({
                                                     {secondBreakerObj?.name}
                                                 </Typography.Subheader>
                                                 <Brick sizeInRem={1} />
-                                                <div className="d-flex justify-content-between">
-                                                    <div className="w-100 mr-4">
+                                                <div
+                                                    className={`custom-space-between ${
+                                                        firstBreakerObj?.sensor_link
+                                                            ? `configured-breaker-style`
+                                                            : `unconfigured-breaker-style`
+                                                    }`}>
+                                                    <div className="w-100">
                                                         <Typography.Body size={Typography.Sizes.md}>
                                                             Device ID
                                                         </Typography.Body>
                                                         <Brick sizeInRem={0.25} />
                                                         <Select
                                                             id="exampleSelect"
-                                                            placeholder="Select Device ID Name"
+                                                            placeholder="Select Device"
                                                             name="select"
                                                             isSearchable={true}
                                                             options={passiveDevicesListTwo}
@@ -1745,14 +1786,22 @@ const BreakerConfiguration = ({
                                                         <Brick sizeInRem={0.25} />
                                                         <Select
                                                             id="exampleSelect"
-                                                            placeholder="Select Sensor Number"
+                                                            placeholder="Select Sensor"
                                                             name="select"
                                                             isSearchable={true}
                                                             options={secondSensorList}
-                                                            currentValue={secondSensorList.filter(
-                                                                (option) =>
-                                                                    option.value === secondBreakerObj?.sensor_link
-                                                            )}
+                                                            currentValue={secondSensorList
+                                                                .map((el) => ({
+                                                                    ...el,
+                                                                    label:
+                                                                        el.value === secondBreakerObj?.sensor_link
+                                                                            ? el.label.split(` (`)[0]
+                                                                            : el.label,
+                                                                }))
+                                                                .filter(
+                                                                    (option) =>
+                                                                        option.value === secondBreakerObj?.sensor_link
+                                                                )}
                                                             onChange={(e) => {
                                                                 handleBreakerConfigChange(
                                                                     'sensor_link',
@@ -1771,6 +1820,23 @@ const BreakerConfiguration = ({
                                                             }
                                                         />
                                                     </div>
+                                                    {secondBreakerObj?.sensor_link && (
+                                                        <div className="w-100">
+                                                            <Typography.Body size={Typography.Sizes.md}>
+                                                                Amps
+                                                            </Typography.Body>
+                                                            <Brick sizeInRem={0.25} />
+                                                            <InputTooltip
+                                                                type="number"
+                                                                labelSize={Typography.Sizes.md}
+                                                                value={findSensorAmpsForBreaker(
+                                                                    secondSensorList,
+                                                                    secondBreakerObj?.sensor_link
+                                                                )}
+                                                                disabled={true}
+                                                            />
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <Brick sizeInRem={firstBreakerObj?.breaker_type !== 3 ? 1 : 0.25} />
                                                 <hr />
@@ -1785,15 +1851,20 @@ const BreakerConfiguration = ({
                                                     {thirdBreakerObj?.name}
                                                 </Typography.Subheader>
                                                 <Brick sizeInRem={1} />
-                                                <div className="d-flex justify-content-between">
-                                                    <div className="w-100 mr-4">
+                                                <div
+                                                    className={`custom-space-between ${
+                                                        firstBreakerObj?.sensor_link
+                                                            ? `configured-breaker-style`
+                                                            : `unconfigured-breaker-style`
+                                                    }`}>
+                                                    <div className="w-100">
                                                         <Typography.Body size={Typography.Sizes.md}>
                                                             Device ID
                                                         </Typography.Body>
                                                         <Brick sizeInRem={0.25} />
                                                         <Select
                                                             id="exampleSelect"
-                                                            placeholder="Select Device ID Name"
+                                                            placeholder="Select Device"
                                                             name="select"
                                                             isSearchable={true}
                                                             options={passiveDevicesListThree}
@@ -1830,14 +1901,22 @@ const BreakerConfiguration = ({
                                                         <Brick sizeInRem={0.25} />
                                                         <Select
                                                             id="exampleSelect"
-                                                            placeholder="Select Sensor Number"
+                                                            placeholder="Select Sensor"
                                                             name="select"
                                                             isSearchable={true}
                                                             options={thirdSensorList}
-                                                            currentValue={thirdSensorList.filter(
-                                                                (option) =>
-                                                                    option.value === thirdBreakerObj?.sensor_link
-                                                            )}
+                                                            currentValue={thirdSensorList
+                                                                .map((el) => ({
+                                                                    ...el,
+                                                                    label:
+                                                                        el.value === thirdBreakerObj?.sensor_link
+                                                                            ? el.label.split(` (`)[0]
+                                                                            : el.label,
+                                                                }))
+                                                                .filter(
+                                                                    (option) =>
+                                                                        option.value === thirdBreakerObj?.sensor_link
+                                                                )}
                                                             onChange={(e) => {
                                                                 handleBreakerConfigChange(
                                                                     'sensor_link',
@@ -1856,6 +1935,23 @@ const BreakerConfiguration = ({
                                                             }
                                                         />
                                                     </div>
+                                                    {thirdBreakerObj?.sensor_link && (
+                                                        <div className="w-100">
+                                                            <Typography.Body size={Typography.Sizes.md}>
+                                                                Amps
+                                                            </Typography.Body>
+                                                            <Brick sizeInRem={0.25} />
+                                                            <InputTooltip
+                                                                type="number"
+                                                                labelSize={Typography.Sizes.md}
+                                                                value={findSensorAmpsForBreaker(
+                                                                    thirdSensorList,
+                                                                    thirdBreakerObj?.sensor_link
+                                                                )}
+                                                                disabled={true}
+                                                            />
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <Brick sizeInRem={0.25} />
                                                 <hr />
@@ -1863,7 +1959,7 @@ const BreakerConfiguration = ({
                                             </div>
                                         )}
 
-                                        <div className="d-flex justify-content-between">
+                                        <div className="d-flex justify-content-between custom-space-between">
                                             <div className="w-100">
                                                 <Button
                                                     label="Reset Configuration"
@@ -1874,7 +1970,7 @@ const BreakerConfiguration = ({
                                                         handleUnlinkAlertShow();
                                                     }}
                                                     icon={<UnlinkOldSVG />}
-                                                    className="w-100 mr-3"
+                                                    className="w-100"
                                                 />
                                             </div>
 
@@ -1893,13 +1989,13 @@ const BreakerConfiguration = ({
                                                         }
                                                     }}
                                                     icon={<DeleteSVG />}
-                                                    className="w-100 ml-3"
+                                                    className="w-100"
                                                 />
                                             </div>
                                         </div>
 
                                         {firstBreakerObj?.breaker_type !== 1 && (
-                                            <div className="float-right mr-2">
+                                            <div className="float-right">
                                                 <Brick sizeInRem={0.25} />
                                                 <Typography.Body size={Typography.Sizes.sm} className="txt-warn-color">
                                                     Grouped breakers cannot be deleted

@@ -508,9 +508,11 @@ const EquipChartModal = ({
                                     <div className="ytd-container">
                                         <div>
                                             <div className="ytd-heading">
-                                                {`Total Consumption (${moment(startDate).format('MMM D')} to ${moment(
-                                                    endDate
-                                                ).format('MMM D')})`}
+                                                {`Total Consumption (${moment(startDate).format(
+                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
+                                                )} to ${moment(endDate).format(
+                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
+                                                )})`}
                                             </div>
                                             {isYtdDataFetching ? (
                                                 <Skeleton count={1} />
@@ -527,9 +529,11 @@ const EquipChartModal = ({
                                         </div>
                                         <div>
                                             <div className="ytd-heading">
-                                                {`Peak kW (${moment(startDate).format('MMM D')} to ${moment(
-                                                    endDate
-                                                ).format('MMM D')})`}
+                                                {`Peak kW (${moment(startDate).format(
+                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
+                                                )} to ${moment(endDate).format(
+                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
+                                                )})`}
                                             </div>
                                             {isYtdDataFetching ? (
                                                 <Skeleton count={1} />
@@ -551,7 +555,11 @@ const EquipChartModal = ({
                                                                 .clone()
                                                                 .tz(timeZone)
                                                                 .format(
-                                                                    `MM/DD ${
+                                                                    `${
+                                                                        userPrefDateFormat === `DD-MM-YYYY`
+                                                                            ? `DD/MM`
+                                                                            : `MM/DD`
+                                                                    } ${
                                                                         userPrefTimeFormat === `12h`
                                                                             ? `hh:mm A`
                                                                             : `HH:mm`

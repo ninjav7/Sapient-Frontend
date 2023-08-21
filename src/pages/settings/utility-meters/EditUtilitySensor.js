@@ -93,11 +93,15 @@ const MetricsTab = (props) => {
                         if (!(selected_consmption === 'current' || selected_consmption === 'voltage')) {
                             let formattedData = [];
                             responseData.map((el) => {
-                                if (el?.data === '') {
-                                    formattedData.push({ x: moment.utc(new Date(el?.time_stamp)), y: null });
-                                } else {
-                                    formattedData.push({ x: new Date(el?.time_stamp).getTime(), y: el?.data });
-                                }
+                                formattedData.push({
+                                    x: new Date(el?.time_stamp).getTime(),
+                                    y:
+                                        el?.data === ''
+                                            ? null
+                                            : selected_consmption === 'energy'
+                                            ? +(el?.data / 1000).toFixed(2)
+                                            : el?.data,
+                                });
                             });
                             recordToInsert = [
                                 {
@@ -234,12 +238,14 @@ const MetricsTab = (props) => {
                                 {`Total YTD`}
                             </Typography.Subheader>
                             <Brick sizeInRem={0.25} />
-                            <Typography.Header className="d-inline-block mr-1" size={Typography.Sizes.lg}>
-                                {sensorYtdData?.sum ? formatConsumptionValue(sensorYtdData?.sum / 1000, 0) : 0}
-                            </Typography.Header>
-                            <Typography.Subheader className="d-inline-block" size={Typography.Sizes.sm}>
-                                <span> {`kWh`} </span>
-                            </Typography.Subheader>
+                            <div className="d-flex align-items-baseline">
+                                <Typography.Header className="mr-1" size={Typography.Sizes.lg}>
+                                    {sensorYtdData?.sum ? formatConsumptionValue(sensorYtdData?.sum / 1000, 0) : 0}
+                                </Typography.Header>
+                                <Typography.Subheader size={Typography.Sizes.sm}>
+                                    <span> {`kWh`} </span>
+                                </Typography.Subheader>
+                            </div>
                         </div>
 
                         {utilityMeterObj?.device_type !== `pulse counter` && (
@@ -248,23 +254,28 @@ const MetricsTab = (props) => {
                                     {`Peak kW YTD`}
                                 </Typography.Subheader>
                                 <Brick sizeInRem={0.25} />
-                                <Typography.Header className="d-inline-block mr-1" size={Typography.Sizes.lg}>
-                                    {sensorYtdData?.peak?.consumption
-                                        ? formatConsumptionValue(sensorYtdData?.peak?.consumption / 1000, 0)
-                                        : 0}
-                                </Typography.Header>
-                                <Typography.Subheader className="d-inline-block" size={Typography.Sizes.sm}>
-                                    <span>
-                                        {sensorYtdData?.peak?.time_stamp
-                                            ? `kWh @ ${moment
-                                                  .utc(sensorYtdData?.peak?.time_stamp)
-                                                  .clone()
-                                                  .tz(timeZone)
-                                                  .format(
-                                                      `MM/DD ${userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`}`
-                                                  )}`
-                                            : `kWh`}
-                                    </span>
+                                <div className="d-flex align-items-baseline">
+                                    <Typography.Header size={Typography.Sizes.lg} className="mr-1">
+                                        {sensorYtdData?.peak?.consumption
+                                            ? formatConsumptionValue(sensorYtdData?.peak?.consumption / 1000, 0)
+                                            : 0}
+                                    </Typography.Header>
+                                    <Typography.Subheader size={Typography.Sizes.sm}>
+                                        <span> {`kW`} </span>
+                                    </Typography.Subheader>
+                                </div>
+                                <Brick sizeInRem={0.15} />
+                                <Typography.Subheader size={Typography.Sizes.sm}>
+                                    {sensorYtdData?.peak?.time_stamp &&
+                                        `@ ${moment
+                                            .utc(sensorYtdData?.peak?.time_stamp)
+                                            .clone()
+                                            .tz(timeZone)
+                                            .format(
+                                                `${userPrefDateFormat === `DD-MM-YYYY` ? `DD/MM` : `MM/DD`} ${
+                                                    userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`
+                                                }`
+                                            )}`}
                                 </Typography.Subheader>
                             </div>
                         )}

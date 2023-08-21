@@ -267,13 +267,34 @@ const ActiveDevices = () => {
         )
             .then((res) => {
                 const response = res?.data;
-                if (response?.data) setActiveDeviceData(response?.data);
+                if (response?.data) {
+                    for (const element of response?.data) {
+                        element.bldg_id = bldgId;
+                    }
+                    setActiveDeviceData(response?.data);
+                }
                 if (response?.total_data) setTotalItems(response?.total_data);
                 setIsDeviceProcessing(false);
             })
             .catch(() => {
                 setIsDeviceProcessing(false);
             });
+    };
+
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Active Devices',
+                    path: '/settings/active-devices',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'building-settings';
+        });
     };
 
     useEffect(() => {
@@ -298,21 +319,6 @@ const ActiveDevices = () => {
     }, [pageNo, pageSize]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Active Devices',
-                        path: '/settings/active-devices',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'building-settings';
-            });
-        };
         updateBreadcrumbStore();
     }, []);
 
@@ -320,7 +326,12 @@ const ActiveDevices = () => {
         if (bldgId && buildingListData && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             if (bldgObj?.building_id)
-                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+                updateBuildingStore(
+                    bldgObj?.building_id,
+                    bldgObj?.building_name,
+                    bldgObj?.timezone,
+                    bldgObj?.plug_only
+                );
         }
     }, [buildingListData, bldgId]);
 
@@ -329,7 +340,7 @@ const ActiveDevices = () => {
     };
 
     const handleDownloadCsv = async () => {
-        let params = `?building_id=${bldgId}`;
+        const params = `?building_id=${bldgId}`;
         await getSingleActiveDevice(params)
             .then((res) => {
                 const responseData = res?.data?.data;
@@ -354,7 +365,7 @@ const ActiveDevices = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/active-devices/single/${bldgId}/${row.equipments_id}`,
+                    pathname: `/settings/active-devices/single/${row?.bldg_id}/${row.equipments_id}`,
                 }}>
                 <a>{row.identifier}</a>
             </Link>
