@@ -121,9 +121,14 @@ const PassiveDevices = () => {
             sensorSelected
         )
             .then((res) => {
-                const responseData = res?.data;
-                setPassiveDeviceData(responseData?.data);
-                setTotalItems(responseData?.total_data);
+                const response = res?.data;
+                if (response?.data) {
+                    for (const element of response?.data) {
+                        element.bldg_id = bldgId;
+                    }
+                    setPassiveDeviceData(response?.data);
+                }
+                if (response?.total_data) setTotalItems(response?.total_data);
                 setIsDataFetching(false);
             })
             .catch(() => {
@@ -286,7 +291,7 @@ const PassiveDevices = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/smart-meters/single/${bldgId}/${row.equipments_id}`,
+                    pathname: `/settings/smart-meters/single/${row?.bldg_id}/${row.equipments_id}`,
                 }}>
                 <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
                     {row?.identifier === '' ? '-' : row?.identifier}

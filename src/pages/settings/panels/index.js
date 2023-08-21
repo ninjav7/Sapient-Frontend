@@ -142,14 +142,14 @@ const Panels = () => {
             panelVoltageSelected
         )
             .then((res) => {
-                const responseData = res?.data;
-                if (responseData.data && responseData.data.length !== 0) {
-                    responseData.data.forEach((record) => {
-                        record.bldg_id = bldgId;
-                    });
+                const response = res?.data;
+                if (response && response?.data.length !== 0) {
+                    for (const element of response?.data) {
+                        element.bldg_id = bldgId;
+                    }
                 }
-                setPanelsData(responseData?.data);
-                setTotalItems(responseData?.total_data);
+                setPanelsData(response?.data);
+                setTotalItems(response?.total_data);
                 setDataFetching(false);
             })
             .catch(() => {

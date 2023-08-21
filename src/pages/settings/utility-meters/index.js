@@ -81,7 +81,13 @@ const UtilityMeters = () => {
                 const response = res?.data;
                 if (response?.success) {
                     setUtilityMetersData(response?.data);
-                    setTotalItems(response?.data.length);
+                    if (response?.data) {
+                        for (const element of response?.data) {
+                            element.bldg_id = bldgId;
+                        }
+                        setUtilityMetersData(response?.data);
+                    }
+                    setTotalItems(response?.total_data ? response?.total_data : response?.data.length);
                 }
                 setIsDataFetching(false);
             })
@@ -148,7 +154,7 @@ const UtilityMeters = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/utility-monitors/single/${bldgId}/${row?.id}`,
+                    pathname: `/settings/utility-monitors/single/${row?.bldg_id}/${row?.id}`,
                 }}>
                 <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
                     {row?.mac_address ? convertToMac(row?.mac_address) : ''}
