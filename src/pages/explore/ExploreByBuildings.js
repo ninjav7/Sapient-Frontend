@@ -672,7 +672,7 @@ const ExploreByBuildings = () => {
                 <a
                     className="typography-wrapper link mouse-pointer"
                     onClick={() => {
-                        redirectToExploreEquipPage(row?.building_id, row?.building_name, row?.timezone);
+                        redirectToExploreEquipPage(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);
                     }}>
                     {row.building_name}
                 </a>
@@ -712,8 +712,8 @@ const ExploreByBuildings = () => {
         );
     };
 
-    const redirectToExploreEquipPage = (bldId, bldName, bldTimeZone) => {
-        updateBuildingStore(bldId, bldName, bldTimeZone);
+    const redirectToExploreEquipPage = (bldId, bldName, bldTimeZone, isPlugOnly) => {
+        updateBuildingStore(bldId, bldName, bldTimeZone, isPlugOnly);
 
         history.push({
             pathname: `/explore-page/by-equipment/${bldId}`,

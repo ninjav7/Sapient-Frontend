@@ -7,7 +7,7 @@ import NavLinks from './NavLinks';
 import Control from './Control';
 
 import { buildingData, userPermissionData } from '../../store/globalState';
-import { BuildingListStore } from '../../store/BuildingStore';
+import { BuildingListStore, BuildingStore } from '../../store/BuildingStore';
 import { fetchBuildingsList } from '../../services/buildings';
 import { fetchPermissions } from '../../services/permissions';
 
@@ -27,6 +27,8 @@ const TopNav = () => {
     const [buildingListData, setBuildingListData] = useAtom(buildingData);
     const [userPermissionDataNow, setUserPermissionDataNow] = useAtom(userPermissionData);
     const pageRefresh = BuildingListStore.useState((s) => s.fetchBuildingList);
+    const IS_PLUG_ONLY = BuildingStore.useState((s) => s.isPlugOnly);
+    console.log('SSR IS_PLUG_ONLY => ', IS_PLUG_ONLY);
 
     const [activeBldgList, setActiveBldgList] = useState(false);
 

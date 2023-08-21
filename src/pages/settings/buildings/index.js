@@ -103,7 +103,7 @@ const Buildings = () => {
     };
 
     const handleBuildingClick = (record) => {
-        updateBuildingStore(record?.building_id, record?.building_name, record?.timezone);
+        updateBuildingStore(record?.building_id, record?.building_name, record?.timezone, record?.plug_only);
     };
 
     const renderBldgName = (row) => {

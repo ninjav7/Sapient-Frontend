@@ -111,7 +111,7 @@ const CompareBuildings = () => {
                     size={Typography.Sizes.md}
                     className="mouse-pointer"
                     onClick={() => {
-                        updateBuildingStore(row.building_id, row.building_name, row.timezone);
+                        updateBuildingStore(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);
                         history.push({
                             pathname: `/energy/building/overview/${row.building_id}`,
                         });
