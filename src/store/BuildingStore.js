@@ -7,6 +7,8 @@ export const BuildingStore = new Store({
         localStorage.getItem('buildingTimeZone') === 'undefined'
             ? 'US/Eastern'
             : localStorage.getItem('buildingTimeZone'),
+    BldgName: localStorage.getItem('buildingName'),
+    isPlugOnly: localStorage.getItem('isPlugOnly'),
 });
 
 export const BuildingListStore = new Store({

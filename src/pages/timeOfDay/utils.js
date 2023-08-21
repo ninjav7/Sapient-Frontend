@@ -236,3 +236,40 @@ export const heatMapOptions = {
         },
     },
 };
+
+const calculateTotalEnergy = (array) => {
+    let totalNow = 0;
+    let totalOld = 0;
+
+    array.forEach((item) => {
+        totalNow += item?.now;
+        totalOld += item?.old;
+    });
+
+    return {
+        now: totalNow,
+        old: totalOld,
+    };
+};
+
+export const separateAndCalculateEnergyData = (array) => {
+    const energyConsumptionArray = [];
+    const afterHoursEnergyConsumptionArray = [];
+
+    array.forEach((item) => {
+        energyConsumptionArray.push(item?.energy_consumption);
+        afterHoursEnergyConsumptionArray.push(item?.after_hours_energy_consumption);
+    });
+
+    const onHoursObj = {
+        name: 'On-hours',
+        consumption: calculateTotalEnergy(energyConsumptionArray),
+    };
+
+    const afterHoursObj = {
+        name: 'After-hours',
+        consumption: calculateTotalEnergy(afterHoursEnergyConsumptionArray),
+    };
+
+    return [onHoursObj, afterHoursObj];
+};

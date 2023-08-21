@@ -93,7 +93,7 @@ const SecondaryTopNavBar = () => {
     };
 
     const handleBuildingChange = (record, path) => {
-        updateBuildingStore(record?.value, record?.label, record?.timezone);
+        updateBuildingStore(record?.value, record?.label, record?.timezone, record?.plug_only);
 
         if (path === '/explore-page/by-buildings') {
             redirectToEndpoint(`/explore-page/by-equipment/${record?.value}`);
@@ -110,7 +110,7 @@ const SecondaryTopNavBar = () => {
             return;
         }
 
-        if(path.includes('control/plug-rules')){
+        if (path.includes('control/plug-rules')) {
             redirectToEndpoint(`/control/plug-rules`);
             return;
         }
@@ -167,27 +167,27 @@ const SecondaryTopNavBar = () => {
         handleBuildingChange(bldgObj, location.pathname);
     };
 
+    const getBuildingList = async () => {
+        const allBuildingsList = buildingListData.map((record) => ({
+            label: record?.building_name,
+            value: record?.building_id,
+            timezone: record?.timezone,
+            iconForSelected: <BuildingSVG className="p-0 square" />,
+            plug_only: record?.plug_only,
+        }));
+
+        const updatedBuildingsList = [...buildingsList];
+        updatedBuildingsList[2].options = allBuildingsList;
+
+        setBuildingsList(updatedBuildingsList);
+    };
+
     useEffect(() => {
         const bldgObj = buildingsList[2].options.find((record) => record?.value === selectedBuilding.value);
         if (bldgObj?.value) setSelectedBuilding(bldgObj);
     }, [buildingsList]);
 
     useEffect(() => {
-        const getBuildingList = async () => {
-            let bldgList = [...buildingsList];
-            let allBuildingsList = [];
-            buildingListData.forEach((record) => {
-                const obj = {
-                    label: record?.building_name,
-                    value: record?.building_id,
-                    timezone: record?.timezone,
-                    iconForSelected: <BuildingSVG className="p-0 square" />,
-                };
-                allBuildingsList.push(obj);
-            });
-            bldgList[2].options = allBuildingsList;
-            setBuildingsList(bldgList);
-        };
         getBuildingList();
     }, [buildingListData]);
 
