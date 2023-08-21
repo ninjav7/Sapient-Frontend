@@ -2124,10 +2124,9 @@ const PlugRule = () => {
     };
     const getDateRange = (rawLineChartData) => {
         if (!_.isEmpty(rawLineChartData)) {
-            const minDate = moment.utc(rawLineChartData[0].time_stamp).startOf('isoweek');
+            const minDate = moment(rawLineChartData[0].time_stamp).utc(true).startOf('week');
             const maxDate = moment.utc(rawLineChartData[rawLineChartData.length - 1].time_stamp).endOf('isoweek');
             maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
-            minDate.set({ hour: 0, minute: 0, second: 1, millisecond: 0 });
             setDateRangeAverageData({
                 minDate: minDate.unix() * 1000,
                 maxDate: maxDate.unix() * 1000,
@@ -2136,7 +2135,7 @@ const PlugRule = () => {
             const minDate = moment().utc().startOf('isoweek');
             const maxDate = moment().utc().endOf('isoweek');
             maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
-            minDate.set({ hour: 0, minute: 1, second: 0, millisecond: 0 });
+            minDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
             setDateRangeAverageData({
                 minDate: minDate.unix() * 1000,
                 maxDate: maxDate.unix() * 1000,
@@ -2555,7 +2554,7 @@ const PlugRule = () => {
                                         xAxis: {
                                             labels: {
                                                 formatter: function (val) {
-                                                    return moment(val.value).format('ddd');
+                                                    return moment.utc(val.value).format('ddd');
                                                 },
                                                 step: 1,
                                             },
