@@ -221,3 +221,4 @@ export const updateUserProfile = '/api/v2/user/user/profile';
 export const generalBuildingDetailV2 = '/api/v2/building/building_details';
 export const sensorUsageData = '/api/v2/metrics/sensor';
 export const sensorUsageDataForUtilityMonitor = '/api/v2/metrics/ytd';
+export const getEnergyConsumptionV2 = '/api/v2/metrics/building';

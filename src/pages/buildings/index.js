@@ -16,6 +16,7 @@ import {
     fetchEnergyConsumptionByEquipType,
     fetchEnergyConsumptionBySpaceType,
     fetchEnergyConsumptionByFloor,
+    fetchEnergyConsumptionV2,
 } from '../buildings/services';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -325,23 +326,30 @@ const BuildingOverview = () => {
     };
 
     const buildingConsumptionChart = async (time_zone) => {
-        const payload = apiRequestBody(startDate, endDate, time_zone);
-        await fetchEnergyConsumption(bldgId, payload)
+        const payload = {
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: time_zone,
+            bldg_id: bldgId,
+        };
+        await fetchEnergyConsumptionV2(payload)
             .then((res) => {
                 const response = res?.data;
-                let energyCategories = [];
-                let energyData = [
-                    {
-                        name: 'Energy',
-                        data: [],
-                    },
-                ];
-                response.forEach((record) => {
-                    energyCategories.push(record?.x);
-                    energyData[0].data.push(parseFloat((record?.y / 1000).toFixed(2)));
-                });
-                setEnergyConsumptionsCategories(energyCategories);
-                setEnergyConsumptionsData(energyData);
+                if (response?.success && response?.data.length !== 0) {
+                    let energyCategories = [];
+                    let energyData = [
+                        {
+                            name: 'Energy',
+                            data: [],
+                        },
+                    ];
+                    response.data.forEach((record) => {
+                        energyCategories.push(record?.time_stamp);
+                        energyData[0].data.push(parseFloat((record?.data / 1000).toFixed(2)));
+                    });
+                    setEnergyConsumptionsCategories(energyCategories);
+                    setEnergyConsumptionsData(energyData);
+                }
             })
             .catch((error) => {});
     };
