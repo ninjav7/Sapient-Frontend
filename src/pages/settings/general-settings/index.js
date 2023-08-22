@@ -183,8 +183,6 @@ const GeneralBuildingSettings = () => {
         bldgData.address = buildingAddress;
         bldgData.operating_hours = operationTime.operating_hours;
 
-        console.log('SSR bldgData => ', bldgData);
-
         await updateGeneralBuildingChange(bldgData, params)
             .then((res) => {
                 const response = res?.data;
