@@ -49,7 +49,7 @@ const NavLinks = () => {
         '/settings/layout',
         '/settings/equipment',
         '/settings/panels',
-        '/settings/active-devices',
+        '/settings/smart-plugs',
         '/settings/smart-meters',
         '/settings/utility-monitors',
     ];

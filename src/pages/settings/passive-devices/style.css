@@ -2,13 +2,13 @@
     width: auto;
     height: 6.25rem;
     background: #f9fafb;
-    border-bottom: .0625rem solid #eaecf0;
+    border-bottom: 0.0625rem solid #eaecf0;
 }
 
 .nav-header-container {
     padding: 0rem;
     width: auto;
-    border-bottom: .0625rem solid #eaecf0;
+    border-bottom: 0.0625rem solid #eaecf0;
 }
 .single-consumption-container {
     padding: 16px;
@@ -421,13 +421,6 @@
     font-size: 14px !important;
     line-height: 20px !important;
     color: #344054 !important;
-}
-
-.passive-device-flex {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
 }
 
 .selected-option-style {

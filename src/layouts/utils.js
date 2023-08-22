@@ -1,5 +1,5 @@
 export const deviceConfigRoutes = [
-    '/settings/active-devices/single',
+    '/settings/smart-plugs/single',
     '/settings/smart-meters/single',
     '/settings/utility-monitors/single',
 ];

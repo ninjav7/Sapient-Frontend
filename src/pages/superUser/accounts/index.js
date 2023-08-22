@@ -336,7 +336,7 @@ const Accounts = () => {
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: 'Active Devices',
+            name: 'Smart Plugs',
             accessor: 'active_devices',
             callbackValue: renderActiveDevices,
             onSort: (method, name) => setSortBy({ method, name }),

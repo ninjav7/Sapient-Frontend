@@ -285,8 +285,8 @@ const ActiveDevices = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'Active Devices',
-                    path: '/settings/active-devices',
+                    label: 'Smart Plugs',
+                    path: '/settings/smart-plugs',
                     active: true,
                 },
             ];
@@ -365,7 +365,7 @@ const ActiveDevices = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/active-devices/single/${row?.bldg_id}/${row.equipments_id}`,
+                    pathname: `/settings/smart-plugs/single/${row?.bldg_id}/${row.equipments_id}`,
                 }}>
                 <a>{row.identifier}</a>
             </Link>
@@ -469,17 +469,17 @@ const ActiveDevices = () => {
                 <Col lg={12}>
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <Typography.Header size={Typography.Sizes.lg}>Active Devices</Typography.Header>
+                            <Typography.Header size={Typography.Sizes.lg}>{`Smart Plugs`}</Typography.Header>
                         </div>
                         {userPermission?.user_role === 'admin' ||
                         userPermission?.permissions?.permissions?.advanced_active_device_permission?.create ? (
                             <div className="d-flex">
                                 <Link
                                     to={{
-                                        pathname: `/settings/active-devices/provision/${bldgId}`,
+                                        pathname: `/settings/smart-plugs/provision/${bldgId}`,
                                     }}>
                                     <Button
-                                        label={'Add Active Device'}
+                                        label={`Add Smart Plug`}
                                         size={Button.Sizes.md}
                                         type={Button.Type.primary}
                                         icon={<PlusSVG />}

@@ -267,13 +267,13 @@ const Provision = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Active Devices',
-                        path: `/settings/active-devices/${bldgId}`,
+                        label: 'Smart Plugs',
+                        path: `/settings/smart-plugs/${bldgId}`,
                         active: false,
                     },
                     {
                         label: 'Provisioning',
-                        path: '/settings/active-devices/provision',
+                        path: '/settings/smart-plugs/provision',
                         active: true,
                     },
                 ];
