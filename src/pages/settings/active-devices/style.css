@@ -621,14 +621,3 @@
     color: #475467;
     margin-right: 2vw;
 }
-
-/* .dropdown-search-clear-icon {
-    opacity: -1 !important;
-} */
-
-.active-device-flex {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-}

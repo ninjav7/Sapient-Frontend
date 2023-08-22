@@ -13,17 +13,17 @@ export const configRoutes = [
     '/settings/layout',
     '/settings/equipment',
     '/settings/panels',
-    '/settings/active-devices',
+    '/settings/smart-plugs',
     '/settings/smart-meters',
     '/settings/utility-monitors',
 ];
 
 export const configChildRoutes = [
     '/settings/panels/edit-panel',
-    '/settings/active-devices/single/',
+    '/settings/smart-plugs/single/',
     '/settings/smart-meters/single/',
     '/settings/utility-monitors/single/',
-    '/settings/active-devices/provision',
+    '/settings/smart-plugs/provision',
 ];
 
 export const isPathInSettingsRoutes = (path, routes) => {

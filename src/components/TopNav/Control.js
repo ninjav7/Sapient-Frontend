@@ -52,7 +52,7 @@ const Control = () => {
         '/settings/layout',
         '/settings/equipment',
         '/settings/panels',
-        '/settings/active-devices',
+        '/settings/smart-plugs',
     ]);
 
     const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
@@ -240,8 +240,8 @@ const Control = () => {
                         return current !== '/settings/panels';
                     })
                 );
-                if (!accountRoutes.includes('/settings/active-devices')) {
-                    setConfigRoutes((el) => [...el, '/settings/active-devices']);
+                if (!accountRoutes.includes('/settings/smart-plugs')) {
+                    setConfigRoutes((el) => [...el, '/settings/smart-plugs']);
                 }
             }
 
@@ -251,7 +251,7 @@ const Control = () => {
             ) {
                 setConfigRoutes((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setConfigRoutes((el) => [...el, '/settings/general']);
@@ -263,7 +263,7 @@ const Control = () => {
             ) {
                 setConfigRoutes((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setConfigRoutes((el) => [...el, '/settings/layout']);
@@ -275,7 +275,7 @@ const Control = () => {
             ) {
                 setConfigRoutes((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setConfigRoutes((el) => [...el, '/settings/equipment']);
@@ -287,7 +287,7 @@ const Control = () => {
             ) {
                 setConfigRoutes((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setConfigRoutes((el) => [...el, '/settings/panels']);

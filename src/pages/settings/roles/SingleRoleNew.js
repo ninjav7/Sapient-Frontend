@@ -2161,11 +2161,11 @@ const SingleRoleNew = () => {
                                         <div className="grid-style-3">
                                             <FormGroup>
                                                 <div className="single-line-style">
-                                                    <h6 className="card-title">Active Devices</h6>
+                                                    <h6 className="card-title">Smart Plugs</h6>
                                                     <h6
                                                         className="card-subtitle mb-2 text-muted"
                                                         htmlFor="customSwitches">
-                                                        Ability to manage active devices in an account.
+                                                        Ability to manage smart plugs in an account.
                                                     </h6>
                                                 </div>
                                             </FormGroup>
