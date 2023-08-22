@@ -167,8 +167,9 @@ const GeneralBuildingSettings = () => {
     const saveBuildingSettings = async () => {
         setLoadButton(true);
         const params = `/${bldgId}`;
+
         let bldgData = {};
-        bldgData.info = buildingDetails;
+        bldgData.info = Object.assign({}, buildingDetails);
 
         // Handle Square Footage / Meter change with converstion check and fix
         if (bldgData.info.square_footage === '') bldgData.info.square_footage = 0;
@@ -316,17 +317,13 @@ const GeneralBuildingSettings = () => {
     const handleBldgSettingChanges = (key, value) => {
         if (key === 'active') {
             let obj = Object.assign({}, buildingDetails);
-
             obj[key] = value;
-
             setBuildingDetails(obj);
         }
 
         if (key === 'name') {
             let obj = Object.assign({}, buildingDetails);
-
             obj[key] = value;
-
             setBuildingDetails(obj);
         }
 
@@ -340,65 +337,49 @@ const GeneralBuildingSettings = () => {
 
         if (key === 'square_footage') {
             let obj = Object.assign({}, buildingDetails);
-
             obj[key] = value;
-
             setBuildingDetails(obj);
         }
 
         if (key === 'street_address') {
             let obj = Object.assign({}, buildingAddress);
-
             obj[key] = value;
-
             setBuildingAddress(obj);
         }
 
         if (key === 'address_2') {
             let obj = Object.assign({}, buildingAddress);
-
             obj[key] = value;
-
             setBuildingAddress(obj);
         }
 
         if (key === 'city') {
             let obj = Object.assign({}, buildingAddress);
-
             obj[key] = value;
-
             setBuildingAddress(obj);
         }
 
         if (key === 'state') {
             let obj = Object.assign({}, buildingAddress);
-
             obj[key] = value;
-
             setBuildingAddress(obj);
         }
 
         if (key === 'zip_code') {
             let obj = Object.assign({}, buildingAddress);
-
             obj[key] = value;
-
             setBuildingAddress(obj);
         }
 
         if (key === 'time_format') {
             let obj = Object.assign({}, buildingDetails);
-
             obj[key] = value;
-
             setBuildingDetails(obj);
         }
 
         if (key === 'timezone') {
             let obj = Object.assign({}, buildingDetails);
-
             obj[key] = value;
-
             setBuildingDetails(obj);
         }
 
