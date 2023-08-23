@@ -1,5 +1,5 @@
 export const BaseUrl = 'https://sapient-dev-service.stacksapien.com';
-
+export const SingularityBaseUrl = 'https://api.singularity.energy/v2/'
 // Auth
 export const signin = '/api/user_role/user/signin';
 export const signup = '/api/user_role/user/signup';
@@ -27,7 +27,9 @@ export const builidingEquipments = '/api/energy/building/equipment';
 export const energyConsumptionByEquipmentType = '/api/v2/metrics/equipmenttype';
 export const energyConsumptionBySpaceType = '/api/v2/metrics/spacetype';
 export const energyConsumptionByFloor = '/api/v2/metrics/floor';
-
+// export const energyCarbonByBuilding = '/api/v2/metrics/building/carbon'
+export const metricsForCarbonBuildingPage = '/api/v2/metrics/building'
+export const metricsKpiForCarbonBuildingPage = '/api/v2/metrics/portfolio/kpi'
 // time of day
 export const builidingHourly = '/api/energy/time_of_day/hourly';
 export const avgDailyUsageByHour = '/api/energy/time_of_day/chart';

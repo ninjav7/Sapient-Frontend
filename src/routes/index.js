@@ -54,6 +54,7 @@ const Portfolio = React.lazy(() => import('../pages/portfolio'));
 
 // building
 const Building = React.lazy(() => import('../pages/buildings'));
+const CarbonBuilding = React.lazy(() => import('../pages/carbonBuilding'));
 
 // endUses
 const EndUses = React.lazy(() => import('../pages/endUses'));
@@ -176,6 +177,14 @@ const portfolioRoutes = {
             route: PrivateRoute,
             visibility: true,
             parent: 'carbon',
+        },
+        {
+            path: '/carbon/building/overview/:bldgId',
+            name: 'Carbon Building Overview',
+            component: CarbonBuilding,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'buildings',
         },
         {
             path: '/energy/time-of-day/:bldgId',

@@ -445,7 +445,7 @@ const CarbonOverview = () => {
                     onClick={() => {
                         updateBuildingStore(row.building_id, row.building_name, row.timezone);
                         history.push({
-                            pathname: `/carbon//overview/${row.building_id}`,
+                            pathname: `/carbon/building/overview/${row.building_id}`,
                         });
                     }}>
                     {row.building_name !== '' ? row.building_name : '-'}
@@ -480,16 +480,7 @@ const CarbonOverview = () => {
             </Typography.Body>
         );
     };
-    const fetchCarbonData = async () => {
-        buildingsData.length &&
-            (await getCarbonBuildingChartData(buildingsData[0].building_id).then((res) => {
-                console.log('RES', res);
-            }));
-    };
-    useEffect(() => {
-        fetchCarbonData();
-    }, [buildingsData]);
-    console.log('buildingsData', buildingsData);
+
 
     const renderChangeEnergy = (row) => {
         return (
