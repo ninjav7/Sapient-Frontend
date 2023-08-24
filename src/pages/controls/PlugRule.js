@@ -485,8 +485,6 @@ const PlugRule = () => {
     useEffect(() => {
         if (currentData?.building_id?.length && currentData?.building_id !== 'create-plug-rule') {
             setActiveBuildingId(currentData.building_id);
-            fetchLinkedSocketRules();
-            fetchLinkedSocketIds();
         }
     }, [currentData.building_id]);
 
@@ -1281,7 +1279,9 @@ const PlugRule = () => {
                         setCheckedToUnlinkAll(true);
                     }
                     setCheckedToUnlinkAll(false);
-                    setSelectedInitialyIds(linkedIds || []);
+                    if (!_.isEqual(selectedInitialyIds, linkedIds)) {
+                        setSelectedInitialyIds(linkedIds || []);
+                    }
                     setLinkedSocketsTabData(response.data);
                     // if (!isSetInitiallySocketsCountLinked) {
                     setCountLinkedSockets(response.total_data);
@@ -2642,7 +2642,8 @@ const PlugRule = () => {
                                             name: 'Location',
                                             accessor: 'equipment_link_location',
                                             callbackValue: renderLocation,
-                                            onSort: (method, name) => setSortByLinkedTab({ method, name }),
+                                            onSort: (method, name) =>
+                                                setSortByLinkedTab({ method, name: 'installed_floor' }),
                                         },
                                         {
                                             name: 'Space Type',
@@ -2751,7 +2752,8 @@ const PlugRule = () => {
                                             name: 'Location',
                                             accessor: 'equipment_link_location',
                                             callbackValue: renderLocation,
-                                            onSort: (method, name) => setSortByUnlinkedTab({ method, name }),
+                                            onSort: (method, name) =>
+                                                setSortByUnlinkedTab({ method, name: 'installed_floor' }),
                                         },
                                         {
                                             name: 'Space Type',
