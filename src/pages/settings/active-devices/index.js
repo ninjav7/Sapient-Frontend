@@ -82,6 +82,8 @@ const ActiveDevices = () => {
     const [deviceIdFilterString, setDeviceIdFilterString] = useState([]);
     const [deviceModelString, setDeviceModelString] = useState([]);
     const [sensorString, setSensorString] = useState([]);
+    const [floorString, setFloorString] = useState([]);
+    const [spaceString, setSpaceString] = useState([]);
     const [firmWareString, setFirmWareString] = useState([]);
     const [hardWareString, setHardWareString] = useState([]);
     const [filterOptions, setFilterOptions] = useState([]);
@@ -104,6 +106,8 @@ const ActiveDevices = () => {
         let sensorSelected = modifySensorFilter(sensorString);
         let firmwareSelected = encodeURIComponent(firmWareString.join('+'));
         let hardwareSelected = encodeURIComponent(hardWareString.join('+'));
+        let floorSelected = encodeURIComponent(floorString.join('+'));
+        let spaceSelected = encodeURIComponent(spaceString.join('+'));
 
         const filters = await fetchActiveFilter({
             bldgId,
@@ -112,8 +116,18 @@ const ActiveDevices = () => {
             sensorSelected,
             firmwareSelected,
             hardwareSelected,
+            floorSelected,
+            spaceSelected,
         });
         filters.data.forEach((filterOptions) => {
+            const sortedFloors = filterOptions?.installed_floor
+                .slice()
+                .sort((a, b) => a.floor_name.localeCompare(b.floor_name));
+
+            const sortedSpaces = filterOptions?.installed_space
+                .slice()
+                .sort((a, b) => a.space_name.localeCompare(b.space_name));
+
             const filterOptionsFetched = [
                 {
                     label: 'Identifier',
@@ -159,6 +173,52 @@ const ActiveDevices = () => {
                     },
                     onDelete: () => {
                         setDeviceModelString([]);
+                    },
+                },
+                {
+                    label: 'Floors',
+                    value: 'floor',
+                    placeholder: 'All Floors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: sortedFloors.map((filterItem) => ({
+                        value: filterItem.floor_id,
+                        label: filterItem.floor_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let sensors = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                sensors.push(opt[i].value);
+                            }
+                            setFloorString(sensors);
+                        }
+                    },
+                    onDelete: () => {
+                        setFloorString([]);
+                    },
+                },
+                {
+                    label: 'Spaces',
+                    value: 'space',
+                    placeholder: 'All Spaces',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: sortedSpaces.map((filterItem) => ({
+                        value: filterItem.space_id,
+                        label: filterItem.space_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let sensors = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                sensors.push(opt[i].value);
+                            }
+                            setSpaceString(sensors);
+                        }
+                    },
+                    onDelete: () => {
+                        setSpaceString([]);
                     },
                 },
                 {
@@ -244,6 +304,8 @@ const ActiveDevices = () => {
         let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
         let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
         let sensorSelected = encodeURIComponent(sensorString.join('+'));
+        let floorSelected = encodeURIComponent(floorString.join('+'));
+        let spaceSelected = encodeURIComponent(spaceString.join('+'));
         let firmwareSelected = encodeURIComponent(firmWareString.join('+'));
         let hardwareSelected = encodeURIComponent(hardWareString.join('+'));
 
@@ -263,7 +325,9 @@ const ActiveDevices = () => {
             deviceModelSelected,
             sensorSelected,
             firmwareSelected,
-            hardwareSelected
+            hardwareSelected,
+            floorSelected,
+            spaceSelected
         )
             .then((res) => {
                 const response = res?.data;
@@ -310,6 +374,8 @@ const ActiveDevices = () => {
         deviceIdFilterString,
         deviceModelString,
         sensorString,
+        floorString,
+        spaceString,
         firmWareString,
         hardWareString,
     ]);
