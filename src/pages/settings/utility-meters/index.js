@@ -87,7 +87,7 @@ const UtilityMeters = () => {
                         }
                         setUtilityMetersData(response?.data);
                     }
-                    setTotalItems(response?.total_data ? response?.total_data : response?.data.length);
+                    setTotalItems(response?.total_data);
                 }
                 setIsDataFetching(false);
             })
