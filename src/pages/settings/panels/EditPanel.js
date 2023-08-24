@@ -22,7 +22,13 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import Brick from '../../../sharedComponents/brick';
 import Panel from '../../../sharedComponents/widgets/panel/Panel';
 import { Breaker } from '../../../sharedComponents/breaker';
-import { compareSensorsCount, getVoltageConfigValue, toFindDuplicates, validateBreakerConfiguration } from './utils';
+import {
+    compareSensorsCount,
+    fetchEquipmentName,
+    getVoltageConfigValue,
+    toFindDuplicates,
+    validateBreakerConfiguration,
+} from './utils';
 import { comparePanelData } from './utils';
 import { buildingData, userPermissionData } from '../../../store/globalState';
 import { Button } from '../../../sharedComponents/button';
@@ -1414,7 +1420,7 @@ const EditPanel = () => {
                 }}
                 callBackBreakerProps={({ breakerProps, breakerData }) => {
                     const type = breakerData?.breaker_state;
-                    const equipmentName = breakerData?.equipment_links[0]?.name;
+                    const equipmentName = fetchEquipmentName(breakerData);
                     const status = breakerData?.status;
                     const isLoading = breakerData?.id === breakerUpdateId;
                     return {

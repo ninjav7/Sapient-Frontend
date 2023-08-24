@@ -131,6 +131,16 @@ export const getBreakerType = (breaker_lvl) => {
     if (breaker_lvl === 3) return 'triple';
 };
 
+export const fetchEquipmentName = (breakerObj) => {
+    let equipName = ``;
+    if (breakerObj?.type === `unwired` || breakerObj?.type === `blank`) {
+        equipName = breakerObj?.type === `unwired` ? `Unwired` : `Blank`;
+    } else {
+        equipName = breakerObj?.equipment_links[0]?.name;
+    }
+    return equipName;
+};
+
 export const validateBreakerConfiguration = (sourceBreakerObj, targetBreakerObj) => {
     let isGroupable = true;
     let alertText = '';
