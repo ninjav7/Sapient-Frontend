@@ -130,8 +130,7 @@ const SecondaryTopNavBar = () => {
             configChildRoutes.forEach((route) => {
                 if (path.includes(route)) {
                     if (path.includes('edit-panel')) redirectToEndpoint(`/settings/panels/${record?.value}`);
-                    if (path.includes('active-devices'))
-                        redirectToEndpoint(`/settings/active-devices/${record?.value}`);
+                    if (path.includes('smart-plugs')) redirectToEndpoint(`/settings/smart-plugs/${record?.value}`);
                     if (path.includes('smart-meters')) redirectToEndpoint(`/settings/smart-meters/${record?.value}`);
                     if (path.includes('utility-monitors'))
                         redirectToEndpoint(`/settings/utility-monitors/${record?.value}`);

@@ -87,7 +87,7 @@ const Buildings = () => {
         '/settings/layout',
         '/settings/equipment',
         '/settings/panels',
-        '/settings/active-devices',
+        '/settings/smart-plugs',
     ]);
 
     const resetBuildingFilter = () => {
@@ -207,8 +207,8 @@ const Buildings = () => {
                         return current !== '/settings/panels';
                     })
                 );
-                if (!internalRoute.includes('/settings/active-devices')) {
-                    setInternalRoute((el) => [...el, '/settings/active-devices']);
+                if (!internalRoute.includes('/settings/smart-plugs')) {
+                    setInternalRoute((el) => [...el, '/settings/smart-plugs']);
                 }
             }
 
@@ -218,7 +218,7 @@ const Buildings = () => {
             ) {
                 setInternalRoute((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setInternalRoute((el) => [...el, '/settings/general']);
@@ -230,7 +230,7 @@ const Buildings = () => {
             ) {
                 setInternalRoute((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setInternalRoute((el) => [...el, '/settings/layout']);
@@ -242,7 +242,7 @@ const Buildings = () => {
             ) {
                 setInternalRoute((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setInternalRoute((el) => [...el, '/settings/equipment']);
@@ -254,7 +254,7 @@ const Buildings = () => {
             ) {
                 setInternalRoute((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setInternalRoute((el) => [...el, '/settings/panels']);

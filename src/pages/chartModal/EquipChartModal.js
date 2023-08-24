@@ -264,11 +264,11 @@ const EquipChartModal = ({
             return '';
         }
 
-        if (deviceType === 'active-device') {
-            return `/settings/active-devices/single/${bldgId}/${equipDeviceId}`;
+        if (deviceType === 'smart-plugs') {
+            return `/settings/smart-plugs/single/${bldgId}/${equipDeviceId}`;
         }
 
-        if (deviceType === 'passive-device') {
+        if (deviceType === 'smart-meters') {
             return `/settings/smart-meters/single/${bldgId}/${equipDeviceId}`;
         }
     };
@@ -278,11 +278,11 @@ const EquipChartModal = ({
             return;
         }
 
-        if (deviceType === 'active-device') {
-            history.push({ pathname: `/settings/active-devices/single/${bldgId}/${equipDeviceId}` });
+        if (deviceType === 'smart-plugs') {
+            history.push({ pathname: `/settings/smart-plugs/single/${bldgId}/${equipDeviceId}` });
         }
 
-        if (deviceType === 'passive-device') {
+        if (deviceType === 'smart-meters') {
             history.push({ pathname: `/settings/smart-meters/single/${bldgId}/${equipDeviceId}` });
         }
     };
@@ -600,9 +600,9 @@ const EquipChartModal = ({
                                                     to={redirectToConfigDevicePageLink(
                                                         equipData?.device_id,
                                                         equipData?.device_type === 'passive'
-                                                            ? 'passive-device'
+                                                            ? 'smart-meters'
                                                             : equipData?.device_type === 'active'
-                                                            ? 'active-device'
+                                                            ? 'smart-plugs'
                                                             : ''
                                                     )}>
                                                     <span
@@ -1026,7 +1026,7 @@ const EquipChartModal = ({
                                                             onClick={() => {
                                                                 redirectToConfigDevicePage(
                                                                     equipData?.device_id,
-                                                                    'passive-device'
+                                                                    'smart-meters'
                                                                 );
                                                             }}
                                                             disabled={
@@ -1130,7 +1130,7 @@ const EquipChartModal = ({
                                                         onClick={() => {
                                                             redirectToConfigDevicePage(
                                                                 equipData?.device_id,
-                                                                'active-device'
+                                                                'smart-plugs'
                                                             );
                                                         }}
                                                         className="m-0"
