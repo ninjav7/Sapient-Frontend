@@ -6,20 +6,16 @@ import { formatConsumptionValue } from '../../helpers/helpers';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { useHistory } from 'react-router-dom';
 import { ComponentStore } from '../../store/ComponentStore';
-import { fetchCompareBuildings } from '../../services/compareBuildings';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { percentageHandler } from '../../utils/helper';
 import Typography from '../../sharedComponents/typography';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import { getCompareBuildingTableCSVExport } from '../../utils/tablesExport';
 import { Badge } from '../../sharedComponents/badge';
 import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
-import './style.css';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { timeZone } from '../../utils/helper';
-import { BuildingStore } from '../../store/BuildingStore';
 import { apiRequestBody } from '../../helpers/helpers';
 import { primaryGray1000 } from '../../assets/scss/_colors.scss';
 import { getAverageValue } from '../../helpers/AveragePercent';
@@ -28,6 +24,8 @@ import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { UserStore } from '../../store/UserStore';
 import { UNITS } from '../../constants/units';
 import { handleUnitConverstion } from '../settings/general-settings/utils';
+import { fetchCompareBuildingsV2 } from './services';
+import './style.css';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color={primaryGray1000} height={35}>
@@ -43,6 +41,9 @@ const SkeletonLoading = () => (
                 <Skeleton count={5} />
             </th>
 
+            <th>
+                <Skeleton count={5} />
+            </th>
             <th>
                 <Skeleton count={5} />
             </th>
@@ -129,10 +130,10 @@ const CompareBuildings = () => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {`${formatConsumptionValue(row?.energy_density, 2)} ${row?.energy_density_units}`}
+                    {`${formatConsumptionValue(row?.average_consumption, 2)} ${row?.average_consumption_units}`}
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
-                <TinyBarChart percent={getAverageValue(row.energy_density, 0, top)} />
+                <TinyBarChart percent={getAverageValue(row.average_consumption, 0, top)} />
             </>
         );
     };
@@ -143,6 +144,10 @@ const CompareBuildings = () => {
                 {`${formatConsumptionValue(Math.round(row.total_consumption / 1000))} ${UNITS.KWH}`}
             </Typography.Body>
         );
+    };
+
+    const renderEquipmentCount = (row) => {
+        return <Typography.Body size={Typography.Sizes.md}>{`${row.equipment_count}`}</Typography.Body>;
     };
 
     const renderChangeEnergy = (row) => {
@@ -176,9 +181,8 @@ const CompareBuildings = () => {
         },
         {
             name: `Average Consumption / ${userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`}`,
-            accessor: 'energy_density',
+            accessor: 'average_consumption',
             callbackValue: renderEnergyDensity,
-
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
@@ -199,27 +203,44 @@ const CompareBuildings = () => {
             callbackValue: renderSquareFootage,
             onSort: (method, name) => setSortBy({ method, name }),
         },
+        {
+            name: 'Equipment Count',
+            accessor: 'equipment_count',
+            callbackValue: renderEquipmentCount,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
     ]);
 
-    const fetchcompareBuildingsData = async (search, ordered_by = 'energy_density', sort_by, userPrefUnits) => {
+    const fetchCompareBuildingsData = async (search, ordered_by = 'total_consumption', sort_by, userPrefUnits) => {
         setIsLoadingBuildingData(true);
-        let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?ordered_by=${ordered_by}`;
+
+        const start_date = encodeURIComponent(startDate);
+        const end_date = encodeURIComponent(endDate);
+
+        let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&ordered_by=${ordered_by}`;
+
         if (search) params = params.concat(`&building_search=${encodeURIComponent(search)}`);
         if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
-        await fetchCompareBuildings(params, payload)
+
+        await fetchCompareBuildingsV2(params)
             .then((res) => {
-                let response = res?.data;
-                let topVal = Math.max(...response.map((o) => o.energy_density));
-                top = Math.max(...response.map((o) => o.energy_density));
-                response.length !== 0 &&
-                    response.forEach((el) => {
-                        el.square_footage = Math.round(handleUnitConverstion(el.square_footage, userPrefUnits));
-                        el.energy_density = el?.energy_density / 1000;
-                        el.energy_density_units = `${userPrefUnits === 'si' ? `kWh / sq. m.` : `kWh / sq. ft.`}`;
-                    });
-                setTopEnergyDensity(topVal);
-                setBuildingsData(response);
+                const response = res?.data;
+                if (response?.success) {
+                    let responseData = response?.data;
+
+                    let topVal = Math.max(...responseData.map((o) => o.average_consumption));
+                    top = Math.max(...responseData.map((o) => o.average_consumption));
+                    responseData.length !== 0 &&
+                        responseData.forEach((el) => {
+                            el.square_footage = Math.round(handleUnitConverstion(el.square_footage, userPrefUnits));
+                            el.average_consumption = el?.average_consumption / 1000;
+                            el.average_consumption_units = `${
+                                userPrefUnits === 'si' ? `kWh / sq. m.` : `kWh / sq. ft.`
+                            }`;
+                        });
+                    setTopEnergyDensity(topVal);
+                    setBuildingsData(responseData);
+                }
                 setIsLoadingBuildingData(false);
             })
             .catch((error) => {
@@ -252,7 +273,7 @@ const CompareBuildings = () => {
         if (userPrefUnits) {
             let newHeaderList = tableHeader;
             newHeaderList.forEach((record) => {
-                if (record?.accessor === 'energy_density') {
+                if (record?.accessor === 'average_consumption') {
                     record.name = `Average Consumption / ${
                         userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`
                     }`;
@@ -267,10 +288,10 @@ const CompareBuildings = () => {
     }, [userPrefUnits]);
 
     useEffect(() => {
-        const ordered_by = sortBy.name === undefined ? 'energy_density' : sortBy.name;
+        const ordered_by = sortBy.name === undefined ? 'total_consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
 
-        fetchcompareBuildingsData(search, ordered_by, sort_by, userPrefUnits);
+        fetchCompareBuildingsData(search, ordered_by, sort_by, userPrefUnits);
     }, [search, sortBy, daysCount, userPrefUnits]);
 
     useEffect(() => {

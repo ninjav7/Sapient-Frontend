@@ -36,7 +36,7 @@ export function fetchEnergyConsumption(bldgId, payload) {
 }
 
 export function fetchEnergyConsumptionV2(payload) {
-    const params = `?date_from=${payload?.date_from}&date_to=${payload?.date_to}&timezone=${payload?.tz_info}`;
+    const params = `?date_from=${payload?.date_from}&date_to=${payload?.date_to}&tz_info=${payload?.tz_info}`;
     return axiosInstance.get(`${getEnergyConsumptionV2}/${payload?.bldg_id}${params}`).then((res) => res);
 }
 
