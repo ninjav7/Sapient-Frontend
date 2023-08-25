@@ -47,6 +47,9 @@ const SkeletonLoading = () => (
             <th>
                 <Skeleton count={5} />
             </th>
+            <th>
+                <Skeleton count={5} />
+            </th>
         </tr>
     </SkeletonTheme>
 );
@@ -143,6 +146,10 @@ const CompareBuildings = () => {
         );
     };
 
+    const renderEquipmentCount = (row) => {
+        return <Typography.Body size={Typography.Sizes.md}>{`${row.equipment_count}`}</Typography.Body>;
+    };
+
     const renderChangeEnergy = (row) => {
         return (
             <div>
@@ -176,7 +183,6 @@ const CompareBuildings = () => {
             name: `Average Consumption / ${userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`}`,
             accessor: 'average_consumption',
             callbackValue: renderEnergyDensity,
-
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
@@ -197,9 +203,15 @@ const CompareBuildings = () => {
             callbackValue: renderSquareFootage,
             onSort: (method, name) => setSortBy({ method, name }),
         },
+        {
+            name: 'Equipment Count',
+            accessor: 'equipment_count',
+            callbackValue: renderEquipmentCount,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
     ]);
 
-    const fetchCompareBuildingsData = async (search, ordered_by = 'average_consumption', sort_by, userPrefUnits) => {
+    const fetchCompareBuildingsData = async (search, ordered_by = 'total_consumption', sort_by, userPrefUnits) => {
         setIsLoadingBuildingData(true);
 
         const start_date = encodeURIComponent(startDate);
@@ -276,7 +288,7 @@ const CompareBuildings = () => {
     }, [userPrefUnits]);
 
     useEffect(() => {
-        const ordered_by = sortBy.name === undefined ? 'average_consumption' : sortBy.name;
+        const ordered_by = sortBy.name === undefined ? 'total_consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
 
         fetchCompareBuildingsData(search, ordered_by, sort_by, userPrefUnits);
