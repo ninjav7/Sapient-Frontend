@@ -228,7 +228,6 @@ const CompareBuildings = () => {
                         });
                     setTopEnergyDensity(topVal);
                     setBuildingsData(responseData);
-                    console.log('SSR response => ', responseData);
                 }
                 setIsLoadingBuildingData(false);
             })
