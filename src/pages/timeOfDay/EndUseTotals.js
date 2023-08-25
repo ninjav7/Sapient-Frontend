@@ -14,7 +14,7 @@ const EndUseTotals = ({ energyConsumption, className = '', isPlugOnly }) => {
             const label = record?.name;
             const value = Math.round(record?.consumption?.now / 1000);
             const trendValue = percentageHandler(record?.consumption?.now, record?.consumption?.old);
-            const color = record?.name === 'On-hours' ? colorPalette.datavizMain1 : colorPalette.datavizMain2;
+            const color = record?.name === 'Occupied Hours' ? colorPalette.datavizMain1 : colorPalette.datavizMain2;
             const trendType =
                 record?.consumption?.now <= record?.consumption?.old
                     ? TRENDS_BADGE_TYPES.DOWNWARD_TREND
@@ -43,7 +43,7 @@ const EndUseTotals = ({ energyConsumption, className = '', isPlugOnly }) => {
         <div>
             <DonutChartWidget
                 id="consumptionEnergyDonut"
-                title={isPlugOnly ? `On-Hours / After-Hours Energy` : `After-Hours Energy`}
+                title={isPlugOnly ? `Occupied Hours / Off Hours Energy` : `Off Hours Energy`}
                 subtitle={`Energy Total (kWh)`}
                 items={donutChartData}
                 type={DONUT_CHART_TYPES.VERTICAL}

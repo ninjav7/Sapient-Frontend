@@ -682,7 +682,7 @@ const BuildingOverview = () => {
                     <div className="mt-4">
                         <EnergyConsumptionChart
                             title="Energy Consumption by Equipment Type"
-                            subTitle="Office-Hours and After-Hours Energy Used"
+                            subTitle="Occupied Hours and Off Hours Energy Used"
                             isFetching={isFetchingEquipType}
                             rows={equipTypeData}
                             totalBldgUsage={totalBldgUsageByEquipType}
@@ -691,7 +691,7 @@ const BuildingOverview = () => {
                     <div className="mt-4">
                         <EnergyConsumptionChart
                             title="Energy Consumption by Space Type"
-                            subTitle="Office-Hours and After-Hours Energy Used"
+                            subTitle="Occupied Hours and Off Hours Energy Used"
                             isFetching={isFetchingSpaceType}
                             rows={spaceTypeData}
                             totalBldgUsage={totalBldgUsageBySpaceType}
@@ -700,7 +700,7 @@ const BuildingOverview = () => {
                     <div className="mt-4">
                         <EnergyConsumptionChart
                             title="Energy Consumption by Floor"
-                            subTitle="Office-Hours and After-Hours Energy Used"
+                            subTitle="Occupied Hours and Off Hours Energy Used"
                             isFetching={isFetchingFloor}
                             rows={floorData}
                             totalBldgUsage={totalBldgUsageByFloor}
