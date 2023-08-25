@@ -14,7 +14,8 @@ const EndUseTotals = ({ energyConsumption, className = '', isPlugOnly }) => {
             const label = record?.name;
             const value = Math.round(record?.consumption?.now / 1000);
             const trendValue = percentageHandler(record?.consumption?.now, record?.consumption?.old);
-            const color = record?.name === 'Occupied Hours' ? colorPalette.datavizMain2 : colorPalette.datavizMain9;
+            const color =
+                record?.name === 'Occupied Hours' ? colorPalette.sapientSpecificHvac : colorPalette.datavizRed300;
             const trendType =
                 record?.consumption?.now <= record?.consumption?.old
                     ? TRENDS_BADGE_TYPES.DOWNWARD_TREND
