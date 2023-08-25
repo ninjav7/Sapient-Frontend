@@ -133,6 +133,7 @@ export const getBuildingTypes = '/api/config/building-types';
 
 // compare-buildings
 export const compareBuildings = '/api/energy/energy/compare-buildings';
+export const compareBuildingsV2 = '/api/v2/metrics/portfolio/compare-buildings';
 
 //config settings
 export const getBuildings = '/api/config/get_buildings';
