@@ -3,24 +3,24 @@ import Modal from 'react-bootstrap/Modal';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
-import { deleteEquipmentTypeData } from './services';
+import { deleteSpaceTypeData } from './services';
 import { UserStore } from '../../../store/UserStore';
 
-const DeleteEquipType = ({
-    isDeleteEquipTypeModalOpen,
-    closeDeleteEquipTypeModal,
-    selectedEquipType,
-    fetchEquipTypeData,
+const DeleteSpaceType = ({
+    isDeleteSpaceTypeModalOpen,
+    closeDeleteSpaceTypeModal,
+    fetchSpaceTypeData,
+    selectedSpaceType,
     search,
-    openEditEquipTypeModal,
 }) => {
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [equipTypeId, setEquipTypeId] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [spaceTypeId, setSpaceTypeId] = useState('');
 
-    const handleEquipTypeDelete = async () => {
-        setIsProcessing(true);
-        let params = `?equipment_type_id=${equipTypeId}`;
-        await deleteEquipmentTypeData(params)
+    const handleSpaceTypeDelete = async () => {
+        setIsDeleting(true);
+        const params = `/${spaceTypeId}`;
+
+        await deleteSpaceTypeData(params)
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
@@ -35,15 +35,15 @@ const DeleteEquipType = ({
                         s.notificationMessage = response?.message
                             ? response?.message
                             : res
-                            ? 'Unable to Delete Equipment Type.'
-                            : 'Unable to delete Equipment Type due to Internal Server Error!.';
+                            ? 'Unable to Delete Space Type.'
+                            : 'Unable to delete Space Type due to Internal Server Error!.';
                         s.notificationType = 'error';
                     });
                 }
-                closeDeleteEquipTypeModal();
-                setEquipTypeId('');
-                fetchEquipTypeData(search);
-                setIsProcessing(false);
+                setIsDeleting(false);
+                closeDeleteSpaceTypeModal();
+                setSpaceTypeId('');
+                fetchSpaceTypeData(search);
             })
             .catch((error) => {
                 UserStore.update((s) => {
@@ -51,31 +51,34 @@ const DeleteEquipType = ({
                     s.notificationMessage = 'Internal Server Error! Unable to delete record.';
                     s.notificationType = 'error';
                 });
-                setIsProcessing(false);
+                setIsDeleting(false);
             });
     };
 
     const handleDeleteAlertClose = () => {
-        closeDeleteEquipTypeModal();
-        if (openEditEquipTypeModal) openEditEquipTypeModal();
+        closeDeleteSpaceTypeModal();
     };
 
     useEffect(() => {
-        if (isDeleteEquipTypeModalOpen) setEquipTypeId(selectedEquipType?.equipment_id);
-    }, [isDeleteEquipTypeModalOpen]);
+        if (isDeleteSpaceTypeModalOpen) {
+            setSpaceTypeId(selectedSpaceType?.id);
+        } else {
+            setSpaceTypeId('');
+        }
+    }, [isDeleteSpaceTypeModalOpen]);
 
     return (
         <Modal
-            show={isDeleteEquipTypeModalOpen}
-            onHide={closeDeleteEquipTypeModal}
+            show={isDeleteSpaceTypeModalOpen}
+            onHide={closeDeleteSpaceTypeModal}
             centered
             backdrop="static"
             keyboard={false}>
             <Modal.Body className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>Delete Equipment Type</Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>{`Delete Space Type`}</Typography.Header>
                 <Brick sizeInRem={1.5} />
                 <Typography.Body size={Typography.Sizes.lg}>
-                    Are you sure you want to delete the Equipment Type?
+                    {`Are you sure you want to delete the Space Type?`}
                 </Typography.Body>
             </Modal.Body>
             <Modal.Footer className="pb-4 pr-4">
@@ -86,15 +89,15 @@ const DeleteEquipType = ({
                     onClick={handleDeleteAlertClose}
                 />
                 <Button
-                    label={isProcessing ? 'Deleting' : 'Delete'}
+                    label={isDeleting ? 'Deleting' : 'Delete'}
                     size={Button.Sizes.lg}
                     type={Button.Type.primaryDistructive}
-                    disabled={isProcessing}
-                    onClick={handleEquipTypeDelete}
+                    disabled={isDeleting}
+                    onClick={handleSpaceTypeDelete}
                 />
             </Modal.Footer>
         </Modal>
     );
 };
 
-export default DeleteEquipType;
+export default DeleteSpaceType;

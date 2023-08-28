@@ -7,7 +7,7 @@ import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { getEndUseData, updateEquipTypeData } from './services';
 import Select from '../../../sharedComponents/form/select';
 import { UserStore } from '../../../store/UserStore';
-import DeleteEquipType from './DeleteEquipType';
+import DeleteEquipType from './DeleteSpaceType';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 
 const EditEquipType = ({

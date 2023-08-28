@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { useAtom } from 'jotai';
+import _ from 'lodash';
 import { userPermissionData } from '../../../store/globalState';
-import CreateEquipType from './CreateEquipType';
+import CreateSpaceType from './CreateSpaceType';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
-import { getEquipTypeData, fetchEquipmentTypeFilter } from './services';
+import { getSpaceTypesList } from './services';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { getEquipTypeTableCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
@@ -16,17 +17,12 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { pageListSizes } from '../../../helpers/helpers';
 import EditEquipType from './EditEquipType';
-import DeleteEquipType from './DeleteEquipType';
-import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
+import DeleteSpaceType from './DeleteSpaceType';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
         <tr>
-            <th>
-                <Skeleton count={10} />
-            </th>
-
             <th>
                 <Skeleton count={10} />
             </th>
@@ -49,94 +45,83 @@ const SkeletonLoading = () => (
 const SpaceTypes = () => {
     const [userPermission] = useAtom(userPermissionData);
 
-    // Add EquipType Modal states
-    const [isAddEquipTypeModalOpen, setEquipTypeModal] = useState(false);
-    const closeAddEquipTypeModal = () => setEquipTypeModal(false);
-    const openAddEquipTypeModal = () => setEquipTypeModal(true);
+    // Add SpaceType Modal states
+    const [isAddSpaceTypeModalOpen, setSpaceTypeModal] = useState(false);
+    const closeAddSpaceTypeModal = () => setSpaceTypeModal(false);
+    const openAddSpaceTypeModal = () => setSpaceTypeModal(true);
 
-    // Edit EquipType Modal states
-    const [isEditEquipTypeModalOpen, setEditEquipTypeModal] = useState(false);
-    const closeEditEquipTypeModal = () => setEditEquipTypeModal(false);
-    const openEditEquipTypeModal = () => setEditEquipTypeModal(true);
+    // Edit SpaceType Modal states
+    const [isEditSpaceTypeModalOpen, setEditSpaceTypeModal] = useState(false);
+    const closeEditSpaceTypeModal = () => setEditSpaceTypeModal(false);
+    const openEditSpaceTypeModal = () => setEditSpaceTypeModal(true);
 
-    // Delete EquipType Modal states
-    const [isDeleteEquipTypeModalOpen, setDeleteEquipTypeModal] = useState(false);
-    const closeDeleteEquipTypeModal = () => setDeleteEquipTypeModal(false);
-    const openDeleteEquipTypeModal = () => setDeleteEquipTypeModal(true);
+    // Delete SpaceType Modal states
+    const [isDeleteSpaceTypeModalOpen, setDeleteSpaceTypeModal] = useState(false);
+    const closeDeleteSpaceTypeModal = () => setDeleteSpaceTypeModal(false);
+    const openDeleteSpaceTypeModal = () => setDeleteSpaceTypeModal(true);
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
 
-    const [selectedEquipType, setSelectedEquipType] = useState({});
-    const [filterOptions, setFilterOptions] = useState([]);
+    const [selectedSpaceType, setSelectedSpaceType] = useState({});
 
     const { download } = useCSVDownload();
 
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
 
-    const [equipTypeData, setEquipTypeData] = useState([]);
+    const [spaceTypesData, setSpaceTypesData] = useState([]);
+    const [customSpaceTypes, setCustomSpaceTypes] = useState([]);
+    const [systemSpaceTypes, setSystemSpaceTypes] = useState([]);
+
     const [isDataFetching, setDataFetching] = useState(false);
+
     const [totalItems, setTotalItems] = useState(0);
     const [selectedFilter, setSelectedFilter] = useState(0);
     const [EndUseString, SetEndUseString] = useState([]);
 
-    const [equipCountAPIFlag, setEquipCountAPIFlag] = useState('');
-    const [minVal, setMinVal] = useState(0);
-    const [maxVal, setMaxVal] = useState(0);
-    const [minEquipCount, setMinEquipCount] = useState(0);
-    const [maxEquipCount, setMaxEquipCount] = useState(0);
-    const [filterData, setFilterData] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState(0);
 
     const handleEdit = (record) => {
-        setSelectedEquipType(record);
-        openEditEquipTypeModal();
+        setSelectedSpaceType(record);
+        openEditSpaceTypeModal();
     };
 
     const handleDelete = (record) => {
-        setSelectedEquipType(record);
-        openDeleteEquipTypeModal();
+        setSelectedSpaceType(record);
+        openDeleteSpaceTypeModal();
     };
 
     const handleAbleToDeleteRow = (row) => {
-        return row?.status.toLowerCase() === 'system' ? false : true;
+        return row?.is_custom ? true : false;
     };
 
     const handleAbleToEditRow = (row) => {
-        return row?.status.toLowerCase() === 'system' ? false : true;
+        return row?.is_custom ? true : false;
     };
 
-    const fetchEquipTypeData = async (
-        searchTxt,
-        page_no = 1,
-        page_size = 20,
-        ordered_by = 'equipment_type',
-        sort_by
-    ) => {
-        let endUseIds = encodeURIComponent(EndUseString.join('+'));
+    const fetchSpaceTypeData = async (searchTxt, page_no = 1, page_size = 20, ordered_by = 'name', sort_by) => {
         setDataFetching(true);
-        let params = `?page_size=${page_size}&page_no=${page_no}&ordered_by=${ordered_by}`;
-        if (searchTxt) params = params.concat(`&equipment_search=${encodeURIComponent(searchTxt)}`);
-        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
-        if (endUseIds.length) {
-            params += `&end_use_id=${endUseIds}`;
-        }
-        if (equipCountAPIFlag !== '') {
-            params += `&equipment_count_min=${minEquipCount}&equipment_count_max=${maxEquipCount}`;
-        }
-        if (selectedStatus == 2) {
-            params += `&status=Custom`;
-        }
-        if (selectedStatus == 1) {
-            params += `&status=System`;
-        }
 
-        await getEquipTypeData(params)
+        const params = `?page_size=${page_size}&page_no=${page_no}&ordered_by=${ordered_by}&sort_by=${sort_by}`;
+
+        await getSpaceTypesList(params)
             .then((res) => {
                 const response = res?.data;
-                setTotalItems(response?.total_data);
-                setEquipTypeData(response?.data);
+                if (response?.success) {
+                    if (response?.data[0]) {
+                        const sortedSystemTypes = _.sortBy(response?.data[0]?.generic_spacetypes, 'name');
+                        const sortedCustomTypes = _.sortBy(response?.data[0]?.user_defined_spacetypes, 'name');
+                        let mergeResult = [
+                            ...response?.data[0]?.generic_spacetypes,
+                            ...response?.data[0]?.user_defined_spacetypes,
+                        ];
+                        mergeResult = _.sortBy(mergeResult, 'name');
+                        setSpaceTypesData(mergeResult);
+                        setSystemSpaceTypes(sortedSystemTypes);
+                        setCustomSpaceTypes(sortedCustomTypes);
+                    }
+                }
                 setDataFetching(false);
             })
             .catch(() => {
@@ -144,88 +129,12 @@ const SpaceTypes = () => {
             });
     };
 
-    const getFilters = async () => {
-        let EndUseSelected = encodeURIComponent(EndUseString.join('+'));
-        const filters = await fetchEquipmentTypeFilter({
-            EndUseSelected,
-        });
-        setFilterData(filters.data);
-        setMinVal(filters?.data[0]?.equipment_linked_min);
-        setMaxVal(filters?.data[0]?.equipment_linked_max);
-        setMinEquipCount(filters?.data[0]?.equipment_linked_min);
-        setMaxEquipCount(filters?.data[0]?.equipment_linked_max);
-    };
-
-    useEffect(() => {
-        if (minEquipCount !== maxEquipCount && maxEquipCount !== 0) {
-            if (Object.keys(filterData).length !== 0) {
-                filterData.forEach((filterOptions) => {
-                    const filterOptionsFetched = [
-                        {
-                            label: 'End Use',
-                            value: 'identifier',
-                            placeholder: 'All End Uses',
-                            filterType: FILTER_TYPES.MULTISELECT,
-                            filterOptions: filterOptions.end_use.map((filterItem) => ({
-                                value: filterItem?.end_use_id,
-                                label: filterItem?.end_use_name,
-                            })),
-                            onClose: (options) => {
-                                let opt = options;
-                                if (opt.length !== 0) {
-                                    let endUses = [];
-                                    for (let i = 0; i < opt.length; i++) {
-                                        endUses.push(opt[i].value);
-                                    }
-                                    SetEndUseString(endUses);
-                                }
-                            },
-                            onDelete: () => {
-                                SetEndUseString([]);
-                            },
-                        },
-                        {
-                            label: 'Equipment Count',
-                            value: 'equipment_count',
-                            placeholder: 'All Equipment Count',
-                            filterType: FILTER_TYPES.RANGE_SELECTOR,
-                            filterOptions: [minEquipCount, maxEquipCount],
-                            componentProps: {
-                                prefix: '',
-                                title: 'Equipment Count',
-                                min: minVal,
-                                max: maxVal,
-                                range: [minEquipCount, maxEquipCount],
-                                withTrendsFilter: false,
-                            },
-                            onClose: function onClose(options) {
-                                setMinEquipCount(options[0]);
-                                setMaxEquipCount(options[1]);
-                                setEquipCountAPIFlag(options[0] + options[1]);
-                            },
-                            onDelete: () => {
-                                setMinEquipCount(0);
-                                setMaxEquipCount(maxVal);
-                                setEquipCountAPIFlag('');
-                            },
-                        },
-                    ];
-                    setFilterOptions(filterOptionsFetched);
-                });
-            }
-        }
-    }, [minEquipCount, maxEquipCount]);
-
-    useEffect(() => {
-        getFilters();
-    }, [search]);
-
     const handleDownloadCsv = async () => {
-        await getEquipTypeData()
+        await getSpaceTypesList()
             .then((res) => {
                 const responseData = res?.data?.data;
                 download(
-                    `Equipment_Types_${new Date().toISOString().split('T')[0]}`,
+                    `Space_Types_${new Date().toISOString().split('T')[0]}`,
                     getEquipTypeTableCSVExport(responseData, headerProps)
                 );
             })
@@ -233,39 +142,29 @@ const SpaceTypes = () => {
     };
 
     const currentRow = () => {
-        if (selectedFilter === 0) {
-            return equipTypeData;
-        }
+        let showData = [];
+        if (selectedStatus === 0) showData = spaceTypesData;
+        if (selectedStatus === 1) showData = systemSpaceTypes;
+        if (selectedStatus === 2) showData = customSpaceTypes;
+        return showData;
     };
 
-    const renderEquipTypeName = (row) => {
-        return (
-            <div className="typography-wrapper link mouse-pointer">
-                {row?.equipment_type === '' ? '-' : row?.equipment_type}
-            </div>
-        );
+    const renderSpaceTypeName = (row) => {
+        return <div className="typography-wrapper link mouse-pointer">{row?.name === '' ? '-' : row?.name}</div>;
     };
 
-    const renderEquipTypeClass = (row) => {
+    const renderSpaceTypeClass = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md} className="gray-950">
-                {row?.status === '' ? '-' : row?.status}
+                {row?.is_custom ? `Custom` : `System`}
             </Typography.Body>
         );
     };
 
-    const renderEndUse = (row) => {
+    const renderSpaceCount = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {row?.end_use_name === '' ? '-' : row?.end_use_name}
-            </Typography.Body>
-        );
-    };
-
-    const renderEquipCount = (row) => {
-        return (
-            <Typography.Body size={Typography.Sizes.md}>
-                {row?.equipment_count ? formatConsumptionValue(row?.equipment_count, 0) : 0}
+                {row?.space_count ? formatConsumptionValue(row?.space_count, 0) : 0}
             </Typography.Body>
         );
     };
@@ -273,57 +172,52 @@ const SpaceTypes = () => {
     const headerProps = [
         {
             name: 'Name',
-            accessor: 'equipment_type',
-            callbackValue: renderEquipTypeName,
+            accessor: 'name',
+            callbackValue: renderSpaceTypeName,
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Class',
-            accessor: 'status',
-            callbackValue: renderEquipTypeClass,
+            accessor: 'is_custom',
+            callbackValue: renderSpaceTypeClass,
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: 'End Use',
-            accessor: 'end_use_name',
-            callbackValue: renderEndUse,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Equipment Count',
-            accessor: 'equipment_count',
-            callbackValue: renderEquipCount,
+            name: 'Space Count',
+            accessor: 'space_count',
+            callbackValue: renderSpaceCount,
             onSort: (method, name) => setSortBy({ method, name }),
         },
     ];
 
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Space Types',
+                    path: '/settings/space-types',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'account';
+        });
+    };
+
     useEffect(() => {
-        const ordered_by = sortBy.name === undefined ? 'equipment_type' : sortBy.name;
+        const ordered_by = sortBy.name === undefined ? 'name' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
 
-        fetchEquipTypeData(search, pageNo, pageSize, ordered_by, sort_by);
-    }, [search, pageNo, pageSize, sortBy, EndUseString, equipCountAPIFlag, selectedStatus]);
+        fetchSpaceTypeData(search, pageNo, pageSize, ordered_by, sort_by);
+    }, [search, pageNo, pageSize, sortBy]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [pageNo, pageSize]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Space Types',
-                        path: '/settings/space-types',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'account';
-            });
-        };
         updateBreadcrumbStore();
     }, []);
 
@@ -343,7 +237,7 @@ const SpaceTypes = () => {
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
                                     onClick={() => {
-                                        openAddEquipTypeModal();
+                                        openAddSpaceTypeModal();
                                     }}
                                     icon={<PlusSVG />}
                                 />
@@ -360,7 +254,7 @@ const SpaceTypes = () => {
                     <DataTableWidget
                         isLoading={isDataFetching}
                         isLoadingComponent={<SkeletonLoading />}
-                        id="equipmentType_list"
+                        id="spaceTypes_list"
                         onSearch={(query) => {
                             setPageNo(1);
                             setSearch(query);
@@ -375,7 +269,6 @@ const SpaceTypes = () => {
                         searchResultRows={currentRow()}
                         onDownload={() => handleDownloadCsv()}
                         headers={headerProps}
-                        filterOptions={filterOptions}
                         currentPage={pageNo}
                         onChangePage={setPageNo}
                         pageSize={pageSize}
@@ -390,8 +283,7 @@ const SpaceTypes = () => {
                         onDeleteRow={
                             userPermission?.user_role === 'admin' ||
                             userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                ? (record, id, row) =>
-                                      row?.status.toLowerCase() === 'system' ? null : handleDelete(row)
+                                ? (record, id, row) => handleDelete(row)
                                 : null
                         }
                         isDeletable={(row) => handleAbleToDeleteRow(row)}
@@ -406,27 +298,27 @@ const SpaceTypes = () => {
                 </Col>
             </Row>
 
-            <CreateEquipType
-                isAddEquipTypeModalOpen={isAddEquipTypeModalOpen}
-                closeAddEquipTypeModal={closeAddEquipTypeModal}
-                fetchEquipTypeData={fetchEquipTypeData}
+            <CreateSpaceType
+                isAddSpaceTypeModalOpen={isAddSpaceTypeModalOpen}
+                closeAddSpaceTypeModal={closeAddSpaceTypeModal}
+                fetchSpaceTypeData={fetchSpaceTypeData}
                 search={search}
             />
 
             <EditEquipType
-                isEditEquipTypeModalOpen={isEditEquipTypeModalOpen}
-                closeEditEquipTypeModal={closeEditEquipTypeModal}
-                fetchEquipTypeData={fetchEquipTypeData}
-                selectedEquipType={selectedEquipType}
+                isEditEquipTypeModalOpen={isEditSpaceTypeModalOpen}
+                closeEditEquipTypeModal={closeEditSpaceTypeModal}
+                fetchSpaceTypeData={fetchSpaceTypeData}
+                selectedEquipType={selectedSpaceType}
                 search={search}
-                openEditEquipTypeModal={openEditEquipTypeModal}
+                openEditEquipTypeModal={openEditSpaceTypeModal}
             />
 
-            <DeleteEquipType
-                isDeleteEquipTypeModalOpen={isDeleteEquipTypeModalOpen}
-                closeDeleteEquipTypeModal={closeDeleteEquipTypeModal}
-                fetchEquipTypeData={fetchEquipTypeData}
-                selectedEquipType={selectedEquipType}
+            <DeleteSpaceType
+                isDeleteSpaceTypeModalOpen={isDeleteSpaceTypeModalOpen}
+                closeDeleteSpaceTypeModal={closeDeleteSpaceTypeModal}
+                fetchSpaceTypeData={fetchSpaceTypeData}
+                selectedSpaceType={selectedSpaceType}
                 search={search}
             />
         </React.Fragment>

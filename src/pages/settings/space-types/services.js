@@ -5,7 +5,10 @@ import {
     equipmentType,
     updateEquipmentType,
     getMetadataFilter,
-    deleteEquipmentType,
+    getSpaceTypes,
+    createSpaceType,
+    deleteSpaceType,
+    updateSpace,
 } from '../../../services/Network';
 import _ from 'lodash';
 
@@ -43,6 +46,20 @@ export function fetchEquipmentTypeFilter(args) {
         });
 }
 
-export function deleteEquipmentTypeData(params) {
-    return axiosInstance.delete(`${deleteEquipmentType}${params}`).then((res) => res);
+// -----------------------------------------------------------------------------------------------------
+
+export function getSpaceTypesList(params) {
+    return axiosInstance.get(`${getSpaceTypes}${params}`).then((res) => res);
+}
+
+export function saveSpaceTypeData(payload) {
+    return axiosInstance.post(`${createSpaceType}`, payload).then((res) => res);
+}
+
+export function updateSpaceType(params, payload) {
+    return axiosInstance.patch(`${updateSpace}${params}`, payload).then((res) => res);
+}
+
+export function deleteSpaceTypeData(params) {
+    return axiosInstance.delete(`${deleteSpaceType}${params}`).then((res) => res);
 }
