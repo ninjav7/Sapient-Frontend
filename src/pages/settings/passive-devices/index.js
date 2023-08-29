@@ -90,6 +90,7 @@ const PassiveDevices = () => {
 
     const [selectedPassiveDevice, setSelectedPassiveDevice] = useState({});
     const [isDataFetching, setIsDataFetching] = useState(false);
+    const [isFilterFetching, setFetchingFilters] = useState(false);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [deviceIdFilterString, setDeviceIdFilterString] = useState([]);
     const [deviceModelString, setDeviceModelString] = useState([]);
@@ -143,6 +144,7 @@ const PassiveDevices = () => {
     };
 
     const getFilters = async () => {
+        setFetchingFilters(true);
         let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
         let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
         let floorSelected = encodeURIComponent(floorString.join('+'));
@@ -284,6 +286,7 @@ const PassiveDevices = () => {
 
             setFilterOptions(filterOptionsFetched);
         });
+        setFetchingFilters(false);
     };
 
     const currentRow = () => {
@@ -487,6 +490,7 @@ const PassiveDevices = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isDataFetching}
+                        isFilterLoading={isFilterFetching}
                         isLoadingComponent={<SkeletonLoading />}
                         id="smart_meter_list"
                         onSearch={(query) => {

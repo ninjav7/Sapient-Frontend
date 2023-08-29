@@ -198,6 +198,7 @@ const Equipment = () => {
     const [deviceMacAddress, setDeviceMacAddress] = useState('');
     const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
     const [isLoadingEndUseData, setIsLoadingEndUseData] = useState(true);
+    const [isFilterFetching, setFetchingFilters] = useState(false);
 
     const [floorTypeFilterString, setFloorTypeFilterString] = useState('');
     const [spaceFilterString, setSpaceFilterString] = useState('');
@@ -439,6 +440,7 @@ const Equipment = () => {
     };
 
     const getFilters = async () => {
+        setFetchingFilters(true);
         const filters = await getFiltersForEquipmentRequest({
             bldgId,
             deviceMacAddress,
@@ -517,6 +519,7 @@ const Equipment = () => {
 
             setFilterOptions(filterOptionsFetched);
         });
+        setFetchingFilters(false);
     };
 
     useEffect(() => {
@@ -699,6 +702,7 @@ const Equipment = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isEquipDataFetched || isLoadingEndUseData}
+                        isFilterLoading={isFilterFetching}
                         isLoadingComponent={<SkeletonLoading />}
                         id="equipment"
                         onSearch={(query) => {

@@ -101,6 +101,7 @@ const Panels = () => {
 
     const [panelsData, setPanelsData] = useState([]);
     const [isDataFetching, setDataFetching] = useState(true);
+    const [isFilterFetching, setFetchingFilters] = useState(false);
 
     const [filterOptions, setFilterOptions] = useState([]);
     const [panelType, setPanelType] = useState([]);
@@ -375,6 +376,7 @@ const Panels = () => {
     };
 
     const getFilters = async () => {
+        setFetchingFilters(true);
         const filters = await fetchPanelsFilter({
             bldgId,
         });
@@ -498,6 +500,7 @@ const Panels = () => {
             ];
             setFilterOptions(filterOptionsFetched);
         });
+        setFetchingFilters(false);
     };
 
     useEffect(() => {
@@ -573,6 +576,7 @@ const Panels = () => {
                     <DataTableWidget
                         id="panels_list"
                         isLoading={isDataFetching}
+                        isFilterLoading={isFilterFetching}
                         isLoadingComponent={<SkeletonLoading />}
                         buttonGroupFilterOptions={[]}
                         onSearch={(query) => {
