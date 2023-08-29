@@ -61,19 +61,20 @@ const EditFloorModal = (props) => {
     }, [props.modalType]);
 
     const fetchingSpaceTypes = async () => {
-        let params = `?building_id=${bldgId}`;
+        const params = `?ordered_by=name&sort_by=ace`;
+
         await fetchSpaceTypes(params)
             .then((res) => {
                 const responseData = res?.data;
-                let response = responseData.data?.[0]?.generic_spacetypes;
-                response.sort((a, b) => {
-                    return a.name.localeCompare(b.name);
-                });
-                let arr = [];
-                response.map((el) => {
-                    arr.push({ label: el?.name, value: el?.id });
-                });
-                setFloor(arr);
+                if (responseData?.success && responseData?.data.length !== 0) {
+                    const spaceList = responseData?.data.map((el) => {
+                        return {
+                            label: el?.name,
+                            value: el?.id,
+                        };
+                    });
+                    setFloor(spaceList);
+                }
             })
             .catch(() => {});
     };
