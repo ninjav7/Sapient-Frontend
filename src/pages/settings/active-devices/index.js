@@ -79,6 +79,7 @@ const ActiveDevices = () => {
     const [activeDeviceData, setActiveDeviceData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
+    const [isFilterFetching, setFetchingFilters] = useState(false);
     const [deviceIdFilterString, setDeviceIdFilterString] = useState([]);
     const [deviceModelString, setDeviceModelString] = useState([]);
     const [sensorString, setSensorString] = useState([]);
@@ -101,6 +102,7 @@ const ActiveDevices = () => {
     };
 
     const getFilters = async () => {
+        setFetchingFilters(true);
         let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
         let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
         let sensorSelected = modifySensorFilter(sensorString);
@@ -293,6 +295,7 @@ const ActiveDevices = () => {
             ];
             setFilterOptions(filterOptionsFetched);
         });
+        setFetchingFilters(false);
     };
 
     const fetchActiveDeviceData = async () => {
@@ -564,6 +567,7 @@ const ActiveDevices = () => {
                     <DataTableWidget
                         isLoading={isDeviceProcessing}
                         isLoadingComponent={<SkeletonLoading />}
+                        isFilterLoading={isFilterFetching}
                         id="active_devices_list"
                         onSearch={(query) => {
                             setPageNo(1);

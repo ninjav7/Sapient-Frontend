@@ -256,6 +256,7 @@ const DataTableWidget = (props) => {
                         filterOptions={props.filterOptions}
                         selectedFilters={selectedFilters}
                         onDeleteFilter={handleDeleteFilter}
+                        isFilterLoading={props?.isFilterLoading}
                     />
                     <div className="ml-auto data-table-widget-action-button-wrapper">
                         {!props.disableColumnDragging && <DraggableColumns onSortEnd={onSortEnd} headers={headers} />}
@@ -455,6 +456,7 @@ DataTableWidget.propTypes = {
     customCheckAll: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
     isLoadingComponent: PropTypes.node.isRequired,
     isLoading: PropTypes.bool.isRequired,
+    isFilterLoading: PropTypes.bool,
     filters: PropTypes.shape({
         selectedFilters: PropTypes.object,
         selectedFiltersValues: PropTypes.object,
