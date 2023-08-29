@@ -384,3 +384,9 @@ export const dateTimeFormatForHighChart = (date_format, time_format) => {
         ? `%e %b '%y @ %H:%M`
         : `%b %e '%y @ %H:%M`;
 };
+
+export const xAxisLabelStepCount = (days_count, time_format) => {
+    let value = 1;
+    if (time_format === '12h' && days_count <= 7 && days_count > 1) value = 2;
+    return value;
+};
