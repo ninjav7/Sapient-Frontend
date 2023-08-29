@@ -86,7 +86,7 @@ export const updateEquipment = '/api/config/equipments_details/update_equipment'
 export const searchEquipment = '/api/config/equipments_details/search_by_equipments';
 export const getEndUseId = '/api/config/get_end_use';
 export const linkActiveSensorToEquip = '/api/config/sensor/active/lnk_act_snr_to_eqt';
-export const deleteEquipment = `/api/config/equipments_details/delete-equipment`;
+export const deleteEquipment = '/api/config/equipments_details/delete-equipment';
 
 // active
 export const generalActiveDevices = '/api/config/devices/active';
@@ -159,8 +159,11 @@ export const updateFloor = '/api/config/layout/update-floor';
 export const getSpaces = '/api/config/layout/get-spaces';
 export const getSpaceTypes = '/api/config/layout/get-spacetype';
 export const createSpace = '/api/config/layout/create-space';
+export const createSpaceType = '/api/config/layout/create-spacetype';
 export const updateSpace = '/api/config/layout/update-space';
+export const updateSpaceType = '/api/config/layout/update-space_type';
 export const deleteSpace = '/api/config/layout/delete-space/';
+export const deleteSpaceType = '/api/config/layout/delete-space_type';
 export const deleteFloor = '/api/config/layout/delete-floor';
 
 // getLocation
