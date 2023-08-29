@@ -16,7 +16,7 @@ import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { pageListSizes } from '../../../helpers/helpers';
-import EditEquipType from './EditEquipType';
+import EditSpaceType from './EditSpaceType';
 import DeleteSpaceType from './DeleteSpaceType';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
@@ -299,13 +299,12 @@ const SpaceTypes = () => {
                 search={search}
             />
 
-            <EditEquipType
-                isEditEquipTypeModalOpen={isEditSpaceTypeModalOpen}
-                closeEditEquipTypeModal={closeEditSpaceTypeModal}
+            <EditSpaceType
+                isEditSpaceTypeModalOpen={isEditSpaceTypeModalOpen}
+                closeEditSpaceTypeModal={closeEditSpaceTypeModal}
                 fetchSpaceTypeData={fetchSpaceTypeData}
-                selectedEquipType={selectedSpaceType}
+                selectedSpaceType={selectedSpaceType}
                 search={search}
-                openEditEquipTypeModal={openEditSpaceTypeModal}
             />
 
             <DeleteSpaceType

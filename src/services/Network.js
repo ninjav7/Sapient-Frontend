@@ -161,6 +161,7 @@ export const getSpaceTypes = '/api/config/layout/get-spacetype';
 export const createSpace = '/api/config/layout/create-space';
 export const createSpaceType = '/api/config/layout/create-spacetype';
 export const updateSpace = '/api/config/layout/update-space';
+export const updateSpaceType = '/api/config/layout/update-space_type';
 export const deleteSpace = '/api/config/layout/delete-space/';
 export const deleteSpaceType = '/api/config/layout/delete-space_type';
 export const deleteFloor = '/api/config/layout/delete-floor';

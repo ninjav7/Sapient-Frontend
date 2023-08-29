@@ -1,52 +1,5 @@
 import axiosInstance from '../../../services/axiosInstance';
-import {
-    addEquipmentType,
-    getEndUseId,
-    equipmentType,
-    updateEquipmentType,
-    getMetadataFilter,
-    getSpaceTypes,
-    createSpaceType,
-    deleteSpaceType,
-    updateSpace,
-} from '../../../services/Network';
-import _ from 'lodash';
-
-export function saveEquipTypeData(payload) {
-    return axiosInstance.post(`${addEquipmentType}`, payload).then((res) => res);
-}
-
-export function updateEquipTypeData(payload) {
-    return axiosInstance.post(`${updateEquipmentType}`, payload).then((res) => res);
-}
-
-export function getEndUseData() {
-    return axiosInstance.get(`${getEndUseId}`).then((res) => res);
-}
-
-export function getEquipTypeData(params) {
-    let endPoint = `${equipmentType}`;
-    if (params) endPoint = endPoint.concat(`${params}`);
-    return axiosInstance.get(endPoint).then((res) => res);
-}
-
-export function fetchEquipmentTypeFilter(args) {
-    return axiosInstance
-        .get(`${getMetadataFilter}`, {
-            params: _.pickBy(
-                {
-                    query_collection: 'equipment_type',
-                    end_use: args.EndUseSelected,
-                },
-                _.identity
-            ),
-        })
-        .then((res) => {
-            return res.data;
-        });
-}
-
-// -----------------------------------------------------------------------------------------------------
+import { getSpaceTypes, createSpaceType, deleteSpaceType, updateSpaceType } from '../../../services/Network';
 
 export function getSpaceTypesList(params) {
     return axiosInstance.get(`${getSpaceTypes}${params}`).then((res) => res);
@@ -56,8 +9,8 @@ export function saveSpaceTypeData(payload) {
     return axiosInstance.post(`${createSpaceType}`, payload).then((res) => res);
 }
 
-export function updateSpaceType(params, payload) {
-    return axiosInstance.patch(`${updateSpace}${params}`, payload).then((res) => res);
+export function updateSpaceTypeData(params, payload) {
+    return axiosInstance.patch(`${updateSpaceType}${params}`, payload).then((res) => res);
 }
 
 export function deleteSpaceTypeData(params) {
