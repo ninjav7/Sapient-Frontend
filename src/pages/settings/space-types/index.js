@@ -11,7 +11,7 @@ import { Button } from '../../../sharedComponents/button';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import { getSpaceTypesList } from './services';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
-import { getEquipTypeTableCSVExport } from '../../../utils/tablesExport';
+import { getSpaceTypeTableCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
@@ -71,9 +71,6 @@ const SpaceTypes = () => {
     const [pageSize, setPageSize] = useState(20);
 
     const [spaceTypesData, setSpaceTypesData] = useState([]);
-    const [customSpaceTypes, setCustomSpaceTypes] = useState([]);
-    const [systemSpaceTypes, setSystemSpaceTypes] = useState([]);
-
     const [isDataFetching, setDataFetching] = useState(false);
 
     const [totalItems, setTotalItems] = useState(0);
@@ -93,34 +90,31 @@ const SpaceTypes = () => {
     };
 
     const handleAbleToDeleteRow = (row) => {
-        return row?.is_custom ? true : false;
+        return row?.created_by_info.toLowerCase() === 'system' ? false : true;
     };
 
     const handleAbleToEditRow = (row) => {
-        return row?.is_custom ? true : false;
+        return row?.created_by_info.toLowerCase() === 'system' ? false : true;
     };
 
-    const fetchSpaceTypeData = async (searchTxt, page_no = 1, page_size = 20, ordered_by = 'name', sort_by) => {
+    const fetchSpaceTypeData = async (searchTxt, ordered_by = 'name', sort_by) => {
         setDataFetching(true);
+        setSpaceTypesData([]);
+        setTotalItems(0);
 
-        const params = `?page_size=${page_size}&page_no=${page_no}&ordered_by=${ordered_by}&sort_by=${sort_by}`;
+        let params = `?page_size=${pageSize}&page_no=${pageNo}&ordered_by=${ordered_by}`;
+
+        if (searchTxt) params = params.concat(`&space_type_search=${encodeURIComponent(searchTxt)}`);
+        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
+        if (selectedStatus === 1) params += `&status=System`;
+        if (selectedStatus === 2) params += `&status=Custom`;
 
         await getSpaceTypesList(params)
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
-                    if (response?.data[0]) {
-                        const sortedSystemTypes = _.sortBy(response?.data[0]?.generic_spacetypes, 'name');
-                        const sortedCustomTypes = _.sortBy(response?.data[0]?.user_defined_spacetypes, 'name');
-                        let mergeResult = [
-                            ...response?.data[0]?.generic_spacetypes,
-                            ...response?.data[0]?.user_defined_spacetypes,
-                        ];
-                        mergeResult = _.sortBy(mergeResult, 'name');
-                        setSpaceTypesData(mergeResult);
-                        setSystemSpaceTypes(sortedSystemTypes);
-                        setCustomSpaceTypes(sortedCustomTypes);
-                    }
+                    if (response?.data.length !== 0) setSpaceTypesData(response?.data);
+                    if (response?.total_data) setTotalItems(response?.total_data);
                 }
                 setDataFetching(false);
             })
@@ -130,23 +124,21 @@ const SpaceTypes = () => {
     };
 
     const handleDownloadCsv = async () => {
-        await getSpaceTypesList()
+        await getSpaceTypesList('')
             .then((res) => {
-                const responseData = res?.data?.data;
-                download(
-                    `Space_Types_${new Date().toISOString().split('T')[0]}`,
-                    getEquipTypeTableCSVExport(responseData, headerProps)
-                );
+                const response = res?.data;
+                if (response?.success) {
+                    download(
+                        `Space_Types_${new Date().toISOString().split('T')[0]}`,
+                        getSpaceTypeTableCSVExport(response?.data, headerProps)
+                    );
+                }
             })
             .catch(() => {});
     };
 
     const currentRow = () => {
-        let showData = [];
-        if (selectedStatus === 0) showData = spaceTypesData;
-        if (selectedStatus === 1) showData = systemSpaceTypes;
-        if (selectedStatus === 2) showData = customSpaceTypes;
-        return showData;
+        return spaceTypesData;
     };
 
     const renderSpaceTypeName = (row) => {
@@ -156,7 +148,7 @@ const SpaceTypes = () => {
     const renderSpaceTypeClass = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md} className="gray-950">
-                {row?.is_custom ? `Custom` : `System`}
+                {row?.created_by_info === '' ? '-' : row?.created_by_info}
             </Typography.Body>
         );
     };
@@ -178,7 +170,7 @@ const SpaceTypes = () => {
         },
         {
             name: 'Class',
-            accessor: 'is_custom',
+            accessor: 'created_by_info',
             callbackValue: renderSpaceTypeClass,
             onSort: (method, name) => setSortBy({ method, name }),
         },
@@ -210,8 +202,8 @@ const SpaceTypes = () => {
         const ordered_by = sortBy.name === undefined ? 'name' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
 
-        fetchSpaceTypeData(search, pageNo, pageSize, ordered_by, sort_by);
-    }, [search, pageNo, pageSize, sortBy]);
+        fetchSpaceTypeData(search, ordered_by, sort_by);
+    }, [search, pageNo, pageSize, sortBy, selectedStatus]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -277,13 +269,15 @@ const SpaceTypes = () => {
                         onEditRow={
                             userPermission?.user_role === 'admin' ||
                             userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                ? (record, id, row) => (row?.status.toLowerCase() === 'system' ? null : handleEdit(row))
+                                ? (record, id, row) =>
+                                      row?.created_by_info.toLowerCase() === 'system' ? null : handleEdit(row)
                                 : null
                         }
                         onDeleteRow={
                             userPermission?.user_role === 'admin' ||
                             userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                ? (record, id, row) => handleDelete(row)
+                                ? (record, id, row) =>
+                                      row?.created_by_info.toLowerCase() === 'system' ? null : handleDelete(row)
                                 : null
                         }
                         isDeletable={(row) => handleAbleToDeleteRow(row)}

@@ -107,16 +107,10 @@ const EquipmentType = () => {
         return row?.status.toLowerCase() === 'system' ? false : true;
     };
 
-    const fetchEquipTypeData = async (
-        searchTxt,
-        page_no = 1,
-        page_size = 20,
-        ordered_by = 'equipment_type',
-        sort_by
-    ) => {
+    const fetchEquipTypeData = async (searchTxt, ordered_by = 'equipment_type', sort_by) => {
         let endUseIds = encodeURIComponent(EndUseString.join('+'));
         setDataFetching(true);
-        let params = `?page_size=${page_size}&page_no=${page_no}&ordered_by=${ordered_by}`;
+        let params = `?page_size=${pageSize}&page_no=${pageNo}&ordered_by=${ordered_by}`;
         if (searchTxt) params = params.concat(`&equipment_search=${encodeURIComponent(searchTxt)}`);
         if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
         if (endUseIds.length) {
@@ -301,7 +295,7 @@ const EquipmentType = () => {
         const ordered_by = sortBy.name === undefined ? 'equipment_type' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
 
-        fetchEquipTypeData(search, pageNo, pageSize, ordered_by, sort_by);
+        fetchEquipTypeData(search, ordered_by, sort_by);
     }, [search, pageNo, pageSize, sortBy, EndUseString, equipCountAPIFlag, selectedStatus]);
 
     useEffect(() => {
