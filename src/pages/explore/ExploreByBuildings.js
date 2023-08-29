@@ -86,6 +86,7 @@ const ExploreByBuildings = () => {
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
+    const [isFilterFetching, setFetchingFilters] = useState(false);
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
     const [selectedBuildingId, setSelectedBuildingId] = useState('');
     const [seriesData, setSeriesData] = useState([]);
@@ -159,6 +160,7 @@ const ExploreByBuildings = () => {
     }, []);
 
     const exploreDataFetch = async () => {
+        setFetchingFilters(true);
         const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
         isLoadingRef.current = true;
@@ -252,10 +254,12 @@ const ExploreByBuildings = () => {
 
                 isLoadingRef.current = false;
                 setIsExploreDataLoading(false);
+                setFetchingFilters(false);
             })
             .catch((error) => {
                 isLoadingRef.current = false;
                 setIsExploreDataLoading(false);
+                setFetchingFilters(false);
             });
     };
 
@@ -997,6 +1001,7 @@ const ExploreByBuildings = () => {
                         <DataTableWidget
                             isLoading={isExploreDataLoading}
                             isLoadingComponent={<SkeletonLoading />}
+                            isFilterLoading={isFilterFetching}
                             id="explore-by-building"
                             onSearch={setSearch}
                             buttonGroupFilterOptions={[]}
