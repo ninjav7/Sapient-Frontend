@@ -54,7 +54,7 @@ const SkeletonLoading = () => (
     </SkeletonTheme>
 );
 
-const DataTable = ({
+const CompareBuildingsTable = ({
     tableHeader,
     isLoadingBuildingData,
     buildingsData,
@@ -304,7 +304,7 @@ const CompareBuildings = () => {
             <Header title="Compare Buildings" type="page" />
             <Row className="mt-4">
                 <Col lg={12}>
-                    <DataTable
+                    <CompareBuildingsTable
                         tableHeader={tableHeader}
                         isLoadingBuildingData={isLoadingBuildingData}
                         buildingsData={buildingsData}

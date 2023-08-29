@@ -180,6 +180,7 @@ export const Filters = ({
     selectedFilters,
     onDeleteFilter,
     hideStatusFilter = false,
+    isFilterLoading = false,
 }) => {
     const { widgetProps, setSearch } = useContext(DataTableWidgetContext);
 
@@ -196,6 +197,7 @@ export const Filters = ({
                     onChange={onChange}
                     options={filterOptions}
                     value={selectedFilters}
+                    isLoading={isFilterLoading}
                     components={{
                         Control: (props) => (
                             <div {...props}>

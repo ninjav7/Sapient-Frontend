@@ -1625,9 +1625,11 @@ const PlugRule = () => {
 
     const [filterOptionsUnlinked, setFilterOptionsUnlinked] = useState([]);
     const [filterOptionsLinked, setFilterOptionsLinked] = useState([]);
+    const [isFilterFetching, setFetchingFilters] = useState(false);
 
     const fetchFiltersForSensorsUnlinked = async () => {
         isLoadingUnlinkedRef.current = true;
+        setFetchingFilters(true);
         await getFiltersForSensorsRequest({
             activeBuildingId,
             macTypeFilterString: macTypeFilterStringUnlinked,
@@ -1758,12 +1760,13 @@ const PlugRule = () => {
                 : [];
             setFilterOptionsUnlinked(filterOptionsFetched);
         });
-
+        setFetchingFilters(false);
         isLoadingUnlinkedRef.current = false;
     };
 
     const fetchFiltersForSensorsLinked = async () => {
         isLoadingLinkedRef.current = true;
+        setFetchingFilters(true);
         await getFiltersForSensorsRequest({
             activeBuildingId,
             macTypeFilterString: macTypeFilterStringLinked,
@@ -1894,7 +1897,7 @@ const PlugRule = () => {
                 : [];
             setFilterOptionsLinked(filterOptionsFetched);
         });
-
+        setFetchingFilters(false);
         isLoadingLinkedRef.current = false;
     };
 
@@ -2615,6 +2618,7 @@ const PlugRule = () => {
                                 <DataTableWidget
                                     isLoading={isLoadingLinkedRef.current}
                                     isLoadingComponent={<SkeletonLoading />}
+                                    isFilterLoading={isFilterFetching}
                                     id="sockets-plug-rules"
                                     onSearch={(query) => {
                                         setPageNoLinked(1);
@@ -2725,6 +2729,7 @@ const PlugRule = () => {
                                 <DataTableWidget
                                     isLoading={isLoadingUnlinkedRef.current}
                                     isLoadingComponent={<SkeletonLoading />}
+                                    isFilterLoading={isFilterFetching}
                                     id="sockets-plug-rules"
                                     onSearch={(query) => {
                                         setPageNoUnlinked(1);
