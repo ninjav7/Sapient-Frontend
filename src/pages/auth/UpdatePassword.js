@@ -224,7 +224,7 @@ const Confirm = (props) => {
             } else {
                 setLowerCaseErr('error');
             }
-            if (password.match(/[`~!@#$%\^&*()+=|;:'",.<>\/?\\\-]/)) {
+            if (password.match(/[~\!?@#\$%\^&\*\(\)_\+{}\":;.,='\[\]]/)) {
                 setSpecialCharErr('success');
             } else {
                 setSpecialCharErr('error');
@@ -517,13 +517,13 @@ const Confirm = (props) => {
                                                                     <Typography.Subheader
                                                                         size={Typography.Sizes.md}
                                                                         className="text-mute-error mt-2">
-                                                                        Error: Special Character (1 or more)
+                                                                        {`Error: Special characters (one or more) allowed: ~\!?@#\$%\^&\*\(\)_\+{}\":;.,='\[\]`}
                                                                     </Typography.Subheader>
                                                                 ) : (
                                                                     <Typography.Subheader
                                                                         size={Typography.Sizes.md}
                                                                         className="text-mute mt-2">
-                                                                        Special Character (1 or more)
+                                                                        {`Special Character (1 or more)`}
                                                                     </Typography.Subheader>
                                                                 )}
                                                             </div>
