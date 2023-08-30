@@ -167,3 +167,9 @@ h3 {
 .model-text-style:hover {
     border-bottom: 0.0625rem solid;
 }
+
+.reset-page-btn-style {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
