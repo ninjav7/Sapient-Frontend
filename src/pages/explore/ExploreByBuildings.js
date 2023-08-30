@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Row, Col } from 'reactstrap';
-import { fetchExploreBuildingList, fetchExploreBuildingChart } from '../explore/services';
+import { fetchExploreBuildingList, fetchExploreBuildingChart, fetchExploreByBuildingList } from '../explore/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { fetchDateRange } from '../../helpers/formattedChartData';
@@ -159,15 +159,18 @@ const ExploreByBuildings = () => {
         localStorage.removeItem('explorer');
     }, []);
 
-    const exploreDataFetch = async () => {
+    const exploreByBuildingDataFetch = async () => {
         setFetchingFilters(true);
-        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
+        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'total_consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
         isLoadingRef.current = true;
         setIsExploreDataLoading(true);
-        const value = apiRequestBody(startDate, endDate, timeZone);
-        await fetchExploreBuildingList(
-            value,
+        const start_date = encodeURIComponent(startDate);
+        const end_date = encodeURIComponent(endDate);
+        await fetchExploreByBuildingList(
+            start_date,
+            end_date,
+            timeZone,
             search,
             ordered_by,
             sort_by,
@@ -188,7 +191,7 @@ const ExploreByBuildings = () => {
                     totalBuildingId.length = 0;
                     setSeriesData([]);
                 }
-                let responseData = res?.data;
+                let responseData = res?.data?.data;
                 if (responseData.length !== 0) {
                     responseData.forEach((el) => {
                         el.user_pref_units = userPrefUnits;
@@ -210,17 +213,20 @@ const ExploreByBuildings = () => {
                     userPrefUnits === `si`
                         ? Math.round(handleUnitConverstion(responseData[0].square_footage, userPrefUnits))
                         : responseData[0].square_footage;
-                let topConsumption = responseData[0].consumption.now;
-                let bottomConsumption = responseData[0].consumption.now;
-                let topChange = responseData[0].consumption.change;
-                let bottomChange = responseData[0].consumption.change;
+                let topConsumption = responseData[0].energy_consumption.now;
+                let bottomConsumption = responseData[0].energy_consumption.now;
+                let topChange = responseData[0].energy_consumption.change;
+                let bottomChange = responseData[0].energy_consumption.change;
                 let topSqft = squareFootage;
                 let bottomSqft = squareFootage;
                 responseData.map((ele) => {
-                    if (Number(ele.consumption.now) > topConsumption) topConsumption = ele.consumption.now;
-                    if (Number(ele.consumption.now) < bottomConsumption) bottomConsumption = ele.consumption.now;
-                    if (Number(ele.consumption.change) > topChange) topChange = ele.consumption.change;
-                    if (Number(ele.consumption.change) < bottomChange) bottomChange = ele.consumption.change;
+                    if (Number(ele.energy_consumption.now) > topConsumption)
+                        topConsumption = ele.energy_consumption.now;
+                    if (Number(ele.energy_consumption.now) < bottomConsumption)
+                        bottomConsumption = ele.energy_consumption.now;
+                    if (Number(ele.energy_consumption.change) > topChange) topChange = ele.energy_consumption.change;
+                    if (Number(ele.energy_consumption.change) < bottomChange)
+                        bottomChange = ele.energy_consumption.change;
                     if (Number(ele.square_footage) > topSqft)
                         topSqft = Math.round(handleUnitConverstion(ele.square_footage, userPrefUnits));
                     if (Number(ele.square_footage) < bottomSqft)
@@ -251,7 +257,6 @@ const ExploreByBuildings = () => {
                 setBottomSquareFootage(Math.abs(Math.round(bottomSqft)));
                 setTopSquareFootage(Math.abs(Math.round(topSqft)));
                 set_maxSqftValue(Math.abs(topSqft === bottomSqft ? Math.round(topSqft) + 1 : Math.round(topSqft)));
-
                 isLoadingRef.current = false;
                 setIsExploreDataLoading(false);
                 setFetchingFilters(false);
@@ -270,9 +275,10 @@ const ExploreByBuildings = () => {
         if (endDate === null) {
             return;
         }
-        if (conAPIFlag === '' && perAPIFlag === '' && sqftAPIFlag === '' && selectedBuildingType.length === 0)
-            exploreDataFetch();
-        else {
+        if (conAPIFlag === '' && perAPIFlag === '' && sqftAPIFlag === '' && selectedBuildingType.length === 0) {
+            // exploreDataFetch();
+            exploreByBuildingDataFetch();
+        } else {
             filterexploreDataFetch();
         }
     }, [
@@ -628,7 +634,7 @@ const ExploreByBuildings = () => {
 
                 setAllBuildingList(responseData);
                 setTotalItems(responseData.length);
-                setTopEnergyConsumption(responseData[0].consumption.now);
+                setTopEnergyConsumption(responseData[0]?.energy_consumption?.now);
                 isLoadingRef.current = false;
                 setIsExploreDataLoading(false);
             })
@@ -695,10 +701,10 @@ const ExploreByBuildings = () => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {Math.round(row.consumption.now / 1000)} kWh
+                    {Math.round(row?.energy_consumption?.now / 1000)} kWh
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
-                <TinyBarChart percent={getAverageValue(row.consumption.now / 1000, bottom, top)} />
+                <TinyBarChart percent={getAverageValue(row?.energy_consumption.now / 1000, bottom, top)} />
             </>
         );
     };
@@ -706,9 +712,9 @@ const ExploreByBuildings = () => {
     const renderPerChange = (row) => {
         return (
             <TrendsBadge
-                value={Math.abs(Math.round(row.consumption.change))}
+                value={Math.abs(Math.round(row?.energy_consumption?.change))}
                 type={
-                    row?.consumption?.now < row?.consumption?.old
+                    row?.energy_consumption?.now < row?.energy_consumption?.old
                         ? TrendsBadge.Type.DOWNWARD_TREND
                         : TrendsBadge.Type.UPWARD_TREND
                 }
@@ -884,10 +890,10 @@ const ExploreByBuildings = () => {
                 });
                 let NulledData = [];
                 data.map((ele) => {
-                    if (ele.consumption === '') {
+                    if (ele.energy_consumption === '') {
                         NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
                     } else {
-                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: ele.consumption });
+                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: ele.energy_consumption });
                     }
                 });
                 let recordToInsert = {
@@ -914,10 +920,10 @@ const ExploreByBuildings = () => {
                 });
                 let NulledData = [];
                 data.map((ele) => {
-                    if (ele.consumption === '') {
+                    if (ele?.energy_consumption === '') {
                         NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
                     } else {
-                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: ele.consumption });
+                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: ele?.energy_consumption });
                     }
                 });
                 let recordToInsert = {

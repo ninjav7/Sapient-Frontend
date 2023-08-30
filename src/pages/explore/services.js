@@ -7,6 +7,7 @@ import {
     getExploreEquipmentChart,
     getExploreFilter,
     getWeather,
+    compareBuildingsV2,
 } from '../../services/Network';
 
 //Explore By Building
@@ -46,6 +47,48 @@ export function fetchExploreBuildingList(
         };
     if (selectedBuildingType.length !== 0) obj['building_type'] = selectedBuildingType;
     return axiosInstance.post(`${getExploreBuildingList}${params}`, obj).then((res) => {
+        return res;
+    });
+}
+
+export function fetchExploreByBuildingList(
+    start_date,
+    end_date,
+    timeZone,
+    search,
+    order_by,
+    sort_by,
+    minConValue,
+    maxConValue,
+    minPerValue,
+    maxPerValue,
+    minSqftValue,
+    maxSqftValue,
+    selectedBuildingType,
+    conAPIFlag,
+    perAPIFlag,
+    sqftAPIFlag,
+    userPrefUnits
+) {
+    let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&consumption=energy&search_by_name=${search}&ordered_by=${order_by}&sort_by=${sort_by}`;
+    let obj = {};
+    if (conAPIFlag !== '')
+        obj['consumption_range'] = {
+            gte: (minConValue - 1) * 1000,
+            lte: (maxConValue + 1) * 1000,
+        };
+    if (perAPIFlag !== '')
+        obj['change'] = {
+            gte: minPerValue - 0.5,
+            lte: maxPerValue + 0.5,
+        };
+    if (sqftAPIFlag !== '')
+        obj['sq_ft_range'] = {
+            gte: minSqftValue,
+            lte: maxSqftValue,
+        };
+    if (selectedBuildingType.length !== 0) obj['building_type'] = selectedBuildingType;
+    return axiosInstance.get(`${compareBuildingsV2}${params}`, obj).then((res) => {
         return res;
     });
 }
