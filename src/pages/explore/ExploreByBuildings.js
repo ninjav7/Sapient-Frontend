@@ -232,17 +232,17 @@ const ExploreByBuildings = () => {
                 let topSqft = squareFootage;
                 let bottomSqft = squareFootage;
                 responseData.map((ele) => {
-                    if (Number(ele.energy_consumption.now) > topConsumption)
-                        topConsumption = ele.energy_consumption.now;
-                    if (Number(ele.energy_consumption.now) < bottomConsumption)
-                        bottomConsumption = ele.energy_consumption.now;
-                    if (Number(ele.energy_consumption.change) > topChange) topChange = ele.energy_consumption.change;
-                    if (Number(ele.energy_consumption.change) < bottomChange)
-                        bottomChange = ele.energy_consumption.change;
-                    if (Number(ele.square_footage) > topSqft)
-                        topSqft = Math.round(handleUnitConverstion(ele.square_footage, userPrefUnits));
-                    if (Number(ele.square_footage) < bottomSqft)
-                        bottomSqft = Math.round(handleUnitConverstion(ele.square_footage, userPrefUnits));
+                    if (Number(ele?.energy_consumption.now) > topConsumption)
+                        topConsumption = ele?.energy_consumption.now;
+                    if (Number(ele?.energy_consumption.now) < bottomConsumption)
+                        bottomConsumption = ele?.energy_consumption.now;
+                    if (Number(ele?.energy_consumption.change) > topChange) topChange = ele?.energy_consumption.change;
+                    if (Number(ele?.energy_consumption.change) < bottomChange)
+                        bottomChange = ele?.energy_consumption.change;
+                    if (Number(ele?.square_footage) > topSqft)
+                        topSqft = Math.round(handleUnitConverstion(ele?.square_footage, userPrefUnits));
+                    if (Number(ele?.square_footage) < bottomSqft)
+                        bottomSqft = Math.round(handleUnitConverstion(ele?.square_footage, userPrefUnits));
                 });
                 top = topConsumption / 1000;
                 bottom = bottomConsumption / 1000;
@@ -798,7 +798,7 @@ const ExploreByBuildings = () => {
                         totalBuildingId.length = 0;
                         setSeriesData([]);
                     }
-                    let responseData = res.data;
+                    let responseData = res?.data;
                     setTotalItemsSearched(responseData.length);
                     setAllSearchData(responseData);
                     isLoadingRef.current = false;
@@ -908,7 +908,7 @@ const ExploreByBuildings = () => {
         let value = apiRequestBody(startDate, endDate, timeZone);
         await fetchExploreBuildingChart(value, buildIdNow)
             .then((res) => {
-                let responseData = res.data;
+                let responseData = res?.data;
                 let data = responseData.data;
                 let arr = [];
                 arr = allBuildingList.filter(function (item) {
@@ -916,10 +916,10 @@ const ExploreByBuildings = () => {
                 });
                 let NulledData = [];
                 data.map((ele) => {
-                    if (ele.energy_consumption === '') {
-                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
+                    if (ele?.energy_consumption === '') {
+                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
                     } else {
-                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: ele.energy_consumption });
+                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.energy_consumption });
                     }
                 });
                 let recordToInsert = {
@@ -938,7 +938,7 @@ const ExploreByBuildings = () => {
         let value = apiRequestBody(startDate, endDate, timeZone);
         await fetchExploreBuildingChart(value, id)
             .then((res) => {
-                let responseData = res.data;
+                let responseData = res?.data;
                 let data = responseData.data;
                 let arr = [];
                 arr = allBuildingList.filter(function (item) {
@@ -947,9 +947,9 @@ const ExploreByBuildings = () => {
                 let NulledData = [];
                 data.map((ele) => {
                     if (ele?.energy_consumption === '') {
-                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
+                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
                     } else {
-                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: ele?.energy_consumption });
+                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.energy_consumption });
                     }
                 });
                 let recordToInsert = {
