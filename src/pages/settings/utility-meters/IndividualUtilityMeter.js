@@ -24,7 +24,7 @@ import {
     getUtilitySensorsList,
     updateUtilityMeterServices,
 } from './services';
-import { convertToAlphaNumeric, convertToMac } from './utils';
+import { UTILITY_MONITOR, convertToAlphaNumeric, convertToMac } from './utils';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import DeleteModal from './AlertModals';
 import EditUtilitySensor from './EditUtilitySensor';
@@ -143,7 +143,8 @@ const Sensors = (props) => {
             {data.map((record, index) => {
                 const sensorNo = index + 1;
                 const sensorData = formatSensorList(record);
-                const isPulseWeightVisible = utilityMeterObj?.device_type === 'pulse counter' && record?.pulse_weight;
+                const isPulseWeightVisible =
+                    utilityMeterObj?.device_type === UTILITY_MONITOR.PULSE_COUNTER && record?.pulse_weight;
                 const isSensorConfigured =
                     record?.utility_provider || record?.utility_meter_serial_number || record?.pulse_weight;
                 const isSensorAttached =
@@ -163,18 +164,36 @@ const Sensors = (props) => {
                                     {sensorNo}
                                 </Typography.Subheader>
 
-                                {isSensorConfigured ? (
+                                {utilityMeterObj?.device_type === UTILITY_MONITOR.PULSE_COUNTER ? (
                                     <>
-                                        {sensorData !== '' && (
-                                            <Typography.Subheader size={Typography.Sizes.md} className="mr-4">
-                                                {sensorData}
+                                        {isSensorConfigured ? (
+                                            <>
+                                                {sensorData !== '' && (
+                                                    <Typography.Subheader size={Typography.Sizes.md} className="mr-4">
+                                                        {sensorData}
+                                                    </Typography.Subheader>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <Typography.Subheader
+                                                size={Typography.Sizes.md}
+                                                className="mr-4 sensor-index">
+                                                {`Not Attached`}
                                             </Typography.Subheader>
                                         )}
                                     </>
                                 ) : (
-                                    <Typography.Subheader size={Typography.Sizes.md} className="mr-4 sensor-index">
-                                        {`Not Attached`}
-                                    </Typography.Subheader>
+                                    <>
+                                        {isSensorConfigured && (
+                                            <>
+                                                {sensorData !== '' && (
+                                                    <Typography.Subheader size={Typography.Sizes.md} className="mr-4">
+                                                        {sensorData}
+                                                    </Typography.Subheader>
+                                                )}
+                                            </>
+                                        )}
+                                    </>
                                 )}
 
                                 {isPulseWeightVisible && (
@@ -186,7 +205,7 @@ const Sensors = (props) => {
                                 )}
                             </div>
                             <div className="d-flex align-items-center">
-                                {utilityMeterObj?.device_type === 'pulse counter' ? (
+                                {utilityMeterObj?.device_type === UTILITY_MONITOR.PULSE_COUNTER ? (
                                     <>
                                         {isPulseWeightVisible && (
                                             <Badge text={`${locationName}`} className="font-weight-bold mr-2" />

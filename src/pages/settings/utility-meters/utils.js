@@ -1,6 +1,11 @@
+export const UTILITY_MONITOR = {
+    PULSE_COUNTER: 'pulse counter',
+    SHADOW_METER: 'shadow meter',
+};
+
 export const utilityMeterModel = [
     {
-        value: 'pulse counter',
+        value: UTILITY_MONITOR.PULSE_COUNTER,
         label: 'Sapient Pulse',
     },
     {

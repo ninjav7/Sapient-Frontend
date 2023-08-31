@@ -8,7 +8,7 @@ import Select from '../../../sharedComponents/form/select';
 import { useHistory } from 'react-router-dom';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
-import { convertToAlphaNumeric, utilityMeterModel } from './utils';
+import { UTILITY_MONITOR, convertToAlphaNumeric, utilityMeterModel } from './utils';
 import { UserStore } from '../../../store/UserStore';
 import { createUtilityMeterServices } from './services';
 
@@ -20,7 +20,7 @@ const CreateUtilityMeters = (props) => {
     const defaultObj = {
         status: true,
         device_id: '',
-        model: 'pulse counter',
+        model: UTILITY_MONITOR.PULSE_COUNTER,
         model_name: 'Sapient Pulse',
         modbus: '',
     };
