@@ -148,6 +148,7 @@ const Sensors = (props) => {
                     record?.utility_provider || record?.utility_meter_serial_number || record?.pulse_weight;
                 const isSensorAttached =
                     record?.utility_provider || record?.utility_meter_serial_number || record?.pulse_weight;
+                const locationName = record?.service_location ? record?.service_location_name : `Building Meter`;
 
                 return (
                     <div key={record?.id}>
@@ -185,6 +186,16 @@ const Sensors = (props) => {
                                 )}
                             </div>
                             <div className="d-flex align-items-center">
+                                {utilityMeterObj?.device_type === 'pulse counter' ? (
+                                    <>
+                                        {isPulseWeightVisible && (
+                                            <Badge text={`${locationName}`} className="font-weight-bold mr-2" />
+                                        )}
+                                    </>
+                                ) : (
+                                    <Badge text={`${locationName}`} className="font-weight-bold mr-2" />
+                                )}
+
                                 <Button
                                     className="breaker-action-btn"
                                     onClick={() => handleModalOpen(record, 'metrics')}
