@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Row, Col } from 'reactstrap';
+import { Row, Col, UncontrolledTooltip } from 'reactstrap';
 import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../explore/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -28,6 +28,7 @@ import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import Select from '../../sharedComponents/form/select';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { UserStore } from '../../store/UserStore';
+import { Badge } from '../../sharedComponents/badge';
 import './style.css';
 
 const SkeletonLoading = () => (
@@ -56,9 +57,27 @@ const SkeletonLoading = () => (
             <th>
                 <Skeleton count={5} />
             </th>
+
             <th>
                 <Skeleton count={5} />
             </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
+
             <th>
                 <Skeleton count={5} />
             </th>
@@ -282,6 +301,7 @@ const ExploreByEquipment = () => {
     let arr = apiRequestBody(startDate, endDate, timeZone);
 
     const currentRow = () => {
+        console.log('SSR allEquipmentList => ', allEquipmentList);
         if (selectedEquipmentFilter === 0) {
             return allEquipmentList;
         }
@@ -343,6 +363,46 @@ const ExploreByEquipment = () => {
             />
         );
     };
+
+    const renderBreakers = useCallback((row) => {
+        return (
+            <div className="breakers-row-content">
+                {row?.breaker_number.length === 0 ? (
+                    <Typography.Body>-</Typography.Body>
+                ) : (
+                    <Badge text={<span className="gray-950">{row?.breaker_number.join(', ')}</span>} />
+                )}
+            </div>
+        );
+    });
+
+    const renderTags = useCallback((row) => {
+        const slicedArr = row?.tags.slice(1);
+        return (
+            <div className="tags-row-content">
+                <Badge text={<span className="gray-950">{row?.tags[0] ? row?.tags[0] : 'none'}</span>} />
+                {slicedArr?.length > 0 ? (
+                    <>
+                        <Badge
+                            text={
+                                <span className="gray-950" id={`tags-badge-${row?.equipments_id}`}>
+                                    +{slicedArr.length} more
+                                </span>
+                            }
+                        />
+                        <UncontrolledTooltip
+                            placement="top"
+                            target={`tags-badge-${row.equipments_id}`}
+                            className="tags-tooltip">
+                            {slicedArr.map((el) => {
+                                return <Badge text={<span className="gray-950">{el}</span>} />;
+                            })}
+                        </UncontrolledTooltip>
+                    </>
+                ) : null}
+            </div>
+        );
+    });
 
     const renderEquipmentName = (row) => {
         return (
@@ -1377,6 +1437,28 @@ const ExploreByEquipment = () => {
         {
             name: 'End Use Category',
             accessor: 'end_user',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Tags',
+            accessor: 'tags',
+            callbackValue: renderTags,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Notes',
+            accessor: 'note',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Panel Name',
+            accessor: 'panel',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Breakers',
+            accessor: 'breaker_number',
+            callbackValue: renderBreakers,
             onSort: (method, name) => setSortBy({ method, name }),
         },
     ];
