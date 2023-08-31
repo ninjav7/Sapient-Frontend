@@ -12,3 +12,5 @@ export const compareStrings = (str1, str2) => {
     const result = str1.localeCompare(str2);
     return result === 0 ? true : false;
 };
+
+export const specialChartPattern = /[\.\,:;'"'`><\]\[}{_\/\|?\)\(=\+\-\*&%^$#@!~\\]/g;
