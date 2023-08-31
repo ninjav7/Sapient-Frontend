@@ -26,7 +26,7 @@ import Button from '../../sharedComponents/button/Button';
 import colorPalette from '../../assets/scss/_colors.scss';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 import TermsAndConditions from './terms-conditions/TermsAndConditions';
-import { compareStrings } from './utils';
+import { compareStrings, specialChartPattern } from './utils';
 import { Notification } from '../../sharedComponents/notification';
 import './auth.scss';
 
@@ -224,7 +224,7 @@ const Confirm = (props) => {
             } else {
                 setLowerCaseErr('error');
             }
-            if (password.match(/[~\!?@#\$%\^&\*\(\)_\+{}\":;.,='\[\]]/)) {
+            if (password.match(specialChartPattern)) {
                 setSpecialCharErr('success');
             } else {
                 setSpecialCharErr('error');
