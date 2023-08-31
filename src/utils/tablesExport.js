@@ -104,14 +104,14 @@ export const getExploreByBuildingTableCSVExport = (tableData, columns, userPrefU
                     arr.push(result);
                     break;
 
-                case 'consumption':
-                    const consumption = tableRow['consumption'];
-                    arr.push(`${consumption.now / 1000} kWh`);
+                case 'energy_consumption':
+                    const energy_consumption = tableRow['energy_consumption'];
+                    arr.push(`${energy_consumption?.now / 1000} kWh`);
                     break;
 
                 case 'change':
-                    const change = tableRow['consumption'];
-                    arr.push(`${change.change} %`);
+                    const change = tableRow['energy_consumption'];
+                    arr.push(`${change?.change} %`);
                     break;
 
                 case 'square_footage':
