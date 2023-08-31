@@ -217,7 +217,7 @@ const CompareBuildings = () => {
         const start_date = encodeURIComponent(startDate);
         const end_date = encodeURIComponent(endDate);
 
-        let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&ordered_by=${ordered_by}`;
+        let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&metric=energy&ordered_by=${ordered_by}`;
 
         if (search) params = params.concat(`&building_search=${encodeURIComponent(search)}`);
         if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
