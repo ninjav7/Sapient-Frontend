@@ -26,7 +26,7 @@ import Button from '../../sharedComponents/button/Button';
 import colorPalette from '../../assets/scss/_colors.scss';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 import TermsAndConditions from './terms-conditions/TermsAndConditions';
-import { compareStrings } from './utils';
+import { compareStrings, specialChartPattern } from './utils';
 import { Notification } from '../../sharedComponents/notification';
 import './auth.scss';
 
@@ -34,11 +34,11 @@ const Confirm = (props) => {
     const cookies = new Cookies();
     const history = useHistory();
     const [_isMounted, set_isMounted] = useState(false);
-    const [passwordResetSuccessful, setPasswordResetSuccessful] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [titleText, setTitleText] = useState('Set New Password');
     const [updateStatus, setUpdateStatus] = useState('');
     const [detailMessage, setDetailMessage] = useState('');
+    const [isRetry, setRetry] = useState(false);
     const [showReset, setShowReset] = useState(false);
     const [redirectToLogin, setRedirectToLogin] = useState(false);
     const [matchError, setMatchError] = useState(false);
@@ -133,50 +133,60 @@ const Confirm = (props) => {
                 setMatchError(true);
                 return;
             }
-            try {
-                setIsLoading(true);
-                const headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${props.match.params.token}`,
-                };
-                await axios
-                    .post(
-                        `${BaseUrl}${UpdateUserPassword}`,
-                        {
-                            password: password,
-                            confirm_password: cpassword,
-                            accept_terms: isTermsAccepted,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        const response = res?.data;
-                        let message = '';
-                        if (response?.success) {
-                            setTitleText('Success');
-                            message = response?.message ? response?.message : `Password set successfully!`;
-                            notifyUser(Notification.Types.success, message);
-                            setDetailMessage(`You have successfully set your password. You may now log in to the
+            setIsLoading(true);
+            const headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${props.match.params.token}`,
+            };
+            await axios
+                .post(
+                    `${BaseUrl}${UpdateUserPassword}`,
+                    {
+                        password: password,
+                        confirm_password: cpassword,
+                        accept_terms: isTermsAccepted,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    const response = res?.data;
+                    let message = '';
+                    if (response?.success) {
+                        setTitleText('Success');
+                        message = response?.message ? response?.message : `Password set successfully!`;
+                        notifyUser(Notification.Types.success, message);
+                        setDetailMessage(`You have successfully set your password. You may now log in to the
                             Sapient Energy Portal.`);
-                        } else {
-                            setTitleText('Failed');
-                            message = response?.message ? response?.message : `Failed to update password.`;
-                            notifyUser(Notification.Types.error, message);
-                            setDetailMessage(
-                                `Password Change Failed: Unfortunately, we were unable to update your password. Please make another attempt or reach out to Administrator for assistance.`
-                            );
-                        }
-                        setIsLoading(false);
-                        setUpdateStatus(message);
-                        setPasswordResetSuccessful(true);
-                        setShowReset(true);
-                    });
-            } catch (error) {
-                setIsLoading(false);
-            }
-        } else {
-            return;
+                    } else {
+                        setTitleText('Failed');
+                        message = response?.message ? response?.message : `Failed to update password.`;
+                        notifyUser(Notification.Types.error, message);
+                        setDetailMessage(
+                            `Password Change Failed: Unfortunately, we were unable to update your password. Please make another attempt or reach out to Administrator for assistance.`
+                        );
+                    }
+                    setUpdateStatus(message);
+                    setRetry(false);
+                })
+                .catch((error) => {
+                    const response = error?.response?.data;
+                    if (!response?.success) {
+                        let message = '';
+                        setTitleText('Failed');
+                        message = response?.message
+                            ? response?.message
+                            : `Password Change Failed: Unfortunately, we were unable to update your password. Please make another attempt or reach out to Administrator for assistance.`;
+                        notifyUser(Notification.Types.error, `Failed to update password.`);
+                        setDetailMessage(message);
+                        setUpdateStatus(`Failed to update password.`);
+                        setRetry(true);
+                    }
+                })
+                .finally(() => {
+                    setIsLoading(false);
+                    setShowReset(true);
+                });
         }
     };
 
@@ -214,7 +224,7 @@ const Confirm = (props) => {
             } else {
                 setLowerCaseErr('error');
             }
-            if (password.match(/[`~!@#$%\^&*()+=|;:'",.<>\/?\\\-]/)) {
+            if (password.match(specialChartPattern)) {
                 setSpecialCharErr('success');
             } else {
                 setSpecialCharErr('error');
@@ -266,6 +276,8 @@ const Confirm = (props) => {
         window.location.reload();
     };
 
+    const messageLines = detailMessage.split('\n');
+
     return (
         <React.Fragment>
             {alreadyLogin ? (
@@ -301,20 +313,36 @@ const Confirm = (props) => {
 
                                                 <Brick sizeInRem={2} />
 
-                                                <Typography.Subheader size={Typography.Sizes.md} className="text-mute">
-                                                    {detailMessage}
+                                                <Typography.Subheader size={Typography.Sizes.md} className="text-muted">
+                                                    {messageLines.map((line, index) => (
+                                                        <p key={index}>{line}</p>
+                                                    ))}
                                                 </Typography.Subheader>
 
                                                 <Brick sizeInRem={2} />
 
-                                                <Button
-                                                    label={'Go to Login'}
-                                                    size={Button.Sizes.lg}
-                                                    type={Button.Type.primary}
-                                                    className="sub-button"
-                                                    onClick={async () => {
-                                                        setRedirectToLogin(true);
-                                                    }}></Button>
+                                                <FormGroup className={`w-100 ${isRetry ? 'reset-page-btn-style' : ''}`}>
+                                                    {isRetry && (
+                                                        <Button
+                                                            label={'Retry Password Update'}
+                                                            size={Button.Sizes.lg}
+                                                            type={Button.Type.secondaryGrey}
+                                                            className="sub-button"
+                                                            onClick={() => {
+                                                                setShowReset(false);
+                                                                setTitleText('Set New Password');
+                                                            }}></Button>
+                                                    )}
+
+                                                    <Button
+                                                        label={'Go to Login'}
+                                                        size={Button.Sizes.lg}
+                                                        type={Button.Type.primary}
+                                                        className="sub-button"
+                                                        onClick={async () => {
+                                                            setRedirectToLogin(true);
+                                                        }}></Button>
+                                                </FormGroup>
                                             </>
                                         ) : (
                                             <>
@@ -489,13 +517,13 @@ const Confirm = (props) => {
                                                                     <Typography.Subheader
                                                                         size={Typography.Sizes.md}
                                                                         className="text-mute-error mt-2">
-                                                                        Error: Special Character (1 or more)
+                                                                        {`Error: Special characters (one or more) allowed: ~\!?@#\$%\^&\*\(\)_\+{}\":;.,='\[\]`}
                                                                     </Typography.Subheader>
                                                                 ) : (
                                                                     <Typography.Subheader
                                                                         size={Typography.Sizes.md}
                                                                         className="text-mute mt-2">
-                                                                        Special Character (1 or more)
+                                                                        {`Special Character (1 or more)`}
                                                                     </Typography.Subheader>
                                                                 )}
                                                             </div>

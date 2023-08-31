@@ -63,8 +63,7 @@ const Breaker = (props) => {
                 'is-loading': isLoading,
                 className,
             })}
-            style={styleWrapper}
-        >
+            style={styleWrapper}>
             {items && (
                 <div className="breaker-content-collector breaker-id-wrapper">
                     {items.map(({ id }) => (
@@ -96,7 +95,10 @@ const Breaker = (props) => {
 
             <div className="breaker-device-name">
                 {equipmentName ? (
-                    <Typography.Body size={Typography.Sizes.xs} className="gray-800">
+                    <Typography.Body
+                        size={Typography.Sizes.xs}
+                        className="gray-800"
+                        style={{ marginLeft: equipmentName === 'Blank' ? '1.65rem' : '0rem' }}>
                         {equipmentName}
                     </Typography.Body>
                 ) : (

@@ -104,14 +104,14 @@ export const getExploreByBuildingTableCSVExport = (tableData, columns, userPrefU
                     arr.push(result);
                     break;
 
-                case 'consumption':
-                    const consumption = tableRow['consumption'];
-                    arr.push(`${consumption.now / 1000} kWh`);
+                case 'energy_consumption':
+                    const energy_consumption = tableRow['energy_consumption'];
+                    arr.push(`${energy_consumption?.now / 1000} kWh`);
                     break;
 
                 case 'change':
-                    const change = tableRow['consumption'];
-                    arr.push(`${change.change} %`);
+                    const change = tableRow['energy_consumption'];
+                    arr.push(`${change?.change} %`);
                     break;
 
                 case 'square_footage':
@@ -374,6 +374,31 @@ export const getPlugRulesTableCSVExport = (tableData, columns, buildingList) => 
 };
 
 export const getEquipTypeTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+
+    tableData.forEach((tableRow) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
+export const getSpaceTypeTableCSVExport = (tableData, columns) => {
     let dataToExport = [];
 
     tableData.forEach((tableRow) => {

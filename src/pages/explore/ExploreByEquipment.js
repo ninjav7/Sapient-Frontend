@@ -107,6 +107,8 @@ const ExploreByEquipment = () => {
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
+    const [isFilterFetching, setFetchingFilters] = useState(false);
+
     const [seriesData, setSeriesData] = useState([]);
     let entryPoint = '';
     let top = '';
@@ -428,6 +430,7 @@ const ExploreByEquipment = () => {
     useEffect(() => {
         (async () => {
             setIsExploreDataLoading(true);
+            setFetchingFilters(true);
             const filters = await fetchExploreFilter(bldgId, startDate, endDate, timeZone, [], [], [], [], 0, 0, '');
 
             if (filters?.data?.data !== null) {
@@ -471,12 +474,14 @@ const ExploreByEquipment = () => {
             }
 
             setIsExploreDataLoading(false);
+            setFetchingFilters(false);
         })();
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
         if (conAPIFlag !== '') {
             (async () => {
+                setFetchingFilters(true);
                 const filters = await fetchExploreFilter(
                     bldgId,
                     startDate,
@@ -683,6 +688,7 @@ const ExploreByEquipment = () => {
                     },
                 ];
                 setFilterOptions(filterOptionsFetched);
+                setFetchingFilters(false);
             })();
         }
     }, [conAPIFlag]);
@@ -1459,6 +1465,7 @@ const ExploreByEquipment = () => {
                         <DataTableWidget
                             isLoading={isExploreDataLoading}
                             isLoadingComponent={<SkeletonLoading />}
+                            isFilterLoading={isFilterFetching}
                             id="explore-by-equipment"
                             onSearch={setSearch}
                             buttonGroupFilterOptions={[]}

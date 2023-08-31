@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Row, Col } from 'reactstrap';
-import { fetchExploreBuildingList, fetchExploreBuildingChart } from '../explore/services';
+import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../explore/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { fetchDateRange } from '../../helpers/formattedChartData';
 import { ComponentStore } from '../../store/ComponentStore';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { useHistory } from 'react-router-dom';
@@ -86,6 +85,7 @@ const ExploreByBuildings = () => {
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
+    const [isFilterFetching, setFetchingFilters] = useState(false);
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
     const [selectedBuildingId, setSelectedBuildingId] = useState('');
     const [seriesData, setSeriesData] = useState([]);
@@ -119,6 +119,24 @@ const ExploreByBuildings = () => {
     const [bottomVal, setBottomVal] = useState(0);
     const [shouldRender, setShouldRender] = useState(true);
 
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Portfolio Level',
+                    path: '/explore-page/by-buildings',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'explore';
+        });
+
+        updateBuildingStore('portfolio', 'Portfolio', '');
+    };
+
     useEffect(() => {
         entryPoint = 'entered';
     }, []);
@@ -137,56 +155,55 @@ const ExploreByBuildings = () => {
     }, [startDate, endDate]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Portfolio Level',
-                        path: '/explore-page/by-buildings',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'explore';
-            });
-
-            updateBuildingStore('portfolio', 'Portfolio', '');
-        };
         updateBreadcrumbStore();
         localStorage.removeItem('explorer');
     }, []);
 
-    const exploreDataFetch = async () => {
-        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
-        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
+    const exploreByBuildingDataFetch = async () => {
+        setFetchingFilters(true);
         isLoadingRef.current = true;
         setIsExploreDataLoading(true);
-        const value = apiRequestBody(startDate, endDate, timeZone);
-        await fetchExploreBuildingList(
-            value,
-            search,
-            ordered_by,
-            sort_by,
-            minConValue,
-            maxConValue,
-            minPerValue,
-            maxPerValue,
-            minSqftValue,
-            maxSqftValue,
-            selectedBuildingType,
-            conAPIFlag,
-            perAPIFlag,
-            sqftAPIFlag,
-            userPrefUnits
-        )
+
+        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'total_consumption' : sortBy.name;
+        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
+        const start_date = encodeURIComponent(startDate);
+        const end_date = encodeURIComponent(endDate);
+
+        let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&metric=energy`;
+
+        if (search) params = params.concat(`&building_search=${encodeURIComponent(search)}`);
+        if (ordered_by) params = params.concat(`&ordered_by=${ordered_by}`);
+        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
+        if (selectedBuildingType.length !== 0) {
+            const buildingTypesSelected = encodeURIComponent(selectedBuildingType.join('+'));
+            params.concat(`&building_type=${buildingTypesSelected}`);
+        }
+
+        if (conAPIFlag !== '') {
+            const gte = (minConValue - 1) * 1000;
+            const lte = (maxConValue + 1) * 1000;
+            params.concat(`&energy_consumption_lte=${lte}&energy_consumption_gte=${gte}`);
+        }
+
+        if (perAPIFlag !== '') {
+            const gte = minPerValue - 0.5;
+            const lte = maxPerValue + 0.5;
+            params.concat(`&change_lte=${lte}&change_gte=${gte}`);
+        }
+
+        if (sqftAPIFlag !== '') {
+            const gte = minSqftValue;
+            const lte = maxSqftValue;
+            params.concat(`&square_footage_lte=${lte}&square_footage_gte=${gte}`);
+        }
+
+        await fetchExploreByBuildingListV2(params)
             .then((res) => {
                 if (entryPoint === 'entered') {
                     totalBuildingId.length = 0;
                     setSeriesData([]);
                 }
-                let responseData = res?.data;
+                let responseData = res?.data?.data;
                 if (responseData.length !== 0) {
                     responseData.forEach((el) => {
                         el.user_pref_units = userPrefUnits;
@@ -208,21 +225,24 @@ const ExploreByBuildings = () => {
                     userPrefUnits === `si`
                         ? Math.round(handleUnitConverstion(responseData[0].square_footage, userPrefUnits))
                         : responseData[0].square_footage;
-                let topConsumption = responseData[0].consumption.now;
-                let bottomConsumption = responseData[0].consumption.now;
-                let topChange = responseData[0].consumption.change;
-                let bottomChange = responseData[0].consumption.change;
+                let topConsumption = responseData[0].energy_consumption.now;
+                let bottomConsumption = responseData[0].energy_consumption.now;
+                let topChange = responseData[0].energy_consumption.change;
+                let bottomChange = responseData[0].energy_consumption.change;
                 let topSqft = squareFootage;
                 let bottomSqft = squareFootage;
                 responseData.map((ele) => {
-                    if (Number(ele.consumption.now) > topConsumption) topConsumption = ele.consumption.now;
-                    if (Number(ele.consumption.now) < bottomConsumption) bottomConsumption = ele.consumption.now;
-                    if (Number(ele.consumption.change) > topChange) topChange = ele.consumption.change;
-                    if (Number(ele.consumption.change) < bottomChange) bottomChange = ele.consumption.change;
-                    if (Number(ele.square_footage) > topSqft)
-                        topSqft = Math.round(handleUnitConverstion(ele.square_footage, userPrefUnits));
-                    if (Number(ele.square_footage) < bottomSqft)
-                        bottomSqft = Math.round(handleUnitConverstion(ele.square_footage, userPrefUnits));
+                    if (Number(ele?.energy_consumption.now) > topConsumption)
+                        topConsumption = ele?.energy_consumption.now;
+                    if (Number(ele?.energy_consumption.now) < bottomConsumption)
+                        bottomConsumption = ele?.energy_consumption.now;
+                    if (Number(ele?.energy_consumption.change) > topChange) topChange = ele?.energy_consumption.change;
+                    if (Number(ele?.energy_consumption.change) < bottomChange)
+                        bottomChange = ele?.energy_consumption.change;
+                    if (Number(ele?.square_footage) > topSqft)
+                        topSqft = Math.round(handleUnitConverstion(ele?.square_footage, userPrefUnits));
+                    if (Number(ele?.square_footage) < bottomSqft)
+                        bottomSqft = Math.round(handleUnitConverstion(ele?.square_footage, userPrefUnits));
                 });
                 top = topConsumption / 1000;
                 bottom = bottomConsumption / 1000;
@@ -249,26 +269,23 @@ const ExploreByBuildings = () => {
                 setBottomSquareFootage(Math.abs(Math.round(bottomSqft)));
                 setTopSquareFootage(Math.abs(Math.round(topSqft)));
                 set_maxSqftValue(Math.abs(topSqft === bottomSqft ? Math.round(topSqft) + 1 : Math.round(topSqft)));
-
                 isLoadingRef.current = false;
                 setIsExploreDataLoading(false);
+                setFetchingFilters(false);
             })
             .catch((error) => {
                 isLoadingRef.current = false;
                 setIsExploreDataLoading(false);
+                setFetchingFilters(false);
             });
     };
 
     useEffect(() => {
-        if (startDate === null) {
-            return;
-        }
-        if (endDate === null) {
-            return;
-        }
-        if (conAPIFlag === '' && perAPIFlag === '' && sqftAPIFlag === '' && selectedBuildingType.length === 0)
-            exploreDataFetch();
-        else {
+        if (startDate === null || endDate === null) return;
+
+        if (conAPIFlag === '' && perAPIFlag === '' && sqftAPIFlag === '' && selectedBuildingType.length === 0) {
+            exploreByBuildingDataFetch();
+        } else {
             filterexploreDataFetch();
         }
     }, [
@@ -292,7 +309,7 @@ const ExploreByBuildings = () => {
             const filterOptionsFetched = [
                 {
                     label: 'Energy Consumption',
-                    value: 'consumption',
+                    value: 'energy_consumption',
                     placeholder: 'All Consumptions',
                     filterType: FILTER_TYPES.RANGE_SELECTOR,
                     filterOptions: [minConValue, maxConValue],
@@ -417,8 +434,8 @@ const ExploreByBuildings = () => {
                     placeholder: 'All Building Types',
                     filterType: FILTER_TYPES.MULTISELECT,
                     filterOptions: buildingTypeList.map((filterItem) => ({
-                        value: filterItem.building_type,
-                        label: filterItem.building_type,
+                        value: filterItem?.building_id,
+                        label: filterItem?.building_type,
                     })),
                     onClose: (options) => {
                         let opt = options;
@@ -444,7 +461,7 @@ const ExploreByBuildings = () => {
             const filterOptionsFetched = [
                 {
                     label: 'Energy Consumption',
-                    value: 'consumption',
+                    value: 'energy_consumption',
                     placeholder: 'All Consumptions',
                     filterType: FILTER_TYPES.RANGE_SELECTOR,
                     filterOptions: [minConValue, maxConValue],
@@ -592,30 +609,45 @@ const ExploreByBuildings = () => {
     }, [perAPIFlag]);
 
     const filterexploreDataFetch = async () => {
-        const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
-        const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
         isLoadingRef.current = true;
         setIsExploreDataLoading(true);
-        const value = apiRequestBody(startDate, endDate, timeZone);
-        await fetchExploreBuildingList(
-            value,
-            search,
-            ordered_by,
-            sort_by,
-            minConValue,
-            maxConValue,
-            minPerValue,
-            maxPerValue,
-            minSqftValue,
-            maxSqftValue,
-            selectedBuildingType,
-            conAPIFlag,
-            perAPIFlag,
-            sqftAPIFlag,
-            userPrefUnits
-        )
+
+        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'total_consumption' : sortBy.name;
+        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
+        const start_date = encodeURIComponent(startDate);
+        const end_date = encodeURIComponent(endDate);
+
+        let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&metric=energy`;
+
+        if (search) params = params.concat(`&building_search=${encodeURIComponent(search)}`);
+        if (ordered_by) params = params.concat(`&ordered_by=${ordered_by}`);
+        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
+        if (selectedBuildingType.length !== 0) {
+            const buildingTypesSelected = encodeURIComponent(selectedBuildingType.join('+'));
+            params = params.concat(`&building_type=${buildingTypesSelected}`);
+        }
+
+        if (conAPIFlag !== '') {
+            const gte = (minConValue - 1) * 1000;
+            const lte = (maxConValue + 1) * 1000;
+            params = params.concat(`&energy_consumption_lte=${lte}&energy_consumption_gte=${gte}`);
+        }
+
+        if (perAPIFlag !== '') {
+            const gte = minPerValue - 0.5;
+            const lte = maxPerValue + 0.5;
+            params = params.concat(`&change_lte=${lte}&change_gte=${gte}`);
+        }
+
+        if (sqftAPIFlag !== '') {
+            const gte = minSqftValue;
+            const lte = maxSqftValue;
+            params = params.concat(`&square_footage_lte=${lte}&square_footage_gte=${gte}`);
+        }
+
+        await fetchExploreByBuildingListV2(params)
             .then((res) => {
-                let responseData = res?.data;
+                let responseData = res?.data?.data;
                 if (responseData.length !== 0) {
                     responseData.forEach((el) => {
                         el.user_pref_units = userPrefUnits;
@@ -624,7 +656,7 @@ const ExploreByBuildings = () => {
 
                 setAllBuildingList(responseData);
                 setTotalItems(responseData.length);
-                setTopEnergyConsumption(responseData[0].consumption.now);
+                setTopEnergyConsumption(responseData[0]?.energy_consumption?.now);
                 isLoadingRef.current = false;
                 setIsExploreDataLoading(false);
             })
@@ -674,7 +706,7 @@ const ExploreByBuildings = () => {
                     onClick={() => {
                         redirectToExploreEquipPage(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);
                     }}>
-                    {row.building_name}
+                    {row?.building_name}
                 </a>
                 <Brick sizeInPixels={3} />
             </div>
@@ -691,10 +723,10 @@ const ExploreByBuildings = () => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {Math.round(row.consumption.now / 1000)} kWh
+                    {Math.round(row?.energy_consumption?.now / 1000)} kWh
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
-                <TinyBarChart percent={getAverageValue(row.consumption.now / 1000, bottom, top)} />
+                <TinyBarChart percent={getAverageValue(row?.energy_consumption.now / 1000, bottom, top)} />
             </>
         );
     };
@@ -702,9 +734,9 @@ const ExploreByBuildings = () => {
     const renderPerChange = (row) => {
         return (
             <TrendsBadge
-                value={Math.abs(Math.round(row.consumption.change))}
+                value={Math.abs(Math.round(row?.energy_consumption?.change))}
                 type={
-                    row?.consumption?.now < row?.consumption?.old
+                    row?.energy_consumption?.now < row?.energy_consumption?.old
                         ? TrendsBadge.Type.DOWNWARD_TREND
                         : TrendsBadge.Type.UPWARD_TREND
                 }
@@ -724,35 +756,49 @@ const ExploreByBuildings = () => {
         setAllSearchData([]);
 
         const fetchAllData = async () => {
-            const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
-            const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
-
             isLoadingRef.current = true;
             setIsExploreDataLoading(true);
-            const value = apiRequestBody(startDate, endDate, timeZone);
-            await fetchExploreBuildingList(
-                value,
-                search,
-                ordered_by,
-                sort_by,
-                minConValue,
-                maxConValue,
-                minPerValue,
-                maxPerValue,
-                minSqftValue,
-                maxSqftValue,
-                selectedBuildingType,
-                conAPIFlag,
-                perAPIFlag,
-                sqftAPIFlag,
-                userPrefUnits
-            )
+
+            const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'total_consumption' : sortBy.name;
+            const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
+            const start_date = encodeURIComponent(startDate);
+            const end_date = encodeURIComponent(endDate);
+
+            let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&metric=energy`;
+
+            if (search) params = params.concat(`&building_search=${encodeURIComponent(search)}`);
+            if (ordered_by) params = params.concat(`&ordered_by=${ordered_by}`);
+            if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
+            if (selectedBuildingType.length !== 0) {
+                const buildingTypesSelected = encodeURIComponent(selectedBuildingType.join('+'));
+                params.concat(`&building_type=${buildingTypesSelected}`);
+            }
+
+            if (conAPIFlag !== '') {
+                const gte = (minConValue - 1) * 1000;
+                const lte = (maxConValue + 1) * 1000;
+                params.concat(`&energy_consumption_lte=${lte}&energy_consumption_gte=${gte}`);
+            }
+
+            if (perAPIFlag !== '') {
+                const gte = minPerValue - 0.5;
+                const lte = maxPerValue + 0.5;
+                params.concat(`&change_lte=${lte}&change_gte=${gte}`);
+            }
+
+            if (sqftAPIFlag !== '') {
+                const gte = minSqftValue;
+                const lte = maxSqftValue;
+                params.concat(`&square_footage_lte=${lte}&square_footage_gte=${gte}`);
+            }
+
+            await fetchExploreByBuildingListV2(params)
                 .then((res) => {
                     if (entryPoint === 'entered') {
                         totalBuildingId.length = 0;
                         setSeriesData([]);
                     }
-                    let responseData = res.data;
+                    let responseData = res?.data;
                     setTotalItemsSearched(responseData.length);
                     setAllSearchData(responseData);
                     isLoadingRef.current = false;
@@ -794,7 +840,7 @@ const ExploreByBuildings = () => {
         },
         {
             name: 'Energy Consumption',
-            accessor: 'consumption',
+            accessor: 'energy_consumption',
             callbackValue: renderConsumption,
             onSort: (method, name) => setSortBy({ method, name }),
         },
@@ -818,29 +864,19 @@ const ExploreByBuildings = () => {
     ]);
 
     const handleDownloadCsv = async () => {
-        const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
-        const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
-        const value = apiRequestBody(startDate, endDate, timeZone);
+        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'total_consumption' : sortBy.name;
+        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
+        const start_date = encodeURIComponent(startDate);
+        const end_date = encodeURIComponent(endDate);
 
-        await fetchExploreBuildingList(
-            value,
-            '',
-            ordered_by,
-            sort_by,
-            minConValue,
-            maxConValue,
-            minPerValue,
-            maxPerValue,
-            minSqftValue,
-            maxSqftValue,
-            [],
-            '',
-            '',
-            '',
-            userPrefUnits
-        )
+        let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&metric=energy`;
+
+        if (ordered_by) params = params.concat(`&ordered_by=${ordered_by}`);
+        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
+
+        await fetchExploreByBuildingListV2(params)
             .then((res) => {
-                let responseData = res?.data;
+                let responseData = res?.data?.data;
                 download(
                     `Explore_By_Building_${new Date().toISOString().split('T')[0]}`,
                     getExploreByBuildingTableCSVExport(responseData, tableHeader, userPrefUnits)
@@ -872,7 +908,7 @@ const ExploreByBuildings = () => {
         let value = apiRequestBody(startDate, endDate, timeZone);
         await fetchExploreBuildingChart(value, buildIdNow)
             .then((res) => {
-                let responseData = res.data;
+                let responseData = res?.data;
                 let data = responseData.data;
                 let arr = [];
                 arr = allBuildingList.filter(function (item) {
@@ -880,10 +916,10 @@ const ExploreByBuildings = () => {
                 });
                 let NulledData = [];
                 data.map((ele) => {
-                    if (ele.consumption === '') {
-                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
+                    if (ele?.energy_consumption === '') {
+                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
                     } else {
-                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: ele.consumption });
+                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.energy_consumption });
                     }
                 });
                 let recordToInsert = {
@@ -902,7 +938,7 @@ const ExploreByBuildings = () => {
         let value = apiRequestBody(startDate, endDate, timeZone);
         await fetchExploreBuildingChart(value, id)
             .then((res) => {
-                let responseData = res.data;
+                let responseData = res?.data;
                 let data = responseData.data;
                 let arr = [];
                 arr = allBuildingList.filter(function (item) {
@@ -910,10 +946,10 @@ const ExploreByBuildings = () => {
                 });
                 let NulledData = [];
                 data.map((ele) => {
-                    if (ele.consumption === '') {
-                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
+                    if (ele?.energy_consumption === '') {
+                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
                     } else {
-                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: ele.consumption });
+                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.energy_consumption });
                     }
                 });
                 let recordToInsert = {
@@ -997,6 +1033,7 @@ const ExploreByBuildings = () => {
                         <DataTableWidget
                             isLoading={isExploreDataLoading}
                             isLoadingComponent={<SkeletonLoading />}
+                            isFilterLoading={isFilterFetching}
                             id="explore-by-building"
                             onSearch={setSearch}
                             buttonGroupFilterOptions={[]}

@@ -20,7 +20,7 @@ export function updateUtilityMeterServices(params, payload) {
 
 export function getAllUtilityMetersServices(bldgId, search, pageNo, pageSize, deviceStatus, getParams) {
     const searchData = encodeURIComponent(search);
-    let params = `?building_id=${bldgId}&panel_search=${searchData}&page_size=${pageSize}&page_no=${pageNo}`;
+    let params = `?building_id=${bldgId}&device_search=${searchData}&page_size=${pageSize}&page_no=${pageNo}`;
 
     if (deviceStatus !== 0) params = params.concat(`&stat=${deviceStatus === 1 ? 'true' : 'false'}`);
 

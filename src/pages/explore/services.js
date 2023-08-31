@@ -1,51 +1,16 @@
 import axiosInstance from '../../services/axiosInstance';
 import _ from 'lodash';
 import {
-    getExploreBuildingList,
     getExploreBuildingChart,
     getExploreEquipmentList,
     getExploreEquipmentChart,
     getExploreFilter,
     getWeather,
+    compareBuildingsV2,
 } from '../../services/Network';
 
-//Explore By Building
-export function fetchExploreBuildingList(
-    dateTimeData,
-    search,
-    order_by,
-    sort_by,
-    minConValue,
-    maxConValue,
-    minPerValue,
-    maxPerValue,
-    minSqftValue,
-    maxSqftValue,
-    selectedBuildingType,
-    conAPIFlag,
-    perAPIFlag,
-    sqftAPIFlag,
-    userPrefUnits
-) {
-    let params = `?consumption=energy&search_by_name=${search}&ordered_by=${order_by}&sort_by=${sort_by}`;
-    let obj = { ...dateTimeData };
-    if (conAPIFlag !== '')
-        obj['consumption_range'] = {
-            gte: (minConValue - 1) * 1000,
-            lte: (maxConValue + 1) * 1000,
-        };
-    if (perAPIFlag !== '')
-        obj['change'] = {
-            gte: minPerValue - 0.5,
-            lte: maxPerValue + 0.5,
-        };
-    if (sqftAPIFlag !== '')
-        obj['sq_ft_range'] = {
-            gte: minSqftValue,
-            lte: maxSqftValue,
-        };
-    if (selectedBuildingType.length !== 0) obj['building_type'] = selectedBuildingType;
-    return axiosInstance.post(`${getExploreBuildingList}${params}`, obj).then((res) => {
+export function fetchExploreByBuildingListV2(params) {
+    return axiosInstance.get(`${compareBuildingsV2}${params}`).then((res) => {
         return res;
     });
 }

@@ -13,6 +13,7 @@ import UtilityMeters from '../pages/settings/utility-meters';
 import Layout from '../pages/settings/layout';
 import Equipment from '../pages/settings/equipment/Equipment';
 import EquipmentTypes from '../pages/settings/equipment-type';
+import SpaceTypes from '../pages/settings/space-types';
 import Panels from '../pages/settings/panels';
 import EditPanel from '../pages/settings/panels/EditPanel';
 import ActiveDevices from '../pages/settings/active-devices';
@@ -360,6 +361,14 @@ const settingsRoutes = {
             path: '/settings/equipment-types',
             name: 'Equipment Types',
             component: EquipmentTypes,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'account',
+        },
+        {
+            path: '/settings/space-types',
+            name: 'Space Types',
+            component: SpaceTypes,
             route: PrivateRoute,
             visibility: true,
             parent: 'account',

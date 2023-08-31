@@ -262,12 +262,12 @@ export const separateAndCalculateEnergyData = (array) => {
     });
 
     const onHoursObj = {
-        name: 'On-hours',
+        name: 'Occupied Hours',
         consumption: calculateTotalEnergy(energyConsumptionArray),
     };
 
     const afterHoursObj = {
-        name: 'After-hours',
+        name: 'Off Hours',
         consumption: calculateTotalEnergy(afterHoursEnergyConsumptionArray),
     };
 

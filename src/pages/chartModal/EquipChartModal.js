@@ -31,6 +31,7 @@ import {
     compareObjData,
     dateTimeFormatForHighChart,
     formatXaxisForHighCharts,
+    xAxisLabelStepCount,
 } from '../../helpers/helpers';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
@@ -660,6 +661,8 @@ const EquipChartModal = ({
                                                                 userPrefDateFormat,
                                                                 userPrefTimeFormat
                                                             ),
+                                                            align: 'left',
+                                                            step: xAxisLabelStepCount(daysCount, userPrefTimeFormat),
                                                         },
                                                     },
                                                 }}
