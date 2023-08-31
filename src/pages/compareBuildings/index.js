@@ -114,13 +114,13 @@ const CompareBuildings = () => {
                     onClick={() => {
                         updateBuildingStore(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);
                         history.push({
-                            pathname: `/energy/building/overview/${row.building_id}`,
+                            pathname: `/energy/building/overview/${row?.building_id}`,
                         });
                     }}>
-                    {row.building_name !== '' ? row.building_name : '-'}
+                    {row?.building_name !== '' ? row?.building_name : '-'}
                 </Typography.Link>
                 <div className="mt-1 w-50">
-                    <Badge text={row.building_type || '-'} />
+                    <Badge text={row?.building_type || '-'} />
                 </div>
             </>
         );
@@ -133,7 +133,7 @@ const CompareBuildings = () => {
                     {`${formatConsumptionValue(row?.average_consumption, 2)} ${row?.average_consumption_units}`}
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
-                <TinyBarChart percent={getAverageValue(row.average_consumption, 0, top)} />
+                <TinyBarChart percent={getAverageValue(row?.average_consumption, 0, top)} />
             </>
         );
     };
@@ -141,26 +141,26 @@ const CompareBuildings = () => {
     const renderTotalConsumption = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {`${formatConsumptionValue(Math.round(row.total_consumption / 1000))} ${UNITS.KWH}`}
+                {`${formatConsumptionValue(Math.round(row?.total_consumption / 1000))} ${UNITS.KWH}`}
             </Typography.Body>
         );
     };
 
     const renderEquipmentCount = (row) => {
-        return <Typography.Body size={Typography.Sizes.md}>{`${row.equipment_count}`}</Typography.Body>;
+        return <Typography.Body size={Typography.Sizes.md}>{`${row?.equipment_count}`}</Typography.Body>;
     };
 
     const renderChangeEnergy = (row) => {
         return (
             <div>
-                {row.energy_consumption.now >= row.energy_consumption.old ? (
+                {row?.energy_consumption.now >= row?.energy_consumption.old ? (
                     <TrendsBadge
-                        value={Math.abs(Math.round(row.energy_consumption.change))}
+                        value={Math.abs(Math.round(row?.energy_consumption.change))}
                         type={TRENDS_BADGE_TYPES.UPWARD_TREND}
                     />
                 ) : (
                     <TrendsBadge
-                        value={Math.abs(Math.round(row.energy_consumption.change))}
+                        value={Math.abs(Math.round(row?.energy_consumption.change))}
                         type={TRENDS_BADGE_TYPES.DOWNWARD_TREND}
                     />
                 )}
@@ -169,7 +169,7 @@ const CompareBuildings = () => {
     };
 
     const renderSquareFootage = (row) => {
-        return <div>{formatConsumptionValue(row.square_footage)}</div>;
+        return <div>{formatConsumptionValue(row?.square_footage)}</div>;
     };
 
     const [tableHeader, setTableHeader] = useState([
