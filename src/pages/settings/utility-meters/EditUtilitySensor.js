@@ -17,7 +17,7 @@ import Select from '../../../sharedComponents/form/select';
 import { fetchDateRange } from '../../../helpers/formattedChartData';
 import Header from '../../../components/Header';
 import { DateRangeStore } from '../../../store/DateRangeStore';
-import { convertToMac, shadowChartMetrics, pulseChartMetrics } from './utils';
+import { convertToMac, shadowChartMetrics, pulseChartMetrics, UTILITY_MONITOR } from './utils';
 import {
     compareObjData,
     dateTimeFormatForHighChart,
@@ -225,7 +225,9 @@ const MetricsTab = (props) => {
 
     useEffect(() => {
         if (!utilityMeterObj?.id) return;
-        utilityMeterObj?.device_type === 'pulse counter' ? setMetric(pulseChartMetrics) : setMetric(shadowChartMetrics);
+        utilityMeterObj?.device_type === UTILITY_MONITOR.PULSE_COUNTER
+            ? setMetric(pulseChartMetrics)
+            : setMetric(shadowChartMetrics);
     }, [utilityMeterObj]);
 
     return (
@@ -248,7 +250,7 @@ const MetricsTab = (props) => {
                             </div>
                         </div>
 
-                        {utilityMeterObj?.device_type !== `pulse counter` && (
+                        {utilityMeterObj?.device_type !== UTILITY_MONITOR.PULSE_COUNTER && (
                             <div className="w-50">
                                 <Typography.Subheader className="gray-550" size={Typography.Sizes.md}>
                                     {`Peak kW YTD`}
@@ -412,7 +414,7 @@ const ConfigureTab = (props) => {
 
             <Brick sizeInRem={2} />
 
-            {utilityMeterObj?.device_type === 'pulse counter' ? (
+            {utilityMeterObj?.device_type === UTILITY_MONITOR.PULSE_COUNTER ? (
                 <>
                     <div className="d-flex w-100 form-gap">
                         <div className="w-100">
@@ -642,7 +644,7 @@ const EditUtilitySensor = (props) => {
     const updateUtilitySensorData = async () => {
         let alertObj = Object.assign({}, sensorErrorObj);
 
-        if (utilityMeterObj?.device_type === 'pulse counter' && sensorObj?.pulse_weight.length === 0) {
+        if (utilityMeterObj?.device_type === UTILITY_MONITOR.PULSE_COUNTER && sensorObj?.pulse_weight.length === 0) {
             alertObj.pulse_weight = 'Please enter pulse weight. It cannot be empty.';
         }
 
@@ -659,7 +661,8 @@ const EditUtilitySensor = (props) => {
             };
 
             if (sensorObj?.service_location !== '') payload.service_location = sensorObj?.service_location;
-            if (utilityMeterObj?.device_type === 'pulse counter') payload.pulse_weight = sensorObj?.pulse_weight;
+            if (utilityMeterObj?.device_type === UTILITY_MONITOR.PULSE_COUNTER)
+                payload.pulse_weight = sensorObj?.pulse_weight;
 
             const params = `?sensor_id=${sensorObj?.id}`;
 
@@ -720,7 +723,7 @@ const EditUtilitySensor = (props) => {
                             )}
                             <Typography.Header size={Typography.Sizes.md}>
                                 {activeTab === 'metrics'
-                                    ? utilityMeterObj?.device_type === 'pulse counter'
+                                    ? utilityMeterObj?.device_type === UTILITY_MONITOR.PULSE_COUNTER
                                         ? formatSensorHeading(selectedSensorObj, 'pulse')
                                         : formatSensorHeading(selectedSensorObj, 'shadow')
                                     : `Sensor Details`}
