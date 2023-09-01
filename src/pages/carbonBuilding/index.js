@@ -102,8 +102,17 @@ const CarbonBuilding = () => {
     const [isPlugOnly, setIsPlugOnly] = useState(false);
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
     const [carbonConsumptionsCategories, setCarbonConsumptionsCategories] = useState([]);
+
     const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
     const [carbonIntensity, setCarbonIntensity] = useState([]);
+
+    const [chartsData, setChartsData] = useState([]);
+    const [dataToDisplay, setDataToDisplay] = useState([]);
+    const [legendObj, setLegendObj] = useState({
+        carbon: true,
+        energy: true,
+    });
+
     const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
     const [hourlyAvgConsumpData, setHourlyAvgConsumpData] = useState([]);
     const heatMapChartHeight = 125;
@@ -604,7 +613,32 @@ const CarbonBuilding = () => {
             })
             .catch((error) => {});
     };
-    console.log('[...energyConsumptionsData, ...carbonIntensity]', [...energyConsumptionsData, ...carbonIntensity]);
+
+    const handleLedgendStatusChange = (key, value) => {
+        setLegendObj((prevLegendObj) => ({
+            ...prevLegendObj,
+            [key]: value,
+        }));
+    };
+
+    useEffect(() => {
+        const mergedList = [...energyConsumptionsData, ...carbonIntensity];
+        setChartsData(mergedList);
+    }, [energyConsumptionsData, carbonIntensity]);
+
+    useEffect(() => {
+        if (legendObj?.carbon && legendObj?.energy) setDataToDisplay(chartsData);
+        if (!legendObj?.carbon && !legendObj?.energy) setDataToDisplay([]);
+        if (legendObj?.carbon && !legendObj?.energy) {
+            let obj = chartsData.find((el) => el?.name === 'Carbon');
+            setDataToDisplay([obj]);
+        }
+        if (!legendObj?.carbon && legendObj?.energy) {
+            let obj = chartsData.find((el) => el?.name === 'Energy');
+            setDataToDisplay([obj]);
+        }
+    }, [legendObj, chartsData]);
+
     return (
         <React.Fragment>
             <Header title="Carbon Building Overview" type="page" />
@@ -620,24 +654,24 @@ const CarbonBuilding = () => {
                     colors={[colors.datavizMain2, colors.datavizMain1]}
                     categories={carbonConsumptionsCategories}
                     tooltipUnit={UNITS.KWH}
-                    series={[...energyConsumptionsData, ...carbonIntensity]}
+                    series={dataToDisplay}
                     isLegendsEnabled={false}
                     plotBandsLegends={[
-                            {
-                                label: 'Carbon',
-                                color: colors.datavizMain2,
-                                type: 'spline',
-                                onClick: (event) => console.log('CARBONCLICKED', event),
+                        {
+                            label: 'Carbon',
+                            color: colors.datavizMain2,
+                            type: 'spline',
+                            onClick: (event) => handleLedgendStatusChange('carbon', !event),
+                        },
+                        {
+                            type: 'column',
+                            label: 'Energy',
+                            color: {
+                                background: 'rgba(180, 35, 24, 0.1)',
+                                borderColor: colors.datavizMain1,
                             },
-                            {
-                                type: 'column',
-                                label: 'Energy',
-                                color: {
-                                    background: 'rgba(180, 35, 24, 0.1)',
-                                    borderColor: colors.datavizMain1,
-                                },
-                                onClick: (event) => console.log('EnergyCLICKED', event),
-                            },
+                            onClick: (event) => handleLedgendStatusChange('energy', !event),
+                        },
                     ]}
                     timeZone={timeZone}
                     xAxisCallBackValue={formatXaxis}
