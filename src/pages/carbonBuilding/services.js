@@ -57,8 +57,8 @@ export function fetchMetricsBuildingPage(bldg_id, params) {
     return axiosInstance.get(`${metricsForCarbonBuildingPage}/${bldg_id}`, { params }).then((res) => res);
 }
 
-export function fetchMetricsKpiBuildingPage(bldg_id, params) {
-    return axiosInstance.get(`${metricsKpiForCarbonBuildingPage}/${bldg_id}`, { params }).then((res) => res.data);
+export function fetchMetricsKpiBuildingPage(params) {
+    return axiosInstance.get(`${metricsKpiForCarbonBuildingPage}`, { params }).then((res) => res.data);
 }
 export function fetchcurrentFuelMix(params) {
     const payload = '?region=ISONE&source=EIA';

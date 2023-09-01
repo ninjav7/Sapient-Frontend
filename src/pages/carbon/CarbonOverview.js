@@ -6,7 +6,7 @@ import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { formatConsumptionValue } from '../../helpers/helpers';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import { Badge } from '../../sharedComponents/badge';
-import { fetchCompareBuildings, getCarbonBuildingChartData } from '../../services/compareBuildings';
+import { fetchCompareBuildingsV2, getCarbonBuildingChartData } from '../compareBuildings/services';
 import { getCompareBuildingTableCSVExport } from '../../utils/tablesExport';
 
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
@@ -76,86 +76,6 @@ const SkeletonLoading = () => (
     </SkeletonTheme>
 );
 
-const SingularityWidget = () => {
-    useEffect(() => {
-        // Install Singularity on the webpage
-        (function (window, document) {
-            if (window.singularity) console.error('singularity embed already included');
-            window.singularity = {};
-            const m = ['init', 'chart', 'debug'];
-            window.singularity._c = [];
-            m.forEach(
-                (me) =>
-                    (window.singularity[me] = function () {
-                        window.singularity._c.push([me, arguments]);
-                    })
-            );
-            const elt = document.createElement('script');
-            elt.type = 'text/javascript';
-            elt.async = true;
-            elt.src = 'https://js.singularity.energy/widget/shim.js';
-            const before = document.getElementsByTagName('script')[0];
-            before.parentNode.insertBefore(elt, before);
-        })(window, document, undefined);
-
-        // Initialize the Singularity widget with your public ID
-        // window?.singularity?.authorize("2a5154fe73f74442a36c2cd6267ab602");
-
-        window.singularity.init('eb096e746b');
-        window.singularity.chart({
-            containerId: 'element-id-for-singularity-chart',
-            width: '800',
-            height: '440',
-            title: "Today's carbon intensity comparison",
-            style: { fontFamily: 'sans-serif' },
-            series: [
-                {
-                    timeframe: 'realtime',
-                    data: {
-                        type: 'carbon_intensity',
-                        source: 'ISONE',
-                    },
-                    name: 'New England (ISONE)',
-                },
-                {
-                    timeframe: 'realtime',
-                    data: {
-                        type: 'carbon_intensity',
-                        source: 'NYISO',
-                    },
-                    name: 'New York (NYISO)',
-                },
-                {
-                    timeframe: 'realtime',
-                    data: {
-                        type: 'carbon_intensity',
-                        source: 'CAISO',
-                    },
-                    name: 'California (CAISO)',
-                },
-            ],
-            chart: {
-                yAxis: {
-                    gridLineColor: 'rgba(200,200,200, 0.2)',
-                    title: { text: 'lbs CO2 per MWh' },
-                },
-                time: { useUTC: false },
-                legend: { enabled: true },
-                tooltip: {
-                    dateFormat: {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    },
-                    yLabel: 'lbs/MWh',
-                },
-            },
-        });
-    }, []);
-    return <div id="element-id-for-singularity-chart"></div>;
-};
-
 const CarbonOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
@@ -181,14 +101,14 @@ const CarbonOverview = () => {
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: `Average Consumption / ${userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`}`,
+            name: `Average Emissions Rate `,
             accessor: 'energy_density',
             callbackValue: (row) => renderEnergyDensity(row),
 
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: 'Total Consumption',
+            name: 'Total Carbon Emissions',
             accessor: 'total_consumption',
             callbackValue: (row) => renderTotalConsumption(row),
             onSort: (method, name) => setSortBy({ method, name }),
@@ -292,24 +212,14 @@ const CarbonOverview = () => {
         getXaxisForDaysSelected(daysCount);
         getFormattedChartDates(daysCount, userPrefTimeFormat, userPrefDateFormat);
     }, [daysCount, userPrefTimeFormat, userPrefDateFormat]);
-    const fetchcompareBuildingsData = async (search, ordered_by = 'energy_density', sort_by, userPrefUnits) => {
+    const fetchcompareBuildingsData = async (search, ordered_by = 'building_name', sort_by, userPrefUnits) => {
         setIsLoadingBuildingData(true);
-        let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?ordered_by=${ordered_by}`;
+        let params = `?date_from=${startDate}&date_to=${endDate}&tz_info=${timeZone}&metric=carbon&ordered_by=${ordered_by}`;
         if (search) params = params.concat(`&building_search=${encodeURIComponent(search)}`);
         if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
-        await fetchCompareBuildings(params, payload)
+        await fetchCompareBuildingsV2(params)
             .then((res) => {
-                let response = res?.data;
-                let topVal = Math.max(...response.map((o) => o.energy_density));
-                top = Math.max(...response.map((o) => o.energy_density));
-                response.length !== 0 &&
-                    response.forEach((el) => {
-                        el.square_footage = Math.round(handleUnitConverstion(el.square_footage, userPrefUnits));
-                        el.energy_density = el?.energy_density / 1000;
-                        el.energy_density_units = `${userPrefUnits === 'si' ? `kWh / sq. m.` : `kWh / sq. ft.`}`;
-                    });
-                setTopEnergyDensity(topVal);
+                let response = res?.data.data;
                 setBuildingsData(response);
                 setIsLoadingBuildingData(false);
             })
@@ -318,7 +228,7 @@ const CarbonOverview = () => {
             });
     };
     useEffect(() => {
-        const ordered_by = sortBy.name === undefined ? 'energy_density' : sortBy.name;
+        const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
 
         fetchcompareBuildingsData(search, ordered_by, sort_by, userPrefUnits);
@@ -429,7 +339,7 @@ const CarbonOverview = () => {
         };
 
         const updateBuildingData = () => {
-            updateBuildingStore('carbon', 'Carbon', '');
+            updateBuildingStore('portfolio', 'Portfolio', '');
         };
 
         updateBreadcrumbStore();
@@ -437,6 +347,7 @@ const CarbonOverview = () => {
     }, []);
 
     const renderName = (row) => {
+        console.log("row.building_type",row);
         return (
             <>
                 <Typography.Link
@@ -465,18 +376,16 @@ const CarbonOverview = () => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {Math.round(row?.energy_density)} {row?.energy_density_units}
+                    {row?.average_emissions_rate} lbs/MWh
                 </Typography.Body>
-                <Brick sizeInRem={0.375} />
-                <TinyBarChart percent={getAverageValue(row.energy_density, 0, top)} />
             </>
         );
-    };
+    }; 
 
     const renderTotalConsumption = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {Math.round(row.total_consumption / 1000)} {UNITS.KWH}
+                {Math.round(row.total_carbon_emissions / 1000)} {UNITS.ibs}
             </Typography.Body>
         );
     };
@@ -485,14 +394,14 @@ const CarbonOverview = () => {
     const renderChangeEnergy = (row) => {
         return (
             <div>
-                {row.energy_consumption.now >= row.energy_consumption.old ? (
+                {row.carbon_emissions.now >= row.carbon_emissions.old ? (
                     <TrendsBadge
-                        value={Math.abs(Math.round(row.energy_consumption.change))}
+                        value={Math.abs(Math.round(row.carbon_emissions.change))}
                         type={TRENDS_BADGE_TYPES.UPWARD_TREND}
                     />
                 ) : (
                     <TrendsBadge
-                        value={Math.abs(Math.round(row.energy_consumption.change))}
+                        value={Math.abs(Math.round(row.carbon_emissions.change))}
                         type={TRENDS_BADGE_TYPES.DOWNWARD_TREND}
                     />
                 )}
@@ -545,7 +454,6 @@ const CarbonOverview = () => {
                             />
                         </Col>
                     </Row>
-                    <SingularityWidget />
                 </>
             ) : (
                 <div>You don't have the permission to view this page</div>

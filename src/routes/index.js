@@ -177,7 +177,7 @@ const portfolioRoutes = {
             component: CarbonOverview,
             route: PrivateRoute,
             visibility: true,
-            parent: 'carbon',
+            parent: 'building',
         },
         {
             path: '/carbon/building/overview/:bldgId',

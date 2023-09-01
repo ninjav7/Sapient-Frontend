@@ -24,8 +24,8 @@ export const builidingOverview = '/api/energy/building/overview';
 export const builidingAlerts = '/api/energy/building/alerts';
 export const builidingPeak = '/api/energy/building/peak';
 export const builidingEquipments = '/api/energy/building/equipment';
-export const energyConsumptionByEquipmentType = '/api/v2/metrics/equipmenttype';
-export const energyConsumptionBySpaceType = '/api/v2/metrics/spacetype';
+export const energyConsumptionByEquipmentType = '/api/v2/metrics/equipment_type';
+export const energyConsumptionBySpaceType = '/api/v2/metrics/space_type';
 export const energyConsumptionByFloor = '/api/v2/metrics/floor';
 // export const energyCarbonByBuilding = '/api/v2/metrics/building/carbon'
 export const metricsForCarbonBuildingPage = '/api/v2/metrics/building'
@@ -135,7 +135,6 @@ export const getBuildingTypes = '/api/config/building-types';
 
 // compare-buildings
 export const compareBuildings = '/api/energy/energy/compare-buildings';
-export const compareBuildingsV2 = '/api/v2/metrics/portfolio/compare-buildings';
 
 //config settings
 export const getBuildings = '/api/config/get_buildings';
@@ -228,3 +227,5 @@ export const generalBuildingDetailV2 = '/api/v2/building/building_details';
 export const sensorUsageData = '/api/v2/metrics/sensor';
 export const sensorUsageDataForUtilityMonitor = '/api/v2/metrics/ytd';
 export const getEnergyConsumptionV2 = '/api/v2/metrics/building';
+export const compareBuildingsV2 = '/api/v2/metrics/portfolio/compare-buildings';
+

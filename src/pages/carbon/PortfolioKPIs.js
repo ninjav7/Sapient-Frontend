@@ -9,9 +9,6 @@ import { UNITS } from '../../constants/units';
 import './PortfolioKPIs.scss';
 
 const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0, userPrefUnits }) => {
-    console.log("totalBuilding",totalBuilding);
-    console.log("overalldata",overalldata);
-    console.log("userPrefUnits",userPrefUnits);
     return (
         <>
             <div className="portfolioKPIs-wrapper ml-2">

@@ -8,7 +8,6 @@ import moment from 'moment';
 import 'moment-timezone';
 import { useHistory, useParams } from 'react-router-dom';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
-import { getCarbonBuildingChartData } from '../../services/compareBuildings';
 import {
     fetchOverallBldgData,
     fetchBuildingEquipments,
@@ -18,6 +17,7 @@ import {
     fetchEnergyConsumptionByEquipType,
     fetchEnergyConsumptionBySpaceType,
     fetchEnergyConsumptionByFloor,
+    fetchEnergyConsumptionV2,
 } from '../buildings/services';
 import { fetchEnergyCarbonByBuilding } from './services';
 import { percentageHandler } from '../../utils/helper';
@@ -33,7 +33,7 @@ import TopConsumptionWidget from '../../sharedComponents/topConsumptionWidget/To
 import { UNITS } from '../../constants/units';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import EquipChartModal from '../chartModal/EquipChartModal';
-import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
+import ColumnLineChart from '../../sharedComponents/columnLineChart/ColumnLineChart';
 import colors from '../../assets/scss/_colors.scss';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
@@ -50,7 +50,11 @@ const CarbonBuilding = () => {
     let time_zone = 'US/Eastern';
 
     const history = useHistory();
-    const [kpiMetrics, setKpiMetrics] = useState({});
+    const [kpiMetrics, setKpiMetrics] = useState({
+        average: { now: 0, old: 0, change: 0 },
+        current_carbon_intensity: { now: 0, old: 0, change: 0 },
+        total: { now: 0, old: 0, change: 0 },
+    });
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
@@ -75,6 +79,7 @@ const CarbonBuilding = () => {
             old: 0,
         },
     });
+    console.log('kpiMetrics23425643', kpiMetrics);
 
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
 
@@ -96,9 +101,10 @@ const CarbonBuilding = () => {
 
     const [isPlugOnly, setIsPlugOnly] = useState(false);
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
+    const [carbonConsumptionsCategories, setCarbonConsumptionsCategories] = useState([]);
     const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
+    const [carbonIntensity, setCarbonIntensity] = useState([]);
     const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
-
     const [hourlyAvgConsumpData, setHourlyAvgConsumpData] = useState([]);
     const heatMapChartHeight = 125;
     const [energyConsumption, setEnergyConsumption] = useState([]);
@@ -107,7 +113,7 @@ const CarbonBuilding = () => {
 
     const [weatherData, setWeatherData] = useState(null);
     const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
-const [currentFuelTrend,setCurrentFuelTrend] = useState([]);
+    const [currentFuelTrend, setCurrentFuelTrend] = useState([]);
     //EquipChartModel
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
@@ -194,20 +200,6 @@ const [currentFuelTrend,setCurrentFuelTrend] = useState([]);
             })
             .catch((error) => {});
     };
-    // const fetchCarbonData = async () => {
-    //     const payload = {
-    //         date_from: encodeURIComponent(startDate),
-    //         date_to: encodeURIComponent(endDate),
-    //         tz_info: time_zone,
-    //     };
-    //     bldgId &&
-    //         (await getCarbonBuildingChartData(bldgId, payload).then((res) => {
-    //             console.log('RES', res);
-    //         }));
-    // };
-    // useEffect(() => {
-    //     fetchCarbonData();
-    // }, [bldgId]);
 
     const buildingEndUserData = async (time_zone) => {
         const params = `?building_id=${bldgId}&off_hours=false`;
@@ -331,27 +323,6 @@ const [currentFuelTrend,setCurrentFuelTrend] = useState([]);
             });
     };
 
-    const buildingConsumptionChart = async (time_zone) => {
-        const payload = apiRequestBody(startDate, endDate, time_zone);
-        await fetchEnergyConsumption(bldgId, payload)
-            .then((res) => {
-                const response = res?.data;
-                let energyCategories = [];
-                let energyData = [
-                    {
-                        name: 'Energy',
-                        data: [],
-                    },
-                ];
-                response.forEach((record) => {
-                    energyCategories.push(record?.x);
-                    energyData[0].data.push(parseFloat((record?.y / 1000).toFixed(2)));
-                });
-                setEnergyConsumptionsCategories(energyCategories);
-                setEnergyConsumptionsData(energyData);
-            })
-            .catch((error) => {});
-    };
     const fetchWeatherData = async (time_zone) => {
         const payload = {
             date_from: encodeURIComponent(startDate),
@@ -396,9 +367,7 @@ const [currentFuelTrend,setCurrentFuelTrend] = useState([]);
                 setWeatherData(null);
             });
     };
-    console.log('weather324324', weatherData);
     const getEnergyConsumptionByEquipType = async (time_zone) => {
-
         const payload = {
             bldg_id: bldgId,
             date_from: encodeURIComponent(startDate),
@@ -410,17 +379,15 @@ const [currentFuelTrend,setCurrentFuelTrend] = useState([]);
             .then((res) => {
                 const response = res?.data;
                 if (response?.data?.total_building_usage)
-                    // setTotalBldgUsageByEquipType(response?.data?.total_building_usage);
-                if (response?.success && response?.data?.equipment_type_usage.length !== 0) {
-                    // setEquipTypeData(response?.data?.equipment_type_usage);
-                }
+                    if (response?.success && response?.data?.equipment_type_usage.length !== 0) {
+                        // setTotalBldgUsageByEquipType(response?.data?.total_building_usage);
+                        // setEquipTypeData(response?.data?.equipment_type_usage);
+                    }
             })
-            .catch(() => {
-            });
+            .catch(() => {});
     };
 
     const getEnergyConsumptionBySpaceType = async (time_zone) => {
-
         const payload = {
             bldg_id: bldgId,
             date_from: encodeURIComponent(startDate),
@@ -432,17 +399,15 @@ const [currentFuelTrend,setCurrentFuelTrend] = useState([]);
             .then((res) => {
                 const response = res?.data;
                 if (response?.data?.total_building_usage)
-                    // setTotalBldgUsageBySpaceType(response?.data?.total_building_usage);
-                if (response?.success && response?.data?.space_type_usage.length !== 0) {
-                    // setSpaceTypeData(response?.data?.space_type_usage);
-                }
+                    if (response?.success && response?.data?.space_type_usage.length !== 0) {
+                        // setTotalBldgUsageBySpaceType(response?.data?.total_building_usage);
+                        // setSpaceTypeData(response?.data?.space_type_usage);
+                    }
             })
-            .catch(() => {
-            });
+            .catch(() => {});
     };
 
     const getEnergyConsumptionByFloor = async (time_zone) => {
-
         const payload = {
             bldg_id: bldgId,
             date_from: encodeURIComponent(startDate),
@@ -454,13 +419,12 @@ const [currentFuelTrend,setCurrentFuelTrend] = useState([]);
             .then((res) => {
                 const response = res?.data;
                 if (response?.data?.total_building_usage)
-                    // setTotalBldgUsageByFloor(response?.data?.total_building_usage);
-                if (response?.success && response?.data?.floor_usage.length !== 0) {
-                    // setFloorData(response?.data?.floor_usage);
-                }
+                    if (response?.success && response?.data?.floor_usage.length !== 0) {
+                        // setTotalBldgUsageByFloor(response?.data?.total_building_usage);
+                        // setFloorData(response?.data?.floor_usage);
+                    }
             })
-            .catch(() => {
-            });
+            .catch(() => {});
     };
 
     const updateBreadcrumbStore = () => {
@@ -519,7 +483,8 @@ const [currentFuelTrend,setCurrentFuelTrend] = useState([]);
         builidingEquipmentsData(time_zone);
         buildingHourlyData(time_zone);
         fetchMetrics();
-        buildingConsumptionChart(time_zone);
+        buildingConsumptionChartEnergy(time_zone);
+        buildingEnergyConsumptionChartCarbon(time_zone);
         getEnergyConsumptionByEquipType(time_zone);
         getEnergyConsumptionBySpaceType(time_zone);
         getEnergyConsumptionByFloor(time_zone);
@@ -537,7 +502,7 @@ const [currentFuelTrend,setCurrentFuelTrend] = useState([]);
 
     const fetchMetrics = async () => {
         const payload = {
-            // metric: 'generated_carbon_rate',
+            metric: 'generated_carbon_rate',
             carbon_metric_unit: 'kg',
             date_from: startDate,
             date_to: endDate,
@@ -549,13 +514,14 @@ const [currentFuelTrend,setCurrentFuelTrend] = useState([]);
     };
     const fetchMetricsKpi = async () => {
         const payload = {
+            building_id: bldgId,
+            metric: 'carbon',
             date_from: startDate,
             date_to: endDate,
             tz_info: time_zone,
-            metric: 'carbon',
         };
-        await fetchMetricsKpiBuildingPage(bldgId, payload).then((res) => {
-            setKpiMetrics(res);
+        await fetchMetricsKpiBuildingPage(payload).then((res) => {
+            setKpiMetrics(res.data);
         });
     };
     const fetchCurrentFuelMixData = async () => {
@@ -566,8 +532,7 @@ const [currentFuelTrend,setCurrentFuelTrend] = useState([]);
     useEffect(() => {
         fetchMetrics();
         fetchMetricsKpi();
-        fetchCurrentFuelMixData();
-        
+        // fetchCurrentFuelMixData();
     }, [bldgId]);
 
     useEffect(() => {
@@ -576,7 +541,70 @@ const [currentFuelTrend,setCurrentFuelTrend] = useState([]);
             if (bldgObj?.building_id) setIsPlugOnly(bldgObj?.plug_only);
         }
     }, [buildingListData, bldgId]);
+    const buildingConsumptionChartEnergy = async (time_zone) => {
+        const payload = {
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: time_zone,
+            bldg_id: bldgId,
+        };
+        await fetchEnergyConsumptionV2(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success && response?.data.length !== 0) {
+                    let energyCategories = [];
+                    let energyData = [
+                        {
+                            name: 'Energy',
+                            data: [],
+                            type: 'column',
+                            yAxis: 0,
+                        },
+                    ];
+                    response.data.forEach((record) => {
+                        energyCategories.push(record?.time_stamp);
+                        energyData[0].data.push(parseFloat((record?.data / 1000).toFixed(2)));
+                    });
+                    setEnergyConsumptionsCategories(energyCategories);
+                    setEnergyConsumptionsData(energyData);
+                }
+            })
+            .catch((error) => {});
+    };
 
+    const buildingEnergyConsumptionChartCarbon = async (time_zone) => {
+        const payload = {
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: time_zone,
+            bldg_id: bldgId,
+        };
+        await fetchEnergyConsumptionV2(payload, 'generated_carbon_rate')
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success && response?.data.length !== 0) {
+                    let carbonCategories = [];
+                    let carbonData = [
+                        {
+                            name: 'Carbon',
+                            data: [],
+                            type: 'spline',
+                            yAxis: 1,
+                        },
+                    ];
+                    response.data.forEach((record) => {
+                        carbonCategories.push(record?.time_stamp);
+                        carbonData[0].data.push(record?.data);
+                    });
+
+                    setCarbonConsumptionsCategories(carbonCategories);
+                    setEnergyConsumptionsData(carbonData);
+                    setCarbonIntensity(carbonData);
+                }
+            })
+            .catch((error) => {});
+    };
+    console.log('[...energyConsumptionsData, ...carbonIntensity]', [...energyConsumptionsData, ...carbonIntensity]);
     return (
         <React.Fragment>
             <Header title="Carbon Building Overview" type="page" />
@@ -584,32 +612,37 @@ const [currentFuelTrend,setCurrentFuelTrend] = useState([]);
             <div className="mt-4 mb-4">
                 <BuildingKPIs daysCount={daysCount} overalldata={kpiMetrics} userPrefUnits={userPrefUnits} />
             </div>
-
+            {console.log(startDate)}
             <div className="mt-4">
-                <ColumnChart
+                <ColumnLineChart
                     // title="Total Energy Consumption"
                     // subTitle="Hourly Energy Consumption (kWh)"
-                    onMoreDetail={() => handleRouteChange('/energy/end-uses')}
-                    colors={[colors.datavizMain2]}
-                    categories={energyConsumptionsCategories}
+                    colors={[colors.datavizMain2, colors.datavizMain1]}
+                    categories={carbonConsumptionsCategories}
                     tooltipUnit={UNITS.KWH}
-                    series={energyConsumptionsData}
+                    series={[...energyConsumptionsData, ...carbonIntensity]}
                     isLegendsEnabled={false}
+                    plotBandsLegends={[
+                            {
+                                label: 'Carbon',
+                                color: colors.datavizMain2,
+                                type: 'spline',
+                                onClick: (event) => console.log('CARBONCLICKED', event),
+                            },
+                            {
+                                type: 'column',
+                                label: 'Energy',
+                                color: {
+                                    background: 'rgba(180, 35, 24, 0.1)',
+                                    borderColor: colors.datavizMain1,
+                                },
+                                onClick: (event) => console.log('EnergyCLICKED', event),
+                            },
+                    ]}
                     timeZone={timeZone}
                     xAxisCallBackValue={formatXaxis}
                     restChartProps={xAxisObj}
                     tooltipCallBackValue={toolTipFormatter}
-                    temperatureSeries={weatherData}
-                    plotBands={null}
-                    upperLegendsProps={{
-                        weather: {
-                            onClick: ({ withTemp }) => {
-                                setWeatherChartVisibility(withTemp);
-                            },
-                            isAlwaysShown: true,
-                        },
-                    }}
-                    withTemp={isWeatherChartVisible}
                 />
             </div>
             <EnergyConsumptionByEndUse
@@ -621,52 +654,6 @@ const [currentFuelTrend,setCurrentFuelTrend] = useState([]);
                 handleRouteChange={() => handleRouteChange('/energy/end-uses')}
                 showRouteBtn={true}
             />
-            {/* <LineChart
-                data={lineChartData.map((d) => ({
-                    ...d,
-                    fillColor: {
-                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                        stops: [[1, 'rgba(255,255,255,.01)']],
-                    },
-                }))}
-                dateRange={dateRangeAverageData}
-                height={200}
-                plotBands={offHoursPlots}
-                customDownloadCsvHandler={() => {
-                    handleDownloadCsvAverageEnergyDemand();
-                }}
-                title={'Average Energy Demand'}
-                subTitle={'Last 2 Weeks'}
-                plotBandsLegends={[
-                    { label: 'Plug Rule Off-Hours', color: 'rgb(16 24 40 / 25%)' },
-                    {
-                        label: 'After-Hours',
-                        color: {
-                            background: 'rgba(180, 35, 24, 0.1)',
-                            borderColor: colors.error700,
-                        },
-                        onClick: () => {},
-                    },
-                ]}
-                unitInfo={{
-                    title: 'Estimated Annual Energy Savings',
-                    unit: UNITS.KWH,
-                    value: Math.round(estimatedEnergySavings),
-                }}
-                chartProps={{
-                    tooltip: {
-                        xDateFormat: is24Format ? '%A, %H:%M' : '%A, %I:%M %p',
-                    },
-                    xAxis: {
-                        labels: {
-                            formatter: function (val) {
-                                return moment.utc(val.value).format('ddd');
-                            },
-                            step: 2,
-                        },
-                    },
-                }}
-            /> */}
         </React.Fragment>
     );
 };

@@ -592,14 +592,14 @@ const BuildingOverview = () => {
                                 tooltipCallBackValue={toolTipFormatter}
                                 temperatureSeries={weatherData}
                                 plotBands={null}
-                                upperLegendsProps={{
-                                    weather: {
-                                        onClick: ({ withTemp }) => {
-                                            setWeatherChartVisibility(withTemp);
-                                        },
-                                        isAlwaysShown: true,
-                                    },
-                                }}
+                                // upperLegendsProps={{
+                                //     weather: {
+                                //         onClick: ({ withTemp }) => {
+                                //             setWeatherChartVisibility(withTemp);
+                                //         },
+                                //         isAlwaysShown: true,
+                                //     },
+                                // }}
                                 withTemp={isWeatherChartVisible}
                             />
 
