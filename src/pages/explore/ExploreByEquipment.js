@@ -301,7 +301,6 @@ const ExploreByEquipment = () => {
     let arr = apiRequestBody(startDate, endDate, timeZone);
 
     const currentRow = () => {
-        console.log('SSR allEquipmentList => ', allEquipmentList);
         if (selectedEquipmentFilter === 0) {
             return allEquipmentList;
         }
