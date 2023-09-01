@@ -422,26 +422,28 @@ const ExploreByBuildings = () => {
 
         await fetchExploreBuildingChart(payload, id)
             .then((res) => {
-                const responseData = res?.data;
-                const data = responseData?.data;
-                let arr = [];
-                arr = allBuildingList.filter(function (item) {
-                    return item?.building_id === id;
-                });
-                let NulledData = [];
-                data.map((ele) => {
-                    if (ele?.energy_consumption === '') {
-                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
-                    } else {
-                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
-                    }
-                });
-                let recordToInsert = {
-                    name: arr[0]?.building_name,
-                    data: NulledData,
-                    id: arr[0]?.building_id,
-                };
-                setSeriesData([...seriesData, recordToInsert]);
+                const response = res?.data;
+                if (response?.success) {
+                    const data = response?.data;
+                    let arr = [];
+                    arr = allBuildingList.filter(function (item) {
+                        return item?.building_id === id;
+                    });
+                    let NulledData = [];
+                    data.map((ele) => {
+                        if (ele?.consumption === '') {
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
+                        } else {
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
+                        }
+                    });
+                    let recordToInsert = {
+                        name: arr[0]?.building_name,
+                        data: NulledData,
+                        id: arr[0]?.building_id,
+                    };
+                    setSeriesData([...seriesData, recordToInsert]);
+                }
             })
             .catch((error) => {});
     };
@@ -451,28 +453,30 @@ const ExploreByBuildings = () => {
 
         await fetchExploreBuildingChart(payload, id)
             .then((res) => {
-                let responseData = res?.data;
-                let data = responseData.data;
-                let arr = [];
-                arr = allBuildingList.filter(function (item) {
-                    return item.building_id === id;
-                });
-                let NulledData = [];
-                data.map((ele) => {
-                    if (ele?.energy_consumption === '') {
-                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
-                    } else {
-                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
+                const response = res?.data;
+                if (response?.success) {
+                    const data = response?.data;
+                    let arr = [];
+                    arr = allBuildingList.filter(function (item) {
+                        return item?.building_id === id;
+                    });
+                    let NulledData = [];
+                    data.map((ele) => {
+                        if (ele?.consumption === '') {
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
+                        } else {
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
+                        }
+                    });
+                    let recordToInsert = {
+                        name: arr[0]?.building_name,
+                        data: NulledData,
+                        id: arr[0]?.building_id,
+                    };
+                    dataarr.push(recordToInsert);
+                    if (selectedIds.length === dataarr.length) {
+                        setSeriesData(dataarr);
                     }
-                });
-                let recordToInsert = {
-                    name: arr[0]?.building_name,
-                    data: NulledData,
-                    id: arr[0]?.building_id,
-                };
-                dataarr.push(recordToInsert);
-                if (selectedIds.length === dataarr.length) {
-                    setSeriesData(dataarr);
                 }
             })
             .catch((error) => {});
