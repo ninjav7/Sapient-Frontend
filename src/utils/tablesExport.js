@@ -53,7 +53,7 @@ export const getEquipmentTableCSVExport = (tableData, columns, preparedEndUseDat
 
 export const getExploreByEquipmentTableCSVExport = (tableData, columns) => {
     let dataToExport = [];
-    tableData.forEach((tableRow, index) => {
+    tableData.forEach((tableRow) => {
         let arr = [];
         for (let i = 0; i <= columns.length - 1; i++) {
             switch (columns[i].accessor) {
@@ -62,20 +62,40 @@ export const getExploreByEquipmentTableCSVExport = (tableData, columns) => {
                     const search = ',';
                     const replaceWith = ' ';
                     const result = name.split(search).join(replaceWith);
-
                     arr.push(result);
                     break;
+
                 case 'consumption':
                     const consumption = tableRow['consumption'];
                     arr.push(`${consumption.now / 1000} kWh`);
                     break;
+
                 case 'change':
-                    const change = tableRow['consumption'];
-                    arr.push(`${change.change} %`);
+                    const consumptionObj = tableRow['consumption'];
+                    arr.push(`${consumptionObj?.change} %`);
+                    break;
+
+                case 'tags':
+                    const tags = tableRow['tags'];
+                    const tagsString = tags.join('; ');
+                    arr.push(tagsString);
+                    break;
+
+                case 'breaker_number':
+                    const breaker_number = tableRow['breaker_number'];
+                    const breakersNumberString = 'Breaker ' + breaker_number.join('; ');
+                    arr.push(breakersNumberString);
+                    break;
+
+                case 'note':
+                    const note = tableRow['note'];
+                    const stringWithSemicolons = note.replace(/,/g, ';');
+                    const stringWithoutSlashN = stringWithSemicolons.replace('\n', ' ');
+                    arr.push(stringWithoutSlashN);
                     break;
 
                 default:
-                    arr.push(tableRow[columns[i].accessor]);
+                    arr.push(tableRow[columns[i]?.accessor]);
                     break;
             }
         }

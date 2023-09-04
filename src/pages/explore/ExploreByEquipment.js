@@ -31,75 +31,30 @@ import { UserStore } from '../../store/UserStore';
 import { Badge } from '../../sharedComponents/badge';
 import './style.css';
 
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <th>
-                <Skeleton count={5} />
-            </th>
+const SkeletonLoading = ({ noofRows }) => {
+    const rowArray = Array.from({ length: noofRows });
 
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+    return (
+        <SkeletonTheme color="$primary-gray-1000" height={35}>
+            <tr>
+                {rowArray.map((_, index) => (
+                    <th key={index}>
+                        <Skeleton count={5} />
+                    </th>
+                ))}
+            </tr>
+        </SkeletonTheme>
+    );
+};
 
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
     const [buildingListData] = useAtom(buildingData);
-    const [chartLoading, setChartLoading] = useState(false);
 
     const [equpimentIdSelection] = useAtom(selectedEquipment);
     const [totalEquipmentId] = useAtom(totalSelectionEquipmentId);
 
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
     const { download } = useCSVDownload();
-
-    // New Refactor Declarations
-    const isLoadingRef = useRef(false);
     const [conAPIFlag, setConAPIFlag] = useState('');
     const [perAPIFlag, setPerAPIFlag] = useState('');
     const [search, setSearch] = useState('');
@@ -253,6 +208,7 @@ const ExploreByEquipment = () => {
         const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
         setIsExploreDataLoading(true);
+        setAllEquipmentList([]);
 
         await fetchExploreEquipmentList(
             startDate,
@@ -1164,7 +1120,6 @@ const ExploreByEquipment = () => {
     }, []);
 
     const fetchExploreChartData = async () => {
-        setChartLoading(true);
         let payload = apiRequestBody(startDate, endDate, timeZone);
         let params = `?building_id=${bldgId}&consumption=${
             selectedConsumption === 'rmsCurrentMilliAmps' && device_type === 'active' ? 'mAh' : selectedConsumption
@@ -1230,7 +1185,6 @@ const ExploreByEquipment = () => {
                 }
 
                 setSelectedEquipmentId('');
-                setChartLoading(false);
             })
             .catch((error) => {});
     };
@@ -1445,11 +1399,6 @@ const ExploreByEquipment = () => {
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: 'Notes',
-            accessor: 'note',
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
             name: 'Panel Name',
             accessor: 'panel',
             onSort: (method, name) => setSortBy({ method, name }),
@@ -1458,6 +1407,11 @@ const ExploreByEquipment = () => {
             name: 'Breakers',
             accessor: 'breaker_number',
             callbackValue: renderBreakers,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Notes',
+            accessor: 'note',
             onSort: (method, name) => setSortBy({ method, name }),
         },
     ];
@@ -1545,7 +1499,7 @@ const ExploreByEquipment = () => {
                     <Col lg={12}>
                         <DataTableWidget
                             isLoading={isExploreDataLoading}
-                            isLoadingComponent={<SkeletonLoading />}
+                            isLoadingComponent={<SkeletonLoading noofRows={headerProps.length + 1} />}
                             isFilterLoading={isFilterFetching}
                             id="explore-by-equipment"
                             onSearch={setSearch}
@@ -1556,6 +1510,7 @@ const ExploreByEquipment = () => {
                             filterOptions={filterOptions}
                             onDownload={() => handleDownloadCsv()}
                             headers={headerProps}
+                            customExcludedHeaders={['Panel Name', 'Breakers', 'Notes']}
                             customCheckAll={() => (
                                 <Checkbox
                                     label=""
