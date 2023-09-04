@@ -53,6 +53,8 @@ export const initialFilterState = {
 };
 
 const DataTableWidget = (props) => {
+    const { customExcludedHeaders = [] } = props;
+
     const [excludedHeaderLocalStorage, setExcludedHeadersLocalStorage] = useLocalStorage(
         `${LOCAL_STORAGE.EXCLUDED_HEADERS}${props.id && '-' + props.id}`,
         []
@@ -70,8 +72,7 @@ const DataTableWidget = (props) => {
     });
 
     const [headers, setHeaders] = useState(orderedHeaders || props.headers);
-    const [excludedHeaders, setExcludedHeaders] = useState(excludedHeaderLocalStorage || []);
-
+    const [excludedHeaders, setExcludedHeaders] = useState([...excludedHeaderLocalStorage, ...customExcludedHeaders]);
     const [rows, setRows] = useState(props.rows);
     const [selectedRows, setSelectedRows] = useState([]);
     const [searchedRows, setSearchedRows] = useState([]);
@@ -234,6 +235,9 @@ const DataTableWidget = (props) => {
             <HeadComponent name={name} onSort={onSort} accessor={accessor} {...cellProps} key={index} />
         ));
     }, [JSON.stringify(filteredHeaders)]);
+
+    console.log('SSR props.filterOptions => ', props.filterOptions);
+    console.log('SSR excludedHeaderLocalStorage => ', excludedHeaderLocalStorage);
 
     return (
         <DataTableWidgetContext.Provider
@@ -447,6 +451,7 @@ DataTableWidget.propTypes = {
             onSort: PropTypes.func,
         })
     ),
+    customExcludedHeaders: PropTypes.array,
     onCheckboxRow: PropTypes.func,
     onCheckAll: PropTypes.func,
     id: PropTypes.string,
