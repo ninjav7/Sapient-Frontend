@@ -32,7 +32,7 @@ import Select from '../../sharedComponents/form/select';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { UserStore } from '../../store/UserStore';
 import { Badge } from '../../sharedComponents/badge';
-import { isEmptyObject } from './utils';
+import { isEmptyObject, truncateString } from './utils';
 import './style.css';
 
 const SkeletonLoading = ({ noofRows }) => {
@@ -232,23 +232,46 @@ const ExploreByEquipment = () => {
         );
     });
 
+    const renderNotes = useCallback((row) => {
+        let renderText = !row?.note || row?.note === '' ? '-' : row?.note;
+        if (renderText?.length > 60) renderText = truncateString(renderText);
+
+        return (
+            <div style={{ width: '15rem' }}>
+                <Typography.Body size={Typography.Sizes.md}>
+                    {renderText}
+                    {row?.note?.length > 60 && (
+                        <>
+                            <div
+                                className="d-inline mouse-pointer"
+                                id={`notes-badge-${row?.equipment_id}`}>{` ...`}</div>
+                            <UncontrolledTooltip placement="top" target={`notes-badge-${row?.equipment_id}`}>
+                                {row?.note}
+                            </UncontrolledTooltip>
+                        </>
+                    )}
+                </Typography.Body>
+            </div>
+        );
+    });
+
     const renderTags = useCallback((row) => {
         const slicedArr = row?.tags.slice(1);
         return (
-            <div className="tags-row-content">
+            <div className="tag-row-content">
                 <Badge text={<span className="gray-950">{row?.tags[0] ? row?.tags[0] : 'none'}</span>} />
                 {slicedArr?.length > 0 ? (
                     <>
                         <Badge
                             text={
-                                <span className="gray-950" id={`tags-badge-${row?.equipments_id}`}>
+                                <span className="gray-950" id={`tags-badge-${row?.equipment_id}`}>
                                     +{slicedArr.length} more
                                 </span>
                             }
                         />
                         <UncontrolledTooltip
                             placement="top"
-                            target={`tags-badge-${row.equipments_id}`}
+                            target={`tags-badge-${row?.equipment_id}`}
                             className="tags-tooltip">
                             {slicedArr.map((el) => {
                                 return <Badge text={<span className="gray-950">{el}</span>} />;
@@ -674,6 +697,7 @@ const ExploreByEquipment = () => {
         {
             name: 'Notes',
             accessor: 'note',
+            callbackValue: renderNotes,
             onSort: (method, name) => setSortBy({ method, name }),
         },
     ];
