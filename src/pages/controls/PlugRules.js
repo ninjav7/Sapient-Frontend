@@ -176,7 +176,7 @@ const PlugRules = () => {
                     setSkeletonLoading(false);
                 }
                 let response = res.data;
-                setPlugRuleData(response.data);
+                setPlugRuleData(response?.data||[]);
                 let onlineData = [];
                 let offlineData = [];
                 response.data.forEach((record) => {

@@ -1,4 +1,5 @@
 import axiosInstance from '../../services/axiosInstance';
+import singularityAxiosInstance from '../../services/singularityAxiosInstance';
 import {
     builidingEquipments,
     builidingHourly,
@@ -9,7 +10,8 @@ import {
     energyConsumptionBySpaceType,
     energyConsumptionByFloor,
     energyCarbonByBuilding,
-    getEnergyConsumptionV2,
+    metricsForCarbonBuildingPage,
+    metricsKpiForCarbonBuildingPage,
 } from '../../services/Network';
 
 export function fetchOverallBldgData(bldgId, payload) {
@@ -32,16 +34,8 @@ export function fetchBuilidingHourly(bldgId, payload) {
 }
 
 export function fetchEnergyConsumption(bldgId, payload) {
-    const params = `building_id=${bldgId}`;
+    let params = `?building_id=${bldgId}`;
     return axiosInstance.post(`${getEnergyConsumption}${params}`, payload).then((res) => res);
-}
-
-export function fetchEnergyConsumptionV2(payload,metric) {
-    let params = `?date_from=${payload?.date_from}&date_to=${payload?.date_to}&timezone=${payload?.tz_info}`;
-    if(metric){
-        params+=`&metric=${metric}`
-    }
-    return axiosInstance.get(`${getEnergyConsumptionV2}/${payload?.bldg_id}${params}`).then((res) => res);
 }
 
 export function fetchEnergyConsumptionByEquipType(obj) {
@@ -57,4 +51,21 @@ export function fetchEnergyConsumptionBySpaceType(obj) {
 export function fetchEnergyConsumptionByFloor(obj) {
     const params = `?building_id=${obj?.bldg_id}&date_from=${obj?.date_from}&date_to=${obj?.date_to}&timezone=${obj?.tz_info}`;
     return axiosInstance.get(`${energyConsumptionByFloor}${params}`).then((res) => res);
+}
+
+export function fetchMetricsBuildingPage(bldg_id, params) {
+    return axiosInstance.get(`${metricsForCarbonBuildingPage}/${bldg_id}`, { params }).then((res) => res);
+}
+
+export function fetchMetricsKpiBuildingPage(params) {
+    return axiosInstance.get(`${metricsKpiForCarbonBuildingPage}`, { params }).then((res) => res.data);
+}
+export function fetchcurrentFuelMix(params) {
+    const payload = '?region=ISONE&source=EIA';
+    return singularityAxiosInstance.get(`/generated/fuel-mix/latest${payload}`).then((res) => res);
+}
+
+export function fetchcurrentFuelTrend(params) {
+    const payload = '?region=ISONE&source=EIA&start=2022-01-02T00%3A00%3A00Z&end=2022-01-03T00%3A00%3A00Z&per_page=300';
+    return singularityAxiosInstance.get(`/generated/fuel-mix${payload}`).then((res) => res);
 }

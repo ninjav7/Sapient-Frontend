@@ -4,6 +4,7 @@ import { useAtom } from 'jotai';
 import { useLocation, useHistory } from 'react-router-dom';
 import { authProtectedRoutes } from '../../routes/index';
 import { configChildRoutes } from '../SecondaryTopNavBar/utils';
+import { ReactComponent as CarbonCo2 } from '../../assets/icon/carbon.svg';
 
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -31,6 +32,7 @@ const NavLinks = () => {
     const ENERGY_TAB = '/energy/portfolio/overview';
     const CONTROL_TAB = '/control/plug-rules';
     const EXPLORE_TAB = '/explore-page/by-buildings';
+    const CARBON_TAB = '/carbon/portfolio/overview';
 
     const routeToControlPage = () => {
         history.push({
@@ -41,6 +43,11 @@ const NavLinks = () => {
     const routeToPortfolioPage = () => {
         history.push({
             pathname: `/energy/portfolio/overview`,
+        });
+    };
+    const routeToPortfolioCarbonPage = () => {
+        history.push({
+            pathname: `/carbon/portfolio/overview`,
         });
     };
 
@@ -159,6 +166,9 @@ const NavLinks = () => {
             });
         }
     };
+    const handleCarbonClick = () => {
+        routeToPortfolioCarbonPage();
+    };
 
     const handleSideNavChange = (componentName) => {
         if (componentName === 'Energy') {
@@ -200,6 +210,9 @@ const NavLinks = () => {
                 break;
             case EXPLORE_TAB:
                 handleExploreClick();
+                break;
+            case CARBON_TAB:
+                handleCarbonClick();
                 break;
             default:
                 history.push({
@@ -281,6 +294,11 @@ const NavLinks = () => {
                                 {item.name === 'Control' && (
                                     <div>
                                         <Toggleon className={`navbar-icons-style ${className}`} />
+                                    </div>
+                                )}
+                                {item.name === 'Carbon' && (
+                                    <div>
+                                        <CarbonCo2 className={`navbar-icons-style ${className}`} />
                                     </div>
                                 )}
                                 {item.name === 'Explore' && (
