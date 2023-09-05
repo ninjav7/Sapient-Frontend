@@ -551,6 +551,9 @@ const ExploreByEquipment = () => {
 
     const fetchFilterDataOnPageLoad = async () => {
         setFetchingFilters(true);
+        setFilterData({});
+        setFilterOptions([]);
+
         await fetchExploreFilter(
             startDate,
             endDate,
@@ -734,11 +737,7 @@ const ExploreByEquipment = () => {
         selectedBreakers,
         selectedNotes,
         conAPIFlag,
-        // minConValue,
-        // maxConValue,
         perAPIFlag,
-        // minPerValue,
-        // maxPerValue,
     ]);
 
     useEffect(() => {
@@ -757,11 +756,7 @@ const ExploreByEquipment = () => {
         selectedBreakers,
         selectedNotes,
         conAPIFlag,
-        // minConValue,
-        // maxConValue,
         perAPIFlag,
-        // minPerValue,
-        // maxPerValue,
     ]);
 
     useEffect(() => {
@@ -1031,308 +1026,6 @@ const ExploreByEquipment = () => {
         if (equipIdNow) fetchExploreChartData(equipIdNow);
     }, [equipIdNow]);
 
-    // useEffect(() => {
-    //     if (
-    //         conAPIFlag !== '' ||
-    //         perAPIFlag !== '' ||
-    //         (minConValue !== maxConValue && maxConValue !== 0) ||
-    //         (minPerValue !== maxPerValue && maxPerValue !== 0)
-    //     ) {
-    //         (async () => {
-    //             setFetchingFilters(true);
-    //             const filters = await fetchExploreFilter(
-    //                 bldgId,
-    //                 startDate,
-    //                 endDate,
-    //                 timeZone,
-    //                 selectedLocation,
-    //                 selectedEquipType,
-    //                 selectedEndUse,
-    //                 selectedSpaceType,
-    //                 minConValue,
-    //                 maxConValue,
-    //                 conAPIFlag,
-    //                 selectedTags,
-    //                 selectedPanels,
-    //                 selectedBreakers,
-    //                 selectedNotes
-    //             );
-
-    //             const filterOptionsFetched = [
-    //                 {
-    //                     label: 'Energy Consumption',
-    //                     value: 'consumption',
-    //                     placeholder: 'All Consumptions',
-    //                     filterType: FILTER_TYPES.RANGE_SELECTOR,
-    //                     filterOptions: [minConValue, maxConValue],
-    //                     componentProps: {
-    //                         prefix: ' kWh',
-    //                         title: 'Consumption',
-    //                         min: bottomConsumption,
-    //                         max: topConsumption + 1,
-    //                         range: [minConValue, maxConValue],
-    //                         withTrendsFilter: false,
-    //                     },
-    //                     onClose: async function onClose(options) {
-    //                         set_minConValue(options[0]);
-    //                         set_maxConValue(options[1]);
-    //                         setPageNo(1);
-    //                         setConAPIFlag(options[0] + options[1]);
-    //                     },
-    //                     onDelete: () => {
-    //                         set_minConValue(bottomConsumption);
-    //                         set_maxConValue(topConsumption);
-    //                         setConAPIFlag('');
-    //                     },
-    //                 },
-    //                 {
-    //                     label: '% Change',
-    //                     value: 'change',
-    //                     placeholder: 'All % Change',
-    //                     filterType: FILTER_TYPES.RANGE_SELECTOR,
-    //                     filterOptions: [minPerValue, maxPerValue],
-    //                     componentProps: {
-    //                         prefix: ' %',
-    //                         title: '% Change',
-    //                         min: bottomVal,
-    //                         max: topVal + 1,
-    //                         range: [minPerValue, maxPerValue],
-    //                         withTrendsFilter: true,
-    //                         currentButtonId: currentButtonId,
-    //                         handleButtonClick: function handleButtonClick() {
-    //                             for (
-    //                                 var _len = arguments.length, args = new Array(_len), _key = 0;
-    //                                 _key < _len;
-    //                                 _key++
-    //                             ) {
-    //                                 args[_key] = arguments[_key];
-    //                                 if (args[0] === 0) {
-    //                                     setIsOpened(true);
-    //                                     setCurrentButtonId(0);
-    //                                     set_minPerValue(bottomPerChange);
-    //                                     set_maxPerValue(topPerChange);
-    //                                     setBottomVal(bottomPerChange);
-    //                                     setTopVal(topPerChange);
-    //                                 }
-    //                                 if (args[0] === 1) {
-    //                                     setIsOpened(true);
-    //                                     setCurrentButtonId(1);
-    //                                     if (bottomPerChange < 0) {
-    //                                         setBottomVal(bottomPerChange);
-    //                                         setTopVal(neutralPerChange);
-    //                                         set_minPerValue(bottomPerChange);
-    //                                         set_maxPerValue(neutralPerChange);
-    //                                     } else if (bottomPerChange >= 0) {
-    //                                         setBottomVal(neutralPerChange);
-    //                                         setTopVal(neutralPerChange + 1);
-    //                                         set_minPerValue(neutralPerChange);
-    //                                         set_maxPerValue(neutralPerChange);
-    //                                     }
-    //                                 }
-    //                                 if (args[0] === 2) {
-    //                                     setIsOpened(true);
-    //                                     setCurrentButtonId(2);
-    //                                     if (topPerChange > 0) {
-    //                                         setBottomVal(neutralPerChange);
-    //                                         setTopVal(topPerChange);
-    //                                         set_minPerValue(neutralPerChange);
-    //                                         set_maxPerValue(topPerChange);
-    //                                     } else if (bottomPerChange >= 0) {
-    //                                         setBottomVal(neutralPerChange);
-    //                                         setTopVal(neutralPerChange + 1);
-    //                                         set_minPerValue(neutralPerChange);
-    //                                         set_maxPerValue(neutralPerChange);
-    //                                     }
-    //                                 }
-    //                             }
-    //                         },
-    //                     },
-    //                     isOpened: isopened,
-    //                     onClose: function onClose(options) {
-    //                         setIsOpened(false);
-    //                         set_minPerValue(options[0]);
-    //                         set_maxPerValue(options[1]);
-    //                         setPageNo(1);
-    //                         setPerAPIFlag(options[0] + options[1]);
-    //                     },
-    //                     onDelete: () => {
-    //                         set_minPerValue(bottomPerChange);
-    //                         set_maxPerValue(topPerChange);
-    //                         setPerAPIFlag('');
-    //                     },
-    //                 },
-    //                 {
-    //                     label: 'Equipment Type',
-    //                     value: 'equipments_type',
-    //                     placeholder: 'All Equipment Types',
-    //                     filterType: FILTER_TYPES.MULTISELECT,
-    //                     filterOptions: filters.data.data.equipments_type.map((filterItem) => ({
-    //                         value: filterItem.equipment_type_id,
-    //                         label: filterItem.equipment_type_name,
-    //                     })),
-    //                     onChange: function onChange(options) {},
-    //                     onClose: (options) => {
-    //                         let opt = options;
-    //                         if (opt.length !== 0) {
-    //                             let equipIds = [];
-    //                             for (let i = 0; i < opt.length; i++) {
-    //                                 equipIds.push(opt[i].value);
-    //                             }
-    //                             setPageNo(1);
-    //                             setSelectedEquipType(equipIds);
-    //                         }
-    //                     },
-    //                     onDelete: (options) => {
-    //                         setSelectedEquipType([]);
-    //                     },
-    //                 },
-    //                 {
-    //                     label: 'End Uses',
-    //                     value: 'end_users',
-    //                     placeholder: 'All End Uses',
-    //                     filterType: FILTER_TYPES.MULTISELECT,
-    //                     filterOptions: filterData.end_users.map((filterItem) => ({
-    //                         value: filterItem.end_use_id,
-    //                         label: filterItem.end_use_name,
-    //                     })),
-    //                     onClose: (options) => {
-    //                         let opt = options;
-    //                         if (opt.length !== 0) {
-    //                             let endUseIds = [];
-    //                             for (let i = 0; i < opt.length; i++) {
-    //                                 endUseIds.push(opt[i].value);
-    //                             }
-    //                             setPageNo(1);
-    //                             setSelectedEndUse(endUseIds);
-    //                         }
-    //                     },
-    //                     onDelete: () => {
-    //                         setSelectedEndUse([]);
-    //                     },
-    //                 },
-    //                 {
-    //                     label: 'Space Type',
-    //                     value: 'location_types',
-    //                     placeholder: 'All Space Types',
-    //                     filterType: FILTER_TYPES.MULTISELECT,
-    //                     filterOptions: filters?.data?.data?.location_types.map((filterItem) => ({
-    //                         value: filterItem?.location_type_id,
-    //                         label: filterItem?.location_types_name,
-    //                     })),
-    //                     onClose: (options) => {
-    //                         let opt = options;
-    //                         if (opt.length !== 0) {
-    //                             let spaceIds = [];
-    //                             for (let i = 0; i < opt.length; i++) {
-    //                                 spaceIds.push(opt[i].value);
-    //                             }
-    //                             setPageNo(1);
-    //                             setSelectedSpaceType(spaceIds);
-    //                         }
-    //                     },
-    //                     onDelete: () => {
-    //                         setSelectedSpaceType([]);
-    //                     },
-    //                 },
-    //                 {
-    //                     label: 'Tags',
-    //                     value: 'tags',
-    //                     placeholder: 'All tags',
-    //                     filterType: FILTER_TYPES.MULTISELECT,
-    //                     filterOptions: filters?.data?.data?.tags.map((filterItem) => ({
-    //                         value: filterItem,
-    //                         label: filterItem,
-    //                     })),
-    //                     onClose: (options) => {
-    //                         let opt = options;
-    //                         if (opt.length !== 0) {
-    //                             let tags = [];
-    //                             for (let i = 0; i < opt.length; i++) {
-    //                                 tags.push(opt[i].value);
-    //                             }
-    //                             setSelectedTags(tags);
-    //                         }
-    //                     },
-    //                     onDelete: () => {
-    //                         setSelectedTags([]);
-    //                     },
-    //                 },
-    //                 {
-    //                     label: 'Panel Name',
-    //                     value: 'panel',
-    //                     placeholder: 'All Panels',
-    //                     filterType: FILTER_TYPES.MULTISELECT,
-    //                     filterOptions: filters?.data?.data?.panel.map((filterItem) => ({
-    //                         value: filterItem?.panel_id,
-    //                         label: filterItem?.panel_name,
-    //                     })),
-    //                     onClose: (options) => {
-    //                         let opt = options;
-    //                         if (opt.length !== 0) {
-    //                             let panels = [];
-    //                             for (let i = 0; i < opt.length; i++) {
-    //                                 panels.push(opt[i].value);
-    //                             }
-    //                             setSelectedPanels(panels);
-    //                         }
-    //                     },
-    //                     onDelete: () => {
-    //                         setSelectedPanels([]);
-    //                     },
-    //                 },
-    //                 {
-    //                     label: 'Breakers',
-    //                     value: 'breaker_number',
-    //                     placeholder: 'All Breakers',
-    //                     filterType: FILTER_TYPES.MULTISELECT,
-    //                     filterOptions: filterData?.breaker_number.map((filterItem) => ({
-    //                         value: filterItem,
-    //                         label: filterItem,
-    //                     })),
-    //                     onClose: (options) => {
-    //                         let opt = options;
-    //                         if (opt.length !== 0) {
-    //                             let breakers_count = [];
-    //                             for (let i = 0; i < opt.length; i++) {
-    //                                 breakers_count.push(opt[i].value);
-    //                             }
-    //                             setSelectedBreakers(breakers_count);
-    //                         }
-    //                     },
-    //                     onDelete: () => {
-    //                         setSelectedBreakers([]);
-    //                     },
-    //                 },
-    //                 // {
-    //                 //     label: 'Notes',
-    //                 //     value: 'note',
-    //                 //     placeholder: 'All Notes',
-    //                 //     filterType: FILTER_TYPES.MULTISELECT,
-    //                 //     filterOptions: filterData?.notes.map((filterItem) => ({
-    //                 //         value: filterItem,
-    //                 //         label: filterItem,
-    //                 //     })),
-    //                 //     onClose: (options) => {
-    //                 //         let opt = options;
-    //                 //         if (opt.length !== 0) {
-    //                 //             let notes = [];
-    //                 //             for (let i = 0; i < opt.length; i++) {
-    //                 //                 notes.push(opt[i].value);
-    //                 //             }
-    //                 //             setSelectedNotes(notes);
-    //                 //         }
-    //                 //     },
-    //                 //     onDelete: () => {
-    //                 //         setSelectedNotes([]);
-    //                 //     },
-    //                 // },
-    //             ];
-    //             setFilterOptions(filterOptionsFetched);
-    //             setFetchingFilters(false);
-    //         })();
-    //     }
-    // }, [minConValue, maxConValue, minPerValue, maxPerValue, conAPIFlag, perAPIFlag]);
-
     useEffect(() => {
         if (selectedEquipmentId !== '') fetchExploreChartData();
     }, [selectedEquipmentId, equpimentIdSelection]);
@@ -1402,7 +1095,6 @@ const ExploreByEquipment = () => {
                         tooltipUnit={selectedUnit}
                         tooltipLabel={selectedConsumptionLabel}
                         data={seriesData}
-                        // dateRange={fetchDateRange(startDate, endDate)}
                         chartProps={{
                             navigator: {
                                 outlineWidth: 0,
@@ -1464,7 +1156,7 @@ const ExploreByEquipment = () => {
                             filterOptions={filterOptions}
                             onDownload={() => handleDownloadCsv()}
                             headers={headerProps}
-                            // customExcludedHeaders={['Panel Name', 'Breakers', 'Notes']}
+                            customExcludedHeaders={['Panel Name', 'Breakers', 'Notes']}
                             customCheckAll={() => (
                                 <Checkbox
                                     label=""
