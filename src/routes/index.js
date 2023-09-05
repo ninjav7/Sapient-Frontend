@@ -575,9 +575,9 @@ const allRoutes = [rootRoute, portfolioRoutes, settingsRoutes, controlRoutes,car
 const authProtectedRoutes = [
     portfolioRoutes,
     settingsRoutes,
+    carbonRoutes,
     controlRoutes,
     exploreRoutes,
-    carbonRoutes,
     adminRoutes,
 ];
 
