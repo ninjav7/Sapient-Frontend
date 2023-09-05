@@ -1,6 +1,7 @@
 import { percentageHandler } from '../utils/helper';
 import { getBuildingName } from '../helpers/helpers';
 import { handleUnitConverstion } from '../pages/settings/general-settings/utils';
+import { UNITS } from '../constants/units';
 
 export const getTableHeadersList = (record) => {
     let arr = [];
@@ -257,6 +258,55 @@ export const getUsersTableCSVExport = (tableData, columns, handleLastActiveDate)
                     arr.push(`${data}`);
                     break;
 
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+export const getCarbonCompareBuildingsTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+    tableData.forEach((tableRow, index) => {
+        let arr = [];
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'building_name':
+                    const formattedBldgName = `${tableRow?.building_name}`;
+                    arr.push(formattedBldgName);
+                    break;
+                case 'average_carbon_intensity':
+                    const preparedEnergyDestiny = tableRow.average_carbon_intensity!==null?`${tableRow.average_carbon_intensity.toFixed(2)} lbs/MWh`:`0 lbs/MWh`;
+                    arr.push(preparedEnergyDestiny);
+                    break;
+                case 'total_carbon_emissions':
+                    const preparedConsumption = Math.round(tableRow.total_carbon_emissions / 1000);
+                    arr.push(`${preparedConsumption} ${UNITS.ibs}`);
+                    break;
+                case 'change':
+                    const diffPercentage = percentageHandler(
+                        tableRow?.carbon_emissions.now,
+                        tableRow?.carbon_emissions.old
+                    );
+                    {
+                        tableRow?.carbon_emissions.now >= tableRow?.carbon_emissions.old
+                            ? arr.push(`+${diffPercentage}%`)
+                            : arr.push(`-${diffPercentage}%`);
+                    }
+                    break;
+                case 'square_footage':
+                    const squareFootage = tableRow.square_footage;
+                    arr.push(`${squareFootage} ${columns[i].name}`);
+                    break;
                 default:
                     arr.push(tableRow[columns[i].accessor]);
                     break;

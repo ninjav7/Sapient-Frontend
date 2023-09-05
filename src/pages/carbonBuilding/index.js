@@ -11,7 +11,6 @@ import {
     fetchOverallBldgData,
     fetchBuildingEquipments,
     fetchBuilidingHourly,
-    fetchEnergyConsumption,
     fetchEndUseByBuilding,
     fetchEnergyConsumptionByEquipType,
     fetchEnergyConsumptionBySpaceType,
@@ -25,28 +24,29 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { buildingData } from '../../store/globalState';
 import { UserStore } from '../../store/UserStore';
 import BuildingKPIs from './BuildingKPIs';
-import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
-import HourlyAvgConsumption from './HourlyAvgConsumption';
-import TopConsumptionWidget from '../../sharedComponents/topConsumptionWidget/TopConsumptionWidget';
 import { UNITS } from '../../constants/units';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
-import EquipChartModal from '../chartModal/EquipChartModal';
-import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
+import ColumnLineChart from '../../sharedComponents/columnLineChart/ColumnLineChart';
 import colors from '../../assets/scss/_colors.scss';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
 import { getWeatherData } from '../../services/weather';
-import EnergyConsumptionChart from './energy-consumption/EnergyConsumptionChart';
 import './style.css';
+import { fetchMetricsBuildingPage, fetchMetricsKpiBuildingPage, fetchcurrentFuelMix } from './services';
 
-const BuildingOverview = () => {
+const CarbonBuilding = () => {
     const { bldgId } = useParams();
     const [buildingListData] = useAtom(buildingData);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    let time_zone = 'US/Eastern';
 
     const history = useHistory();
-
+    const [kpiMetrics, setKpiMetrics] = useState({
+        average: { now: 0, old: 0, change: 0 },
+        current_carbon_intensity: { now: 0, old: 0, change: 0 },
+        total: { now: 0, old: 0, change: 0 },
+    });
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
@@ -71,7 +71,6 @@ const BuildingOverview = () => {
             old: 0,
         },
     });
-
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
 
     const [xAxisObj, setXAxisObj] = useState({
@@ -92,9 +91,19 @@ const BuildingOverview = () => {
 
     const [isPlugOnly, setIsPlugOnly] = useState(false);
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
-    const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
-    const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
+    const [carbonConsumptionsCategories, setCarbonConsumptionsCategories] = useState([]);
 
+    const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
+    const [carbonIntensity, setCarbonIntensity] = useState([]);
+
+    const [chartsData, setChartsData] = useState([]);
+    const [dataToDisplay, setDataToDisplay] = useState([]);
+    const [legendObj, setLegendObj] = useState({
+        carbon: true,
+        energy: true,
+    });
+
+    const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
     const [hourlyAvgConsumpData, setHourlyAvgConsumpData] = useState([]);
     const heatMapChartHeight = 125;
     const [energyConsumption, setEnergyConsumption] = useState([]);
@@ -103,19 +112,7 @@ const BuildingOverview = () => {
 
     const [weatherData, setWeatherData] = useState(null);
     const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
-
-    const [equipTypeData, setEquipTypeData] = useState([]);
-    const [spaceTypeData, setSpaceTypeData] = useState([]);
-    const [floorData, setFloorData] = useState([]);
-
-    const [isFetchingEquipType, setFetchingEquipType] = useState(false);
-    const [isFetchingSpaceType, setFetchingSpaceType] = useState(false);
-    const [isFetchingFloor, setFetchingFloor] = useState(false);
-
-    const [totalBldgUsageByEquipType, setTotalBldgUsageByEquipType] = useState(0);
-    const [totalBldgUsageBySpaceType, setTotalBldgUsageBySpaceType] = useState(0);
-    const [totalBldgUsageByFloor, setTotalBldgUsageByFloor] = useState(0);
-
+    const [currentFuelTrend, setCurrentFuelTrend] = useState([]);
     //EquipChartModel
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
@@ -325,35 +322,6 @@ const BuildingOverview = () => {
             });
     };
 
-    const buildingConsumptionChart = async (time_zone) => {
-        const payload = {
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
-            tz_info: time_zone,
-            bldg_id: bldgId,
-        };
-        await fetchEnergyConsumptionV2(payload)
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success && response?.data.length !== 0) {
-                    let energyCategories = [];
-                    let energyData = [
-                        {
-                            name: 'Energy',
-                            data: [],
-                        },
-                    ];
-                    response.data.forEach((record) => {
-                        energyCategories.push(record?.time_stamp);
-                        energyData[0].data.push(parseFloat((record?.data / 1000).toFixed(2)));
-                    });
-                    setEnergyConsumptionsCategories(energyCategories);
-                    setEnergyConsumptionsData(energyData);
-                }
-            })
-            .catch((error) => {});
-    };
-
     const fetchWeatherData = async (time_zone) => {
         const payload = {
             date_from: encodeURIComponent(startDate),
@@ -398,10 +366,7 @@ const BuildingOverview = () => {
                 setWeatherData(null);
             });
     };
-
     const getEnergyConsumptionByEquipType = async (time_zone) => {
-        setFetchingEquipType(true);
-
         const payload = {
             bldg_id: bldgId,
             date_from: encodeURIComponent(startDate),
@@ -413,20 +378,15 @@ const BuildingOverview = () => {
             .then((res) => {
                 const response = res?.data;
                 if (response?.data?.total_building_usage)
-                    setTotalBldgUsageByEquipType(response?.data?.total_building_usage);
-                if (response?.success && response?.data?.equipment_type_usage.length !== 0) {
-                    setEquipTypeData(response?.data?.equipment_type_usage);
-                }
-                setFetchingEquipType(false);
+                    if (response?.success && response?.data?.equipment_type_usage.length !== 0) {
+                        // setTotalBldgUsageByEquipType(response?.data?.total_building_usage);
+                        // setEquipTypeData(response?.data?.equipment_type_usage);
+                    }
             })
-            .catch(() => {
-                setFetchingEquipType(false);
-            });
+            .catch(() => {});
     };
 
     const getEnergyConsumptionBySpaceType = async (time_zone) => {
-        setFetchingSpaceType(true);
-
         const payload = {
             bldg_id: bldgId,
             date_from: encodeURIComponent(startDate),
@@ -438,20 +398,15 @@ const BuildingOverview = () => {
             .then((res) => {
                 const response = res?.data;
                 if (response?.data?.total_building_usage)
-                    setTotalBldgUsageBySpaceType(response?.data?.total_building_usage);
-                if (response?.success && response?.data?.space_type_usage.length !== 0) {
-                    setSpaceTypeData(response?.data?.space_type_usage);
-                }
-                setFetchingSpaceType(false);
+                    if (response?.success && response?.data?.space_type_usage.length !== 0) {
+                        // setTotalBldgUsageBySpaceType(response?.data?.total_building_usage);
+                        // setSpaceTypeData(response?.data?.space_type_usage);
+                    }
             })
-            .catch(() => {
-                setFetchingSpaceType(false);
-            });
+            .catch(() => {});
     };
 
     const getEnergyConsumptionByFloor = async (time_zone) => {
-        setFetchingFloor(true);
-
         const payload = {
             bldg_id: bldgId,
             date_from: encodeURIComponent(startDate),
@@ -463,15 +418,12 @@ const BuildingOverview = () => {
             .then((res) => {
                 const response = res?.data;
                 if (response?.data?.total_building_usage)
-                    setTotalBldgUsageByFloor(response?.data?.total_building_usage);
-                if (response?.success && response?.data?.floor_usage.length !== 0) {
-                    setFloorData(response?.data?.floor_usage);
-                }
-                setFetchingFloor(false);
+                    if (response?.success && response?.data?.floor_usage.length !== 0) {
+                        // setTotalBldgUsageByFloor(response?.data?.total_building_usage);
+                        // setFloorData(response?.data?.floor_usage);
+                    }
             })
-            .catch(() => {
-                setFetchingFloor(false);
-            });
+            .catch(() => {});
     };
 
     const updateBreadcrumbStore = () => {
@@ -479,14 +431,14 @@ const BuildingOverview = () => {
             let newList = [
                 {
                     label: 'Building Overview',
-                    path: '/energy/building/overview',
+                    path: '/carbon/building/overview',
                     active: true,
                 },
             ];
             bs.items = newList;
         });
         ComponentStore.update((s) => {
-            s.parent = 'buildings';
+            s.parent = 'carbon';
         });
     };
 
@@ -529,7 +481,9 @@ const BuildingOverview = () => {
         buildingEndUserData(time_zone);
         builidingEquipmentsData(time_zone);
         buildingHourlyData(time_zone);
-        buildingConsumptionChart(time_zone);
+        fetchMetrics();
+        buildingConsumptionChartEnergy(time_zone);
+        buildingEnergyConsumptionChartCarbon(time_zone);
         getEnergyConsumptionByEquipType(time_zone);
         getEnergyConsumptionBySpaceType(time_zone);
         getEnergyConsumptionByFloor(time_zone);
@@ -541,10 +495,42 @@ const BuildingOverview = () => {
             fetchWeatherData(bldgObj?.timezone);
         }
     }, [isWeatherChartVisible, startDate, endDate]);
-
     useEffect(() => {
         updateBreadcrumbStore();
     }, []);
+
+    const fetchMetrics = async () => {
+        const payload = {
+            metric: 'generated_carbon_rate',
+            carbon_metric_unit: 'kg',
+            date_from: startDate,
+            date_to: endDate,
+            tz_info: time_zone,
+        };
+        fetchMetricsBuildingPage(bldgId, payload).then((res) => {
+        });
+    };
+    const fetchMetricsKpi = async () => {
+        const payload = {
+            building_id: bldgId,
+            metric: 'carbon',
+            date_from: startDate,
+            date_to: endDate,
+            tz_info: time_zone,
+        };
+        await fetchMetricsKpiBuildingPage(payload).then((res) => {
+            setKpiMetrics(res.data);
+        });
+    };
+    const fetchCurrentFuelMixData = async () => {
+        await fetchcurrentFuelMix().then((res) => {
+        });
+    };
+    useEffect(() => {
+        fetchMetrics();
+        fetchMetricsKpi();
+        // fetchCurrentFuelMixData();
+    }, [bldgId]);
 
     useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
@@ -552,168 +538,140 @@ const BuildingOverview = () => {
             if (bldgObj?.building_id) setIsPlugOnly(bldgObj?.plug_only);
         }
     }, [buildingListData, bldgId]);
+    const buildingConsumptionChartEnergy = async (time_zone) => {
+        const payload = {
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: time_zone,
+            bldg_id: bldgId,
+        };
+        await fetchEnergyConsumptionV2(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success && response?.data.length !== 0) {
+                    let energyCategories = [];
+                    let energyData = [
+                        {
+                            name: 'Energy',
+                            data: [],
+                            type: 'column',
+                            color:colors.datavizMain2,
+                            yAxis: 0,
+                            tooltip: {
+                                valueSuffix: ' KWh',
+                            },
+                        },
+                    ];
+                    response.data.forEach((record) => {
+                        energyCategories.push(record?.time_stamp);
+                        energyData[0].data.push(parseFloat((record?.data / 1000).toFixed(2)));
+                    });
+                    setEnergyConsumptionsCategories(energyCategories);
+                    setEnergyConsumptionsData(energyData);
+                }
+            })
+            .catch((error) => {});
+    };
+
+    const buildingEnergyConsumptionChartCarbon = async (time_zone) => {
+        const payload = {
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: time_zone,
+            bldg_id: bldgId,
+        };
+        await fetchEnergyConsumptionV2(payload, 'generated_carbon_rate')
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success && response?.data.length !== 0) {
+                    let carbonCategories = [];
+                    let carbonData = [
+                        {
+                            name: 'Carbon',
+                            data: [],
+                            type: 'spline',
+                            yAxis: 1,
+                            color:colors.datavizMain1,
+                            tooltip: {
+                                valueSuffix: userPrefUnits == 'si' ? ' kgs/MWh' : ' lbs/MWh',
+                            },
+                        },
+                    ];
+                    response.data.forEach((record) => {
+                        carbonCategories.push(record?.time_stamp);
+                        carbonData[0].data.push(record?.data);
+                    });
+
+                    setCarbonConsumptionsCategories(carbonCategories);
+                    setEnergyConsumptionsData(carbonData);
+                    setCarbonIntensity(carbonData);
+                }
+            })
+            .catch((error) => {});
+    };
+
+    const handleLedgendStatusChange = (key, value) => {
+        setLegendObj((prevLegendObj) => ({
+            ...prevLegendObj,
+            [key]: value,
+        }));
+    };
+
+    useEffect(() => {
+        const mergedList = [...energyConsumptionsData, ...carbonIntensity];
+        setChartsData(mergedList);
+    }, [energyConsumptionsData, carbonIntensity]);
+
+    useEffect(() => {
+        if (legendObj?.carbon && legendObj?.energy) setDataToDisplay(chartsData);
+        if (!legendObj?.carbon && !legendObj?.energy) setDataToDisplay([]);
+        if (legendObj?.carbon && !legendObj?.energy) {
+            let obj = chartsData.find((el) => el?.name === 'Carbon');
+            setDataToDisplay([obj]);
+        }
+        if (!legendObj?.carbon && legendObj?.energy) {
+            let obj = chartsData.find((el) => el?.name === 'Energy');
+            setDataToDisplay([obj]);
+        }
+    }, [legendObj, chartsData]);
 
     return (
         <React.Fragment>
             <Header title="Building Overview" type="page" />
 
             <div className="mt-4 mb-4">
-                <BuildingKPIs daysCount={daysCount} overalldata={overallBldgData} userPrefUnits={userPrefUnits} />
+                <BuildingKPIs daysCount={daysCount} overalldata={kpiMetrics} userPrefUnits={userPrefUnits} />
             </div>
-
-            <div className="bldg-page-grid-style">
-                <div>
-                    {!isPlugOnly && (
-                        <EnergyConsumptionByEndUse
-                            title="Energy Consumption by End Use"
-                            subtitle="Energy Totals"
-                            energyConsumption={energyConsumption}
-                            bldgId={bldgId}
-                            pageType="building"
-                            handleRouteChange={() => handleRouteChange('/energy/end-uses')}
-                            showRouteBtn={true}
-                        />
-                    )}
-
-                    {isPlugOnly ? (
-                        <>
-                            <ColumnChart
-                                title="Total Energy Consumption"
-                                subTitle="Hourly Energy Consumption (kWh)"
-                                onMoreDetail={() => handleRouteChange('/energy/end-uses/plug')}
-                                colors={[colors.datavizMain2]}
-                                categories={energyConsumptionsCategories}
-                                tooltipUnit={UNITS.KWH}
-                                series={energyConsumptionsData}
-                                isLegendsEnabled={false}
-                                timeZone={timeZone}
-                                xAxisCallBackValue={formatXaxis}
-                                restChartProps={xAxisObj}
-                                tooltipCallBackValue={toolTipFormatter}
-                                temperatureSeries={weatherData}
-                                plotBands={null}
-                                withTemp={isWeatherChartVisible}
-                            />
-
-                            <HourlyAvgConsumption
-                                title="Hourly Average Consumption"
-                                subtitle="Average by Hour (kWh)"
-                                isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
-                                startEndDayCount={daysCount}
-                                series={hourlyAvgConsumpData}
-                                height={heatMapChartHeight}
-                                timeZone={timeZone}
-                                className="mt-4"
-                                pageType="building"
-                                handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
-                                showRouteBtn={true}
-                                timeFormat={userPrefTimeFormat}
-                            />
-                        </>
-                    ) : (
-                        <>
-                            <HourlyAvgConsumption
-                                title="Hourly Average Consumption"
-                                subtitle="Average by Hour (kWh)"
-                                isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
-                                startEndDayCount={daysCount}
-                                series={hourlyAvgConsumpData}
-                                height={heatMapChartHeight}
-                                timeZone={timeZone}
-                                className="mt-4"
-                                pageType="building"
-                                handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
-                                showRouteBtn={true}
-                                timeFormat={userPrefTimeFormat}
-                            />
-
-                            <div className="mt-4">
-                                <ColumnChart
-                                    title="Total Energy Consumption"
-                                    subTitle="Hourly Energy Consumption (kWh)"
-                                    onMoreDetail={() => handleRouteChange('/energy/end-uses')}
-                                    colors={[colors.datavizMain2]}
-                                    categories={energyConsumptionsCategories}
-                                    tooltipUnit={UNITS.KWH}
-                                    series={energyConsumptionsData}
-                                    isLegendsEnabled={false}
-                                    timeZone={timeZone}
-                                    xAxisCallBackValue={formatXaxis}
-                                    restChartProps={xAxisObj}
-                                    tooltipCallBackValue={toolTipFormatter}
-                                    temperatureSeries={weatherData}
-                                    plotBands={null}
-                                    upperLegendsProps={{
-                                        weather: {
-                                            onClick: ({ withTemp }) => {
-                                                setWeatherChartVisibility(withTemp);
-                                            },
-                                            isAlwaysShown: true,
-                                        },
-                                    }}
-                                    withTemp={isWeatherChartVisible}
-                                />
-                            </div>
-                        </>
-                    )}
-                </div>
-
-                <div className="w-100">
-                    <div>
-                        <TopConsumptionWidget
-                            title="Top Energy Consumers"
-                            heads={['Equipment', 'Energy', 'Change']}
-                            rows={topEnergyConsumptionData}
-                            className={'fit-container-style w-100'}
-                            handleClick={handleClick}
-                            widgetType="TopEnergyConsumersWidget"
-                            tableStyle={{ width: '75%' }}
-                            isFetching={topEnergyDataFetching}
-                        />
-                    </div>
-                    <div className="mt-4">
-                        <EnergyConsumptionChart
-                            title="Energy Consumption by Equipment Type"
-                            subTitle="Occupied Hours and Off Hours Energy Used"
-                            isFetching={isFetchingEquipType}
-                            rows={equipTypeData}
-                            totalBldgUsage={totalBldgUsageByEquipType}
-                        />
-                    </div>
-                    <div className="mt-4">
-                        <EnergyConsumptionChart
-                            title="Energy Consumption by Space Type"
-                            subTitle="Occupied Hours and Off Hours Energy Used"
-                            isFetching={isFetchingSpaceType}
-                            rows={spaceTypeData}
-                            totalBldgUsage={totalBldgUsageBySpaceType}
-                        />
-                    </div>
-                    <div className="mt-4">
-                        <EnergyConsumptionChart
-                            title="Energy Consumption by Floor"
-                            subTitle="Occupied Hours and Off Hours Energy Used"
-                            isFetching={isFetchingFloor}
-                            rows={floorData}
-                            totalBldgUsage={totalBldgUsageByFloor}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <EquipChartModal
-                    showEquipmentChart={showEquipmentChart}
-                    handleChartClose={handleChartClose}
-                    equipmentFilter={equipmentFilter}
-                    fetchEquipmentData={builidingEquipmentsData}
-                    selectedTab={selectedModalTab}
-                    setSelectedTab={setSelectedModalTab}
-                    activePage="buildingOverview"
+            <div className="mt-4">
+                <ColumnLineChart
+                    colors={[colors.datavizMain2, colors.datavizMain1]}
+                    categories={carbonConsumptionsCategories}
+                    tooltipUnit={UNITS.KWH}
+                    carbonUnits={userPrefUnits}
+                    series={dataToDisplay}
+                    isLegendsEnabled={false}
+                    plotBandsLegends={[
+                        {
+                            label: `Carbon Intensity (${userPrefUnits == 'si' ? 'kgs/MWh' : 'lbs/MWh'})`,
+                            color: colors.datavizMain1,
+                            type: 'spline',
+                            onClick: (event) => handleLedgendStatusChange('carbon', !event),
+                        },
+                        {
+                            label: 'Energy Consumption (kWh)',
+                            type: 'column',
+                            color: colors.datavizMain2,
+                            onClick: (event) => handleLedgendStatusChange('energy', !event),
+                        },
+                    ]}
+                    timeZone={timeZone}
+                    xAxisCallBackValue={formatXaxis}
+                    restChartProps={xAxisObj}
+                    tooltipCallBackValue={toolTipFormatter}
                 />
             </div>
         </React.Fragment>
     );
 };
 
-export default BuildingOverview;
+export default CarbonBuilding;

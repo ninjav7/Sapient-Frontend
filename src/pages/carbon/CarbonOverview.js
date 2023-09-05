@@ -2,12 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import moment from 'moment';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+import { formatConsumptionValue } from '../../helpers/helpers';
+import { getAverageValue } from '../../helpers/AveragePercent';
+import { Badge } from '../../sharedComponents/badge';
+import { fetchCompareBuildingsV2, getCarbonBuildingChartData } from '../compareBuildings/services';
+import { getCarbonCompareBuildingsTableCSVExport } from '../../utils/tablesExport';
+
+import { TrendsBadge } from '../../sharedComponents/trendsBadge';
+
 import {
     fetchPortfolioBuilidings,
     fetchPortfolioOverall,
     fetchPortfolioEndUse,
     fetchPortfolioEnergyConsumption,
 } from '../portfolio/services';
+import { useHistory } from 'react-router-dom';
+import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
+
+import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
+
+import { primaryGray1000 } from '../../assets/scss/_colors.scss';
+import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
+import Typography from '../../sharedComponents/typography';
+
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+
 import { timeZone } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -27,13 +47,89 @@ import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { UserStore } from '../../store/UserStore';
 import './style.scss';
 
-const PortfolioOverview = () => {
+export const handleUnitConverstion = (value = 0, currentType = 'imp') => {
+    if (currentType === 'si') value = value / 10.7639;
+    return value;
+};
+
+const SkeletonLoading = () => (
+    <SkeletonTheme color={primaryGray1000} height={35}>
+        <tr>
+            <th>
+                <Skeleton count={5} />
+            </th>
+            <th>
+                <Skeleton count={5} />
+            </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
+            <th>
+                <Skeleton count={5} />
+            </th>
+        </tr>
+    </SkeletonTheme>
+);
+
+const CarbonOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
     const [energyConsumption, setenergyConsumption] = useState([]);
     const [isEnergyConsumptionChartLoading, setIsEnergyConsumptionChartLoading] = useState(false);
     const [markers, setMarkers] = useState([]);
 
+    const history = useHistory();
+    const { download } = useCSVDownload();
+    const [buildingsData, setBuildingsData] = useState([]);
+
+    const [sortBy, setSortBy] = useState({});
+    const [search, setSearch] = useState('');
+    const [shouldRender, setShouldRender] = useState(true);
+
+    const [topEnergyDensity, setTopEnergyDensity] = useState();
+    const [totalItemsSearched, setTotalItemsSearched] = useState(0);
+    const [tableHeader, setTableHeader] = useState([
+        {
+            name: 'Name',
+            accessor: 'building_name',
+            callbackValue: (row) => renderName(row),
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: `Average Emissions Rate `,
+            accessor: 'average_carbon_intensity',
+            callbackValue: (row) => renderAverageEmissionRate(row),
+
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Total Carbon Emissions',
+            accessor: 'total_carbon_emissions',
+            callbackValue: (row) => renderTotalConsumption(row),
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: '% Change',
+            accessor: 'change',
+            callbackValue: (row) => renderChangeEnergy(row),
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: `${userPrefUnits === 'si' ? `Sq. M.` : `Sq. Ft.`}`,
+            accessor: 'square_footage',
+            callbackValue: (row) => renderSquareFootage(row),
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+    ]);
+
+    const [isLoadingBuildingData, setIsLoadingBuildingData] = useState(false);
+    let entryPoint = '';
+    let top = '';
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
@@ -48,16 +144,26 @@ const PortfolioOverview = () => {
             now: 0,
             old: 0,
         },
-        average_energy_density: {
-            now: 0,
-            old: 0,
+        total_carbon_emissions: {
+            now: 10,
+            old: 8,
         },
         yearly_electric_eui: {
             now: 0,
             old: 0,
         },
     });
-
+    useEffect(() => {
+        if (userPrefUnits) {
+            let newHeaderList = tableHeader;
+            newHeaderList.forEach((record) => {
+                if (record?.accessor === 'building_size') {
+                    record.name = `${userPrefUnits === 'si' ? `Sq. M.` : `Sq. Ft.`}`;
+                }
+            });
+            setTableHeader(newHeaderList);
+        }
+    }, [userPrefUnits]);
     const [isKPIsLoading, setIsKPIsLoading] = useState(false);
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
@@ -106,22 +212,42 @@ const PortfolioOverview = () => {
         getXaxisForDaysSelected(daysCount);
         getFormattedChartDates(daysCount, userPrefTimeFormat, userPrefDateFormat);
     }, [daysCount, userPrefTimeFormat, userPrefDateFormat]);
+    const fetchcompareBuildingsData = async (search, ordered_by = 'building_name', sort_by, userPrefUnits) => {
+        setIsLoadingBuildingData(true);
+        let params = `?date_from=${startDate}&date_to=${endDate}&tz_info=${timeZone}&metric=carbon&ordered_by=${ordered_by}`;
+        if (search) params = params.concat(`&building_search=${encodeURIComponent(search)}`);
+        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
+        await fetchCompareBuildingsV2(params)
+            .then((res) => {
+                let response = res?.data.data;
+                setBuildingsData(response);
+                setIsLoadingBuildingData(false);
+            })
+            .catch((error) => {
+                setIsLoadingBuildingData(false);
+            });
+    };
+    useEffect(() => {
+        const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
+        const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
 
+        fetchcompareBuildingsData(search, ordered_by, sort_by, userPrefUnits);
+    }, [search, sortBy, daysCount, userPrefUnits]);
     useEffect(() => {
         if (startDate === null || endDate === null) return;
 
-        const portfolioOverallData = async () => {
-            setIsKPIsLoading(true);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchPortfolioOverall(payload)
-                .then((res) => {
-                    if (res?.data) setOveralldata(res?.data);
-                    setIsKPIsLoading(false);
-                })
-                .catch((error) => {
-                    setIsKPIsLoading(false);
-                });
-        };
+        // const portfolioOverallData = async () => {
+        //     setIsKPIsLoading(true);
+        //     let payload = apiRequestBody(startDate, endDate, timeZone);
+        //     await fetchPortfolioOverall(payload)
+        //         .then((res) => {
+        //             if (res?.data) setOveralldata(res?.data);
+        //             setIsKPIsLoading(false);
+        //         })
+        //         .catch((error) => {
+        //             setIsKPIsLoading(false);
+        //         });
+        // };
 
         const portfolioEndUsesData = async () => {
             setIsEnergyConsumptionChartLoading(true);
@@ -190,7 +316,7 @@ const PortfolioOverview = () => {
         };
 
         portfolioBuilidingsData();
-        portfolioOverallData();
+        // portfolioOverallData();
         portfolioEndUsesData();
         energyConsumptionData();
     }, [startDate, endDate, userPrefUnits]);
@@ -200,18 +326,17 @@ const PortfolioOverview = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Portfolio Overview',
-                        path: '/energy/portfolio/overview',
+                        label: 'Building Overview',
+                        path: '/carbon/portfolio/overview',
                         active: true,
                     },
                 ];
                 bs.items = newList;
             });
             ComponentStore.update((s) => {
-                s.parent = 'portfolio';
+                s.parent = 'Portfolio Overview';
             });
         };
-
         const updateBuildingData = () => {
             updateBuildingStore('portfolio', 'Portfolio', '');
         };
@@ -220,10 +345,75 @@ const PortfolioOverview = () => {
         updateBuildingData();
     }, []);
 
+    const renderName = (row) => {
+        return (
+            <>
+                <Typography.Link
+                    size={Typography.Sizes.md}
+                    className="mouse-pointer"
+                    onClick={() => {
+                        updateBuildingStore(row.building_id, row.building_name, row.timezone);
+                        history.push({
+                            pathname: `/carbon/building/overview/${row.building_id}`,
+                        });
+                    }}>
+                    {row.building_name !== '' ? row.building_name : '-'}
+                </Typography.Link>
+                <div className="mt-1 w-50">
+                    <Badge text={row.building_type || '-'} />
+                </div>
+            </>
+        );
+    };
+
+    const handleDownloadCsv = async () => {
+        download('Compare_Buildings', getCarbonCompareBuildingsTableCSVExport(buildingsData, tableHeader));
+    };
+
+    const renderAverageEmissionRate = (row) => {
+        return (
+            <>
+                <Typography.Body size={Typography.Sizes.sm}>
+                    {row?.average_carbon_intensity!==null?parseFloat(row?.average_carbon_intensity).toFixed(2):0} lbs/MWh
+                </Typography.Body>
+            </>
+        );
+    }; 
+
+    const renderTotalConsumption = (row) => {
+        return (
+            <Typography.Body size={Typography.Sizes.md}>
+                {Math.round(row.total_carbon_emissions / 1000)} {UNITS.ibs}
+            </Typography.Body>
+        );
+    };
+
+
+    const renderChangeEnergy = (row) => {
+        return (
+            <div>
+                {row.carbon_emissions.now >= row.carbon_emissions.old ? (
+                    <TrendsBadge
+                        value={Math.abs(Math.round(row.carbon_emissions.change))}
+                        type={TRENDS_BADGE_TYPES.UPWARD_TREND}
+                    />
+                ) : (
+                    <TrendsBadge
+                        value={Math.abs(Math.round(row.carbon_emissions.change))}
+                        type={TRENDS_BADGE_TYPES.DOWNWARD_TREND}
+                    />
+                )}
+            </div>
+        );
+    };
+
+    const renderSquareFootage = (row) => {
+        return <div>{row.square_footage}</div>;
+    };
+
     return (
         <>
             <Header title="Portfolio Overview" type="page" />
-
             <Brick sizeInRem={1.5} />
 
             {userPermission?.user_role === 'admin' ||
@@ -241,31 +431,24 @@ const PortfolioOverview = () => {
                     </Row>
 
                     <Brick sizeInRem={1.5} />
-
-                    <Row className="container-gap">
-                        <Col xl={6}>
-                            <EnergyConsumptionByEndUse
-                                title="Energy Consumption by End Use"
-                                subtitle="Totals in kWh"
-                                energyConsumption={energyConsumption}
-                                isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
-                                pageType="portfolio"
-                                className="h-100"
-                            />
-                        </Col>
-                        <Col xl={6}>
-                            <ColumnChart
-                                title="Total Energy Consumption"
-                                subTitle="Hourly Energy Consumption (kWh)"
-                                colors={[colors.datavizMain2, colors.datavizMain1]}
-                                categories={energyConsumptionsCategories}
-                                tooltipUnit={UNITS.KWH}
-                                series={energyConsumptionsData}
-                                isLegendsEnabled={false}
-                                timeZone={timeZone}
-                                xAxisCallBackValue={formatXaxis}
-                                restChartProps={xAxisObj}
-                                tooltipCallBackValue={toolTipFormatter}
+                    <Row>
+                        <Col xl={12}>
+                            <DataTableWidget
+                                isLoading={isLoadingBuildingData}
+                                isLoadingComponent={<SkeletonLoading />}
+                                id="carbon-compare-building"
+                                onSearch={(query) => setSearch(query)}
+                                rows={buildingsData}
+                                searchResultRows={buildingsData}
+                                onDownload={handleDownloadCsv}
+                                headers={tableHeader}
+                                buttonGroupFilterOptions={[]}
+                                totalCount={() => {
+                                    if (search) {
+                                        return totalItemsSearched;
+                                    }
+                                    return 0;
+                                }}
                             />
                         </Col>
                     </Row>
@@ -277,4 +460,4 @@ const PortfolioOverview = () => {
     );
 };
 
-export default PortfolioOverview;
+export default CarbonOverview;

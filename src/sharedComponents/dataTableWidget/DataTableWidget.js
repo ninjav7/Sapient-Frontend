@@ -382,7 +382,7 @@ const DataTableWidget = (props) => {
                 )}
             </div>
             <Brick sizeInRem={1.25} />
-            {props.onPageSize && props.onChangePage && (
+            {props.onPageSize && props?.onChangePage && (
                 <div className="d-flex justify-content-center">
                     <Pagination
                         className="pagination-bar"
@@ -410,9 +410,9 @@ DataTableWidget.propTypes = {
     onEditRow: PropTypes.func,
     isEditable: PropTypes.func,
     /**** The following 4 props are responsible for showing pagination ****/
-    onChangePage: PropTypes.func.isRequired,
+    onChangePage: PropTypes.func,
     totalCount: PropTypes.number.isRequired,
-    currentPage: PropTypes.number.isRequired,
+    currentPage: PropTypes.number,
     onPageSize: PropTypes.func.isRequired,
     pageSize: PropTypes.number,
     //@TODO More generic func, now it is not important

@@ -1,5 +1,5 @@
 export const BaseUrl = 'https://sapient-dev-service.stacksapien.com';
-
+export const SingularityBaseUrl = 'https://api.singularity.energy/v2/'
 // Auth
 export const signin = '/api/user_role/user/signin';
 export const signup = '/api/user_role/user/signup';
@@ -27,7 +27,9 @@ export const builidingEquipments = '/api/energy/building/equipment';
 export const energyConsumptionByEquipmentType = '/api/v2/metrics/equipment_type';
 export const energyConsumptionBySpaceType = '/api/v2/metrics/space_type';
 export const energyConsumptionByFloor = '/api/v2/metrics/floor';
-
+// export const energyCarbonByBuilding = '/api/v2/metrics/building/carbon'
+export const metricsForCarbonBuildingPage = '/api/v2/metrics/building'
+export const metricsKpiForCarbonBuildingPage = '/api/v2/metrics/portfolio/kpi'
 // time of day
 export const builidingHourly = '/api/energy/time_of_day/hourly';
 export const avgDailyUsageByHour = '/api/energy/time_of_day/chart';
@@ -133,7 +135,6 @@ export const getBuildingTypes = '/api/config/building-types';
 
 // compare-buildings
 export const compareBuildings = '/api/energy/energy/compare-buildings';
-export const compareBuildingsV2 = '/api/v2/metrics/portfolio/compare-buildings';
 
 //config settings
 export const getBuildings = '/api/config/get_buildings';
@@ -226,3 +227,5 @@ export const generalBuildingDetailV2 = '/api/v2/building/building_details';
 export const sensorUsageData = '/api/v2/metrics/sensor';
 export const sensorUsageDataForUtilityMonitor = '/api/v2/metrics/ytd';
 export const getEnergyConsumptionV2 = '/api/v2/metrics/building';
+export const compareBuildingsV2 = '/api/v2/metrics/portfolio/compare-buildings';
+

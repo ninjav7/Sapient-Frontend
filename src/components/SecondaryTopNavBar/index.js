@@ -66,6 +66,9 @@ const SecondaryTopNavBar = () => {
             redirectToEndpoint(`/explore-page/by-buildings`);
             return;
         }
+        if(path.includes('/carbon')){
+            redirectToEndpoint(`/carbon/portfolio/overview`);
+        }
 
         if (path.includes('/control/plug-rules')) {
             redirectToEndpoint(`/control/plug-rules`);
@@ -124,6 +127,9 @@ const SecondaryTopNavBar = () => {
             const pathName = path.substr(0, path.lastIndexOf('/'));
             redirectToEndpoint(`${pathName}/${record?.value}`);
             return;
+        }
+        if(path.includes('/carbon')){
+            redirectToEndpoint(`/carbon/building/overview/${record?.value}`);
         }
 
         if (path.includes('/settings')) {
