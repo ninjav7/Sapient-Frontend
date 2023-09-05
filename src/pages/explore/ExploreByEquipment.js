@@ -494,7 +494,7 @@ const ExploreByEquipment = () => {
             });
     };
 
-    const fetchExploreEquipDataOnPageLoad = async () => {
+    const fetchExploreEquipData = async () => {
         setIsExploreDataLoading(true);
         const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
@@ -549,7 +549,7 @@ const ExploreByEquipment = () => {
             });
     };
 
-    const fetchFilterDataOnPageLoad = async () => {
+    const fetchFilterData = async () => {
         setFetchingFilters(true);
         setFilterData({});
         setFilterOptions([]);
@@ -720,7 +720,7 @@ const ExploreByEquipment = () => {
     useEffect(() => {
         if (!bldgId || startDate === null || endDate === null) return;
 
-        fetchExploreEquipDataOnPageLoad();
+        fetchExploreEquipData();
     }, [
         startDate,
         endDate,
@@ -743,7 +743,7 @@ const ExploreByEquipment = () => {
     useEffect(() => {
         if (!bldgId || startDate === null || endDate === null) return;
 
-        fetchFilterDataOnPageLoad();
+        fetchFilterData();
     }, [
         startDate,
         endDate,
@@ -1207,7 +1207,7 @@ const ExploreByEquipment = () => {
                 showEquipmentChart={showEquipmentChart}
                 handleChartClose={handleChartClose}
                 equipmentFilter={equipmentFilter}
-                fetchEquipmentData={fetchExploreEquipDataOnPageLoad}
+                fetchEquipmentData={fetchExploreEquipData}
                 selectedTab={selectedModalTab}
                 setSelectedTab={setSelectedModalTab}
                 activePage="explore"
