@@ -22,22 +22,6 @@ const config = {
     xAxisCallBackValue: ({ value }) => {
         return moment(value).format('MM/DD H:00 A');
     },
-    //callback to tooltip header
-    // tooltipCallBackValue: ({value}) => {
-    //     return  moment(value).format(`MMM D 'YY @ hh:mm A`);
-    // },
-
-    // You can overwrite base config we used for chart, pls refer to Official Highcharts doc.
-    // restChartProps: {
-    //     legend: {
-    //         enabled: false,
-    //     },
-    //     xAxis: {
-    //         labels: {
-    //             enabled: false,
-    //         },
-    //     },
-    // },
 
     //Categories should be timestamps
     categories: [
