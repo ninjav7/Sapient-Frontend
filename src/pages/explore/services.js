@@ -59,13 +59,13 @@ export function fetchExploreEquipmentList(
         tz_info: timeZone,
     };
 
-    if (conAPIFlag && conAPIFlag !== '')
+    if (conAPIFlag !== '')
         payload['consumption_range'] = {
             gte: (Number(minConValue) - 1) * 1000,
             lte: (Number(maxConValue) + 1) * 1000,
         };
 
-    if (perAPIFlag && perAPIFlag !== '')
+    if (perAPIFlag !== '')
         payload['change'] = {
             gte: Number(minPerValue) - 0.5,
             lte: Number(maxPerValue) + 0.5,
@@ -117,17 +117,17 @@ export function fetchExploreFilter(
         tz_info: timeZone,
     };
 
-    if (conAPIFlag && conAPIFlag !== '')
+    if (conAPIFlag !== '')
         payload['consumption_range'] = {
             gte: (Number(minConValue) - 1) * 1000,
             lte: (Number(maxConValue) + 1) * 1000,
         };
 
-    // if (perAPIFlag && perAPIFlag !== '')
-    //     payload['change'] = {
-    //         gte: Number(minPerValue) - 0.5,
-    //         lte: Number(maxPerValue) + 0.5,
-    //     };
+    if (perAPIFlag !== '')
+        payload['change'] = {
+            gte: Number(minPerValue) - 0.5,
+            lte: Number(maxPerValue) + 0.5,
+        };
 
     if (selectedEquipType && selectedEquipType.length !== 0) payload['equipment_types'] = selectedEquipType;
     if (selectedEndUse && selectedEndUse.length !== 0) payload['end_use'] = selectedEndUse;
