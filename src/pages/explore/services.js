@@ -28,47 +28,57 @@ export function fetchExploreEquipmentList(
     endDate,
     timeZone,
     bldgId,
-    search,
-    order_by,
+    ordered_by,
     sort_by,
     pageSize,
     pageNo,
+    search,
+    selectedEquipType,
+    selectedEndUse,
+    selectedSpaceType,
+    selectedTags,
+    selectedPanels,
+    selectedBreakers,
+    selectedNotes,
+    conAPIFlag,
     minConValue,
     maxConValue,
+    perAPIFlag,
     minPerValue,
-    maxPerValue,
-    selectedLocation,
-    selectedEndUse,
-    selectedEquipType,
-    selectedSpaceType,
-    conAPIFlag,
-    perAPIFlag
+    maxPerValue
 ) {
-    let params = '';
-    if (pageSize === 0 && pageNo === 0) {
-        params = `?consumption=energy&building_id=${bldgId}&ordered_by=${order_by}&sort_by=${sort_by}&search_by_name=${search}`;
-    } else {
-        params = `?consumption=energy&building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}&ordered_by=${order_by}&sort_by=${sort_by}&search_by_name=${search}`;
-    }
+    let params = `?consumption=energy&building_id=${bldgId}`;
 
-    let payload = {};
-    payload['date_from'] = startDate;
-    payload['date_to'] = endDate;
-    payload['tz_info'] = timeZone;
-    if (conAPIFlag !== '')
+    if (ordered_by && sort_by) params = params.concat(`&ordered_by=${ordered_by}&sort_by=${sort_by}`);
+    if (search) params = params.concat(`&search_by_name=${encodeURIComponent(search)}`);
+    if (pageSize && pageNo) params = params.concat(`&page_size=${pageSize}&page_no=${pageNo}`);
+
+    let payload = {
+        date_from: startDate,
+        date_to: endDate,
+        tz_info: timeZone,
+    };
+
+    if (conAPIFlag && conAPIFlag !== '')
         payload['consumption_range'] = {
             gte: (Number(minConValue) - 1) * 1000,
             lte: (Number(maxConValue) + 1) * 1000,
         };
-    if (perAPIFlag !== '')
+
+    if (perAPIFlag && perAPIFlag !== '')
         payload['change'] = {
             gte: Number(minPerValue) - 0.5,
             lte: Number(maxPerValue) + 0.5,
         };
-    if (selectedLocation.length !== 0) payload['location'] = selectedLocation;
-    if (selectedEquipType.length !== 0) payload['equipment_types'] = selectedEquipType;
-    if (selectedSpaceType.length !== 0) payload['space_type'] = selectedSpaceType;
-    if (selectedEndUse.length !== 0) payload['end_use'] = selectedEndUse;
+
+    if (selectedEquipType && selectedEquipType.length !== 0) payload['equipment_types'] = selectedEquipType;
+    if (selectedEndUse && selectedEndUse.length !== 0) payload['end_use'] = selectedEndUse;
+    if (selectedSpaceType && selectedSpaceType.length !== 0) payload['space_type'] = selectedSpaceType;
+    if (selectedTags && selectedTags.length !== 0) payload['tags'] = selectedTags;
+    if (selectedPanels && selectedPanels.length !== 0) payload['panel'] = selectedPanels;
+    if (selectedBreakers && selectedBreakers.length !== 0) payload['breaker_number'] = selectedBreakers;
+    if (selectedNotes && selectedNotes.length !== 0) payload['notes'] = selectedNotes;
+
     return axiosInstance.post(`${getExploreEquipmentList}${params}`, payload).then((res) => {
         return res;
     });
@@ -81,41 +91,52 @@ export function fetchExploreEquipmentChart(payload, params) {
 }
 
 export function fetchExploreFilter(
-    bldgId,
     startDate,
     endDate,
     timeZone,
-    selectedLocation,
+    bldgId,
     selectedEquipType,
     selectedEndUse,
     selectedSpaceType,
+    selectedTags,
+    selectedPanels,
+    selectedBreakers,
+    selectedNotes,
+    conAPIFlag,
     minConValue,
     maxConValue,
-    conAPIFlag
+    perAPIFlag,
+    minPerValue,
+    maxPerValue
 ) {
-    let params = `?building_id=${bldgId}&consumption=energy`;
-    let payload = {};
-    payload['date_from'] = startDate;
-    payload['date_to'] = endDate;
-    payload['tz_info'] = timeZone;
-    if (selectedLocation.length !== 0) {
-        payload['location'] = selectedLocation;
-    }
-    if (selectedEquipType.length !== 0) {
-        payload['equipment_types'] = selectedEquipType;
-    }
-    if (selectedSpaceType.length !== 0) {
-        payload['space_type'] = selectedSpaceType;
-    }
-    if (selectedEndUse.length !== 0) {
-        payload['end_use'] = selectedEndUse;
-    }
-    if (conAPIFlag !== '') {
+    const params = `?building_id=${bldgId}&consumption=energy`;
+
+    let payload = {
+        date_from: startDate,
+        date_to: endDate,
+        tz_info: timeZone,
+    };
+
+    if (conAPIFlag && conAPIFlag !== '')
         payload['consumption_range'] = {
-            gte: (minConValue - 1) * 1000,
-            lte: (maxConValue + 1) * 1000,
+            gte: (Number(minConValue) - 1) * 1000,
+            lte: (Number(maxConValue) + 1) * 1000,
         };
-    }
+
+    // if (perAPIFlag && perAPIFlag !== '')
+    //     payload['change'] = {
+    //         gte: Number(minPerValue) - 0.5,
+    //         lte: Number(maxPerValue) + 0.5,
+    //     };
+
+    if (selectedEquipType && selectedEquipType.length !== 0) payload['equipment_types'] = selectedEquipType;
+    if (selectedEndUse && selectedEndUse.length !== 0) payload['end_use'] = selectedEndUse;
+    if (selectedSpaceType && selectedSpaceType.length !== 0) payload['space_type'] = selectedSpaceType;
+    if (selectedTags && selectedTags.length !== 0) payload['tags'] = selectedTags;
+    if (selectedPanels && selectedPanels.length !== 0) payload['panel'] = selectedPanels;
+    if (selectedBreakers && selectedBreakers.length !== 0) payload['breaker_number'] = selectedBreakers;
+    if (selectedNotes && selectedNotes.length !== 0) payload['notes'] = selectedNotes;
+
     return axiosInstance.post(`${getExploreFilter}${params}`, payload).then((res) => {
         return res;
     });

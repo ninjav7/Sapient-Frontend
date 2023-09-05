@@ -12,7 +12,12 @@ import Header from '../../components/Header';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { buildingData, selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
-import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
+import {
+    apiRequestBody,
+    dateTimeFormatForHighChart,
+    formatXaxisForHighCharts,
+    pageListSizes,
+} from '../../helpers/helpers';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 import Brick from '../../sharedComponents/brick';
@@ -27,6 +32,7 @@ import Select from '../../sharedComponents/form/select';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { UserStore } from '../../store/UserStore';
 import { Badge } from '../../sharedComponents/badge';
+import { isEmptyObject } from './utils';
 import './style.css';
 
 const SkeletonLoading = ({ noofRows }) => {
@@ -53,8 +59,6 @@ const ExploreByEquipment = () => {
     const [totalEquipmentId] = useAtom(totalSelectionEquipmentId);
 
     const { download } = useCSVDownload();
-    const [conAPIFlag, setConAPIFlag] = useState('');
-    const [perAPIFlag, setPerAPIFlag] = useState('');
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
     const [allSearchData, setAllSearchData] = useState([]);
@@ -78,38 +82,49 @@ const ExploreByEquipment = () => {
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
-    const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
     const [isFilterFetching, setFetchingFilters] = useState(false);
+    const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
 
     const [seriesData, setSeriesData] = useState([]);
     let entryPoint = '';
     let top = '';
-    const [pageSize, setPageSize] = useState(20);
+
     const [pageNo, setPageNo] = useState(1);
+    const [pageSize, setPageSize] = useState(20);
+
     const [filterData, setFilterData] = useState({});
     const [topConsumption, setTopConsumption] = useState(0);
     const [bottomConsumption, setBottomConsumption] = useState(0);
     const [topPerChange, setTopPerChange] = useState(0);
     const [neutralPerChange, setNeutralPerChange] = useState(0);
     const [bottomPerChange, setBottomPerChange] = useState(0);
+
     const [showEquipmentChart, setShowEquipmentChart] = useState(false);
     const handleChartOpen = () => setShowEquipmentChart(true);
     const handleChartClose = () => setShowEquipmentChart(false);
+
     const [selectedEquipmentId, setSelectedEquipmentId] = useState('');
     const [removeEquipmentId, setRemovedEquipmentId] = useState('');
     const [equipmentListArray, setEquipmentListArray] = useState([]);
     const [allEquipmentData, setAllEquipmenData] = useState([]);
-    const [selectedLocation, setSelectedLocation] = useState([]);
+
+    const [conAPIFlag, setConAPIFlag] = useState('');
+    const [minConValue, set_minConValue] = useState(0);
+    const [maxConValue, set_maxConValue] = useState(0);
+
+    const [perAPIFlag, setPerAPIFlag] = useState('');
+    const [minPerValue, set_minPerValue] = useState(0);
+    const [maxPerValue, set_maxPerValue] = useState(0);
+
     const [selectedEquipType, setSelectedEquipType] = useState([]);
     const [selectedEndUse, setSelectedEndUse] = useState([]);
     const [selectedSpaceType, setSelectedSpaceType] = useState([]);
+
     const [selectedTags, setSelectedTags] = useState([]);
     const [selectedPanels, setSelectedPanels] = useState([]);
     const [selectedBreakers, setSelectedBreakers] = useState([]);
-    const [minConValue, set_minConValue] = useState(0);
-    const [maxConValue, set_maxConValue] = useState(0);
-    const [minPerValue, set_minPerValue] = useState(0);
-    const [maxPerValue, set_maxPerValue] = useState(0);
+    const [selectedNotes, setSelectedNotes] = useState([]);
+
     const [topVal, setTopVal] = useState(0);
     const [bottomVal, setBottomVal] = useState(0);
     const [currentButtonId, setCurrentButtonId] = useState(0);
@@ -122,6 +137,7 @@ const ExploreByEquipment = () => {
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
     const [selectedAllEquipmentId, setSelectedAllEquipmentId] = useState([]);
+
     const metric = [
         { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy Consumption' },
         { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power Consumption' },
@@ -139,73 +155,6 @@ const ExploreByEquipment = () => {
     const handleConsumptionChange = (value) => {
         let obj = metric.find((record) => record.value === value);
         setSelectedConsumptionLabel(obj.Consumption);
-    };
-
-    const pageListSizes = [
-        {
-            label: '20 Rows',
-            value: '20',
-        },
-        {
-            label: '50 Rows',
-            value: '50',
-        },
-        {
-            label: '100 Rows',
-            value: '100',
-        },
-    ];
-
-    const exploreDataFetch = async () => {
-        setIsExploreDataLoading(true);
-        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
-        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
-        setAllEquipmentList([]);
-
-        await fetchExploreEquipmentList(
-            startDate,
-            endDate,
-            timeZone,
-            bldgId,
-            search,
-            ordered_by,
-            sort_by,
-            pageSize,
-            pageNo,
-            minConValue,
-            maxConValue,
-            minPerValue,
-            maxPerValue,
-            selectedLocation,
-            selectedEndUse,
-            selectedEquipType,
-            selectedSpaceType,
-            conAPIFlag,
-            perAPIFlag
-        )
-            .then((res) => {
-                const { data, total_data } = res?.data;
-                if (data) {
-                    if (data.length !== 0) {
-                        if (entryPoint === 'entered') {
-                            totalEquipmentId.length = 0;
-                            setSeriesData([]);
-                        }
-                        setTopEnergyConsumption(data[0]?.consumption?.now);
-                        topCon.current = data[0]?.consumption?.now;
-                        top = data[0]?.consumption?.now;
-                    }
-                    setExploreTableData(data);
-                    setAllEquipmentList(data);
-                    if (total_data) setTotalItems(total_data);
-                    setTotalItemsSearched(data.length);
-                    setAllSearchData(data);
-                    setIsExploreDataLoading(false);
-                }
-            })
-            .catch((error) => {
-                setIsExploreDataLoading(false);
-            });
     };
 
     const currentRow = () => {
@@ -354,22 +303,6 @@ const ExploreByEquipment = () => {
                 : prevState.filter((equipId) => equipId !== equip.equipment_id);
         });
     };
-
-    const fetchAPI = useCallback(() => {
-        exploreDataFetch();
-    }, [
-        startDate,
-        endDate,
-        search,
-        sortBy,
-        pageSize,
-        pageNo,
-        selectedEquipType,
-        selectedEndUse,
-        selectedSpaceType,
-        conAPIFlag,
-        perAPIFlag,
-    ]);
 
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
@@ -537,27 +470,7 @@ const ExploreByEquipment = () => {
         const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
 
-        await fetchExploreEquipmentList(
-            startDate,
-            endDate,
-            timeZone,
-            bldgId,
-            '',
-            ordered_by,
-            sort_by,
-            0,
-            0,
-            minConValue,
-            maxConValue,
-            minPerValue,
-            maxPerValue,
-            [],
-            [],
-            [],
-            [],
-            '',
-            ''
-        )
+        await fetchExploreEquipmentList(startDate, endDate, timeZone, bldgId, ordered_by, sort_by)
             .then((res) => {
                 const { data } = res?.data;
                 if (data.length !== 0) {
@@ -578,6 +491,124 @@ const ExploreByEquipment = () => {
                     s.notificationMessage = 'Data failed to export in CSV.';
                     s.notificationType = 'error';
                 });
+            });
+    };
+
+    const fetchExploreEquipDataOnPageLoad = async () => {
+        setIsExploreDataLoading(true);
+        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
+        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
+        setAllEquipmentList([]);
+
+        await fetchExploreEquipmentList(
+            startDate,
+            endDate,
+            timeZone,
+            bldgId,
+            ordered_by,
+            sort_by,
+            pageSize,
+            pageNo,
+            search,
+            selectedEquipType,
+            selectedEndUse,
+            selectedSpaceType,
+            selectedTags,
+            selectedPanels,
+            selectedBreakers,
+            selectedNotes,
+            conAPIFlag,
+            minConValue,
+            maxConValue,
+            perAPIFlag,
+            minPerValue,
+            maxPerValue
+        )
+            .then((res) => {
+                const { data, total_data } = res?.data;
+                if (data) {
+                    if (data.length !== 0) {
+                        if (entryPoint === 'entered') {
+                            totalEquipmentId.length = 0;
+                            setSeriesData([]);
+                        }
+                        setTopEnergyConsumption(data[0]?.consumption?.now);
+                        topCon.current = data[0]?.consumption?.now;
+                        top = data[0]?.consumption?.now;
+                    }
+                    setExploreTableData(data);
+                    setAllEquipmentList(data);
+                    if (total_data) setTotalItems(total_data);
+                    setTotalItemsSearched(data.length);
+                    setAllSearchData(data);
+                }
+            })
+            .catch((error) => {})
+            .finally(() => {
+                setIsExploreDataLoading(false);
+            });
+    };
+
+    const fetchFilterDataOnPageLoad = async () => {
+        setFetchingFilters(true);
+        await fetchExploreFilter(
+            startDate,
+            endDate,
+            timeZone,
+            bldgId,
+            selectedEquipType,
+            selectedEndUse,
+            selectedSpaceType,
+            selectedTags,
+            selectedPanels,
+            selectedBreakers,
+            selectedNotes,
+            conAPIFlag,
+            minConValue,
+            maxConValue,
+            perAPIFlag,
+            minPerValue,
+            maxPerValue
+        )
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    const { data } = response;
+                    setTopVal(Math.round(data?.max_change === data?.min_change ? data?.max_change : data?.max_change));
+                    setBottomVal(Math.round(data?.min_change));
+                    setTopConsumption(Math.abs(Math.round(data?.max_consumption / 1000)));
+                    setBottomConsumption(Math.abs(Math.round(data?.min_consumption / 1000)));
+                    setTopPerChange(
+                        Math.round(data?.max_change === data?.min_change ? data?.max_change : data?.max_change)
+                    );
+                    setNeutralPerChange(Math.round(data?.neutral_change));
+                    setBottomPerChange(Math.round(data?.min_change));
+                    set_minConValue(Math.abs(Math.round(data?.min_consumption / 1000)));
+                    set_maxConValue(Math.abs(Math.round(data?.max_consumption / 1000)));
+                    set_minPerValue(Math.round(data?.min_change));
+                    set_maxPerValue(
+                        Math.round(data?.max_change === data?.min_change ? data?.max_change : data?.max_change)
+                    );
+                    if (data) setFilterData(data);
+                } else {
+                    setFilterData({});
+                    setFilterOptions([]);
+                    set_minConValue(0);
+                    set_maxConValue(0);
+                    set_minPerValue(0);
+                    set_maxPerValue(0);
+                }
+            })
+            .catch((e) => {
+                setFilterData({});
+                setFilterOptions([]);
+                set_minConValue(0);
+                set_maxConValue(0);
+                set_minPerValue(0);
+                set_maxPerValue(0);
+            })
+            .finally(() => {
+                setFetchingFilters(false);
             });
     };
 
@@ -651,6 +682,10 @@ const ExploreByEquipment = () => {
     }, []);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pageNo, pageSize]);
+
+    useEffect(() => {
         if (bldgId) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             if (bldgObj?.building_id)
@@ -672,36 +707,21 @@ const ExploreByEquipment = () => {
             setSelectedEndUse([]);
             setSelectedEquipType([]);
             setSelectedSpaceType([]);
-            setConAPIFlag('');
-            setPerAPIFlag('');
+            setSelectedTags([]);
+            setSelectedPanels([]);
+            setSelectedBreakers([]);
+            setSelectedNotes([]);
         }
     }, [bldgId]);
 
     useEffect(() => {
-        top = '';
-        topCon.current = '';
-        if (selectedIds?.length >= 1) {
-            let arr = [];
-            for (let i = 0; i < selectedIds?.length; i++) {
-                arr.push(selectedIds[i]);
-            }
-            setSeriesData([]);
-            setSelectedAllEquipmentId(arr);
-        } else {
-            setSelectedEquipmentId('');
-        }
-    }, [startDate, endDate, selectedConsumption]);
+        if (!bldgId || startDate === null || endDate === null) return;
 
-    useEffect(() => {
-        if (equipIdNow) fetchExploreChartData(equipIdNow);
-    }, [equipIdNow]);
-
-    useEffect(() => {
-        if (startDate === null || endDate === null) return;
-        fetchAPI();
+        fetchExploreEquipDataOnPageLoad();
     }, [
         startDate,
         endDate,
+        bldgId,
         search,
         sortBy,
         pageSize,
@@ -709,347 +729,43 @@ const ExploreByEquipment = () => {
         selectedEquipType,
         selectedEndUse,
         selectedSpaceType,
+        selectedTags,
+        selectedPanels,
+        selectedBreakers,
+        selectedNotes,
         conAPIFlag,
+        // minConValue,
+        // maxConValue,
         perAPIFlag,
+        // minPerValue,
+        // maxPerValue,
     ]);
 
     useEffect(() => {
-        (async () => {
-            setIsExploreDataLoading(true);
-            setFetchingFilters(true);
-            const filters = await fetchExploreFilter(bldgId, startDate, endDate, timeZone, [], [], [], [], 0, 0, '');
+        if (!bldgId || startDate === null || endDate === null) return;
 
-            if (filters?.data?.data !== null) {
-                setFilterData(filters.data.data);
-                setTopVal(
-                    Math.round(
-                        filters.data.data.max_change === filters.data.data.min_change
-                            ? filters.data.data.max_change
-                            : filters.data.data.max_change
-                    )
-                );
-                setBottomVal(Math.round(filters.data.data.min_change));
-                setTopConsumption(Math.abs(Math.round(filters?.data?.data?.max_consumption / 1000)));
-                setBottomConsumption(Math.abs(Math.round(filters?.data?.data?.min_consumption / 1000)));
-                setTopPerChange(
-                    Math.round(
-                        filters.data.data.max_change === filters.data.data.min_change
-                            ? filters.data.data.max_change
-                            : filters.data.data.max_change
-                    )
-                );
-                setNeutralPerChange(Math.round(filters.data.data.neutral_change));
-                setBottomPerChange(Math.round(filters.data.data.min_change));
-                set_minConValue(Math.abs(Math.round(filters.data.data.min_consumption / 1000)));
-                set_maxConValue(Math.abs(Math.round(filters.data.data.max_consumption / 1000)));
-                set_minPerValue(Math.round(filters.data.data.min_change));
-                set_maxPerValue(
-                    Math.round(
-                        filters.data.data.max_change === filters.data.data.min_change
-                            ? filters.data.data.max_change
-                            : filters.data.data.max_change
-                    )
-                );
-            } else {
-                setFilterData({});
-                setFilterOptions([]);
-                set_minConValue(0);
-                set_maxConValue(0);
-                set_minPerValue(0);
-                set_maxPerValue(0);
-            }
-
-            setIsExploreDataLoading(false);
-            setFetchingFilters(false);
-        })();
-    }, [startDate, endDate, bldgId]);
+        fetchFilterDataOnPageLoad();
+    }, [
+        startDate,
+        endDate,
+        bldgId,
+        selectedEquipType,
+        selectedEndUse,
+        selectedSpaceType,
+        selectedTags,
+        selectedPanels,
+        selectedBreakers,
+        selectedNotes,
+        conAPIFlag,
+        // minConValue,
+        // maxConValue,
+        perAPIFlag,
+        // minPerValue,
+        // maxPerValue,
+    ]);
 
     useEffect(() => {
-        if (conAPIFlag !== '') {
-            (async () => {
-                setFetchingFilters(true);
-                const filters = await fetchExploreFilter(
-                    bldgId,
-                    startDate,
-                    endDate,
-                    timeZone,
-                    selectedLocation,
-                    selectedEquipType,
-                    selectedEndUse,
-                    selectedSpaceType,
-                    minConValue,
-                    maxConValue,
-                    conAPIFlag
-                );
-
-                const filterOptionsFetched = [
-                    {
-                        label: 'Energy Consumption',
-                        value: 'consumption',
-                        placeholder: 'All Consumptions',
-                        filterType: FILTER_TYPES.RANGE_SELECTOR,
-                        filterOptions: [minConValue, maxConValue],
-                        componentProps: {
-                            prefix: ' kWh',
-                            title: 'Consumption',
-                            min: bottomConsumption,
-                            max: topConsumption + 1,
-                            range: [minConValue, maxConValue],
-                            withTrendsFilter: false,
-                        },
-                        onClose: async function onClose(options) {
-                            set_minConValue(options[0]);
-                            set_maxConValue(options[1]);
-                            setPageNo(1);
-                            setConAPIFlag(options[0] + options[1]);
-                        },
-                        onDelete: () => {
-                            set_minConValue(bottomConsumption);
-                            set_maxConValue(topConsumption);
-                            setConAPIFlag('');
-                        },
-                    },
-                    {
-                        label: '% Change',
-                        value: 'change',
-                        placeholder: 'All % Change',
-                        filterType: FILTER_TYPES.RANGE_SELECTOR,
-                        filterOptions: [minPerValue, maxPerValue],
-                        componentProps: {
-                            prefix: ' %',
-                            title: '% Change',
-                            min: bottomVal,
-                            max: topVal + 1,
-                            range: [minPerValue, maxPerValue],
-                            withTrendsFilter: true,
-                            currentButtonId: currentButtonId,
-                            handleButtonClick: function handleButtonClick() {
-                                for (
-                                    var _len = arguments.length, args = new Array(_len), _key = 0;
-                                    _key < _len;
-                                    _key++
-                                ) {
-                                    args[_key] = arguments[_key];
-                                    if (args[0] === 0) {
-                                        setIsOpened(true);
-                                        setCurrentButtonId(0);
-                                        set_minPerValue(bottomPerChange);
-                                        set_maxPerValue(topPerChange);
-                                        setBottomVal(bottomPerChange);
-                                        setTopVal(topPerChange);
-                                    }
-                                    if (args[0] === 1) {
-                                        setIsOpened(true);
-                                        setCurrentButtonId(1);
-                                        if (bottomPerChange < 0) {
-                                            setBottomVal(bottomPerChange);
-                                            setTopVal(neutralPerChange);
-                                            set_minPerValue(bottomPerChange);
-                                            set_maxPerValue(neutralPerChange);
-                                        } else if (bottomPerChange >= 0) {
-                                            setBottomVal(neutralPerChange);
-                                            setTopVal(neutralPerChange + 1);
-                                            set_minPerValue(neutralPerChange);
-                                            set_maxPerValue(neutralPerChange);
-                                        }
-                                    }
-                                    if (args[0] === 2) {
-                                        setIsOpened(true);
-                                        setCurrentButtonId(2);
-                                        if (topPerChange > 0) {
-                                            setBottomVal(neutralPerChange);
-                                            setTopVal(topPerChange);
-                                            set_minPerValue(neutralPerChange);
-                                            set_maxPerValue(topPerChange);
-                                        } else if (bottomPerChange >= 0) {
-                                            setBottomVal(neutralPerChange);
-                                            setTopVal(neutralPerChange + 1);
-                                            set_minPerValue(neutralPerChange);
-                                            set_maxPerValue(neutralPerChange);
-                                        }
-                                    }
-                                }
-                            },
-                        },
-                        isOpened: isopened,
-                        onClose: function onClose(options) {
-                            setIsOpened(false);
-                            set_minPerValue(options[0]);
-                            set_maxPerValue(options[1]);
-                            setPageNo(1);
-                            setPerAPIFlag(options[0] + options[1]);
-                        },
-                        onDelete: () => {
-                            set_minPerValue(bottomPerChange);
-                            set_maxPerValue(topPerChange);
-                            setPerAPIFlag('');
-                        },
-                    },
-                    // {
-                    //     label: 'Location',
-                    //     value: 'spaces',
-                    //     placeholder: 'All Locations',
-                    //     filterType: FILTER_TYPES.MULTISELECT,
-                    //     filterOptions: filters.data.data.spaces.map((filterItem) => ({
-                    //         value: filterItem.space_id,
-                    //         label: filterItem.space_name,
-                    //     })),
-                    //     onClose: (options) => {},
-                    //     onDelete: () => {
-                    //         setSelectedLocation([]);
-                    //     },
-                    // },
-                    {
-                        label: 'Equipment Type',
-                        value: 'equipments_type',
-                        placeholder: 'All Equipment Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filters.data.data.equipments_type.map((filterItem) => ({
-                            value: filterItem.equipment_type_id,
-                            label: filterItem.equipment_type_name,
-                        })),
-                        onChange: function onChange(options) {},
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let equipIds = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    equipIds.push(opt[i].value);
-                                }
-                                setPageNo(1);
-                                setSelectedEquipType(equipIds);
-                            }
-                        },
-                        onDelete: (options) => {
-                            setSelectedEquipType([]);
-                        },
-                    },
-                    {
-                        label: 'End Uses',
-                        value: 'end_users',
-                        placeholder: 'All End Uses',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterData.end_users.map((filterItem) => ({
-                            value: filterItem.end_use_id,
-                            label: filterItem.end_use_name,
-                        })),
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let endUseIds = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    endUseIds.push(opt[i].value);
-                                }
-                                setPageNo(1);
-                                setSelectedEndUse(endUseIds);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedEndUse([]);
-                        },
-                    },
-                    {
-                        label: 'Space Type',
-                        value: 'location_types',
-                        placeholder: 'All Space Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filters?.data?.data?.location_types.map((filterItem) => ({
-                            value: filterItem?.location_type_id,
-                            label: filterItem?.location_types_name,
-                        })),
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let spaceIds = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    spaceIds.push(opt[i].value);
-                                }
-                                setPageNo(1);
-                                setSelectedSpaceType(spaceIds);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedSpaceType([]);
-                        },
-                    },
-                    {
-                        label: 'Tags',
-                        value: 'tags',
-                        placeholder: 'All tags',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filters?.data?.data?.tags.map((filterItem) => ({
-                            value: filterItem,
-                            label: filterItem,
-                        })),
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let tags = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    tags.push(opt[i].value);
-                                }
-                                setSelectedTags(tags);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedTags([]);
-                        },
-                    },
-                    {
-                        label: 'Panel Name',
-                        value: 'panel',
-                        placeholder: 'All Panels',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filters?.data?.data?.panel.map((filterItem) => ({
-                            value: filterItem?.panel_id,
-                            label: filterItem?.panel_name,
-                        })),
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let panels = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    panels.push(opt[i].value);
-                                }
-                                setSelectedPanels(panels);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedPanels([]);
-                        },
-                    },
-                    {
-                        label: 'Breakers',
-                        value: 'breaker_number',
-                        placeholder: 'All Breakers',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterData?.breaker_number.map((filterItem) => ({
-                            value: filterItem,
-                            label: filterItem,
-                        })),
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let breakers_count = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    breakers_count.push(opt[i].value);
-                                }
-                                setSelectedBreakers(breakers_count);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedBreakers([]);
-                        },
-                    },
-                ];
-                setFilterOptions(filterOptionsFetched);
-                setFetchingFilters(false);
-            })();
-        }
-    }, [conAPIFlag]);
-
-    useEffect(() => {
-        if (perAPIFlag !== '') {
+        if (!isEmptyObject(filterData)) {
             const filterOptionsFetched = [
                 {
                     label: 'Energy Consumption',
@@ -1149,28 +865,14 @@ const ExploreByEquipment = () => {
                         setPerAPIFlag('');
                     },
                 },
-                // {
-                //     label: 'Location',
-                //     value: 'spaces',
-                //     placeholder: 'All Locations',
-                //     filterType: FILTER_TYPES.MULTISELECT,
-                //     filterOptions: filterData.spaces.map((filterItem) => ({
-                //         value: filterItem.space_id,
-                //         label: filterItem.space_name,
-                //     })),
-                //     onClose: (options) => {},
-                //     onDelete: () => {
-                //         setSelectedLocation([]);
-                //     },
-                // },
                 {
                     label: 'Equipment Type',
                     value: 'equipments_type',
                     placeholder: 'All Equipment Types',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterData.equipments_type.map((filterItem) => ({
-                        value: filterItem.equipment_type_id,
-                        label: filterItem.equipment_type_name,
+                    filterOptions: filterData?.equipments_type.map((filterItem) => ({
+                        value: filterItem?.equipment_type_id,
+                        label: filterItem?.equipment_type_name,
                     })),
                     onChange: function onChange(options) {},
                     onClose: (options) => {
@@ -1193,9 +895,9 @@ const ExploreByEquipment = () => {
                     value: 'end_users',
                     placeholder: 'All End Uses',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterData.end_users.map((filterItem) => ({
-                        value: filterItem.end_use_id,
-                        label: filterItem.end_use_name,
+                    filterOptions: filterData?.end_users.map((filterItem) => ({
+                        value: filterItem?.end_use_id,
+                        label: filterItem?.end_use_name,
                     })),
                     onClose: (options) => {
                         let opt = options;
@@ -1217,9 +919,9 @@ const ExploreByEquipment = () => {
                     value: 'location_types',
                     placeholder: 'All Space Types',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterData.location_types.map((filterItem) => ({
-                        value: filterItem.location_type_id,
-                        label: filterItem.location_types_name,
+                    filterOptions: filterData?.location_types.map((filterItem) => ({
+                        value: filterItem?.location_type_id,
+                        label: filterItem?.location_types_name,
                     })),
                     onClose: (options) => {
                         let opt = options;
@@ -1308,261 +1010,328 @@ const ExploreByEquipment = () => {
             ];
             setFilterOptions(filterOptionsFetched);
         }
-    }, [perAPIFlag]);
+    }, [filterData]);
 
     useEffect(() => {
-        if ((minConValue !== maxConValue && maxConValue !== 0) || (minPerValue !== maxPerValue && maxPerValue !== 0)) {
-            if (Object.keys(filterData).length !== 0) {
-                const filterOptionsFetched = [
-                    {
-                        label: 'Energy Consumption',
-                        value: 'consumption',
-                        placeholder: 'All Consumptions',
-                        filterType: FILTER_TYPES.RANGE_SELECTOR,
-                        filterOptions: [minConValue, maxConValue],
-                        componentProps: {
-                            prefix: ' kWh',
-                            title: 'Consumption',
-                            min: bottomConsumption,
-                            max: topConsumption + 1,
-                            range: [minConValue, maxConValue],
-                            withTrendsFilter: false,
-                        },
-                        onClose: function onClose(options) {
-                            set_minConValue(options[0]);
-                            set_maxConValue(options[1]);
-                            setPageNo(1);
-                            setConAPIFlag(options[0] + options[1]);
-                        },
-                        onDelete: () => {
-                            set_minConValue(bottomConsumption);
-                            set_maxConValue(topConsumption);
-                            setConAPIFlag('');
-                        },
-                    },
-                    {
-                        label: '% Change',
-                        value: 'change',
-                        placeholder: 'All % Change',
-                        filterType: FILTER_TYPES.RANGE_SELECTOR,
-                        filterOptions: [minPerValue, maxPerValue],
-                        componentProps: {
-                            prefix: ' %',
-                            title: '% Change',
-                            min: bottomVal,
-                            max: topVal + 1,
-                            range: [minPerValue, maxPerValue],
-                            withTrendsFilter: true,
-                            currentButtonId: currentButtonId,
-                            handleButtonClick: function handleButtonClick() {
-                                for (
-                                    var _len = arguments.length, args = new Array(_len), _key = 0;
-                                    _key < _len;
-                                    _key++
-                                ) {
-                                    args[_key] = arguments[_key];
-                                    if (args[0] === 0) {
-                                        setIsOpened(true);
-                                        setCurrentButtonId(0);
-                                        set_minPerValue(bottomPerChange);
-                                        set_maxPerValue(topPerChange);
-                                        setBottomVal(bottomPerChange);
-                                        setTopVal(topPerChange);
-                                    }
-                                    if (args[0] === 1) {
-                                        setIsOpened(true);
-                                        setCurrentButtonId(1);
-                                        if (bottomPerChange < 0) {
-                                            setBottomVal(bottomPerChange);
-                                            setTopVal(neutralPerChange);
-                                            set_minPerValue(bottomPerChange);
-                                            set_maxPerValue(neutralPerChange);
-                                        } else if (bottomPerChange >= 0) {
-                                            setBottomVal(neutralPerChange);
-                                            setTopVal(neutralPerChange + 1);
-                                            set_minPerValue(neutralPerChange);
-                                            set_maxPerValue(neutralPerChange);
-                                        }
-                                    }
-                                    if (args[0] === 2) {
-                                        setIsOpened(true);
-                                        setCurrentButtonId(2);
-                                        if (topPerChange > 0) {
-                                            setBottomVal(neutralPerChange);
-                                            setTopVal(topPerChange);
-                                            set_minPerValue(neutralPerChange);
-                                            set_maxPerValue(topPerChange);
-                                        } else if (bottomPerChange >= 0) {
-                                            setBottomVal(neutralPerChange);
-                                            setTopVal(neutralPerChange + 1);
-                                            set_minPerValue(neutralPerChange);
-                                            set_maxPerValue(neutralPerChange);
-                                        }
-                                    }
-                                }
-                            },
-                        },
-                        isOpened: isopened,
-                        onClose: function onClose(options) {
-                            setIsOpened(false);
-                            set_minPerValue(options[0]);
-                            set_maxPerValue(options[1]);
-                            setPageNo(1);
-                            setPerAPIFlag(options[0] + options[1]);
-                        },
-                        onDelete: () => {
-                            set_minPerValue(bottomPerChange);
-                            set_maxPerValue(topPerChange);
-                            setPerAPIFlag('');
-                        },
-                    },
-                    {
-                        label: 'Equipment Type',
-                        value: 'equipments_type',
-                        placeholder: 'All Equipment Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterData.equipments_type.map((filterItem) => ({
-                            value: filterItem.equipment_type_id,
-                            label: filterItem.equipment_type_name,
-                        })),
-                        onChange: function onChange(options) {},
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let equipIds = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    equipIds.push(opt[i].value);
-                                }
-                                setPageNo(1);
-                                setSelectedEquipType(equipIds);
-                            }
-                        },
-                        onDelete: (options) => {
-                            setSelectedEquipType([]);
-                        },
-                    },
-                    {
-                        label: 'End Uses',
-                        value: 'end_users',
-                        placeholder: 'All End Uses',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterData.end_users.map((filterItem) => ({
-                            value: filterItem.end_use_id,
-                            label: filterItem.end_use_name,
-                        })),
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let endUseIds = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    endUseIds.push(opt[i].value);
-                                }
-                                setPageNo(1);
-                                setSelectedEndUse(endUseIds);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedEndUse([]);
-                        },
-                    },
-                    {
-                        label: 'Space Type',
-                        value: 'location_types',
-                        placeholder: 'All Space Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterData?.location_types.map((filterItem) => ({
-                            value: filterItem.location_type_id,
-                            label: filterItem.location_types_name,
-                        })),
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let spaceIds = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    spaceIds.push(opt[i].value);
-                                }
-                                setPageNo(1);
-                                setSelectedSpaceType(spaceIds);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedSpaceType([]);
-                        },
-                    },
-                    {
-                        label: 'Tags',
-                        value: 'tags',
-                        placeholder: 'All tags',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterData?.tags.map((filterItem) => ({
-                            value: filterItem,
-                            label: filterItem,
-                        })),
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let tags = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    tags.push(opt[i].value);
-                                }
-                                setSelectedTags(tags);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedTags([]);
-                        },
-                    },
-                    {
-                        label: 'Panel Name',
-                        value: 'panel',
-                        placeholder: 'All Panels',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterData?.panel.map((filterItem) => ({
-                            value: filterItem?.panel_id,
-                            label: filterItem?.panel_name,
-                        })),
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let panels = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    panels.push(opt[i].value);
-                                }
-                                setSelectedPanels(panels);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedPanels([]);
-                        },
-                    },
-                    {
-                        label: 'Breakers',
-                        value: 'breaker_number',
-                        placeholder: 'All Breakers',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterData?.breaker_number.map((filterItem) => ({
-                            value: filterItem,
-                            label: filterItem,
-                        })),
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let breakers_count = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    breakers_count.push(opt[i].value);
-                                }
-                                setSelectedBreakers(breakers_count);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedBreakers([]);
-                        },
-                    },
-                ];
-                setFilterOptions(filterOptionsFetched);
+        top = '';
+        topCon.current = '';
+        if (selectedIds?.length >= 1) {
+            let arr = [];
+            for (let i = 0; i < selectedIds?.length; i++) {
+                arr.push(selectedIds[i]);
             }
+            setSeriesData([]);
+            setSelectedAllEquipmentId(arr);
+        } else {
+            setSelectedEquipmentId('');
         }
-    }, [minConValue, maxConValue, minPerValue, maxPerValue]);
+    }, [startDate, endDate, selectedConsumption]);
+
+    useEffect(() => {
+        if (equipIdNow) fetchExploreChartData(equipIdNow);
+    }, [equipIdNow]);
+
+    // useEffect(() => {
+    //     if (
+    //         conAPIFlag !== '' ||
+    //         perAPIFlag !== '' ||
+    //         (minConValue !== maxConValue && maxConValue !== 0) ||
+    //         (minPerValue !== maxPerValue && maxPerValue !== 0)
+    //     ) {
+    //         (async () => {
+    //             setFetchingFilters(true);
+    //             const filters = await fetchExploreFilter(
+    //                 bldgId,
+    //                 startDate,
+    //                 endDate,
+    //                 timeZone,
+    //                 selectedLocation,
+    //                 selectedEquipType,
+    //                 selectedEndUse,
+    //                 selectedSpaceType,
+    //                 minConValue,
+    //                 maxConValue,
+    //                 conAPIFlag,
+    //                 selectedTags,
+    //                 selectedPanels,
+    //                 selectedBreakers,
+    //                 selectedNotes
+    //             );
+
+    //             const filterOptionsFetched = [
+    //                 {
+    //                     label: 'Energy Consumption',
+    //                     value: 'consumption',
+    //                     placeholder: 'All Consumptions',
+    //                     filterType: FILTER_TYPES.RANGE_SELECTOR,
+    //                     filterOptions: [minConValue, maxConValue],
+    //                     componentProps: {
+    //                         prefix: ' kWh',
+    //                         title: 'Consumption',
+    //                         min: bottomConsumption,
+    //                         max: topConsumption + 1,
+    //                         range: [minConValue, maxConValue],
+    //                         withTrendsFilter: false,
+    //                     },
+    //                     onClose: async function onClose(options) {
+    //                         set_minConValue(options[0]);
+    //                         set_maxConValue(options[1]);
+    //                         setPageNo(1);
+    //                         setConAPIFlag(options[0] + options[1]);
+    //                     },
+    //                     onDelete: () => {
+    //                         set_minConValue(bottomConsumption);
+    //                         set_maxConValue(topConsumption);
+    //                         setConAPIFlag('');
+    //                     },
+    //                 },
+    //                 {
+    //                     label: '% Change',
+    //                     value: 'change',
+    //                     placeholder: 'All % Change',
+    //                     filterType: FILTER_TYPES.RANGE_SELECTOR,
+    //                     filterOptions: [minPerValue, maxPerValue],
+    //                     componentProps: {
+    //                         prefix: ' %',
+    //                         title: '% Change',
+    //                         min: bottomVal,
+    //                         max: topVal + 1,
+    //                         range: [minPerValue, maxPerValue],
+    //                         withTrendsFilter: true,
+    //                         currentButtonId: currentButtonId,
+    //                         handleButtonClick: function handleButtonClick() {
+    //                             for (
+    //                                 var _len = arguments.length, args = new Array(_len), _key = 0;
+    //                                 _key < _len;
+    //                                 _key++
+    //                             ) {
+    //                                 args[_key] = arguments[_key];
+    //                                 if (args[0] === 0) {
+    //                                     setIsOpened(true);
+    //                                     setCurrentButtonId(0);
+    //                                     set_minPerValue(bottomPerChange);
+    //                                     set_maxPerValue(topPerChange);
+    //                                     setBottomVal(bottomPerChange);
+    //                                     setTopVal(topPerChange);
+    //                                 }
+    //                                 if (args[0] === 1) {
+    //                                     setIsOpened(true);
+    //                                     setCurrentButtonId(1);
+    //                                     if (bottomPerChange < 0) {
+    //                                         setBottomVal(bottomPerChange);
+    //                                         setTopVal(neutralPerChange);
+    //                                         set_minPerValue(bottomPerChange);
+    //                                         set_maxPerValue(neutralPerChange);
+    //                                     } else if (bottomPerChange >= 0) {
+    //                                         setBottomVal(neutralPerChange);
+    //                                         setTopVal(neutralPerChange + 1);
+    //                                         set_minPerValue(neutralPerChange);
+    //                                         set_maxPerValue(neutralPerChange);
+    //                                     }
+    //                                 }
+    //                                 if (args[0] === 2) {
+    //                                     setIsOpened(true);
+    //                                     setCurrentButtonId(2);
+    //                                     if (topPerChange > 0) {
+    //                                         setBottomVal(neutralPerChange);
+    //                                         setTopVal(topPerChange);
+    //                                         set_minPerValue(neutralPerChange);
+    //                                         set_maxPerValue(topPerChange);
+    //                                     } else if (bottomPerChange >= 0) {
+    //                                         setBottomVal(neutralPerChange);
+    //                                         setTopVal(neutralPerChange + 1);
+    //                                         set_minPerValue(neutralPerChange);
+    //                                         set_maxPerValue(neutralPerChange);
+    //                                     }
+    //                                 }
+    //                             }
+    //                         },
+    //                     },
+    //                     isOpened: isopened,
+    //                     onClose: function onClose(options) {
+    //                         setIsOpened(false);
+    //                         set_minPerValue(options[0]);
+    //                         set_maxPerValue(options[1]);
+    //                         setPageNo(1);
+    //                         setPerAPIFlag(options[0] + options[1]);
+    //                     },
+    //                     onDelete: () => {
+    //                         set_minPerValue(bottomPerChange);
+    //                         set_maxPerValue(topPerChange);
+    //                         setPerAPIFlag('');
+    //                     },
+    //                 },
+    //                 {
+    //                     label: 'Equipment Type',
+    //                     value: 'equipments_type',
+    //                     placeholder: 'All Equipment Types',
+    //                     filterType: FILTER_TYPES.MULTISELECT,
+    //                     filterOptions: filters.data.data.equipments_type.map((filterItem) => ({
+    //                         value: filterItem.equipment_type_id,
+    //                         label: filterItem.equipment_type_name,
+    //                     })),
+    //                     onChange: function onChange(options) {},
+    //                     onClose: (options) => {
+    //                         let opt = options;
+    //                         if (opt.length !== 0) {
+    //                             let equipIds = [];
+    //                             for (let i = 0; i < opt.length; i++) {
+    //                                 equipIds.push(opt[i].value);
+    //                             }
+    //                             setPageNo(1);
+    //                             setSelectedEquipType(equipIds);
+    //                         }
+    //                     },
+    //                     onDelete: (options) => {
+    //                         setSelectedEquipType([]);
+    //                     },
+    //                 },
+    //                 {
+    //                     label: 'End Uses',
+    //                     value: 'end_users',
+    //                     placeholder: 'All End Uses',
+    //                     filterType: FILTER_TYPES.MULTISELECT,
+    //                     filterOptions: filterData.end_users.map((filterItem) => ({
+    //                         value: filterItem.end_use_id,
+    //                         label: filterItem.end_use_name,
+    //                     })),
+    //                     onClose: (options) => {
+    //                         let opt = options;
+    //                         if (opt.length !== 0) {
+    //                             let endUseIds = [];
+    //                             for (let i = 0; i < opt.length; i++) {
+    //                                 endUseIds.push(opt[i].value);
+    //                             }
+    //                             setPageNo(1);
+    //                             setSelectedEndUse(endUseIds);
+    //                         }
+    //                     },
+    //                     onDelete: () => {
+    //                         setSelectedEndUse([]);
+    //                     },
+    //                 },
+    //                 {
+    //                     label: 'Space Type',
+    //                     value: 'location_types',
+    //                     placeholder: 'All Space Types',
+    //                     filterType: FILTER_TYPES.MULTISELECT,
+    //                     filterOptions: filters?.data?.data?.location_types.map((filterItem) => ({
+    //                         value: filterItem?.location_type_id,
+    //                         label: filterItem?.location_types_name,
+    //                     })),
+    //                     onClose: (options) => {
+    //                         let opt = options;
+    //                         if (opt.length !== 0) {
+    //                             let spaceIds = [];
+    //                             for (let i = 0; i < opt.length; i++) {
+    //                                 spaceIds.push(opt[i].value);
+    //                             }
+    //                             setPageNo(1);
+    //                             setSelectedSpaceType(spaceIds);
+    //                         }
+    //                     },
+    //                     onDelete: () => {
+    //                         setSelectedSpaceType([]);
+    //                     },
+    //                 },
+    //                 {
+    //                     label: 'Tags',
+    //                     value: 'tags',
+    //                     placeholder: 'All tags',
+    //                     filterType: FILTER_TYPES.MULTISELECT,
+    //                     filterOptions: filters?.data?.data?.tags.map((filterItem) => ({
+    //                         value: filterItem,
+    //                         label: filterItem,
+    //                     })),
+    //                     onClose: (options) => {
+    //                         let opt = options;
+    //                         if (opt.length !== 0) {
+    //                             let tags = [];
+    //                             for (let i = 0; i < opt.length; i++) {
+    //                                 tags.push(opt[i].value);
+    //                             }
+    //                             setSelectedTags(tags);
+    //                         }
+    //                     },
+    //                     onDelete: () => {
+    //                         setSelectedTags([]);
+    //                     },
+    //                 },
+    //                 {
+    //                     label: 'Panel Name',
+    //                     value: 'panel',
+    //                     placeholder: 'All Panels',
+    //                     filterType: FILTER_TYPES.MULTISELECT,
+    //                     filterOptions: filters?.data?.data?.panel.map((filterItem) => ({
+    //                         value: filterItem?.panel_id,
+    //                         label: filterItem?.panel_name,
+    //                     })),
+    //                     onClose: (options) => {
+    //                         let opt = options;
+    //                         if (opt.length !== 0) {
+    //                             let panels = [];
+    //                             for (let i = 0; i < opt.length; i++) {
+    //                                 panels.push(opt[i].value);
+    //                             }
+    //                             setSelectedPanels(panels);
+    //                         }
+    //                     },
+    //                     onDelete: () => {
+    //                         setSelectedPanels([]);
+    //                     },
+    //                 },
+    //                 {
+    //                     label: 'Breakers',
+    //                     value: 'breaker_number',
+    //                     placeholder: 'All Breakers',
+    //                     filterType: FILTER_TYPES.MULTISELECT,
+    //                     filterOptions: filterData?.breaker_number.map((filterItem) => ({
+    //                         value: filterItem,
+    //                         label: filterItem,
+    //                     })),
+    //                     onClose: (options) => {
+    //                         let opt = options;
+    //                         if (opt.length !== 0) {
+    //                             let breakers_count = [];
+    //                             for (let i = 0; i < opt.length; i++) {
+    //                                 breakers_count.push(opt[i].value);
+    //                             }
+    //                             setSelectedBreakers(breakers_count);
+    //                         }
+    //                     },
+    //                     onDelete: () => {
+    //                         setSelectedBreakers([]);
+    //                     },
+    //                 },
+    //                 // {
+    //                 //     label: 'Notes',
+    //                 //     value: 'note',
+    //                 //     placeholder: 'All Notes',
+    //                 //     filterType: FILTER_TYPES.MULTISELECT,
+    //                 //     filterOptions: filterData?.notes.map((filterItem) => ({
+    //                 //         value: filterItem,
+    //                 //         label: filterItem,
+    //                 //     })),
+    //                 //     onClose: (options) => {
+    //                 //         let opt = options;
+    //                 //         if (opt.length !== 0) {
+    //                 //             let notes = [];
+    //                 //             for (let i = 0; i < opt.length; i++) {
+    //                 //                 notes.push(opt[i].value);
+    //                 //             }
+    //                 //             setSelectedNotes(notes);
+    //                 //         }
+    //                 //     },
+    //                 //     onDelete: () => {
+    //                 //         setSelectedNotes([]);
+    //                 //     },
+    //                 // },
+    //             ];
+    //             setFilterOptions(filterOptionsFetched);
+    //             setFetchingFilters(false);
+    //         })();
+    //     }
+    // }, [minConValue, maxConValue, minPerValue, maxPerValue, conAPIFlag, perAPIFlag]);
 
     useEffect(() => {
         if (selectedEquipmentId !== '') fetchExploreChartData();
@@ -1604,10 +1373,6 @@ const ExploreByEquipment = () => {
         if (allEquipmentData.length === 0) return;
         if (allEquipmentData.length === exploreTableData.length) setSeriesData(allEquipmentData);
     }, [allEquipmentData]);
-
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [pageNo, pageSize]);
 
     return (
         <>
@@ -1699,7 +1464,7 @@ const ExploreByEquipment = () => {
                             filterOptions={filterOptions}
                             onDownload={() => handleDownloadCsv()}
                             headers={headerProps}
-                            customExcludedHeaders={['Panel Name', 'Breakers', 'Notes']}
+                            // customExcludedHeaders={['Panel Name', 'Breakers', 'Notes']}
                             customCheckAll={() => (
                                 <Checkbox
                                     label=""
@@ -1750,7 +1515,7 @@ const ExploreByEquipment = () => {
                 showEquipmentChart={showEquipmentChart}
                 handleChartClose={handleChartClose}
                 equipmentFilter={equipmentFilter}
-                fetchEquipmentData={exploreDataFetch}
+                fetchEquipmentData={fetchExploreEquipDataOnPageLoad}
                 selectedTab={selectedModalTab}
                 setSelectedTab={setSelectedModalTab}
                 activePage="explore"
