@@ -103,6 +103,7 @@ const ExploreByEquipment = () => {
     const [selectedEquipType, setSelectedEquipType] = useState([]);
     const [selectedEndUse, setSelectedEndUse] = useState([]);
     const [selectedSpaceType, setSelectedSpaceType] = useState([]);
+    const [selectedTags, setSelectedTags] = useState([]);
     const [selectedPanels, setSelectedPanels] = useState([]);
     const [selectedBreakers, setSelectedBreakers] = useState([]);
     const [minConValue, set_minConValue] = useState(0);
@@ -155,10 +156,10 @@ const ExploreByEquipment = () => {
         },
     ];
 
-    const exploreDataFetch = async (bodyVal) => {
+    const exploreDataFetch = async () => {
+        setIsExploreDataLoading(true);
         const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
-        setIsExploreDataLoading(true);
         setAllEquipmentList([]);
 
         await fetchExploreEquipmentList(
@@ -183,22 +184,24 @@ const ExploreByEquipment = () => {
             perAPIFlag
         )
             .then((res) => {
-                let responseData = res.data;
-                if (responseData.data.length !== 0) {
-                    if (entryPoint === 'entered') {
-                        totalEquipmentId.length = 0;
-                        setSeriesData([]);
+                const { data, total_data } = res?.data;
+                if (data) {
+                    if (data.length !== 0) {
+                        if (entryPoint === 'entered') {
+                            totalEquipmentId.length = 0;
+                            setSeriesData([]);
+                        }
+                        setTopEnergyConsumption(data[0]?.consumption?.now);
+                        topCon.current = data[0]?.consumption?.now;
+                        top = data[0]?.consumption?.now;
                     }
-                    setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    topCon.current = responseData.data[0].consumption.now;
-                    top = responseData.data[0].consumption.now;
+                    setExploreTableData(data);
+                    setAllEquipmentList(data);
+                    if (total_data) setTotalItems(total_data);
+                    setTotalItemsSearched(data.length);
+                    setAllSearchData(data);
+                    setIsExploreDataLoading(false);
                 }
-                setExploreTableData(responseData.data);
-                setAllEquipmentList(responseData.data);
-                setTotalItems(responseData.total_data);
-                setTotalItemsSearched(responseData.data.length);
-                setAllSearchData(responseData.data);
-                setIsExploreDataLoading(false);
             })
             .catch((error) => {
                 setIsExploreDataLoading(false);
@@ -556,13 +559,26 @@ const ExploreByEquipment = () => {
             ''
         )
             .then((res) => {
-                let responseData = res.data;
-                download(
-                    `${bldgName}_Explore_By_Equipment_${new Date().toISOString().split('T')[0]}`,
-                    getExploreByEquipmentTableCSVExport(responseData.data, headerProps)
-                );
+                const { data } = res?.data;
+                if (data.length !== 0) {
+                    download(
+                        `${bldgName}_Explore_By_Equipment_${new Date().toISOString().split('T')[0]}`,
+                        getExploreByEquipmentTableCSVExport(data, headerProps)
+                    );
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'CSV export completed successfully.';
+                        s.notificationType = 'success';
+                    });
+                }
             })
-            .catch((error) => {});
+            .catch((error) => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Data failed to export in CSV.';
+                    s.notificationType = 'error';
+                });
+            });
     };
 
     const headerProps = [
@@ -957,7 +973,30 @@ const ExploreByEquipment = () => {
                         },
                     },
                     {
-                        label: 'Panel',
+                        label: 'Tags',
+                        value: 'tags',
+                        placeholder: 'All tags',
+                        filterType: FILTER_TYPES.MULTISELECT,
+                        filterOptions: filters?.data?.data?.tags.map((filterItem) => ({
+                            value: filterItem,
+                            label: filterItem,
+                        })),
+                        onClose: (options) => {
+                            let opt = options;
+                            if (opt.length !== 0) {
+                                let tags = [];
+                                for (let i = 0; i < opt.length; i++) {
+                                    tags.push(opt[i].value);
+                                }
+                                setSelectedTags(tags);
+                            }
+                        },
+                        onDelete: () => {
+                            setSelectedTags([]);
+                        },
+                    },
+                    {
+                        label: 'Panel Name',
                         value: 'panel',
                         placeholder: 'All Panels',
                         filterType: FILTER_TYPES.MULTISELECT,
@@ -1198,7 +1237,30 @@ const ExploreByEquipment = () => {
                     },
                 },
                 {
-                    label: 'Panel',
+                    label: 'Tags',
+                    value: 'tags',
+                    placeholder: 'All tags',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterData?.tags.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let tags = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                tags.push(opt[i].value);
+                            }
+                            setSelectedTags(tags);
+                        }
+                    },
+                    onDelete: () => {
+                        setSelectedTags([]);
+                    },
+                },
+                {
+                    label: 'Panel Name',
                     value: 'panel',
                     placeholder: 'All Panels',
                     filterType: FILTER_TYPES.MULTISELECT,
@@ -1354,20 +1416,6 @@ const ExploreByEquipment = () => {
                             setPerAPIFlag('');
                         },
                     },
-                    // {
-                    //     label: 'Location',
-                    //     value: 'spaces',
-                    //     placeholder: 'All Locations',
-                    //     filterType: FILTER_TYPES.MULTISELECT,
-                    //     filterOptions: filterData.spaces.map((filterItem) => ({
-                    //         value: filterItem.space_id,
-                    //         label: filterItem.space_name,
-                    //     })),
-                    //     onClose: (options) => {},
-                    //     onDelete: () => {
-                    //         setSelectedLocation([]);
-                    //     },
-                    // },
                     {
                         label: 'Equipment Type',
                         value: 'equipments_type',
@@ -1442,7 +1490,30 @@ const ExploreByEquipment = () => {
                         },
                     },
                     {
-                        label: 'Panel',
+                        label: 'Tags',
+                        value: 'tags',
+                        placeholder: 'All tags',
+                        filterType: FILTER_TYPES.MULTISELECT,
+                        filterOptions: filterData?.tags.map((filterItem) => ({
+                            value: filterItem,
+                            label: filterItem,
+                        })),
+                        onClose: (options) => {
+                            let opt = options;
+                            if (opt.length !== 0) {
+                                let tags = [];
+                                for (let i = 0; i < opt.length; i++) {
+                                    tags.push(opt[i].value);
+                                }
+                                setSelectedTags(tags);
+                            }
+                        },
+                        onDelete: () => {
+                            setSelectedTags([]);
+                        },
+                    },
+                    {
+                        label: 'Panel Name',
                         value: 'panel',
                         placeholder: 'All Panels',
                         filterType: FILTER_TYPES.MULTISELECT,

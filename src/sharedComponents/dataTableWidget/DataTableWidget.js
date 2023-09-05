@@ -131,6 +131,8 @@ const DataTableWidget = (props) => {
     };
 
     const filteredHeaders = headers.filter(({ name }) => !excludedHeaders.includes(name));
+    const uniqueExcludedHeadersList = Array.from(new Set(excludedHeaders));
+    const filteredOptions = props.filterOptions.filter(({ label }) => !uniqueExcludedHeadersList.includes(label));
 
     const debouncedSearch = useDebounce(search, 500);
 
@@ -150,7 +152,8 @@ const DataTableWidget = (props) => {
     }, [headers]);
 
     useEffect(() => {
-        setExcludedHeadersLocalStorage(excludedHeaders);
+        const uniqueExcludedHeaders = Array.from(new Set(excludedHeaders));
+        setExcludedHeadersLocalStorage(uniqueExcludedHeaders);
     }, [excludedHeaders]);
 
     useEffect(() => {
@@ -236,9 +239,6 @@ const DataTableWidget = (props) => {
         ));
     }, [JSON.stringify(filteredHeaders)]);
 
-    console.log('SSR props.filterOptions => ', props.filterOptions);
-    console.log('SSR excludedHeaderLocalStorage => ', excludedHeaderLocalStorage);
-
     return (
         <DataTableWidgetContext.Provider
             value={{
@@ -257,7 +257,7 @@ const DataTableWidget = (props) => {
                         selectedFiltersValues={selectedFiltersValues}
                         onChangeFilterValue={setSelectedFiltersValues}
                         onChange={setSelectedFilters}
-                        filterOptions={props.filterOptions}
+                        filterOptions={filteredOptions}
                         selectedFilters={selectedFilters}
                         onDeleteFilter={handleDeleteFilter}
                         isFilterLoading={props?.isFilterLoading}
