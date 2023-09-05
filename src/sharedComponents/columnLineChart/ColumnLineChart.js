@@ -48,11 +48,6 @@ const ColumnLineChart = (props) => {
     const [withTemp, setWithTemp] = useState(withTempProp);
 
     const { plotBands, renderPlotBandsLegends } = usePlotBandsLegends({ plotBandsProp, plotBandsLegends });
-    console.log(plotBands, plotBands);
-    console.log('renderPlotBandsLegends ', renderPlotBandsLegends);
-    const filterWeather = useCallback(() => {
-        setWithTemp((old) => !old);
-    }, []);
 
     useEffect(() => {
         setWithTemp(withTempProp);
@@ -80,29 +75,21 @@ const ColumnLineChart = (props) => {
                     <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>
                     <Typography.Body size={Typography.Sizes.xs}>{subTitle}</Typography.Body>
                 </div>
-                {/* {showUpperLegends && ( */}
-                <div className="ml-auto d-flex plot-bands-legends-wrapper">
+                <div className="d-flex plot-bands-legends-wrapper w-100">
                     {renderPlotBandsLegends.map((legendProps) => {
                         const props = { ...legendProps, ...upperLegendsProps.plotBands };
                         return (
                             <UpperLegendComponent
                                 {...props}
                                 onClick={(event) => {
-                                    console.log('CLICKED23432', event);
                                     legendProps?.onClick && legendProps.onClick(event);
                                     const onClick = _.get(upperLegendsProps, 'plotBands.onClick');
                                     onClick && onClick({ event, props });
-                                    // if(type==column){
-                                    //     setShowColumn(event)
-                                    // }else{
-                                    //     setShowLine(event)
-                                    // }
                                 }}
                             />
                         );
                     })}
                 </div>
-                {/* )} */}
                 <DropDownIcon
                     classNameButton="column-chart-download-button"
                     options={[

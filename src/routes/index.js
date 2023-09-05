@@ -173,19 +173,18 @@ const portfolioRoutes = {
         },
         {
             path: '/carbon/portfolio/overview',
-            name: 'End Uses',
+            name: 'Portfolio Overview',
             component: CarbonOverview,
             route: PrivateRoute,
             visibility: true,
-            parent: 'building',
         },
         {
             path: '/carbon/building/overview/:bldgId',
-            name: 'Carbon Building Overview',
+            name: 'Building Overview',
             component: CarbonBuilding,
             route: PrivateRoute,
             visibility: true,
-            parent: 'buildings',
+            parent: 'carbon',
         },
         {
             path: '/energy/time-of-day/:bldgId',
@@ -383,12 +382,12 @@ const carbonRoutes = {
         visibility: true,
         children: [
             {
-                path: '/carbon/portfolio/overview',
-                name: 'Carbon',
+                path: '/carbon/building/overview/:bldgId',
+                name: 'Building overview',
                 component: CarbonOverview,
                 route: PrivateRoute,
-                parent: 'carbon',
-                visibility: true,
+                parent: 'Portfolio Overview',
+                visibility: false,
             },
         ],
         icon: <CarbonCo2/>,
@@ -571,9 +570,16 @@ const flattenRoutes = (routes) => {
 };
 
 // All routes
-const allRoutes = [rootRoute, portfolioRoutes, settingsRoutes, controlRoutes, exploreRoutes, adminRoutes, authRoutes];
+const allRoutes = [rootRoute, portfolioRoutes, settingsRoutes, controlRoutes,carbonRoutes, exploreRoutes, adminRoutes, authRoutes];
 
-const authProtectedRoutes = [portfolioRoutes, settingsRoutes, controlRoutes, exploreRoutes,carbonRoutes, adminRoutes];
+const authProtectedRoutes = [
+    portfolioRoutes,
+    settingsRoutes,
+    controlRoutes,
+    exploreRoutes,
+    carbonRoutes,
+    adminRoutes,
+];
 
 const allFlattenRoutes = flattenRoutes(allRoutes);
 export { allRoutes, authProtectedRoutes, allFlattenRoutes };

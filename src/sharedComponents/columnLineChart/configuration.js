@@ -2,40 +2,14 @@ import React from 'react';
 import _ from 'lodash';
 import moment from 'moment';
 
-import Typography from '../typography';
 
 import { chartsBaseConfig } from '../configs/chartsBaseConfig';
-import { renderComponents } from './helper';
-import { UNITS } from '../../constants/units';
 import { LOW_MED_HIGH, PLOT_BANDS_TYPE } from '../common/charts/modules/contants';
 
 import colors from '../../assets/scss/_colors.scss';
 
-// refer doc https://api.highcharts.com/highcharts/series.line
-const tempSeries = (data) =>
-    data.map((s) => ({
-        ...s,
-        type: 'line',
-        //HIGH MED LOW
-        typeOfValue: s.type,
-        group: LOW_MED_HIGH,
-        marker: false,
-        lineWidth: 1,
-        showInLegend: false,
-        yAxis: 1,
-        zIndex: -1,
-        states: {
-            hover: {
-                enabled: false,
-            },
-            inactive: {
-                opacity: 1,
-            },
-        },
-    }));
-
 export const options = (props) => {
-    const { plotBands } = props;
+    const { plotBands, carbonUnits } = props;
     const plotBandsData = plotBands
         ?.map(({ background, from, to, borderBottomColor, type }) => {
             switch (type) {
@@ -109,23 +83,22 @@ export const options = (props) => {
         })
         .flat();
 
-    const baseConfig = chartsBaseConfig({
+    const baseConfigEnergy = chartsBaseConfig({
         columnType: 'column',
         chartHeight: props.chartHeight || 341,
         colors: props.colors,
         series: props?.series,
         categories: props.categories,
         onMoreDetail: props.onMoreDetail,
-        tooltipUnit: props.tooltipUnit,
         yAxisWithAssignMeasure: false,
         tooltipValuesKey: props.tooltipValuesKey ? props.tooltipValuesKey : '{point.y}',
     });
-
     return _.merge(
-        baseConfig,
+        baseConfigEnergy,
         _.merge(
             {
                 tooltip: {
+                    shared: true,
                     formatter: function (tooltip) {
                         try {
                             let _this = this;
@@ -154,14 +127,8 @@ export const options = (props) => {
                 },
                 xAxis: {
                     labels: {
-                        formatter: function (args) {
-                            let value;
-
-                            if (props.xAxisCallBackValue) {
-                                value = props.xAxisCallBackValue({ value: this.value, _this: this, args });
-                            }
-
-                            return this.axis.defaultLabelFormatter.call(value ? { ...this, value } : this);
+                        formatter: function (val) {
+                            return moment.utc(val.value).format('ddd - MMM D');
                         },
                     },
                     plotBands: plotBandsData,
@@ -169,17 +136,25 @@ export const options = (props) => {
                 yAxis: [
                     {
                         title: {
-                            text: 'Energy'
-                        },                        
+                            text: '',
+                        },
+                        labels: {
+                            format: '{value} KWh',
+                        },
                     },
                     {
                         title: {
-                            text: 'lbs/MWh',
-                            // align: 'high',
+                            text: carbonUnits == 'si' ? ' kgs/MWh' : ' lbs/MWh',
+                            align: 'low',
+                            rotation: 0,
+                            y: -10,
+                            reserveSpace: false,
                         },
-                        opposite: true
+                        labels: {
+                            format: `{value}${carbonUnits == 'si' ? ' kgs/MWh' : ' lbs/MWh'}`,
+                        },
+                        opposite: true,
                     },
-                    
                 ],
             },
             props?.restChartProps

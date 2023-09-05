@@ -257,7 +257,7 @@ const PortfolioOverview = () => {
                             <ColumnChart
                                 title="Total Energy Consumption"
                                 subTitle="Hourly Energy Consumption (kWh)"
-                                colors={[colors.datavizMain2]}
+                                colors={[colors.datavizMain2, colors.datavizMain1]}
                                 categories={energyConsumptionsCategories}
                                 tooltipUnit={UNITS.KWH}
                                 series={energyConsumptionsData}

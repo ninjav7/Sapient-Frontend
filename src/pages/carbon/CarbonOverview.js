@@ -7,7 +7,7 @@ import { formatConsumptionValue } from '../../helpers/helpers';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import { Badge } from '../../sharedComponents/badge';
 import { fetchCompareBuildingsV2, getCarbonBuildingChartData } from '../compareBuildings/services';
-import { getCompareBuildingTableCSVExport } from '../../utils/tablesExport';
+import { getCarbonCompareBuildingsTableCSVExport } from '../../utils/tablesExport';
 
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 
@@ -102,14 +102,14 @@ const CarbonOverview = () => {
         },
         {
             name: `Average Emissions Rate `,
-            accessor: 'energy_density',
-            callbackValue: (row) => renderEnergyDensity(row),
+            accessor: 'average_carbon_intensity',
+            callbackValue: (row) => renderAverageEmissionRate(row),
 
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Total Carbon Emissions',
-            accessor: 'total_consumption',
+            accessor: 'total_carbon_emissions',
             callbackValue: (row) => renderTotalConsumption(row),
             onSort: (method, name) => setSortBy({ method, name }),
         },
@@ -326,7 +326,7 @@ const CarbonOverview = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Carbon Overview',
+                        label: 'Building Overview',
                         path: '/carbon/portfolio/overview',
                         active: true,
                     },
@@ -334,10 +334,9 @@ const CarbonOverview = () => {
                 bs.items = newList;
             });
             ComponentStore.update((s) => {
-                s.parent = 'carbon';
+                s.parent = 'Portfolio Overview';
             });
         };
-
         const updateBuildingData = () => {
             updateBuildingStore('portfolio', 'Portfolio', '');
         };
@@ -347,7 +346,6 @@ const CarbonOverview = () => {
     }, []);
 
     const renderName = (row) => {
-        console.log("row.building_type",row);
         return (
             <>
                 <Typography.Link
@@ -369,14 +367,14 @@ const CarbonOverview = () => {
     };
 
     const handleDownloadCsv = async () => {
-        download('Compare_Buildings', getCompareBuildingTableCSVExport(buildingsData, tableHeader));
+        download('Compare_Buildings', getCarbonCompareBuildingsTableCSVExport(buildingsData, tableHeader));
     };
 
-    const renderEnergyDensity = (row) => {
+    const renderAverageEmissionRate = (row) => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {row?.average_emissions_rate} lbs/MWh
+                    {row?.average_carbon_intensity!==null?parseFloat(row?.average_carbon_intensity).toFixed(2):0} lbs/MWh
                 </Typography.Body>
             </>
         );

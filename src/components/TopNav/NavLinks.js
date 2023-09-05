@@ -32,6 +32,7 @@ const NavLinks = () => {
     const ENERGY_TAB = '/energy/portfolio/overview';
     const CONTROL_TAB = '/control/plug-rules';
     const EXPLORE_TAB = '/explore-page/by-buildings';
+    const CARBON_TAB = '/carbon/portfolio/overview';
 
     const routeToControlPage = () => {
         history.push({
@@ -42,6 +43,11 @@ const NavLinks = () => {
     const routeToPortfolioPage = () => {
         history.push({
             pathname: `/energy/portfolio/overview`,
+        });
+    };
+    const routeToPortfolioCarbonPage = () => {
+        history.push({
+            pathname: `/carbon/portfolio/overview`,
         });
     };
 
@@ -160,6 +166,9 @@ const NavLinks = () => {
             });
         }
     };
+    const handleCarbonClick = () => {
+        routeToPortfolioCarbonPage();
+    };
 
     const handleSideNavChange = (componentName) => {
         if (componentName === 'Energy') {
@@ -201,6 +210,9 @@ const NavLinks = () => {
                 break;
             case EXPLORE_TAB:
                 handleExploreClick();
+                break;
+            case CARBON_TAB:
+                handleCarbonClick();
                 break;
             default:
                 history.push({

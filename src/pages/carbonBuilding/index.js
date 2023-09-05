@@ -7,19 +7,16 @@ import { useAtom } from 'jotai';
 import moment from 'moment';
 import 'moment-timezone';
 import { useHistory, useParams } from 'react-router-dom';
-import LineChart from '../../sharedComponents/lineChart/LineChart';
 import {
     fetchOverallBldgData,
     fetchBuildingEquipments,
     fetchBuilidingHourly,
-    fetchEnergyConsumption,
     fetchEndUseByBuilding,
     fetchEnergyConsumptionByEquipType,
     fetchEnergyConsumptionBySpaceType,
     fetchEnergyConsumptionByFloor,
     fetchEnergyConsumptionV2,
 } from '../buildings/services';
-import { fetchEnergyCarbonByBuilding } from './services';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -27,19 +24,14 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { buildingData } from '../../store/globalState';
 import { UserStore } from '../../store/UserStore';
 import BuildingKPIs from './BuildingKPIs';
-import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
-import HourlyAvgConsumption from './HourlyAvgConsumption';
-import TopConsumptionWidget from '../../sharedComponents/topConsumptionWidget/TopConsumptionWidget';
 import { UNITS } from '../../constants/units';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
-import EquipChartModal from '../chartModal/EquipChartModal';
 import ColumnLineChart from '../../sharedComponents/columnLineChart/ColumnLineChart';
 import colors from '../../assets/scss/_colors.scss';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
 import { getWeatherData } from '../../services/weather';
-import EnergyConsumptionChart from '../buildings/energy-consumption/EnergyConsumptionChart';
 import './style.css';
 import { fetchMetricsBuildingPage, fetchMetricsKpiBuildingPage, fetchcurrentFuelMix } from './services';
 
@@ -79,8 +71,6 @@ const CarbonBuilding = () => {
             old: 0,
         },
     });
-    console.log('kpiMetrics23425643', kpiMetrics);
-
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
 
     const [xAxisObj, setXAxisObj] = useState({
@@ -441,14 +431,14 @@ const CarbonBuilding = () => {
             let newList = [
                 {
                     label: 'Building Overview',
-                    path: '/energy/building/overview',
+                    path: '/carbon/building/overview',
                     active: true,
                 },
             ];
             bs.items = newList;
         });
         ComponentStore.update((s) => {
-            s.parent = 'buildings';
+            s.parent = 'carbon';
         });
     };
 
@@ -518,7 +508,6 @@ const CarbonBuilding = () => {
             tz_info: time_zone,
         };
         fetchMetricsBuildingPage(bldgId, payload).then((res) => {
-            console.log('res32543', res);
         });
     };
     const fetchMetricsKpi = async () => {
@@ -535,7 +524,6 @@ const CarbonBuilding = () => {
     };
     const fetchCurrentFuelMixData = async () => {
         await fetchcurrentFuelMix().then((res) => {
-            console.log('res325435464323451236', res);
         });
     };
     useEffect(() => {
@@ -567,7 +555,11 @@ const CarbonBuilding = () => {
                             name: 'Energy',
                             data: [],
                             type: 'column',
+                            color:colors.datavizMain2,
                             yAxis: 0,
+                            tooltip: {
+                                valueSuffix: ' KWh',
+                            },
                         },
                     ];
                     response.data.forEach((record) => {
@@ -599,6 +591,10 @@ const CarbonBuilding = () => {
                             data: [],
                             type: 'spline',
                             yAxis: 1,
+                            color:colors.datavizMain1,
+                            tooltip: {
+                                valueSuffix: userPrefUnits == 'si' ? ' kgs/MWh' : ' lbs/MWh',
+                            },
                         },
                     ];
                     response.data.forEach((record) => {
@@ -641,35 +637,30 @@ const CarbonBuilding = () => {
 
     return (
         <React.Fragment>
-            <Header title="Carbon Building Overview" type="page" />
+            <Header title="Building Overview" type="page" />
 
             <div className="mt-4 mb-4">
                 <BuildingKPIs daysCount={daysCount} overalldata={kpiMetrics} userPrefUnits={userPrefUnits} />
             </div>
-            {console.log(startDate)}
             <div className="mt-4">
                 <ColumnLineChart
-                    // title="Total Energy Consumption"
-                    // subTitle="Hourly Energy Consumption (kWh)"
                     colors={[colors.datavizMain2, colors.datavizMain1]}
                     categories={carbonConsumptionsCategories}
                     tooltipUnit={UNITS.KWH}
+                    carbonUnits={userPrefUnits}
                     series={dataToDisplay}
                     isLegendsEnabled={false}
                     plotBandsLegends={[
                         {
-                            label: 'Carbon',
-                            color: colors.datavizMain2,
+                            label: `Carbon Intensity (${userPrefUnits == 'si' ? 'kgs/MWh' : 'lbs/MWh'})`,
+                            color: colors.datavizMain1,
                             type: 'spline',
                             onClick: (event) => handleLedgendStatusChange('carbon', !event),
                         },
                         {
+                            label: 'Energy Consumption (kWh)',
                             type: 'column',
-                            label: 'Energy',
-                            color: {
-                                background: 'rgba(180, 35, 24, 0.1)',
-                                borderColor: colors.datavizMain1,
-                            },
+                            color: colors.datavizMain2,
                             onClick: (event) => handleLedgendStatusChange('energy', !event),
                         },
                     ]}
@@ -679,15 +670,6 @@ const CarbonBuilding = () => {
                     tooltipCallBackValue={toolTipFormatter}
                 />
             </div>
-            <EnergyConsumptionByEndUse
-                title="Energy Consumption by End Use"
-                subtitle="Energy Totals"
-                energyConsumption={energyConsumption}
-                bldgId={bldgId}
-                pageType="building"
-                handleRouteChange={() => handleRouteChange('/energy/end-uses')}
-                showRouteBtn={true}
-            />
         </React.Fragment>
     );
 };
