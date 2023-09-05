@@ -131,8 +131,13 @@ const DataTableWidget = (props) => {
     };
 
     const filteredHeaders = headers.filter(({ name }) => !excludedHeaders.includes(name));
-    const uniqueExcludedHeadersList = Array.from(new Set(excludedHeaders));
-    const filteredOptions = props.filterOptions.filter(({ label }) => !uniqueExcludedHeadersList.includes(label));
+
+    // Added for exluding Filters if column is hidden
+    let filteredOptions = [];
+    if (props.filterOptions) {
+        const uniqueExcludedHeadersList = Array.from(new Set(excludedHeaders));
+        filteredOptions = props.filterOptions.filter(({ label }) => !uniqueExcludedHeadersList.includes(label));
+    }
 
     const debouncedSearch = useDebounce(search, 500);
 
@@ -257,7 +262,7 @@ const DataTableWidget = (props) => {
                         selectedFiltersValues={selectedFiltersValues}
                         onChangeFilterValue={setSelectedFiltersValues}
                         onChange={setSelectedFilters}
-                        filterOptions={filteredOptions}
+                        filterOptions={filteredOptions.length !== 0 ? filteredOptions : props.filterOptions}
                         selectedFilters={selectedFilters}
                         onDeleteFilter={handleDeleteFilter}
                         isFilterLoading={props?.isFilterLoading}
