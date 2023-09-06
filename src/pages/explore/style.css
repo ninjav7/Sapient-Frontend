@@ -30,3 +30,9 @@
     column-gap: 0.25rem;
     justify-content: flex-start;
 }
+
+.tag-row-content {
+    display: flex;
+    column-gap: 0.25rem;
+    justify-content: flex-start;
+}

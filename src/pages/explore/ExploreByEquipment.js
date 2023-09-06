@@ -4,104 +4,63 @@ import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilt
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
-import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { Progress } from 'reactstrap';
 import { useParams } from 'react-router-dom';
 import EquipChartModal from '../chartModal/EquipChartModal';
 import Header from '../../components/Header';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { buildingData, selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
-import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
+import {
+    apiRequestBody,
+    dateTimeFormatForHighChart,
+    formatConsumptionValue,
+    formatXaxisForHighCharts,
+    pageListSizes,
+} from '../../helpers/helpers';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 import Brick from '../../sharedComponents/brick';
-import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 import Typography from '../../sharedComponents/typography';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
-import { fetchDateRange } from '../../helpers/formattedChartData';
-import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import Select from '../../sharedComponents/form/select';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { UserStore } from '../../store/UserStore';
 import { Badge } from '../../sharedComponents/badge';
+import { isEmptyObject, truncateString } from './utils';
+import { UNITS } from '../../constants/units';
 import './style.css';
+import './styles.scss';
 
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <th>
-                <Skeleton count={5} />
-            </th>
+const SkeletonLoading = ({ noofRows }) => {
+    const rowArray = Array.from({ length: noofRows });
 
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+    return (
+        <SkeletonTheme color="$primary-gray-1000" height={35}>
+            <tr>
+                {rowArray.map((_, index) => (
+                    <th key={index}>
+                        <Skeleton count={5} />
+                    </th>
+                ))}
+            </tr>
+        </SkeletonTheme>
+    );
+};
 
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
     const [buildingListData] = useAtom(buildingData);
-    const [chartLoading, setChartLoading] = useState(false);
 
     const [equpimentIdSelection] = useAtom(selectedEquipment);
     const [totalEquipmentId] = useAtom(totalSelectionEquipmentId);
 
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
     const { download } = useCSVDownload();
-
-    // New Refactor Declarations
-    const isLoadingRef = useRef(false);
-    const [conAPIFlag, setConAPIFlag] = useState('');
-    const [perAPIFlag, setPerAPIFlag] = useState('');
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
     const [allSearchData, setAllSearchData] = useState([]);
@@ -125,35 +84,49 @@ const ExploreByEquipment = () => {
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
-    const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
     const [isFilterFetching, setFetchingFilters] = useState(false);
+    const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
 
     const [seriesData, setSeriesData] = useState([]);
     let entryPoint = '';
     let top = '';
-    const [pageSize, setPageSize] = useState(20);
+
     const [pageNo, setPageNo] = useState(1);
+    const [pageSize, setPageSize] = useState(20);
+
     const [filterData, setFilterData] = useState({});
     const [topConsumption, setTopConsumption] = useState(0);
     const [bottomConsumption, setBottomConsumption] = useState(0);
     const [topPerChange, setTopPerChange] = useState(0);
     const [neutralPerChange, setNeutralPerChange] = useState(0);
     const [bottomPerChange, setBottomPerChange] = useState(0);
+
     const [showEquipmentChart, setShowEquipmentChart] = useState(false);
     const handleChartOpen = () => setShowEquipmentChart(true);
     const handleChartClose = () => setShowEquipmentChart(false);
+
     const [selectedEquipmentId, setSelectedEquipmentId] = useState('');
     const [removeEquipmentId, setRemovedEquipmentId] = useState('');
     const [equipmentListArray, setEquipmentListArray] = useState([]);
     const [allEquipmentData, setAllEquipmenData] = useState([]);
-    const [selectedLocation, setSelectedLocation] = useState([]);
+
+    const [conAPIFlag, setConAPIFlag] = useState('');
+    const [minConValue, set_minConValue] = useState(0);
+    const [maxConValue, set_maxConValue] = useState(0);
+
+    const [perAPIFlag, setPerAPIFlag] = useState('');
+    const [minPerValue, set_minPerValue] = useState(0);
+    const [maxPerValue, set_maxPerValue] = useState(0);
+
     const [selectedEquipType, setSelectedEquipType] = useState([]);
     const [selectedEndUse, setSelectedEndUse] = useState([]);
     const [selectedSpaceType, setSelectedSpaceType] = useState([]);
-    const [minConValue, set_minConValue] = useState(0);
-    const [maxConValue, set_maxConValue] = useState(0);
-    const [minPerValue, set_minPerValue] = useState(0);
-    const [maxPerValue, set_maxPerValue] = useState(0);
+
+    const [selectedTags, setSelectedTags] = useState([]);
+    const [selectedPanels, setSelectedPanels] = useState([]);
+    const [selectedBreakers, setSelectedBreakers] = useState([]);
+    const [selectedNotes, setSelectedNotes] = useState([]);
+
     const [topVal, setTopVal] = useState(0);
     const [bottomVal, setBottomVal] = useState(0);
     const [currentButtonId, setCurrentButtonId] = useState(0);
@@ -166,6 +139,7 @@ const ExploreByEquipment = () => {
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
     const [selectedAllEquipmentId, setSelectedAllEquipmentId] = useState([]);
+
     const metric = [
         { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy Consumption' },
         { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power Consumption' },
@@ -174,131 +148,16 @@ const ExploreByEquipment = () => {
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
-    useEffect(() => {
-        entryPoint = 'entered';
-    }, []);
+
     const handleUnitChange = (value) => {
         let obj = metric.find((record) => record.value === value);
         setSelectedUnit(obj.unit);
     };
+
     const handleConsumptionChange = (value) => {
         let obj = metric.find((record) => record.value === value);
         setSelectedConsumptionLabel(obj.Consumption);
     };
-
-    useEffect(() => {
-        if (bldgId) {
-            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
-            if (bldgObj?.building_id)
-                updateBuildingStore(
-                    bldgObj?.building_id,
-                    bldgObj?.building_name,
-                    bldgObj?.timezone,
-                    bldgObj?.plug_only
-                );
-        }
-        if (entryPoint !== 'entered') {
-            setFiltersValues({
-                selectedFilters: [],
-            });
-            setSeriesData([]);
-            setConAPIFlag('');
-            setPerAPIFlag('');
-            setSelectedIds([]);
-            setSelectedEndUse([]);
-            setSelectedEquipType([]);
-            setSelectedSpaceType([]);
-            setConAPIFlag('');
-            setPerAPIFlag('');
-        }
-    }, [bldgId]);
-
-    const pageListSizes = [
-        {
-            label: '20 Rows',
-            value: '20',
-        },
-        {
-            label: '50 Rows',
-            value: '50',
-        },
-        {
-            label: '100 Rows',
-            value: '100',
-        },
-    ];
-
-    useEffect(() => {
-        top = '';
-        topCon.current = '';
-        if (selectedIds?.length >= 1) {
-            let arr = [];
-            for (let i = 0; i < selectedIds?.length; i++) {
-                arr.push(selectedIds[i]);
-            }
-            setSeriesData([]);
-            setSelectedAllEquipmentId(arr);
-        } else {
-            setSelectedEquipmentId('');
-        }
-    }, [startDate, endDate, selectedConsumption]);
-
-    useEffect(() => {
-        if (equipIdNow) {
-            fetchExploreChartData(equipIdNow);
-        }
-    }, [equipIdNow]);
-
-    const exploreDataFetch = async (bodyVal) => {
-        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
-        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
-        setIsExploreDataLoading(true);
-
-        await fetchExploreEquipmentList(
-            startDate,
-            endDate,
-            timeZone,
-            bldgId,
-            search,
-            ordered_by,
-            sort_by,
-            pageSize,
-            pageNo,
-            minConValue,
-            maxConValue,
-            minPerValue,
-            maxPerValue,
-            selectedLocation,
-            selectedEndUse,
-            selectedEquipType,
-            selectedSpaceType,
-            conAPIFlag,
-            perAPIFlag
-        )
-            .then((res) => {
-                let responseData = res.data;
-                if (responseData.data.length !== 0) {
-                    if (entryPoint === 'entered') {
-                        totalEquipmentId.length = 0;
-                        setSeriesData([]);
-                    }
-                    setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    topCon.current = responseData.data[0].consumption.now;
-                    top = responseData.data[0].consumption.now;
-                }
-                setExploreTableData(responseData.data);
-                setAllEquipmentList(responseData.data);
-                setTotalItems(responseData.total_data);
-                setTotalItemsSearched(responseData.data.length);
-                setAllSearchData(responseData.data);
-                setIsExploreDataLoading(false);
-            })
-            .catch((error) => {
-                setIsExploreDataLoading(false);
-            });
-    };
-
-    let arr = apiRequestBody(startDate, endDate, timeZone);
 
     const currentRow = () => {
         if (selectedEquipmentFilter === 0) {
@@ -332,18 +191,27 @@ const ExploreByEquipment = () => {
         return allEquipmentList.filter(({ id }) => !selectedIds.find((eqId) => eqId === id));
     };
 
-    const fetchAveragePercentage = (con) => {
-        return getAverageValue(con / 1000, bottomConsumption, topCon.current / 1000);
-    };
-
     const renderConsumption = (row) => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {Math.round(row.consumption.now / 1000)} kWh
+                    {`${formatConsumptionValue(Math.round(row?.consumption?.now / 1000))} ${UNITS.KWH}`}
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
-                <TinyBarChart percent={fetchAveragePercentage(row.consumption.now)} />
+                <Progress multi className="custom-progress-bar">
+                    <Progress
+                        bar
+                        value={row?.consumption?.now}
+                        max={row?.total_building_usage}
+                        barClassName="custom-on-hour"
+                    />
+                    <Progress
+                        bar
+                        value={row?.consumption?.off_hours}
+                        max={row?.total_building_usage}
+                        barClassName="custom-off-hour"
+                    />
+                </Progress>
             </>
         );
     };
@@ -375,23 +243,46 @@ const ExploreByEquipment = () => {
         );
     });
 
+    const renderNotes = useCallback((row) => {
+        let renderText = !row?.note || row?.note === '' ? '-' : row?.note;
+        if (renderText?.length > 50) renderText = truncateString(renderText);
+
+        return (
+            <div style={{ maxWidth: '15rem' }}>
+                <Typography.Body size={Typography.Sizes.md}>
+                    {renderText}
+                    {row?.note?.length > 50 && (
+                        <>
+                            <div
+                                className="d-inline mouse-pointer"
+                                id={`notes-badge-${row?.equipment_id}`}>{` ...`}</div>
+                            <UncontrolledTooltip placement="top" target={`notes-badge-${row?.equipment_id}`}>
+                                {row?.note}
+                            </UncontrolledTooltip>
+                        </>
+                    )}
+                </Typography.Body>
+            </div>
+        );
+    });
+
     const renderTags = useCallback((row) => {
         const slicedArr = row?.tags.slice(1);
         return (
-            <div className="tags-row-content">
+            <div className="tag-row-content">
                 <Badge text={<span className="gray-950">{row?.tags[0] ? row?.tags[0] : 'none'}</span>} />
                 {slicedArr?.length > 0 ? (
                     <>
                         <Badge
                             text={
-                                <span className="gray-950" id={`tags-badge-${row?.equipments_id}`}>
+                                <span className="gray-950" id={`tags-badge-${row?.equipment_id}`}>
                                     +{slicedArr.length} more
                                 </span>
                             }
                         />
                         <UncontrolledTooltip
                             placement="top"
-                            target={`tags-badge-${row.equipments_id}`}
+                            target={`tags-badge-${row?.equipment_id}`}
                             className="tags-tooltip">
                             {slicedArr.map((el) => {
                                 return <Badge text={<span className="gray-950">{el}</span>} />;
@@ -422,6 +313,7 @@ const ExploreByEquipment = () => {
             </div>
         );
     };
+
     const handleEquipStateChange = (value, equip) => {
         if (value === 'true') {
             let arr1 = seriesData.filter(function (item) {
@@ -445,315 +337,471 @@ const ExploreByEquipment = () => {
                 : prevState.filter((equipId) => equipId !== equip.equipment_id);
         });
     };
-    const fetchAPI = useCallback(() => {
-        exploreDataFetch();
-    }, [
-        startDate,
-        endDate,
-        search,
-        sortBy,
-        pageSize,
-        pageNo,
-        selectedEquipType,
-        selectedEndUse,
-        selectedSpaceType,
-        conAPIFlag,
-        perAPIFlag,
-    ]);
 
-    useEffect(() => {
-        if (startDate === null) {
-            return;
-        }
-        if (endDate === null) {
-            return;
-        }
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Building View',
+                    path: '/explore-page/by-equipment',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'explore';
+        });
+    };
 
-        fetchAPI();
-    }, [
-        startDate,
-        endDate,
-        search,
-        sortBy,
-        pageSize,
-        pageNo,
-        selectedEquipType,
-        selectedEndUse,
-        selectedSpaceType,
-        conAPIFlag,
-        perAPIFlag,
-    ]);
+    const fetchExploreChartData = async () => {
+        let payload = apiRequestBody(startDate, endDate, timeZone);
+        let params = `?building_id=${bldgId}&consumption=${
+            selectedConsumption === 'rmsCurrentMilliAmps' && device_type === 'active' ? 'mAh' : selectedConsumption
+        }&equipment_id=${equipIdNow}&divisible_by=1000${
+            selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
+        }`;
+        await fetchExploreEquipmentChart(payload, params)
+            .then((res) => {
+                let responseData = res.data;
+                let data = responseData.data;
 
-    useEffect(() => {}, [selectedEquipType, selectedEndUse, selectedSpaceType]);
+                let arr = [];
+                arr = allEquipmentList.filter(function (item) {
+                    return item.equipment_id === equipIdNow;
+                });
+                let sg = '';
+                let legendName = '';
+                sg = arr[0].location.substring(arr[0].location.indexOf('>') + 1);
+                if (sg === '') {
+                    legendName = arr[0].equipment_name;
+                } else {
+                    legendName = arr[0].equipment_name + ' - ' + sg;
+                }
+                let NulledData = [];
+                if (selectedConsumption === 'rmsCurrentMilliAmps') {
+                    NulledData = seriesData;
+                    for (let i = 0; i < data.length; i++) {
+                        let sensorData = [];
+                        data[i].data.map((ele) => {
+                            if (ele.consumption === '') {
+                                sensorData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
+                            } else {
+                                sensorData.push({
+                                    x: new Date(ele.time_stamp).getTime(),
+                                    y: ele.consumption,
+                                });
+                            }
+                        });
+                        let recordToInsert = {
+                            name: `${legendName} - Sensor ${data[i].sensor_name}`,
+                            data: sensorData,
+                            id: arr[0].equipment_id,
+                        };
 
-    useEffect(() => {
-        (async () => {
-            setIsExploreDataLoading(true);
-            setFetchingFilters(true);
-            const filters = await fetchExploreFilter(bldgId, startDate, endDate, timeZone, [], [], [], [], 0, 0, '');
+                        NulledData.push(recordToInsert);
+                    }
 
-            if (filters?.data?.data !== null) {
-                setFilterData(filters.data.data);
-                setTopVal(
-                    Math.round(
-                        filters.data.data.max_change === filters.data.data.min_change
-                            ? filters.data.data.max_change
-                            : filters.data.data.max_change
-                    )
-                );
-                setBottomVal(Math.round(filters.data.data.min_change));
-                setTopConsumption(Math.abs(Math.round(filters?.data?.data?.max_consumption / 1000)));
-                setBottomConsumption(Math.abs(Math.round(filters?.data?.data?.min_consumption / 1000)));
-                setTopPerChange(
-                    Math.round(
-                        filters.data.data.max_change === filters.data.data.min_change
-                            ? filters.data.data.max_change
-                            : filters.data.data.max_change
-                    )
-                );
-                setNeutralPerChange(Math.round(filters.data.data.neutral_change));
-                setBottomPerChange(Math.round(filters.data.data.min_change));
-                set_minConValue(Math.abs(Math.round(filters.data.data.min_consumption / 1000)));
-                set_maxConValue(Math.abs(Math.round(filters.data.data.max_consumption / 1000)));
-                set_minPerValue(Math.round(filters.data.data.min_change));
-                set_maxPerValue(
-                    Math.round(
-                        filters.data.data.max_change === filters.data.data.min_change
-                            ? filters.data.data.max_change
-                            : filters.data.data.max_change
-                    )
-                );
-            } else {
+                    setSeriesData(NulledData);
+                } else {
+                    data.map((ele) => {
+                        if (ele?.consumption === '') {
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
+                        } else {
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
+                        }
+                    });
+                    let recordToInsert = {
+                        name: legendName,
+                        data: NulledData,
+                        id: arr[0].equipment_id,
+                    };
+                    setSeriesData([...seriesData, recordToInsert]);
+                }
+
+                setSelectedEquipmentId('');
+            })
+            .catch((error) => {});
+    };
+
+    const dataarr = [];
+    let ct = 0;
+
+    const fetchExploreAllChartData = async (id) => {
+        const payload = apiRequestBody(startDate, endDate, timeZone);
+        const params = `?building_id=${bldgId}&consumption=${
+            selectedConsumption === 'rmsCurrentMilliAmps' && device_type === 'active' ? 'mAh' : selectedConsumption
+        }&equipment_id=${id}&divisible_by=1000${selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''}`;
+        await fetchExploreEquipmentChart(payload, params)
+            .then((res) => {
+                let responseData = res.data;
+                let data = responseData.data;
+                let arr = [];
+
+                arr = allEquipmentList.filter(function (item) {
+                    return item.equipment_id === id;
+                });
+                let sg = '';
+                let legendName = '';
+                sg = arr[0].location.substring(arr[0].location.indexOf('>') + 1);
+                if (sg === '') {
+                    legendName = arr[0].equipment_name;
+                } else {
+                    legendName = arr[0].equipment_name + ' - ' + sg;
+                }
+                let NulledData = [];
+
+                if (selectedConsumption === 'rmsCurrentMilliAmps') {
+                    ct++;
+                    for (let i = 0; i < data.length; i++) {
+                        let sensorData = [];
+                        data[i].data.map((ele) => {
+                            if (ele.consumption === '') {
+                                sensorData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
+                            } else {
+                                sensorData.push({
+                                    x: new Date(ele.time_stamp).getTime(),
+                                    y: ele.consumption,
+                                });
+                            }
+                        });
+                        let recordToInsert = {
+                            name: `${legendName} - Sensor ${data[i].sensor_name}`,
+                            data: sensorData,
+                            id: arr[0].equipment_id,
+                        };
+
+                        dataarr.push(recordToInsert);
+                    }
+
+                    if (selectedIds.length === ct) {
+                        setSeriesData(dataarr);
+                        ct = 0;
+                    }
+                } else {
+                    data.map((ele) => {
+                        if (ele?.consumption === '') {
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
+                        } else {
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
+                        }
+                    });
+                    let recordToInsert = {
+                        name: legendName,
+                        data: NulledData,
+                        id: arr[0].equipment_id,
+                    };
+                    dataarr.push(recordToInsert);
+                    if (selectedIds.length === dataarr.length) {
+                        setSeriesData(dataarr);
+                    }
+                }
+            })
+            .catch((error) => {});
+    };
+
+    const handleDownloadCsv = async () => {
+        const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
+        const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
+
+        await fetchExploreEquipmentList(startDate, endDate, timeZone, bldgId, ordered_by, sort_by)
+            .then((res) => {
+                const { data } = res?.data;
+                if (data.length !== 0) {
+                    download(
+                        `${bldgName}_Explore_By_Equipment_${new Date().toISOString().split('T')[0]}`,
+                        getExploreByEquipmentTableCSVExport(data, headerProps)
+                    );
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'CSV export completed successfully.';
+                        s.notificationType = 'success';
+                    });
+                }
+            })
+            .catch((error) => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Data failed to export in CSV.';
+                    s.notificationType = 'error';
+                });
+            });
+    };
+
+    const fetchExploreEquipData = async () => {
+        setIsExploreDataLoading(true);
+        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
+        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
+        setAllEquipmentList([]);
+
+        await fetchExploreEquipmentList(
+            startDate,
+            endDate,
+            timeZone,
+            bldgId,
+            ordered_by,
+            sort_by,
+            pageSize,
+            pageNo,
+            search,
+            selectedEquipType,
+            selectedEndUse,
+            selectedSpaceType,
+            selectedTags,
+            selectedPanels,
+            selectedBreakers,
+            selectedNotes,
+            conAPIFlag,
+            minConValue,
+            maxConValue,
+            perAPIFlag,
+            minPerValue,
+            maxPerValue
+        )
+            .then((res) => {
+                const { data, total_data, total_building_usage } = res?.data;
+                if (data) {
+                    if (data.length !== 0) {
+                        if (entryPoint === 'entered') {
+                            totalEquipmentId.length = 0;
+                            setSeriesData([]);
+                        }
+                        setTopEnergyConsumption(data[0]?.consumption?.now);
+                        topCon.current = data[0]?.consumption?.now;
+                        top = data[0]?.consumption?.now;
+
+                        const updatedData = data.map((el) => ({
+                            ...el,
+                            total_building_usage: total_building_usage,
+                        }));
+
+                        setExploreTableData(updatedData);
+                        setAllEquipmentList(updatedData);
+                    }
+                    if (total_data) setTotalItems(total_data);
+                    setTotalItemsSearched(data?.length);
+                    setAllSearchData(data);
+                }
+            })
+            .catch((error) => {})
+            .finally(() => {
+                setIsExploreDataLoading(false);
+            });
+    };
+
+    const fetchFilterData = async () => {
+        setFetchingFilters(true);
+        setFilterData({});
+        setFilterOptions([]);
+
+        await fetchExploreFilter(
+            startDate,
+            endDate,
+            timeZone,
+            bldgId,
+            selectedEquipType,
+            selectedEndUse,
+            selectedSpaceType,
+            selectedTags,
+            selectedPanels,
+            selectedBreakers,
+            selectedNotes,
+            conAPIFlag,
+            minConValue,
+            maxConValue,
+            perAPIFlag,
+            minPerValue,
+            maxPerValue
+        )
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    const { data } = response;
+                    setTopVal(Math.round(data?.max_change === data?.min_change ? data?.max_change : data?.max_change));
+                    setBottomVal(Math.round(data?.min_change));
+                    setTopConsumption(Math.abs(Math.round(data?.max_consumption / 1000)));
+                    setBottomConsumption(Math.abs(Math.round(data?.min_consumption / 1000)));
+                    setTopPerChange(
+                        Math.round(data?.max_change === data?.min_change ? data?.max_change : data?.max_change)
+                    );
+                    setNeutralPerChange(Math.round(data?.neutral_change));
+                    setBottomPerChange(Math.round(data?.min_change));
+                    set_minConValue(Math.abs(Math.round(data?.min_consumption / 1000)));
+                    set_maxConValue(Math.abs(Math.round(data?.max_consumption / 1000)));
+                    set_minPerValue(Math.round(data?.min_change));
+                    set_maxPerValue(
+                        Math.round(data?.max_change === data?.min_change ? data?.max_change : data?.max_change)
+                    );
+                    if (data) setFilterData(data);
+                } else {
+                    setFilterData({});
+                    setFilterOptions([]);
+                    set_minConValue(0);
+                    set_maxConValue(0);
+                    set_minPerValue(0);
+                    set_maxPerValue(0);
+                }
+            })
+            .catch((e) => {
                 setFilterData({});
                 setFilterOptions([]);
                 set_minConValue(0);
                 set_maxConValue(0);
                 set_minPerValue(0);
                 set_maxPerValue(0);
-            }
-
-            setIsExploreDataLoading(false);
-            setFetchingFilters(false);
-        })();
-    }, [startDate, endDate, bldgId]);
-
-    useEffect(() => {
-        if (conAPIFlag !== '') {
-            (async () => {
-                setFetchingFilters(true);
-                const filters = await fetchExploreFilter(
-                    bldgId,
-                    startDate,
-                    endDate,
-                    timeZone,
-                    selectedLocation,
-                    selectedEquipType,
-                    selectedEndUse,
-                    selectedSpaceType,
-                    minConValue,
-                    maxConValue,
-                    conAPIFlag
-                );
-
-                const filterOptionsFetched = [
-                    {
-                        label: 'Energy Consumption',
-                        value: 'consumption',
-                        placeholder: 'All Consumptions',
-                        filterType: FILTER_TYPES.RANGE_SELECTOR,
-                        filterOptions: [minConValue, maxConValue],
-                        componentProps: {
-                            prefix: ' kWh',
-                            title: 'Consumption',
-                            min: bottomConsumption,
-                            max: topConsumption + 1,
-                            range: [minConValue, maxConValue],
-                            withTrendsFilter: false,
-                        },
-                        onClose: async function onClose(options) {
-                            set_minConValue(options[0]);
-                            set_maxConValue(options[1]);
-                            setPageNo(1);
-                            setConAPIFlag(options[0] + options[1]);
-                        },
-                        onDelete: () => {
-                            set_minConValue(bottomConsumption);
-                            set_maxConValue(topConsumption);
-                            setConAPIFlag('');
-                        },
-                    },
-                    {
-                        label: '% Change',
-                        value: 'change',
-                        placeholder: 'All % Change',
-                        filterType: FILTER_TYPES.RANGE_SELECTOR,
-                        filterOptions: [minPerValue, maxPerValue],
-                        componentProps: {
-                            prefix: ' %',
-                            title: '% Change',
-                            min: bottomVal,
-                            max: topVal + 1,
-                            range: [minPerValue, maxPerValue],
-                            withTrendsFilter: true,
-                            currentButtonId: currentButtonId,
-                            handleButtonClick: function handleButtonClick() {
-                                for (
-                                    var _len = arguments.length, args = new Array(_len), _key = 0;
-                                    _key < _len;
-                                    _key++
-                                ) {
-                                    args[_key] = arguments[_key];
-                                    if (args[0] === 0) {
-                                        setIsOpened(true);
-                                        setCurrentButtonId(0);
-                                        set_minPerValue(bottomPerChange);
-                                        set_maxPerValue(topPerChange);
-                                        setBottomVal(bottomPerChange);
-                                        setTopVal(topPerChange);
-                                    }
-                                    if (args[0] === 1) {
-                                        setIsOpened(true);
-                                        setCurrentButtonId(1);
-                                        if (bottomPerChange < 0) {
-                                            setBottomVal(bottomPerChange);
-                                            setTopVal(neutralPerChange);
-                                            set_minPerValue(bottomPerChange);
-                                            set_maxPerValue(neutralPerChange);
-                                        } else if (bottomPerChange >= 0) {
-                                            setBottomVal(neutralPerChange);
-                                            setTopVal(neutralPerChange + 1);
-                                            set_minPerValue(neutralPerChange);
-                                            set_maxPerValue(neutralPerChange);
-                                        }
-                                    }
-                                    if (args[0] === 2) {
-                                        setIsOpened(true);
-                                        setCurrentButtonId(2);
-                                        if (topPerChange > 0) {
-                                            setBottomVal(neutralPerChange);
-                                            setTopVal(topPerChange);
-                                            set_minPerValue(neutralPerChange);
-                                            set_maxPerValue(topPerChange);
-                                        } else if (bottomPerChange >= 0) {
-                                            setBottomVal(neutralPerChange);
-                                            setTopVal(neutralPerChange + 1);
-                                            set_minPerValue(neutralPerChange);
-                                            set_maxPerValue(neutralPerChange);
-                                        }
-                                    }
-                                }
-                            },
-                        },
-                        isOpened: isopened,
-                        onClose: function onClose(options) {
-                            setIsOpened(false);
-                            set_minPerValue(options[0]);
-                            set_maxPerValue(options[1]);
-                            setPageNo(1);
-                            setPerAPIFlag(options[0] + options[1]);
-                        },
-                        onDelete: () => {
-                            set_minPerValue(bottomPerChange);
-                            set_maxPerValue(topPerChange);
-                            setPerAPIFlag('');
-                        },
-                    },
-                    // {
-                    //     label: 'Location',
-                    //     value: 'spaces',
-                    //     placeholder: 'All Locations',
-                    //     filterType: FILTER_TYPES.MULTISELECT,
-                    //     filterOptions: filters.data.data.spaces.map((filterItem) => ({
-                    //         value: filterItem.space_id,
-                    //         label: filterItem.space_name,
-                    //     })),
-                    //     onClose: (options) => {},
-                    //     onDelete: () => {
-                    //         setSelectedLocation([]);
-                    //     },
-                    // },
-                    {
-                        label: 'Equipment Type',
-                        value: 'equipments_type',
-                        placeholder: 'All Equipment Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filters.data.data.equipments_type.map((filterItem) => ({
-                            value: filterItem.equipment_type_id,
-                            label: filterItem.equipment_type_name,
-                        })),
-                        onChange: function onChange(options) {},
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let equipIds = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    equipIds.push(opt[i].value);
-                                }
-                                setPageNo(1);
-                                setSelectedEquipType(equipIds);
-                            }
-                        },
-                        onDelete: (options) => {
-                            setSelectedEquipType([]);
-                        },
-                    },
-                    {
-                        label: 'End Uses',
-                        value: 'end_users',
-                        placeholder: 'All End Uses',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterData.end_users.map((filterItem) => ({
-                            value: filterItem.end_use_id,
-                            label: filterItem.end_use_name,
-                        })),
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let endUseIds = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    endUseIds.push(opt[i].value);
-                                }
-                                setPageNo(1);
-                                setSelectedEndUse(endUseIds);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedEndUse([]);
-                        },
-                    },
-                    {
-                        label: 'Space Type',
-                        value: 'location_types',
-                        placeholder: 'All Space Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filters.data.data.location_types.map((filterItem) => ({
-                            value: filterItem.location_type_id,
-                            label: filterItem.location_types_name,
-                        })),
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let spaceIds = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    spaceIds.push(opt[i].value);
-                                }
-                                setPageNo(1);
-                                setSelectedSpaceType(spaceIds);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedSpaceType([]);
-                        },
-                    },
-                ];
-                setFilterOptions(filterOptionsFetched);
+            })
+            .finally(() => {
                 setFetchingFilters(false);
-            })();
-        }
-    }, [conAPIFlag]);
+            });
+    };
+
+    const headerProps = [
+        {
+            name: 'Name',
+            accessor: 'equipment_name',
+            callbackValue: renderEquipmentName,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Energy Consumption',
+            accessor: 'consumption',
+            callbackValue: renderConsumption,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: '% Change',
+            accessor: 'change',
+            callbackValue: renderPerChange,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Location',
+            accessor: 'location',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Space Type',
+            accessor: 'location_type',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Equipment Type',
+            accessor: 'equipments_type',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'End Use Category',
+            accessor: 'end_user',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Tags',
+            accessor: 'tags',
+            callbackValue: renderTags,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Panel Name',
+            accessor: 'panel',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Breakers',
+            accessor: 'breaker_number',
+            callbackValue: renderBreakers,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Notes',
+            accessor: 'note',
+            callbackValue: renderNotes,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+    ];
 
     useEffect(() => {
-        if (perAPIFlag !== '') {
+        entryPoint = 'entered';
+        updateBreadcrumbStore();
+        localStorage.removeItem('explorer');
+    }, []);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pageNo, pageSize]);
+
+    useEffect(() => {
+        if (bldgId) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id)
+                updateBuildingStore(
+                    bldgObj?.building_id,
+                    bldgObj?.building_name,
+                    bldgObj?.timezone,
+                    bldgObj?.plug_only
+                );
+        }
+        if (entryPoint !== 'entered') {
+            setFiltersValues({
+                selectedFilters: [],
+            });
+            setSeriesData([]);
+            setConAPIFlag('');
+            setPerAPIFlag('');
+            setSelectedIds([]);
+            setSelectedEndUse([]);
+            setSelectedEquipType([]);
+            setSelectedSpaceType([]);
+            setSelectedTags([]);
+            setSelectedPanels([]);
+            setSelectedBreakers([]);
+            setSelectedNotes([]);
+        }
+    }, [bldgId]);
+
+    useEffect(() => {
+        if (!bldgId || startDate === null || endDate === null) return;
+
+        fetchExploreEquipData();
+    }, [
+        startDate,
+        endDate,
+        bldgId,
+        search,
+        sortBy,
+        pageSize,
+        pageNo,
+        selectedEquipType,
+        selectedEndUse,
+        selectedSpaceType,
+        selectedTags,
+        selectedPanels,
+        selectedBreakers,
+        selectedNotes,
+        conAPIFlag,
+        perAPIFlag,
+    ]);
+
+    useEffect(() => {
+        if (!bldgId || startDate === null || endDate === null) return;
+
+        fetchFilterData();
+    }, [
+        startDate,
+        endDate,
+        bldgId,
+        selectedEquipType,
+        selectedEndUse,
+        selectedSpaceType,
+        selectedTags,
+        selectedPanels,
+        selectedBreakers,
+        selectedNotes,
+        conAPIFlag,
+        perAPIFlag,
+    ]);
+
+    useEffect(() => {
+        if (!isEmptyObject(filterData)) {
             const filterOptionsFetched = [
                 {
                     label: 'Energy Consumption',
@@ -853,28 +901,14 @@ const ExploreByEquipment = () => {
                         setPerAPIFlag('');
                     },
                 },
-                // {
-                //     label: 'Location',
-                //     value: 'spaces',
-                //     placeholder: 'All Locations',
-                //     filterType: FILTER_TYPES.MULTISELECT,
-                //     filterOptions: filterData.spaces.map((filterItem) => ({
-                //         value: filterItem.space_id,
-                //         label: filterItem.space_name,
-                //     })),
-                //     onClose: (options) => {},
-                //     onDelete: () => {
-                //         setSelectedLocation([]);
-                //     },
-                // },
                 {
                     label: 'Equipment Type',
                     value: 'equipments_type',
                     placeholder: 'All Equipment Types',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterData.equipments_type.map((filterItem) => ({
-                        value: filterItem.equipment_type_id,
-                        label: filterItem.equipment_type_name,
+                    filterOptions: filterData?.equipments_type.map((filterItem) => ({
+                        value: filterItem?.equipment_type_id,
+                        label: filterItem?.equipment_type_name,
                     })),
                     onChange: function onChange(options) {},
                     onClose: (options) => {
@@ -897,9 +931,9 @@ const ExploreByEquipment = () => {
                     value: 'end_users',
                     placeholder: 'All End Uses',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterData.end_users.map((filterItem) => ({
-                        value: filterItem.end_use_id,
-                        label: filterItem.end_use_name,
+                    filterOptions: filterData?.end_users.map((filterItem) => ({
+                        value: filterItem?.end_use_id,
+                        label: filterItem?.end_use_name,
                     })),
                     onClose: (options) => {
                         let opt = options;
@@ -921,9 +955,9 @@ const ExploreByEquipment = () => {
                     value: 'location_types',
                     placeholder: 'All Space Types',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterData.location_types.map((filterItem) => ({
-                        value: filterItem.location_type_id,
-                        label: filterItem.location_types_name,
+                    filterOptions: filterData?.location_types.map((filterItem) => ({
+                        value: filterItem?.location_type_id,
+                        label: filterItem?.location_types_name,
                     })),
                     onClose: (options) => {
                         let opt = options;
@@ -940,307 +974,101 @@ const ExploreByEquipment = () => {
                         setSelectedSpaceType([]);
                     },
                 },
+                {
+                    label: 'Tags',
+                    value: 'tags',
+                    placeholder: 'All tags',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterData?.tags.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let tags = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                tags.push(opt[i].value);
+                            }
+                            setSelectedTags(tags);
+                        }
+                    },
+                    onDelete: () => {
+                        setSelectedTags([]);
+                    },
+                },
+                {
+                    label: 'Panel Name',
+                    value: 'panel',
+                    placeholder: 'All Panels',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterData?.panel.map((filterItem) => ({
+                        value: filterItem?.panel_id,
+                        label: filterItem?.panel_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let panels = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                panels.push(opt[i].value);
+                            }
+                            setSelectedPanels(panels);
+                        }
+                    },
+                    onDelete: () => {
+                        setSelectedPanels([]);
+                    },
+                },
+                {
+                    label: 'Breakers',
+                    value: 'breaker_number',
+                    placeholder: 'All Breakers',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterData?.breaker_number.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let breakers_count = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                breakers_count.push(opt[i].value);
+                            }
+                            setSelectedBreakers(breakers_count);
+                        }
+                    },
+                    onDelete: () => {
+                        setSelectedBreakers([]);
+                    },
+                },
             ];
             setFilterOptions(filterOptionsFetched);
         }
-    }, [perAPIFlag]);
+    }, [filterData]);
+
     useEffect(() => {
-        if ((minConValue !== maxConValue && maxConValue !== 0) || (minPerValue !== maxPerValue && maxPerValue !== 0)) {
-            if (Object.keys(filterData).length !== 0) {
-                const filterOptionsFetched = [
-                    {
-                        label: 'Energy Consumption',
-                        value: 'consumption',
-                        placeholder: 'All Consumptions',
-                        filterType: FILTER_TYPES.RANGE_SELECTOR,
-                        filterOptions: [minConValue, maxConValue],
-                        componentProps: {
-                            prefix: ' kWh',
-                            title: 'Consumption',
-                            min: bottomConsumption,
-                            max: topConsumption + 1,
-                            range: [minConValue, maxConValue],
-                            withTrendsFilter: false,
-                        },
-                        onClose: function onClose(options) {
-                            set_minConValue(options[0]);
-                            set_maxConValue(options[1]);
-                            setPageNo(1);
-                            setConAPIFlag(options[0] + options[1]);
-                        },
-                        onDelete: () => {
-                            set_minConValue(bottomConsumption);
-                            set_maxConValue(topConsumption);
-                            setConAPIFlag('');
-                        },
-                    },
-                    {
-                        label: '% Change',
-                        value: 'change',
-                        placeholder: 'All % Change',
-                        filterType: FILTER_TYPES.RANGE_SELECTOR,
-                        filterOptions: [minPerValue, maxPerValue],
-                        componentProps: {
-                            prefix: ' %',
-                            title: '% Change',
-                            min: bottomVal,
-                            max: topVal + 1,
-                            range: [minPerValue, maxPerValue],
-                            withTrendsFilter: true,
-                            currentButtonId: currentButtonId,
-                            handleButtonClick: function handleButtonClick() {
-                                for (
-                                    var _len = arguments.length, args = new Array(_len), _key = 0;
-                                    _key < _len;
-                                    _key++
-                                ) {
-                                    args[_key] = arguments[_key];
-                                    if (args[0] === 0) {
-                                        setIsOpened(true);
-                                        setCurrentButtonId(0);
-                                        set_minPerValue(bottomPerChange);
-                                        set_maxPerValue(topPerChange);
-                                        setBottomVal(bottomPerChange);
-                                        setTopVal(topPerChange);
-                                    }
-                                    if (args[0] === 1) {
-                                        setIsOpened(true);
-                                        setCurrentButtonId(1);
-                                        if (bottomPerChange < 0) {
-                                            setBottomVal(bottomPerChange);
-                                            setTopVal(neutralPerChange);
-                                            set_minPerValue(bottomPerChange);
-                                            set_maxPerValue(neutralPerChange);
-                                        } else if (bottomPerChange >= 0) {
-                                            setBottomVal(neutralPerChange);
-                                            setTopVal(neutralPerChange + 1);
-                                            set_minPerValue(neutralPerChange);
-                                            set_maxPerValue(neutralPerChange);
-                                        }
-                                    }
-                                    if (args[0] === 2) {
-                                        setIsOpened(true);
-                                        setCurrentButtonId(2);
-                                        if (topPerChange > 0) {
-                                            setBottomVal(neutralPerChange);
-                                            setTopVal(topPerChange);
-                                            set_minPerValue(neutralPerChange);
-                                            set_maxPerValue(topPerChange);
-                                        } else if (bottomPerChange >= 0) {
-                                            setBottomVal(neutralPerChange);
-                                            setTopVal(neutralPerChange + 1);
-                                            set_minPerValue(neutralPerChange);
-                                            set_maxPerValue(neutralPerChange);
-                                        }
-                                    }
-                                }
-                            },
-                        },
-                        isOpened: isopened,
-                        onClose: function onClose(options) {
-                            setIsOpened(false);
-                            set_minPerValue(options[0]);
-                            set_maxPerValue(options[1]);
-                            setPageNo(1);
-                            setPerAPIFlag(options[0] + options[1]);
-                        },
-                        onDelete: () => {
-                            set_minPerValue(bottomPerChange);
-                            set_maxPerValue(topPerChange);
-                            setPerAPIFlag('');
-                        },
-                    },
-                    // {
-                    //     label: 'Location',
-                    //     value: 'spaces',
-                    //     placeholder: 'All Locations',
-                    //     filterType: FILTER_TYPES.MULTISELECT,
-                    //     filterOptions: filterData.spaces.map((filterItem) => ({
-                    //         value: filterItem.space_id,
-                    //         label: filterItem.space_name,
-                    //     })),
-                    //     onClose: (options) => {},
-                    //     onDelete: () => {
-                    //         setSelectedLocation([]);
-                    //     },
-                    // },
-                    {
-                        label: 'Equipment Type',
-                        value: 'equipments_type',
-                        placeholder: 'All Equipment Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterData.equipments_type.map((filterItem) => ({
-                            value: filterItem.equipment_type_id,
-                            label: filterItem.equipment_type_name,
-                        })),
-                        onChange: function onChange(options) {},
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let equipIds = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    equipIds.push(opt[i].value);
-                                }
-                                setPageNo(1);
-                                setSelectedEquipType(equipIds);
-                            }
-                        },
-                        onDelete: (options) => {
-                            setSelectedEquipType([]);
-                        },
-                    },
-                    {
-                        label: 'End Uses',
-                        value: 'end_users',
-                        placeholder: 'All End Uses',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterData.end_users.map((filterItem) => ({
-                            value: filterItem.end_use_id,
-                            label: filterItem.end_use_name,
-                        })),
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let endUseIds = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    endUseIds.push(opt[i].value);
-                                }
-                                setPageNo(1);
-                                setSelectedEndUse(endUseIds);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedEndUse([]);
-                        },
-                    },
-                    {
-                        label: 'Space Type',
-                        value: 'location_types',
-                        placeholder: 'All Space Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterData.location_types.map((filterItem) => ({
-                            value: filterItem.location_type_id,
-                            label: filterItem.location_types_name,
-                        })),
-                        onClose: (options) => {
-                            let opt = options;
-                            if (opt.length !== 0) {
-                                let spaceIds = [];
-                                for (let i = 0; i < opt.length; i++) {
-                                    spaceIds.push(opt[i].value);
-                                }
-                                setPageNo(1);
-                                setSelectedSpaceType(spaceIds);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedSpaceType([]);
-                        },
-                    },
-                ];
-                setFilterOptions(filterOptionsFetched);
+        top = '';
+        topCon.current = '';
+        if (selectedIds?.length >= 1) {
+            let arr = [];
+            for (let i = 0; i < selectedIds?.length; i++) {
+                arr.push(selectedIds[i]);
             }
+            setSeriesData([]);
+            setSelectedAllEquipmentId(arr);
+        } else {
+            setSelectedEquipmentId('');
         }
-    }, [minConValue, maxConValue, minPerValue, maxPerValue]);
+    }, [startDate, endDate, selectedConsumption]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Building View',
-                        path: '/explore-page/by-equipment',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'explore';
-            });
-        };
-        updateBreadcrumbStore();
-        localStorage.removeItem('explorer');
-    }, []);
-
-    const fetchExploreChartData = async () => {
-        setChartLoading(true);
-        let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?building_id=${bldgId}&consumption=${
-            selectedConsumption === 'rmsCurrentMilliAmps' && device_type === 'active' ? 'mAh' : selectedConsumption
-        }&equipment_id=${equipIdNow}&divisible_by=1000${
-            selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
-        }`;
-        await fetchExploreEquipmentChart(payload, params)
-            .then((res) => {
-                let responseData = res.data;
-                let data = responseData.data;
-
-                let arr = [];
-                arr = allEquipmentList.filter(function (item) {
-                    return item.equipment_id === equipIdNow;
-                });
-                let sg = '';
-                let legendName = '';
-                sg = arr[0].location.substring(arr[0].location.indexOf('>') + 1);
-                if (sg === '') {
-                    legendName = arr[0].equipment_name;
-                } else {
-                    legendName = arr[0].equipment_name + ' - ' + sg;
-                }
-                let NulledData = [];
-                if (selectedConsumption === 'rmsCurrentMilliAmps') {
-                    NulledData = seriesData;
-                    for (let i = 0; i < data.length; i++) {
-                        let sensorData = [];
-                        data[i].data.map((ele) => {
-                            if (ele.consumption === '') {
-                                sensorData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
-                            } else {
-                                sensorData.push({
-                                    x: new Date(ele.time_stamp).getTime(),
-                                    y: ele.consumption,
-                                });
-                            }
-                        });
-                        let recordToInsert = {
-                            name: `${legendName} - Sensor ${data[i].sensor_name}`,
-                            data: sensorData,
-                            id: arr[0].equipment_id,
-                        };
-
-                        NulledData.push(recordToInsert);
-                    }
-
-                    setSeriesData(NulledData);
-                } else {
-                    data.map((ele) => {
-                        if (ele?.consumption === '') {
-                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
-                        } else {
-                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
-                        }
-                    });
-                    let recordToInsert = {
-                        name: legendName,
-                        data: NulledData,
-                        id: arr[0].equipment_id,
-                    };
-                    setSeriesData([...seriesData, recordToInsert]);
-                }
-
-                setSelectedEquipmentId('');
-                setChartLoading(false);
-            })
-            .catch((error) => {});
-    };
+        if (equipIdNow) fetchExploreChartData(equipIdNow);
+    }, [equipIdNow]);
 
     useEffect(() => {
-        if (selectedEquipmentId === '') {
-            return;
-        }
-
-        fetchExploreChartData();
+        if (selectedEquipmentId !== '') fetchExploreChartData();
     }, [selectedEquipmentId, equpimentIdSelection]);
 
     useEffect(() => {
@@ -1254,9 +1082,7 @@ const ExploreByEquipment = () => {
     }, [selectedAllEquipmentId]);
 
     useEffect(() => {
-        if (removeEquipmentId === '') {
-            return;
-        }
+        if (removeEquipmentId === '') return;
         let arr1 = [];
         arr1 = seriesData.filter(function (item) {
             return item.id !== removeEquipmentId;
@@ -1264,86 +1090,8 @@ const ExploreByEquipment = () => {
         setSeriesData(arr1);
     }, [removeEquipmentId]);
 
-    const dataarr = [];
-    let ct = 0;
-
-    const fetchExploreAllChartData = async (id) => {
-        let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?building_id=${bldgId}&consumption=${
-            selectedConsumption === 'rmsCurrentMilliAmps' && device_type === 'active' ? 'mAh' : selectedConsumption
-        }&equipment_id=${id}&divisible_by=1000${selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''}`;
-        await fetchExploreEquipmentChart(payload, params)
-            .then((res) => {
-                let responseData = res.data;
-                let data = responseData.data;
-                let arr = [];
-
-                arr = allEquipmentList.filter(function (item) {
-                    return item.equipment_id === id;
-                });
-                let sg = '';
-                let legendName = '';
-                sg = arr[0].location.substring(arr[0].location.indexOf('>') + 1);
-                if (sg === '') {
-                    legendName = arr[0].equipment_name;
-                } else {
-                    legendName = arr[0].equipment_name + ' - ' + sg;
-                }
-                let NulledData = [];
-
-                if (selectedConsumption === 'rmsCurrentMilliAmps') {
-                    ct++;
-                    for (let i = 0; i < data.length; i++) {
-                        let sensorData = [];
-                        data[i].data.map((ele) => {
-                            if (ele.consumption === '') {
-                                sensorData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
-                            } else {
-                                sensorData.push({
-                                    x: new Date(ele.time_stamp).getTime(),
-                                    y: ele.consumption,
-                                });
-                            }
-                        });
-                        let recordToInsert = {
-                            name: `${legendName} - Sensor ${data[i].sensor_name}`,
-                            data: sensorData,
-                            id: arr[0].equipment_id,
-                        };
-
-                        dataarr.push(recordToInsert);
-                    }
-
-                    if (selectedIds.length === ct) {
-                        setSeriesData(dataarr);
-                        ct = 0;
-                    }
-                } else {
-                    data.map((ele) => {
-                        if (ele?.consumption === '') {
-                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
-                        } else {
-                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
-                        }
-                    });
-                    let recordToInsert = {
-                        name: legendName,
-                        data: NulledData,
-                        id: arr[0].equipment_id,
-                    };
-                    dataarr.push(recordToInsert);
-                    if (selectedIds.length === dataarr.length) {
-                        setSeriesData(dataarr);
-                    }
-                }
-            })
-            .catch((error) => {});
-    };
-
     useEffect(() => {
-        if (equipmentListArray.length === 0) {
-            return;
-        }
+        if (equipmentListArray.length === 0) return;
         for (var i = 0; i < equipmentListArray.length; i++) {
             let arr1 = [];
             arr1 = seriesData.filter(function (item) {
@@ -1356,115 +1104,9 @@ const ExploreByEquipment = () => {
     }, [equipmentListArray]);
 
     useEffect(() => {
-        if (allEquipmentData.length === 0) {
-            return;
-        }
-        if (allEquipmentData.length === exploreTableData.length) {
-            setSeriesData(allEquipmentData);
-        }
+        if (allEquipmentData.length === 0) return;
+        if (allEquipmentData.length === exploreTableData.length) setSeriesData(allEquipmentData);
     }, [allEquipmentData]);
-
-    const handleDownloadCsv = async () => {
-        const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
-        const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
-
-        await fetchExploreEquipmentList(
-            startDate,
-            endDate,
-            timeZone,
-            bldgId,
-            '',
-            ordered_by,
-            sort_by,
-            0,
-            0,
-            minConValue,
-            maxConValue,
-            minPerValue,
-            maxPerValue,
-            [],
-            [],
-            [],
-            [],
-            '',
-            ''
-        )
-            .then((res) => {
-                let responseData = res.data;
-                download(
-                    `${bldgName}_Explore_By_Equipment_${new Date().toISOString().split('T')[0]}`,
-                    getExploreByEquipmentTableCSVExport(responseData.data, headerProps)
-                );
-            })
-            .catch((error) => {});
-    };
-
-    const headerProps = [
-        {
-            name: 'Name',
-            accessor: 'equipment_name',
-            callbackValue: renderEquipmentName,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Energy Consumption',
-            accessor: 'consumption',
-            callbackValue: renderConsumption,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: '% Change',
-            accessor: 'change',
-            callbackValue: renderPerChange,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Location',
-            accessor: 'location',
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Space Type',
-            accessor: 'location_type',
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Equipment Type',
-            accessor: 'equipments_type',
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'End Use Category',
-            accessor: 'end_user',
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Tags',
-            accessor: 'tags',
-            callbackValue: renderTags,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Notes',
-            accessor: 'note',
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Panel Name',
-            accessor: 'panel',
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Breakers',
-            accessor: 'breaker_number',
-            callbackValue: renderBreakers,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-    ];
-
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [pageNo, pageSize]);
 
     return (
         <>
@@ -1494,7 +1136,6 @@ const ExploreByEquipment = () => {
                         tooltipUnit={selectedUnit}
                         tooltipLabel={selectedConsumptionLabel}
                         data={seriesData}
-                        // dateRange={fetchDateRange(startDate, endDate)}
                         chartProps={{
                             navigator: {
                                 outlineWidth: 0,
@@ -1545,7 +1186,7 @@ const ExploreByEquipment = () => {
                     <Col lg={12}>
                         <DataTableWidget
                             isLoading={isExploreDataLoading}
-                            isLoadingComponent={<SkeletonLoading />}
+                            isLoadingComponent={<SkeletonLoading noofRows={headerProps.length + 1} />}
                             isFilterLoading={isFilterFetching}
                             id="explore-by-equipment"
                             onSearch={setSearch}
@@ -1556,6 +1197,7 @@ const ExploreByEquipment = () => {
                             filterOptions={filterOptions}
                             onDownload={() => handleDownloadCsv()}
                             headers={headerProps}
+                            customExcludedHeaders={['Panel Name', 'Breakers', 'Notes']}
                             customCheckAll={() => (
                                 <Checkbox
                                     label=""
@@ -1606,7 +1248,7 @@ const ExploreByEquipment = () => {
                 showEquipmentChart={showEquipmentChart}
                 handleChartClose={handleChartClose}
                 equipmentFilter={equipmentFilter}
-                fetchEquipmentData={exploreDataFetch}
+                fetchEquipmentData={fetchExploreEquipData}
                 selectedTab={selectedModalTab}
                 setSelectedTab={setSelectedModalTab}
                 activePage="explore"

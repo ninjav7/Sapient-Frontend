@@ -53,6 +53,8 @@ export const initialFilterState = {
 };
 
 const DataTableWidget = (props) => {
+    const { customExcludedHeaders = [] } = props;
+
     const [excludedHeaderLocalStorage, setExcludedHeadersLocalStorage] = useLocalStorage(
         `${LOCAL_STORAGE.EXCLUDED_HEADERS}${props.id && '-' + props.id}`,
         []
@@ -70,8 +72,7 @@ const DataTableWidget = (props) => {
     });
 
     const [headers, setHeaders] = useState(orderedHeaders || props.headers);
-    const [excludedHeaders, setExcludedHeaders] = useState(excludedHeaderLocalStorage || []);
-
+    const [excludedHeaders, setExcludedHeaders] = useState([...excludedHeaderLocalStorage, ...customExcludedHeaders]);
     const [rows, setRows] = useState(props.rows);
     const [selectedRows, setSelectedRows] = useState([]);
     const [searchedRows, setSearchedRows] = useState([]);
@@ -131,6 +132,13 @@ const DataTableWidget = (props) => {
 
     const filteredHeaders = headers.filter(({ name }) => !excludedHeaders.includes(name));
 
+    // Added for exluding Filters if column is hidden
+    let filteredOptions = [];
+    if (props.filterOptions) {
+        const uniqueExcludedHeadersList = Array.from(new Set(excludedHeaders));
+        filteredOptions = props.filterOptions.filter(({ label }) => !uniqueExcludedHeadersList.includes(label));
+    }
+
     const debouncedSearch = useDebounce(search, 500);
 
     useEffect(() => {
@@ -149,7 +157,8 @@ const DataTableWidget = (props) => {
     }, [headers]);
 
     useEffect(() => {
-        setExcludedHeadersLocalStorage(excludedHeaders);
+        const uniqueExcludedHeaders = Array.from(new Set(excludedHeaders));
+        setExcludedHeadersLocalStorage(uniqueExcludedHeaders);
     }, [excludedHeaders]);
 
     useEffect(() => {
@@ -253,7 +262,7 @@ const DataTableWidget = (props) => {
                         selectedFiltersValues={selectedFiltersValues}
                         onChangeFilterValue={setSelectedFiltersValues}
                         onChange={setSelectedFilters}
-                        filterOptions={props.filterOptions}
+                        filterOptions={filteredOptions.length !== 0 ? filteredOptions : props.filterOptions}
                         selectedFilters={selectedFilters}
                         onDeleteFilter={handleDeleteFilter}
                         isFilterLoading={props?.isFilterLoading}
@@ -447,6 +456,7 @@ DataTableWidget.propTypes = {
             onSort: PropTypes.func,
         })
     ),
+    customExcludedHeaders: PropTypes.array,
     onCheckboxRow: PropTypes.func,
     onCheckAll: PropTypes.func,
     id: PropTypes.string,
