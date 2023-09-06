@@ -6,6 +6,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { Progress } from 'reactstrap';
 import { useParams } from 'react-router-dom';
 import EquipChartModal from '../chartModal/EquipChartModal';
 import Header from '../../components/Header';
@@ -15,25 +16,26 @@ import { useAtom } from 'jotai';
 import {
     apiRequestBody,
     dateTimeFormatForHighChart,
+    formatConsumptionValue,
     formatXaxisForHighCharts,
     pageListSizes,
 } from '../../helpers/helpers';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 import Brick from '../../sharedComponents/brick';
-import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 import Typography from '../../sharedComponents/typography';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
-import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import Select from '../../sharedComponents/form/select';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { UserStore } from '../../store/UserStore';
 import { Badge } from '../../sharedComponents/badge';
 import { isEmptyObject, truncateString } from './utils';
+import { UNITS } from '../../constants/units';
 import './style.css';
+import './styles.scss';
 
 const SkeletonLoading = ({ noofRows }) => {
     const rowArray = Array.from({ length: noofRows });
@@ -189,18 +191,27 @@ const ExploreByEquipment = () => {
         return allEquipmentList.filter(({ id }) => !selectedIds.find((eqId) => eqId === id));
     };
 
-    const fetchAveragePercentage = (con) => {
-        return getAverageValue(con / 1000, bottomConsumption, topCon.current / 1000);
-    };
-
     const renderConsumption = (row) => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {Math.round(row.consumption.now / 1000)} kWh
+                    {`${formatConsumptionValue(Math.round(row?.consumption?.now / 1000))} ${UNITS.KWH}`}
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
-                <TinyBarChart percent={fetchAveragePercentage(row.consumption.now)} />
+                <Progress multi className="custom-progress-bar">
+                    <Progress
+                        bar
+                        value={row?.consumption?.now}
+                        max={row?.total_building_usage}
+                        barClassName="custom-on-hour"
+                    />
+                    <Progress
+                        bar
+                        value={row?.consumption?.off_hours}
+                        max={row?.total_building_usage}
+                        barClassName="custom-off-hour"
+                    />
+                </Progress>
             </>
         );
     };
@@ -234,13 +245,13 @@ const ExploreByEquipment = () => {
 
     const renderNotes = useCallback((row) => {
         let renderText = !row?.note || row?.note === '' ? '-' : row?.note;
-        if (renderText?.length > 60) renderText = truncateString(renderText);
+        if (renderText?.length > 50) renderText = truncateString(renderText);
 
         return (
-            <div style={{ width: '15rem' }}>
+            <div style={{ maxWidth: '15rem' }}>
                 <Typography.Body size={Typography.Sizes.md}>
                     {renderText}
-                    {row?.note?.length > 60 && (
+                    {row?.note?.length > 50 && (
                         <>
                             <div
                                 className="d-inline mouse-pointer"
@@ -548,7 +559,7 @@ const ExploreByEquipment = () => {
             maxPerValue
         )
             .then((res) => {
-                const { data, total_data } = res?.data;
+                const { data, total_data, total_building_usage } = res?.data;
                 if (data) {
                     if (data.length !== 0) {
                         if (entryPoint === 'entered') {
@@ -558,11 +569,17 @@ const ExploreByEquipment = () => {
                         setTopEnergyConsumption(data[0]?.consumption?.now);
                         topCon.current = data[0]?.consumption?.now;
                         top = data[0]?.consumption?.now;
+
+                        const updatedData = data.map((el) => ({
+                            ...el,
+                            total_building_usage: total_building_usage,
+                        }));
+
+                        setExploreTableData(updatedData);
+                        setAllEquipmentList(updatedData);
                     }
-                    setExploreTableData(data);
-                    setAllEquipmentList(data);
                     if (total_data) setTotalItems(total_data);
-                    setTotalItemsSearched(data.length);
+                    setTotalItemsSearched(data?.length);
                     setAllSearchData(data);
                 }
             })

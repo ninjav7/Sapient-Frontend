@@ -3,8 +3,8 @@ export const isEmptyObject = (obj) => {
 };
 
 export const truncateString = (inputString) => {
-    if (inputString.length > 60) {
-        return inputString.substring(0, 60);
+    if (inputString.length > 50) {
+        return inputString.substring(0, 50);
     } else {
         return inputString;
     }
