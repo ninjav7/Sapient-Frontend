@@ -100,7 +100,7 @@ const Control = () => {
         let currentPath = location.pathname;
         let pathName = '';
 
-        if (currentPath.includes('/control/plug-rules')) {
+        if (currentPath.includes('/control/plug-rules') || currentPath.includes('/carbon/portfolio/overview')) {
             bldgId === 'portfolio' ? (pathName = accountRoutes[0]) : (pathName = `${configRoutes[0]}/${bldgId}`);
         } else {
             routesForAccountSettings.includes(currentPath) || currentPath.includes(accountChildRoutes[0])
