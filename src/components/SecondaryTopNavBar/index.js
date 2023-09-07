@@ -66,7 +66,7 @@ const SecondaryTopNavBar = () => {
             redirectToEndpoint(`/explore-page/by-buildings`);
             return;
         }
-        if(path.includes('/carbon')){
+        if (path.includes('/carbon')) {
             redirectToEndpoint(`/carbon/portfolio/overview`);
         }
 
@@ -128,7 +128,7 @@ const SecondaryTopNavBar = () => {
             redirectToEndpoint(`${pathName}/${record?.value}`);
             return;
         }
-        if(path.includes('/carbon')){
+        if (path.includes('/carbon')) {
             redirectToEndpoint(`/carbon/building/overview/${record?.value}`);
         }
 
