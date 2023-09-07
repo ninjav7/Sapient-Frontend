@@ -77,7 +77,7 @@ export function fetchExploreEquipmentList(
     if (selectedTags && selectedTags.length !== 0) payload['tags'] = selectedTags;
     if (selectedPanels && selectedPanels.length !== 0) payload['panel'] = selectedPanels;
     if (selectedBreakers && selectedBreakers.length !== 0) payload['breaker_number'] = selectedBreakers;
-    if (selectedNotes && selectedNotes.length !== 0) payload['notes'] = selectedNotes;
+    if (selectedNotes && selectedNotes.length === 1) payload['has_note'] = selectedNotes[0];
 
     return axiosInstance.post(`${getExploreEquipmentList}${params}`, payload).then((res) => {
         return res;
@@ -135,7 +135,7 @@ export function fetchExploreFilter(
     if (selectedTags && selectedTags.length !== 0) payload['tags'] = selectedTags;
     if (selectedPanels && selectedPanels.length !== 0) payload['panel'] = selectedPanels;
     if (selectedBreakers && selectedBreakers.length !== 0) payload['breaker_number'] = selectedBreakers;
-    if (selectedNotes && selectedNotes.length !== 0) payload['notes'] = selectedNotes;
+    if (selectedNotes && selectedNotes.length === 1) payload['has_note'] = selectedNotes[0];
 
     return axiosInstance.post(`${getExploreFilter}${params}`, payload).then((res) => {
         return res;
