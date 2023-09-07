@@ -275,14 +275,17 @@ const NavLinks = () => {
 
     useEffect(() => {
         if (userPermission?.user_role !== 'admin') {
+            if (!userPermission?.permissions?.permissions?.explore_general_permission?.view) {
+                setuserPermissionBuildingExplore('Explore');
+            }
             if (!userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
                 setuserPermisionBuildingEnergy('Energy');
             }
+            if (!userPermission?.permissions?.permissions?.control_control_permission?.view) {
+                setuserPermisionBuildingControl('Control');
+            }
             if (!userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
                 setuserPermisionBuildingCarbon('Carbon');
-            }
-            if (!userPermission?.permissions?.permissions?.explore_general_permission?.view) {
-                setuserPermissionBuildingExplore('Explore');
             }
             if (userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
                 setuserPermisionBuildingEnergy('');
@@ -312,7 +315,8 @@ const NavLinks = () => {
                     (item) =>
                         item?.name !== userPermissionBuildingExplore &&
                         item?.name !== userPermisionBuildingEnergy &&
-                        item?.name !== userPermisionBuildingControl
+                        item?.name !== userPermisionBuildingControl &&
+                        item?.name !== userPermisionBuildingCarbon
                 )
                 .map((item, index) => {
                     if (!item.visibility) return;
