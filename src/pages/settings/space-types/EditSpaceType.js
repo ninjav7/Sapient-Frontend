@@ -42,7 +42,7 @@ const EditSpaceType = ({
         setUpdating(true);
 
         const payload = { name: spaceTypeData?.name };
-        const params = `?space_id=${spaceTypeData?.id}`;
+        const params = `/${spaceTypeData?.id}`;
 
         if (spaceTypeData?.name.trim() !== selectedSpaceType?.name.trim()) {
             payload.name = spaceTypeData?.name.trim();
