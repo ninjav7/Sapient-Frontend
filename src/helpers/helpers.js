@@ -272,7 +272,7 @@ export const formatXaxisForHighCharts = (daysCount, dateFormat, timeFormat, char
 
     // >6 Months
     else if (daysCount >= 182) {
-        return chartType === 'energy' ? '{value:%b}' : "{value:%e %b '%y}";
+        return chartType === 'energy' ? "{value:%b '%y}" : "{value:%e %b '%y}";
     }
 
     // Default if not any
