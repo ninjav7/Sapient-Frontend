@@ -1043,6 +1043,29 @@ const ExploreByEquipment = () => {
                         setSelectedBreakers([]);
                     },
                 },
+                {
+                    label: 'Notes',
+                    value: 'notes',
+                    placeholder: 'All Notes',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterData?.notes.map((filterItem) => ({
+                        value: filterItem?.value,
+                        label: filterItem?.label,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let notes = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                notes.push(opt[i].value);
+                            }
+                            setSelectedNotes(notes);
+                        }
+                    },
+                    onDelete: () => {
+                        setSelectedNotes([]);
+                    },
+                },
             ];
             setFilterOptions(filterOptionsFetched);
         }
