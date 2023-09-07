@@ -206,7 +206,7 @@ export const xaxisFilters = (daysCount, timezone) => {
     }
 };
 
-export const formatXaxisForHighCharts = (daysCount, dateFormat, timeFormat) => {
+export const formatXaxisForHighCharts = (daysCount, dateFormat, timeFormat, chartType = 'energy') => {
     // Up to and including 1 day
     if (daysCount === 1) {
         return timeFormat === `12h` ? '{value:%I:%M %p}' : '{value:%H:%M}';
@@ -272,7 +272,7 @@ export const formatXaxisForHighCharts = (daysCount, dateFormat, timeFormat) => {
 
     // >6 Months
     else if (daysCount >= 182) {
-        return '{value:%b}';
+        return chartType === 'energy' ? "{value:%b '%y}" : "{value:%e %b '%y}";
     }
 
     // Default if not any

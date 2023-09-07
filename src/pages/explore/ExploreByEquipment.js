@@ -1178,7 +1178,12 @@ const ExploreByEquipment = () => {
                                 gridLineWidth: 0,
                                 type: 'datetime',
                                 labels: {
-                                    format: formatXaxisForHighCharts(daysCount, userPrefDateFormat, userPrefTimeFormat),
+                                    format: formatXaxisForHighCharts(
+                                        daysCount,
+                                        userPrefDateFormat,
+                                        userPrefTimeFormat,
+                                        selectedConsumption
+                                    ),
                                 },
                             },
                             yAxis: [

@@ -111,6 +111,7 @@ export const options = ({ data, series, dateRange, tooltipUnit, tooltipLabel, wi
             type: 'datetime',
             labels: {
                 format: '{value: %e %b `%y}',
+                padding: 10,
             },
         },
         yAxis: {
