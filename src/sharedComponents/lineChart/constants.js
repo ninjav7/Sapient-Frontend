@@ -216,6 +216,7 @@ export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel
             type: 'datetime',
             labels: {
                 format: '{value: %e %b `%y}',
+                padding: 10,
             },
             zoomEnabled: true,
             plotBands: plotBandsData,
