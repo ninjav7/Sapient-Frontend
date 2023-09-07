@@ -50,7 +50,7 @@ export function updateUtilitySensorServices(params, payload) {
 }
 
 export function getSensorGraphDataForUtilityMonitors(payload) {
-    const params = `/${payload?.sensor_id}?building_id=${payload?.bldg_id}&date_from=${payload?.date_from}&date_to=${payload?.date_to}&timezone=${payload?.tz_info}&metric=${payload?.selected_metric}`;
+    const params = `/${payload?.sensor_id}?building_id=${payload?.bldg_id}&date_from=${payload?.date_from}&date_to=${payload?.date_to}&tz_info=${payload?.tz_info}&metric=${payload?.selected_metric}`;
     return axiosInstance.get(`${sensorUsageData}${params}`).then((res) => res);
 }
 
