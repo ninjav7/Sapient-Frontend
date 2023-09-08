@@ -88,8 +88,6 @@ const ExploreByEquipment = () => {
 
     const [seriesData, setSeriesData] = useState([]);
 
-    console.log('SSR seriesData => ', seriesData);
-
     let entryPoint = '';
     let top = '';
 
@@ -371,11 +369,9 @@ const ExploreByEquipment = () => {
                     const { data } = response;
 
                     const equipObj = allEquipmentList.find((el) => el?.equipment_id === equipId);
-                    if (!equipObj?.equipment_id) return;
+                    if (!equipObj?.equipment_id || data.length === 0) return;
 
                     if (selectedConsumption === 'rmsCurrentMilliAmps') {
-                        if (data.length === 0) return;
-
                         const chartData = [];
 
                         let legendName = equipObj?.equipment_name;
@@ -467,22 +463,46 @@ const ExploreByEquipment = () => {
                     promiseResponse.forEach((record, index) => {
                         const response = record?.data;
                         if (response?.success && response?.data.length !== 0) {
-                            const newMappedData = response?.data.map((el) => ({
-                                x: new Date(el?.time_stamp).getTime(),
-                                y: el?.consumption,
-                            }));
-
                             const equipObj = allEquipmentList.find((el) => el?.equipment_id === equipIDs[index]);
-
                             if (!equipObj?.equipment_id) return;
 
-                            const recordToInsert = {
-                                id: equipObj?.equipment_id,
-                                name: equipObj?.equipment_name,
-                                data: newMappedData,
-                            };
+                            if (selectedConsumption === 'rmsCurrentMilliAmps') {
+                                let legendName = equipObj?.equipment_name;
+                                if (equipObj?.location.includes('>')) {
+                                    legendName += ` - ${equipObj?.location.split('>')[1].trim()}`;
+                                }
 
-                            newResponse.push(recordToInsert);
+                                response.data.forEach((sensorObj) => {
+                                    const newSensorMappedData = sensorObj?.data.map((el) => ({
+                                        x: new Date(el?.time_stamp).getTime(),
+                                        y: el?.consumption,
+                                    }));
+
+                                    newResponse.push({
+                                        id: equipObj?.equipment_id,
+                                        name: `${legendName} - ${sensorObj?.sensor_name}`,
+                                        data: newSensorMappedData,
+                                    });
+                                });
+                            }
+
+                            if (selectedConsumption !== 'rmsCurrentMilliAmps') {
+                                let legendName = equipObj?.equipment_name;
+                                if (equipObj?.location.includes('>')) {
+                                    legendName += ` - ${equipObj?.location.split('>')[1].trim()}`;
+                                }
+
+                                const newEquipMappedData = response?.data.map((el) => ({
+                                    x: new Date(el?.time_stamp).getTime(),
+                                    y: el?.consumption,
+                                }));
+
+                                newResponse.push({
+                                    id: equipObj?.equipment_id,
+                                    name: legendName,
+                                    data: newEquipMappedData,
+                                });
+                            }
                         }
                     });
 
