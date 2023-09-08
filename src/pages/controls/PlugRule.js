@@ -121,10 +121,13 @@ const indexOfDay = {
 };
 const formatAverageData = (data) => {
     const res = [];
-    data.forEach((el) => {
-        const today = moment.utc(el.time_stamp);
-        res.push({ x: today.unix() * 1000, y: el.consumption });
-    });
+    if (data.length) {
+        data.forEach((el) => {
+            const today = moment.utc(el.time_stamp);
+            res.push({ x: today.unix() * 1000, y: el.consumption });
+        });
+    }
+
     return res;
 };
 const notificationCreateData = {
@@ -1277,8 +1280,9 @@ const PlugRule = () => {
                     });
                     if (response.data.length > 0) {
                         setCheckedToUnlinkAll(true);
+                    } else {
+                        setCheckedToUnlinkAll(false);
                     }
-                    setCheckedToUnlinkAll(false);
                     if (!_.isEqual(selectedInitialyIds, linkedIds)) {
                         setSelectedInitialyIds(linkedIds || []);
                     }
@@ -1407,15 +1411,46 @@ const PlugRule = () => {
                     setTotalSocket(response.total_data);
                 }));
         } else {
-            setRulesToUnLink({ rule_id: ruleId, sensor_id: listSocketsIds });
-            setTotalSocket(0);
-            setSelectedIdsToUnlink(listSocketsIds);
-            isLoadingLinkedRef.current = false;
+            await getUnlinkedSocketRules(
+                pageSizeLinked,
+                pageNoLinked,
+                activeBuildingId,
+                equipmentTypeFilterStringLinked,
+                macTypeFilterStringLinked,
+                locationTypeFilterString,
+                sensorTypeFilterStringLinked,
+                floorTypeFilterStringLinked,
+                spaceTypeFilterStringLinked,
+                spaceTypeTypeFilterStringLinked,
+                assignedRuleFilterStringLinked,
+                tagsFilterStringLinked,
+                false,
+                {
+                    ...sorting,
+                },
+                true,
+                ruleId,
+                searchLinked
+            )
+                .then((res) => {
+                    isLoadingLinkedRef.current = false;
+
+                    let responseData = res?.data;
+                    const preparedIdsToUnlink = [];
+                    responseData.data.forEach((el) => {
+                        preparedIdsToUnlink.push(el.id);
+                    });
+                    setRulesToUnLink({ rule_id: ruleId, sensor_id: preparedIdsToUnlink });
+
+                    setSelectedIdsToUnlink(preparedIdsToUnlink);
+                    setTotalSocket(0);
+                })
+                .catch((error) => {});
         }
         setIsChangedSocketsLinked(true);
         setCheckedToUnlinkAll(checkedAllToUnlink);
+        isLoadingLinkedRef.current = false;
     };
-
     const selectAllRowsSensors = async (checkedAllToLink) => {
         const sorting = sortByUnlinkedTab.method &&
             sortByUnlinkedTab.name && {
@@ -2126,7 +2161,7 @@ const PlugRule = () => {
         return res;
     };
     const getDateRange = (rawLineChartData) => {
-        if (!_.isEmpty(rawLineChartData)) {
+        if (!_.isEmpty(rawLineChartData?.data)) {
             const minDate = moment(rawLineChartData[0].time_stamp).utc(true).startOf('week');
             const maxDate = moment.utc(rawLineChartData[rawLineChartData.length - 1].time_stamp).endOf('isoweek');
             maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
