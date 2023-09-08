@@ -8,16 +8,13 @@ import { UNITS } from '../../constants/units';
 
 import '../portfolio/PortfolioKPIs.scss';
 
-const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
+const BuildingKPIs = ({ overallData = {}, daysCount = 0, userPrefUnits }) => {
     return (
         <div className={`portfolioKPIs-wrapper`}>
             <KPILabeled
                 title="Total Consumption"
-                value={formatConsumptionValue(overalldata?.total_consumption?.now / 1000, 0)}
-                badgePrecentage={percentageHandler(
-                    overalldata?.total_consumption?.now,
-                    overalldata?.total_consumption?.old
-                )}
+                value={formatConsumptionValue(overallData?.total?.now / 1000, 0)}
+                badgePrecentage={percentageHandler(overallData?.total?.now, overallData?.total?.old)}
                 unit={KPI_UNITS.KWH}
                 tooltipText={
                     daysCount > 1
@@ -26,7 +23,7 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
                 }
                 tooltipId="total-bld-cnsmp"
                 type={
-                    overalldata?.total_consumption?.now >= overalldata?.total_consumption?.old
+                    overallData?.total?.now >= overallData?.total?.old
                         ? TRENDS_BADGE_TYPES.UPWARD_TREND
                         : TRENDS_BADGE_TYPES.DOWNWARD_TREND
                 }
@@ -34,11 +31,8 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
 
             <KPILabeled
                 title={`Average Consumption / ${userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`}`}
-                value={formatConsumptionValue(overalldata?.average_energy_density?.now / 1000, 2)}
-                badgePrecentage={percentageHandler(
-                    overalldata?.average_energy_density?.now,
-                    overalldata?.average_energy_density?.old
-                )}
+                value={formatConsumptionValue(overallData?.average?.now / 1000, 2)}
+                badgePrecentage={percentageHandler(overallData?.average?.now, overallData?.average?.old)}
                 unit={`${userPrefUnits === 'si' ? `${UNITS.KWH}/${UNITS.SQ_M}` : `${UNITS.KWH}/${UNITS.SQ_FT}`}`}
                 tooltipText={
                     daysCount > 1
@@ -51,7 +45,7 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
                 }
                 tooltipId="avg-bld-dnty"
                 type={
-                    overalldata?.average_energy_density?.now >= overalldata?.average_energy_density?.old
+                    overallData?.average?.now >= overallData?.average?.old
                         ? TRENDS_BADGE_TYPES.UPWARD_TREND
                         : TRENDS_BADGE_TYPES.DOWNWARD_TREND
                 }

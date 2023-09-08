@@ -8,16 +8,15 @@ import moment from 'moment';
 import 'moment-timezone';
 import { useHistory, useParams } from 'react-router-dom';
 import {
-    fetchOverallBldgData,
     fetchBuildingEquipments,
     fetchBuilidingHourly,
-    fetchEnergyConsumption,
     fetchEndUseByBuilding,
     fetchEnergyConsumptionByEquipType,
     fetchEnergyConsumptionBySpaceType,
     fetchEnergyConsumptionByFloor,
     fetchEnergyConsumptionV2,
 } from '../buildings/services';
+import { fetchPortfolioOverall } from '../portfolio/services';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -56,19 +55,15 @@ const BuildingOverview = () => {
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [overallBldgData, setOverallBldgData] = useState({
-        total_building: 0,
-        portfolio_rank: '10 of 50',
-        total_consumption: {
+        total: {
             now: 0,
             old: 0,
+            change: 0,
         },
-        average_energy_density: {
+        average: {
             now: 0,
             old: 0,
-        },
-        yearly_electric_eui: {
-            now: 0,
-            old: 0,
+            change: 0,
         },
     });
 
@@ -195,10 +190,20 @@ const BuildingOverview = () => {
     };
 
     const buildingOverallData = async (time_zone) => {
-        const payload = apiRequestBody(startDate, endDate, time_zone);
-        await fetchOverallBldgData(bldgId, payload)
+        const payload = {
+            bldg_id: bldgId,
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: encodeURIComponent(time_zone),
+            metric: 'energy',
+        };
+
+        await fetchPortfolioOverall(payload)
             .then((res) => {
-                if (res?.data) setOverallBldgData(res?.data);
+                const response = res?.data;
+                if (response?.success && response?.data) {
+                    setOverallBldgData(response?.data);
+                }
             })
             .catch((error) => {});
     };
@@ -558,7 +563,7 @@ const BuildingOverview = () => {
             <Header title="Building Overview" type="page" />
 
             <div className="mt-4 mb-4">
-                <BuildingKPIs daysCount={daysCount} overalldata={overallBldgData} userPrefUnits={userPrefUnits} />
+                <BuildingKPIs daysCount={daysCount} overallData={overallBldgData} userPrefUnits={userPrefUnits} />
             </div>
 
             <div className="bldg-page-grid-style">

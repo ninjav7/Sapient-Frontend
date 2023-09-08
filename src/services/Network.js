@@ -16,7 +16,7 @@ export const checkLinkValidity = '/api/user_role/user/check-token-validity';
 
 // portfolio overview
 export const portfolioOverall = '/api/energy/portfolio/overall';
-export const portfolioKPIsV2 = '/api/V2/metrics/portfolio/kpi';
+export const portfolioKPIsV2 = '/api/v2/metrics/portfolio/kpi';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
 export const portfolioEndUser = '/api/energy/portfolio/end-user';
 
