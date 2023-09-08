@@ -137,7 +137,6 @@ const ExploreByEquipment = () => {
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
-    const [selectedAllEquipmentId, setSelectedAllEquipmentId] = useState([]);
 
     const metric = [
         { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy Consumption' },
@@ -518,9 +517,11 @@ const ExploreByEquipment = () => {
     // This function executed to fetch chart data when start and end date changes
     const fetchExploreAllChartData = async (id) => {
         const payload = apiRequestBody(startDate, endDate, timeZone);
+
         const params = `?building_id=${bldgId}&consumption=${
             selectedConsumption === 'rmsCurrentMilliAmps' && device_type === 'active' ? 'mAh' : selectedConsumption
         }&equipment_id=${id}&divisible_by=1000${selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''}`;
+
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
                 let responseData = res.data;
@@ -1172,16 +1173,6 @@ const ExploreByEquipment = () => {
     useEffect(() => {
         if (equipIdNow) fetchSingleEquipChartData(equipIdNow);
     }, [equipIdNow]);
-
-    useEffect(() => {
-        if (selectedAllEquipmentId.length === 1) {
-            fetchExploreAllChartData(selectedAllEquipmentId[0]);
-        } else {
-            selectedAllEquipmentId.map((ele) => {
-                fetchExploreAllChartData(ele);
-            });
-        }
-    }, [selectedAllEquipmentId]);
 
     useEffect(() => {
         if (removeEquipmentId === '') return;
