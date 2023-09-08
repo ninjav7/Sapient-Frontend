@@ -11,7 +11,7 @@ import {
     energyConsumptionByFloor,
     energyCarbonByBuilding,
     metricsForCarbonBuildingPage,
-    metricsKpiForCarbonBuildingPage,
+    portfolioKPIsV2,
 } from '../../services/Network';
 
 export function fetchOverallBldgData(bldgId, payload) {
@@ -58,7 +58,7 @@ export function fetchMetricsBuildingPage(bldg_id, params) {
 }
 
 export function fetchMetricsKpiBuildingPage(params) {
-    return axiosInstance.get(`${metricsKpiForCarbonBuildingPage}`, { params }).then((res) => res.data);
+    return axiosInstance.get(`${portfolioKPIsV2}`, { params }).then((res) => res.data);
 }
 export function fetchcurrentFuelMix(params) {
     const payload = '?region=ISONE&source=EIA';
