@@ -6,6 +6,7 @@ export const ComponentStore = new Store({
 
 //  ---------- Options: ----------
 // portfolio
+// carbon
 // buildings
 // control
 // explore

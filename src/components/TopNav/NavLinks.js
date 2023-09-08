@@ -25,14 +25,15 @@ const NavLinks = () => {
     const [buildingListData] = useAtom(buildingData);
 
     const [userPermission] = useAtom(userPermissionData);
-    const [userPermissionBuildingExplore, setuserPermissionBuildingExplore] = useState('');
     const [userPermisionBuildingEnergy, setuserPermisionBuildingEnergy] = useState('');
+    const [userPermisionBuildingCarbon, setuserPermisionBuildingCarbon] = useState('');
     const [userPermisionBuildingControl, setuserPermisionBuildingControl] = useState('');
+    const [userPermissionBuildingExplore, setuserPermissionBuildingExplore] = useState('');
 
     const ENERGY_TAB = '/energy/portfolio/overview';
+    const CARBON_TAB = '/carbon/portfolio/overview';
     const CONTROL_TAB = '/control/plug-rules';
     const EXPLORE_TAB = '/explore-page/by-buildings';
-    const CARBON_TAB = '/carbon/portfolio/overview';
 
     const routeToControlPage = () => {
         history.push({
@@ -45,7 +46,8 @@ const NavLinks = () => {
             pathname: `/energy/portfolio/overview`,
         });
     };
-    const routeToPortfolioCarbonPage = () => {
+
+    const routeToCarbonPage = () => {
         history.push({
             pathname: `/carbon/portfolio/overview`,
         });
@@ -72,7 +74,8 @@ const NavLinks = () => {
 
         if (
             location.pathname.includes('/explore-page/by-equipment') ||
-            location.pathname.includes('/control/plug-rules')
+            location.pathname.includes('/control/plug-rules') ||
+            location.pathname.includes('/carbon/building/overview')
         ) {
             history.push({
                 pathname: `/energy/building/overview/${bldgId}`,
@@ -100,6 +103,51 @@ const NavLinks = () => {
             });
         } else {
             routeToPortfolioPage();
+            updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
+        }
+    };
+
+    const handleCarbonClick = () => {
+        const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+        if (!bldgObj?.active) {
+            routeToCarbonPage();
+            updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
+            return;
+        }
+
+        if (
+            location.pathname.includes('/energy/building/overview') ||
+            location.pathname.includes('/energy/end-uses') ||
+            location.pathname.includes('/energy/time-of-day') ||
+            location.pathname.includes('/control/plug-rules') ||
+            location.pathname.includes('/explore-page/by-equipment')
+        ) {
+            history.push({
+                pathname: `/carbon/building/overview/${bldgId}`,
+            });
+            return;
+        }
+
+        if (location.pathname.includes('/settings')) {
+            configRoutes.forEach((record) => {
+                if (location.pathname.includes(record)) {
+                    history.push({
+                        pathname: `/carbon/building/overview/${bldgId}`,
+                    });
+                    return;
+                }
+            });
+
+            configChildRoutes.forEach((record) => {
+                if (location.pathname.includes(record)) {
+                    history.push({
+                        pathname: `/carbon/building/overview/${bldgId}`,
+                    });
+                    return;
+                }
+            });
+        } else {
+            routeToCarbonPage();
             updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
         }
     };
@@ -134,7 +182,8 @@ const NavLinks = () => {
             location.pathname.includes('/energy/building/overview') ||
             location.pathname.includes('/energy/end-uses') ||
             location.pathname.includes('/energy/time-of-day') ||
-            location.pathname.includes('/control/plug-rules')
+            location.pathname.includes('/control/plug-rules') ||
+            location.pathname.includes('/carbon/building/overview')
         ) {
             history.push({
                 pathname: `/explore-page/by-equipment/${bldgId}`,
@@ -166,14 +215,16 @@ const NavLinks = () => {
             });
         }
     };
-    const handleCarbonClick = () => {
-        routeToPortfolioCarbonPage();
-    };
 
     const handleSideNavChange = (componentName) => {
         if (componentName === 'Energy') {
             ComponentStore.update((s) => {
                 s.parent = 'portfolio';
+            });
+        }
+        if (componentName === 'Carbon') {
+            ComponentStore.update((s) => {
+                s.parent = 'carbon';
             });
         }
         if (componentName === 'Control') {
@@ -205,14 +256,14 @@ const NavLinks = () => {
             case ENERGY_TAB:
                 handleEnergyClick();
                 break;
+            case CARBON_TAB:
+                handleCarbonClick();
+                break;
             case CONTROL_TAB:
                 handleControlClick();
                 break;
             case EXPLORE_TAB:
                 handleExploreClick();
-                break;
-            case CARBON_TAB:
-                handleCarbonClick();
                 break;
             default:
                 history.push({
@@ -233,19 +284,26 @@ const NavLinks = () => {
             if (!userPermission?.permissions?.permissions?.control_control_permission?.view) {
                 setuserPermisionBuildingControl('Control');
             }
-            if (userPermission?.permissions?.permissions?.explore_general_permission?.view) {
-                setuserPermissionBuildingExplore('');
+            if (!userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
+                setuserPermisionBuildingCarbon('Carbon');
             }
             if (userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
                 setuserPermisionBuildingEnergy('');
             }
+            if (userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
+                setuserPermisionBuildingCarbon('');
+            }
             if (userPermission?.permissions?.permissions?.control_control_permission?.view) {
                 setuserPermisionBuildingControl('');
             }
+            if (userPermission?.permissions?.permissions?.explore_general_permission?.view) {
+                setuserPermissionBuildingExplore('');
+            }
         }
         if (userPermission?.user_role === 'admin') {
-            setuserPermissionBuildingExplore('');
             setuserPermisionBuildingEnergy('');
+            setuserPermisionBuildingCarbon('');
+            setuserPermissionBuildingExplore('');
             setuserPermisionBuildingControl('');
         }
     }, [userPermission]);
@@ -257,7 +315,8 @@ const NavLinks = () => {
                     (item) =>
                         item?.name !== userPermissionBuildingExplore &&
                         item?.name !== userPermisionBuildingEnergy &&
-                        item?.name !== userPermisionBuildingControl
+                        item?.name !== userPermisionBuildingControl &&
+                        item?.name !== userPermisionBuildingCarbon
                 )
                 .map((item, index) => {
                     if (!item.visibility) return;

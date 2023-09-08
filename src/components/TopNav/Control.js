@@ -100,7 +100,7 @@ const Control = () => {
         let currentPath = location.pathname;
         let pathName = '';
 
-        if (currentPath.includes('/control/plug-rules')) {
+        if (currentPath.includes('/control/plug-rules') || currentPath.includes('/carbon/portfolio/overview')) {
             bldgId === 'portfolio' ? (pathName = accountRoutes[0]) : (pathName = `${configRoutes[0]}/${bldgId}`);
         } else {
             routesForAccountSettings.includes(currentPath) || currentPath.includes(accountChildRoutes[0])
@@ -313,9 +313,11 @@ const Control = () => {
                             className={`float-right h-100 mr-3 navbar-head-container d-flex align-items-center ${
                                 pageType === 'settings' ? 'active ' : ''
                             }`}>
-                            <button className="btn btn-sm" onClick={handleSettingsClick}>
-                                <Gear className={`navbar-icons-style ${pageType === 'settings' ? 'active' : ''}`} />
-                            </button>
+                            {userPermission?.email && (
+                                <button className="btn btn-sm" onClick={handleSettingsClick}>
+                                    <Gear className={`navbar-icons-style ${pageType === 'settings' ? 'active' : ''}`} />
+                                </button>
+                            )}
                         </div>
                     )}
 
@@ -329,12 +331,18 @@ const Control = () => {
                             </div>
                             <div className="user-name">{userName}</div>
                         </DropdownToggle>
+
                         <DropdownMenu right className="mr-2" style={dropdownMenuStyle}>
-                            <DropdownItem onClick={handleModalOpen} className="pb-3 pl-3 pr-3">
-                                <PreferencesSVG className="mr-3 topnav-dropdown-style topnav-icon-color" />
-                                {`User Preferences`}
-                            </DropdownItem>
-                            <hr className="m-0 p-0" />
+                            {userPermission?.name && (
+                                <>
+                                    <DropdownItem onClick={handleModalOpen} className="pb-3 pl-3 pr-3">
+                                        <PreferencesSVG className="mr-3 topnav-dropdown-style topnav-icon-color" />
+                                        {`User Preferences`}
+                                    </DropdownItem>
+                                    <hr className="m-0 p-0" />
+                                </>
+                            )}
+
                             <DropdownItem onClick={handleLogout} className="pt-2 pl-3 pr-3">
                                 <LogoutSVG className="mr-3 topnav-dropdown-style topnav-icon-color" />
                                 {`Sign out`}
