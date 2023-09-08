@@ -16,7 +16,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import PortfolioKPIs from './PortfolioKPIs';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
 import { useAtom } from 'jotai';
-import { userPermissionData } from '../../store/globalState';
+import { buildingData, userPermissionData } from '../../store/globalState';
 import { apiRequestBody } from '../../helpers/helpers';
 import Brick from '../../sharedComponents/brick';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
@@ -29,6 +29,8 @@ import './style.scss';
 
 const PortfolioOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
+    const [buildingListData] = useAtom(buildingData);
+
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
     const [energyConsumption, setenergyConsumption] = useState([]);
     const [isEnergyConsumptionChartLoading, setIsEnergyConsumptionChartLoading] = useState(false);
@@ -42,23 +44,19 @@ const PortfolioOverview = () => {
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
-    const [overalldata, setOveralldata] = useState({
-        total_building: 0,
-        total_consumption: {
+    const [overallData, setOverallData] = useState({
+        total: {
             now: 0,
             old: 0,
+            change: 0,
         },
-        average_energy_density: {
+        average: {
             now: 0,
             old: 0,
-        },
-        yearly_electric_eui: {
-            now: 0,
-            old: 0,
+            change: 0,
         },
     });
 
-    const [isKPIsLoading, setIsKPIsLoading] = useState(false);
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
     const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
@@ -111,16 +109,21 @@ const PortfolioOverview = () => {
         if (startDate === null || endDate === null) return;
 
         const portfolioOverallData = async () => {
-            setIsKPIsLoading(true);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = {
+                date_from: encodeURIComponent(startDate),
+                date_to: encodeURIComponent(endDate),
+                tz_info: encodeURIComponent(timeZone),
+                metric: 'energy',
+            };
+
             await fetchPortfolioOverall(payload)
                 .then((res) => {
-                    if (res?.data) setOveralldata(res?.data);
-                    setIsKPIsLoading(false);
+                    const response = res?.data;
+                    if (response?.success && response?.data) {
+                        setOverallData(response?.data);
+                    }
                 })
-                .catch((error) => {
-                    setIsKPIsLoading(false);
-                });
+                .catch((error) => {});
         };
 
         const portfolioEndUsesData = async () => {
@@ -189,7 +192,7 @@ const PortfolioOverview = () => {
                 .catch((error) => {});
         };
 
-        portfolioBuilidingsData();
+        // portfolioBuilidingsData(); // Planned to enable when maps integrated in Portfolio Page
         portfolioOverallData();
         portfolioEndUsesData();
         energyConsumptionData();
@@ -232,9 +235,9 @@ const PortfolioOverview = () => {
                     <Row>
                         <div>
                             <PortfolioKPIs
+                                totalBuilding={buildingListData.length !== 0 ? buildingListData.length : 0}
+                                overallData={overallData}
                                 daysCount={daysCount}
-                                totalBuilding={buildingsEnergyConsume.length}
-                                overalldata={overalldata}
                                 userPrefUnits={userPrefUnits}
                             />
                         </div>

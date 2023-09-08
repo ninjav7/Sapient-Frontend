@@ -16,6 +16,7 @@ export const checkLinkValidity = '/api/user_role/user/check-token-validity';
 
 // portfolio overview
 export const portfolioOverall = '/api/energy/portfolio/overall';
+export const portfolioKPIsV2 = '/api/v2/metrics/portfolio/kpi';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
 export const portfolioEndUser = '/api/energy/portfolio/end-user';
 
@@ -27,9 +28,10 @@ export const builidingEquipments = '/api/energy/building/equipment';
 export const energyConsumptionByEquipmentType = '/api/v2/metrics/equipment_type';
 export const energyConsumptionBySpaceType = '/api/v2/metrics/space_type';
 export const energyConsumptionByFloor = '/api/v2/metrics/floor';
+
 // export const energyCarbonByBuilding = '/api/v2/metrics/building/carbon'
 export const metricsForCarbonBuildingPage = '/api/v2/metrics/building';
-export const metricsKpiForCarbonBuildingPage = '/api/v2/metrics/portfolio/kpi';
+
 // time of day
 export const builidingHourly = '/api/energy/time_of_day/hourly';
 export const avgDailyUsageByHour = '/api/energy/time_of_day/chart';
