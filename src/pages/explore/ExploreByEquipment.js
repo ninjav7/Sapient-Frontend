@@ -370,22 +370,54 @@ const ExploreByEquipment = () => {
                 if (response?.success) {
                     const { data } = response;
 
-                    const newMappedData = data.map((el) => ({
-                        x: new Date(el?.time_stamp).getTime(),
-                        y: el?.consumption,
-                    }));
-
                     const equipObj = allEquipmentList.find((el) => el?.equipment_id === equipId);
-
                     if (!equipObj?.equipment_id) return;
 
-                    const recordToInsert = {
-                        id: equipObj?.equipment_id,
-                        name: equipObj?.equipment_name,
-                        data: newMappedData,
-                    };
+                    if (selectedConsumption === 'rmsCurrentMilliAmps') {
+                        if (data.length === 0) return;
 
-                    setSeriesData((prevSeriesData) => [...prevSeriesData, recordToInsert]);
+                        const chartData = [];
+
+                        let legendName = equipObj?.equipment_name;
+                        if (equipObj?.location.includes('>')) {
+                            legendName += ` - ${equipObj?.location.split('>')[1].trim()}`;
+                        }
+
+                        data.forEach((sensorObj) => {
+                            const newSensorMappedData = sensorObj?.data.map((el) => ({
+                                x: new Date(el?.time_stamp).getTime(),
+                                y: el?.consumption,
+                            }));
+
+                            chartData.push({
+                                id: equipObj?.equipment_id,
+                                name: `${legendName} - ${sensorObj?.sensor_name}`,
+                                data: newSensorMappedData,
+                            });
+                        });
+
+                        setSeriesData((prevSeriesData) => [...prevSeriesData, ...chartData]);
+                    }
+
+                    if (selectedConsumption !== 'rmsCurrentMilliAmps') {
+                        let legendName = equipObj?.equipment_name;
+                        if (equipObj?.location.includes('>')) {
+                            legendName += ` - ${equipObj?.location.split('>')[1].trim()}`;
+                        }
+
+                        const newEquipMappedData = data.map((el) => ({
+                            x: new Date(el?.time_stamp).getTime(),
+                            y: el?.consumption,
+                        }));
+
+                        const recordToInsert = {
+                            id: equipObj?.equipment_id,
+                            name: legendName,
+                            data: newEquipMappedData,
+                        };
+
+                        setSeriesData((prevSeriesData) => [...prevSeriesData, recordToInsert]);
+                    }
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
