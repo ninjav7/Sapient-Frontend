@@ -57,7 +57,6 @@ const ExploreByEquipment = () => {
     const { bldgId } = useParams();
     const [buildingListData] = useAtom(buildingData);
 
-    const [equpimentIdSelection] = useAtom(selectedEquipment);
     const [totalEquipmentId] = useAtom(totalSelectionEquipmentId);
 
     const { download } = useCSVDownload();
@@ -88,6 +87,9 @@ const ExploreByEquipment = () => {
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
 
     const [seriesData, setSeriesData] = useState([]);
+
+    console.log('SSR seriesData => ', seriesData);
+
     let entryPoint = '';
     let top = '';
 
@@ -105,7 +107,6 @@ const ExploreByEquipment = () => {
     const handleChartOpen = () => setShowEquipmentChart(true);
     const handleChartClose = () => setShowEquipmentChart(false);
 
-    const [selectedEquipmentId, setSelectedEquipmentId] = useState('');
     const [removeEquipmentId, setRemovedEquipmentId] = useState('');
     const [equipmentListArray, setEquipmentListArray] = useState([]);
     const [allEquipmentData, setAllEquipmenData] = useState([]);
@@ -354,79 +355,115 @@ const ExploreByEquipment = () => {
         });
     };
 
-    const fetchExploreChartData = async () => {
-        let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?building_id=${bldgId}&consumption=${
+    const fetchSingleEquipChartData = async (equipId) => {
+        const payload = apiRequestBody(startDate, endDate, timeZone);
+
+        const params = `?building_id=${bldgId}&consumption=${
             selectedConsumption === 'rmsCurrentMilliAmps' && device_type === 'active' ? 'mAh' : selectedConsumption
-        }&equipment_id=${equipIdNow}&divisible_by=1000${
+        }&equipment_id=${equipId}&divisible_by=1000${
             selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
         }`;
+
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
-                let responseData = res.data;
-                let data = responseData.data;
+                const response = res?.data;
+                if (response?.success) {
+                    const { data } = response;
 
-                let arr = [];
-                arr = allEquipmentList.filter(function (item) {
-                    return item.equipment_id === equipIdNow;
-                });
-                let sg = '';
-                let legendName = '';
-                sg = arr[0].location.substring(arr[0].location.indexOf('>') + 1);
-                if (sg === '') {
-                    legendName = arr[0].equipment_name;
+                    const newMappedData = data.map((el) => ({
+                        x: new Date(el?.time_stamp).getTime(),
+                        y: el?.consumption,
+                    }));
+
+                    const equipObj = allEquipmentList.find((el) => el?.equipment_id === equipId);
+
+                    if (!equipObj?.equipment_id) return;
+
+                    const recordToInsert = {
+                        id: equipObj?.equipment_id,
+                        name: equipObj?.equipment_name,
+                        data: newMappedData,
+                    };
+
+                    setSeriesData((prevSeriesData) => [...prevSeriesData, recordToInsert]);
                 } else {
-                    legendName = arr[0].equipment_name + ' - ' + sg;
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to fetch data for selected Equipment.'
+                            : 'Unable to fetch data due to Internal Server Error!.';
+                        s.notificationType = 'error';
+                    });
                 }
-                let NulledData = [];
-                if (selectedConsumption === 'rmsCurrentMilliAmps') {
-                    NulledData = seriesData;
-                    for (let i = 0; i < data.length; i++) {
-                        let sensorData = [];
-                        data[i].data.map((ele) => {
-                            if (ele.consumption === '') {
-                                sensorData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
-                            } else {
-                                sensorData.push({
-                                    x: new Date(ele.time_stamp).getTime(),
-                                    y: ele.consumption,
-                                });
-                            }
-                        });
-                        let recordToInsert = {
-                            name: `${legendName} - Sensor ${data[i].sensor_name}`,
-                            data: sensorData,
-                            id: arr[0].equipment_id,
-                        };
+            })
+            .catch((err) => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to fetch data due to Internal Server Error!.';
+                    s.notificationType = 'error';
+                });
+            });
+    };
 
-                        NulledData.push(recordToInsert);
-                    }
+    const fetchMultipleEquipChartData = async (start_date, end_date, data_type = 'energy', equipIDs = []) => {
+        if (start_date === null || end_date === null || !data_type || equipIDs.length === 0) return;
 
-                    setSeriesData(NulledData);
-                } else {
-                    data.map((ele) => {
-                        if (ele?.consumption === '') {
-                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
-                        } else {
-                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
+        const payload = apiRequestBody(start_date, end_date, timeZone);
+
+        const promisesList = [];
+
+        equipIDs.forEach((id) => {
+            const params = `?building_id=${bldgId}&consumption=${
+                selectedConsumption === 'rmsCurrentMilliAmps' && device_type === 'active' ? 'mAh' : selectedConsumption
+            }&equipment_id=${id}&divisible_by=1000${
+                selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
+            }`;
+            promisesList.push(fetchExploreEquipmentChart(payload, params));
+        });
+
+        setSeriesData([]);
+
+        Promise.all(promisesList)
+            .then((res) => {
+                const promiseResponse = res;
+
+                if (promiseResponse?.length !== 0) {
+                    const newResponse = [];
+
+                    promiseResponse.forEach((record, index) => {
+                        const response = record?.data;
+                        if (response?.success && response?.data.length !== 0) {
+                            const newMappedData = response?.data.map((el) => ({
+                                x: new Date(el?.time_stamp).getTime(),
+                                y: el?.consumption,
+                            }));
+
+                            const equipObj = allEquipmentList.find((el) => el?.equipment_id === equipIDs[index]);
+
+                            if (!equipObj?.equipment_id) return;
+
+                            const recordToInsert = {
+                                id: equipObj?.equipment_id,
+                                name: equipObj?.equipment_name,
+                                data: newMappedData,
+                            };
+
+                            newResponse.push(recordToInsert);
                         }
                     });
-                    let recordToInsert = {
-                        name: legendName,
-                        data: NulledData,
-                        id: arr[0].equipment_id,
-                    };
-                    setSeriesData([...seriesData, recordToInsert]);
-                }
 
-                setSelectedEquipmentId('');
+                    setSeriesData(newResponse);
+                }
             })
-            .catch((error) => {});
+            .catch(() => {});
     };
 
     const dataarr = [];
     let ct = 0;
 
+    // This function executed to fetch chart data when start and end date changes
     const fetchExploreAllChartData = async (id) => {
         const payload = apiRequestBody(startDate, endDate, timeZone);
         const params = `?building_id=${bldgId}&consumption=${
@@ -1074,25 +1111,15 @@ const ExploreByEquipment = () => {
     useEffect(() => {
         top = '';
         topCon.current = '';
-        if (selectedIds?.length >= 1) {
-            let arr = [];
-            for (let i = 0; i < selectedIds?.length; i++) {
-                arr.push(selectedIds[i]);
-            }
-            setSeriesData([]);
-            setSelectedAllEquipmentId(arr);
-        } else {
-            setSelectedEquipmentId('');
+
+        if (selectedIds.length !== 0) {
+            fetchMultipleEquipChartData(startDate, endDate, selectedConsumption, selectedIds);
         }
     }, [startDate, endDate, selectedConsumption]);
 
     useEffect(() => {
-        if (equipIdNow) fetchExploreChartData(equipIdNow);
+        if (equipIdNow) fetchSingleEquipChartData(equipIdNow);
     }, [equipIdNow]);
-
-    useEffect(() => {
-        if (selectedEquipmentId !== '') fetchExploreChartData();
-    }, [selectedEquipmentId, equpimentIdSelection]);
 
     useEffect(() => {
         if (selectedAllEquipmentId.length === 1) {
