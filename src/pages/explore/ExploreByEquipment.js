@@ -685,7 +685,11 @@ const ExploreByEquipment = () => {
     }, []);
 
     useEffect(() => {
-        window.scrollTo(0, 0);
+        if (pageNo !== 1 || pageSize !== 20) {
+            window.scrollTo(0, 300);
+        } else {
+            window.scrollTo(0, 0);
+        }
     }, [pageNo, pageSize]);
 
     useEffect(() => {
