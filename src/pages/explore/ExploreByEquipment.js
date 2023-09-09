@@ -1020,6 +1020,20 @@ const ExploreByEquipment = () => {
         }
     }, [startDate, endDate, selectedConsumption]);
 
+    useEffect(() => {
+        if (checkedAll) {
+            if (exploreEquipDataList.length !== 0) {
+                const allEquipIds = exploreEquipDataList.map((el) => el?.equipment_id);
+                fetchMultipleEquipChartData(startDate, endDate, selectedConsumption, allEquipIds);
+                setSelectedEquipIds(allEquipIds);
+            }
+        }
+        if (!checkedAll) {
+            setSeriesData([]);
+            setSelectedEquipIds([]);
+        }
+    }, [checkedAll]);
+
     return (
         <>
             <Row className="ml-2 mr-2 explore-filters-style">
@@ -1132,8 +1146,8 @@ const ExploreByEquipment = () => {
                                     type="checkbox"
                                     id="equip"
                                     name="equip"
-                                    checked={selectedEquipIds.includes(record?.equipment_id) || checkedAll}
-                                    value={selectedEquipIds.includes(record?.equipment_id) || checkedAll}
+                                    checked={selectedEquipIds.includes(record?.equipment_id)}
+                                    value={selectedEquipIds.includes(record?.equipment_id)}
                                     onChange={(e) => {
                                         handleEquipStateChange(e.target.value, record);
                                     }}
