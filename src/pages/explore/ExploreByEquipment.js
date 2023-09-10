@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { useAtom } from 'jotai';
-import { Progress } from 'reactstrap';
 import { useParams } from 'react-router-dom';
-import { Row, Col, UncontrolledTooltip } from 'reactstrap';
+import { Row, Col, UncontrolledTooltip, Progress, Spinner } from 'reactstrap';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 import { UserStore } from '../../store/UserStore';
@@ -88,6 +87,7 @@ const ExploreByEquipment = () => {
     const [exploreEquipDataList, setExploreEquipDataList] = useState([]);
 
     const [isFilterFetching, setFilterFetching] = useState(false);
+    const [isFetchingChartData, setFetchingChartData] = useState(false);
     const [isExploreEquipDataFetching, setExploreEquipDataFetching] = useState(false);
 
     const [selectedEquipIds, setSelectedEquipIds] = useState([]);
@@ -413,6 +413,8 @@ const ExploreByEquipment = () => {
     const fetchMultipleEquipChartData = async (start_date, end_date, data_type = 'energy', equipIDs = []) => {
         if (start_date === null || end_date === null || !data_type || equipIDs.length === 0) return;
 
+        setFetchingChartData(true);
+
         const payload = apiRequestBody(start_date, end_date, timeZone);
 
         const promisesList = [];
@@ -484,7 +486,10 @@ const ExploreByEquipment = () => {
                     setSeriesData(newResponse);
                 }
             })
-            .catch(() => {});
+            .catch(() => {})
+            .finally(() => {
+                setFetchingChartData(false);
+            });
     };
 
     const handleEquipStateChange = (value, equipObj) => {
@@ -1057,62 +1062,70 @@ const ExploreByEquipment = () => {
 
             <Row>
                 <div className="explore-data-table-style p-2">
-                    <ExploreChart
-                        title={''}
-                        subTitle={''}
-                        isLoadingData={false}
-                        disableDefaultPlotBands={true}
-                        tooltipValuesKey={'{point.y:.1f}'}
-                        tooltipUnit={selectedUnit}
-                        tooltipLabel={selectedConsumptionLabel}
-                        data={seriesData}
-                        chartProps={{
-                            navigator: {
-                                outlineWidth: 0,
-                                adaptToUpdatedData: false,
-                                stickToMax: true,
-                            },
-                            plotOptions: {
-                                series: {
-                                    states: {
-                                        inactive: {
-                                            opacity: 1,
+                    {isFetchingChartData ? (
+                        <div className="explore-chart-wrapper">
+                            <div className="explore-chart-loader">
+                                <Spinner color="primary" />
+                            </div>
+                        </div>
+                    ) : (
+                        <ExploreChart
+                            title={''}
+                            subTitle={''}
+                            isLoadingData={false}
+                            disableDefaultPlotBands={true}
+                            tooltipValuesKey={'{point.y:.1f}'}
+                            tooltipUnit={selectedUnit}
+                            tooltipLabel={selectedConsumptionLabel}
+                            data={seriesData}
+                            chartProps={{
+                                navigator: {
+                                    outlineWidth: 0,
+                                    adaptToUpdatedData: false,
+                                    stickToMax: true,
+                                },
+                                plotOptions: {
+                                    series: {
+                                        states: {
+                                            inactive: {
+                                                opacity: 1,
+                                            },
                                         },
                                     },
                                 },
-                            },
-                            xAxis: {
-                                gridLineWidth: 0,
-                                type: 'datetime',
-                                labels: {
-                                    format: formatXaxisForHighCharts(
-                                        daysCount,
-                                        userPrefDateFormat,
-                                        userPrefTimeFormat,
-                                        selectedConsumption
-                                    ),
-                                },
-                            },
-                            yAxis: [
-                                {
-                                    gridLineWidth: 1,
-                                    lineWidth: 1,
-                                    opposite: false,
-                                    lineColor: null,
-                                },
-                                {
-                                    opposite: true,
-                                    title: false,
-                                    max: 120,
-                                    postFix: '23',
+                                xAxis: {
                                     gridLineWidth: 0,
+                                    type: 'datetime',
+                                    labels: {
+                                        format: formatXaxisForHighCharts(
+                                            daysCount,
+                                            userPrefDateFormat,
+                                            userPrefTimeFormat,
+                                            selectedConsumption
+                                        ),
+                                    },
                                 },
-                            ],
-                            tooltip: {
-                                xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
-                            },
-                        }}
-                    />
+                                yAxis: [
+                                    {
+                                        gridLineWidth: 1,
+                                        lineWidth: 1,
+                                        opposite: false,
+                                        lineColor: null,
+                                    },
+                                    {
+                                        opposite: true,
+                                        title: false,
+                                        max: 120,
+                                        postFix: '23',
+                                        gridLineWidth: 0,
+                                    },
+                                ],
+                                tooltip: {
+                                    xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
+                                },
+                            }}
+                        />
+                    )}
                 </div>
             </Row>
 
