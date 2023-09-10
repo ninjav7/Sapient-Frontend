@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, FormGroup } from 'reactstrap';
+import { Row, Col, FormGroup, Spinner } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
@@ -228,7 +228,6 @@ const EquipChartModal = ({
                         exploreData.push(recordToInsert);
                     }
                     setDeviceData(exploreData);
-                    setIsEquipDataFetched(false);
                 } else {
                     let data = response.data.map((_data) => {
                         _data[1] = parseInt(_data[1]);
@@ -252,11 +251,12 @@ const EquipChartModal = ({
                     };
                     exploreData.push(recordToInsert);
                     setDeviceData(exploreData);
-                    setIsEquipDataFetched(false);
                 }
             })
-            .catch((error) => {});
-        setIsEquipDataFetched(false);
+            .catch((error) => {})
+            .finally(() => {
+                setIsEquipDataFetched(false);
+            });
     };
 
     const redirectToConfigDevicePageLink = (equipDeviceId, deviceType) => {
@@ -635,36 +635,38 @@ const EquipChartModal = ({
                                     </div>
 
                                     {isEquipDataFetched ? (
-                                        <></>
+                                        <div className="line-chart-wrapper">
+                                            <div className="line-chart-loader">
+                                                <Spinner color="primary" />
+                                            </div>
+                                        </div>
                                     ) : (
-                                        <div>
-                                            <LineChart
-                                                title={''}
-                                                subTitle={''}
-                                                tooltipUnit={selectedUnit}
-                                                tooltipLabel={selectedConsumptionLabel}
-                                                data={deviceData}
-                                                // dateRange={fetchDateRange(startDate, endDate)}
-                                                chartProps={{
-                                                    tooltip: {
-                                                        xDateFormat: dateTimeFormatForHighChart(
+                                        <LineChart
+                                            title={''}
+                                            subTitle={''}
+                                            tooltipUnit={selectedUnit}
+                                            tooltipLabel={selectedConsumptionLabel}
+                                            data={deviceData}
+                                            // dateRange={fetchDateRange(startDate, endDate)}
+                                            chartProps={{
+                                                tooltip: {
+                                                    xDateFormat: dateTimeFormatForHighChart(
+                                                        userPrefDateFormat,
+                                                        userPrefTimeFormat
+                                                    ),
+                                                },
+                                                xAxis: {
+                                                    type: 'datetime',
+                                                    labels: {
+                                                        format: formatXaxisForHighCharts(
+                                                            daysCount,
                                                             userPrefDateFormat,
                                                             userPrefTimeFormat
                                                         ),
                                                     },
-                                                    xAxis: {
-                                                        type: 'datetime',
-                                                        labels: {
-                                                            format: formatXaxisForHighCharts(
-                                                                daysCount,
-                                                                userPrefDateFormat,
-                                                                userPrefTimeFormat
-                                                            ),
-                                                        },
-                                                    },
-                                                }}
-                                            />
-                                        </div>
+                                                },
+                                            }}
+                                        />
                                     )}
                                 </Col>
                             </Row>
