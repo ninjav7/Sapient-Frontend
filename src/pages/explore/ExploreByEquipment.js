@@ -1026,7 +1026,7 @@ const ExploreByEquipment = () => {
 
     useEffect(() => {
         if (checkedAll) {
-            if (exploreEquipDataList.length !== 0) {
+            if (exploreEquipDataList.length !== 0 && exploreEquipDataList.length <= 20) {
                 const allEquipIds = exploreEquipDataList.map((el) => el?.equipment_id);
                 fetchMultipleEquipChartData(startDate, endDate, selectedConsumption, allEquipIds);
                 setSelectedEquipIds(allEquipIds);
@@ -1040,7 +1040,7 @@ const ExploreByEquipment = () => {
 
     return (
         <>
-            <Row className="ml-2 mr-2 explore-filters-style">
+            <Row className="p-2 explore-filters-style">
                 <div className="mr-2">
                     <Select
                         defaultValue={selectedConsumption}
@@ -1056,7 +1056,7 @@ const ExploreByEquipment = () => {
             </Row>
 
             <Row>
-                <div className="explore-data-table-style p-2 mb-2">
+                <div className="explore-data-table-style p-2">
                     <ExploreChart
                         title={''}
                         subTitle={''}
@@ -1115,6 +1115,8 @@ const ExploreByEquipment = () => {
                     />
                 </div>
             </Row>
+
+            <Brick sizeInRem={0.75} />
 
             <Row>
                 <div className="explore-data-table-style">
