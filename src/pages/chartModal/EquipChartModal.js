@@ -194,63 +194,57 @@ const EquipChartModal = ({
 
     const fetchEquipmentChart = async (equipId, equiName) => {
         setIsEquipDataFetched(true);
-        let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${
+
+        const payload = apiRequestBody(startDate, endDate, timeZone);
+
+        const params = `?building_id=${bldgId}&consumption=${
             selectedConsumption === 'rmsCurrentMilliAmps' && equipData?.device_type === 'active'
                 ? 'mAh'
                 : selectedConsumption
-        }&divisible_by=1000${selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''}`;
+        }&equipment_id=${equipId}&divisible_by=1000${
+            selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
+        }`;
+
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
-                let response = res.data;
+                const response = res?.data;
 
-                if (selectedConsumption === 'rmsCurrentMilliAmps') {
-                    let exploreData = [];
+                if (response?.success) {
+                    const { data } = response;
 
-                    let data = response.data;
-                    for (let i = 0; i < data.length; i++) {
-                        let NulledData = [];
-                        data[i].data.map((ele) => {
-                            if (ele.consumption === '') {
-                                NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
-                            } else {
-                                NulledData.push({
-                                    x: new Date(ele.time_stamp).getTime(),
-                                    y: ele.consumption,
-                                });
-                            }
+                    if (!data || data.length === 0) return;
+
+                    if (selectedConsumption === 'rmsCurrentMilliAmps') {
+                        const chartData = [];
+
+                        data.forEach((sensorObj) => {
+                            const newSensorMappedData = sensorObj?.data.map((el) => ({
+                                x: new Date(el?.time_stamp).getTime(),
+                                y: el?.consumption,
+                            }));
+
+                            chartData.push({
+                                name: `Sensor ${sensorObj?.index_alias}`,
+                                data: newSensorMappedData,
+                            });
                         });
-                        let recordToInsert = {
-                            name: `Sensor ${data[i].index_alias}`,
-                            data: NulledData,
+
+                        setDeviceData(chartData);
+                    }
+
+                    if (selectedConsumption !== 'rmsCurrentMilliAmps') {
+                        const newEquipMappedData = data.map((el) => ({
+                            x: new Date(el?.time_stamp).getTime(),
+                            y: el?.consumption,
+                        }));
+
+                        const recordToInsert = {
+                            name: equiName,
+                            data: newEquipMappedData,
                         };
 
-                        exploreData.push(recordToInsert);
+                        setDeviceData([recordToInsert]);
                     }
-                    setDeviceData(exploreData);
-                } else {
-                    let data = response.data.map((_data) => {
-                        _data[1] = parseInt(_data[1]);
-                        return _data;
-                    });
-                    let exploreData = [];
-                    let NulledData = [];
-                    data.map((ele) => {
-                        if (ele?.consumption === '') {
-                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
-                        } else {
-                            NulledData.push({
-                                x: new Date(ele?.time_stamp).getTime(),
-                                y: ele?.consumption,
-                            });
-                        }
-                    });
-                    let recordToInsert = {
-                        name: equiName,
-                        data: NulledData,
-                    };
-                    exploreData.push(recordToInsert);
-                    setDeviceData(exploreData);
                 }
             })
             .catch((error) => {})
