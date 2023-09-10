@@ -138,17 +138,17 @@ const ExploreByEquipment = () => {
         { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A', Consumption: 'Current Consumption' },
     ];
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
-    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
-    const [selectedConsumption, setConsumption] = useState(metric[0].value);
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0]?.Consumption);
+    const [selectedConsumption, setConsumption] = useState(metric[0]?.value);
 
     const handleUnitChange = (value) => {
-        let obj = metric.find((record) => record.value === value);
-        setSelectedUnit(obj.unit);
+        const obj = metric.find((record) => record?.value === value);
+        setSelectedUnit(obj?.unit);
     };
 
     const handleConsumptionChange = (value) => {
-        let obj = metric.find((record) => record.value === value);
-        setSelectedConsumptionLabel(obj.Consumption);
+        const obj = metric.find((record) => record?.value === value);
+        setSelectedConsumptionLabel(obj?.Consumption);
     };
 
     const currentRow = () => {
