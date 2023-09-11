@@ -220,7 +220,7 @@ const EquipChartModal = ({
                         data.forEach((sensorObj) => {
                             const newSensorMappedData = sensorObj?.data.map((el) => ({
                                 x: new Date(el?.time_stamp).getTime(),
-                                y: el?.consumption,
+                                y: el?.consumption === '' ? null : el?.consumption,
                             }));
 
                             chartData.push({
@@ -235,7 +235,7 @@ const EquipChartModal = ({
                     if (selectedConsumption !== 'rmsCurrentMilliAmps') {
                         const newEquipMappedData = data.map((el) => ({
                             x: new Date(el?.time_stamp).getTime(),
-                            y: el?.consumption,
+                            y: el?.consumption === '' ? null : el?.consumption,
                         }));
 
                         const recordToInsert = {

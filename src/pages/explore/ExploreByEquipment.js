@@ -357,7 +357,7 @@ const ExploreByEquipment = () => {
                         data.forEach((sensorObj) => {
                             const newSensorMappedData = sensorObj?.data.map((el) => ({
                                 x: new Date(el?.time_stamp).getTime(),
-                                y: el?.consumption,
+                                y: el?.consumption === '' ? null : el?.consumption,
                             }));
 
                             chartData.push({
@@ -378,7 +378,7 @@ const ExploreByEquipment = () => {
 
                         const newEquipMappedData = data.map((el) => ({
                             x: new Date(el?.time_stamp).getTime(),
-                            y: el?.consumption,
+                            y: el?.consumption === '' ? null : el?.consumption,
                         }));
 
                         const recordToInsert = {
@@ -452,7 +452,7 @@ const ExploreByEquipment = () => {
                                 response.data.forEach((sensorObj) => {
                                     const newSensorMappedData = sensorObj?.data.map((el) => ({
                                         x: new Date(el?.time_stamp).getTime(),
-                                        y: el?.consumption,
+                                        y: el?.consumption === '' ? null : el?.consumption,
                                     }));
 
                                     newResponse.push({
@@ -471,7 +471,7 @@ const ExploreByEquipment = () => {
 
                                 const newEquipMappedData = response?.data.map((el) => ({
                                     x: new Date(el?.time_stamp).getTime(),
-                                    y: el?.consumption,
+                                    y: el?.consumption === '' ? null : el?.consumption,
                                 }));
 
                                 newResponse.push({
@@ -1042,6 +1042,8 @@ const ExploreByEquipment = () => {
             setSelectedEquipIds([]);
         }
     }, [checkedAll]);
+
+    console.log('SSR seriesData => ', seriesData);
 
     return (
         <>
