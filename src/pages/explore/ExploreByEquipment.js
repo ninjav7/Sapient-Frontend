@@ -1147,7 +1147,10 @@ const ExploreByEquipment = () => {
                             isLoading={isEquipDataFetching}
                             isLoadingComponent={<SkeletonLoading noofRows={headerProps.length + 1} />}
                             isFilterLoading={isFiltersFetching}
-                            onSearch={setSearch}
+                            onSearch={(e) => {
+                                setSearch(e);
+                                setCheckedAll(false);
+                            }}
                             buttonGroupFilterOptions={[]}
                             rows={currentRow()}
                             searchResultRows={currentRow()}
