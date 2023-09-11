@@ -93,6 +93,7 @@ const BuildingOverview = () => {
     const [hourlyAvgConsumpData, setHourlyAvgConsumpData] = useState([]);
     const heatMapChartHeight = 125;
     const [energyConsumption, setEnergyConsumption] = useState([]);
+    const [isEndUseDataFetching, setEndUseDataFetching] = useState(false);
     const [topEnergyConsumptionData, setTopEnergyConsumptionData] = useState([]);
     const [topEnergyDataFetching, setTopEnergyDataFetching] = useState(false);
 
@@ -211,13 +212,18 @@ const BuildingOverview = () => {
     const buildingEndUserData = async (time_zone) => {
         const params = `?building_id=${bldgId}&off_hours=false`;
         const payload = apiRequestBody(startDate, endDate, time_zone);
+        setEndUseDataFetching(true);
+
         await fetchEndUseByBuilding(params, payload)
             .then((res) => {
                 const response = res?.data?.data;
                 response.sort((a, b) => b?.energy_consumption.now - a?.energy_consumption.now);
                 setEnergyConsumption(response);
             })
-            .catch((error) => {});
+            .catch((error) => {})
+            .finally(() => {
+                setEndUseDataFetching(false);
+            });
     };
 
     const buildingHourlyData = async (time_zone) => {
@@ -577,6 +583,7 @@ const BuildingOverview = () => {
                             pageType="building"
                             handleRouteChange={() => handleRouteChange('/energy/end-uses')}
                             showRouteBtn={true}
+                            isLoading={isEndUseDataFetching}
                         />
                     )}
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Spinner } from 'reactstrap';
 import ReactDOMServer from 'react-dom/server';
 import Highcharts from 'highcharts/highstock';
 import HighchartsMore from 'highcharts/highcharts-more';
@@ -63,6 +64,7 @@ const DonutChartWidget = ({
     title,
     subtitle,
     pageType,
+    isChartLoading = false,
     ...props
 }) => {
     const chartComponentRef = useRef(null);
@@ -191,22 +193,28 @@ const DonutChartWidget = ({
                     />
                 </div>
 
-                <div className={`donut-chart-widget-wrapper w-100 justify-content-center ${className} ${type}`}>
-                    <div className={`chart-wrapper ${type}`}>{renderChart()}</div>
+                {isChartLoading ? (
+                    <div className="donut-main-wrapper-loader">
+                        <Spinner />
+                    </div>
+                ) : (
+                    <div className={`donut-chart-widget-wrapper w-100 justify-content-center ${className} ${type}`}>
+                        <div className={`chart-wrapper ${type}`}>{renderChart()}</div>
 
-                    <div className="chart-labels">
                         <div className="chart-labels">
-                            <DonutChartLabels
-                                onHover={(_, index) => hoverChart(index)}
-                                onMouseLeave={(_, index) => unHoverChart(index)}
-                                className={type}
-                                isShowTrend
-                                isShowValue
-                                labels={items}
-                            />
+                            <div className="chart-labels">
+                                <DonutChartLabels
+                                    onHover={(_, index) => hoverChart(index)}
+                                    onMouseLeave={(_, index) => unHoverChart(index)}
+                                    className={type}
+                                    isShowTrend
+                                    isShowValue
+                                    labels={items}
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {props.onMoreDetail && (
                     <div className="donut-chart-widget-more-detail">

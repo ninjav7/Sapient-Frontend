@@ -60,6 +60,7 @@ const PortfolioOverview = () => {
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
     const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
+    const [isEnergyChartLoading, setEnergyChartLoading] = useState(false);
     const [xAxisObj, setXAxisObj] = useState({
         xAxis: {
             tickPositioner: function () {
@@ -139,15 +140,16 @@ const PortfolioOverview = () => {
                         record.energy_consumption.old = Math.round(record.energy_consumption.old);
                     });
                     setenergyConsumption(response);
-                    setIsEnergyConsumptionChartLoading(false);
                 })
-                .catch((error) => {
+                .finally(() => {
                     setIsEnergyConsumptionChartLoading(false);
                 });
         };
 
         const energyConsumptionData = async () => {
             const payload = apiRequestBody(startDate, endDate, timeZone);
+            setEnergyChartLoading(true);
+
             await fetchPortfolioEnergyConsumption(payload)
                 .then((res) => {
                     const response = res?.data;
@@ -165,7 +167,9 @@ const PortfolioOverview = () => {
                     setEnergyConsumptionsCategories(energyCategories);
                     setEnergyConsumptionsData(energyData);
                 })
-                .catch((error) => {});
+                .finally(() => {
+                    setEnergyChartLoading(false);
+                });
         };
 
         const portfolioBuilidingsData = async () => {
@@ -251,7 +255,7 @@ const PortfolioOverview = () => {
                                 title="Energy Consumption by End Use"
                                 subtitle="Totals in kWh"
                                 energyConsumption={energyConsumption}
-                                isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
+                                isChartLoading={isEnergyConsumptionChartLoading}
                                 pageType="portfolio"
                                 className="h-100"
                             />
@@ -269,6 +273,7 @@ const PortfolioOverview = () => {
                                 xAxisCallBackValue={formatXaxis}
                                 restChartProps={xAxisObj}
                                 tooltipCallBackValue={toolTipFormatter}
+                                isChartLoading={isEnergyChartLoading}
                             />
                         </Col>
                     </Row>

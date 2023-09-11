@@ -68,7 +68,6 @@ const EnergyConsumptionByEndUse = ({
             title={title}
             subtitle={subtitle}
             items={donutChartData}
-            isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
             pageType={pageType}
             bldgId={bldgId}
             onMoreDetail={props.showRouteBtn ? props.handleRouteChange : null}
