@@ -364,7 +364,10 @@ const ExploreByEquipment = () => {
                             return prevState.filter((id) => updatedData.some((equip) => equip?.equipment_id === id));
                         });
                     }
-                    if (data.length === 0) setSelectedEquipIds([]);
+                    if (data.length === 0) {
+                        setSelectedEquipIds([]);
+                        setSeriesData([]);
+                    }
                     if (total_data) setTotalItems(total_data);
                 }
             })
@@ -413,7 +416,7 @@ const ExploreByEquipment = () => {
                             });
                         });
 
-                        setSeriesData((prevSeriesData) => [...prevSeriesData, ...chartData]);
+                        setSeriesData([...seriesData, ...chartData]);
                     }
 
                     if (selectedConsumption !== 'rmsCurrentMilliAmps') {
@@ -433,7 +436,7 @@ const ExploreByEquipment = () => {
                             data: newEquipMappedData,
                         };
 
-                        setSeriesData((prevSeriesData) => [...prevSeriesData, recordToInsert]);
+                        setSeriesData([...seriesData, recordToInsert]);
                     }
                 } else {
                     UserStore.update((s) => {

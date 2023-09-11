@@ -270,6 +270,7 @@ const ExploreByBuildings = () => {
 
                 if (responseData.length === 0) {
                     setSelectedBldgIds([]);
+                    setSeriesData([]);
                 } else {
                     setSelectedBldgIds((prevState) => {
                         return prevState.filter((id) => responseData.some((bldg) => bldg?.building_id === id));
@@ -367,9 +368,7 @@ const ExploreByBuildings = () => {
                         data: newBldgMappedData,
                     };
 
-                    console.log('SSR single recordToInsert => ', recordToInsert);
-
-                    setSeriesData((prevSeriesData) => [...prevSeriesData, recordToInsert]);
+                    setSeriesData([...seriesData, recordToInsert]);
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -432,7 +431,6 @@ const ExploreByBuildings = () => {
                         }
                     });
 
-                    console.log('SSR multiple newResponse => ', newResponse);
                     setSeriesData(newResponse);
                 }
             })
