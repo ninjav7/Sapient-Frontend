@@ -33,7 +33,7 @@ import {
     pageListSizes,
 } from '../../helpers/helpers';
 import { UNITS } from '../../constants/units';
-import { isEmptyObject, truncateString, validateSeriesData } from './utils';
+import { isEmptyObject, truncateString, validateSeriesDataForEquipments } from './utils';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../explore/services';
@@ -274,25 +274,6 @@ const ExploreByEquipment = () => {
             </div>
         );
     });
-
-    const handleEquipStateChange = (value, equipObj) => {
-        if (value === 'true') {
-            const newDataList = seriesData.filter((item) => item?.id !== equipObj?.equipment_id);
-            setSeriesData(newDataList);
-        }
-
-        if (value === 'false') {
-            if (equipObj?.device_type) setDeviceType(equipObj?.device_type);
-            if (equipObj?.equipment_id) fetchSingleEquipChartData(equipObj?.equipment_id, equipObj?.device_type);
-        }
-
-        const isAdding = value === 'false';
-        setSelectedEquipIds((prevState) => {
-            return isAdding
-                ? [...prevState, equipObj?.equipment_id]
-                : prevState.filter((equipId) => equipId !== equipObj?.equipment_id);
-        });
-    };
 
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
@@ -621,6 +602,25 @@ const ExploreByEquipment = () => {
             .finally(() => {
                 setFiltersFetching(false);
             });
+    };
+
+    const handleEquipStateChange = (value, equipObj) => {
+        if (value === 'true') {
+            const newDataList = seriesData.filter((item) => item?.id !== equipObj?.equipment_id);
+            setSeriesData(newDataList);
+        }
+
+        if (value === 'false') {
+            if (equipObj?.device_type) setDeviceType(equipObj?.device_type);
+            if (equipObj?.equipment_id) fetchSingleEquipChartData(equipObj?.equipment_id, equipObj?.device_type);
+        }
+
+        const isAdding = value === 'false';
+        setSelectedEquipIds((prevState) => {
+            return isAdding
+                ? [...prevState, equipObj?.equipment_id]
+                : prevState.filter((equipId) => equipId !== equipObj?.equipment_id);
+        });
     };
 
     const headerProps = [
@@ -1045,11 +1045,11 @@ const ExploreByEquipment = () => {
         }
     }, [checkedAll]);
 
-    const dataToRenderOnChart = validateSeriesData(selectedEquipIds, equipDataList, seriesData);
+    const dataToRenderOnChart = validateSeriesDataForEquipments(selectedEquipIds, equipDataList, seriesData);
 
     return (
         <>
-            <Row className="p-2 explore-filters-style">
+            <Row className="explore-filters-style p-2">
                 <div className="mr-2">
                     <Select
                         defaultValue={selectedConsumption}
