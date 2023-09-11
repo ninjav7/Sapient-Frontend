@@ -33,7 +33,7 @@ import {
     pageListSizes,
 } from '../../helpers/helpers';
 import { UNITS } from '../../constants/units';
-import { isEmptyObject, truncateString } from './utils';
+import { isEmptyObject, truncateString, validateDataToDisplay } from './utils';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../explore/services';
@@ -318,7 +318,12 @@ const ExploreByEquipment = () => {
                             totalBldgUsage: total_building_usage ? total_building_usage : 0,
                         }));
                         setExploreEquipDataList(updatedData);
+
+                        setSelectedEquipIds((prevState) => {
+                            return prevState.filter((id) => updatedData.some((equip) => equip?.equipment_id === id));
+                        });
                     }
+                    if (data.length === 0) setSelectedEquipIds([]);
                     if (total_data) setTotalItems(total_data);
                 }
             })
@@ -1043,7 +1048,7 @@ const ExploreByEquipment = () => {
         }
     }, [checkedAll]);
 
-    console.log('SSR seriesData => ', seriesData);
+    const dataToRenderOnChart = validateDataToDisplay(selectedEquipIds, exploreEquipDataList, seriesData);
 
     return (
         <>
@@ -1079,7 +1084,7 @@ const ExploreByEquipment = () => {
                             tooltipValuesKey={'{point.y:.1f}'}
                             tooltipUnit={selectedUnit}
                             tooltipLabel={selectedConsumptionLabel}
-                            data={seriesData}
+                            data={dataToRenderOnChart}
                             chartProps={{
                                 navigator: {
                                     outlineWidth: 0,

@@ -9,3 +9,9 @@ export const truncateString = (inputString) => {
         return inputString;
     }
 };
+
+export const validateDataToDisplay = (selectedEquipIds, exploreEquipDataList, seriesData) => {
+    if (selectedEquipIds.length === 0 || exploreEquipDataList.length === 0) return [];
+    const filteredSeriesData = seriesData.filter((el) => selectedEquipIds.some((id) => id === el?.id));
+    return filteredSeriesData;
+};
