@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Row, Col } from 'reactstrap';
+import React, { useState, useEffect } from 'react';
+import { Row, Col, Spinner } from 'reactstrap';
 import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../explore/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { useHistory } from 'react-router-dom';
-import { totalSelectionBuildingId } from '../../store/globalState';
-import { useAtom } from 'jotai';
 import { timeZone } from '../../utils/helper';
 import Header from '../../components/Header';
 import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
@@ -26,6 +24,8 @@ import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { UserStore } from '../../store/UserStore';
 import { handleUnitConverstion } from '../settings/general-settings/utils';
 import './style.css';
+import './styles.scss';
+import { validateSeriesDataForBuildings } from './utils';
 
 const SkeletonLoading = ({ noofRows }) => {
     const rowArray = Array.from({ length: noofRows });
@@ -44,22 +44,8 @@ const SkeletonLoading = ({ noofRows }) => {
 };
 
 const ExploreByBuildings = () => {
-    const isLoadingRef = useRef(false);
-    const [search, setSearch] = useState('');
-    const [sortBy, setSortBy] = useState({});
-    const [allSearchData, setAllSearchData] = useState([]);
-    const [totalItems, setTotalItems] = useState(0);
-    const [totalItemsSearched, setTotalItemsSearched] = useState(0);
-    const [allBuildingList, setAllBuildingList] = useState([]);
-    const [selectedBuildingFilter, setSelectedBuildingFilter] = useState(0);
-    const [selectedIds, setSelectedIds] = useState([]);
-    const [filterOptions, setFilterOptions] = useState([]);
-    const { download } = useCSVDownload();
-    const [checkedAll, setCheckedAll] = useState(false);
-    const [buildIdNow, setBuildIdNow] = useState('');
     const history = useHistory();
-
-    const [totalBuildingId] = useAtom(totalSelectionBuildingId);
+    const { download } = useCSVDownload();
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -69,14 +55,22 @@ const ExploreByBuildings = () => {
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
-    const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
-    const [isFilterFetching, setFetchingFilters] = useState(false);
-    const [seriesData, setSeriesData] = useState([]);
+    const [search, setSearch] = useState('');
+    const [sortBy, setSortBy] = useState({});
+    const [totalItems, setTotalItems] = useState(0);
+    const [checkedAll, setCheckedAll] = useState(false);
 
-    let entryPoint = '';
+    const [seriesData, setSeriesData] = useState([]);
+    const [filterOptions, setFilterOptions] = useState([]);
+    const [selectedBldgIds, setSelectedBldgIds] = useState([]);
+    const [exploreBuildingsList, setExploreBuildingsList] = useState([]);
+
+    const [isFilterFetching, setFetchingFilters] = useState(false);
+    const [isFetchingChartData, setFetchingChartData] = useState(false);
+    const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
+
     let top = '';
     let bottom = '';
-    const dataarr = [];
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(0);
     const [bottomEnergyConsumption, setBottomEnergyConsumption] = useState(0);
@@ -84,7 +78,6 @@ const ExploreByBuildings = () => {
     const [bottomPerChange, setBottomPerChange] = useState(0);
     const [topSquareFootage, setTopSquareFootage] = useState(0);
     const [bottomSquareFootage, setBottomSquareFootage] = useState(0);
-    const [selectedAllBuildingId, setSelectedAllBuildingId] = useState([]);
 
     const [minConValue, set_minConValue] = useState(0);
     const [maxConValue, set_maxConValue] = useState(0);
@@ -103,175 +96,16 @@ const ExploreByBuildings = () => {
     const [bottomVal, setBottomVal] = useState(0);
     const [shouldRender, setShouldRender] = useState(true);
 
-    const updateBreadcrumbStore = () => {
-        BreadcrumbStore.update((bs) => {
-            let newList = [
-                {
-                    label: 'Portfolio Level',
-                    path: '/explore-page/by-buildings',
-                    active: true,
-                },
-            ];
-            bs.items = newList;
-        });
-        ComponentStore.update((s) => {
-            s.parent = 'explore';
-        });
-
-        updateBuildingStore('portfolio', 'Portfolio', '');
-    };
-
-    const exploreByBuildingDataFetch = async () => {
-        setFetchingFilters(true);
-        isLoadingRef.current = true;
-        setIsExploreDataLoading(true);
-
-        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'total_consumption' : sortBy.name;
-        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
-        const start_date = encodeURIComponent(startDate);
-        const end_date = encodeURIComponent(endDate);
-
-        let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&metric=energy`;
-
-        if (search) params = params.concat(`&building_search=${encodeURIComponent(search)}`);
-        if (ordered_by) params = params.concat(`&ordered_by=${ordered_by}`);
-        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
-        if (selectedBuildingType.length !== 0) {
-            const buildingTypesSelected = encodeURIComponent(selectedBuildingType.join('+'));
-            params.concat(`&building_type=${buildingTypesSelected}`);
-        }
-
-        if (conAPIFlag !== '') {
-            const gte = (minConValue - 1) * 1000;
-            const lte = (maxConValue + 1) * 1000;
-            params.concat(`&energy_consumption_lte=${lte}&energy_consumption_gte=${gte}`);
-        }
-
-        if (perAPIFlag !== '') {
-            const gte = minPerValue - 0.5;
-            const lte = maxPerValue + 0.5;
-            params.concat(`&change_lte=${lte}&change_gte=${gte}`);
-        }
-
-        if (sqftAPIFlag !== '') {
-            const gte = minSqftValue;
-            const lte = maxSqftValue;
-            params.concat(`&square_footage_lte=${lte}&square_footage_gte=${gte}`);
-        }
-
-        await fetchExploreByBuildingListV2(params)
-            .then((res) => {
-                if (entryPoint === 'entered') {
-                    totalBuildingId.length = 0;
-                    setSeriesData([]);
-                }
-                let responseData = res?.data?.data;
-                if (responseData.length !== 0) {
-                    responseData.forEach((el) => {
-                        el.user_pref_units = userPrefUnits;
-                    });
-                }
-                setAllBuildingList(responseData);
-                setTotalItems(responseData.length);
-                const uniqueIds = [];
-                const uniqueBuildingTypes = responseData.filter((element) => {
-                    const isDuplicate = uniqueIds.includes(element.building_type);
-                    if (!isDuplicate) {
-                        uniqueIds.push(element.building_type);
-                        return true;
-                    }
-                    return false;
-                });
-                setBuildingTypeList(uniqueBuildingTypes);
-                const squareFootage =
-                    userPrefUnits === `si`
-                        ? Math.round(handleUnitConverstion(responseData[0].square_footage, userPrefUnits))
-                        : responseData[0].square_footage;
-                let topConsumption = responseData[0].energy_consumption.now;
-                let bottomConsumption = responseData[0].energy_consumption.now;
-                let topChange = responseData[0].energy_consumption.change;
-                let bottomChange = responseData[0].energy_consumption.change;
-                let topSqft = squareFootage;
-                let bottomSqft = squareFootage;
-                responseData.map((ele) => {
-                    if (Number(ele?.energy_consumption.now) > topConsumption)
-                        topConsumption = ele?.energy_consumption.now;
-                    if (Number(ele?.energy_consumption.now) < bottomConsumption)
-                        bottomConsumption = ele?.energy_consumption.now;
-                    if (Number(ele?.energy_consumption.change) > topChange) topChange = ele?.energy_consumption.change;
-                    if (Number(ele?.energy_consumption.change) < bottomChange)
-                        bottomChange = ele?.energy_consumption.change;
-                    if (Number(ele?.square_footage) > topSqft)
-                        topSqft = Math.round(handleUnitConverstion(ele?.square_footage, userPrefUnits));
-                    if (Number(ele?.square_footage) < bottomSqft)
-                        bottomSqft = Math.round(handleUnitConverstion(ele?.square_footage, userPrefUnits));
-                });
-                top = topConsumption / 1000;
-                bottom = bottomConsumption / 1000;
-                if (top === bottom) {
-                    bottom = 0;
-                }
-                set_minConValue(Math.abs(Math.round(bottomConsumption / 1000)));
-                setBottomEnergyConsumption(Math.abs(Math.round(bottomConsumption / 1000)));
-                set_maxConValue(
-                    Math.abs(
-                        topConsumption === bottomConsumption
-                            ? Math.round(topConsumption / 1000) + 1
-                            : Math.round(topConsumption / 1000)
-                    )
-                );
-                setTopVal(Math.round(topChange));
-                setBottomVal(Math.round(bottomChange));
-                setTopEnergyConsumption(Math.abs(Math.round(topConsumption / 1000)));
-                set_minPerValue(Math.round(bottomChange));
-                setBottomPerChange(Math.round(bottomChange));
-                set_maxPerValue(topChange === bottomChange ? Math.round(topChange) + 1 : Math.round(topChange));
-                setTopPerChange(Math.round(topChange));
-                set_minSqftValue(Math.abs(Math.round(bottomSqft)));
-                setBottomSquareFootage(Math.abs(Math.round(bottomSqft)));
-                setTopSquareFootage(Math.abs(Math.round(topSqft)));
-                set_maxSqftValue(Math.abs(topSqft === bottomSqft ? Math.round(topSqft) + 1 : Math.round(topSqft)));
-                isLoadingRef.current = false;
-                setIsExploreDataLoading(false);
-                setFetchingFilters(false);
-            })
-            .catch((error) => {
-                isLoadingRef.current = false;
-                setIsExploreDataLoading(false);
-                setFetchingFilters(false);
-            });
-    };
-
     const currentRow = () => {
-        if (selectedBuildingFilter === 0) {
-            return allBuildingList;
-        }
-        if (selectedBuildingFilter === 1) {
-            return selectedIds.reduce((acc, id) => {
-                const foundSelectedBuilding = allBuildingList.find((blgd) => blgd.building_id === id);
-                if (foundSelectedBuilding) {
-                    acc.push(foundSelectedBuilding);
-                }
-                return acc;
-            }, []);
-        }
-        return allBuildingList.filter(({ building_id }) => !selectedIds.find((blgd) => blgd === building_id));
+        return exploreBuildingsList;
     };
 
-    const currentRowSearched = () => {
-        if (selectedBuildingFilter === 0) {
-            return allSearchData;
-        }
-        if (selectedBuildingFilter === 1) {
-            return selectedIds.reduce((acc, id) => {
-                const foundSelectedBuilding = allSearchData.find((blgd) => blgd.building_id === id);
-                if (foundSelectedBuilding) {
-                    acc.push(foundSelectedBuilding);
-                }
-                return acc;
-            }, []);
-        }
-        return allSearchData.filter(({ id }) => !selectedIds.find((blgd) => blgd === id));
+    const redirectToExploreEquipPage = (bldId, bldName, bldTimeZone, isPlugOnly) => {
+        updateBuildingStore(bldId, bldName, bldTimeZone, isPlugOnly);
+
+        history.push({
+            pathname: `/explore-page/by-equipment/${bldId}`,
+        });
     };
 
     const renderBuildingName = (row) => {
@@ -318,34 +152,6 @@ const ExploreByBuildings = () => {
                 }
             />
         );
-    };
-
-    const redirectToExploreEquipPage = (bldId, bldName, bldTimeZone, isPlugOnly) => {
-        updateBuildingStore(bldId, bldName, bldTimeZone, isPlugOnly);
-
-        history.push({
-            pathname: `/explore-page/by-equipment/${bldId}`,
-        });
-    };
-
-    const handleBuildingStateChange = (value, selectedBldg) => {
-        const isRecordChecked = value === 'true' ? true : false;
-
-        if (isRecordChecked) {
-            let arr1 = seriesData.filter(function (item) {
-                return item?.id !== selectedBldg?.building_id;
-            });
-            setSeriesData(arr1);
-            setBuildIdNow('');
-        } else {
-            setBuildIdNow(selectedBldg?.building_id);
-        }
-
-        setSelectedIds((prevState) => {
-            return isRecordChecked
-                ? prevState.filter((buildId) => buildId !== selectedBldg?.building_id)
-                : [...prevState, selectedBldg?.building_id];
-        });
     };
 
     const [tableHeader, setTableHeader] = useState([
@@ -417,83 +223,268 @@ const ExploreByBuildings = () => {
             });
     };
 
-    const fetchExploreChartData = async (id) => {
-        const payload = apiRequestBody(startDate, endDate, timeZone);
+    const exploreByBuildingDataFetch = async () => {
+        setFetchingFilters(true);
+        setIsExploreDataLoading(true);
 
-        await fetchExploreBuildingChart(payload, id)
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    const data = response?.data;
-                    let arr = [];
-                    arr = allBuildingList.filter(function (item) {
-                        return item?.building_id === id;
-                    });
-                    let NulledData = [];
-                    data.map((ele) => {
-                        if (ele?.consumption === '') {
-                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
-                        } else {
-                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
-                        }
-                    });
-                    let recordToInsert = {
-                        name: arr[0]?.building_name,
-                        data: NulledData,
-                        id: arr[0]?.building_id,
-                    };
-                    setSeriesData([...seriesData, recordToInsert]);
-                }
-            })
-            .catch((error) => {});
-    };
+        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'total_consumption' : sortBy.name;
+        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
+        const start_date = encodeURIComponent(startDate);
+        const end_date = encodeURIComponent(endDate);
 
-    const fetchExploreAllChartData = async (id) => {
-        const payload = apiRequestBody(startDate, endDate, timeZone);
+        let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&metric=energy`;
 
-        await fetchExploreBuildingChart(payload, id)
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    const data = response?.data;
-                    let arr = [];
-                    arr = allBuildingList.filter(function (item) {
-                        return item?.building_id === id;
-                    });
-                    let NulledData = [];
-                    data.map((ele) => {
-                        if (ele?.consumption === '') {
-                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
-                        } else {
-                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
-                        }
-                    });
-                    let recordToInsert = {
-                        name: arr[0]?.building_name,
-                        data: NulledData,
-                        id: arr[0]?.building_id,
-                    };
-                    dataarr.push(recordToInsert);
-                    if (selectedIds.length === dataarr.length) {
-                        setSeriesData(dataarr);
-                    }
-                }
-            })
-            .catch((error) => {});
-    };
-
-    useEffect(() => {
-        entryPoint = 'entered';
-        updateBreadcrumbStore();
-        localStorage.removeItem('explorer');
-    }, []);
-
-    useEffect(() => {
-        if (selectedIds?.length !== 0) {
-            setSeriesData([]);
-            setSelectedAllBuildingId(selectedIds);
+        if (search) params = params.concat(`&building_search=${encodeURIComponent(search)}`);
+        if (ordered_by) params = params.concat(`&ordered_by=${ordered_by}`);
+        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
+        if (selectedBuildingType.length !== 0) {
+            const buildingTypesSelected = encodeURIComponent(selectedBuildingType.join('+'));
+            params.concat(`&building_type=${buildingTypesSelected}`);
         }
-    }, [startDate, endDate]);
+
+        if (conAPIFlag !== '') {
+            const gte = (minConValue - 1) * 1000;
+            const lte = (maxConValue + 1) * 1000;
+            params.concat(`&energy_consumption_lte=${lte}&energy_consumption_gte=${gte}`);
+        }
+
+        if (perAPIFlag !== '') {
+            const gte = minPerValue - 0.5;
+            const lte = maxPerValue + 0.5;
+            params.concat(`&change_lte=${lte}&change_gte=${gte}`);
+        }
+
+        if (sqftAPIFlag !== '') {
+            const gte = minSqftValue;
+            const lte = maxSqftValue;
+            params.concat(`&square_footage_lte=${lte}&square_footage_gte=${gte}`);
+        }
+
+        await fetchExploreByBuildingListV2(params)
+            .then((res) => {
+                let responseData = res?.data?.data;
+                if (responseData.length !== 0) {
+                    responseData.forEach((el) => {
+                        el.user_pref_units = userPrefUnits;
+                    });
+                }
+                setExploreBuildingsList(responseData);
+
+                if (responseData) setTotalItems(responseData.length);
+
+                if (responseData.length === 0) {
+                    setSelectedBldgIds([]);
+                } else {
+                    setSelectedBldgIds((prevState) => {
+                        return prevState.filter((id) => responseData.some((bldg) => bldg?.building_id === id));
+                    });
+                }
+
+                const uniqueIds = [];
+                const uniqueBuildingTypes = responseData.filter((element) => {
+                    const isDuplicate = uniqueIds.includes(element.building_type);
+                    if (!isDuplicate) {
+                        uniqueIds.push(element.building_type);
+                        return true;
+                    }
+                    return false;
+                });
+                setBuildingTypeList(uniqueBuildingTypes);
+                const squareFootage =
+                    userPrefUnits === `si`
+                        ? Math.round(handleUnitConverstion(responseData[0].square_footage, userPrefUnits))
+                        : responseData[0].square_footage;
+                let topConsumption = responseData[0].energy_consumption.now;
+                let bottomConsumption = responseData[0].energy_consumption.now;
+                let topChange = responseData[0].energy_consumption.change;
+                let bottomChange = responseData[0].energy_consumption.change;
+                let topSqft = squareFootage;
+                let bottomSqft = squareFootage;
+                responseData.map((ele) => {
+                    if (Number(ele?.energy_consumption.now) > topConsumption)
+                        topConsumption = ele?.energy_consumption.now;
+                    if (Number(ele?.energy_consumption.now) < bottomConsumption)
+                        bottomConsumption = ele?.energy_consumption.now;
+                    if (Number(ele?.energy_consumption.change) > topChange) topChange = ele?.energy_consumption.change;
+                    if (Number(ele?.energy_consumption.change) < bottomChange)
+                        bottomChange = ele?.energy_consumption.change;
+                    if (Number(ele?.square_footage) > topSqft)
+                        topSqft = Math.round(handleUnitConverstion(ele?.square_footage, userPrefUnits));
+                    if (Number(ele?.square_footage) < bottomSqft)
+                        bottomSqft = Math.round(handleUnitConverstion(ele?.square_footage, userPrefUnits));
+                });
+                top = topConsumption / 1000;
+                bottom = bottomConsumption / 1000;
+                if (top === bottom) {
+                    bottom = 0;
+                }
+                set_minConValue(Math.abs(Math.round(bottomConsumption / 1000)));
+                setBottomEnergyConsumption(Math.abs(Math.round(bottomConsumption / 1000)));
+                set_maxConValue(
+                    Math.abs(
+                        topConsumption === bottomConsumption
+                            ? Math.round(topConsumption / 1000) + 1
+                            : Math.round(topConsumption / 1000)
+                    )
+                );
+                setTopVal(Math.round(topChange));
+                setBottomVal(Math.round(bottomChange));
+                setTopEnergyConsumption(Math.abs(Math.round(topConsumption / 1000)));
+                set_minPerValue(Math.round(bottomChange));
+                setBottomPerChange(Math.round(bottomChange));
+                set_maxPerValue(topChange === bottomChange ? Math.round(topChange) + 1 : Math.round(topChange));
+                setTopPerChange(Math.round(topChange));
+                set_minSqftValue(Math.abs(Math.round(bottomSqft)));
+                setBottomSquareFootage(Math.abs(Math.round(bottomSqft)));
+                setTopSquareFootage(Math.abs(Math.round(topSqft)));
+                set_maxSqftValue(Math.abs(topSqft === bottomSqft ? Math.round(topSqft) + 1 : Math.round(topSqft)));
+
+                setIsExploreDataLoading(false);
+                setFetchingFilters(false);
+            })
+            .catch((error) => {
+                setIsExploreDataLoading(false);
+                setFetchingFilters(false);
+            });
+    };
+
+    const fetchSingleBldgChartData = async (id) => {
+        const payload = apiRequestBody(startDate, endDate, timeZone);
+
+        await fetchExploreBuildingChart(payload, id)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    const { data } = response;
+
+                    const bldgObj = exploreBuildingsList.find((el) => el?.building_id === id);
+                    if (!bldgObj?.building_id || data.length === 0) return;
+
+                    const newBldgMappedData = data.map((el) => ({
+                        x: new Date(el?.time_stamp).getTime(),
+                        y: el?.consumption === '' ? null : el?.consumption,
+                    }));
+
+                    const recordToInsert = {
+                        id: bldgObj?.building_id,
+                        name: bldgObj?.building_name,
+                        data: newBldgMappedData,
+                    };
+
+                    console.log('SSR single recordToInsert => ', recordToInsert);
+
+                    setSeriesData((prevSeriesData) => [...prevSeriesData, recordToInsert]);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to fetch data for selected Building.'
+                            : 'Unable to fetch data due to Internal Server Error!.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch((err) => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to fetch data due to Internal Server Error!.';
+                    s.notificationType = 'error';
+                });
+            });
+    };
+
+    const fetchMultipleBldgsChartData = async (start_date, end_date, bldgIDs = []) => {
+        if (start_date === null || end_date === null || bldgIDs.length === 0) return;
+
+        setFetchingChartData(true);
+
+        const payload = apiRequestBody(start_date, end_date, timeZone);
+
+        const promisesList = [];
+
+        bldgIDs.forEach((id) => {
+            promisesList.push(fetchExploreBuildingChart(payload, id));
+        });
+
+        setSeriesData([]);
+
+        Promise.all(promisesList)
+            .then((res) => {
+                const promiseResponse = res;
+
+                if (promiseResponse?.length !== 0) {
+                    const newResponse = [];
+
+                    promiseResponse.forEach((record, index) => {
+                        const response = record?.data;
+                        if (response?.success && response?.data.length !== 0) {
+                            const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldgIDs[index]);
+                            if (!bldgObj?.building_id) return;
+
+                            const newBldgsMappedData = response?.data.map((el) => ({
+                                x: new Date(el?.time_stamp).getTime(),
+                                y: el?.consumption === '' ? null : el?.consumption,
+                            }));
+
+                            newResponse.push({
+                                id: bldgObj?.building_id,
+                                name: bldgObj?.building_name,
+                                data: newBldgsMappedData,
+                            });
+                        }
+                    });
+
+                    console.log('SSR multiple newResponse => ', newResponse);
+                    setSeriesData(newResponse);
+                }
+            })
+            .catch(() => {})
+            .finally(() => {
+                setFetchingChartData(false);
+            });
+    };
+
+    const handleBuildingStateChange = (value, selectedBldg) => {
+        if (value === 'true') {
+            const newDataList = seriesData.filter((item) => item?.id !== selectedBldg?.building_id);
+            setSeriesData(newDataList);
+        }
+
+        if (value === 'false') {
+            if (selectedBldg?.building_id) fetchSingleBldgChartData(selectedBldg?.building_id);
+        }
+
+        const isAdding = value === 'false';
+        setSelectedBldgIds((prevState) => {
+            return isAdding
+                ? [...prevState, selectedBldg?.building_id]
+                : prevState.filter((buildId) => buildId !== selectedBldg?.building_id);
+        });
+    };
+
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Portfolio Level',
+                    path: '/explore-page/by-buildings',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'explore';
+        });
+
+        updateBuildingStore('portfolio', 'Portfolio', '');
+    };
+
+    useEffect(() => {
+        updateBreadcrumbStore();
+    }, []);
 
     useEffect(() => {
         if (userPrefUnits) {
@@ -510,6 +501,7 @@ const ExploreByBuildings = () => {
 
     useEffect(() => {
         if (startDate === null || endDate === null) return;
+
         exploreByBuildingDataFetch();
     }, [
         search,
@@ -683,51 +675,70 @@ const ExploreByBuildings = () => {
     }, [minConValue, maxConValue, minPerValue, maxPerValue, minSqftValue, maxSqftValue, perAPIFlag, userPrefUnits]);
 
     useEffect(() => {
-        if (buildIdNow !== '') fetchExploreChartData(buildIdNow);
-    }, [buildIdNow]);
+        if (selectedBldgIds.length !== 0) {
+            fetchMultipleBldgsChartData(startDate, endDate, selectedBldgIds);
+        }
+    }, [startDate, endDate]);
 
     useEffect(() => {
-        if (selectedAllBuildingId.length === 1) {
-            fetchExploreAllChartData(selectedAllBuildingId[0]);
-        } else if (selectedAllBuildingId.length > 1) {
-            selectedAllBuildingId.forEach((ele) => {
-                fetchExploreAllChartData(ele);
-            });
+        if (checkedAll) {
+            if (exploreBuildingsList.length !== 0 && exploreBuildingsList.length <= 20) {
+                const allBldgsIds = exploreBuildingsList.map((el) => el?.building_id);
+                fetchMultipleBldgsChartData(startDate, endDate, allBldgsIds);
+                setSelectedBldgIds(allBldgsIds);
+            }
         }
-    }, [selectedAllBuildingId]);
+        if (!checkedAll) {
+            setSeriesData([]);
+            setSelectedBldgIds([]);
+        }
+    }, [checkedAll]);
+
+    const dataToRenderOnChart = validateSeriesDataForBuildings(selectedBldgIds, exploreBuildingsList, seriesData);
 
     return (
         <>
-            <Row className="ml-2 mr-2 explore-filters-style">
+            <Row className="explore-filters-style p-2">
                 <Header title="" type="page" />
             </Row>
 
             <Row>
-                <div className="explore-data-table-style p-2 mb-2">
-                    <ExploreChart
-                        title={''}
-                        subTitle={''}
-                        tooltipUnit="KWh"
-                        tooltipLabel="Energy Consumption"
-                        data={seriesData}
-                        // dateRange={fetchDateRange(startDate, endDate)}
-                        chartProps={{
-                            navigator: {
-                                outlineWidth: 0,
-                                adaptToUpdatedData: false,
-                                stickToMax: true,
-                            },
-                            tooltip: {
-                                xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
-                            },
-                            xAxis: {
-                                type: 'datetime',
-                                labels: {
-                                    format: formatXaxisForHighCharts(daysCount, userPrefDateFormat, userPrefTimeFormat),
+                <div className="explore-data-table-style p-2">
+                    {isFetchingChartData ? (
+                        <div className="explore-chart-wrapper">
+                            <div className="explore-chart-loader">
+                                <Spinner color="primary" />
+                            </div>
+                        </div>
+                    ) : (
+                        <ExploreChart
+                            title={''}
+                            subTitle={''}
+                            tooltipUnit="KWh"
+                            tooltipLabel="Energy Consumption"
+                            data={dataToRenderOnChart}
+                            chartProps={{
+                                navigator: {
+                                    outlineWidth: 0,
+                                    adaptToUpdatedData: false,
+                                    stickToMax: true,
                                 },
-                            },
-                        }}
-                    />
+                                tooltip: {
+                                    xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
+                                },
+                                xAxis: {
+                                    type: 'datetime',
+                                    labels: {
+                                        format: formatXaxisForHighCharts(
+                                            daysCount,
+                                            userPrefDateFormat,
+                                            userPrefTimeFormat
+                                        ),
+                                    },
+                                },
+                            }}
+                        />
+                    )}
                 </div>
             </Row>
 
@@ -735,15 +746,13 @@ const ExploreByBuildings = () => {
                 <div className="explore-data-table-style">
                     <Col lg={12}>
                         <DataTableWidget
+                            id="explore-by-building"
                             isLoading={isExploreDataLoading}
                             isLoadingComponent={<SkeletonLoading noofRows={tableHeader.length + 1} />}
                             isFilterLoading={isFilterFetching}
-                            id="explore-by-building"
                             onSearch={setSearch}
                             buttonGroupFilterOptions={[]}
-                            onStatus={setSelectedBuildingFilter}
                             rows={currentRow()}
-                            searchResultRows={currentRowSearched()}
                             filterOptions={filterOptions}
                             onDownload={() => handleDownloadCsv()}
                             headers={tableHeader}
@@ -757,6 +766,7 @@ const ExploreByBuildings = () => {
                                     onChange={() => {
                                         setCheckedAll(!checkedAll);
                                     }}
+                                    disabled={!exploreBuildingsList || exploreBuildingsList.length > 20}
                                 />
                             )}
                             customCheckboxForCell={(record) => (
@@ -765,22 +775,15 @@ const ExploreByBuildings = () => {
                                     type="checkbox"
                                     id="building_check"
                                     name="building_check"
-                                    checked={selectedIds.includes(record?.building_id) || checkedAll}
-                                    value={selectedIds.includes(record?.building_id) || checkedAll ? true : false}
+                                    checked={selectedBldgIds.includes(record?.building_id)}
+                                    value={selectedBldgIds.includes(record?.building_id)}
                                     onChange={(e) => {
                                         handleBuildingStateChange(e.target.value, record);
                                     }}
                                 />
                             )}
                             totalCount={(() => {
-                                if (search) {
-                                    return totalItemsSearched;
-                                }
-                                if (selectedBuildingFilter === 0) {
-                                    return totalItems;
-                                }
-
-                                return 0;
+                                return totalItems;
                             })()}
                         />
                     </Col>
