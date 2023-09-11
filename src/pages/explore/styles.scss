@@ -13,3 +13,10 @@
     border-radius: 0.2rem;
     background-color: $dataviz-background-2;
 }
+
+.explore-chart-loader {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, FormGroup } from 'reactstrap';
+import { Row, Col, FormGroup, Spinner } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
@@ -194,69 +194,63 @@ const EquipChartModal = ({
 
     const fetchEquipmentChart = async (equipId, equiName) => {
         setIsEquipDataFetched(true);
-        let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${
+
+        const payload = apiRequestBody(startDate, endDate, timeZone);
+
+        const params = `?building_id=${bldgId}&consumption=${
             selectedConsumption === 'rmsCurrentMilliAmps' && equipData?.device_type === 'active'
                 ? 'mAh'
                 : selectedConsumption
-        }&divisible_by=1000${selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''}`;
+        }&equipment_id=${equipId}&divisible_by=1000${
+            selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
+        }`;
+
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
-                let response = res.data;
+                const response = res?.data;
 
-                if (selectedConsumption === 'rmsCurrentMilliAmps') {
-                    let exploreData = [];
+                if (response?.success) {
+                    const { data } = response;
 
-                    let data = response.data;
-                    for (let i = 0; i < data.length; i++) {
-                        let NulledData = [];
-                        data[i].data.map((ele) => {
-                            if (ele.consumption === '') {
-                                NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
-                            } else {
-                                NulledData.push({
-                                    x: new Date(ele.time_stamp).getTime(),
-                                    y: ele.consumption,
-                                });
-                            }
+                    if (!data || data.length === 0) return;
+
+                    if (selectedConsumption === 'rmsCurrentMilliAmps') {
+                        const chartData = [];
+
+                        data.forEach((sensorObj) => {
+                            const newSensorMappedData = sensorObj?.data.map((el) => ({
+                                x: new Date(el?.time_stamp).getTime(),
+                                y: el?.consumption === '' ? null : el?.consumption,
+                            }));
+
+                            chartData.push({
+                                name: `Sensor ${sensorObj?.index_alias}`,
+                                data: newSensorMappedData,
+                            });
                         });
-                        let recordToInsert = {
-                            name: `Sensor ${data[i].index_alias}`,
-                            data: NulledData,
+
+                        setDeviceData(chartData);
+                    }
+
+                    if (selectedConsumption !== 'rmsCurrentMilliAmps') {
+                        const newEquipMappedData = data.map((el) => ({
+                            x: new Date(el?.time_stamp).getTime(),
+                            y: el?.consumption === '' ? null : el?.consumption,
+                        }));
+
+                        const recordToInsert = {
+                            name: equiName,
+                            data: newEquipMappedData,
                         };
 
-                        exploreData.push(recordToInsert);
+                        setDeviceData([recordToInsert]);
                     }
-                    setDeviceData(exploreData);
-                    setIsEquipDataFetched(false);
-                } else {
-                    let data = response.data.map((_data) => {
-                        _data[1] = parseInt(_data[1]);
-                        return _data;
-                    });
-                    let exploreData = [];
-                    let NulledData = [];
-                    data.map((ele) => {
-                        if (ele?.consumption === '') {
-                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
-                        } else {
-                            NulledData.push({
-                                x: new Date(ele?.time_stamp).getTime(),
-                                y: ele?.consumption,
-                            });
-                        }
-                    });
-                    let recordToInsert = {
-                        name: equiName,
-                        data: NulledData,
-                    };
-                    exploreData.push(recordToInsert);
-                    setDeviceData(exploreData);
-                    setIsEquipDataFetched(false);
                 }
             })
-            .catch((error) => {});
-        setIsEquipDataFetched(false);
+            .catch((error) => {})
+            .finally(() => {
+                setIsEquipDataFetched(false);
+            });
     };
 
     const redirectToConfigDevicePageLink = (equipDeviceId, deviceType) => {
@@ -635,36 +629,38 @@ const EquipChartModal = ({
                                     </div>
 
                                     {isEquipDataFetched ? (
-                                        <></>
+                                        <div className="line-chart-wrapper">
+                                            <div className="line-chart-loader">
+                                                <Spinner color="primary" />
+                                            </div>
+                                        </div>
                                     ) : (
-                                        <div>
-                                            <LineChart
-                                                title={''}
-                                                subTitle={''}
-                                                tooltipUnit={selectedUnit}
-                                                tooltipLabel={selectedConsumptionLabel}
-                                                data={deviceData}
-                                                // dateRange={fetchDateRange(startDate, endDate)}
-                                                chartProps={{
-                                                    tooltip: {
-                                                        xDateFormat: dateTimeFormatForHighChart(
+                                        <LineChart
+                                            title={''}
+                                            subTitle={''}
+                                            tooltipUnit={selectedUnit}
+                                            tooltipLabel={selectedConsumptionLabel}
+                                            data={deviceData}
+                                            // dateRange={fetchDateRange(startDate, endDate)}
+                                            chartProps={{
+                                                tooltip: {
+                                                    xDateFormat: dateTimeFormatForHighChart(
+                                                        userPrefDateFormat,
+                                                        userPrefTimeFormat
+                                                    ),
+                                                },
+                                                xAxis: {
+                                                    type: 'datetime',
+                                                    labels: {
+                                                        format: formatXaxisForHighCharts(
+                                                            daysCount,
                                                             userPrefDateFormat,
                                                             userPrefTimeFormat
                                                         ),
                                                     },
-                                                    xAxis: {
-                                                        type: 'datetime',
-                                                        labels: {
-                                                            format: formatXaxisForHighCharts(
-                                                                daysCount,
-                                                                userPrefDateFormat,
-                                                                userPrefTimeFormat
-                                                            ),
-                                                        },
-                                                    },
-                                                }}
-                                            />
-                                        </div>
+                                                },
+                                            }}
+                                        />
                                     )}
                                 </Col>
                             </Row>

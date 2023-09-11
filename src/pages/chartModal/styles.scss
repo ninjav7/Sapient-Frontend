@@ -7,3 +7,10 @@
     border: 0.0625rem solid $primary-gray-150;
     padding: 1.5rem;
 }
+
+.line-chart-loader {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
