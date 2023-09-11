@@ -1,31 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Spinner } from 'reactstrap';
-import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../explore/services';
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { Link } from 'react-router-dom';
+
+import { UserStore } from '../../store/UserStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { ComponentStore } from '../../store/ComponentStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import { useHistory } from 'react-router-dom';
-import { timeZone } from '../../utils/helper';
+
 import Header from '../../components/Header';
-import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
+import Brick from '../../sharedComponents/brick';
+import Typography from '../../sharedComponents/typography';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
-import Brick from '../../sharedComponents/brick';
+import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
 import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
-import Typography from '../../sharedComponents/typography';
-import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
-import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
-import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
-import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+
+import { timeZone } from '../../utils/helper';
+import { validateSeriesDataForBuildings } from './utils';
 import { getAverageValue } from '../../helpers/AveragePercent';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-import { UserStore } from '../../store/UserStore';
+import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
+import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../explore/services';
 import { handleUnitConverstion } from '../settings/general-settings/utils';
+import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
+import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
+
 import './style.css';
 import './styles.scss';
-import { validateSeriesDataForBuildings } from './utils';
 
 const SkeletonLoading = ({ noofRows }) => {
     const rowArray = Array.from({ length: noofRows });
@@ -44,7 +48,6 @@ const SkeletonLoading = ({ noofRows }) => {
 };
 
 const ExploreByBuildings = () => {
-    const history = useHistory();
     const { download } = useCSVDownload();
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -100,36 +103,29 @@ const ExploreByBuildings = () => {
         return exploreBuildingsList;
     };
 
-    const redirectToExploreEquipPage = (bldId, bldName, bldTimeZone, isPlugOnly) => {
-        updateBuildingStore(bldId, bldName, bldTimeZone, isPlugOnly);
-
-        history.push({
-            pathname: `/explore-page/by-equipment/${bldId}`,
-        });
-    };
-
     const renderBuildingName = (row) => {
         return (
             <div style={{ fontSize: 0 }}>
-                <a
+                <Link
+                    to={`/explore-page/by-equipment/${row?.building_id}`}
                     className="typography-wrapper link mouse-pointer"
                     onClick={() => {
-                        redirectToExploreEquipPage(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);
+                        updateBuildingStore(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);
                     }}>
                     {row?.building_name}
-                </a>
+                </Link>
                 <Brick sizeInPixels={3} />
             </div>
         );
     };
 
-    const renderSquareFootage = (row) => {
+    const renderSquareFootage = useCallback((row) => {
         const value = Math.round(handleUnitConverstion(row?.square_footage, row?.user_pref_units));
         const unit = `${row?.user_pref_units === `si` ? `Sq.M.` : `Sq.Ft.`}`;
         return <Typography.Body size={Typography.Sizes.sm}>{`${value} ${unit}`}</Typography.Body>;
-    };
+    });
 
-    const renderConsumption = (row) => {
+    const renderConsumption = useCallback((row) => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
@@ -139,9 +135,9 @@ const ExploreByBuildings = () => {
                 <TinyBarChart percent={getAverageValue(row?.energy_consumption.now / 1000, bottom, top)} />
             </>
         );
-    };
+    });
 
-    const renderPerChange = (row) => {
+    const renderPerChange = useCallback((row) => {
         return (
             <TrendsBadge
                 value={Math.abs(Math.round(row?.energy_consumption?.change))}
@@ -152,7 +148,7 @@ const ExploreByBuildings = () => {
                 }
             />
         );
-    };
+    });
 
     const [tableHeader, setTableHeader] = useState([
         {
@@ -741,6 +737,8 @@ const ExploreByBuildings = () => {
                     )}
                 </div>
             </Row>
+
+            <Brick sizeInRem={0.75} />
 
             <Row>
                 <div className="explore-data-table-style">
