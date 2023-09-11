@@ -222,6 +222,7 @@ const ExploreByBuildings = () => {
     const exploreByBuildingDataFetch = async () => {
         setFetchingFilters(true);
         setIsExploreDataLoading(true);
+        setExploreBuildingsList([]);
 
         const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'total_consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
@@ -746,9 +747,13 @@ const ExploreByBuildings = () => {
                             isLoading={isExploreDataLoading}
                             isLoadingComponent={<SkeletonLoading noofRows={tableHeader.length + 1} />}
                             isFilterLoading={isFilterFetching}
-                            onSearch={setSearch}
+                            onSearch={(e) => {
+                                setSearch(e);
+                                setCheckedAll(false);
+                            }}
                             buttonGroupFilterOptions={[]}
                             rows={currentRow()}
+                            searchResultRows={currentRow()}
                             filterOptions={filterOptions}
                             onDownload={() => handleDownloadCsv()}
                             headers={tableHeader}
