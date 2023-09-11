@@ -700,6 +700,7 @@ const ExploreByEquipment = () => {
         } else {
             window.scrollTo(0, 0);
         }
+        setCheckedAll(false);
     }, [pageNo, pageSize]);
 
     useEffect(() => {
