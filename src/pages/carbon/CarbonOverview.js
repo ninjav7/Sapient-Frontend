@@ -3,24 +3,15 @@ import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import moment from 'moment';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
-import { formatConsumptionValue } from '../../helpers/helpers';
-import { getAverageValue } from '../../helpers/AveragePercent';
 import { Badge } from '../../sharedComponents/badge';
 import { fetchCompareBuildingsV2, getCarbonBuildingChartData } from '../compareBuildings/services';
 import { getCarbonCompareBuildingsTableCSVExport } from '../../utils/tablesExport';
 
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 
-import {
-    fetchPortfolioBuilidings,
-    fetchPortfolioOverall,
-    fetchPortfolioEndUse,
-    fetchPortfolioEnergyConsumption,
-} from '../portfolio/services';
 import { useHistory } from 'react-router-dom';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 
-import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
 
 import { primaryGray1000 } from '../../assets/scss/_colors.scss';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
@@ -34,13 +25,9 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import 'react-loading-skeleton/dist/skeleton.css';
 import PortfolioKPIs from './PortfolioKPIs';
-import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
-import { apiRequestBody } from '../../helpers/helpers';
 import Brick from '../../sharedComponents/brick';
-import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
-import colors from '../../assets/scss/_colors.scss';
 import { UNITS } from '../../constants/units';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
@@ -79,9 +66,6 @@ const SkeletonLoading = () => (
 const CarbonOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
-    const [energyConsumption, setenergyConsumption] = useState([]);
-    const [isEnergyConsumptionChartLoading, setIsEnergyConsumptionChartLoading] = useState(false);
-    const [markers, setMarkers] = useState([]);
 
     const history = useHistory();
     const { download } = useCSVDownload();
@@ -89,9 +73,7 @@ const CarbonOverview = () => {
 
     const [sortBy, setSortBy] = useState({});
     const [search, setSearch] = useState('');
-    const [shouldRender, setShouldRender] = useState(true);
 
-    const [topEnergyDensity, setTopEnergyDensity] = useState();
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
     const [tableHeader, setTableHeader] = useState([
         {
@@ -212,6 +194,7 @@ const CarbonOverview = () => {
         getXaxisForDaysSelected(daysCount);
         getFormattedChartDates(daysCount, userPrefTimeFormat, userPrefDateFormat);
     }, [daysCount, userPrefTimeFormat, userPrefDateFormat]);
+
     const fetchcompareBuildingsData = async (search, ordered_by = 'building_name', sort_by, userPrefUnits) => {
         setIsLoadingBuildingData(true);
         let params = `?date_from=${startDate}&date_to=${endDate}&tz_info=${timeZone}&metric=carbon&ordered_by=${ordered_by}`;
@@ -233,93 +216,6 @@ const CarbonOverview = () => {
 
         fetchcompareBuildingsData(search, ordered_by, sort_by, userPrefUnits);
     }, [search, sortBy, daysCount, userPrefUnits]);
-    useEffect(() => {
-        if (startDate === null || endDate === null) return;
-
-        // const portfolioOverallData = async () => {
-        //     setIsKPIsLoading(true);
-        //     let payload = apiRequestBody(startDate, endDate, timeZone);
-        //     await fetchPortfolioOverall(payload)
-        //         .then((res) => {
-        //             if (res?.data) setOveralldata(res?.data);
-        //             setIsKPIsLoading(false);
-        //         })
-        //         .catch((error) => {
-        //             setIsKPIsLoading(false);
-        //         });
-        // };
-
-        const portfolioEndUsesData = async () => {
-            setIsEnergyConsumptionChartLoading(true);
-            const params = `?off_hours=false`;
-            const payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchPortfolioEndUse(params, payload)
-                .then((res) => {
-                    const response = res?.data?.data;
-                    response.sort((a, b) => b?.energy_consumption?.now - a?.energy_consumption?.now);
-                    response.forEach((record) => {
-                        record.energy_consumption.now = Math.round(record.energy_consumption.now);
-                        record.energy_consumption.old = Math.round(record.energy_consumption.old);
-                    });
-                    setenergyConsumption(response);
-                    setIsEnergyConsumptionChartLoading(false);
-                })
-                .catch((error) => {
-                    setIsEnergyConsumptionChartLoading(false);
-                });
-        };
-
-        const energyConsumptionData = async () => {
-            const payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchPortfolioEnergyConsumption(payload)
-                .then((res) => {
-                    const response = res?.data;
-                    let energyCategories = [];
-                    let energyData = [
-                        {
-                            name: 'Energy',
-                            data: [],
-                        },
-                    ];
-                    response.forEach((record) => {
-                        energyCategories.push(record?.x);
-                        energyData[0].data.push(parseFloat((record?.y / 1000).toFixed(2)));
-                    });
-                    setEnergyConsumptionsCategories(energyCategories);
-                    setEnergyConsumptionsData(energyData);
-                })
-                .catch((error) => {});
-        };
-
-        const portfolioBuilidingsData = async () => {
-            let payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchPortfolioBuilidings(payload)
-                .then((res) => {
-                    let data = res.data;
-                    setBuildingsEnergyConsume(data);
-                    let markerArray = [];
-                    data.map((record) => {
-                        let markerObj = {
-                            markerOffset: 25,
-                            name: record.buildingName,
-                            coordinates: [parseInt(record.lat), parseInt(record.long)],
-                        };
-                        markerArray.push(markerObj);
-                    });
-                    const markerArr = [
-                        { markerOffset: 25, name: 'NYPL', coordinates: [-74.006, 40.7128] },
-                        { markerOffset: 25, name: 'Justin', coordinates: [90.56, 76.76] },
-                    ];
-                    setMarkers(markerArr);
-                })
-                .catch((error) => {});
-        };
-
-        portfolioBuilidingsData();
-        // portfolioOverallData();
-        portfolioEndUsesData();
-        energyConsumptionData();
-    }, [startDate, endDate, userPrefUnits]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
