@@ -1161,6 +1161,7 @@ const ExploreByEquipment = () => {
                                     onChange={() => {
                                         setCheckedAll(!checkedAll);
                                     }}
+                                    disabled={!equipDataList || equipDataList.length > 20}
                                 />
                             )}
                             customCheckboxForCell={(record) => (
