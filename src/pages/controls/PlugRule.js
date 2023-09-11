@@ -536,13 +536,6 @@ const PlugRule = () => {
         }
     };
 
-    useEffect(() => {
-        if (selectedInitialyIds.length) {
-            getGraphData();
-            fetchEstimateSensorSavings();
-        }
-        getDateRange([]);
-    }, [selectedInitialyIds]);
 
     useEffect(() => {
         if (selectedIdsToUnlink.length) {
@@ -1553,14 +1546,11 @@ const PlugRule = () => {
         Promise.allSettled([
             isChangedRuleDetails && updatePlugRuleData(),
             isChangedSocketsUnlinked && reassignSensorsToRule(),
-            // isChangedSockets && updateSocketUnlink(),
         ]).then((value) => {
             handleCloseSocketsModal(true);
             fetchUnLinkedSocketRules();
             fetchFiltersForSensorsUnlinked();
             fetchFiltersForSensorsLinked();
-            fetchLinkedSocketRules();
-            fetchLinkedSocketIds();
             fetchPlugRuleDetail();
             setIsChangedRuleDetails(false);
             setIsChangedSocketsUnlinked(false);
@@ -1632,8 +1622,6 @@ const PlugRule = () => {
                 setIsChangedRuleDetails(false);
                 setIsChangedSocketsUnlinked(false);
                 setIsChangedSocketsLinked(false);
-                fetchUnLinkedSocketRules();
-                fetchLinkedSocketRules();
                 fetchLinkedSocketIds();
                 fetchFiltersForSensorsUnlinked();
                 fetchFiltersForSensorsLinked();
