@@ -162,7 +162,10 @@ const EditSensorModal = (props) => {
                     />
                 </div>
 
-                {ctSensorObj?.model === 'Custom' ? (
+                <Brick sizeInRem={1.5} />
+
+                {/* --- PLT-1562 Hide "Custom" CT functionality temperory */}
+                {/* {ctSensorObj?.model === 'Custom' ? (
                     <Brick sizeInRem={1.5} />
                 ) : (
                     <>
@@ -180,7 +183,7 @@ const EditSensorModal = (props) => {
                         </div>
                         <Brick sizeInRem={1.25} />
                     </>
-                )}
+                )} */}
 
                 <div className="w-100 mr-2">
                     <Typography.Body size={Typography.Sizes.md}>
