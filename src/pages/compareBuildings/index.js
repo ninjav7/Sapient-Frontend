@@ -27,32 +27,21 @@ import { handleUnitConverstion } from '../settings/general-settings/utils';
 import { fetchCompareBuildingsV2 } from './services';
 import './style.css';
 
-const SkeletonLoading = () => (
-    <SkeletonTheme color={primaryGray1000} height={35}>
-        <tr>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
+const SkeletonLoading = ({ noofRows }) => {
+    const rowArray = Array.from({ length: noofRows });
 
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+    return (
+        <SkeletonTheme color="$primary-gray-1000" height={35}>
+            <tr>
+                {rowArray.map((_, index) => (
+                    <th key={index}>
+                        <Skeleton count={10} />
+                    </th>
+                ))}
+            </tr>
+        </SkeletonTheme>
+    );
+};
 
 const CompareBuildingsTable = ({
     tableHeader,
@@ -66,7 +55,7 @@ const CompareBuildingsTable = ({
     return (
         <DataTableWidget
             isLoading={isLoadingBuildingData}
-            isLoadingComponent={<SkeletonLoading />}
+            isLoadingComponent={<SkeletonLoading noofRows={tableHeader.length} />}
             id="compare-building"
             onSearch={(query) => setSearch(query)}
             rows={buildingsData}
@@ -241,9 +230,8 @@ const CompareBuildings = () => {
                     setTopEnergyDensity(topVal);
                     setBuildingsData(responseData);
                 }
-                setIsLoadingBuildingData(false);
             })
-            .catch((error) => {
+            .finally(() => {
                 setIsLoadingBuildingData(false);
             });
     };
