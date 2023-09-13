@@ -10,6 +10,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 import Header from '../../components/Header';
 import Brick from '../../sharedComponents/brick';
+import Select from '../../sharedComponents/form/select';
 import Typography from '../../sharedComponents/typography';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
@@ -18,6 +19,7 @@ import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 
 import { timeZone } from '../../utils/helper';
+import { UNITS } from '../../constants/units';
 import { exploreBldgMetrics, validateSeriesDataForBuildings } from './utils';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
@@ -30,7 +32,6 @@ import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 
 import './style.css';
 import './styles.scss';
-import Select from '../../sharedComponents/form/select';
 
 const SkeletonLoading = ({ noofRows }) => {
     const rowArray = Array.from({ length: noofRows });
@@ -711,6 +712,12 @@ const ExploreByBuildings = () => {
 
     const dataToRenderOnChart = validateSeriesDataForBuildings(selectedBldgIds, exploreBuildingsList, seriesData);
 
+    const tooltipUnitVal = selectedConsumption.includes('carbon')
+        ? userPrefUnits === 'si'
+            ? UNITS.KGS_MWH
+            : UNITS.LBS_MWH
+        : selectedUnit;
+
     return (
         <>
             <Row className="explore-filters-style p-2">
@@ -740,7 +747,7 @@ const ExploreByBuildings = () => {
                         <ExploreChart
                             title={''}
                             subTitle={''}
-                            tooltipUnit={selectedUnit}
+                            tooltipUnit={tooltipUnitVal}
                             tooltipLabel={selectedConsumptionLabel}
                             data={dataToRenderOnChart}
                             chartProps={{

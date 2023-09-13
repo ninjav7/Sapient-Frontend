@@ -1,3 +1,5 @@
+import { UNITS } from '../../constants/units';
+
 export const exploreBldgMetrics = [
     { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
     { value: 'power', label: 'Power (kW)', unit: 'kW', Consumption: 'Power' },
@@ -7,7 +9,7 @@ export const exploreBldgMetrics = [
     { value: 'reactive_power', label: 'Reactive Power (kVAR)', unit: 'kVAR', Consumption: 'Reactive Power' },
     { value: 'frequency', label: 'Frequency (Hz)', unit: 'Hz', Consumption: 'Frequency' },
     { value: 'power_factor', label: 'Power Factor (%)', unit: '%', Consumption: 'Power Factor' },
-    { value: 'carbon_emissions', label: 'Carbon Emissions', unit: 'CE', Consumption: 'Carbon Emissions' },
+    { value: 'carbon_emissions', label: 'Carbon Emissions', unit: UNITS.KGS_MWH, Consumption: 'Carbon Emissions' },
     {
         value: 'generated_carbon_rate',
         label: 'Generated Carbon Intensity',
