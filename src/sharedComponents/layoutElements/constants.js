@@ -16,6 +16,7 @@ const ACCESSORS = Object.freeze({
     _ID: '_id',
     PARENT_SPACE: 'parent_space',
     SPACES: 'spaces',
+    HAS_CHILDREN: 'has_children',
 });
 
 const MAP_PROPERTIES_ACTIONS = {
