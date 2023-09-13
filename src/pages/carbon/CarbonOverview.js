@@ -6,12 +6,18 @@ import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { Badge } from '../../sharedComponents/badge';
 import { fetchCompareBuildingsV2, getCarbonBuildingChartData } from '../compareBuildings/services';
 import { getCarbonCompareBuildingsTableCSVExport } from '../../utils/tablesExport';
+import { apiRequestBody } from '../../helpers/helpers';
+import {
+    fetchPortfolioBuilidings,
+    fetchPortfolioOverall,
+    fetchPortfolioEndUse,
+    fetchPortfolioEnergyConsumption,
+} from '../portfolio/services';
 
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 
 import { useHistory } from 'react-router-dom';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
-
 
 import { primaryGray1000 } from '../../assets/scss/_colors.scss';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
@@ -122,16 +128,9 @@ const CarbonOverview = () => {
 
     const [overalldata, setOveralldata] = useState({
         total_building: 0,
-        total_consumption: {
+        total: {
             now: 0,
-            old: 0,
-        },
-        total_carbon_emissions: {
-            now: 10,
-            old: 8,
-        },
-        yearly_electric_eui: {
-            now: 0,
+            change: 0,
             old: 0,
         },
     });
@@ -146,10 +145,47 @@ const CarbonOverview = () => {
             setTableHeader(newHeaderList);
         }
     }, [userPrefUnits]);
+    const portfolioOverallData = async () => {
+        setIsKPIsLoading(true);
+        let payload = {
+            date_from: startDate,
+            date_to: endDate,
+            tz_info: timeZone,
+            metric: 'carbon',
+        };
+
+        await fetchPortfolioOverall(payload)
+            .then((res) => {
+                console.log('RES34564', res);
+                if (res?.data) setOveralldata(res?.data.data);
+                setIsKPIsLoading(false);
+            })
+            .catch((error) => {
+                setIsKPIsLoading(false);
+            });
+    };
+
+    useEffect(() => {
+        if (startDate === null || endDate === null) return;
+
+        portfolioOverallData();
+        const portfolioBuilidingsData = async () => {
+            let payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchPortfolioBuilidings(payload)
+                .then((res) => {
+                    let data = res.data;
+                    setBuildingsEnergyConsume(data);
+                })
+                .catch((error) => {});
+        };
+
+        portfolioBuilidingsData();
+        portfolioOverallData();
+    }, [startDate, endDate, userPrefUnits]);
+
     const [isKPIsLoading, setIsKPIsLoading] = useState(false);
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
-    const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
     const [xAxisObj, setXAxisObj] = useState({
         xAxis: {
             tickPositioner: function () {
@@ -270,20 +306,21 @@ const CarbonOverview = () => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {row?.average_carbon_intensity!==null?parseFloat(row?.average_carbon_intensity).toFixed(2):0} lbs/MWh
+                    {row?.average_carbon_intensity !== null ? parseFloat(row?.average_carbon_intensity).toFixed(2) : 0}{' '}
+                    {userPrefUnits === 'si' ? `${UNITS.ibs}/MWh` : `${UNITS.kg}/MWh`}
                 </Typography.Body>
             </>
         );
-    }; 
+    };
 
     const renderTotalConsumption = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {Math.round(row.total_carbon_emissions / 1000)} {UNITS.ibs}
+                {Math.round(row.total_carbon_emissions / 1000)} {userPrefUnits === 'si' ? `${UNITS.ibs}` : `${UNITS.kg}`}
+
             </Typography.Body>
         );
     };
-
 
     const renderChangeEnergy = (row) => {
         return (

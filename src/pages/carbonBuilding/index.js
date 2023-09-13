@@ -65,8 +65,8 @@ const CarbonBuilding = () => {
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
     const [carbonConsumptionsCategories, setCarbonConsumptionsCategories] = useState([]);
 
-    const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
-    const [carbonIntensity, setCarbonIntensity] = useState([]);
+    const [energyConsumptionsData, setEnergyConsumptionsData] = useState([{}]);
+    const [carbonIntensity, setCarbonIntensity] = useState([{}]);
 
     const [chartsData, setChartsData] = useState([]);
     const [dataToDisplay, setDataToDisplay] = useState([]);
@@ -236,14 +236,13 @@ const CarbonBuilding = () => {
                     });
 
                     setCarbonConsumptionsCategories(carbonCategories);
-                    setEnergyConsumptionsData(carbonData);
                     setCarbonIntensity(carbonData);
                 }
             })
             .catch((error) => {});
     };
 
-    const handleLedgendStatusChange = (key, value) => {
+    const handleLegendStatusChange = (key, value) => {
         setLegendObj((prevLegendObj) => ({
             ...prevLegendObj,
             [key]: value,
@@ -251,12 +250,20 @@ const CarbonBuilding = () => {
     };
 
     useEffect(() => {
-        const mergedList = [...energyConsumptionsData, ...carbonIntensity];
+        const mergedList = [];
+        if(energyConsumptionsData[0].name){
+            mergedList[0] = energyConsumptionsData[0];
+        } 
+        if(carbonIntensity[0].name){
+            mergedList[1] = carbonIntensity[0];
+        }
         setChartsData(mergedList);
     }, [energyConsumptionsData, carbonIntensity]);
 
     useEffect(() => {
-        if (legendObj?.carbon && legendObj?.energy) setDataToDisplay(chartsData);
+        if (legendObj?.carbon && legendObj?.energy) {
+            setDataToDisplay(chartsData);
+        }
         if (!legendObj?.carbon && !legendObj?.energy) setDataToDisplay([]);
         if (legendObj?.carbon && !legendObj?.energy) {
             let obj = chartsData.find((el) => el?.name === 'Carbon');
@@ -288,13 +295,13 @@ const CarbonBuilding = () => {
                             label: `Carbon Intensity (${userPrefUnits == 'si' ? 'kgs/MWh' : 'lbs/MWh'})`,
                             color: colors.datavizMain1,
                             type: 'spline',
-                            onClick: (event) => handleLedgendStatusChange('carbon', !event),
+                            onClick: (event) => handleLegendStatusChange('carbon', !event),
                         },
                         {
                             label: 'Energy Consumption (kWh)',
                             type: 'column',
                             color: colors.datavizMain2,
-                            onClick: (event) => handleLedgendStatusChange('energy', !event),
+                            onClick: (event) => handleLegendStatusChange('energy', !event),
                         },
                     ]}
                     timeZone={timeZone}
