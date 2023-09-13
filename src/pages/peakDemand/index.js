@@ -253,8 +253,8 @@ const PeakDemand = () => {
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const cookies = new Cookies();
     const userdata = cookies.get('user');
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const headers = {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, FormGroup } from 'reactstrap';
+import { Row, Col, FormGroup, Spinner } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
@@ -18,6 +18,7 @@ import moment from 'moment';
 import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
+import { UserStore } from '../../store/UserStore';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import Header from '../../components/Header';
@@ -25,7 +26,12 @@ import { formatConsumptionValue } from '../../helpers/explorehelpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
 import '../../sharedComponents/typography/style.scss';
-import { apiRequestBody, compareObjData } from '../../helpers/helpers';
+import {
+    apiRequestBody,
+    compareObjData,
+    dateTimeFormatForHighChart,
+    formatXaxisForHighCharts,
+} from '../../helpers/helpers';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
@@ -35,9 +41,8 @@ import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/attached.svg';
 import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
-import './styles.scss';
 import '../settings/passive-devices/styles.scss';
-import { UserStore } from '../../store/UserStore';
+import './styles.scss';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -52,8 +57,12 @@ const EquipChartModal = ({
 
     const history = useHistory();
 
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
@@ -185,69 +194,63 @@ const EquipChartModal = ({
 
     const fetchEquipmentChart = async (equipId, equiName) => {
         setIsEquipDataFetched(true);
-        let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${
+
+        const payload = apiRequestBody(startDate, endDate, timeZone);
+
+        const params = `?building_id=${bldgId}&consumption=${
             selectedConsumption === 'rmsCurrentMilliAmps' && equipData?.device_type === 'active'
                 ? 'mAh'
                 : selectedConsumption
-        }&divisible_by=1000${selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''}`;
+        }&equipment_id=${equipId}&divisible_by=1000${
+            selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
+        }`;
+
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
-                let response = res.data;
+                const response = res?.data;
 
-                if (selectedConsumption === 'rmsCurrentMilliAmps') {
-                    let exploreData = [];
+                if (response?.success) {
+                    const { data } = response;
 
-                    let data = response.data;
-                    for (let i = 0; i < data.length; i++) {
-                        let NulledData = [];
-                        data[i].data.map((ele) => {
-                            if (ele.consumption === '') {
-                                NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
-                            } else {
-                                NulledData.push({
-                                    x: new Date(ele.time_stamp).getTime(),
-                                    y: ele.consumption,
-                                });
-                            }
+                    if (!data || data.length === 0) return;
+
+                    if (selectedConsumption === 'rmsCurrentMilliAmps') {
+                        const chartData = [];
+
+                        data.forEach((sensorObj) => {
+                            const newSensorMappedData = sensorObj?.data.map((el) => ({
+                                x: new Date(el?.time_stamp).getTime(),
+                                y: el?.consumption === '' ? null : el?.consumption,
+                            }));
+
+                            chartData.push({
+                                name: `Sensor ${sensorObj?.index_alias}`,
+                                data: newSensorMappedData,
+                            });
                         });
-                        let recordToInsert = {
-                            name: `Sensor ${data[i].index_alias}`,
-                            data: NulledData,
+
+                        setDeviceData(chartData);
+                    }
+
+                    if (selectedConsumption !== 'rmsCurrentMilliAmps') {
+                        const newEquipMappedData = data.map((el) => ({
+                            x: new Date(el?.time_stamp).getTime(),
+                            y: el?.consumption === '' ? null : el?.consumption,
+                        }));
+
+                        const recordToInsert = {
+                            name: equiName,
+                            data: newEquipMappedData,
                         };
 
-                        exploreData.push(recordToInsert);
+                        setDeviceData([recordToInsert]);
                     }
-                    setDeviceData(exploreData);
-                    setIsEquipDataFetched(false);
-                } else {
-                    let data = response.data.map((_data) => {
-                        _data[1] = parseInt(_data[1]);
-                        return _data;
-                    });
-                    let exploreData = [];
-                    let NulledData = [];
-                    data.map((ele) => {
-                        if (ele?.consumption === '') {
-                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
-                        } else {
-                            NulledData.push({
-                                x: new Date(ele?.time_stamp).getTime(),
-                                y: ele?.consumption,
-                            });
-                        }
-                    });
-                    let recordToInsert = {
-                        name: equiName,
-                        data: NulledData,
-                    };
-                    exploreData.push(recordToInsert);
-                    setDeviceData(exploreData);
-                    setIsEquipDataFetched(false);
                 }
             })
-            .catch((error) => {});
-        setIsEquipDataFetched(false);
+            .catch((error) => {})
+            .finally(() => {
+                setIsEquipDataFetched(false);
+            });
     };
 
     const redirectToConfigDevicePageLink = (equipDeviceId, deviceType) => {
@@ -255,11 +258,11 @@ const EquipChartModal = ({
             return '';
         }
 
-        if (deviceType === 'active-device') {
-            return `/settings/active-devices/single/${bldgId}/${equipDeviceId}`;
+        if (deviceType === 'smart-plugs') {
+            return `/settings/smart-plugs/single/${bldgId}/${equipDeviceId}`;
         }
 
-        if (deviceType === 'passive-device') {
+        if (deviceType === 'smart-meters') {
             return `/settings/smart-meters/single/${bldgId}/${equipDeviceId}`;
         }
     };
@@ -269,11 +272,11 @@ const EquipChartModal = ({
             return;
         }
 
-        if (deviceType === 'active-device') {
-            history.push({ pathname: `/settings/active-devices/single/${bldgId}/${equipDeviceId}` });
+        if (deviceType === 'smart-plugs') {
+            history.push({ pathname: `/settings/smart-plugs/single/${bldgId}/${equipDeviceId}` });
         }
 
-        if (deviceType === 'passive-device') {
+        if (deviceType === 'smart-meters') {
             history.push({ pathname: `/settings/smart-meters/single/${bldgId}/${equipDeviceId}` });
         }
     };
@@ -334,6 +337,7 @@ const EquipChartModal = ({
                         return {
                             label: el?.equipment_type,
                             value: el?.equipment_id,
+                            end_use_name: el?.end_use_name,
                         };
                     });
 
@@ -408,7 +412,7 @@ const EquipChartModal = ({
             <Modal
                 show={showEquipmentChart}
                 onHide={handleChartClose}
-                dialogClassName="modal-container-style"
+                size="xl"
                 centered
                 backdrop="static"
                 keyboard={false}>
@@ -445,7 +449,8 @@ const EquipChartModal = ({
                                     </div>
                                 </div>
                                 <div className="d-flex">
-                                    {equipData?.device_type === 'active' && (
+                                    {/* Commented below code as part of Ticket PLT-1373: Hide "Turn Off" button on equipment modal */}
+                                    {/* {equipData?.device_type === 'active' && (
                                         <div>
                                             <Button
                                                 label="Turn Off"
@@ -454,7 +459,7 @@ const EquipChartModal = ({
                                                 className="mr-4"
                                             />
                                         </div>
-                                    )}
+                                    )} */}
 
                                     <div>
                                         <Button
@@ -497,9 +502,11 @@ const EquipChartModal = ({
                                     <div className="ytd-container">
                                         <div>
                                             <div className="ytd-heading">
-                                                {`Total Consumption (${moment(startDate).format('MMM D')} to ${moment(
-                                                    endDate
-                                                ).format('MMM D')})`}
+                                                {`Total Consumption (${moment(startDate).format(
+                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
+                                                )} to ${moment(endDate).format(
+                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
+                                                )})`}
                                             </div>
                                             {isYtdDataFetching ? (
                                                 <Skeleton count={1} />
@@ -516,9 +523,11 @@ const EquipChartModal = ({
                                         </div>
                                         <div>
                                             <div className="ytd-heading">
-                                                {`Peak kW (${moment(startDate).format('MMM D')} to ${moment(
-                                                    endDate
-                                                ).format('MMM D')})`}
+                                                {`Peak kW (${moment(startDate).format(
+                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
+                                                )} to ${moment(endDate).format(
+                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
+                                                )})`}
                                             </div>
                                             {isYtdDataFetching ? (
                                                 <Skeleton count={1} />
@@ -539,7 +548,17 @@ const EquipChartModal = ({
                                                                 .utc(ytdData?.ytd_peak?.time_stamp)
                                                                 .clone()
                                                                 .tz(timeZone)
-                                                                .format('MM/DD  H:mm')}`}
+                                                                .format(
+                                                                    `${
+                                                                        userPrefDateFormat === `DD-MM-YYYY`
+                                                                            ? `DD/MM`
+                                                                            : `MM/DD`
+                                                                    } ${
+                                                                        userPrefTimeFormat === `12h`
+                                                                            ? `hh:mm A`
+                                                                            : `HH:mm`
+                                                                    }`
+                                                                )}`}
                                                         </span>
                                                     ) : (
                                                         <span className="ytd-unit">kW</span>
@@ -575,9 +594,9 @@ const EquipChartModal = ({
                                                     to={redirectToConfigDevicePageLink(
                                                         equipData?.device_id,
                                                         equipData?.device_type === 'passive'
-                                                            ? 'passive-device'
+                                                            ? 'smart-meters'
                                                             : equipData?.device_type === 'active'
-                                                            ? 'active-device'
+                                                            ? 'smart-plugs'
                                                             : ''
                                                     )}>
                                                     <span
@@ -610,18 +629,38 @@ const EquipChartModal = ({
                                     </div>
 
                                     {isEquipDataFetched ? (
-                                        <></>
-                                    ) : (
-                                        <div>
-                                            <LineChart
-                                                title={''}
-                                                subTitle={''}
-                                                tooltipUnit={selectedUnit}
-                                                tooltipLabel={selectedConsumptionLabel}
-                                                data={deviceData}
-                                                dateRange={fetchDateRange(startDate, endDate)}
-                                            />
+                                        <div className="line-chart-wrapper">
+                                            <div className="line-chart-loader">
+                                                <Spinner color="primary" />
+                                            </div>
                                         </div>
+                                    ) : (
+                                        <LineChart
+                                            title={''}
+                                            subTitle={''}
+                                            tooltipUnit={selectedUnit}
+                                            tooltipLabel={selectedConsumptionLabel}
+                                            data={deviceData}
+                                            // dateRange={fetchDateRange(startDate, endDate)}
+                                            chartProps={{
+                                                tooltip: {
+                                                    xDateFormat: dateTimeFormatForHighChart(
+                                                        userPrefDateFormat,
+                                                        userPrefTimeFormat
+                                                    ),
+                                                },
+                                                xAxis: {
+                                                    type: 'datetime',
+                                                    labels: {
+                                                        format: formatXaxisForHighCharts(
+                                                            daysCount,
+                                                            userPrefDateFormat,
+                                                            userPrefTimeFormat
+                                                        ),
+                                                    },
+                                                },
+                                            }}
+                                        />
                                     )}
                                 </Col>
                             </Row>
@@ -667,7 +706,13 @@ const EquipChartModal = ({
                                                 <Brick sizeInRem={0.25} />
                                                 <Select
                                                     placeholder="Select Equipment Type"
-                                                    options={equipmentTypeData}
+                                                    options={
+                                                        equipData?.device_type === 'active'
+                                                            ? equipmentTypeData.filter(
+                                                                  (el) => el?.end_use_name === 'Plug'
+                                                              )
+                                                            : equipmentTypeData
+                                                    }
                                                     currentValue={equipmentTypeData.filter(
                                                         (option) => option.value === equipData?.equipments_type_id
                                                     )}
@@ -977,7 +1022,7 @@ const EquipChartModal = ({
                                                             onClick={() => {
                                                                 redirectToConfigDevicePage(
                                                                     equipData?.device_id,
-                                                                    'passive-device'
+                                                                    'smart-meters'
                                                                 );
                                                             }}
                                                             disabled={
@@ -1069,7 +1114,9 @@ const EquipChartModal = ({
                                                         size={Typography.Sizes.lg}
                                                         Type={Typography.Types.Light}
                                                         className="modal-right-card-title">
-                                                        Power Strip - Socket 2
+                                                        {equipData?.device_model === 'KP115'
+                                                            ? `Smart Plug - Socket 1`
+                                                            : ``}
                                                     </Typography.Subheader>
 
                                                     <Button
@@ -1079,7 +1126,7 @@ const EquipChartModal = ({
                                                         onClick={() => {
                                                             redirectToConfigDevicePage(
                                                                 equipData?.device_id,
-                                                                'active-device'
+                                                                'smart-plugs'
                                                             );
                                                         }}
                                                         className="m-0"

@@ -2,21 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { Spinner } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import 'moment-timezone';
-import { ReactComponent as Xmark } from '../../assets/icon/xmark.svg';
 import { BaseUrl, sensorGraphData } from '../../services/Network';
 import axios from 'axios';
 import { Cookies } from 'react-cookie';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import Header from '../../components/Header';
-import { apiRequestBody } from '../../helpers/helpers';
-import '../../pages/portfolio/style.scss';
-import './style.css';
+import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
 import Typography from '../../sharedComponents/typography';
 import { Button } from '../../sharedComponents/button';
+import { UserStore } from '../../store/UserStore';
+import '../../pages/portfolio/style.scss';
+import './style.css';
 
 const DeviceChartModel = ({
     showChart,
@@ -45,8 +45,10 @@ const DeviceChartModel = ({
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [dropDown, setDropDown] = useState('dropdown-menu dropdown-menu-right');
 
@@ -225,7 +227,18 @@ const DeviceChartModel = ({
                         tooltipUnit={selectedUnit}
                         tooltipLabel={selectedConsumptionLabel}
                         data={deviceData}
-                        dateRange={fetchDateRange(startDate, endDate)}
+                        // dateRange={fetchDateRange(startDate, endDate)}
+                        chartProps={{
+                            tooltip: {
+                                xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
+                            },
+                            xAxis: {
+                                type: 'datetime',
+                                labels: {
+                                    format: formatXaxisForHighCharts(daysCount, userPrefDateFormat, userPrefTimeFormat),
+                                },
+                            },
+                        }}
                     />
                 </div>
             )}

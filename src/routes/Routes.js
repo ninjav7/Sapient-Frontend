@@ -39,15 +39,6 @@ const HorizontalLayout = Loadable({
     loading,
 });
 
-const AdminLayout = Loadable({
-    loader: () => import('../layouts/Admin'),
-    render(loaded, props) {
-        let Component = loaded.default;
-        return <Component {...props} />;
-    },
-    loading,
-});
-
 class Routes extends Component {
     // returns the layout
     getLayout = () => {

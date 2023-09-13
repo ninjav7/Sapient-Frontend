@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Alert, Input, Spinner } from 'reactstrap';
+import { useAtom } from 'jotai';
+import { useParams } from 'react-router-dom';
+import { Row, Col, Alert, Spinner } from 'reactstrap';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+
 import {
     fetchKasaDevices,
     fetchKasaAccounts,
@@ -8,13 +12,12 @@ import {
     getInsertKasaDevices,
     insertToSystem,
 } from './services';
-import { useAtom } from 'jotai';
-import { useParams } from 'react-router-dom';
+
+import { buildingData } from '../../../../store/globalState';
+import { updateBuildingStore } from '../../../../helpers/updateBuildingStore';
 import { BreadcrumbStore } from '../../../../store/BreadcrumbStore';
-import { BuildingStore } from '../../../../store/BuildingStore';
-import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import { ComponentStore } from '../../../../store/ComponentStore';
-import '../style.css';
+
 import { ReactComponent as CircleCheckSVG } from '../../../../assets/icon/circle-check.svg';
 import { ReactComponent as LinkSVG } from '../../../../assets/icon/link.svg';
 import { ReactComponent as LinkSlashSVG } from '../../../../assets/icon/link-slash.svg';
@@ -22,17 +25,19 @@ import { ReactComponent as MagnifyingGlassSVG } from '../../../../assets/icon/ma
 import { ReactComponent as CircleXmarkSVG } from '../../../../assets/icon/circle-xmark.svg';
 import { ReactComponent as SignalStreamSVG } from '../../../../assets/icon/signal-stream.svg';
 import { ReactComponent as ClockSVG } from '../../../../assets/icon/clock.svg';
-import 'react-loading-skeleton/dist/skeleton.css';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import { DataTableWidget } from '../../../../sharedComponents/dataTableWidget';
+
 import Brick from '../../../../sharedComponents/brick';
 import Typography from '../../../../sharedComponents/typography';
-import colorPalette from '../../../../assets/scss/_colors.scss';
+import { DataTableWidget } from '../../../../sharedComponents/dataTableWidget';
+
 import LinkModal from './LinkModal';
 import UnLinkModal from './UnLinkModal';
 import FindDevicesModal from './FindDevicesModal';
-import { buildingData } from '../../../../store/globalState';
-import { updateBuildingStore } from '../../../../helpers/updateBuildingStore';
+
+import colorPalette from '../../../../assets/scss/_colors.scss';
+import 'react-loading-skeleton/dist/skeleton.css';
+import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
+import '../style.css';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -104,22 +109,28 @@ const Provision = () => {
     const [showUnlink, setShowUnLink] = useState(false);
     const [showFind, setShowFind] = useState(false);
     const [checkedEmailFind, setCheckedEmailFind] = useState([]);
+
     const handleLinkClose = () => {
         setShowLink(false);
         setError(false);
     };
+
     const handleUnLinkClose = () => {
         setShowUnLink(false);
         setError(false);
     };
+
     const handleFindClose = () => setShowFind(false);
 
     const [linkedAccount, setLinkedAccount] = useState([]);
-    const [readyData, setReadyData] = useState([]);
-    const [progressData, setProgressData] = useState([]);
-    const [total, setTotal] = useState([]);
+    const [totalReadyData, setTotalReadyData] = useState(0);
     const [isProcessing, setIsProcessing] = useState(false);
+
+    const [availableDevices, setAvailableDevices] = useState(0);
+    const [existingDevices, setExistingDevices] = useState(0);
     const [isAddProcessing, setIsAddProcessing] = useState(false);
+    const [kasaDevicesList, setKasaDevicesList] = useState([]);
+
     const [selectedStatus, setSelectedStatus] = useState(0);
     const [auth, setAuth] = useState('');
     const { bldgId } = useParams();
@@ -127,6 +138,15 @@ const Provision = () => {
     const [error, setError] = useState(false);
     const [message, setMessage] = useState('');
     const [kasaDevices, setKasaDevices] = useState([]);
+    const [search, setSearch] = useState('');
+    const [sortBy, setSortBy] = useState({});
+    const [pageNo, setPageNo] = useState(1);
+    const [pageSize, setPageSize] = useState(5);
+    const [devicesearch, setDeviceSearch] = useState('');
+    const [deviceSortBy, setDeviceSortBy] = useState({});
+    const [devicePageNo, setDevicePageNo] = useState(1);
+    const [devicePageSize, setDevicePageSize] = useState(20);
+    const [selectedAccount, setSelectedAccount] = useState({});
 
     const handleUnlink = async (checkedEmail) => {
         let authData = {
@@ -164,10 +184,15 @@ const Provision = () => {
                 kasa_account_ids: checkedEmailFind,
                 find_new: true,
             };
-            getKasaDevices(arr, true);
+            setSelectedAccount(arr);
+
             setShowFind(false);
         }
     };
+    useEffect(() => {
+        if (Object.entries(selectedAccount).length !== 0)
+            getKasaDevices(selectedAccount, true, selectedStatus === 0 ? 'Found' : 'Completed');
+    }, [selectedAccount, devicePageNo, devicePageSize, devicesearch, deviceSortBy, selectedStatus]);
 
     const handleAuthorize = async (email, password) => {
         let authData = {
@@ -242,13 +267,13 @@ const Provision = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Active Devices',
-                        path: `/settings/active-devices/${bldgId}`,
+                        label: 'Smart Plugs',
+                        path: `/settings/smart-plugs/${bldgId}`,
                         active: false,
                     },
                     {
                         label: 'Provisioning',
-                        path: '/settings/active-devices/provision',
+                        path: '/settings/smart-plugs/provision',
                         active: true,
                     },
                 ];
@@ -263,11 +288,18 @@ const Provision = () => {
 
     const getKasaAccount = async () => {
         setIsProcessing(true);
-        let params = `?building_id=${bldgId}`;
-        await fetchKasaAccounts(params)
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name === undefined ? 'email' : sortBy.name,
+                sort_by: sortBy.method === undefined ? 'ace' : sortBy.method,
+            };
+
+        await fetchKasaAccounts(pageNo, pageSize, bldgId, search, {
+            ...sorting,
+        })
             .then((res) => {
                 let kDevices = [];
-
+                setTotalItems(res?.data?.data?.length);
                 let Hs = 0;
                 let kp = 0;
                 let Hs1 = 0;
@@ -302,7 +334,6 @@ const Provision = () => {
                     Socket: socket,
                     Remaining_Capacity: capy,
                 };
-                setTotal(arr);
                 setIsProcessing(false);
                 setKasaDevices(kDevices);
             })
@@ -311,23 +342,38 @@ const Provision = () => {
             });
     };
 
-    const getKasaDevices = async (details, path) => {
+    const getKasaDevices = async (details, path, statusType = 'Found') => {
         setIsAddProcessing(true);
-        let ready = [];
-        let progress = [];
-        let params = `?building_id=${bldgId}`;
-        await fetchKasaDevices(params, details)
+        setKasaDevicesList([]);
+
+        const sorting = deviceSortBy.method &&
+            deviceSortBy.name && {
+                order_by: deviceSortBy.name === undefined ? 'device_mac' : deviceSortBy.name,
+                sort_by: deviceSortBy.method === undefined ? 'ace' : deviceSortBy.method,
+            };
+
+        await fetchKasaDevices(
+            devicePageNo,
+            devicePageSize,
+            bldgId,
+            devicesearch,
+            {
+                ...sorting,
+            },
+            details,
+            statusType
+        )
             .then((res) => {
-                res.data.data.forEach((ele) => {
-                    if (ele.action === 1) {
-                        ready.push(ele);
-                    } else {
-                        progress.push(ele);
-                    }
-                });
-                if (path === true) setCheckFind(false);
-                setReadyData(ready);
-                setProgressData(progress);
+                const response = res?.data;
+                if (response?.success) {
+                    if (path) setCheckFind(false);
+                    if (response?.data.length > 0) setKasaDevicesList(response?.data);
+                    if (response?.found) setAvailableDevices(+response?.found);
+                    if (response?.completed) setExistingDevices(+response?.completed);
+                    statusType === 'Found'
+                        ? setTotalReadyData(response?.found)
+                        : setTotalReadyData(response?.completed);
+                }
                 setIsAddProcessing(false);
             })
             .catch((error) => {
@@ -337,13 +383,18 @@ const Provision = () => {
 
     useEffect(() => {
         getKasaAccount();
-    }, [auth]);
+    }, [auth, search, sortBy, pageNo, pageSize]);
 
     useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             if (bldgObj?.building_id)
-                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+                updateBuildingStore(
+                    bldgObj?.building_id,
+                    bldgObj?.building_name,
+                    bldgObj?.timezone,
+                    bldgObj?.plug_only
+                );
         }
     }, [buildingListData, bldgId]);
 
@@ -387,9 +438,7 @@ const Provision = () => {
 
     //Linked Devices
     const currentRowDevices = () => {
-        if (selectedStatus === 0) return progressData;
-        else if (selectedStatus === 1) return readyData;
-        else if (selectedStatus === 2) return progressData;
+        return kasaDevicesList;
     };
 
     const renderStatus = (row) => {
@@ -455,6 +504,7 @@ const Provision = () => {
             name: 'Email',
             accessor: 'email',
             callbackValue: renderEmail,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Timezone',
@@ -465,26 +515,31 @@ const Provision = () => {
             name: 'HS110s',
             accessor: 'HS110s',
             callbackValue: renderHS110s,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'KP115s',
             accessor: 'KP115s',
             callbackValue: renderKP115s,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'HS300s',
             accessor: 'HS300s',
             callbackValue: renderHS300s,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Sockets',
             accessor: 'Socket',
             callbackValue: renderSocket,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Remaining Capacity',
             accessor: 'Remaining_Capacity',
             callbackValue: renderRemainingCapacity,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
     ];
 
@@ -514,6 +569,20 @@ const Provision = () => {
             name: 'Kasa Account',
             accessor: 'kasa_account',
             callbackValue: renderKasaAccount,
+        },
+    ];
+    const pageListSizes = [
+        {
+            label: '5 Rows',
+            value: '5',
+        },
+        {
+            label: '10 Rows',
+            value: '10',
+        },
+        {
+            label: '15 Rows',
+            value: '15',
         },
     ];
 
@@ -566,12 +635,20 @@ const Provision = () => {
                             isLoading={isProcessing}
                             isLoadingComponent={<SkeletonLoading />}
                             id="linked_account"
-                            onSearch={(query) => {}}
+                            onSearch={(query) => {
+                                setPageNo(1);
+                                setSearch(query);
+                            }}
                             buttonGroupFilterOptions={[]}
                             rows={currentRow()}
                             searchResultRows={currentRow()}
                             disableColumnDragging={true}
                             headers={headerProps1}
+                            currentPage={pageNo}
+                            onChangePage={setPageNo}
+                            pageSize={pageSize}
+                            onPageSize={setPageSize}
+                            pageListSizes={pageListSizes}
                             totalCount={(() => {
                                 return totalItems;
                             })()}
@@ -623,19 +700,28 @@ const Provision = () => {
                         isLoading={isAddProcessing}
                         isLoadingComponent={<DevicesSkeletonLoading />}
                         id="devices_linked"
-                        onSearch={(query) => {}}
-                        onStatus={setSelectedStatus}
+                        onSearch={(query) => {
+                            setDevicePageNo(1);
+                            setDeviceSearch(query);
+                        }}
+                        onStatus={(value) => {
+                            setDevicePageNo(1);
+                            setSelectedStatus(value);
+                        }}
                         buttonGroupFilterOptions={[
-                            { label: `Available (${progressData.length})` },
-                            { label: `Completed (${readyData.length})` },
-                            { label: 'Existing Devices' },
+                            { label: `Available (${availableDevices})` },
+                            { label: `Existing Devices (${existingDevices})` },
                         ]}
                         rows={currentRowDevices()}
                         disableColumnDragging={true}
                         searchResultRows={currentRowDevices()}
                         headers={headerProps2}
+                        currentPage={devicePageNo}
+                        onChangePage={setDevicePageNo}
+                        pageSize={devicePageSize}
+                        onPageSize={setDevicePageSize}
                         totalCount={(() => {
-                            return totalItems;
+                            return totalReadyData;
                         })()}
                     />
                 </Col>

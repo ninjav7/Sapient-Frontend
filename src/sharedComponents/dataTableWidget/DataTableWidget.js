@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-
+import { Button } from '../button';
 import { Table } from '../table';
 import { DropDownIcon } from '../dropDowns/dropDownButton';
 import Typography from '../typography';
@@ -53,6 +53,8 @@ export const initialFilterState = {
 };
 
 const DataTableWidget = (props) => {
+    const { customExcludedHeaders = [] } = props;
+
     const [excludedHeaderLocalStorage, setExcludedHeadersLocalStorage] = useLocalStorage(
         `${LOCAL_STORAGE.EXCLUDED_HEADERS}${props.id && '-' + props.id}`,
         []
@@ -70,8 +72,7 @@ const DataTableWidget = (props) => {
     });
 
     const [headers, setHeaders] = useState(orderedHeaders || props.headers);
-    const [excludedHeaders, setExcludedHeaders] = useState(excludedHeaderLocalStorage || []);
-
+    const [excludedHeaders, setExcludedHeaders] = useState([...excludedHeaderLocalStorage, ...customExcludedHeaders]);
     const [rows, setRows] = useState(props.rows);
     const [selectedRows, setSelectedRows] = useState([]);
     const [searchedRows, setSearchedRows] = useState([]);
@@ -114,6 +115,7 @@ const DataTableWidget = (props) => {
 
     const handlePageSize = (pageSize) => {
         setPageSize(pageSize);
+        handlePageChange(1); // PLT-1392: Pagination fixes on size change
         props.onPageSize(pageSize);
     };
 
@@ -129,6 +131,13 @@ const DataTableWidget = (props) => {
     };
 
     const filteredHeaders = headers.filter(({ name }) => !excludedHeaders.includes(name));
+
+    // Added for exluding Filters if column is hidden
+    let filteredOptions = [];
+    if (props.filterOptions) {
+        const uniqueExcludedHeadersList = Array.from(new Set(excludedHeaders));
+        filteredOptions = props.filterOptions.filter(({ label }) => !uniqueExcludedHeadersList.includes(label));
+    }
 
     const debouncedSearch = useDebounce(search, 500);
 
@@ -148,7 +157,8 @@ const DataTableWidget = (props) => {
     }, [headers]);
 
     useEffect(() => {
-        setExcludedHeadersLocalStorage(excludedHeaders);
+        const uniqueExcludedHeaders = Array.from(new Set(excludedHeaders));
+        setExcludedHeadersLocalStorage(uniqueExcludedHeaders);
     }, [excludedHeaders]);
 
     useEffect(() => {
@@ -248,12 +258,14 @@ const DataTableWidget = (props) => {
             <div className="data-table-widget-wrapper">
                 <div className="table-filter-widget-wrapper d-flex">
                     <Filters
+                        hideStatusFilter={props?.hideStatusFilter}
                         selectedFiltersValues={selectedFiltersValues}
                         onChangeFilterValue={setSelectedFiltersValues}
                         onChange={setSelectedFilters}
-                        filterOptions={props.filterOptions}
+                        filterOptions={filteredOptions.length !== 0 ? filteredOptions : props.filterOptions}
                         selectedFilters={selectedFilters}
                         onDeleteFilter={handleDeleteFilter}
+                        isFilterLoading={props?.isFilterLoading}
                     />
                     <div className="ml-auto data-table-widget-action-button-wrapper">
                         {!props.disableColumnDragging && <DraggableColumns onSortEnd={onSortEnd} headers={headers} />}
@@ -298,7 +310,8 @@ const DataTableWidget = (props) => {
                                     //@TODO Needs to be refactored
                                     let isEditable = props?.isEditable && props?.isEditable(row);
                                     let isDeletable = props?.isDeletable && props?.isDeletable(row);
-                                    const isActionButtonShown = props.onEditRow && isEditable || props.onDeleteRow && isDeletable;
+                                    const isActionButtonShown =
+                                        (props.onEditRow && isEditable) || (props.onDeleteRow && isDeletable);
 
                                     const menuListPerRowProps = {};
                                     if (props.onEditRow && isEditable) {
@@ -310,7 +323,7 @@ const DataTableWidget = (props) => {
                                             props.onDeleteRow(event, row.id, row, props);
                                     }
                                     /********/
-                                    
+
                                     return (
                                         <Table.Row {...(row.rowProps || {})} key={generateID()}>
                                             {props.onCheckboxRow &&
@@ -345,9 +358,11 @@ const DataTableWidget = (props) => {
                                             {isActionsAvailable && (
                                                 <Table.Cell align="center" width={36}>
                                                     <div className="d-flex justify-content-center">
-                                                        {isActionButtonShown && <DropDownIcon classNameMenu="data-table-widget-drop-down-button-menu">
-                                                            <MenuListPerRow {...menuListPerRowProps} />
-                                                        </DropDownIcon>}
+                                                        {isActionButtonShown && (
+                                                            <DropDownIcon classNameMenu="data-table-widget-drop-down-button-menu">
+                                                                <MenuListPerRow {...menuListPerRowProps} />
+                                                            </DropDownIcon>
+                                                        )}
                                                     </div>
                                                 </Table.Cell>
                                             )}
@@ -376,7 +391,7 @@ const DataTableWidget = (props) => {
                 )}
             </div>
             <Brick sizeInRem={1.25} />
-            {props.onPageSize && props.onChangePage && (
+            {props.onPageSize && props?.onChangePage && (
                 <div className="d-flex justify-content-center">
                     <Pagination
                         className="pagination-bar"
@@ -404,9 +419,9 @@ DataTableWidget.propTypes = {
     onEditRow: PropTypes.func,
     isEditable: PropTypes.func,
     /**** The following 4 props are responsible for showing pagination ****/
-    onChangePage: PropTypes.func.isRequired,
+    onChangePage: PropTypes.func,
     totalCount: PropTypes.number.isRequired,
-    currentPage: PropTypes.number.isRequired,
+    currentPage: PropTypes.number,
     onPageSize: PropTypes.func.isRequired,
     pageSize: PropTypes.number,
     //@TODO More generic func, now it is not important
@@ -441,6 +456,7 @@ DataTableWidget.propTypes = {
             onSort: PropTypes.func,
         })
     ),
+    customExcludedHeaders: PropTypes.array,
     onCheckboxRow: PropTypes.func,
     onCheckAll: PropTypes.func,
     id: PropTypes.string,
@@ -450,6 +466,7 @@ DataTableWidget.propTypes = {
     customCheckAll: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
     isLoadingComponent: PropTypes.node.isRequired,
     isLoading: PropTypes.bool.isRequired,
+    isFilterLoading: PropTypes.bool,
     filters: PropTypes.shape({
         selectedFilters: PropTypes.object,
         selectedFiltersValues: PropTypes.object,

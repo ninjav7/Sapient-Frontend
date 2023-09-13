@@ -16,24 +16,27 @@ const CompareRoles = ({ show, setShow }) => {
     const data = [
         {
             role: 'Portfolio Admin',
+            energy: 'View',
+            control: 'Edit',
+            explore: 'View',
             setting: 'Edit',
             administration: 'Edit',
-            energy: 'View',
-            explore: 'View',
         },
         {
             role: 'Settings & Connfiguration Admin',
+            energy: 'View',
+            control: 'Edit',
+            explore: 'View',
             setting: 'Edit',
             administration: 'No access',
-            energy: 'View',
-            explore: 'View',
         },
         {
             role: 'Viewer',
+            energy: 'View',
+            control: 'View',
+            explore: 'View',
             setting: 'View',
             administration: 'No access',
-            energy: 'View',
-            explore: 'View',
         },
     ];
     const currentRow = () => {
@@ -115,6 +118,29 @@ const CompareRoles = ({ show, setShow }) => {
             </Typography.Subheader>
         );
     };
+    const renderControl = (row) => {
+        if (row?.control === 'Edit') {
+            return (
+                <Typography.Subheader
+                    size={Typography.Sizes.md}
+                    className="d-flex edit-container justify-content-center"
+                    style={{ color: colorPalette.success700 }}>
+                    <Pen style={{ color: colorPalette.success700, width: '1.25rem', height: '1.25rem' }} />
+                    Edit
+                </Typography.Subheader>
+            );
+        } else {
+            return (
+                <Typography.Subheader
+                    size={Typography.Sizes.md}
+                    className="d-flex view-container justify-content-center"
+                    style={{ color: colorPalette.view700 }}>
+                    <Eye style={{ color: colorPalette.primaryGray450 }} />
+                    View
+                </Typography.Subheader>
+            );
+        }
+    };
 
     return (
         <Modal
@@ -153,6 +179,21 @@ const CompareRoles = ({ show, setShow }) => {
                             callbackValue: renderRole,
                         },
                         {
+                            name: 'Energy Module',
+                            accessor: 'energy',
+                            callbackValue: renderEnergy,
+                        },
+                        {
+                            name: 'Control Module',
+                            accessor: 'control',
+                            callbackValue: renderControl,
+                        },
+                        {
+                            name: 'Explore Module',
+                            accessor: 'explore',
+                            callbackValue: renderExplore,
+                        },
+                        {
                             name: 'Settings Module',
                             accessor: 'settings',
                             callbackValue: renderSettings,
@@ -161,16 +202,6 @@ const CompareRoles = ({ show, setShow }) => {
                             name: 'User Administration',
                             accessor: 'administration',
                             callbackValue: renderAdministration,
-                        },
-                        {
-                            name: 'Energy Module',
-                            accessor: 'energy',
-                            callbackValue: renderEnergy,
-                        },
-                        {
-                            name: 'Explore Module',
-                            accessor: 'explore',
-                            callbackValue: renderExplore,
                         },
                     ]}
                 />

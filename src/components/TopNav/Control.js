@@ -1,23 +1,43 @@
 import React, { useEffect, useState } from 'react';
+import { useAtom } from 'jotai';
 import { Cookies } from 'react-cookie';
 import { useLocation, useHistory } from 'react-router-dom';
-import { ComponentStore } from '../../store/ComponentStore';
-import { ReactComponent as LogoutIcon } from '../../assets/images/logout.svg';
+import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+
 import { ReactComponent as Gear } from '../../assets/icon/gear.svg';
-import { useAtom } from 'jotai';
+import { ReactComponent as ProfilePhoto } from '../../assets/icon/user.svg';
+import { ReactComponent as PreferencesSVG } from '../../assets/icon/top-nav/preferences.svg';
+import { ReactComponent as LogoutSVG } from '../../assets/icon/top-nav/logout.svg';
+
+import { ComponentStore } from '../../store/ComponentStore';
 import { userPermissionData } from '../../store/globalState';
-import { routesForAccountSettings } from './utils';
 import { BuildingStore } from '../../store/BuildingStore';
+
+import { routesForAccountSettings } from './utils';
 import { accountChildRoutes } from '../SecondaryTopNavBar/utils';
+
+import UserPreferences from './user-preference/UserPreferences';
+
+import './styles.scss';
 
 const Control = () => {
     const location = useLocation();
     const history = useHistory();
     const cookies = new Cookies();
+    const user = cookies.get('user');
 
     const [userPermission] = useAtom(userPermissionData);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+
+    // User Preference Modal
+    const [isModalOpen, setModalStatus] = useState(false);
+    const handleModalOpen = () => setModalStatus(true);
+    const handleModalClose = () => setModalStatus(false);
+
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
     const [pageType, setPageType] = useState('');
+    const [userName, setUserName] = useState('');
 
     const [accountRoutes, setAccountRoutes] = useState([
         '/settings/account',
@@ -32,16 +52,27 @@ const Control = () => {
         '/settings/layout',
         '/settings/equipment',
         '/settings/panels',
-        '/settings/active-devices',
+        '/settings/smart-plugs',
     ]);
 
+    const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
+
     const handleLogout = () => {
+        localStorage.clear();
+        cookies.remove('user', { path: '/' });
         ComponentStore.update((s) => {
             s.parent = '';
         });
-        localStorage.clear();
-        cookies.remove('user', { path: '/' });
         window.location.reload();
+    };
+
+    const handleSettingsClick = () => {
+        handleRouteChange();
+        handleSideNavChange();
+    };
+
+    const dropdownMenuStyle = {
+        zIndex: 2000,
     };
 
     const handleSideNavChange = () => {
@@ -69,7 +100,7 @@ const Control = () => {
         let currentPath = location.pathname;
         let pathName = '';
 
-        if (currentPath.includes('/control/plug-rules')) {
+        if (currentPath.includes('/control/plug-rules') || currentPath.includes('/carbon/portfolio/overview')) {
             bldgId === 'portfolio' ? (pathName = accountRoutes[0]) : (pathName = `${configRoutes[0]}/${bldgId}`);
         } else {
             routesForAccountSettings.includes(currentPath) || currentPath.includes(accountChildRoutes[0])
@@ -81,6 +112,12 @@ const Control = () => {
             pathname: `${pathName}`,
         });
     };
+
+    useEffect(() => {
+        if (user?.user_id) {
+            user?.name ? setUserName(user?.name) : setUserName(`User`);
+        }
+    }, [user]);
 
     useEffect(() => {
         if (userPermission?.user_role !== 'admin') {
@@ -203,8 +240,8 @@ const Control = () => {
                         return current !== '/settings/panels';
                     })
                 );
-                if (!accountRoutes.includes('/settings/active-devices')) {
-                    setConfigRoutes((el) => [...el, '/settings/active-devices']);
+                if (!accountRoutes.includes('/settings/smart-plugs')) {
+                    setConfigRoutes((el) => [...el, '/settings/smart-plugs']);
                 }
             }
 
@@ -214,7 +251,7 @@ const Control = () => {
             ) {
                 setConfigRoutes((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setConfigRoutes((el) => [...el, '/settings/general']);
@@ -226,7 +263,7 @@ const Control = () => {
             ) {
                 setConfigRoutes((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setConfigRoutes((el) => [...el, '/settings/layout']);
@@ -238,7 +275,7 @@ const Control = () => {
             ) {
                 setConfigRoutes((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setConfigRoutes((el) => [...el, '/settings/equipment']);
@@ -250,7 +287,7 @@ const Control = () => {
             ) {
                 setConfigRoutes((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setConfigRoutes((el) => [...el, '/settings/panels']);
@@ -269,29 +306,53 @@ const Control = () => {
     return (
         <>
             <div className="topbar-buttons-wrapper">
-                <div className="topbar-buttons">
-                    <div
-                        className={`float-right h-100 ${
-                            pageType === 'settings' ? 'navbar-icon-container-active ' : 'navbar-icon-container'
-                        }`}>
-                        <button
-                            className={`btn btn-sm float-right ${
-                                pageType === 'settings' ? 'other-font-icon-style-active' : 'other-font-icon-style'
-                            }`}
-                            onClick={() => {
-                                handleSideNavChange();
-                                handleRouteChange();
-                            }}>
-                            <Gear />
-                        </button>
-                    </div>
+                <div className="d-flex align-items-center">
+                    {/* Portfolio / Building Settings are not for super-user  */}
+                    {pageType !== 'super-user' && (
+                        <div
+                            className={`float-right h-100 mr-3 navbar-head-container d-flex align-items-center ${
+                                pageType === 'settings' ? 'active ' : ''
+                            }`}>
+                            {userPermission?.email && (
+                                <button className="btn btn-sm" onClick={handleSettingsClick}>
+                                    <Gear className={`navbar-icons-style ${pageType === 'settings' ? 'active' : ''}`} />
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    <Dropdown
+                        isOpen={dropdownOpen}
+                        toggle={toggleDropdown}
+                        className="mouse-pointer navbar-head-container ">
+                        <DropdownToggle tag="div" className=" mr-3 user-profile-container">
+                            <div className="profile-container mr-2">
+                                <ProfilePhoto className="profile-photo" />
+                            </div>
+                            <div className="user-name">{userName}</div>
+                        </DropdownToggle>
+
+                        <DropdownMenu right className="mr-2" style={dropdownMenuStyle}>
+                            {userPermission?.name && (
+                                <>
+                                    <DropdownItem onClick={handleModalOpen} className="pb-3 pl-3 pr-3">
+                                        <PreferencesSVG className="mr-3 topnav-dropdown-style topnav-icon-color" />
+                                        {`User Preferences`}
+                                    </DropdownItem>
+                                    <hr className="m-0 p-0" />
+                                </>
+                            )}
+
+                            <DropdownItem onClick={handleLogout} className="pt-2 pl-3 pr-3">
+                                <LogoutSVG className="mr-3 topnav-dropdown-style topnav-icon-color" />
+                                {`Sign out`}
+                            </DropdownItem>
+                        </DropdownMenu>
+                    </Dropdown>
                 </div>
             </div>
 
-            <button className="btn topbar-logout-btn" onClick={handleLogout}>
-                <LogoutIcon />
-                Sign Out
-            </button>
+            <UserPreferences isModalOpen={isModalOpen} closeModal={handleModalClose} />
         </>
     );
 };

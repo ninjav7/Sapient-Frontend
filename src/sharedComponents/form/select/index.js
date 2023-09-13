@@ -3,6 +3,7 @@ import ReactSelect from 'react-select';
 import _ from 'lodash';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
+import colorPalette from '../../../assets/scss/_colors.scss';
 
 import Brick from '../../brick';
 import Typography from '../../typography';
@@ -114,8 +115,13 @@ const Select = ({
         <div className={cx(`react-select-wrapper`, className, { 'is-error': !!error })} ref={containerRef}>
             {label && (
                 <>
-                    <Typography.Body size={Typography.Sizes.sm} className="gray-550">
+                    <Typography.Body size={Typography.Sizes.sm} className="gray-550 font-weight-medium">
                         {label}
+                        {props?.required && (
+                            <span style={{ color: colorPalette.error700 }} className="font-weight-bold ml-1">
+                                *
+                            </span>
+                        )}
                     </Typography.Body>
                     <Brick sizeInRem={0.25} />
                 </>
@@ -182,7 +188,7 @@ Select.Multi = MultiSelect;
 
 Select.propTypes = {
     selectClassName: PropTypes.string,
-    defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object]).isRequired,
+    defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object]),
 
     // The difference between default and current values, is currentValue allows to change current value dynamically
     currentValue: PropTypes.object,
@@ -202,6 +208,7 @@ Select.propTypes = {
             hasValue: PropTypes.bool,
         })
     ).isRequired,
+    required: PropTypes.bool,
     customOption: PropTypes.node,
     type: PropTypes.oneOf(Object.values(DROPDOWN_INPUT_TYPES)),
     icon: PropTypes.node,

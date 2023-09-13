@@ -1,0 +1,23 @@
+@import '../assets/scss/colors';
+
+.energy-side-nav {
+    position: fixed;
+    left: 0;
+    top: 7em;
+    width: 14.7rem;
+    height: 100%;
+    background-color: $primary-gray-50;
+    padding-left: 0em !important;
+}
+
+.energy-page-content {
+    height: 100%;
+    background-color: $base-white;
+}
+
+.notification-alignment {
+    position: fixed;
+    width: 18.75rem;
+    left: 2rem;
+    bottom: 2rem;
+}

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Row, Col } from 'reactstrap';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Row, Col, UncontrolledTooltip } from 'reactstrap';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -23,10 +23,21 @@ import '../style.css';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { UserStore } from '../../../store/UserStore';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+import { Badge } from '../../../sharedComponents/badge';
+import { StatusBadge } from '../../../sharedComponents/statusBadge';
+import './styles.scss';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
         <tr>
+            <th>
+                <Skeleton count={10} />
+            </th>
+
+            <th>
+                <Skeleton count={10} />
+            </th>
+
             <th>
                 <Skeleton count={10} />
             </th>
@@ -90,6 +101,7 @@ const Panels = () => {
 
     const [panelsData, setPanelsData] = useState([]);
     const [isDataFetching, setDataFetching] = useState(true);
+    const [isFilterFetching, setFetchingFilters] = useState(false);
 
     const [filterOptions, setFilterOptions] = useState([]);
     const [panelType, setPanelType] = useState([]);
@@ -131,9 +143,14 @@ const Panels = () => {
             panelVoltageSelected
         )
             .then((res) => {
-                const responseData = res?.data;
-                setPanelsData(responseData?.data);
-                setTotalItems(responseData?.total_data);
+                const response = res?.data;
+                if (response && response?.data.length !== 0) {
+                    for (const element of response?.data) {
+                        element.bldg_id = bldgId;
+                    }
+                }
+                setPanelsData(response?.data);
+                setTotalItems(response?.total_data);
                 setDataFetching(false);
             })
             .catch(() => {
@@ -143,7 +160,7 @@ const Panels = () => {
 
     const handleClick = (el) => {
         history.push({
-            pathname: `/settings/panels/edit-panel/${bldgId}/${el?.panel_type}/${el?.panel_id}`,
+            pathname: `/settings/panels/edit-panel/${el?.bldg_id}/${el?.panel_type}/${el?.panel_id}`,
         });
     };
 
@@ -169,7 +186,7 @@ const Panels = () => {
                 fetchPanelsDataWithFilter();
                 if (response?.success) {
                     history.push({
-                        pathname: `/settings/panels`,
+                        pathname: `/settings/panels/${bldgId}`,
                     });
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -199,9 +216,24 @@ const Panels = () => {
             });
     };
 
+    const renderPanelFlags = (row) => {
+        return (
+            <>
+                {row?.flag_count && row?.flag_count !== 0 ? (
+                    <StatusBadge
+                        text={`${row?.flag_count}`}
+                        type={StatusBadge.Type.warning}
+                        className="flag-container"
+                        textStyle="flag-text"
+                    />
+                ) : null}
+            </>
+        );
+    };
+
     const renderPanelName = (row) => {
         return (
-            <Link to={`/settings/panels/edit-panel/${bldgId}/${row?.panel_type}/${row?.panel_id}`}>
+            <Link to={`/settings/panels/edit-panel/${row?.bldg_id}/${row?.panel_type}/${row?.panel_id}`}>
                 <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
                     {row?.panel_name === '' ? '-' : row?.panel_name}
                 </div>
@@ -212,6 +244,42 @@ const Panels = () => {
     const renderPanelLocation = (row) => {
         return <Typography.Body size={Typography.Sizes.md}>{row?.location ? row?.location : '-'} </Typography.Body>;
     };
+
+    const renderPassiveDevices = useCallback((row) => {
+        const slicedArr = row?.connected_devices.slice(1);
+        return (
+            <div className="tags-row-content">
+                <Badge
+                    text={
+                        <>
+                            <span className="gray-950">
+                                {row?.connected_devices[0] ? row.connected_devices[0]?.device_identifier : 'none'}
+                            </span>
+                        </>
+                    }
+                />
+                {slicedArr?.length > 0 ? (
+                    <>
+                        <Badge
+                            text={
+                                <span className="gray-950" id={`tags-badge-${row.panel_id}`}>
+                                    +{slicedArr.length}
+                                </span>
+                            }
+                        />
+                        <UncontrolledTooltip
+                            placement="top"
+                            target={`tags-badge-${row.panel_id}`}
+                            className="tags-tooltip">
+                            {slicedArr.map((el) => {
+                                return <Badge text={<span className="gray-950">{el?.device_identifier}</span>} />;
+                            })}
+                        </UncontrolledTooltip>
+                    </>
+                ) : null}
+            </div>
+        );
+    });
 
     const renderLinkedBreakers = (row) => {
         return (
@@ -240,6 +308,12 @@ const Panels = () => {
 
     const headerProps = [
         {
+            name: 'Flags',
+            accessor: 'panel_flags',
+            callbackValue: renderPanelFlags,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
             name: 'Name',
             accessor: 'panel_name',
             callbackValue: renderPanelName,
@@ -249,6 +323,12 @@ const Panels = () => {
             name: 'Location',
             accessor: 'location',
             callbackValue: renderPanelLocation,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Passive Device ID',
+            accessor: 'passive_devices',
+            callbackValue: renderPassiveDevices,
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
@@ -296,6 +376,7 @@ const Panels = () => {
     };
 
     const getFilters = async () => {
+        setFetchingFilters(true);
         const filters = await fetchPanelsFilter({
             bldgId,
         });
@@ -419,6 +500,7 @@ const Panels = () => {
             ];
             setFilterOptions(filterOptionsFetched);
         });
+        setFetchingFilters(false);
     };
 
     useEffect(() => {
@@ -456,7 +538,12 @@ const Panels = () => {
         if (bldgId && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             if (bldgObj?.building_id)
-                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+                updateBuildingStore(
+                    bldgObj?.building_id,
+                    bldgObj?.building_name,
+                    bldgObj?.timezone,
+                    bldgObj?.plug_only
+                );
         }
     }, [buildingListData, bldgId]);
 
@@ -489,6 +576,7 @@ const Panels = () => {
                     <DataTableWidget
                         id="panels_list"
                         isLoading={isDataFetching}
+                        isFilterLoading={isFilterFetching}
                         isLoadingComponent={<SkeletonLoading />}
                         buttonGroupFilterOptions={[]}
                         onSearch={(query) => {

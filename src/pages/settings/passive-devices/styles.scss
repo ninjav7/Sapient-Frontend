@@ -1,4 +1,5 @@
 @import '../../../assets/scss/colors';
+@import '../../../sharedComponents/assets/scss/helpers.scss';
 
 .device-container {
     padding: 1rem;
@@ -43,6 +44,11 @@
     border: 0.0625rem solid $primary-gray-200;
 }
 
+.custom-input-field::-webkit-outer-spin-button,
+.custom-input-field::-webkit-inner-spin-button {
+    display: none;
+}
+
 .sensor-index {
     color: $primary-gray-450 !important;
 }
@@ -55,4 +61,26 @@
 .sensor-badge-style {
     background: #eff5ff !important;
     color: #2142d4 !important;
+}
+
+.sensor {
+    &-wrapper {
+        @extend .box-shadow-xs;
+        @extend .borders;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-radius: 0.25rem;
+        transition: 0.35s all;
+        overflow: hidden;
+
+        &.partially-configured {
+            background: $warning-25;
+            border-color: $warning-700;
+        }
+
+        &.is-flagged {
+            border: 0.125rem solid $error-700;
+        }
+    }
 }

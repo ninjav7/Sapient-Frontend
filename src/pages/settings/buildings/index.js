@@ -1,26 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import { Link } from 'react-router-dom';
+import { useAtom } from 'jotai';
+
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
-import { BuildingStore } from '../../../store/BuildingStore';
+import { UserStore } from '../../../store/UserStore';
 import { ComponentStore } from '../../../store/ComponentStore';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+import { userPermissionData } from '../../../store/globalState';
+
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { useAtom } from 'jotai';
-import { userPermissionData } from '../../../store/globalState';
+
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import Typography from '../../../sharedComponents/typography';
 import { Badge } from '../../../sharedComponents/badge';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
+import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
+import { handleUnitConverstion } from '../general-settings/utils';
+
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
-import CreateBuilding from './CreateBuilding';
+
 import { formatConsumptionValue } from '../../../helpers/helpers';
-import { fetchBuildingList, getFiltersForBuildingsRequest } from './services';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getBuildingsTableCSVExport } from '../../../utils/tablesExport';
-import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
-import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+
+import CreateBuilding from './CreateBuilding';
+import { fetchBuildingList, getFiltersForBuildingsRequest } from './services';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -60,6 +67,7 @@ const Buildings = () => {
 
     const [isDataFetching, setIsDataFetching] = useState(false);
     const [buildingsData, setBuildingsData] = useState([]);
+    const userPrefUnits = UserStore.useState((s) => s.unit);
 
     const [buildingTypeList, setBuildingTypeList] = useState([]);
     const [selectedBuildingType, setSelectedBuildingType] = useState([]);
@@ -79,25 +87,8 @@ const Buildings = () => {
         '/settings/layout',
         '/settings/equipment',
         '/settings/panels',
-        '/settings/active-devices',
+        '/settings/smart-plugs',
     ]);
-
-    const fetchGeneralBuildingData = async () => {
-        setIsDataFetching(true);
-
-        const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
-        const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
-
-        await fetchBuildingList(search, sort_by, ordered_by, sqftAPIFlag)
-            .then((res) => {
-                const data = res.data;
-                setBuildingsData(data);
-                setIsDataFetching(false);
-            })
-            .catch(() => {
-                setIsDataFetching(false);
-            });
-    };
 
     const resetBuildingFilter = () => {
         setFiltersValues({
@@ -112,7 +103,7 @@ const Buildings = () => {
     };
 
     const handleBuildingClick = (record) => {
-        updateBuildingStore(record?.building_id, record?.building_name, record?.timezone);
+        updateBuildingStore(record?.building_id, record?.building_name, record?.timezone, record?.plug_only);
     };
 
     const renderBldgName = (row) => {
@@ -156,6 +147,33 @@ const Buildings = () => {
         );
     };
 
+    const [tableHeader, setTableHeader] = useState([
+        {
+            name: 'Building Name',
+            accessor: 'building_name',
+            callbackValue: renderBldgName,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Building Type',
+            accessor: 'building_type',
+            callbackValue: renderBldgType,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: `${userPrefUnits === 'si' ? `Sq. M.` : `Sq. Ft.`}`,
+            accessor: 'building_size',
+            callbackValue: renderBldgSqft,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Devices',
+            accessor: 'num_of_devices',
+            callbackValue: renderDeviceCount,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+    ]);
+
     const currentRow = () => {
         return buildingsData;
     };
@@ -189,8 +207,8 @@ const Buildings = () => {
                         return current !== '/settings/panels';
                     })
                 );
-                if (!internalRoute.includes('/settings/active-devices')) {
-                    setInternalRoute((el) => [...el, '/settings/active-devices']);
+                if (!internalRoute.includes('/settings/smart-plugs')) {
+                    setInternalRoute((el) => [...el, '/settings/smart-plugs']);
                 }
             }
 
@@ -200,7 +218,7 @@ const Buildings = () => {
             ) {
                 setInternalRoute((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setInternalRoute((el) => [...el, '/settings/general']);
@@ -212,7 +230,7 @@ const Buildings = () => {
             ) {
                 setInternalRoute((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setInternalRoute((el) => [...el, '/settings/layout']);
@@ -224,7 +242,7 @@ const Buildings = () => {
             ) {
                 setInternalRoute((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setInternalRoute((el) => [...el, '/settings/equipment']);
@@ -236,7 +254,7 @@ const Buildings = () => {
             ) {
                 setInternalRoute((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/active-devices';
+                        return current !== '/settings/smart-plugs';
                     })
                 );
                 setInternalRoute((el) => [...el, '/settings/panels']);
@@ -258,7 +276,7 @@ const Buildings = () => {
         setMaxSqftVal(filterData?.building_size_max);
     };
 
-    const handleDownloadCsv = async () => {
+    const handleDownloadCsv = async (user_pref_units) => {
         const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
         const search = '';
@@ -266,51 +284,32 @@ const Buildings = () => {
         await fetchBuildingList(search, sort_by, ordered_by)
             .then((res) => {
                 const responseData = res.data;
-                download(
-                    `Buildings_${new Date().toISOString().split('T')[0]}`,
-                    getBuildingsTableCSVExport(responseData, headerProps)
-                );
+                if (responseData && responseData.length !== 0) {
+                    responseData.forEach((el) => {
+                        el.building_size = Math.round(handleUnitConverstion(el?.building_size, user_pref_units));
+                    });
+                    download(
+                        `Buildings_${new Date().toISOString().split('T')[0]}`,
+                        getBuildingsTableCSVExport(responseData, tableHeader)
+                    );
+                }
             })
             .catch((error) => {});
     };
 
-    const headerProps = [
-        {
-            name: 'Building Name',
-            accessor: 'building_name',
-            callbackValue: renderBldgName,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Building Type',
-            accessor: 'building_type',
-            callbackValue: renderBldgType,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Sq. Ft',
-            accessor: 'building_size',
-            callbackValue: renderBldgSqft,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Devices',
-            accessor: 'num_of_devices',
-            callbackValue: renderDeviceCount,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-    ];
-
-    const fetchBuildingListByFilter = async (building_type, min_val, max_val) => {
+    const fetchGeneralBuildingData = async (user_pref_units) => {
         setIsDataFetching(true);
-        let buildingTypeSelected = encodeURIComponent(building_type.join('+'));
 
-        const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
-        const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
+        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'building_name' : sortBy.name;
+        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'ace' : sortBy.method;
 
-        await fetchBuildingList(search, sort_by, ordered_by, sqftAPIFlag, buildingTypeSelected, min_val, max_val)
+        await fetchBuildingList(search, sort_by, ordered_by, sqftAPIFlag)
             .then((res) => {
-                const data = res.data;
+                const data = res?.data;
+                data.length !== 0 &&
+                    data.forEach((el) => {
+                        el.building_size = Math.round(handleUnitConverstion(el?.building_size, user_pref_units));
+                    });
                 setBuildingsData(data);
                 setIsDataFetching(false);
             })
@@ -319,11 +318,49 @@ const Buildings = () => {
             });
     };
 
+    const fetchBuildingListByFilter = async (user_pref_units, building_type, min_val, max_val) => {
+        setIsDataFetching(true);
+        let buildingTypeSelected = encodeURIComponent(building_type.join('+'));
+
+        const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
+        const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
+
+        await fetchBuildingList(search, sort_by, ordered_by, sqftAPIFlag, buildingTypeSelected, min_val, max_val)
+            .then((res) => {
+                const data = res?.data;
+                data.length !== 0 &&
+                    data.forEach((el) => {
+                        el.building_size = Math.round(handleUnitConverstion(el?.building_size, user_pref_units));
+                    });
+                setBuildingsData(data);
+                setIsDataFetching(false);
+            })
+            .catch(() => {
+                setIsDataFetching(false);
+            });
+    };
+
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Buildings',
+                    path: '/settings/buildings',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'account';
+        });
+    };
+
     useEffect(() => {
         if (sqftAPIFlag === '' && selectedBuildingType.length === 0) {
-            fetchGeneralBuildingData();
-        } else fetchBuildingListByFilter(selectedBuildingType, minSqftVal, maxSqftVal);
-    }, [sqftAPIFlag, sortBy, search, selectedBuildingType]);
+            fetchGeneralBuildingData(userPrefUnits);
+        } else fetchBuildingListByFilter(userPrefUnits, selectedBuildingType, minSqftVal, maxSqftVal);
+    }, [sqftAPIFlag, sortBy, search, selectedBuildingType, userPrefUnits]);
 
     useEffect(() => {
         if (minSqftVal !== maxSqftVal && maxSqftVal !== 0) {
@@ -390,21 +427,18 @@ const Buildings = () => {
     }, [userPermission]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Buildings',
-                        path: '/settings/buildings',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
+        if (userPrefUnits) {
+            let newHeaderList = tableHeader;
+            newHeaderList.forEach((record) => {
+                if (record?.accessor === 'building_size') {
+                    record.name = `${userPrefUnits === 'si' ? `Sq. M.` : `Sq. Ft.`}`;
+                }
             });
-            ComponentStore.update((s) => {
-                s.parent = 'account';
-            });
-        };
+            setTableHeader(newHeaderList);
+        }
+    }, [userPrefUnits]);
+
+    useEffect(() => {
         updateBreadcrumbStore();
     }, []);
 
@@ -449,9 +483,9 @@ const Buildings = () => {
                         onStatus={[]}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
-                        onDownload={() => handleDownloadCsv()}
+                        onDownload={() => handleDownloadCsv(userPrefUnits)}
                         filterOptions={filterOptions}
-                        headers={headerProps}
+                        headers={tableHeader}
                         filters={filtersValues}
                         totalCount={(() => {
                             return 0;

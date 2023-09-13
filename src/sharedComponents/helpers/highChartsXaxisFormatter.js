@@ -59,27 +59,30 @@ export const xaxisLabelsCount = (daysCount) => {
     }
 };
 
-export const xaxisLabelsFormat = (daysCount) => {
+export const xaxisLabelsFormat = (daysCount, time_format = `12h`, date_format = `MM-DD-YYYY`) => {
+    const timeFormat = time_format === `12h` ? `hh:00 A` : `HH:00`;
+    const dateFormat = date_format === `DD-MM-YYYY` ? `DD/MM` : `MM/DD`;
+
     // Up to and including 1 day
-    if (daysCount === 1) return 'HH:00';
+    if (daysCount === 1) return timeFormat;
 
     // Up to and including 3 days
-    if (daysCount >= 2 && daysCount <= 3) return 'MM/DD HH:00';
+    if (daysCount >= 2 && daysCount <= 3) return `${dateFormat} ${timeFormat}`;
 
     // Up to and including 7 days
-    if (daysCount >= 4 && daysCount <= 7) return 'MM/DD HH:00';
+    if (daysCount >= 4 && daysCount <= 7) return `${dateFormat} ${timeFormat}`;
 
     // Up to and including 14 days
-    if (daysCount >= 8 && daysCount <= 14) return 'MM/DD';
+    if (daysCount >= 8 && daysCount <= 14) return dateFormat;
 
     // Up to and including 30 days
-    if (daysCount >= 15 && daysCount <= 30) return 'MM/DD';
+    if (daysCount >= 15 && daysCount <= 30) return dateFormat;
 
     // Up to and including 3 Months
-    if (daysCount >= 31 && daysCount <= 90) return 'MM/DD';
+    if (daysCount >= 31 && daysCount <= 90) return dateFormat;
 
     // Up to and including 6 Months
-    if (daysCount >= 91 && daysCount <= 181) return 'MM/DD';
+    if (daysCount >= 91 && daysCount <= 181) return dateFormat;
 
     // >6 Months
     if (daysCount >= 182) return `MMM 'YY`;

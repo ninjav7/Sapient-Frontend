@@ -1,7 +1,7 @@
 // @flow
 import { Cookies } from 'react-cookie';
 import { all, call, fork, put, takeEvery } from 'redux-saga/effects';
-import { BaseUrl, signin, signup, sessionValidator } from '../../services/Network';
+import { BaseUrl, signinV2, signup, sessionValidator } from '../../services/Network';
 import { fetchJSON } from '../../helpers/api';
 
 import { LOGIN_USER, LOGOUT_USER, REGISTER_USER, FORGET_PASSWORD, GOOGLE_LOGIN_USER } from './constants';
@@ -16,6 +16,7 @@ import {
     logoutUser,
 } from './actions';
 import { UserStore } from '../../store/UserStore';
+import { saveUserPreference } from '../../helpers/saveUserPreference';
 
 /**
  * Sets the session
@@ -25,7 +26,7 @@ const setSession = (user) => {
     let cookies = new Cookies();
     if (user) {
         localStorage.setItem('vendorName', user?.vendor_name);
-        localStorage.setItem('vendorId', user?.vendor_id);
+        saveUserPreference(user?.date_format, user?.time_format, user?.unit);
         cookies.set('user', JSON.stringify(user), { path: '/' });
     } else cookies.remove('user', { path: '/' });
 };
@@ -48,7 +49,7 @@ function* login({ payload: { username, password } }) {
     };
 
     try {
-        const response = yield call(fetchJSON, `${BaseUrl}${signin}`, options);
+        const response = yield call(fetchJSON, `${BaseUrl}${signinV2}`, options);
         if (response.success === false) {
             localStorage.setItem('login_success', false);
             localStorage.setItem('failed_message', response.message);
@@ -62,7 +63,7 @@ function* login({ payload: { username, password } }) {
             });
             localStorage.setItem('login_success', true);
         }
-        setSession(response.data);
+        setSession(response?.data);
         yield put(loginUserSuccess(response.data));
     } catch (error) {
         let message;

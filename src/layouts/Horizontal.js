@@ -1,51 +1,37 @@
 import React, { useState, useEffect, Suspense } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Card } from 'reactstrap';
 import { connect } from 'react-redux';
-import './style.css';
 import { changeLayout } from '../redux/actions';
-import SideNav from '../components/SideNav/SideNav';
+
 import TopNav from '../components/TopNav/TopNav';
-import AdminNav from '../components/AdminNav/AdminNav';
-import { useLocation } from 'react-router-dom';
+import SideNav from '../components/SideNav/SideNav';
+
+import { UserStore } from '../store/UserStore';
 import SecondaryTopNavBar from '../components/SecondaryTopNavBar';
 import { Notification } from '../sharedComponents/notification/Notification';
-import { UserStore } from '../store/UserStore';
+import { deviceConfigRoutes, secondaryNavBarNotRequiredRoutes, sideNavNotBarRequiredRoutes } from './utils';
+
+import '../components/style.css';
+import './styles.scss';
 
 const loading = () => <div className="text-center"></div>;
 
 const HorizontalLayout = (props) => {
-    const children = props.children || null;
     const location = useLocation();
+    const children = props.children || null;
+
     const [showSideNav, setShowSideNav] = useState(true);
     const [showTopNav, setShowTopNav] = useState(true);
+    const [showSecondaryNav, setShowSecondaryNav] = useState(true);
+
+    const componentType = UserStore.useState((s) => s.componentType);
+    const notificationType = UserStore.useState((s) => s.notificationType);
     const showNotification = UserStore.useState((s) => s.showNotification);
     const notificationMessage = UserStore.useState((s) => s.notificationMessage);
-    const notificationType = UserStore.useState((s) => s.notificationType);
-    const componentType = UserStore.useState((s) => s.componentType);
-    useEffect(() => {
-        if (!location.pathname.includes('/super-user/')) {
-            setShowTopNav(true);
-        }
-        if (location.pathname.includes('/super-user/')) {
-            setShowTopNav(false);
-        }
-        if (!location.pathname.includes('/explore-page/')) {
-            setShowSideNav(true);
-        }
-        if (location.pathname.includes('/explore-page/')) {
-            setShowSideNav(false);
-        }
-        if (location.pathname.includes('/super-user/')) {
-            setShowSideNav(false);
-        }
-        if (location.pathname.includes('/control/plug-rules/')) {
-            setShowSideNav(false);
-        }
-        if (location.pathname.includes('/login')) {
-            setShowTopNav(false);
-            setShowSideNav(false);
-        }
-    }, [location]);
+
+    // Default 2rem padding not required for device configuration pages in energy app settings
+    const isPaddingRequired = deviceConfigRoutes.some((route) => location.pathname.includes(route));
 
     const updateNotification = () => {
         UserStore.update((s) => {
@@ -53,14 +39,23 @@ const HorizontalLayout = (props) => {
         });
     };
 
-    const deviceRouteList = ['/settings/active-devices/single', '/settings/smart-meters/single'];
+    useEffect(() => {
+        const isSideNavReq = sideNavNotBarRequiredRoutes.some((route) => location.pathname.includes(route));
+        setShowSideNav(!isSideNavReq);
+
+        const isSecondaryNavReq = secondaryNavBarNotRequiredRoutes.some((route) => location.pathname.includes(route));
+        setShowSecondaryNav(!isSecondaryNavReq);
+
+        location.pathname.includes('/login') ? setShowTopNav(false) : setShowTopNav(true);
+    }, [location.pathname]);
 
     return (
         <React.Fragment>
             <div id="wrapper">
-                <div>{showTopNav ? <TopNav /> : <AdminNav />}</div>
-
-                <div>{showTopNav ? <SecondaryTopNavBar /> : null}</div>
+                <div className="position-relative">
+                    {showTopNav && <TopNav />}
+                    {showSecondaryNav && <SecondaryTopNavBar />}
+                </div>
 
                 <div>
                     {showSideNav && (
@@ -69,27 +64,16 @@ const HorizontalLayout = (props) => {
                         </div>
                     )}
 
-                    {showSideNav ? (
-                        <div
-                            className="energy-page-content"
-                            style={{
-                                padding:
-                                    location.pathname.includes(deviceRouteList[0]) ||
-                                    location.pathname.includes(deviceRouteList[1])
-                                        ? '0rem'
-                                        : '2rem',
-                            }}>
-                            <Suspense fallback={loading()}>
-                                <Card className="energy-page-content-card shadow-none">{children}</Card>
-                            </Suspense>
-                        </div>
-                    ) : (
-                        <div className="energy-page-content-full-screen">
-                            <Suspense fallback={loading()}>
-                                <Card className="energy-page-content-card shadow-none">{children}</Card>
-                            </Suspense>
-                        </div>
-                    )}
+                    <div
+                        className={showSideNav ? 'energy-page-content' : 'energy-page-content-full-screen'}
+                        style={{
+                            padding: isPaddingRequired ? '0rem' : '2rem',
+                        }}>
+                        <Suspense fallback={loading()}>
+                            <Card className="energy-page-content-card shadow-none">{children}</Card>
+                        </Suspense>
+                    </div>
+
                     {showNotification ? (
                         <div className="notification-alignment">
                             <Notification
@@ -121,4 +105,5 @@ const mapStateToProps = (state) => {
         user: state.Auth.user,
     };
 };
+
 export default connect(mapStateToProps, { changeLayout })(HorizontalLayout);

@@ -1,27 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
+import Highcharts from 'highcharts';
 import { useParams } from 'react-router-dom';
 import Header from '../../components/Header';
+import { UserStore } from '../../store/UserStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours } from '../timeOfDay/services';
-import EndUseTotals from './EndUseTotals';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
+import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours } from '../timeOfDay/services';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import EndUseTotals from './EndUseTotals';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
 import { apiRequestBody } from '../../helpers/helpers';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import Brick from '../../sharedComponents/brick';
+import { separateAndCalculateEnergyData } from './utils';
 import { buildingData } from '../../store/globalState';
 import './style.css';
-import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const TimeOfDay = () => {
     const { bldgId } = useParams();
     const [buildingListData] = useAtom(buildingData);
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const isPlugOnly = BuildingStore.useState((s) => s.isPlugOnly);
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [lineChartData, setLineChartData] = useState([]);
 
@@ -43,8 +51,6 @@ const TimeOfDay = () => {
         const percentage = Math.round(((value - min) / (max - min)) * 100);
         return Math.round(percentage);
     };
-
-    const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333, 5452]);
 
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
@@ -76,40 +82,51 @@ const TimeOfDay = () => {
 
             if (bldgObj?.building_id) {
                 if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
-                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+                updateBuildingStore(
+                    bldgObj?.building_id,
+                    bldgObj?.building_name,
+                    bldgObj?.timezone,
+                    bldgObj?.plug_only
+                );
             }
         }
 
-        const endUsesByOfHour = async () => {
-            const params = `?building_id=${bldgId}&off_hours=true`;
+        const endUsesByOfHour = async (is_plug_only) => {
+            setEnergyConsumption([]);
+
+            const params = `?building_id=${bldgId}${is_plug_only || is_plug_only === 'true' ? '' : `&off_hours=true`}`;
             const payload = apiRequestBody(startDate, endDate, time_zone);
             await fetchBuildingAfterHours(params, payload)
                 .then((res) => {
-                    const response = res?.data?.data;
-                    if (response.length !== 0) {
-                        response.forEach((el) => {
-                            el.after_hours_energy_consumption.now = Math.round(
-                                el?.after_hours_energy_consumption?.now / 1000
-                            );
-                            el.after_hours_energy_consumption.old = Math.round(
-                                el?.after_hours_energy_consumption?.old / 1000
-                            );
-                        });
+                    if (res?.data.success) {
+                        const response = res?.data?.data;
+                        if (is_plug_only || is_plug_only === 'true') {
+                            if (response.length !== 0) {
+                                const overAllConsumptionData = separateAndCalculateEnergyData(response);
+                                setEnergyConsumption(overAllConsumptionData);
+                            }
+                        } else {
+                            if (response.length !== 0) {
+                                response.forEach((el) => {
+                                    el.after_hours_energy_consumption.now = Math.round(
+                                        el?.after_hours_energy_consumption?.now / 1000
+                                    );
+                                    el.after_hours_energy_consumption.old = Math.round(
+                                        el?.after_hours_energy_consumption?.old / 1000
+                                    );
+                                });
+                            }
+                            setEnergyConsumption(response);
+                        }
                     }
-                    setEnergyConsumption(response);
-                    const energyData = response;
-                    let newDonutData = [];
-                    energyData.forEach((record) => {
-                        let fixedConsumption = parseInt(record?.after_hours_energy_consumption?.now);
-                        newDonutData.push(fixedConsumption);
-                    });
-                    setDonutChartData(newDonutData);
                 })
                 .catch((error) => {});
         };
 
         const dailyUsageByHour = async () => {
             const payload = apiRequestBody(startDate, endDate, time_zone);
+            setLineChartData([]);
+
             await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
                     const response = res?.data;
@@ -691,10 +708,10 @@ const TimeOfDay = () => {
                 .catch((error) => {});
         };
 
-        endUsesByOfHour();
+        endUsesByOfHour(isPlugOnly);
         dailyUsageByHour();
         averageUsageByHourFetch();
-    }, [startDate, endDate, bldgId]);
+    }, [startDate, endDate, bldgId, isPlugOnly]);
 
     return (
         <React.Fragment>
@@ -703,7 +720,12 @@ const TimeOfDay = () => {
             <Brick sizeInRem={1.5} />
 
             <div className="custom-time-of-day-grid">
-                <EndUseTotals series={donutChartData} energyConsumption={energyConsumption} className={'h-100'} />
+                <EndUseTotals
+                    energyConsumption={energyConsumption}
+                    className={'h-100'}
+                    isPlugOnly={isPlugOnly || isPlugOnly === 'true' ? true : false}
+                />
+
                 <HeatMapWidget
                     title="Hourly Average Consumption"
                     subtitle="Energy Usage By Hour (kWh)"
@@ -713,6 +735,7 @@ const TimeOfDay = () => {
                     showRouteBtn={false}
                     labelsPosition={'top'}
                     className={'h-100'}
+                    timeFormat={userPrefTimeFormat}
                 />
             </div>
 
@@ -726,6 +749,21 @@ const TimeOfDay = () => {
                 data={lineChartData}
                 tooltipUnit={metric[0].unit}
                 tooltipLabel={metric[0].label}
+                chartProps={{
+                    tooltip: {
+                        xDateFormat: userPrefTimeFormat === `12h` ? `Time: %I:%M %p` : `Time: %H:%M`,
+                    },
+                    xAxis: {
+                        labels: {
+                            formatter: function (val) {
+                                return Highcharts.dateFormat(
+                                    userPrefTimeFormat === `12h` ? `%I:%M %p` : `%H:%M`,
+                                    val.value
+                                );
+                            },
+                        },
+                    },
+                }}
             />
         </React.Fragment>
     );

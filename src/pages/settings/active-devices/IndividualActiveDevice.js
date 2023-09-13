@@ -41,8 +41,8 @@ const IndividualActiveDevice = () => {
     const history = useHistory();
     const [userPermission] = useAtom(userPermissionData);
 
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     // Chart states
@@ -175,8 +175,8 @@ const IndividualActiveDevice = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'Active Devices',
-                    path: `/settings/active-devices/${bldgId}`,
+                    label: 'Smart Plugs',
+                    path: `/settings/smart-plugs/${bldgId}`,
                     active: false,
                 },
             ];
@@ -279,7 +279,7 @@ const IndividualActiveDevice = () => {
     };
 
     const redirectToActivePage = () => {
-        history.push({ pathname: `/settings/active-devices/${bldgId}` });
+        history.push({ pathname: `/settings/smart-plugs/${bldgId}` });
     };
 
     const updateActiveDevice = async () => {
@@ -309,8 +309,8 @@ const IndividualActiveDevice = () => {
                         s.notificationMessage = response?.message
                             ? response?.message
                             : res
-                            ? 'Unable to update Active Device.'
-                            : 'Unable to update Active Device due to Internal Server Error!.';
+                            ? 'Unable to update Smart Plug.'
+                            : 'Unable to update Smart Plug due to Internal Server Error!.';
                         s.notificationType = 'error';
                     });
                 }
@@ -338,13 +338,13 @@ const IndividualActiveDevice = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'Active Devices',
-                    path: `/settings/active-devices/${bldgId}`,
+                    label: 'Smart Plugs',
+                    path: `/settings/smart-plugs/${bldgId}`,
                     active: false,
                 },
                 {
                     label: activeData?.identifier,
-                    path: '/settings/active-devices/single',
+                    path: '/settings/smart-plugs/single',
                     active: true,
                 },
             ];
@@ -356,7 +356,12 @@ const IndividualActiveDevice = () => {
         if (bldgId && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             if (bldgObj?.building_id)
-                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+                updateBuildingStore(
+                    bldgObj?.building_id,
+                    bldgObj?.building_name,
+                    bldgObj?.timezone,
+                    bldgObj?.plug_only
+                );
         }
     }, [buildingListData, bldgId]);
 
@@ -371,7 +376,7 @@ const IndividualActiveDevice = () => {
                     <div className="passive-header-wrapper d-flex justify-content-between">
                         <div className="d-flex flex-column">
                             <Typography.Subheader size={Typography.Sizes.sm} className="font-weight-bold">
-                                Active Device
+                                {`Smart Plug`}
                             </Typography.Subheader>
                             <div className="d-flex">
                                 <Typography.Header size={Typography.Sizes.md} className="mr-2">

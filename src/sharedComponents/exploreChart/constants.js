@@ -105,12 +105,13 @@ export const options = ({ data, series, dateRange, tooltipUnit, tooltipLabel, wi
             lineWidth: 1,
             ordinal: false,
             gridLineWidth: 1,
-            max: dateRange.maxDate,
-            min: dateRange.minDate,
+            max: dateRange?.maxDate,
+            min: dateRange?.minDate,
             alternateGridColor: !widgetProps.disableDefaultPlotBands && '#F2F4F7',
             type: 'datetime',
             labels: {
                 format: '{value: %e %b `%y}',
+                padding: 10,
             },
         },
         yAxis: {

@@ -90,10 +90,13 @@ const PassiveDevices = () => {
 
     const [selectedPassiveDevice, setSelectedPassiveDevice] = useState({});
     const [isDataFetching, setIsDataFetching] = useState(false);
+    const [isFilterFetching, setFetchingFilters] = useState(false);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [deviceIdFilterString, setDeviceIdFilterString] = useState([]);
     const [deviceModelString, setDeviceModelString] = useState([]);
     const [sensorString, setSensorString] = useState([]);
+    const [floorString, setFloorString] = useState([]);
+    const [spaceString, setSpaceString] = useState([]);
     const [filterOptions, setFilterOptions] = useState([]);
 
     const fetchPassiveDeviceData = async () => {
@@ -105,6 +108,8 @@ const PassiveDevices = () => {
         let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
         let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
         let sensorSelected = encodeURIComponent(sensorString.join('+'));
+        let floorSelected = encodeURIComponent(floorString.join('+'));
+        let spaceSelected = encodeURIComponent(spaceString.join('+'));
         setIsDataFetching(true);
         setPassiveDeviceData([]);
         await getPassiveDeviceData(
@@ -118,12 +123,19 @@ const PassiveDevices = () => {
             },
             macAddressSelected,
             deviceModelSelected,
-            sensorSelected
+            sensorSelected,
+            floorSelected,
+            spaceSelected
         )
             .then((res) => {
-                const responseData = res?.data;
-                setPassiveDeviceData(responseData?.data);
-                setTotalItems(responseData?.total_data);
+                const response = res?.data;
+                if (response?.data) {
+                    for (const element of response?.data) {
+                        element.bldg_id = bldgId;
+                    }
+                    setPassiveDeviceData(response?.data);
+                }
+                if (response?.total_data) setTotalItems(response?.total_data);
                 setIsDataFetching(false);
             })
             .catch(() => {
@@ -131,27 +143,29 @@ const PassiveDevices = () => {
             });
     };
 
-    useEffect(() => {
-        if (bldgId && buildingListData.length !== 0) {
-            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
-            if (bldgObj?.building_id)
-                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
-        }
-    }, [buildingListData, bldgId]);
-
-    useEffect(() => {
-        fetchPassiveDeviceData();
-    }, [search, sortBy, pageNo, pageSize, deviceStatus, bldgId, deviceIdFilterString, deviceModelString, sensorString]);
-
     const getFilters = async () => {
+        setFetchingFilters(true);
         let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
         let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
+        let floorSelected = encodeURIComponent(floorString.join('+'));
+        let spaceSelected = encodeURIComponent(spaceString.join('+'));
+
         const filters = await fetchPassiveFilter({
             bldgId,
             macAddressSelected,
             deviceModelSelected,
+            floorSelected,
+            spaceSelected,
         });
         filters.data.forEach((filterOptions) => {
+            const sortedFloors = filterOptions?.installed_floor
+                .slice()
+                .sort((a, b) => a.floor_name.localeCompare(b.floor_name));
+
+            const sortedSpaces = filterOptions?.installed_space
+                .slice()
+                .sort((a, b) => a.space_name.localeCompare(b.space_name));
+
             const filterOptionsFetched = [
                 {
                     label: 'Device ID',
@@ -222,15 +236,58 @@ const PassiveDevices = () => {
                         setSensorString([]);
                     },
                 },
+                {
+                    label: 'Floors',
+                    value: 'floor',
+                    placeholder: 'All Floors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: sortedFloors.map((filterItem) => ({
+                        value: filterItem.floor_id,
+                        label: filterItem.floor_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let sensors = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                sensors.push(opt[i].value);
+                            }
+                            setFloorString(sensors);
+                        }
+                    },
+                    onDelete: () => {
+                        setFloorString([]);
+                    },
+                },
+                {
+                    label: 'Spaces',
+                    value: 'space',
+                    placeholder: 'All Spaces',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: sortedSpaces.map((filterItem) => ({
+                        value: filterItem.space_id,
+                        label: filterItem.space_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let sensors = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                sensors.push(opt[i].value);
+                            }
+                            setSpaceString(sensors);
+                        }
+                    },
+                    onDelete: () => {
+                        setSpaceString([]);
+                    },
+                },
             ];
 
             setFilterOptions(filterOptionsFetched);
         });
+        setFetchingFilters(false);
     };
-
-    useEffect(() => {
-        getFilters();
-    }, [bldgId]);
 
     const currentRow = () => {
         return passiveDeviceData;
@@ -269,7 +326,7 @@ const PassiveDevices = () => {
     const renderDeviceStatus = (row) => {
         return (
             <StatusBadge
-                text={row?.status ? 'Online' : 'Office'}
+                text={row?.status ? 'Online' : 'Offine'}
                 type={row?.status ? StatusBadge.Type.success : StatusBadge.Type.error}
                 icon={row?.status ? <WifiSVG /> : <WifiSlashSVG />}
             />
@@ -281,7 +338,7 @@ const PassiveDevices = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/smart-meters/single/${bldgId}/${row.equipments_id}`,
+                    pathname: `/settings/smart-meters/single/${row?.bldg_id}/${row.equipments_id}`,
                 }}>
                 <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
                     {row?.identifier === '' ? '-' : row?.identifier}
@@ -314,6 +371,22 @@ const PassiveDevices = () => {
                 }
             />
         );
+    };
+
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Smart Meters',
+                    path: '/settings/smart-meters',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'building-settings';
+        });
     };
 
     const headerProps = [
@@ -350,25 +423,40 @@ const PassiveDevices = () => {
     ];
 
     useEffect(() => {
+        if (bldgId && buildingListData && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id)
+                updateBuildingStore(
+                    bldgObj?.building_id,
+                    bldgObj?.building_name,
+                    bldgObj?.timezone,
+                    bldgObj?.plug_only
+                );
+        }
+    }, [buildingListData, bldgId]);
+
+    useEffect(() => {
+        fetchPassiveDeviceData();
+        getFilters();
+    }, [
+        search,
+        sortBy,
+        pageNo,
+        pageSize,
+        deviceStatus,
+        bldgId,
+        deviceIdFilterString,
+        deviceModelString,
+        sensorString,
+        floorString,
+        spaceString,
+    ]);
+
+    useEffect(() => {
         window.scrollTo(0, 0);
     }, [pageNo, pageSize]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Smart Meters',
-                        path: '/settings/smart-meters',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'building-settings';
-            });
-        };
         updateBreadcrumbStore();
     }, []);
 
@@ -402,6 +490,7 @@ const PassiveDevices = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isDataFetching}
+                        isFilterLoading={isFilterFetching}
                         isLoadingComponent={<SkeletonLoading />}
                         id="smart_meter_list"
                         onSearch={(query) => {

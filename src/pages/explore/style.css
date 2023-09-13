@@ -1,6 +1,6 @@
 .tooltipclass {
-    height: .9375rem;
-    width: .9375rem;
+    height: 0.9375rem;
+    width: 0.9375rem;
     border-radius: 50%;
     display: inline-block;
 }
@@ -23,4 +23,16 @@
 
 .page-title {
     padding: 0rem;
+}
+
+.breakers-row-content {
+    display: flex;
+    column-gap: 0.25rem;
+    justify-content: flex-start;
+}
+
+.tag-row-content {
+    display: flex;
+    column-gap: 0.25rem;
+    justify-content: flex-start;
 }

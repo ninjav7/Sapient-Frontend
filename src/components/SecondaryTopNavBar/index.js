@@ -6,13 +6,13 @@ import { accountRoutes, configRoutes, portfolioRoutes, configChildRoutes } from 
 import { buildingData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import SecondaryNavBar from '../../sharedComponents/secondaryNavBar/SecondaryNavBar';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
+import SecondaryNavBar from '../../sharedComponents/secondaryNavBar/SecondaryNavBar';
 import { ReactComponent as BuildingSVG } from '../../sharedComponents/assets/icons/building-icon.svg';
 import { ReactComponent as PortfolioSVG } from '../../sharedComponents/assets/icons/portfolio-icon.svg';
 
 import './style.scss';
-import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const SecondaryTopNavBar = () => {
     const location = useLocation();
@@ -66,6 +66,9 @@ const SecondaryTopNavBar = () => {
             redirectToEndpoint(`/explore-page/by-buildings`);
             return;
         }
+        if (path.includes('/carbon')) {
+            redirectToEndpoint(`/carbon/portfolio/overview`);
+        }
 
         if (path.includes('/control/plug-rules')) {
             redirectToEndpoint(`/control/plug-rules`);
@@ -93,7 +96,7 @@ const SecondaryTopNavBar = () => {
     };
 
     const handleBuildingChange = (record, path) => {
-        updateBuildingStore(record?.value, record?.label, record?.timezone);
+        updateBuildingStore(record?.value, record?.label, record?.timezone, record?.plug_only);
 
         if (path === '/explore-page/by-buildings') {
             redirectToEndpoint(`/explore-page/by-equipment/${record?.value}`);
@@ -110,6 +113,11 @@ const SecondaryTopNavBar = () => {
             return;
         }
 
+        if (path.includes('control/plug-rules')) {
+            redirectToEndpoint(`/control/plug-rules`);
+            return;
+        }
+
         if (accountRoutes.includes(path)) {
             redirectToEndpoint(`/settings/general/${record?.value}`);
             return;
@@ -120,14 +128,18 @@ const SecondaryTopNavBar = () => {
             redirectToEndpoint(`${pathName}/${record?.value}`);
             return;
         }
+        if (path.includes('/carbon')) {
+            redirectToEndpoint(`/carbon/building/overview/${record?.value}`);
+        }
 
         if (path.includes('/settings')) {
             configChildRoutes.forEach((route) => {
                 if (path.includes(route)) {
                     if (path.includes('edit-panel')) redirectToEndpoint(`/settings/panels/${record?.value}`);
-                    if (path.includes('active-devices'))
-                        redirectToEndpoint(`/settings/active-devices/${record?.value}`);
+                    if (path.includes('smart-plugs')) redirectToEndpoint(`/settings/smart-plugs/${record?.value}`);
                     if (path.includes('smart-meters')) redirectToEndpoint(`/settings/smart-meters/${record?.value}`);
+                    if (path.includes('utility-monitors'))
+                        redirectToEndpoint(`/settings/utility-monitors/${record?.value}`);
                     return;
                 }
             });
@@ -160,27 +172,27 @@ const SecondaryTopNavBar = () => {
         handleBuildingChange(bldgObj, location.pathname);
     };
 
+    const getBuildingList = async () => {
+        const allBuildingsList = buildingListData.map((record) => ({
+            label: record?.building_name,
+            value: record?.building_id,
+            timezone: record?.timezone,
+            iconForSelected: <BuildingSVG className="p-0 square" />,
+            plug_only: record?.plug_only,
+        }));
+
+        const updatedBuildingsList = [...buildingsList];
+        updatedBuildingsList[2].options = allBuildingsList;
+
+        setBuildingsList(updatedBuildingsList);
+    };
+
     useEffect(() => {
         const bldgObj = buildingsList[2].options.find((record) => record?.value === selectedBuilding.value);
         if (bldgObj?.value) setSelectedBuilding(bldgObj);
     }, [buildingsList]);
 
     useEffect(() => {
-        const getBuildingList = async () => {
-            let bldgList = [...buildingsList];
-            let allBuildingsList = [];
-            buildingListData.forEach((record) => {
-                const obj = {
-                    label: record?.building_name,
-                    value: record?.building_id,
-                    timezone: record?.timezone,
-                    iconForSelected: <BuildingSVG className="p-0 square" />,
-                };
-                allBuildingsList.push(obj);
-            });
-            bldgList[2].options = allBuildingsList;
-            setBuildingsList(bldgList);
-        };
         getBuildingList();
     }, [buildingListData]);
 
@@ -206,7 +218,7 @@ const SecondaryTopNavBar = () => {
 
     return (
         <React.Fragment>
-            <div className="buidling-switcher-container w-100 secondary-nav-style">
+            <div className="fixed-secondary-nav buidling-switcher-container secondary-nav-style w-100">
                 <SecondaryNavBar
                     onChangeBuilding={(e) => handleBldgSwitcherChange(e.value)}
                     buildings={buildingsList}

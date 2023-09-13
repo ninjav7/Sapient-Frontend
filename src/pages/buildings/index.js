@@ -8,17 +8,21 @@ import moment from 'moment';
 import 'moment-timezone';
 import { useHistory, useParams } from 'react-router-dom';
 import {
-    fetchOverallBldgData,
     fetchBuildingEquipments,
     fetchBuilidingHourly,
-    fetchEnergyConsumption,
     fetchEndUseByBuilding,
+    fetchEnergyConsumptionByEquipType,
+    fetchEnergyConsumptionBySpaceType,
+    fetchEnergyConsumptionByFloor,
+    fetchEnergyConsumptionV2,
 } from '../buildings/services';
+import { fetchPortfolioOverall } from '../portfolio/services';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { buildingData } from '../../store/globalState';
+import { UserStore } from '../../store/UserStore';
 import BuildingKPIs from './BuildingKPIs';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
 import HourlyAvgConsumption from './HourlyAvgConsumption';
@@ -29,8 +33,11 @@ import EquipChartModal from '../chartModal/EquipChartModal';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import colors from '../../assets/scss/_colors.scss';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
-import './style.css';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
+import { getWeatherData } from '../../services/weather';
+import EnergyConsumptionChart from './energy-consumption/EnergyConsumptionChart';
+import './style.css';
 
 const BuildingOverview = () => {
     const { bldgId } = useParams();
@@ -39,24 +46,24 @@ const BuildingOverview = () => {
 
     const history = useHistory();
 
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
+    const userPrefUnits = UserStore.useState((s) => s.unit);
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+
     const [overallBldgData, setOverallBldgData] = useState({
-        total_building: 0,
-        portfolio_rank: '10 of 50',
-        total_consumption: {
+        total: {
             now: 0,
             old: 0,
+            change: 0,
         },
-        average_energy_density: {
+        average: {
             now: 0,
             old: 0,
-        },
-        yearly_electric_eui: {
-            now: 0,
-            old: 0,
+            change: 0,
         },
     });
 
@@ -87,6 +94,22 @@ const BuildingOverview = () => {
     const heatMapChartHeight = 125;
     const [energyConsumption, setEnergyConsumption] = useState([]);
     const [topEnergyConsumptionData, setTopEnergyConsumptionData] = useState([]);
+    const [topEnergyDataFetching, setTopEnergyDataFetching] = useState(false);
+
+    const [weatherData, setWeatherData] = useState(null);
+    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
+
+    const [equipTypeData, setEquipTypeData] = useState([]);
+    const [spaceTypeData, setSpaceTypeData] = useState([]);
+    const [floorData, setFloorData] = useState([]);
+
+    const [isFetchingEquipType, setFetchingEquipType] = useState(false);
+    const [isFetchingSpaceType, setFetchingSpaceType] = useState(false);
+    const [isFetchingFloor, setFetchingFloor] = useState(false);
+
+    const [totalBldgUsageByEquipType, setTotalBldgUsageByEquipType] = useState(0);
+    const [totalBldgUsageBySpaceType, setTotalBldgUsageBySpaceType] = useState(0);
+    const [totalBldgUsageByFloor, setTotalBldgUsageByFloor] = useState(0);
 
     //EquipChartModel
     const [equipmentFilter, setEquipmentFilter] = useState({});
@@ -100,7 +123,12 @@ const BuildingOverview = () => {
     };
 
     const toolTipFormatter = ({ value }) => {
-        return daysCount >= 182 ? moment.utc(value).format(`MMM 'YY`) : moment.utc(value).format(`MMM D 'YY @ hh:mm A`);
+        const time_format = userPrefTimeFormat === `24h` ? `HH:mm` : `hh:mm A`;
+        const date_format = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM 'YY` : `MMM D 'YY`;
+
+        return daysCount >= 182
+            ? moment.utc(value).format(`MMM 'YY`)
+            : moment.utc(value).format(`${date_format} @ ${time_format}`);
     };
 
     const fetchTrendBadgeType = (now, old) => {
@@ -132,6 +160,8 @@ const BuildingOverview = () => {
 
     const builidingEquipmentsData = async (timeZone) => {
         const payload = apiRequestBody(startDate, endDate, timeZone);
+        setTopEnergyDataFetching(true);
+
         await fetchBuildingEquipments(bldgId, payload)
             .then((res) => {
                 let response = res.data[0].top_contributors;
@@ -140,7 +170,7 @@ const BuildingOverview = () => {
                     let obj = {
                         link: '#',
                         id: record?.equipment_id,
-                        label: record?.equipment_name,
+                        label: record?.equipment_name ? record?.equipment_name : `-`,
                         value: Math.round(record?.energy_consumption.now / 1000),
                         unit: UNITS.KWH,
                         badgePercentage: percentageHandler(
@@ -152,15 +182,28 @@ const BuildingOverview = () => {
                     topEnergyData.push(obj);
                 });
                 setTopEnergyConsumptionData(topEnergyData);
+                setTopEnergyDataFetching(false);
             })
-            .catch((error) => {});
+            .catch((error) => {
+                setTopEnergyDataFetching(false);
+            });
     };
 
     const buildingOverallData = async (time_zone) => {
-        const payload = apiRequestBody(startDate, endDate, time_zone);
-        await fetchOverallBldgData(bldgId, payload)
+        const payload = {
+            bldg_id: bldgId,
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: encodeURIComponent(time_zone),
+            metric: 'energy',
+        };
+
+        await fetchPortfolioOverall(payload)
             .then((res) => {
-                setOverallBldgData(res.data);
+                const response = res?.data;
+                if (response?.success && response?.data) {
+                    setOverallBldgData(response?.data);
+                }
             })
             .catch((error) => {});
     };
@@ -288,25 +331,168 @@ const BuildingOverview = () => {
     };
 
     const buildingConsumptionChart = async (time_zone) => {
-        const payload = apiRequestBody(startDate, endDate, time_zone);
-        await fetchEnergyConsumption(bldgId, payload)
+        const payload = {
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: time_zone,
+            bldg_id: bldgId,
+        };
+        await fetchEnergyConsumptionV2(payload)
             .then((res) => {
                 const response = res?.data;
-                let energyCategories = [];
-                let energyData = [
-                    {
-                        name: 'Energy',
-                        data: [],
-                    },
-                ];
-                response.forEach((record) => {
-                    energyCategories.push(record?.x);
-                    energyData[0].data.push(parseFloat((record?.y / 1000).toFixed(2)));
-                });
-                setEnergyConsumptionsCategories(energyCategories);
-                setEnergyConsumptionsData(energyData);
+                if (response?.success && response?.data.length !== 0) {
+                    let energyCategories = [];
+                    let energyData = [
+                        {
+                            name: 'Energy',
+                            data: [],
+                        },
+                    ];
+                    response.data.forEach((record) => {
+                        energyCategories.push(record?.time_stamp);
+                        energyData[0].data.push(parseFloat((record?.data / 1000).toFixed(2)));
+                    });
+                    setEnergyConsumptionsCategories(energyCategories);
+                    setEnergyConsumptionsData(energyData);
+                }
             })
             .catch((error) => {});
+    };
+
+    const fetchWeatherData = async (time_zone) => {
+        const payload = {
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: time_zone,
+            bldg_id: bldgId,
+        };
+        await getWeatherData(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    const tempData = [];
+                    const highTemp = {
+                        type: LOW_MED_HIGH_TYPES.HIGH,
+                        data: [],
+                        color: colors.datavizRed500,
+                    };
+                    const avgTemp = {
+                        type: LOW_MED_HIGH_TYPES.MED,
+                        data: [],
+                        color: colors.primaryGray450,
+                    };
+                    const lowTemp = {
+                        type: LOW_MED_HIGH_TYPES.LOW,
+                        data: [],
+                        color: colors.datavizBlue400,
+                    };
+                    response.data.forEach((record) => {
+                        if (record.hasOwnProperty('temp')) avgTemp.data.push(record?.temp);
+                        if (record.hasOwnProperty('max_temp')) highTemp.data.push(record?.max_temp);
+                        if (record.hasOwnProperty('min_temp')) lowTemp.data.push(record?.min_temp);
+                    });
+                    if (avgTemp?.data.length !== 0) tempData.push(avgTemp);
+                    if (highTemp?.data.length !== 0) tempData.push(highTemp);
+                    if (lowTemp?.data.length !== 0) tempData.push(lowTemp);
+                    if (tempData.length !== 0) setWeatherData(tempData);
+                } else {
+                    setWeatherData(null);
+                }
+            })
+            .catch(() => {
+                setWeatherData(null);
+            });
+    };
+
+    const getEnergyConsumptionByEquipType = async (time_zone) => {
+        setFetchingEquipType(true);
+
+        const payload = {
+            bldg_id: bldgId,
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: time_zone,
+        };
+
+        await fetchEnergyConsumptionByEquipType(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.data?.total_building_usage)
+                    setTotalBldgUsageByEquipType(response?.data?.total_building_usage);
+                if (response?.success && response?.data?.equipment_type_usage.length !== 0) {
+                    setEquipTypeData(response?.data?.equipment_type_usage);
+                }
+                setFetchingEquipType(false);
+            })
+            .catch(() => {
+                setFetchingEquipType(false);
+            });
+    };
+
+    const getEnergyConsumptionBySpaceType = async (time_zone) => {
+        setFetchingSpaceType(true);
+
+        const payload = {
+            bldg_id: bldgId,
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: time_zone,
+        };
+
+        await fetchEnergyConsumptionBySpaceType(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.data?.total_building_usage)
+                    setTotalBldgUsageBySpaceType(response?.data?.total_building_usage);
+                if (response?.success && response?.data?.space_type_usage.length !== 0) {
+                    setSpaceTypeData(response?.data?.space_type_usage);
+                }
+                setFetchingSpaceType(false);
+            })
+            .catch(() => {
+                setFetchingSpaceType(false);
+            });
+    };
+
+    const getEnergyConsumptionByFloor = async (time_zone) => {
+        setFetchingFloor(true);
+
+        const payload = {
+            bldg_id: bldgId,
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: time_zone,
+        };
+
+        await fetchEnergyConsumptionByFloor(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.data?.total_building_usage)
+                    setTotalBldgUsageByFloor(response?.data?.total_building_usage);
+                if (response?.success && response?.data?.floor_usage.length !== 0) {
+                    setFloorData(response?.data?.floor_usage);
+                }
+                setFetchingFloor(false);
+            })
+            .catch(() => {
+                setFetchingFloor(false);
+            });
+    };
+
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Building Overview',
+                    path: '/energy/building/overview',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'buildings';
+        });
     };
 
     useEffect(() => {
@@ -316,14 +502,14 @@ const BuildingOverview = () => {
             setXAxisObj(xaxisObj);
         };
 
-        const getFormattedChartDates = (days_count) => {
-            const date_format = xaxisLabelsFormat(days_count);
+        const getFormattedChartDates = (days_count, timeFormat, dateFormat) => {
+            const date_format = xaxisLabelsFormat(days_count, timeFormat, dateFormat);
             setDateFormat(date_format);
         };
 
         getXaxisForDaysSelected(daysCount);
-        getFormattedChartDates(daysCount);
-    }, [daysCount]);
+        getFormattedChartDates(daysCount, userPrefTimeFormat, userPrefDateFormat);
+    }, [daysCount, userPrefTimeFormat, userPrefDateFormat]);
 
     useEffect(() => {
         if (startDate === null || endDate === null) return;
@@ -335,7 +521,12 @@ const BuildingOverview = () => {
 
             if (bldgObj?.building_id) {
                 if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
-                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+                updateBuildingStore(
+                    bldgObj?.building_id,
+                    bldgObj?.building_name,
+                    bldgObj?.timezone,
+                    bldgObj?.plug_only
+                );
             }
         }
 
@@ -344,24 +535,19 @@ const BuildingOverview = () => {
         builidingEquipmentsData(time_zone);
         buildingHourlyData(time_zone);
         buildingConsumptionChart(time_zone);
-    }, [startDate, endDate, bldgId]);
+        getEnergyConsumptionByEquipType(time_zone);
+        getEnergyConsumptionBySpaceType(time_zone);
+        getEnergyConsumptionByFloor(time_zone);
+    }, [startDate, endDate, bldgId, userPrefUnits]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Building Overview',
-                        path: '/energy/building/overview',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'buildings';
-            });
-        };
+        if (isWeatherChartVisible && bldgId) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            fetchWeatherData(bldgObj?.timezone);
+        }
+    }, [isWeatherChartVisible, startDate, endDate]);
+
+    useEffect(() => {
         updateBreadcrumbStore();
     }, []);
 
@@ -377,7 +563,7 @@ const BuildingOverview = () => {
             <Header title="Building Overview" type="page" />
 
             <div className="mt-4 mb-4">
-                <BuildingKPIs daysCount={daysCount} overalldata={overallBldgData} />
+                <BuildingKPIs daysCount={daysCount} overallData={overallBldgData} userPrefUnits={userPrefUnits} />
             </div>
 
             <div className="bldg-page-grid-style">
@@ -409,6 +595,9 @@ const BuildingOverview = () => {
                                 xAxisCallBackValue={formatXaxis}
                                 restChartProps={xAxisObj}
                                 tooltipCallBackValue={toolTipFormatter}
+                                temperatureSeries={weatherData}
+                                plotBands={null}
+                                withTemp={isWeatherChartVisible}
                             />
 
                             <HourlyAvgConsumption
@@ -423,6 +612,7 @@ const BuildingOverview = () => {
                                 pageType="building"
                                 handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
                                 showRouteBtn={true}
+                                timeFormat={userPrefTimeFormat}
                             />
                         </>
                     ) : (
@@ -439,6 +629,7 @@ const BuildingOverview = () => {
                                 pageType="building"
                                 handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
                                 showRouteBtn={true}
+                                timeFormat={userPrefTimeFormat}
                             />
 
                             <div className="mt-4">
@@ -455,20 +646,64 @@ const BuildingOverview = () => {
                                     xAxisCallBackValue={formatXaxis}
                                     restChartProps={xAxisObj}
                                     tooltipCallBackValue={toolTipFormatter}
+                                    temperatureSeries={weatherData}
+                                    plotBands={null}
+                                    upperLegendsProps={{
+                                        weather: {
+                                            onClick: ({ withTemp }) => {
+                                                setWeatherChartVisibility(withTemp);
+                                            },
+                                            isAlwaysShown: true,
+                                        },
+                                    }}
+                                    withTemp={isWeatherChartVisible}
                                 />
                             </div>
                         </>
                     )}
                 </div>
 
-                <TopConsumptionWidget
-                    title="Top Energy Consumers"
-                    heads={['Equipment', 'Energy', 'Change']}
-                    rows={topEnergyConsumptionData}
-                    className={'fit-container-style'}
-                    handleClick={handleClick}
-                    widgetType="TopEnergyConsumersWidget"
-                />
+                <div className="w-100">
+                    <div>
+                        <TopConsumptionWidget
+                            title="Top Energy Consumers"
+                            heads={['Equipment', 'Energy', 'Change']}
+                            rows={topEnergyConsumptionData}
+                            className={'fit-container-style w-100'}
+                            handleClick={handleClick}
+                            widgetType="TopEnergyConsumersWidget"
+                            tableStyle={{ width: '75%' }}
+                            isFetching={topEnergyDataFetching}
+                        />
+                    </div>
+                    <div className="mt-4">
+                        <EnergyConsumptionChart
+                            title="Energy Consumption by Equipment Type"
+                            subTitle="Occupied Hours and Off Hours Energy Used"
+                            isFetching={isFetchingEquipType}
+                            rows={equipTypeData}
+                            totalBldgUsage={totalBldgUsageByEquipType}
+                        />
+                    </div>
+                    <div className="mt-4">
+                        <EnergyConsumptionChart
+                            title="Energy Consumption by Space Type"
+                            subTitle="Occupied Hours and Off Hours Energy Used"
+                            isFetching={isFetchingSpaceType}
+                            rows={spaceTypeData}
+                            totalBldgUsage={totalBldgUsageBySpaceType}
+                        />
+                    </div>
+                    <div className="mt-4">
+                        <EnergyConsumptionChart
+                            title="Energy Consumption by Floor"
+                            subTitle="Occupied Hours and Off Hours Energy Used"
+                            isFetching={isFetchingFloor}
+                            rows={floorData}
+                            totalBldgUsage={totalBldgUsageByFloor}
+                        />
+                    </div>
+                </div>
             </div>
 
             <div>

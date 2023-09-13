@@ -27,6 +27,13 @@
             font-weight: normal;
         }
     }
+    .sockets-modal-body {
+        max-height: 40rem;
+        overflow-y: scroll;
+    }
+}
+.unsaved-changes {
+    color: #b42318 !important;
 }
 
 .spacing {
@@ -265,6 +272,15 @@
 
 .plug-rule-body {
     padding: 12px 45px;
+    .isHide {
+        display: none;
+    }
+    .plug-rule-body-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
     .plug-rule-body-container {
         display: flex;
         column-gap: 32px;
@@ -497,6 +513,9 @@
     align-items: center;
     align-content: stretch;
     gap: 5px;
+    &.isDisabled {
+        pointer-events: none;
+    }
 }
 
 .schedule-left-flex {

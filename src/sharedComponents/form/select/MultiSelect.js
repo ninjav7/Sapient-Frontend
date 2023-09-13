@@ -3,6 +3,7 @@ import ReactSelect from 'react-select';
 import cx from 'classnames';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
+import colorPalette from '../../../assets/scss/_colors.scss';
 
 import Brick from '../../brick';
 import Typography from '../../typography';
@@ -94,6 +95,11 @@ const MultiSelect = ({
                 <>
                     <Typography.Body size={Typography.Sizes.sm} className="gray-550">
                         {label}
+                        {props?.required && (
+                            <span style={{ color: colorPalette.error700 }} className="font-weight-bold ml-1">
+                                *
+                            </span>
+                        )}
                     </Typography.Body>
                     <Brick sizeInRem={0.25} />
                 </>
@@ -187,6 +193,7 @@ MultiSelect.propTypes = {
             isFocused: PropTypes.bool,
         })
     ).isRequired,
+    required: PropTypes.bool,
     customOption: PropTypes.node,
     type: PropTypes.string,
     icon: PropTypes.node,

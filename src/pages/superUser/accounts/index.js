@@ -13,14 +13,16 @@ import { ReactComponent as MiniLogo } from '../../../assets/icon/miniLogo.svg';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import { ReactComponent as InactiveSVG } from '../../../assets/icon/ban.svg';
 import { ReactComponent as ActiveSVG } from '../../../assets/icon/circle-check.svg';
-import { TrendsBadge } from '../../../sharedComponents/trendsBadge';
-import AddCustomer from './addCustomer';
+import { TRENDS_BADGE_TYPES, TrendsBadge } from '../../../sharedComponents/trendsBadge';
 import { fetchCustomerList, fetchSelectedCustomer, fetchOfflineDevices } from './services';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getCustomerListCSVExport } from '../../../utils/tablesExport';
-import './style.scss';
 import 'moment-timezone';
-import { timeZone } from '../../../utils/helper';
+import { percentageHandler, timeZone } from '../../../utils/helper';
+import AddCustomer from './addCustomer';
+import Brick from '../../../sharedComponents/brick';
+import { formatConsumptionValue } from '../../../helpers/helpers';
+import './style.scss';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -76,6 +78,11 @@ const Accounts = () => {
     const [pageSize, setPageSize] = useState(20);
     const [sortBy, setSortBy] = useState({});
 
+    const fetchTrendBadgeType = (now, old) => {
+        if (now > old) return TRENDS_BADGE_TYPES.UPWARD_TREND;
+        if (now < old) return TRENDS_BADGE_TYPES.DOWNWARD_TREND;
+    };
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -112,9 +119,9 @@ const Accounts = () => {
                         allArr.push({
                             active_devices: ele?.active_devices,
                             passive_devices: ele?.passive_devices,
-                            percent_change: ele?.percent_change,
                             status: ele?.status,
-                            total_usage: ele?.total_usage,
+                            total_usage: ele?.total_usage / 1000,
+                            old_usage: ele?.old_usage / 1000,
                             vendor_id: ele?.vendor_id,
                             vendor_name: ele?.vendor_name,
                             offline_active_devices: match[0]?.offline_active_devices,
@@ -278,19 +285,12 @@ const Accounts = () => {
         return (
             <>
                 <Row style={{ padding: '0.5rem 0.625rem' }}>
-                    <Typography.Body size={Typography.Sizes.sm}>{row.total_usage.toFixed(2)} kWh </Typography.Body>
-                    &nbsp;&nbsp;
+                    <Typography.Body size={Typography.Sizes.sm} className="mr-2">
+                        {formatConsumptionValue(row.total_usage, 2)} kWh
+                    </Typography.Body>
                     <TrendsBadge
-                        value={
-                            isNaN(Math.abs(Math.round(row.percent_change)))
-                                ? 0
-                                : Math.abs(Math.round(row.percent_change))
-                        }
-                        type={
-                            row?.percent_change < row?.percent_change
-                                ? TrendsBadge.Type.DOWNWARD_TREND
-                                : TrendsBadge.Type.UPWARD_TREND
-                        }
+                        value={percentageHandler(row?.total_usage, row?.old_usage)}
+                        type={fetchTrendBadgeType(row?.total_usage, row?.old_usage)}
                     />
                 </Row>
             </>
@@ -336,7 +336,7 @@ const Accounts = () => {
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: 'Active Devices',
+            name: 'Smart Plugs',
             accessor: 'active_devices',
             callbackValue: renderActiveDevices,
             onSort: (method, name) => setSortBy({ method, name }),
@@ -351,6 +351,7 @@ const Accounts = () => {
             name: 'Energy Used kWh',
             accessor: 'total_usage',
             callbackValue: renderEnergy,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Actions',
@@ -358,6 +359,7 @@ const Accounts = () => {
             callbackValue: renderActions,
         },
     ];
+
     const pageListSizes = [
         {
             label: '20 Rows',
@@ -374,28 +376,31 @@ const Accounts = () => {
     ];
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col className="header-container">
-                    <span className="heading-style">Accounts</span>
-
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                        <div className="mr-2">
+            <Row>
+                <Col lg={12}>
+                    <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                            <Typography.Header size={Typography.Sizes.lg}>Accounts</Typography.Header>
+                        </div>
+                        <div className="d-flex">
                             <Button
-                                label="Add Customer"
-                                size={Button.Sizes.lg}
+                                label={'Add Customer'}
+                                size={Button.Sizes.md}
                                 type={Button.Type.primary}
-                                icon={<PlusSVG />}
-                                iconAlignment={Button.IconAlignment.left}
                                 onClick={() => {
                                     setOpenCustomer(true);
                                 }}
+                                icon={<PlusSVG />}
                             />
                         </div>
                     </div>
                 </Col>
             </Row>
+
+            <Brick sizeInRem={2} />
+
             <Row>
-                <Col lg={12} className="mt-4">
+                <Col lg={12}>
                     <DataTableWidget
                         isLoading={isUserDataFetched}
                         isLoadingComponent={<SkeletonLoading />}
@@ -425,6 +430,7 @@ const Accounts = () => {
                     />
                 </Col>
             </Row>
+
             <AddCustomer
                 isAddCustomerOpen={openCustomer}
                 closeAddCustomerModal={closeAddCustomer}

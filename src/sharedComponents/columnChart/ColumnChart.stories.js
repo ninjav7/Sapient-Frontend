@@ -91,10 +91,27 @@ const config = {
             to: 6,
         },
     ],
+    upperLegendsProps: {
+        weather: {
+            onClick: ({ event, props, withTemp }) => {
+                alert(withTemp);
+            },
+
+            // Will be shown even we don't have data for "temperatureSeries"
+            // In case we didn't fetch the data so far, and we want fetch it once user clicked in the legend.
+            // It has been made porposly to avoid additional not required API call execution.
+            isAlwaysShown: true,
+        },
+        plotBands: {
+            onClick: alert,
+        },
+    },
+    // Not necessary, merely for demo purposes
+    tooltipValuesKey: '{point.y:.1f}',
 };
 
 export const Default = (args) => <ColumnChart {...args} temperatureSeries={null} plotBands={null} />;
 Default.args = config;
 
-export const WithTemp = (args) => <ColumnChart {...args} />;
+export const WithTemp = (args) => <ColumnChart {...args} withTemp={false} />;
 WithTemp.args = config;

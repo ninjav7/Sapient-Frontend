@@ -4,6 +4,7 @@ export const routesForAccountSettings = [
     '/settings/users',
     '/settings/roles',
     '/settings/equipment-types',
+    '/settings/space-types',
     '/energy/portfolio/overview',
     '/explore-page/by-buildings',
     '/energy/compare-buildings',

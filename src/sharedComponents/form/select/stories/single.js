@@ -203,6 +203,15 @@ const Default = (arg) => {
                     />
                     <Brick />
                 </div>
+                <div>
+                    <h5>With Label</h5>
+                    <Select
+                        {...arg}
+                        label="Required Field"
+                        required
+                    />
+                    <Brick />
+                </div>
             </div>
         </>
     );

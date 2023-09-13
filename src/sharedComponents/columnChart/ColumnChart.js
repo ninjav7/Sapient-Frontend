@@ -1,9 +1,10 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import HighchartsExporting from 'highcharts/modules/exporting';
 import HighchartsData from 'highcharts/modules/export-data';
 import highchartsAccessibility from 'highcharts/modules/accessibility';
 import HighchartsReact from 'highcharts-react-official';
 import Highcharts from 'highcharts';
+import _ from 'lodash';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 
@@ -31,7 +32,17 @@ highchartsAccessibility(Highcharts);
 highchartsAddLowMedHighToTooltip(Highcharts);
 
 const ColumnChart = (props) => {
-    const { plotBandsLegends, plotBands: plotBandsProp, withTemp: withTempProp = true } = props;
+    const {
+        title,
+        subTitle,
+        plotBandsLegends,
+        plotBands: plotBandsProp,
+        withTemp: withTempProp = true,
+        upperLegendsProps = {},
+        temperatureSeries,
+        onMoreDetail,
+        style,
+    } = props;
 
     const chartComponentRef = useRef(null);
     const [withTemp, setWithTemp] = useState(withTempProp);
@@ -42,6 +53,10 @@ const ColumnChart = (props) => {
     const filterWeather = useCallback(() => {
         setWithTemp((old) => !old);
     }, []);
+
+    useEffect(() => {
+        setWithTemp(withTempProp);
+    }, [withTempProp]);
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
@@ -56,23 +71,49 @@ const ColumnChart = (props) => {
         }
     };
 
-    const chartConfig = options({ ...props, temperatureSeries: withTemp ? props.temperatureSeries : [], plotBands });
+    const chartConfig = options({ ...props, temperatureSeries: withTemp ? temperatureSeries : [], plotBands });
+
+    const { weather } = upperLegendsProps;
+    const weatherIsAlwaysShown = weather?.isAlwaysShown;
+
+    const showUpperLegends = !!renderPlotBandsLegends?.length || !!temperatureSeries || weatherIsAlwaysShown;
 
     return (
-        <div className="column-chart-wrapper" style={props.style}>
+        <div className="column-chart-wrapper" style={style}>
             <div className="d-flex align-items-center justify-content-between">
                 <div>
-                    <Typography.Subheader size={Typography.Sizes.md}>{props.title}</Typography.Subheader>
-                    <Typography.Body size={Typography.Sizes.xs}>{props.subTitle}</Typography.Body>
+                    <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>
+                    <Typography.Body size={Typography.Sizes.xs}>{subTitle}</Typography.Body>
                 </div>
-                {!!renderPlotBandsLegends?.length && (
+                {showUpperLegends && (
                     <div className="ml-auto d-flex plot-bands-legends-wrapper">
                         {renderPlotBandsLegends.map((legendProps) => {
-                            return <UpperLegendComponent {...legendProps} />;
+                            const props = { ...legendProps, ...upperLegendsProps.plotBands };
+
+                            return (
+                                <UpperLegendComponent
+                                    {...props}
+                                    onClick={(event) => {
+                                        legendProps?.onClick && legendProps.onClick(event);
+                                        const onClick = _.get(upperLegendsProps, 'plotBands.onClick');
+                                        onClick && onClick({ event, props });
+                                    }}
+                                />
+                            );
                         })}
-                        {props.temperatureSeries &&
+                        {(temperatureSeries || weatherIsAlwaysShown) &&
                             renderWeatherLegends.map((legendProps) => (
-                                <UpperLegendComponent {...legendProps} disabled={!withTemp} onClick={filterWeather} />
+                                <UpperLegendComponent
+                                    {...legendProps}
+                                    disabled={!withTemp}
+                                    {...upperLegendsProps.weather}
+                                    onClick={(event) => {
+                                        filterWeather(event);
+
+                                        const onClick = _.get(upperLegendsProps, 'weather.onClick');
+                                        onClick && onClick({ event, props, withTemp: !withTemp });
+                                    }}
+                                />
                             ))}
                     </div>
                 )}
@@ -100,7 +141,7 @@ const ColumnChart = (props) => {
             <Brick sizeInRem={1.5} />
             <HighchartsReact highcharts={Highcharts} options={chartConfig} ref={chartComponentRef} />
 
-            {props.onMoreDetail && (
+            {onMoreDetail && (
                 <Button
                     className={cx('column-chart-more-detail', {
                         //@TODO as temporary solution, need to investigate to put button inside chart's container
@@ -111,7 +152,7 @@ const ColumnChart = (props) => {
                     icon={<ArrowRight style={{ height: 11 }} />}
                     type={Button.Type.tertiary}
                     iconAlignment={Button.IconAlignment.right}
-                    onClick={props.onMoreDetail}
+                    onClick={onMoreDetail}
                 />
             )}
         </div>
@@ -121,6 +162,7 @@ const ColumnChart = (props) => {
 ColumnChart.propTypes = {
     title: PropTypes.string.isRequired,
     subTitle: PropTypes.string.isRequired,
+    tooltipValuesKey: PropTypes.string,
     colors: PropTypes.arrayOf(PropTypes.string).isRequired,
     series: PropTypes.arrayOf(
         PropTypes.shape({
@@ -157,7 +199,11 @@ ColumnChart.propTypes = {
     categories: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
     tooltipCallBackValue: PropTypes.func,
     restChartProps: PropTypes.object,
-    withTempProp: PropTypes.bool,
+    withTemp: PropTypes.bool,
+    upperLegendsProps: PropTypes.shape({
+        weather: PropTypes.object,
+        plotBands: PropTypes.object,
+    }),
 };
 
 export default ColumnChart;

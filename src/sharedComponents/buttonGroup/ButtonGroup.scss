@@ -8,6 +8,10 @@
             border-radius: 0 !important;
         }
     }
+    &.no-padding > ul {
+        padding: 0!important;
+        margin-bottom: 0;
+    }
     ul {
         display: flex;
         justify-content: space-around;

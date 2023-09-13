@@ -1,5 +1,5 @@
-export const BaseUrl = 'https://sapient-dev.azurewebsites.net';
-
+export const BaseUrl = 'https://sapient-dev-service.stacksapien.com';
+export const SingularityBaseUrl = 'https://api.singularity.energy/v2/';
 // Auth
 export const signin = '/api/user_role/user/signin';
 export const signup = '/api/user_role/user/signup';
@@ -16,6 +16,7 @@ export const checkLinkValidity = '/api/user_role/user/check-token-validity';
 
 // portfolio overview
 export const portfolioOverall = '/api/energy/portfolio/overall';
+export const portfolioKPIsV2 = '/api/v2/metrics/portfolio/kpi';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
 export const portfolioEndUser = '/api/energy/portfolio/end-user';
 
@@ -24,6 +25,12 @@ export const builidingOverview = '/api/energy/building/overview';
 export const builidingAlerts = '/api/energy/building/alerts';
 export const builidingPeak = '/api/energy/building/peak';
 export const builidingEquipments = '/api/energy/building/equipment';
+export const energyConsumptionByEquipmentType = '/api/v2/metrics/equipment_type';
+export const energyConsumptionBySpaceType = '/api/v2/metrics/space_type';
+export const energyConsumptionByFloor = '/api/v2/metrics/floor';
+
+// export const energyCarbonByBuilding = '/api/v2/metrics/building/carbon'
+export const metricsForCarbonBuildingPage = '/api/v2/metrics/building';
 
 // time of day
 export const builidingHourly = '/api/energy/time_of_day/hourly';
@@ -83,7 +90,7 @@ export const updateEquipment = '/api/config/equipments_details/update_equipment'
 export const searchEquipment = '/api/config/equipments_details/search_by_equipments';
 export const getEndUseId = '/api/config/get_end_use';
 export const linkActiveSensorToEquip = '/api/config/sensor/active/lnk_act_snr_to_eqt';
-export const deleteEquipment = `/api/config/equipments_details/delete-equipment`;
+export const deleteEquipment = '/api/config/equipments_details/delete-equipment';
 
 // active
 export const generalActiveDevices = '/api/config/devices/active';
@@ -92,6 +99,12 @@ export const updateActivePassiveDevice = '/api/config/devices/update_device';
 //search active and Smart Meter
 export const searchDevices = '/api/config/devices/search_by_devices';
 export const lastUsedEquimentDevice = '/api/config/equipments_details/equipments_last_used';
+
+// utility-monitors
+export const createUtilityMeter = '/api/v2/config/device/utility/create';
+export const getUtilityMeters = '/api/v2/config/device/utility/get';
+export const updateUtilityMeters = '/api/v2/config/device/utility/update';
+export const deleteUtilityMeters = '/api/v2/config/device/utility/delete';
 
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';
@@ -109,6 +122,8 @@ export const createPanel = '/api/config/panels/create_panel';
 export const updatePanel = '/api/config/panels/update_panel';
 export const createBreaker = '/api/config/panels/create_breaker';
 export const updateBreakers = '/api/config/panels/v2/update_breaker';
+export const groupBreakers = '/api/config/panels/group_breakers';
+export const ungroupBreakers = '/api/config/panels/ungroup_breakers';
 export const getBreakers = '/api/config/panels/breakers';
 export const updateLinkBreakers = '/api/config/panels/link_breakers';
 export const updateBreakerTypes = '/api/config/panels/update_breaker_config';
@@ -147,8 +162,11 @@ export const updateFloor = '/api/config/layout/update-floor';
 export const getSpaces = '/api/config/layout/get-spaces';
 export const getSpaceTypes = '/api/config/layout/get-spacetype';
 export const createSpace = '/api/config/layout/create-space';
+export const createSpaceType = '/api/config/layout/create-spacetype';
 export const updateSpace = '/api/config/layout/update-space';
+export const updateSpaceType = '/api/config/layout/update-spacetype';
 export const deleteSpace = '/api/config/layout/delete-space/';
+export const deleteSpaceType = '/api/config/layout/delete-spacetype';
 export const deleteFloor = '/api/config/layout/delete-floor';
 
 // getLocation
@@ -177,6 +195,7 @@ export const peakEquipUsage = '/api/energy/peak_demand/equipment';
 
 // sensors list
 export const listSensor = '/api/config/sensor/list_sensor';
+export const updateSensor = '/api/v2/sensor/update_sensor';
 
 // plug rules
 export const listPlugRules = '/api/energy/plug_rule/all-plug-rules';
@@ -196,3 +215,18 @@ export const unLinkSocket = '/api/energy/plug_rule/unlink-socket';
 export const graphData = '/api/energy/plug_rule/average-sensor-usage';
 export const getSensorLastUsed = '/api/energy/plug_rule/sensor-last-used';
 export const linkSocket = '/api/user_role/plug_rule/link_socket';
+
+// weather api
+export const getWeather = '/api/weather/';
+
+// V2 API's
+export const listCts = '/api/v2/config/sensor/get-cts';
+export const getUtilityMeterSensor = '/api/v2/config/sensor/get';
+export const updateSensorV2 = '/api/v2/config/sensor/update';
+export const signinV2 = '/api/v2/user/user/signin';
+export const updateUserProfile = '/api/v2/user/user/profile';
+export const generalBuildingDetailV2 = '/api/v2/building/building_details';
+export const sensorUsageData = '/api/v2/metrics/sensor';
+export const sensorUsageDataForUtilityMonitor = '/api/v2/metrics/ytd';
+export const getEnergyConsumptionV2 = '/api/v2/metrics/building';
+export const compareBuildingsV2 = '/api/v2/metrics/portfolio/compare-buildings';

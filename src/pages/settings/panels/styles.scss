@@ -9,3 +9,15 @@
 .txt-warn-color {
     color: $error-500 !important;
 }
+
+.flag-container {
+    background: $error-50 !important;
+    border-color: $error-50 !important;
+}
+
+.flag-text {
+    color: $error-700 !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+}

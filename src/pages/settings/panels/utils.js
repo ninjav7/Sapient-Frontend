@@ -130,3 +130,54 @@ export const getBreakerType = (breaker_lvl) => {
     if (breaker_lvl === 2) return 'double';
     if (breaker_lvl === 3) return 'triple';
 };
+
+export const fetchEquipmentName = (breakerObj) => {
+    let equipName = ``;
+    if (breakerObj?.type === `unwired` || breakerObj?.type === `blank`) {
+        equipName = breakerObj?.type === `unwired` ? `Unwired` : `Blank`;
+    } else {
+        equipName = breakerObj?.equipment_links[0]?.name;
+    }
+    return equipName;
+};
+
+export const validateBreakerConfiguration = (sourceBreakerObj, targetBreakerObj) => {
+    let isGroupable = true;
+    let alertText = '';
+    if (sourceBreakerObj?.type === 'equipment' && targetBreakerObj?.type === 'equipment') {
+        const { isLinkable } = validateDevicesForBreaker([
+            sourceBreakerObj?.device_link,
+            targetBreakerObj?.device_link,
+        ]);
+
+        const isEquipDiff = validateConfiguredEquip(sourceBreakerObj, targetBreakerObj);
+
+        if (!isLinkable) {
+            isGroupable = false;
+            alertText = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because they have different device attached.`;
+        }
+        if (isEquipDiff) {
+            isGroupable = false;
+            alertText = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because they have different equipment attached.`;
+        }
+
+        if (isEquipDiff && !isLinkable) {
+            isGroupable = false;
+            alertText = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because they have different device and equipment attached.`;
+        }
+    }
+    return { isGroupable, alertText };
+};
+
+export const toFindDuplicates = (arry) => {
+    const uniqueElements = new Set(arry);
+    const filteredElements = arry.filter((item) => {
+        if (uniqueElements.has(item)) {
+            uniqueElements.delete(item);
+        } else {
+            return item;
+        }
+    });
+
+    return [...new Set(filteredElements)];
+};

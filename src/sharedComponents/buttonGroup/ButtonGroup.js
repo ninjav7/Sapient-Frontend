@@ -3,14 +3,16 @@ import classNames from 'classnames';
 import './ButtonGroup.scss';
 import Typography from '../typography';
 
-const ButtonGroup = ({ buttons, handleButtonClick, currentButtonId }) => {
+const ButtonGroup = ({ buttons, handleButtonClick, currentButtonId, noPadding }) => {
     const [clickedId, setClickedId] = useState(currentButtonId);
     const handleClick = (id) => {
         setClickedId(id);
         handleButtonClick(id);
     };
+    const buttonGroupWrapper = "button-group-wrapper";
+    const paddingStyle =noPadding ? 'no-padding' : null;
     return (
-        <div className="button-group-wrapper">
+        <div className={classNames(buttonGroupWrapper,paddingStyle)}>
             <ul>
                 {buttons.map((buttonItem, i) => {
                     const iconAlignment = buttonItem.iconAlignment == 'right' ? 'icon-right' : 'icon-left';

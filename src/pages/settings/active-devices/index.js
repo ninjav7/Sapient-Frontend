@@ -79,80 +79,57 @@ const ActiveDevices = () => {
     const [activeDeviceData, setActiveDeviceData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
+    const [isFilterFetching, setFetchingFilters] = useState(false);
     const [deviceIdFilterString, setDeviceIdFilterString] = useState([]);
     const [deviceModelString, setDeviceModelString] = useState([]);
     const [sensorString, setSensorString] = useState([]);
+    const [floorString, setFloorString] = useState([]);
+    const [spaceString, setSpaceString] = useState([]);
     const [firmWareString, setFirmWareString] = useState([]);
     const [hardWareString, setHardWareString] = useState([]);
     const [filterOptions, setFilterOptions] = useState([]);
 
-    useEffect(() => {
-        const fetchActiveDeviceData = async () => {
-            const sorting = sortBy.method &&
-                sortBy.name && {
-                    order_by: sortBy.name === undefined ? 'identifier' : sortBy.name,
-                    sort_by: sortBy.method === undefined ? 'ace' : sortBy.method,
-                };
-            let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
-            let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
-            let sensorSelected = encodeURIComponent(sensorString.join('+'));
-            let firmwareSelected = encodeURIComponent(firmWareString.join('+'));
-            let hardwareSelected = encodeURIComponent(hardWareString.join('+'));
-            setIsDeviceProcessing(true);
-            setActiveDeviceData([]);
-            await getActiveDeviceData(
-                pageNo,
-                pageSize,
-                bldgId,
-                search,
-                deviceStatus,
-                {
-                    ...sorting,
-                },
-                macAddressSelected,
-                deviceModelSelected,
-                sensorSelected,
-                firmwareSelected,
-                hardwareSelected
-            )
-                .then((res) => {
-                    let response = res.data;
-                    setActiveDeviceData(response.data);
-                    setTotalItems(response?.total_data);
-                    setIsDeviceProcessing(false);
-                })
-                .catch(() => {
-                    setIsDeviceProcessing(false);
-                });
-        };
-        fetchActiveDeviceData();
-    }, [
-        search,
-        sortBy,
-        pageNo,
-        pageSize,
-        deviceStatus,
-        bldgId,
-        deviceIdFilterString,
-        deviceModelString,
-        sensorString,
-        firmWareString,
-        hardWareString,
-    ]);
+    const modifySensorFilter = (fractions) => {
+        const numerators = [];
+
+        for (let fraction of fractions) {
+            const parts = fraction.split('/');
+            const numerator = parseInt(parts[0]);
+            numerators.push(numerator);
+        }
+
+        return numerators.join('+');
+    };
 
     const getFilters = async () => {
+        setFetchingFilters(true);
         let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
         let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
+        let sensorSelected = modifySensorFilter(sensorString);
         let firmwareSelected = encodeURIComponent(firmWareString.join('+'));
         let hardwareSelected = encodeURIComponent(hardWareString.join('+'));
+        let floorSelected = encodeURIComponent(floorString.join('+'));
+        let spaceSelected = encodeURIComponent(spaceString.join('+'));
+
         const filters = await fetchActiveFilter({
             bldgId,
             macAddressSelected,
             deviceModelSelected,
+            sensorSelected,
             firmwareSelected,
             hardwareSelected,
+            floorSelected,
+            spaceSelected,
         });
         filters.data.forEach((filterOptions) => {
+            const sortedFloors = filterOptions?.installed_floor
+                .slice()
+                .sort((a, b) => a.floor_name.localeCompare(b.floor_name));
+
+            const sortedSpaces = filterOptions?.installed_space
+                .slice()
+                .sort((a, b) => a.space_name.localeCompare(b.space_name));
+
             const filterOptionsFetched = [
                 {
                     label: 'Identifier',
@@ -198,6 +175,52 @@ const ActiveDevices = () => {
                     },
                     onDelete: () => {
                         setDeviceModelString([]);
+                    },
+                },
+                {
+                    label: 'Floors',
+                    value: 'floor',
+                    placeholder: 'All Floors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: sortedFloors.map((filterItem) => ({
+                        value: filterItem.floor_id,
+                        label: filterItem.floor_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let sensors = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                sensors.push(opt[i].value);
+                            }
+                            setFloorString(sensors);
+                        }
+                    },
+                    onDelete: () => {
+                        setFloorString([]);
+                    },
+                },
+                {
+                    label: 'Spaces',
+                    value: 'space',
+                    placeholder: 'All Spaces',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: sortedSpaces.map((filterItem) => ({
+                        value: filterItem.space_id,
+                        label: filterItem.space_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let sensors = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                sensors.push(opt[i].value);
+                            }
+                            setSpaceString(sensors);
+                        }
+                    },
+                    onDelete: () => {
+                        setSpaceString([]);
                     },
                 },
                 {
@@ -270,43 +293,114 @@ const ActiveDevices = () => {
                     },
                 },
             ];
-
             setFilterOptions(filterOptionsFetched);
+        });
+        setFetchingFilters(false);
+    };
+
+    const fetchActiveDeviceData = async () => {
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name === undefined ? 'identifier' : sortBy.name,
+                sort_by: sortBy.method === undefined ? 'ace' : sortBy.method,
+            };
+        let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
+        let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
+        let sensorSelected = encodeURIComponent(sensorString.join('+'));
+        let floorSelected = encodeURIComponent(floorString.join('+'));
+        let spaceSelected = encodeURIComponent(spaceString.join('+'));
+        let firmwareSelected = encodeURIComponent(firmWareString.join('+'));
+        let hardwareSelected = encodeURIComponent(hardWareString.join('+'));
+
+        setIsDeviceProcessing(true);
+        setActiveDeviceData([]);
+
+        await getActiveDeviceData(
+            pageNo,
+            pageSize,
+            bldgId,
+            search,
+            deviceStatus,
+            {
+                ...sorting,
+            },
+            macAddressSelected,
+            deviceModelSelected,
+            sensorSelected,
+            firmwareSelected,
+            hardwareSelected,
+            floorSelected,
+            spaceSelected
+        )
+            .then((res) => {
+                const response = res?.data;
+                if (response?.data) {
+                    for (const element of response?.data) {
+                        element.bldg_id = bldgId;
+                    }
+                    setActiveDeviceData(response?.data);
+                }
+                if (response?.total_data) setTotalItems(response?.total_data);
+                setIsDeviceProcessing(false);
+            })
+            .catch(() => {
+                setIsDeviceProcessing(false);
+            });
+    };
+
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Smart Plugs',
+                    path: '/settings/smart-plugs',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'building-settings';
         });
     };
 
     useEffect(() => {
+        fetchActiveDeviceData();
         getFilters();
-    }, [bldgId]);
+    }, [
+        search,
+        sortBy,
+        pageNo,
+        pageSize,
+        deviceStatus,
+        bldgId,
+        deviceIdFilterString,
+        deviceModelString,
+        sensorString,
+        floorString,
+        spaceString,
+        firmWareString,
+        hardWareString,
+    ]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [pageNo, pageSize]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Active Devices',
-                        path: '/settings/active-devices',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'building-settings';
-            });
-        };
         updateBreadcrumbStore();
     }, []);
 
     useEffect(() => {
-        if (bldgId && buildingListData.length !== 0) {
+        if (bldgId && buildingListData && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             if (bldgObj?.building_id)
-                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+                updateBuildingStore(
+                    bldgObj?.building_id,
+                    bldgObj?.building_name,
+                    bldgObj?.timezone,
+                    bldgObj?.plug_only
+                );
         }
     }, [buildingListData, bldgId]);
 
@@ -315,7 +409,7 @@ const ActiveDevices = () => {
     };
 
     const handleDownloadCsv = async () => {
-        let params = `?building_id=${bldgId}`;
+        const params = `?building_id=${bldgId}`;
         await getSingleActiveDevice(params)
             .then((res) => {
                 const responseData = res?.data?.data;
@@ -340,7 +434,7 @@ const ActiveDevices = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/active-devices/single/${bldgId}/${row.equipments_id}`,
+                    pathname: `/settings/smart-plugs/single/${row?.bldg_id}/${row.equipments_id}`,
                 }}>
                 <a>{row.identifier}</a>
             </Link>
@@ -420,7 +514,7 @@ const ActiveDevices = () => {
         },
         {
             name: 'Sensors',
-            accessor: 'sensor_count',
+            accessor: 'sensor_number',
             callbackValue: renderDeviceSensors,
             onSort: (method, name) => setSortBy({ method, name }),
         },
@@ -444,17 +538,17 @@ const ActiveDevices = () => {
                 <Col lg={12}>
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <Typography.Header size={Typography.Sizes.lg}>Active Devices</Typography.Header>
+                            <Typography.Header size={Typography.Sizes.lg}>{`Smart Plugs`}</Typography.Header>
                         </div>
                         {userPermission?.user_role === 'admin' ||
                         userPermission?.permissions?.permissions?.advanced_active_device_permission?.create ? (
                             <div className="d-flex">
                                 <Link
                                     to={{
-                                        pathname: `/settings/active-devices/provision/${bldgId}`,
+                                        pathname: `/settings/smart-plugs/provision/${bldgId}`,
                                     }}>
                                     <Button
-                                        label={'Add Active Device'}
+                                        label={`Add Smart Plug`}
                                         size={Button.Sizes.md}
                                         type={Button.Type.primary}
                                         icon={<PlusSVG />}
@@ -473,6 +567,7 @@ const ActiveDevices = () => {
                     <DataTableWidget
                         isLoading={isDeviceProcessing}
                         isLoadingComponent={<SkeletonLoading />}
+                        isFilterLoading={isFilterFetching}
                         id="active_devices_list"
                         onSearch={(query) => {
                             setPageNo(1);

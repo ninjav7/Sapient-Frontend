@@ -173,7 +173,15 @@ const mapFilters = {
     },
 };
 
-export const Filters = ({ filterOptions, onChange, onChangeFilterValue, selectedFilters, onDeleteFilter }) => {
+export const Filters = ({
+    filterOptions,
+    onChange,
+    onChangeFilterValue,
+    selectedFilters,
+    onDeleteFilter,
+    hideStatusFilter = false,
+    isFilterLoading = false,
+}) => {
     const { widgetProps, setSearch } = useContext(DataTableWidgetContext);
 
     const handleSearchChange = (event) => {
@@ -182,13 +190,14 @@ export const Filters = ({ filterOptions, onChange, onChangeFilterValue, selected
 
     return (
         <div className="data-table-widget-filters">
-            {widgetProps.onSearch && <Input iconUrl={SearchSVG} onChange={handleSearchChange} placeHolder="Search" />}
+            {widgetProps.onSearch && <Input iconUrl={SearchSVG} onChange={handleSearchChange} placeholder="Search" />}
 
             {filterOptions && (
                 <Select.Multi
                     onChange={onChange}
                     options={filterOptions}
                     value={selectedFilters}
+                    isLoading={isFilterLoading}
                     components={{
                         Control: (props) => (
                             <div {...props}>
@@ -203,7 +212,7 @@ export const Filters = ({ filterOptions, onChange, onChangeFilterValue, selected
                     }}
                 />
             )}
-            <StatusFilter />
+            {!hideStatusFilter && <StatusFilter />}
 
             {selectedFilters.map((filter) => {
                 const Component = mapFilters[filter.filterType];

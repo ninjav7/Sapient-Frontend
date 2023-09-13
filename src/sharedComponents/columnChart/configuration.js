@@ -113,12 +113,12 @@ export const options = (props) => {
         columnType: 'column',
         chartHeight: props.chartHeight || 341,
         colors: props.colors,
-        series: [...props.series, ...tempSeries(props?.temperatureSeries || [])],
+        series: [...props?.series, ...tempSeries(props?.temperatureSeries || [])],
         categories: props.categories,
         onMoreDetail: props.onMoreDetail,
         tooltipUnit: props.tooltipUnit,
         yAxisWithAssignMeasure: false,
-        tooltipValuesKey: '{point.y}',
+        tooltipValuesKey: props.tooltipValuesKey ? props.tooltipValuesKey : '{point.y}',
     });
 
     return _.merge(
@@ -127,25 +127,29 @@ export const options = (props) => {
             {
                 tooltip: {
                     formatter: function (tooltip) {
-                        let _this = this;
-                        let formatter = (args) => {
-                            let momentInstance = moment(args.value);
+                        try {
+                            let _this = this;
+                            let formatter = (args) => {
+                                let momentInstance = moment(args.value);
 
-                            if (props.timeZone) {
-                                momentInstance = momentInstance.tz(props.timeZone);
-                            }
+                                if (props.timeZone) {
+                                    momentInstance = momentInstance.tz(props.timeZone);
+                                }
 
-                            return props.tooltipCallBackValue
-                                ? props.tooltipCallBackValue(args)
-                                : momentInstance.format(`MMM D 'YY @ hh:mm A`);
-                        };
+                                return props.tooltipCallBackValue
+                                    ? props.tooltipCallBackValue(args)
+                                    : momentInstance.format(`MMM D 'YY @ hh:mm A`);
+                            };
 
-                        _this.points = _this.points.map((point) => ({
-                            ...point,
-                            key: formatter({ tooltip, _this: this, value: point.key }),
-                        }));
+                            _this.points = _this.points.map((point) => ({
+                                ...point,
+                                key: formatter({ tooltip, _this: this, value: point.key }),
+                            }));
 
-                        return tooltip.defaultFormatter.call(_this, tooltip);
+                            return tooltip.defaultFormatter.call(_this, tooltip);
+                        } catch (e) {
+                            //seems internal error in the chart itself
+                        }
                     },
                 },
                 xAxis: {

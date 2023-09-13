@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
+import { UserStore } from '../../store/UserStore';
 import { apiRequestBody, formatConsumptionValue } from '../../helpers/helpers';
 import { UNITS } from '../../constants/units';
 import EndUsesKPIs from '../../sharedComponents/endUsesKPIs/EndUsesKPIs';
@@ -19,19 +20,27 @@ import { KPI_UNITS } from '../../sharedComponents/KPIs';
 import colors from '../../assets/scss/_colors.scss';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
-import './style.css';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
+import { getWeatherData } from '../../services/weather';
+import './style.css';
 
 const EndUseType = () => {
     const { endUseType } = useParams();
     const { bldgId } = useParams();
 
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
-    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
-    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+
     const [buildingListData] = useAtom(buildingData);
     const [isPlugOnly, setIsPlugOnly] = useState(false);
+
+    const [weatherData, setWeatherData] = useState(null);
+    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
 
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
@@ -53,13 +62,16 @@ const EndUseType = () => {
     });
 
     const formatXaxis = ({ value }) => {
-        return moment(value).tz(timeZone).format(`${dateFormat}`);
+        return moment.utc(value).format(`${dateFormat}`);
     };
 
     const toolTipFormatter = ({ value }) => {
+        const time_format = userPrefTimeFormat === `24h` ? `HH:mm` : `hh:mm A`;
+        const date_format = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM 'YY` : `MMM D 'YY`;
+
         return daysCount >= 182
-            ? moment(value).tz(timeZone).format(`MMM 'YY`)
-            : moment(value).tz(timeZone).format(`MMM D 'YY @ hh:mm A`);
+            ? moment.utc(value).format(`MMM 'YY`)
+            : moment.utc(value).format(`${date_format} @ ${time_format}`);
     };
 
     const [endUseName, setEndUseName] = useState('');
@@ -73,7 +85,7 @@ const EndUseType = () => {
         const payload = apiRequestBody(startDate, endDate, time_zone);
         await fetchEndUsesUsageChart(bldgId, endUseTypeRequest, payload)
             .then((res) => {
-                const response = res?.data;
+                const response = res?.data?.data;
                 let energyCategories = [];
                 let energyData = [
                     {
@@ -82,8 +94,8 @@ const EndUseType = () => {
                     },
                 ];
                 response.forEach((record) => {
-                    energyCategories.push(record?.date);
-                    energyData[0].data.push(parseFloat((record?.energy_consumption / 1000).toFixed(2)));
+                    energyCategories.push(record?.time_stamp);
+                    energyData[0].data.push(parseFloat((record?.consumption / 1000).toFixed(2)));
                 });
                 setEnergyConsumptionsCategories(energyCategories);
                 setEnergyConsumptionsData(energyData);
@@ -146,6 +158,51 @@ const EndUseType = () => {
             .catch((error) => {});
     };
 
+    const fetchWeatherData = async (time_zone) => {
+        const payload = {
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: time_zone,
+            bldg_id: bldgId,
+        };
+        await getWeatherData(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    const tempData = [];
+                    const highTemp = {
+                        type: LOW_MED_HIGH_TYPES.HIGH,
+                        data: [],
+                        color: colors.datavizRed500,
+                    };
+                    const avgTemp = {
+                        type: LOW_MED_HIGH_TYPES.MED,
+                        data: [],
+                        color: colors.primaryGray450,
+                    };
+                    const lowTemp = {
+                        type: LOW_MED_HIGH_TYPES.LOW,
+                        data: [],
+                        color: colors.datavizBlue400,
+                    };
+                    response.data.forEach((record) => {
+                        if (record.hasOwnProperty('temp')) avgTemp.data.push(record?.temp);
+                        if (record.hasOwnProperty('max_temp')) highTemp.data.push(record?.max_temp);
+                        if (record.hasOwnProperty('min_temp')) lowTemp.data.push(record?.min_temp);
+                    });
+                    if (avgTemp?.data.length !== 0) tempData.push(avgTemp);
+                    if (highTemp?.data.length !== 0) tempData.push(highTemp);
+                    if (lowTemp?.data.length !== 0) tempData.push(lowTemp);
+                    if (tempData.length !== 0) setWeatherData(tempData);
+                } else {
+                    setWeatherData(null);
+                }
+            })
+            .catch(() => {
+                setWeatherData(null);
+            });
+    };
+
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
             const xaxisObj = xaxisLabelsCount(days_count);
@@ -153,14 +210,14 @@ const EndUseType = () => {
             setXAxisObj(xaxisObj);
         };
 
-        const getFormattedChartDates = (days_count) => {
-            const date_format = xaxisLabelsFormat(days_count);
+        const getFormattedChartDates = (days_count, timeFormat, dateFormat) => {
+            const date_format = xaxisLabelsFormat(days_count, timeFormat, dateFormat);
             setDateFormat(date_format);
         };
 
         getXaxisForDaysSelected(daysCount);
-        getFormattedChartDates(daysCount);
-    }, [daysCount]);
+        getFormattedChartDates(daysCount, userPrefTimeFormat, userPrefDateFormat);
+    }, [daysCount, userPrefTimeFormat, userPrefDateFormat]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -212,7 +269,12 @@ const EndUseType = () => {
 
             if (bldgObj?.building_id) {
                 if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
-                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+                updateBuildingStore(
+                    bldgObj?.building_id,
+                    bldgObj?.building_name,
+                    bldgObj?.timezone,
+                    bldgObj?.plug_only
+                );
             }
         }
 
@@ -257,6 +319,13 @@ const EndUseType = () => {
         plugUsageDataFetch(endUseTypeRequest, time_zone);
     }, [startDate, endDate, endUseType, bldgId]);
 
+    useEffect(() => {
+        if (isWeatherChartVisible && bldgId) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            fetchWeatherData(bldgObj?.timezone);
+        }
+    }, [isWeatherChartVisible, startDate, endDate]);
+
     const fetchEnduseTitle = (type) => {
         return type === 'hvac'
             ? 'HVAC Consumption'
@@ -288,6 +357,17 @@ const EndUseType = () => {
                     xAxisCallBackValue={formatXaxis}
                     restChartProps={xAxisObj}
                     tooltipCallBackValue={toolTipFormatter}
+                    temperatureSeries={weatherData}
+                    plotBands={null}
+                    upperLegendsProps={{
+                        weather: {
+                            onClick: ({ withTemp }) => {
+                                setWeatherChartVisibility(withTemp);
+                            },
+                            isAlwaysShown: true,
+                        },
+                    }}
+                    withTemp={isWeatherChartVisible}
                 />
             </div>
 

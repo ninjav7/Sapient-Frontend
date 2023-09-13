@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Cookies } from 'react-cookie';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -14,8 +15,6 @@ import { ReactComponent as CheckXmark } from '../../assets/icon/circle-xmark.svg
 import { ReactComponent as CheckMinusMark } from '../../assets/icon/circle-minusmark.svg';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { ReactComponent as Exclamation } from '../../assets/icon/circleExclamation.svg';
-import './auth.scss';
-import axios from 'axios';
 import { BaseUrl, checkLinkValidity, UpdateUserPassword } from '../../services/Network';
 import { isUserAuthenticated, getLoggedInUser } from '../../helpers/authUtils';
 import Input from '../../sharedComponents/form/input/Input';
@@ -24,14 +23,22 @@ import { ComponentStore } from '../../store/ComponentStore';
 import Brick from '../../sharedComponents/brick';
 import Modal from 'react-bootstrap/Modal';
 import Button from '../../sharedComponents/button/Button';
+import colorPalette from '../../assets/scss/_colors.scss';
+import { Checkbox } from '../../sharedComponents/form/checkbox';
+import TermsAndConditions from './terms-conditions/TermsAndConditions';
+import { compareStrings, specialChartPattern } from './utils';
+import { Notification } from '../../sharedComponents/notification';
+import './auth.scss';
 
 const Confirm = (props) => {
     const cookies = new Cookies();
     const history = useHistory();
     const [_isMounted, set_isMounted] = useState(false);
-    const [passwordResetSuccessful, setPasswordResetSuccessful] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [titleText, setTitleText] = useState('Set New Password');
+    const [updateStatus, setUpdateStatus] = useState('');
+    const [detailMessage, setDetailMessage] = useState('');
+    const [isRetry, setRetry] = useState(false);
     const [showReset, setShowReset] = useState(false);
     const [redirectToLogin, setRedirectToLogin] = useState(false);
     const [matchError, setMatchError] = useState(false);
@@ -50,9 +57,26 @@ const Confirm = (props) => {
     const [alreadyLogin, setAlreadyLogin] = useState(false);
     const [userDetails, setUserDetails] = useState({});
     const [errorCount, setErrorCount] = useState(0);
+    const [isTermsAccepted, setTermsAcceptance] = useState(false);
+    const [isTermsRead, setTermsRead] = useState(false);
+
+    // Terms and Condition Modal
+    const [showModal, setModalShow] = useState(false);
+    const handleModalClose = () => setModalShow(false);
+    const handleModalOpen = () => setModalShow(true);
+
+    const RequiredFieldUI = ({ className = '' }) => {
+        return (
+            <span style={{ color: colorPalette.error600 }} className={`font-weight-bold ${className}`}>
+                *
+            </span>
+        );
+    };
 
     useEffect(() => {
         set_isMounted(true);
+        setTermsRead(false);
+        setTermsAcceptance(false);
         document.body.classList.add('authentication-bg');
         const isAuthTknValid = isUserAuthenticated();
         const user = getLoggedInUser();
@@ -70,23 +94,28 @@ const Confirm = (props) => {
     const checkLinkValidityFunc = async () => {
         try {
             setIsLoading(true);
-            let headers = {
+            const headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                Authorization: `Bearer ${props.match.params.token}`,
+                Authorization: `Bearer ${props?.match?.params?.token}`,
             };
             await axios.get(`${BaseUrl}${checkLinkValidity}`, { headers }).then((res) => {
-                let response = res.data;
-                if (response.success === false) {
-                    history.push('/account/link-expired');
-                } else {
-                }
+                const response = res?.data;
+                if (!response.success) history.push('/account/link-expired');
                 setIsLoading(false);
             });
         } catch (error) {
             history.push('/account/link-expired');
             setIsLoading(false);
         }
+    };
+
+    const notifyUser = (notifyType, notifyMessage) => {
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = notifyMessage;
+            s.notificationType = notifyType;
+        });
     };
 
     const handleValidSubmit = async () => {
@@ -104,43 +133,72 @@ const Confirm = (props) => {
                 setMatchError(true);
                 return;
             }
-            try {
-                setIsLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${props.match.params.token}`,
-                };
-                await axios
-                    .post(
-                        `${BaseUrl}${UpdateUserPassword}`,
-                        {
-                            password: password,
-                            confirm_password: cpassword,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let response = res.data;
-                        if (response.success === false) {
-                            UserStore.update((s) => {
-                                s.showNotification = true;
-                                s.notificationMessage = response?.message;
-                                s.notificationType = 'error';
-                            });
-                        } else {
-                            setPasswordResetSuccessful(true);
-                            setTitleText('Success');
-                            setShowReset(true);
-                        }
-                        setIsLoading(false);
-                    });
-            } catch (error) {
-                setIsLoading(false);
-            }
-        } else {
-            return;
+            setIsLoading(true);
+            const headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${props.match.params.token}`,
+            };
+            await axios
+                .post(
+                    `${BaseUrl}${UpdateUserPassword}`,
+                    {
+                        password: password,
+                        confirm_password: cpassword,
+                        accept_terms: isTermsAccepted,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    const response = res?.data;
+                    let message = '';
+                    if (response?.success) {
+                        setTitleText('Success');
+                        message = response?.message ? response?.message : `Password set successfully!`;
+                        notifyUser(Notification.Types.success, message);
+                        setDetailMessage(`You have successfully set your password. You may now log in to the
+                            Sapient Energy Portal.`);
+                    } else {
+                        setTitleText('Failed');
+                        message = response?.message ? response?.message : `Failed to update password.`;
+                        notifyUser(Notification.Types.error, message);
+                        setDetailMessage(
+                            `Password Change Failed: Unfortunately, we were unable to update your password. Please make another attempt or reach out to Administrator for assistance.`
+                        );
+                    }
+                    setUpdateStatus(message);
+                    setRetry(false);
+                })
+                .catch((error) => {
+                    const response = error?.response?.data;
+                    if (!response?.success) {
+                        let message = '';
+                        setTitleText('Failed');
+                        message = response?.message
+                            ? response?.message
+                            : `Password Change Failed: Unfortunately, we were unable to update your password. Please make another attempt or reach out to Administrator for assistance.`;
+                        notifyUser(Notification.Types.error, `Failed to update password.`);
+                        setDetailMessage(message);
+                        setUpdateStatus(`Failed to update password.`);
+                        setRetry(true);
+                    }
+                })
+                .finally(() => {
+                    setIsLoading(false);
+                    setShowReset(true);
+                });
         }
+    };
+
+    const handleAccept = () => {
+        setTermsRead(true);
+        handleModalClose();
+    };
+
+    const handleDecline = () => {
+        setTermsAcceptance(false);
+        setTermsRead(false);
+        handleModalClose();
     };
 
     useEffect(() => {
@@ -166,7 +224,7 @@ const Confirm = (props) => {
             } else {
                 setLowerCaseErr('error');
             }
-            if (password.match(/[`~!@#$%\^&*()+=|;:'",.<>\/?\\\-]/)) {
+            if (password.match(specialChartPattern)) {
                 setSpecialCharErr('success');
             } else {
                 setSpecialCharErr('error');
@@ -206,14 +264,9 @@ const Confirm = (props) => {
     }, [charErr, numberErr, lowerCaseErr, upperCaseErr, specialCharErr]);
 
     useEffect(() => {
-        if (cpassword.length >= 8) {
-            if (cpassword === password) {
-                setMatchErr('success');
-            } else {
-                setMatchErr('error');
-            }
-        }
-    }, [cpassword]);
+        compareStrings(password, cpassword) ? setMatchErr(`success`) : setMatchErr(`error`);
+    }, [password, cpassword]);
+
     const handleLogout = () => {
         ComponentStore.update((s) => {
             s.parent = '';
@@ -222,6 +275,8 @@ const Confirm = (props) => {
         cookies.remove('user', { path: '/' });
         window.location.reload();
     };
+
+    const messageLines = detailMessage.split('\n');
 
     return (
         <React.Fragment>
@@ -245,21 +300,40 @@ const Confirm = (props) => {
                                         </div>
                                         {showReset ? (
                                             <>
-                                                <div className="successBlock">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        className="successText">
-                                                        <Check /> &nbsp;&nbsp; Password Set
-                                                    </Typography.Subheader>
-                                                </div>
-                                                <Typography.Subheader
-                                                    size={Typography.Sizes.md}
-                                                    className="text-mute mt-4">
-                                                    You have successfully set your password. You may now log in to the
-                                                    Sapient Energy Portal.
+                                                <Notification
+                                                    type={
+                                                        titleText === 'Success'
+                                                            ? Notification.Types.success
+                                                            : Notification.Types.error
+                                                    }
+                                                    component={Notification.ComponentTypes.alert}
+                                                    title={updateStatus}
+                                                    isShownCloseBtn={false}
+                                                />
+
+                                                <Brick sizeInRem={2} />
+
+                                                <Typography.Subheader size={Typography.Sizes.md} className="text-muted">
+                                                    {messageLines.map((line, index) => (
+                                                        <p key={index}>{line}</p>
+                                                    ))}
                                                 </Typography.Subheader>
 
-                                                <FormGroup className="form-group mt-5 pt-4 mb-0 text-center">
+                                                <Brick sizeInRem={2} />
+
+                                                <FormGroup className={`w-100 ${isRetry ? 'reset-page-btn-style' : ''}`}>
+                                                    {isRetry && (
+                                                        <Button
+                                                            label={'Retry Password Update'}
+                                                            size={Button.Sizes.lg}
+                                                            type={Button.Type.secondaryGrey}
+                                                            className="sub-button"
+                                                            onClick={() => {
+                                                                setShowReset(false);
+                                                                setTitleText('Set New Password');
+                                                            }}></Button>
+                                                    )}
+
                                                     <Button
                                                         label={'Go to Login'}
                                                         size={Button.Sizes.lg}
@@ -274,12 +348,14 @@ const Confirm = (props) => {
                                             <>
                                                 <form className="authentication-form">
                                                     <FormGroup className="mb-3 pt-2">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            className="text-mute mb-1">
-                                                            Password
-                                                        </Typography.Subheader>
-
+                                                        <div className="d-flex">
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute mb-1">
+                                                                Password
+                                                            </Typography.Subheader>
+                                                            <RequiredFieldUI className="ml-1" />
+                                                        </div>
                                                         <Input
                                                             placeholder="Enter your password"
                                                             type={passwordType}
@@ -441,13 +517,13 @@ const Confirm = (props) => {
                                                                     <Typography.Subheader
                                                                         size={Typography.Sizes.md}
                                                                         className="text-mute-error mt-2">
-                                                                        Error: Special Character (1 or more)
+                                                                        {`Error: Special characters (one or more) allowed: ~\!?@#\$%\^&\*\(\)_\+{}\":;.,='\[\]`}
                                                                     </Typography.Subheader>
                                                                 ) : (
                                                                     <Typography.Subheader
                                                                         size={Typography.Sizes.md}
                                                                         className="text-mute mt-2">
-                                                                        Special Character (1 or more)
+                                                                        {`Special Character (1 or more)`}
                                                                     </Typography.Subheader>
                                                                 )}
                                                             </div>
@@ -489,12 +565,14 @@ const Confirm = (props) => {
                                                         </div>
                                                     </div>
                                                     <FormGroup className="mb-3 pt-5">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            className="text-mute mb-1">
-                                                            Confirm Password
-                                                        </Typography.Subheader>
-
+                                                        <div className="d-flex">
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute mb-1">
+                                                                Confirm Password
+                                                            </Typography.Subheader>
+                                                            <RequiredFieldUI className="ml-1" />
+                                                        </div>
                                                         <Input
                                                             placeholder="Enter your password"
                                                             disabled={
@@ -536,41 +614,76 @@ const Confirm = (props) => {
                                                     <div className="columnField ml-3">
                                                         <div className="rowField">
                                                             <div className="mr-2">
-                                                                {matchErr == '' ? (
+                                                                {cpassword === '' ? (
                                                                     <CheckMinusMark
                                                                         className="mt-2"
                                                                         style={{ height: '1.2rem', width: '1.2rem' }}
                                                                     />
-                                                                ) : matchErr === 'success' ? (
-                                                                    <Check
-                                                                        className="mt-2"
-                                                                        style={{ height: '1.2rem', width: '1.2rem' }}
-                                                                    />
                                                                 ) : (
-                                                                    <CheckXmark
-                                                                        className="mt-2"
-                                                                        style={{ height: '1.2rem', width: '1.2rem' }}
-                                                                    />
+                                                                    <>
+                                                                        {matchErr === 'success' ? (
+                                                                            <Check
+                                                                                className="mt-2"
+                                                                                style={{
+                                                                                    height: '1.2rem',
+                                                                                    width: '1.2rem',
+                                                                                }}
+                                                                            />
+                                                                        ) : (
+                                                                            <CheckXmark
+                                                                                className="mt-2"
+                                                                                style={{
+                                                                                    height: '1.2rem',
+                                                                                    width: '1.2rem',
+                                                                                }}
+                                                                            />
+                                                                        )}
+                                                                    </>
                                                                 )}
                                                             </div>
                                                             <div>
-                                                                {matchErr === 'error' ? (
-                                                                    <Typography.Subheader
-                                                                        size={Typography.Sizes.md}
-                                                                        className="text-mute-error mt-2">
-                                                                        Error: Password must match
-                                                                    </Typography.Subheader>
-                                                                ) : (
-                                                                    <Typography.Subheader
-                                                                        size={Typography.Sizes.md}
-                                                                        className="text-mute mt-2">
-                                                                        Password must match
-                                                                    </Typography.Subheader>
-                                                                )}
+                                                                <Typography.Subheader
+                                                                    size={Typography.Sizes.md}
+                                                                    className={`mt-2 ${
+                                                                        matchErr === 'error' && cpassword !== ''
+                                                                            ? `text-mute-error`
+                                                                            : `text-mute`
+                                                                    }`}>
+                                                                    {matchErr === 'error' && cpassword !== ''
+                                                                        ? `Error: Password must match`
+                                                                        : `Password must match`}
+                                                                </Typography.Subheader>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <FormGroup className="mb-3 pt-5">
+
+                                                    {/* Terms and Condition  */}
+                                                    <div className="mt-4 d-flex align-items-center">
+                                                        <Checkbox
+                                                            label=""
+                                                            size={Checkbox.Sizes.md}
+                                                            checked={isTermsAccepted}
+                                                            onClick={() => {
+                                                                setTermsAcceptance(!isTermsAccepted);
+                                                            }}
+                                                            disabled={!isTermsRead}
+                                                        />
+                                                        <Typography.Body size={Typography.Sizes.lg}>
+                                                            <div
+                                                                className="d-flex align-items-center"
+                                                                style={{ gap: '0.2rem' }}>
+                                                                <RequiredFieldUI />
+                                                                <div>{`I have read and agree to the`}</div>
+                                                                <div
+                                                                    className="model-text-style mouse-pointer"
+                                                                    onClick={
+                                                                        handleModalOpen
+                                                                    }>{`terms of service.`}</div>
+                                                            </div>
+                                                        </Typography.Body>
+                                                    </div>
+
+                                                    <FormGroup className="mb-3 mt-4">
                                                         <Button
                                                             className="sub-button"
                                                             label={'Set Password'}
@@ -583,7 +696,8 @@ const Confirm = (props) => {
                                                                 lowerCaseErr === 'success' &&
                                                                 upperCaseErr === 'success' &&
                                                                 specialCharErr === 'success' &&
-                                                                numberErr === 'success'
+                                                                numberErr === 'success' &&
+                                                                isTermsAccepted
                                                                     ? false
                                                                     : true
                                                             }></Button>
@@ -654,6 +768,13 @@ const Confirm = (props) => {
                     />
                 </Modal.Footer>
             </Modal>
+
+            <TermsAndConditions
+                showModal={showModal}
+                closeModal={handleModalClose}
+                handleAccept={handleAccept}
+                handleDecline={handleDecline}
+            />
         </React.Fragment>
     );
 };

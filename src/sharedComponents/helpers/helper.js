@@ -60,10 +60,10 @@ function arrayMoveImmutable(array, fromIndex, toIndex) {
 }
 
 const getStatesForSelectAllCheckbox = (values, options) => {
-    const noneSelected = values.length === 0;
-    const allSelected = values.length === options.length;
-    const someSelected = values.length > 0;
-    const optionsAreExisted = options.length > 0;
+    const noneSelected = values?.length === 0;
+    const allSelected = values?.length === options?.length;
+    const someSelected = values?.length > 0;
+    const optionsAreExisted = options?.length > 0;
 
     return {
         checked: optionsAreExisted && !noneSelected && allSelected,
