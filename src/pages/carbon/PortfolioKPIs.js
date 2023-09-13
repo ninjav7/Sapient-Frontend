@@ -16,24 +16,26 @@ const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0, use
 
                 <KPILabeled
                     title={`Total Carbon Emissions`}
-                    value={formatConsumptionValue(overalldata?.total_carbon_emissions?.now / 1000, 2)}
+                    value={formatConsumptionValue(overalldata?.total?.now / 1000, 2)}
                     badgePrecentage={percentageHandler(
-                        overalldata.total_carbon_emissions.now,
-                        overalldata.total_carbon_emissions.old
+                        overalldata.total.now,
+                        overalldata.total.old
                     )}
-                    unit={`${UNITS.ibs}/${UNITS.mwh}`}
+                    unit={`${
+                        userPrefUnits === 'si' ? `${UNITS.ibs}` : `${UNITS.kg}`}`}
+
                     tooltipText={
                         daysCount > 1
-                            ? `Energy density (kWh / ${
-                                  userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`
+                            ? `Total carbon emissions (${
+                                  userPrefUnits === 'si' ? `${UNITS.ibs}` : `${UNITS.kg}`
                               }) across all your buildings for the past ${daysCount} days.`
-                            : `Energy density (kWh / ${
-                                  userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`
+                            : `Total carbon emissions (${
+                                  userPrefUnits === 'si' ? `${UNITS.ibs}` : `${UNITS.kg}`
                               }) across all your buildings for the past ${daysCount} day.`
                     }
                     tooltipId="total-carbon-emissions"
                     type={
-                        overalldata.total_carbon_emissions.now >= overalldata.total_carbon_emissions.old
+                        overalldata.total.now >= overalldata.total.old
                             ? TRENDS_BADGE_TYPES.UPWARD_TREND
                             : TRENDS_BADGE_TYPES.DOWNWARD_TREND
                     }
