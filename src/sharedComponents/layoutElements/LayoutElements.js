@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 
@@ -33,49 +33,75 @@ const renderStackColumns = (
         onItemEdit,
         actionsMap = {},
         isLoadingLastColumn,
-    }
-) =>
-    Object.entries(state.stack).map(([key, { component, callbackState, currentItem }], currentIndex, stackEntries) => {
-        const children = typeof callbackState === 'function' ? callbackState(state) : state;
-        const defaultProps = {
-            key,
-            state,
-            children,
-            onColumnAdd,
-            onColumnEdit,
-            onColumnNameEdit,
-            onColumnFilter,
-            onItemEdit,
-            currentItem,
-            actionsMap,
-            isLoading: isLoadingLastColumn && stackEntries.length - 1 === currentIndex,
-        };
+        spaces,
+    },
+    stackMap
+) => {
+    //For preventing render next column if it was detected without children
+    let rendering = true;
 
-        const customizedProps = (() => {
-            const callBackPropsComponent = callBackEachColumn && callBackEachColumn[key];
-
-            if (callBackForAllColumns && !callBackPropsComponent) {
-                return callBackForAllColumns(defaultProps);
+    return Object.entries(state.stack).map(
+        ([key, { component, callbackState, currentItem }], currentIndex, stackEntries) => {
+            //preventing render if column without children has been detected
+            if (!rendering) {
+                return null;
             }
 
-            if (callBackPropsComponent) {
-                return callBackPropsComponent({ ...component.props, ...defaultProps });
+            const children = typeof callbackState === 'function' ? callbackState(state) : state;
+            const defaultProps = {
+                key,
+                state,
+                children,
+                onColumnAdd,
+                onColumnEdit,
+                onColumnNameEdit,
+                onColumnFilter,
+                onItemEdit,
+                currentItem,
+                actionsMap,
+                isLoading: isLoadingLastColumn && stackEntries.length - 1 === currentIndex,
+            };
+
+            const customizedProps = (() => {
+                const callBackPropsComponent = callBackEachColumn && callBackEachColumn[key];
+
+                if (callBackForAllColumns && !callBackPropsComponent) {
+                    return callBackForAllColumns(defaultProps);
+                }
+
+                if (callBackPropsComponent) {
+                    return callBackPropsComponent({ ...component.props, ...defaultProps });
+                }
+
+                return defaultProps;
+            })();
+
+            const currentId = currentItem[ACCESSORS._ID] || currentItem[ACCESSORS.FLOOR_ID];
+            const actionMappedProps = getActionRestrictions(actionsMap[currentId], true);
+
+            // Deal with spaces but not with first selected spaces based on floor
+            if (stackMap.current[currentIndex] !== currentId) {
+                rendering = false;
+                return null;
             }
 
-            return defaultProps;
-        })();
+            // For selected floor
+            // We don't deal with buildind id, we start work only with index 1
+            if (currentIndex === 1 && !state.floors.some((floor) => currentId === floor[ACCESSORS.FLOOR_ID])) {
+                rendering = false;
+                return null;
+            }
 
-        const currentId = currentItem[ACCESSORS._ID] || currentItem[ACCESSORS.FLOOR_ID];
-        const actionMappedProps = getActionRestrictions(actionsMap[currentId], true);
-
-        return React.cloneElement(component, { ...customizedProps, ...actionMappedProps });
-    });
+            return React.cloneElement(component, { ...customizedProps, ...actionMappedProps });
+        }
+    );
+};
 
 const LayoutElements = (props) => {
     const { state, dispatch } = useStateManager(props);
     const { onClickEachChild, onClickForAllItems, buildingData, className, style } = props;
 
-    const childrenClickHandler = (title, key, callbackState, currentItem, restrictedActions) => {
+    const childrenClickHandler = (title, key, callbackState, currentItem, restrictedActions, selectedItem) => {
         dispatch({
             type: ACTIONS.PUSH_INTO_STACK,
             payload: {
@@ -86,6 +112,10 @@ const LayoutElements = (props) => {
                         childrenCallBackValue={(props) => ({ level: String(props.type_name), ...props })}
                         onChildrenClick={(space, restrictedActions) => {
                             const currentKey = key + 1;
+
+                            // Preserve current's id and number of column
+                            stackMap.current[currentKey] = space[ACCESSORS.SPACE_ID];
+                            countOfStack.current = currentKey;
 
                             const nativeHandler = () =>
                                 childrenClickHandler(
@@ -117,6 +147,7 @@ const LayoutElements = (props) => {
 
                             nativeHandler();
                         }}
+                        selectedItem={selectedItem}
                     />
                 ),
                 key,
@@ -137,6 +168,10 @@ const LayoutElements = (props) => {
                         childrenCallBackValue={(props) => ({ level: 'Floor', ...props })}
                         state={state}
                         onChildrenClick={(floor) => {
+                            // Preserve current's id and number of column
+                            countOfStack.current = 1;
+                            stackMap.current[1] = floor[ACCESSORS.FLOOR_ID];
+
                             const nativeHandler = () =>
                                 childrenClickHandler(
                                     floor[ACCESSORS.NAME],
@@ -167,14 +202,55 @@ const LayoutElements = (props) => {
                 ),
                 key: 0,
                 callbackState: (state) => state.floors.map((floor) => ({ ...floor, hasChildren: floor.has_children })),
-                currentItem: buildingData,
+                currentItem: {
+                    [ACCESSORS.HAS_CHILDREN]: true,
+                    ...buildingData,
+                },
             },
         });
     }, []);
 
+    const stackMap = useRef({});
+
+    const countOfStack = useRef(0);
+    const stackLength = Object.keys(state.stack).length;
+    if (countOfStack.current < stackLength) {
+        countOfStack.current = stackLength;
+    }
+
+    const putInStack = useCallback(
+        (stackCount) => {
+            // Using 2 because the first two levels are already remembered
+            for (let i = 2; i < (stackCount || stackLength); i++) {
+                const currentItem =
+                    props.spaces.find((spaceData) => spaceData[ACCESSORS.SPACE_ID] === stackMap.current[i]) || {};
+
+                childrenClickHandler(
+                    currentItem[ACCESSORS.NAME],
+                    i,
+                    (items) => {
+                        return items.spaces.filter((item) => item[ACCESSORS.PARENT_SPACE] === stackMap.current[i]);
+                    },
+                    currentItem,
+                    //restriction maps
+                    {},
+                    // Id of selected item
+                    stackMap.current[i + 1]
+                );
+            }
+        },
+        [countOfStack.current, countOfStack.current, props.spaces]
+    );
+
+    useEffect(() => {
+        putInStack();
+    }, [props.isLoadingLastColumn, countOfStack.current, props.spaces]);
+
+    console.log(stackMap.current, 'stackmap');
+
     return (
         <div className={cx('layout-elements-wrapper d-flex', className)} style={style}>
-            {renderStackColumns(state, props)}
+            {renderStackColumns(state, props, stackMap)}
         </div>
     );
 };
@@ -207,6 +283,7 @@ LayoutElements.propTypes = {
     floors: PropTypes.arrayOf(PropTypes.object),
     spaces: PropTypes.arrayOf(PropTypes.object),
     actionsMap: PropTypes.object,
+    isPathRemembered: PropTypes.bool,
 };
 
 export default LayoutElements;
