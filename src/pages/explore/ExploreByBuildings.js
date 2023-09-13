@@ -379,7 +379,7 @@ const ExploreByBuildings = () => {
 
                     const newBldgMappedData = data.map((el) => ({
                         x: new Date(el?.time_stamp).getTime(),
-                        y: el?.data === '' ? null : el?.data,
+                        y: el?.data === '' ? null : el?.data / 1000,
                     }));
 
                     const recordToInsert = {
@@ -441,7 +441,7 @@ const ExploreByBuildings = () => {
 
                             const newBldgsMappedData = response?.data.map((el) => ({
                                 x: new Date(el?.time_stamp).getTime(),
-                                y: el?.data === '' ? null : el?.data,
+                                y: el?.data === '' ? null : el?.data / 1000,
                             }));
 
                             newResponse.push({
@@ -749,19 +749,45 @@ const ExploreByBuildings = () => {
                                     adaptToUpdatedData: false,
                                     stickToMax: true,
                                 },
+                                plotOptions: {
+                                    series: {
+                                        states: {
+                                            inactive: {
+                                                opacity: 1,
+                                            },
+                                        },
+                                    },
+                                },
                                 tooltip: {
                                     xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
                                 },
                                 xAxis: {
+                                    gridLineWidth: 0,
                                     type: 'datetime',
                                     labels: {
                                         format: formatXaxisForHighCharts(
                                             daysCount,
                                             userPrefDateFormat,
-                                            userPrefTimeFormat
+                                            userPrefTimeFormat,
+                                            selectedConsumption
                                         ),
                                     },
                                 },
+                                yAxis: [
+                                    {
+                                        gridLineWidth: 1,
+                                        lineWidth: 1,
+                                        opposite: false,
+                                        lineColor: null,
+                                    },
+                                    {
+                                        opposite: true,
+                                        title: false,
+                                        max: 120,
+                                        postFix: '23',
+                                        gridLineWidth: 0,
+                                    },
+                                ],
                             }}
                         />
                     )}
