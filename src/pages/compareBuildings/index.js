@@ -231,6 +231,7 @@ const CompareBuildings = () => {
                     setBuildingsData(responseData);
                 }
             })
+            .catch((error) => {})
             .finally(() => {
                 setIsLoadingBuildingData(false);
             });

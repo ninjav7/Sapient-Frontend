@@ -88,6 +88,7 @@ const BuildingOverview = () => {
     const [isPlugOnly, setIsPlugOnly] = useState(false);
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
     const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
+    const [isEnergyChartLoading, setEnergyChartLoading] = useState(false);
     const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
 
     const [hourlyAvgConsumpData, setHourlyAvgConsumpData] = useState([]);
@@ -337,6 +338,7 @@ const BuildingOverview = () => {
     };
 
     const buildingConsumptionChart = async (time_zone) => {
+        setEnergyChartLoading(true);
         const payload = {
             date_from: encodeURIComponent(startDate),
             date_to: encodeURIComponent(endDate),
@@ -362,7 +364,10 @@ const BuildingOverview = () => {
                     setEnergyConsumptionsData(energyData);
                 }
             })
-            .catch((error) => {});
+            .catch((error) => {})
+            .finally(() => {
+                setEnergyChartLoading(false);
+            });
     };
 
     const fetchWeatherData = async (time_zone) => {
@@ -605,6 +610,7 @@ const BuildingOverview = () => {
                                 temperatureSeries={weatherData}
                                 plotBands={null}
                                 withTemp={isWeatherChartVisible}
+                                isChartLoading={isEnergyChartLoading}
                             />
 
                             <HourlyAvgConsumption
@@ -664,6 +670,7 @@ const BuildingOverview = () => {
                                         },
                                     }}
                                     withTemp={isWeatherChartVisible}
+                                    isChartLoading={isEnergyChartLoading}
                                 />
                             </div>
                         </>

@@ -45,6 +45,7 @@ const EndUseType = () => {
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
     const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
+    const [isEnergyChartLoading, setEnergyChartLoading] = useState([]);
     const [xAxisObj, setXAxisObj] = useState({
         xAxis: {
             tickPositioner: function () {
@@ -82,6 +83,7 @@ const EndUseType = () => {
     };
 
     const plugUsageDataFetch = async (endUseTypeRequest, time_zone) => {
+        setEnergyChartLoading(true);
         const payload = apiRequestBody(startDate, endDate, time_zone);
         await fetchEndUsesUsageChart(bldgId, endUseTypeRequest, payload)
             .then((res) => {
@@ -100,7 +102,10 @@ const EndUseType = () => {
                 setEnergyConsumptionsCategories(energyCategories);
                 setEnergyConsumptionsData(energyData);
             })
-            .catch((error) => {});
+            .catch((error) => {})
+            .finally(() => {
+                setEnergyChartLoading(false);
+            });
     };
 
     const endUsesDataFetch = async (endUseTypeRequest, time_zone) => {
@@ -368,6 +373,7 @@ const EndUseType = () => {
                         },
                     }}
                     withTemp={isWeatherChartVisible}
+                    isChartLoading={isEnergyChartLoading}
                 />
             </div>
 
