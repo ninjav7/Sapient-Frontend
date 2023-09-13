@@ -50,8 +50,13 @@ const LayoutLevelColumn = (props) => {
         currentItem,
         isLoading,
         actionsMap,
+        selectedItem: selectedItemProp,
     } = props;
-    const [selectedItem, setSelectedItem] = useState(props.selectedItem);
+    const [selectedItem, setSelectedItem] = useState(selectedItemProp);
+
+    // useEffect(() => {
+    //     setSelectedItem(selectedItemProp)
+    // }, [selectedItemProp])
 
     useEffect(() => {
         return () => {
@@ -112,10 +117,10 @@ const LayoutLevelColumn = (props) => {
         );
     };
 
-    const columnAddHandler = useCallback(() => onColumnAdd(currentItem), [currentItem]);
-    const columnEditHandler = useCallback(() => onColumnEdit(currentItem), [currentItem]);
-    const columnNameEditHandler = useCallback(() => onColumnNameEdit(currentItem), [currentItem]);
-    const columnFilterHandler = useCallback(() => onColumnFilter(currentItem), [currentItem]);
+    const columnAddHandler = useCallback(() => onColumnAdd && onColumnAdd(currentItem), [currentItem]);
+    const columnEditHandler = useCallback(() => onColumnEdit && onColumnEdit(currentItem), [currentItem]);
+    const columnNameEditHandler = useCallback(() => onColumnNameEdit && onColumnNameEdit(currentItem), [currentItem]);
+    const columnFilterHandler = useCallback(() => onColumnFilter && onColumnFilter(currentItem), [currentItem]);
 
     return (
         <div className="layout-level-column">
