@@ -379,7 +379,7 @@ const ExploreByBuildings = () => {
 
                     const newBldgMappedData = data.map((el) => ({
                         x: new Date(el?.time_stamp).getTime(),
-                        y: el?.data === '' ? null : el?.data / 1000,
+                        y: el?.data === '' ? null : selectedConsumption === 'energy' ? el?.data / 1000 : el?.data,
                     }));
 
                     const recordToInsert = {
@@ -441,7 +441,7 @@ const ExploreByBuildings = () => {
 
                             const newBldgsMappedData = response?.data.map((el) => ({
                                 x: new Date(el?.time_stamp).getTime(),
-                                y: el?.data === '' ? null : el?.data / 1000,
+                                y: el?.data === '' ? null : data_type === 'energy' ? el?.data / 1000 : el?.data,
                             }));
 
                             newResponse.push({
