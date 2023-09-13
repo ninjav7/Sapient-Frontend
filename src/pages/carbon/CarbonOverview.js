@@ -266,7 +266,7 @@ const CarbonOverview = () => {
                 bs.items = newList;
             });
             ComponentStore.update((s) => {
-                s.parent = 'Portfolio Overview';
+                s.parent = 'carbon-portfolio';
             });
         };
         const updateBuildingData = () => {
@@ -316,8 +316,8 @@ const CarbonOverview = () => {
     const renderTotalConsumption = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {Math.round(row.total_carbon_emissions / 1000)} {userPrefUnits === 'si' ? `${UNITS.ibs}` : `${UNITS.kg}`}
-
+                {Math.round(row.total_carbon_emissions / 1000)}{' '}
+                {userPrefUnits === 'si' ? `${UNITS.ibs}` : `${UNITS.kg}`}
             </Typography.Body>
         );
     };
