@@ -616,7 +616,7 @@ const BuildingOverview = () => {
                             <HourlyAvgConsumption
                                 title="Hourly Average Consumption"
                                 subtitle="Average by Hour (kWh)"
-                                isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
+                                isChartLoading={isAvgConsumptionDataLoading}
                                 startEndDayCount={daysCount}
                                 series={hourlyAvgConsumpData}
                                 height={heatMapChartHeight}
@@ -633,7 +633,7 @@ const BuildingOverview = () => {
                             <HourlyAvgConsumption
                                 title="Hourly Average Consumption"
                                 subtitle="Average by Hour (kWh)"
-                                isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
+                                isChartLoading={isAvgConsumptionDataLoading}
                                 startEndDayCount={daysCount}
                                 series={hourlyAvgConsumpData}
                                 height={heatMapChartHeight}

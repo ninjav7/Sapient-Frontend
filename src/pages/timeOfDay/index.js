@@ -39,6 +39,7 @@ const TimeOfDay = () => {
     });
 
     const [heatMapChartData, setHeatMapChartData] = useState([]);
+    const [isAvgConsumptionDataLoading, setAvgConsumptionDataLoading] = useState([]);
 
     const weekdaysChartHeight = '400px';
 
@@ -194,7 +195,9 @@ const TimeOfDay = () => {
         };
 
         const averageUsageByHourFetch = async () => {
+            setAvgConsumptionDataLoading(true);
             const payload = apiRequestBody(startDate, endDate, time_zone);
+
             await fetchAvgDailyUsageByHour(bldgId, payload)
                 .then((res) => {
                     let response = res.data;
@@ -705,7 +708,10 @@ const TimeOfDay = () => {
 
                     setHeatMapChartData(heatMapData.reverse());
                 })
-                .catch((error) => {});
+                .catch((error) => {})
+                .finally(() => {
+                    setAvgConsumptionDataLoading(false);
+                });
         };
 
         endUsesByOfHour(isPlugOnly);
@@ -736,6 +742,7 @@ const TimeOfDay = () => {
                     labelsPosition={'top'}
                     className={'h-100'}
                     timeFormat={userPrefTimeFormat}
+                    isChartLoading={isAvgConsumptionDataLoading}
                 />
             </div>
 

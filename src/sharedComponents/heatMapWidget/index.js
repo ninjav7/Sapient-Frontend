@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Spinner } from 'reactstrap';
 import Typography from '../typography';
 import PropTypes from 'prop-types';
 import Button from '../button/Button';
@@ -46,6 +47,7 @@ const HeatMapWidget = ({
     toolTipUnit = 'kWh',
     toolTipTitle = 'Energy Usage by Hour',
     timeFormat = '12h',
+    isChartLoading = false,
 }) => {
     const [options, setOptions] = useState({
         chart: {
@@ -298,9 +300,13 @@ const HeatMapWidget = ({
             </>
             <Brick sizeInRem={1} />
 
-            <div>
+            {isChartLoading ? (
+                <div className="column-chart-loader">
+                    <Spinner />
+                </div>
+            ) : (
                 <HeatMapChart options={options} series={series} height={height} />
-            </div>
+            )}
         </div>
     );
 };
