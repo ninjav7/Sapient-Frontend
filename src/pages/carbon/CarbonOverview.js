@@ -169,28 +169,6 @@ const CarbonOverview = () => {
         if (startDate === null || endDate === null) return;
 
         portfolioOverallData();
-
-        // const energyConsumptionData = async () => {
-        //     const payload = apiRequestBody(startDate, endDate, timeZone);
-        //     await fetchPortfolioEnergyConsumption(payload)
-        //         .then((res) => {
-        //             const response = res?.data;
-        //             let energyCategories = [];
-        //             let energyData = [
-        //                 {
-        //                     name: 'Energy',
-        //                     data: [],
-        //                 },
-        //             ];
-        //             response.forEach((record) => {
-        //                 energyCategories.push(record?.x);
-        //                 energyData[0].data.push(parseFloat((record?.y / 1000).toFixed(2)));
-        //             });
-        //             // setEnergyConsumptionsCategories(energyCategories);
-        //         })
-        //         .catch((error) => {});
-        // };
-
         const portfolioBuilidingsData = async () => {
             let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchPortfolioBuilidings(payload)
@@ -203,7 +181,6 @@ const CarbonOverview = () => {
 
         portfolioBuilidingsData();
         portfolioOverallData();
-        // energyConsumptionData();
     }, [startDate, endDate, userPrefUnits]);
 
     const [isKPIsLoading, setIsKPIsLoading] = useState(false);
