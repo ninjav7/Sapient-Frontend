@@ -694,7 +694,7 @@ const ExploreByBuildings = () => {
         if (selectedBldgIds.length !== 0) {
             fetchMultipleBldgsChartData(startDate, endDate, selectedConsumption, selectedBldgIds);
         }
-    }, [startDate, endDate, selectedConsumption]);
+    }, [startDate, endDate, selectedConsumption, userPrefUnits]);
 
     useEffect(() => {
         if (checkedAll) {
