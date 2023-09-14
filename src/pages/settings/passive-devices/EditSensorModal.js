@@ -8,6 +8,7 @@ import Select from '../../../sharedComponents/form/select';
 import { Button } from '../../../sharedComponents/button';
 import { getSensorsCts, updateSensorData } from './services';
 import { UserStore } from '../../../store/UserStore';
+import { compareObjData } from '../../../helpers/helpers';
 import './styles.scss';
 
 const EditSensorModal = (props) => {
@@ -16,6 +17,7 @@ const EditSensorModal = (props) => {
     const [isProcessing, setProcessing] = useState(false);
 
     const [ctSensorObj, setCTSensorObj] = useState(null);
+    const [originalCTSensorObj, setOriginalCTSensorObj] = useState(null);
     const [ctSensorsList, setCTSensorsList] = useState([]);
 
     const handleChange = (key, value) => {
@@ -86,11 +88,6 @@ const EditSensorModal = (props) => {
                         s.notificationType = 'error';
                     });
                 }
-                setProcessing(false);
-                closeModal();
-                setErrorObj(null);
-                setCTSensorObj(null);
-                setCTSensorsList([]);
             })
             .catch(() => {
                 UserStore.update((s) => {
@@ -98,8 +95,13 @@ const EditSensorModal = (props) => {
                     s.notificationMessage = 'Unable to update Sensor.';
                     s.notificationType = 'error';
                 });
-                setProcessing(false);
+            })
+            .finally(() => {
                 closeModal();
+                setProcessing(false);
+                setErrorObj(null);
+                setCTSensorObj(null);
+                setCTSensorsList([]);
             });
     };
 
@@ -136,9 +138,11 @@ const EditSensorModal = (props) => {
                     obj.amp_multiplier = currentSensorObj?.amp_multiplier;
                 }
                 setCTSensorObj(obj);
+                setOriginalCTSensorObj(obj);
             } else {
                 const obj = ctSensorsList.find((el) => el?.value === currentSensorObj?.sensor_model_id);
                 setCTSensorObj(obj);
+                setOriginalCTSensorObj(obj);
             }
         }
     }, [ctSensorsList, currentSensorObj]);
@@ -252,6 +256,8 @@ const EditSensorModal = (props) => {
                         onClick={() => {
                             closeModal();
                             setErrorObj(null);
+                            setCTSensorObj(null);
+                            setOriginalCTSensorObj(null);
                         }}
                     />
 
@@ -260,7 +266,7 @@ const EditSensorModal = (props) => {
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         className="w-100"
-                        disabled={isProcessing}
+                        disabled={isProcessing || compareObjData(ctSensorObj, originalCTSensorObj)}
                         onClick={() => saveSensorData(currentSensorObj?.id, ctSensorObj)}
                     />
                 </div>

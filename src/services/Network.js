@@ -29,9 +29,6 @@ export const energyConsumptionByEquipmentType = '/api/v2/metrics/equipment_type'
 export const energyConsumptionBySpaceType = '/api/v2/metrics/space_type';
 export const energyConsumptionByFloor = '/api/v2/metrics/floor';
 
-// export const energyCarbonByBuilding = '/api/v2/metrics/building/carbon'
-export const metricsForCarbonBuildingPage = '/api/v2/metrics/building';
-
 // time of day
 export const builidingHourly = '/api/energy/time_of_day/hourly';
 export const avgDailyUsageByHour = '/api/energy/time_of_day/chart';

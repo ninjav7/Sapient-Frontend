@@ -10,6 +10,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 import Header from '../../components/Header';
 import Brick from '../../sharedComponents/brick';
+import Select from '../../sharedComponents/form/select';
 import Typography from '../../sharedComponents/typography';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
@@ -18,11 +19,12 @@ import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 
 import { timeZone } from '../../utils/helper';
-import { validateSeriesDataForBuildings } from './utils';
+import { UNITS } from '../../constants/units';
+import { exploreBldgMetrics, validateSeriesDataForBuildings } from './utils';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
+import { dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
 import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../explore/services';
 import { handleUnitConverstion } from '../settings/general-settings/utils';
 import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
@@ -98,6 +100,20 @@ const ExploreByBuildings = () => {
     const [topVal, setTopVal] = useState(0);
     const [bottomVal, setBottomVal] = useState(0);
     const [shouldRender, setShouldRender] = useState(true);
+
+    const [selectedUnit, setSelectedUnit] = useState(exploreBldgMetrics[0].unit);
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(exploreBldgMetrics[0]?.Consumption);
+    const [selectedConsumption, setConsumption] = useState(exploreBldgMetrics[0]?.value);
+
+    const handleUnitChange = (value) => {
+        const obj = exploreBldgMetrics.find((record) => record?.value === value);
+        setSelectedUnit(obj?.unit);
+    };
+
+    const handleConsumptionChange = (value) => {
+        const obj = exploreBldgMetrics.find((record) => record?.value === value);
+        setSelectedConsumptionLabel(obj?.Consumption);
+    };
 
     const currentRow = () => {
         return exploreBuildingsList;
@@ -346,21 +362,25 @@ const ExploreByBuildings = () => {
             });
     };
 
-    const fetchSingleBldgChartData = async (id) => {
-        const payload = apiRequestBody(startDate, endDate, timeZone);
+    const fetchSingleBldgChartData = async (bldg_id) => {
+        const start_date = encodeURIComponent(startDate);
+        const end_date = encodeURIComponent(endDate);
+        const time_zone = encodeURIComponent(timeZone);
 
-        await fetchExploreBuildingChart(payload, id)
+        const params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${time_zone}&metric=${selectedConsumption}`;
+
+        await fetchExploreBuildingChart(params, bldg_id)
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
                     const { data } = response;
 
-                    const bldgObj = exploreBuildingsList.find((el) => el?.building_id === id);
+                    const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldg_id);
                     if (!bldgObj?.building_id || data.length === 0) return;
 
                     const newBldgMappedData = data.map((el) => ({
                         x: new Date(el?.time_stamp).getTime(),
-                        y: el?.consumption === '' ? null : el?.consumption,
+                        y: el?.data === '' ? null : selectedConsumption === 'energy' ? el?.data / 1000 : el?.data,
                     }));
 
                     const recordToInsert = {
@@ -391,17 +411,18 @@ const ExploreByBuildings = () => {
             });
     };
 
-    const fetchMultipleBldgsChartData = async (start_date, end_date, bldgIDs = []) => {
-        if (start_date === null || end_date === null || bldgIDs.length === 0) return;
+    const fetchMultipleBldgsChartData = async (start_date, end_date, data_type = 'energy', bldgIDs = []) => {
+        if (start_date === null || end_date === null || !data_type || bldgIDs.length === 0) return;
 
         setFetchingChartData(true);
 
-        const payload = apiRequestBody(start_date, end_date, timeZone);
+        const time_zone = encodeURIComponent(timeZone);
+        const params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${time_zone}&metric=${data_type}`;
 
         const promisesList = [];
 
         bldgIDs.forEach((id) => {
-            promisesList.push(fetchExploreBuildingChart(payload, id));
+            promisesList.push(fetchExploreBuildingChart(params, id));
         });
 
         setSeriesData([]);
@@ -421,7 +442,7 @@ const ExploreByBuildings = () => {
 
                             const newBldgsMappedData = response?.data.map((el) => ({
                                 x: new Date(el?.time_stamp).getTime(),
-                                y: el?.consumption === '' ? null : el?.consumption,
+                                y: el?.data === '' ? null : data_type === 'energy' ? el?.data / 1000 : el?.data,
                             }));
 
                             newResponse.push({
@@ -671,15 +692,15 @@ const ExploreByBuildings = () => {
 
     useEffect(() => {
         if (selectedBldgIds.length !== 0) {
-            fetchMultipleBldgsChartData(startDate, endDate, selectedBldgIds);
+            fetchMultipleBldgsChartData(startDate, endDate, selectedConsumption, selectedBldgIds);
         }
-    }, [startDate, endDate]);
+    }, [startDate, endDate, selectedConsumption, userPrefUnits]);
 
     useEffect(() => {
         if (checkedAll) {
             if (exploreBuildingsList.length !== 0 && exploreBuildingsList.length <= 20) {
                 const allBldgsIds = exploreBuildingsList.map((el) => el?.building_id);
-                fetchMultipleBldgsChartData(startDate, endDate, allBldgsIds);
+                fetchMultipleBldgsChartData(startDate, endDate, selectedConsumption, allBldgsIds);
                 setSelectedBldgIds(allBldgsIds);
             }
         }
@@ -691,9 +712,26 @@ const ExploreByBuildings = () => {
 
     const dataToRenderOnChart = validateSeriesDataForBuildings(selectedBldgIds, exploreBuildingsList, seriesData);
 
+    const tooltipUnitVal = selectedConsumption.includes('carbon')
+        ? userPrefUnits === 'si'
+            ? UNITS.KGS_MWH
+            : UNITS.LBS_MWH
+        : selectedUnit;
+
     return (
         <>
             <Row className="explore-filters-style p-2">
+                <div className="mr-2">
+                    <Select
+                        defaultValue={selectedConsumption}
+                        options={exploreBldgMetrics}
+                        onChange={(e) => {
+                            setConsumption(e.value);
+                            handleUnitChange(e.value);
+                            handleConsumptionChange(e.value);
+                        }}
+                    />
+                </div>
                 <Header title="" type="page" />
             </Row>
 
@@ -709,8 +747,8 @@ const ExploreByBuildings = () => {
                         <ExploreChart
                             title={''}
                             subTitle={''}
-                            tooltipUnit="KWh"
-                            tooltipLabel="Energy Consumption"
+                            tooltipUnit={tooltipUnitVal}
+                            tooltipLabel={selectedConsumptionLabel}
                             data={dataToRenderOnChart}
                             chartProps={{
                                 navigator: {
@@ -718,27 +756,51 @@ const ExploreByBuildings = () => {
                                     adaptToUpdatedData: false,
                                     stickToMax: true,
                                 },
+                                plotOptions: {
+                                    series: {
+                                        states: {
+                                            inactive: {
+                                                opacity: 1,
+                                            },
+                                        },
+                                    },
+                                },
                                 tooltip: {
                                     xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
                                 },
                                 xAxis: {
+                                    gridLineWidth: 0,
                                     type: 'datetime',
                                     labels: {
                                         format: formatXaxisForHighCharts(
                                             daysCount,
                                             userPrefDateFormat,
-                                            userPrefTimeFormat
+                                            userPrefTimeFormat,
+                                            selectedConsumption
                                         ),
                                     },
                                 },
+                                yAxis: [
+                                    {
+                                        gridLineWidth: 1,
+                                        lineWidth: 1,
+                                        opposite: false,
+                                        lineColor: null,
+                                    },
+                                    {
+                                        opposite: true,
+                                        title: false,
+                                        max: 120,
+                                        postFix: '23',
+                                        gridLineWidth: 0,
+                                    },
+                                ],
                             }}
                         />
                     )}
                 </div>
             </Row>
-
             <Brick sizeInRem={0.75} />
-
             <Row>
                 <div className="explore-data-table-style">
                     <Col lg={12}>
