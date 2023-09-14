@@ -49,21 +49,21 @@ const SkeletonLoading = () => (
     <SkeletonTheme color={primaryGray1000} height={35}>
         <tr>
             <th>
-                <Skeleton count={5} />
+                <Skeleton count={10} />
             </th>
             <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
+                <Skeleton count={10} />
             </th>
 
             <th>
-                <Skeleton count={5} />
+                <Skeleton count={10} />
+            </th>
+
+            <th>
+                <Skeleton count={10} />
             </th>
             <th>
-                <Skeleton count={5} />
+                <Skeleton count={10} />
             </th>
         </tr>
     </SkeletonTheme>
@@ -258,7 +258,7 @@ const CarbonOverview = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Building Overview',
+                        label: 'Portfolio Overview',
                         path: '/carbon/portfolio/overview',
                         active: true,
                     },
@@ -266,7 +266,7 @@ const CarbonOverview = () => {
                 bs.items = newList;
             });
             ComponentStore.update((s) => {
-                s.parent = 'Portfolio Overview';
+                s.parent = 'carbon-portfolio';
             });
         };
         const updateBuildingData = () => {
@@ -316,8 +316,8 @@ const CarbonOverview = () => {
     const renderTotalConsumption = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {Math.round(row.total_carbon_emissions / 1000)} {userPrefUnits === 'si' ? `${UNITS.ibs}` : `${UNITS.kg}`}
-
+                {Math.round(row.total_carbon_emissions / 1000)}{' '}
+                {userPrefUnits === 'si' ? `${UNITS.ibs}` : `${UNITS.kg}`}
             </Typography.Body>
         );
     };
