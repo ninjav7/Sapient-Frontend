@@ -43,6 +43,7 @@ const EndUsesPage = () => {
     const [endUseCategories, setEndUseCategories] = useState([]);
     const [stackedColumnChartCategories, setStackedColumnChartCategories] = useState([]);
     const [stackedColumnChartData, setStackedColumnChartData] = useState([]);
+    const [isChartLoading, setChartLoading] = useState(false);
 
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
 
@@ -151,7 +152,9 @@ const EndUsesPage = () => {
 
     const endUsesChartDataFetch = async (time_zone) => {
         setStackedColumnChartData([]);
+        setChartLoading(true);
         const payload = apiRequestBody(startDate, endDate, time_zone);
+
         await fetchEndUsesChart(bldgId, payload)
             .then((res) => {
                 let responseData = res?.data;
@@ -178,7 +181,9 @@ const EndUsesPage = () => {
                 setStackedColumnChartCategories(formattedTimestamp);
                 setStackedColumnChartData(formattedData);
             })
-            .catch((error) => {});
+            .finally(() => {
+                setChartLoading(false);
+            });
     };
 
     const updateBreadcrumbStore = () => {
@@ -255,6 +260,7 @@ const EndUsesPage = () => {
                 timeZone={timeZone}
                 dateFormat={dateFormat}
                 daysCount={daysCount}
+                isChartLoading={isChartLoading}
             />
 
             <Brick sizeInRem={1.5} />

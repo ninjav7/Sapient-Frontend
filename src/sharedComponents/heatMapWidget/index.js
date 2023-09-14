@@ -301,8 +301,10 @@ const HeatMapWidget = ({
             <Brick sizeInRem={1} />
 
             {isChartLoading ? (
-                <div className="column-chart-loader">
-                    <Spinner />
+                <div className="heatmap-container w-100">
+                    <div className="heatmap-container-loader">
+                        <Spinner />
+                    </div>
                 </div>
             ) : (
                 <HeatMapChart options={options} series={series} height={height} />

@@ -65,3 +65,20 @@
         width: 14.375rem;
     }
 }
+
+.stacked-column-container {
+    padding: 0;
+    background: $base-white;
+    min-height: 37vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    &-loader {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 45vh;
+        color: $primary-indigo-400;
+    }
+}

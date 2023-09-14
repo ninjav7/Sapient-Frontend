@@ -27,16 +27,18 @@ const EndUsesCategory = ({ endUsesData }) => {
     );
 };
 
-const EndUsesTypeWidget = ({
-    endUsesData,
-    stackedColumnChartData,
-    stackedColumnChartCategories,
-    endUseCategories,
-    xAxisObj,
-    timeZone,
-    dateFormat,
-    daysCount,
-}) => {
+const EndUsesTypeWidget = (props) => {
+    const {
+        endUsesData,
+        stackedColumnChartData,
+        stackedColumnChartCategories,
+        endUseCategories,
+        xAxisObj,
+        timeZone,
+        dateFormat,
+        daysCount,
+    } = props;
+
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
@@ -72,6 +74,7 @@ const EndUsesTypeWidget = ({
                         xAxisCallBackValue={formatXaxis}
                         restChartProps={xAxisObj}
                         tooltipCallBackValue={toolTipFormatter}
+                        {...props}
                     />
                 </div>
             </div>
