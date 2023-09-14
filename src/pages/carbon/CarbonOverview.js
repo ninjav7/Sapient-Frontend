@@ -265,7 +265,7 @@ const CarbonOverview = () => {
                 bs.items = newList;
             });
             ComponentStore.update((s) => {
-                s.parent = 'carbon-portfolio';
+                s.parent = 'carbon';
             });
         };
         const updateBuildingData = () => {
