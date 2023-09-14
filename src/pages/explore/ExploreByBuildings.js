@@ -714,8 +714,8 @@ const ExploreByBuildings = () => {
 
     const tooltipUnitVal = selectedConsumption.includes('carbon')
         ? userPrefUnits === 'si'
-            ? UNITS.KGS_MWH
-            : UNITS.LBS_MWH
+            ? UNITS.KGS
+            : UNITS.LBS
         : selectedUnit;
 
     return (
