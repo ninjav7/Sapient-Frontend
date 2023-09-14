@@ -145,7 +145,7 @@ const EndUsesPage = () => {
                 setTopEndUsesData(endUsesList);
             })
             .finally(() => {
-                setFetchingData(true);
+                setFetchingData(false);
             });
     };
 
