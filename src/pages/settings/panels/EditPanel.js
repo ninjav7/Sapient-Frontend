@@ -1101,14 +1101,18 @@ const EditPanel = () => {
         const params = `?building_id=${bldg_id}`;
         await getPanelsList(params)
             .then((res) => {
-                const response = res?.data?.data;
-                if (response.length !== 0) {
-                    response.forEach((record) => {
-                        record.label = record?.panel_name;
-                        record.value = record?.panel_id;
+                const response = res?.data;
+                if (response?.success && response?.data.length !== 0) {
+                    let filteredPanelsList = [];
+                    response.data.forEach((record) => {
+                        if (record?.panel_id === panelId) return;
+                        filteredPanelsList.push({
+                            label: record?.panel_name,
+                            value: record?.panel_id,
+                        });
                     });
+                    setPanelsList(filteredPanelsList);
                 }
-                response.length === 0 ? setPanelsList([]) : setPanelsList(response);
             })
             .catch(() => {
                 setPanelsList([]);

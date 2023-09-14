@@ -10,7 +10,7 @@ import {
     energyConsumptionBySpaceType,
     energyConsumptionByFloor,
     energyCarbonByBuilding,
-    metricsForCarbonBuildingPage,
+    getEnergyConsumptionV2,
     portfolioKPIsV2,
 } from '../../services/Network';
 
@@ -40,7 +40,7 @@ export function fetchEnergyConsumptionByFloor(obj) {
 }
 
 export function fetchMetricsBuildingPage(bldg_id, params) {
-    return axiosInstance.get(`${metricsForCarbonBuildingPage}/${bldg_id}`, { params }).then((res) => res);
+    return axiosInstance.get(`${getEnergyConsumptionV2}/${bldg_id}`, { params }).then((res) => res);
 }
 
 export function fetchMetricsKpiBuildingPage(params) {
