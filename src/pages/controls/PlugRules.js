@@ -35,6 +35,36 @@ const buttonGroupFilterOptions = [
     { label: 'Inactive', icon: <InactiveSVG className="bg-grey" /> },
 ];
 
+const SkeletonLoading = () => (
+    <SkeletonTheme color="$primary-gray-1000" height={35}>
+        <tr>
+            <th>
+                <Skeleton count={10} />
+            </th>
+
+            <th>
+                <Skeleton count={10} />
+            </th>
+
+            <th>
+                <Skeleton count={10} />
+            </th>
+
+            <th>
+                <Skeleton count={10} />
+            </th>
+
+            <th>
+                <Skeleton count={10} />
+            </th>
+
+            <th>
+                <Skeleton count={10} />
+            </th>
+        </tr>
+    </SkeletonTheme>
+);
+
 const PlugRules = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -176,7 +206,7 @@ const PlugRules = () => {
                     setSkeletonLoading(false);
                 }
                 let response = res.data;
-                setPlugRuleData(response?.data||[]);
+                setPlugRuleData(response?.data || []);
                 let onlineData = [];
                 let offlineData = [];
                 response.data.forEach((record) => {
@@ -385,40 +415,18 @@ const PlugRules = () => {
                 <Row>
                     <Col lg={12}>
                         <Brick sizeInRem={2} />
-                        {skeletonLoading ? (
-                            <SkeletonTheme color="#202020" height={35}>
-                                <table cellPadding={5} className="table">
-                                    <tr>
-                                        <th width={130}>
-                                            <Skeleton count={5} />
-                                        </th>
-
-                                        <th width={190}>
-                                            <Skeleton count={5} />
-                                        </th>
-
-                                        <th width={200}>
-                                            <Skeleton count={5} />
-                                        </th>
-
-                                        <th>
-                                            <Skeleton count={5} />
-                                        </th>
-                                    </tr>
-                                </table>
-                            </SkeletonTheme>
-                        ) : (
-                            <DataTableWidget
-                                id="plugRulesTable1"
-                                onSearch={setSearch}
-                                onStatus={setSelectedTab}
-                                buttonGroupFilterOptions={buttonGroupFilterOptions}
-                                rows={currentRow()}
-                                searchResultRows={currentRow()}
-                                onDownload={() => handleDownloadCsv()}
-                                headers={headerProps}
-                            />
-                        )}
+                        <DataTableWidget
+                            id="plugRulesTable1"
+                            isLoading={skeletonLoading}
+                            isLoadingComponent={<SkeletonLoading />}
+                            onSearch={setSearch}
+                            onStatus={setSelectedTab}
+                            buttonGroupFilterOptions={buttonGroupFilterOptions}
+                            rows={currentRow()}
+                            searchResultRows={currentRow()}
+                            onDownload={() => handleDownloadCsv()}
+                            headers={headerProps}
+                        />
                     </Col>
                 </Row>
             </div>
