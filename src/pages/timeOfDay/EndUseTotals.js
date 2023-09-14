@@ -6,7 +6,8 @@ import { UNITS } from '../../constants/units';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import colorPalette from '../../assets/scss/_colors.scss';
 
-const EndUseTotals = ({ energyConsumption, className = '', isPlugOnly }) => {
+const EndUseTotals = (props) => {
+    const { energyConsumption, className = '', isPlugOnly } = props;
     let donutChartData = [];
 
     if (isPlugOnly) {
@@ -50,6 +51,7 @@ const EndUseTotals = ({ energyConsumption, className = '', isPlugOnly }) => {
                 type={DONUT_CHART_TYPES.VERTICAL}
                 className={className}
                 onMoreDetail={null}
+                {...props}
             />
         </div>
     );

@@ -94,3 +94,20 @@
         display: none;
     }
 }
+
+.line-chart-container {
+    padding: 0;
+    background: $base-white;
+    min-height: 50vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    &-loader {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 45vh;
+        color: $primary-indigo-400;
+    }
+}
