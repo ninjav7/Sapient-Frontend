@@ -246,8 +246,6 @@ const LayoutElements = (props) => {
         putInStack();
     }, [props.isLoadingLastColumn, countOfStack.current, props.spaces]);
 
-    console.log(stackMap.current, 'stackmap');
-
     return (
         <div className={cx('layout-elements-wrapper d-flex', className)} style={style}>
             {renderStackColumns(state, props, stackMap)}
