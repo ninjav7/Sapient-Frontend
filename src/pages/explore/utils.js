@@ -9,7 +9,7 @@ export const exploreBldgMetrics = [
     { value: 'reactive_power', label: 'Reactive Power (kVAR)', unit: 'kVAR', Consumption: 'Reactive Power' },
     { value: 'frequency', label: 'Frequency (Hz)', unit: 'Hz', Consumption: 'Frequency' },
     { value: 'power_factor', label: 'Power Factor (%)', unit: '%', Consumption: 'Power Factor' },
-    { value: 'carbon_emissions', label: 'Carbon Emissions', unit: UNITS.KGS_MWH, Consumption: 'Carbon Emissions' },
+    { value: 'carbon_emissions', label: 'Carbon Emissions', unit: UNITS.KGS, Consumption: 'Carbon Emissions' },
     {
         value: 'generated_carbon_rate',
         label: 'Generated Carbon Intensity',

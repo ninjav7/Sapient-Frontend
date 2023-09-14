@@ -13,7 +13,7 @@ const BuildingKPIs = ({ overallData = {}, daysCount = 0, userPrefUnits }) => {
         <div className={`portfolioKPIs-wrapper`}>
             <KPILabeled
                 title="Total Consumption"
-                value={formatConsumptionValue(overallData?.total?.now / 1000, 0)}
+                value={formatConsumptionValue(overallData?.total?.now, 0)}
                 badgePrecentage={percentageHandler(overallData?.total?.now, overallData?.total?.old)}
                 unit={KPI_UNITS.KWH}
                 tooltipText={
@@ -31,7 +31,7 @@ const BuildingKPIs = ({ overallData = {}, daysCount = 0, userPrefUnits }) => {
 
             <KPILabeled
                 title={`Average Consumption / ${userPrefUnits === 'si' ? `${UNITS.SQ_M}` : `${UNITS.SQ_FT}`}`}
-                value={formatConsumptionValue(overallData?.average?.now / 1000, 2)}
+                value={formatConsumptionValue(overallData?.average?.now, 2)}
                 badgePrecentage={percentageHandler(overallData?.average?.now, overallData?.average?.old)}
                 unit={`${userPrefUnits === 'si' ? `${UNITS.KWH}/${UNITS.SQ_M}` : `${UNITS.KWH}/${UNITS.SQ_FT}`}`}
                 tooltipText={
