@@ -156,7 +156,6 @@ const CarbonOverview = () => {
 
         await fetchPortfolioOverall(payload)
             .then((res) => {
-                console.log('RES34564', res);
                 if (res?.data) setOveralldata(res?.data.data);
                 setIsKPIsLoading(false);
             })
@@ -258,7 +257,7 @@ const CarbonOverview = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Building Overview',
+                        label: 'Portfolio Overview',
                         path: '/carbon/portfolio/overview',
                         active: true,
                     },
@@ -266,7 +265,7 @@ const CarbonOverview = () => {
                 bs.items = newList;
             });
             ComponentStore.update((s) => {
-                s.parent = 'Portfolio Overview';
+                s.parent = 'carbon';
             });
         };
         const updateBuildingData = () => {
@@ -316,8 +315,8 @@ const CarbonOverview = () => {
     const renderTotalConsumption = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {Math.round(row.total_carbon_emissions / 1000)} {userPrefUnits === 'si' ? `${UNITS.ibs}` : `${UNITS.kg}`}
-
+                {Math.round(row.total_carbon_emissions / 1000)}{' '}
+                {userPrefUnits === 'si' ? `${UNITS.ibs}` : `${UNITS.kg}`}
             </Typography.Body>
         );
     };

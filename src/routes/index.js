@@ -2,12 +2,10 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Route } from 'react-router-dom';
 import * as FeatherIcon from 'react-feather';
-import { ReactComponent as CarbonCo2 } from '../assets/icon/carbon.svg';
 
-//User Auth
 import { isUserAuthenticated, isSuperUserAuthenticated } from '../helpers/authUtils';
 
-// settings
+// Config Components
 import General from '../pages/settings/general-settings';
 import UtilityMeters from '../pages/settings/utility-meters';
 import Layout from '../pages/settings/layout';
@@ -29,54 +27,41 @@ import SingleRole from '../pages/settings/roles/SingleRole';
 import SingleRoleNew from '../pages/settings/roles/SingleRoleNew';
 import IndividualUtilityMeter from '../pages/settings/utility-meters/IndividualUtilityMeter';
 
-// controls
-const PlugRule = React.lazy(() => import('../pages/controls/PlugRule'));
-const PlugRules = React.lazy(() => import('../pages/controls/PlugRules'));
-
-// auth
+// Auth Components
 const Login = React.lazy(() => import('../pages/auth/Login'));
 const Logout = React.lazy(() => import('../pages/auth/Logout'));
 const ForgetPassword = React.lazy(() => import('../pages/auth/ForgetPassword'));
 const UpdatePassword = React.lazy(() => import('../pages/auth/UpdatePassword'));
 const VerifyAccount = React.lazy(() => import('../pages/auth/VerifyAccount'));
 
-// dashboard
-const Dashboard = React.lazy(() => import('../pages/dashboard'));
-
-// pages
-const Error404 = React.lazy(() => import('../pages/other/Error404'));
-const Error500 = React.lazy(() => import('../pages/other/Error500'));
-
-// charts
-const Charts = React.lazy(() => import('../pages/charts'));
-
-// energy
+// Energy-Portfolio Components
 const Portfolio = React.lazy(() => import('../pages/portfolio'));
-
-// building
-const Building = React.lazy(() => import('../pages/buildings'));
-const CarbonBuilding = React.lazy(() => import('../pages/carbonBuilding'));
-
-// endUses
-const EndUses = React.lazy(() => import('../pages/endUses'));
-const EndUseType = React.lazy(() => import('../pages/endUses/EndUseType'));
-
-// timeOfDay
-const TimeOfDay = React.lazy(() => import('../pages/timeOfDay'));
-
-// compareBuildings
 const CompareBuildings = React.lazy(() => import('../pages/compareBuildings'));
 const ExploreBuildingPeak = React.lazy(() => import('../pages/peakDemand/ExploreBuildingPeak'));
 
-// explore
+// Energy-Buildings Components
+const Building = React.lazy(() => import('../pages/buildings'));
+
+// Energy-End-uses Components
+const EndUses = React.lazy(() => import('../pages/endUses'));
+const EndUseType = React.lazy(() => import('../pages/endUses/EndUseType'));
+
+// Energy-Time-of-day Components
+const TimeOfDay = React.lazy(() => import('../pages/timeOfDay'));
+
+// Carbon Components
+const CarbonOverview = React.lazy(() => import('../pages/carbon/CarbonOverview'));
+const CarbonBuilding = React.lazy(() => import('../pages/carbonBuilding'));
+
+// Control Components
+const PlugRule = React.lazy(() => import('../pages/controls/PlugRule'));
+const PlugRules = React.lazy(() => import('../pages/controls/PlugRules'));
+
+// Explore Components
 const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
 const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
 
-//carbon
-const CarbonOverview = React.lazy(() => import('../pages/carbon/CarbonOverview'));
-
-
-//superUser
+// Super-user Components
 const Accounts = React.lazy(() => import('../pages/superUser/accounts'));
 const UpdateAuth = React.lazy(() => import('../pages/auth/updateAuth'));
 const LinkExpired = React.lazy(() => import('../pages/auth/LinkExpired'));
@@ -102,7 +87,7 @@ const PrivateRoute = ({ component: Component, roles, ...rest }) => (
     />
 );
 
-// root routes
+// Root Route
 const rootRoute = {
     path: '/',
     exact: true,
@@ -116,7 +101,7 @@ const rootRoute = {
     visibility: true,
 };
 
-// portfolio
+// Portfolio Routes
 const portfolioRoutes = {
     path: '/energy/portfolio/overview',
     name: 'Energy',
@@ -154,15 +139,6 @@ const portfolioRoutes = {
             route: PrivateRoute,
             visibility: false,
         },
-        // PLT-339: Peak Demand routing disbaled.
-        // {
-        //     path: '/energy/peak-demand/:bldgId',
-        //     name: 'Peak Demand',
-        //     component: PeakDemand,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'buildings',
-        // },
         {
             path: '/energy/end-uses/:bldgId',
             name: 'End Uses',
@@ -170,21 +146,6 @@ const portfolioRoutes = {
             route: PrivateRoute,
             visibility: true,
             parent: 'buildings',
-        },
-        {
-            path: '/carbon/portfolio/overview',
-            name: 'Portfolio Overview',
-            component: CarbonOverview,
-            route: PrivateRoute,
-            visibility: true,
-        },
-        {
-            path: '/carbon/building/overview/:bldgId',
-            name: 'Building Overview',
-            component: CarbonBuilding,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'carbon',
         },
         {
             path: '/energy/time-of-day/:bldgId',
@@ -206,7 +167,35 @@ const portfolioRoutes = {
     roles: ['Admin'],
 };
 
-// settings
+// Carbon Routes
+const carbonRoutes = {
+    path: '/carbon/portfolio/overview',
+    name: 'Carbon',
+    component: CarbonOverview,
+    visibility: true,
+    children: [
+        {
+            path: '/carbon/portfolio/overview',
+            name: 'Portfolio Overview',
+            component: CarbonOverview,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'carbon',
+        },
+        {
+            path: '/carbon/building/overview/:bldgId',
+            name: 'Building Overview',
+            component: CarbonBuilding,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'carbon',
+        },
+    ],
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+};
+
+// Config Routes
 const settingsRoutes = {
     path: '/settings',
     name: 'Settings',
@@ -376,24 +365,8 @@ const settingsRoutes = {
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
 };
-const carbonRoutes = {
-        path: '/carbon/portfolio/overview',
-        name: 'Carbon',
-        visibility: true,
-        children: [
-            {
-                path: '/carbon/building/overview/:bldgId',
-                name: 'Building overview',
-                component: CarbonOverview,
-                route: PrivateRoute,
-                parent: 'Portfolio Overview',
-                visibility: false,
-            },
-        ],
-        icon: <CarbonCo2/>,
-        roles: ['Admin'],
-    };
 
+// Explore Routes
 const exploreRoutes = {
     path: '/explore-page/by-buildings',
     name: 'Explore',
@@ -420,6 +393,7 @@ const exploreRoutes = {
     roles: ['Admin'],
 };
 
+// Control Routes
 const controlRoutes = {
     path: '/control/plug-rules',
     name: 'Control',
@@ -454,7 +428,7 @@ const controlRoutes = {
     roles: ['Admin'],
 };
 
-// auth
+// Auth Routes
 const authRoutes = {
     path: '/account',
     name: 'Auth',
@@ -531,16 +505,10 @@ const authRoutes = {
             route: Route,
             visibility: true,
         },
-        {
-            path: '/*',
-            name: 'Error 404',
-            component: Error404,
-            route: Route,
-        },
     ],
 };
 
-// admin
+// Super-User Routes
 const adminRoutes = {
     path: '/super-user/accounts',
     name: 'Admin',
@@ -570,16 +538,19 @@ const flattenRoutes = (routes) => {
 };
 
 // All routes
-const allRoutes = [rootRoute, portfolioRoutes, settingsRoutes, controlRoutes,carbonRoutes, exploreRoutes, adminRoutes, authRoutes];
-
-const authProtectedRoutes = [
+const allRoutes = [
+    rootRoute,
     portfolioRoutes,
     settingsRoutes,
-    carbonRoutes,
     controlRoutes,
+    carbonRoutes,
     exploreRoutes,
     adminRoutes,
+    authRoutes,
 ];
 
+const authProtectedRoutes = [portfolioRoutes, settingsRoutes, carbonRoutes, controlRoutes, exploreRoutes, adminRoutes];
+
 const allFlattenRoutes = flattenRoutes(allRoutes);
+
 export { allRoutes, authProtectedRoutes, allFlattenRoutes };

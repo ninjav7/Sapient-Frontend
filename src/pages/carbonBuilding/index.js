@@ -6,9 +6,7 @@ import { useAtom } from 'jotai';
 import moment from 'moment';
 import 'moment-timezone';
 import { useHistory, useParams } from 'react-router-dom';
-import {
-    fetchEnergyConsumptionV2,
-} from '../buildings/services';
+import { fetchEnergyConsumptionV2 } from '../buildings/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -87,7 +85,6 @@ const CarbonBuilding = () => {
             ? moment.utc(value).format(`MMM 'YY`)
             : moment.utc(value).format(`${date_format} @ ${time_format}`);
     };
-
 
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
@@ -188,7 +185,7 @@ const CarbonBuilding = () => {
                             name: 'Energy',
                             data: [],
                             type: 'column',
-                            color:colors.datavizMain2,
+                            color: colors.datavizMain2,
                             yAxis: 0,
                             tooltip: {
                                 valueSuffix: ' KWh',
@@ -224,7 +221,7 @@ const CarbonBuilding = () => {
                             data: [],
                             type: 'spline',
                             yAxis: 1,
-                            color:colors.datavizMain1,
+                            color: colors.datavizMain1,
                             tooltip: {
                                 valueSuffix: userPrefUnits == 'si' ? ' kgs/MWh' : ' lbs/MWh',
                             },
@@ -251,10 +248,10 @@ const CarbonBuilding = () => {
 
     useEffect(() => {
         const mergedList = [];
-        if(energyConsumptionsData[0].name){
+        if (energyConsumptionsData[0].name) {
             mergedList[0] = energyConsumptionsData[0];
-        } 
-        if(carbonIntensity[0].name){
+        }
+        if (carbonIntensity[0].name) {
             mergedList[1] = carbonIntensity[0];
         }
         setChartsData(mergedList);
