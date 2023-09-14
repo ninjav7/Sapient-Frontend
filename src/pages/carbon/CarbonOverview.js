@@ -49,21 +49,21 @@ const SkeletonLoading = () => (
     <SkeletonTheme color={primaryGray1000} height={35}>
         <tr>
             <th>
-                <Skeleton count={10} />
+                <Skeleton count={5} />
             </th>
             <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
+                <Skeleton count={5} />
             </th>
 
             <th>
-                <Skeleton count={10} />
+                <Skeleton count={5} />
+            </th>
+
+            <th>
+                <Skeleton count={5} />
             </th>
             <th>
-                <Skeleton count={10} />
+                <Skeleton count={5} />
             </th>
         </tr>
     </SkeletonTheme>
@@ -156,7 +156,6 @@ const CarbonOverview = () => {
 
         await fetchPortfolioOverall(payload)
             .then((res) => {
-                console.log('RES34564', res);
                 if (res?.data) setOveralldata(res?.data.data);
                 setIsKPIsLoading(false);
             })
