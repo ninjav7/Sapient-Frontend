@@ -28,29 +28,29 @@ const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
         <tr>
             <th>
-                <Skeleton count={5} />
+                <Skeleton count={10} />
             </th>
 
             <th>
-                <Skeleton count={5} />
+                <Skeleton count={10} />
             </th>
 
             <th>
-                <Skeleton count={5} />
+                <Skeleton count={10} />
             </th>
 
             <th>
-                <Skeleton count={5} />
+                <Skeleton count={10} />
             </th>
 
             <th>
-                <Skeleton count={5} />
+                <Skeleton count={10} />
             </th>
             <th>
-                <Skeleton count={5} />
+                <Skeleton count={10} />
             </th>
             <th>
-                <Skeleton count={5} />
+                <Skeleton count={10} />
             </th>
         </tr>
     </SkeletonTheme>
