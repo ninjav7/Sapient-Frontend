@@ -38,6 +38,7 @@ const EndUsesPage = () => {
 
     const [endUsesData, setEndUsesData] = useState([]);
     const [topEndUsesData, setTopEndUsesData] = useState([]);
+    const [isFetchingData, setFetchingData] = useState(false);
 
     const [endUseCategories, setEndUseCategories] = useState([]);
     const [stackedColumnChartCategories, setStackedColumnChartCategories] = useState([]);
@@ -69,8 +70,11 @@ const EndUsesPage = () => {
     };
 
     const endUsesDataFetch = async (time_zone) => {
+        setFetchingData(true);
+
         const params = `?building_id=${bldgId}`;
         const payload = apiRequestBody(startDate, endDate, time_zone);
+
         await fetchEndUses(params, payload)
             .then((res) => {
                 const response = res?.data?.data;
@@ -140,7 +144,9 @@ const EndUsesPage = () => {
 
                 setTopEndUsesData(endUsesList);
             })
-            .catch((error) => {});
+            .finally(() => {
+                setFetchingData(true);
+            });
     };
 
     const endUsesChartDataFetch = async (time_zone) => {
@@ -257,6 +263,7 @@ const EndUsesPage = () => {
                 title="Top Systems by Usage"
                 subtitle="Click explore to see more energy usage details."
                 data={topEndUsesData}
+                isDataLoading={isFetchingData}
             />
         </React.Fragment>
     );

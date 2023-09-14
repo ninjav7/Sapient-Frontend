@@ -588,7 +588,7 @@ const BuildingOverview = () => {
                             pageType="building"
                             handleRouteChange={() => handleRouteChange('/energy/end-uses')}
                             showRouteBtn={true}
-                            isLoading={isEndUseDataFetching}
+                            isChartLoading={isEndUseDataFetching}
                         />
                     )}
 

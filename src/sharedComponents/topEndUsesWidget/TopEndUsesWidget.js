@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Spinner } from 'reactstrap';
 
 import './TopEndUsesWidget.scss';
 import Typography from '../typography';
@@ -41,38 +42,49 @@ const TopEndUsesWidgetContent = ({ title, value, unit, trends }) => {
 };
 
 const TopEndUsesWidget = (props) => {
+    const { isDataLoading = false } = props;
+
     return (
         <div className="top-end-uses-wrapper">
             <div className="w-100">
                 <Typography.Subheader size={Typography.Sizes.md}>{props.title}</Typography.Subheader>
                 <Typography.Body size={Typography.Sizes.xs}>{props.subtitle}</Typography.Body>
             </div>
-            <div className="top-end-uses-container w-100">
-                {props.data.map((topEndItem) => {
-                    return (
-                        <div className="top-end-uses" key={generateID()}>
-                            <div className="d-flex align-items-center">
-                                <Typography.Header size={Typography.Sizes.sm}>{topEndItem.title}</Typography.Header>
-                                {topEndItem.viewHandler && (
-                                    <Button
-                                        onClick={topEndItem.viewHandler}
-                                        label="View"
-                                        size={Button.Sizes.md}
-                                        type={Button.Type.secondaryGrey}
-                                    />
-                                )}
+
+            {isDataLoading ? (
+                <div className="end-uses-container w-100">
+                    <div className="end-uses-container-loader">
+                        <Spinner />
+                    </div>
+                </div>
+            ) : (
+                <div className="top-end-uses-container w-100">
+                    {props.data.map((topEndItem) => {
+                        return (
+                            <div className="top-end-uses" key={generateID()}>
+                                <div className="d-flex align-items-center">
+                                    <Typography.Header size={Typography.Sizes.sm}>{topEndItem.title}</Typography.Header>
+                                    {topEndItem.viewHandler && (
+                                        <Button
+                                            onClick={topEndItem.viewHandler}
+                                            label="View"
+                                            size={Button.Sizes.md}
+                                            type={Button.Type.secondaryGrey}
+                                        />
+                                    )}
+                                </div>
+
+                                <Brick />
+
+                                {topEndItem.items &&
+                                    topEndItem.items.map((item) => (
+                                        <TopEndUsesWidgetContent {...item} key={generateID()} />
+                                    ))}
                             </div>
-
-                            <Brick />
-
-                            {topEndItem.items &&
-                                topEndItem.items.map((item) => (
-                                    <TopEndUsesWidgetContent {...item} key={generateID()} />
-                                ))}
-                        </div>
-                    );
-                })}
-            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 };
