@@ -1,12 +1,12 @@
 import axiosInstance from '../../services/axiosInstance';
 import _ from 'lodash';
 import {
-    getExploreBuildingChart,
     getExploreEquipmentList,
     getExploreEquipmentChart,
     getExploreFilter,
     getWeather,
     compareBuildingsV2,
+    getEnergyConsumptionV2,
 } from '../../services/Network';
 
 export function fetchExploreByBuildingListV2(params) {
@@ -15,9 +15,8 @@ export function fetchExploreByBuildingListV2(params) {
     });
 }
 
-export function fetchExploreBuildingChart(currentData, selectedBuildingId) {
-    let params = `?consumption=energy&building_id=${selectedBuildingId}&divisible_by=1000`;
-    return axiosInstance.post(`${getExploreBuildingChart}${params}`, currentData).then((res) => {
+export function fetchExploreBuildingChart(params, bldgId) {
+    return axiosInstance.get(`${getEnergyConsumptionV2}/${bldgId}${params}`).then((res) => {
         return res;
     });
 }

@@ -5,7 +5,9 @@ export const UNITS = {
     F: '°F',
     SQ_M: 'sq. m.',
     SQ_FT: 'sq. ft.',
-    ibs:'Ibs',
-    mwh:'MWh',
-    kg:'kg'
+    KGS_MWH: 'kgs/MWh',
+    LBS_MWH: 'lbs/MWh',
+    ibs: 'Ibs',
+    mwh: 'MWh',
+    kg: 'kg',
 };
