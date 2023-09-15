@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { Row, Col } from 'reactstrap';
 import { Link, useParams } from 'react-router-dom';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import Brick from '../../../sharedComponents/brick';
 import { UserStore } from '../../../store/UserStore';
 import { pageListSizes } from '../../../helpers/helpers';
@@ -16,29 +15,9 @@ import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import CreateUtilityMeters from './CreateUtilityMeters';
 import { deleteUtilityMeterData, getAllUtilityMetersServices } from './services';
-import colorPalette from '../../../assets/scss/_colors.scss';
 import { convertToMac } from './utils';
 import DeleteModal from './AlertModals';
-
-const SkeletonLoading = ({ noofRows }) => {
-    const rowArray = Array.from({ length: noofRows });
-
-    return (
-        <SkeletonTheme
-            baseColor={colorPalette.primaryGray150}
-            highlightColor={colorPalette.baseBackground}
-            borderRadius={10}
-            height={30}>
-            <tr>
-                {rowArray.map((_, index) => (
-                    <th key={index}>
-                        <Skeleton count={15} />
-                    </th>
-                ))}
-            </tr>
-        </SkeletonTheme>
-    );
-};
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const UtilityMeters = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -253,7 +232,7 @@ const UtilityMeters = () => {
                     <DataTableWidget
                         id="utility_meters_list"
                         isLoading={isDataFetching}
-                        isLoadingComponent={<SkeletonLoading noofRows={headerProps.length + 1} />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={15} />}
                         onSearch={(query) => {
                             setPageNo(1);
                             setSearch(query);

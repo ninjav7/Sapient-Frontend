@@ -14,10 +14,7 @@ import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import { getCompareBuildingTableCSVExport } from '../../utils/tablesExport';
 import { Badge } from '../../sharedComponents/badge';
 import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { timeZone } from '../../utils/helper';
-import { apiRequestBody } from '../../helpers/helpers';
-import { primaryGray1000 } from '../../assets/scss/_colors.scss';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import Brick from '../../sharedComponents/brick';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
@@ -25,28 +22,8 @@ import { UserStore } from '../../store/UserStore';
 import { UNITS } from '../../constants/units';
 import { handleUnitConverstion } from '../settings/general-settings/utils';
 import { fetchCompareBuildingsV2 } from './services';
-import colorPalette from '../../assets/scss/_colors.scss';
 import './style.css';
-
-const SkeletonLoading = ({ noofRows }) => {
-    const rowArray = Array.from({ length: noofRows });
-
-    return (
-        <SkeletonTheme
-            baseColor={colorPalette.primaryGray150}
-            highlightColor={colorPalette.baseBackground}
-            borderRadius={10}
-            height={30}>
-            <tr>
-                {rowArray.map((_, index) => (
-                    <th key={index}>
-                        <Skeleton count={15} />
-                    </th>
-                ))}
-            </tr>
-        </SkeletonTheme>
-    );
-};
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const CompareBuildingsTable = ({
     tableHeader,
@@ -60,7 +37,7 @@ const CompareBuildingsTable = ({
     return (
         <DataTableWidget
             isLoading={isLoadingBuildingData}
-            isLoadingComponent={<SkeletonLoading noofRows={tableHeader.length} />}
+            isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={15} />}
             id="compare-building"
             onSearch={(query) => setSearch(query)}
             rows={buildingsData}

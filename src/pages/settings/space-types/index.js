@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { useAtom } from 'jotai';
 import _ from 'lodash';
 import { userPermissionData } from '../../../store/globalState';
@@ -19,27 +18,7 @@ import { pageListSizes } from '../../../helpers/helpers';
 import EditSpaceType from './EditSpaceType';
 import DeleteSpaceType from './DeleteSpaceType';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
-import colorPalette from '../../../assets/scss/_colors.scss';
-
-const SkeletonLoading = ({ noofRows }) => {
-    const rowArray = Array.from({ length: noofRows });
-
-    return (
-        <SkeletonTheme
-            baseColor={colorPalette.primaryGray150}
-            highlightColor={colorPalette.baseBackground}
-            borderRadius={10}
-            height={30}>
-            <tr>
-                {rowArray.map((_, index) => (
-                    <th key={index}>
-                        <Skeleton count={15} />
-                    </th>
-                ))}
-            </tr>
-        </SkeletonTheme>
-    );
-};
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const SpaceTypes = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -244,7 +223,7 @@ const SpaceTypes = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isDataFetching}
-                        isLoadingComponent={<SkeletonLoading noofRows={headerProps.length + 1} />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={15} />}
                         id="spaceTypes_list"
                         onSearch={(query) => {
                             setPageNo(1);

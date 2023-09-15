@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import { fetchMemberUserList, fetchUserFilters } from './service';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { useAtom } from 'jotai';
@@ -23,29 +22,9 @@ import { pageListSizes } from '../../../helpers/helpers';
 import { getUsersTableCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import Brick from '../../../sharedComponents/brick';
-import colorPalette from '../../../assets/scss/_colors.scss';
 import AddUser from './AddUser';
 import '../style.css';
-
-const SkeletonLoading = ({ noofRows }) => {
-    const rowArray = Array.from({ length: noofRows });
-
-    return (
-        <SkeletonTheme
-            baseColor={colorPalette.primaryGray150}
-            highlightColor={colorPalette.baseBackground}
-            borderRadius={10}
-            height={30}>
-            <tr>
-                {rowArray.map((_, index) => (
-                    <th key={index}>
-                        <Skeleton count={15} />
-                    </th>
-                ))}
-            </tr>
-        </SkeletonTheme>
-    );
-};
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const Users = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -341,7 +320,7 @@ const Users = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isUserDataFetched}
-                        isLoadingComponent={<SkeletonLoading noofRows={tableHeader.length} />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={15} />}
                         id="users"
                         onSearch={(query) => {
                             setPageNo(1);

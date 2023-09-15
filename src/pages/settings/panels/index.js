@@ -17,36 +17,14 @@ import { Link, useHistory, useParams } from 'react-router-dom';
 import { getPanelsTableCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import CreatePanel from './CreatePanel';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
-import '../style.css';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { UserStore } from '../../../store/UserStore';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 import { Badge } from '../../../sharedComponents/badge';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
-import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-
-const SkeletonLoading = ({ noofRows }) => {
-    const rowArray = Array.from({ length: noofRows });
-
-    return (
-        <SkeletonTheme
-            baseColor={colorPalette.primaryGray150}
-            highlightColor={colorPalette.baseBackground}
-            borderRadius={10}
-            height={30}>
-            <tr>
-                {rowArray.map((_, index) => (
-                    <th key={index}>
-                        <Skeleton count={15} />
-                    </th>
-                ))}
-            </tr>
-        </SkeletonTheme>
-    );
-};
+import '../style.css';
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const Panels = () => {
     const history = useHistory();
@@ -556,7 +534,7 @@ const Panels = () => {
                         id="panels_list"
                         isLoading={isDataFetching}
                         isFilterLoading={isFilterFetching}
-                        isLoadingComponent={<SkeletonLoading noofRows={headerProps.length + 1} />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={15} />}
                         buttonGroupFilterOptions={[]}
                         onSearch={(query) => {
                             setPageNo(1);

@@ -341,7 +341,7 @@ const CarbonOverview = () => {
                         <Col xl={12}>
                             <DataTableWidget
                                 isLoading={isLoadingBuildingData}
-                                isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={5} />}
+                                isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={8} />}
                                 id="carbon-compare-building"
                                 onSearch={(query) => setSearch(query)}
                                 rows={buildingsData}

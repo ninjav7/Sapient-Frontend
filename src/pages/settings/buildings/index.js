@@ -9,9 +9,6 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 import { userPermissionData } from '../../../store/globalState';
 
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
-
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import Typography from '../../../sharedComponents/typography';
 import { Badge } from '../../../sharedComponents/badge';
@@ -28,27 +25,7 @@ import { getBuildingsTableCSVExport } from '../../../utils/tablesExport';
 
 import CreateBuilding from './CreateBuilding';
 import { fetchBuildingList, getFiltersForBuildingsRequest } from './services';
-import colorPalette from '../../../assets/scss/_colors.scss';
-
-const SkeletonLoading = ({ noofRows }) => {
-    const rowArray = Array.from({ length: noofRows });
-
-    return (
-        <SkeletonTheme
-            baseColor={colorPalette.primaryGray150}
-            highlightColor={colorPalette.baseBackground}
-            borderRadius={10}
-            height={30}>
-            <tr>
-                {rowArray.map((_, index) => (
-                    <th key={index}>
-                        <Skeleton count={15} />
-                    </th>
-                ))}
-            </tr>
-        </SkeletonTheme>
-    );
-};
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const Buildings = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -475,7 +452,7 @@ const Buildings = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isDataFetching}
-                        isLoadingComponent={<SkeletonLoading noofRows={tableHeader.length} />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={15} />}
                         id="buildings_list"
                         buttonGroupFilterOptions={[]}
                         onSearch={setSearch}

@@ -38,46 +38,7 @@ import colorPalette from '../../../../assets/scss/_colors.scss';
 import 'react-loading-skeleton/dist/skeleton.css';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import '../style.css';
-
-const SkeletonLoading = ({ noofRows }) => {
-    const rowArray = Array.from({ length: noofRows });
-
-    return (
-        <SkeletonTheme
-            baseColor={colorPalette.primaryGray150}
-            highlightColor={colorPalette.baseBackground}
-            borderRadius={10}
-            height={30}>
-            <tr>
-                {rowArray.map((_, index) => (
-                    <th key={index}>
-                        <Skeleton count={15} />
-                    </th>
-                ))}
-            </tr>
-        </SkeletonTheme>
-    );
-};
-
-const DevicesSkeletonLoading = ({ noofRows }) => {
-    const rowArray = Array.from({ length: noofRows });
-
-    return (
-        <SkeletonTheme
-            baseColor={colorPalette.primaryGray150}
-            highlightColor={colorPalette.baseBackground}
-            borderRadius={10}
-            height={30}>
-            <tr>
-                {rowArray.map((_, index) => (
-                    <th key={index}>
-                        <Skeleton count={15} />
-                    </th>
-                ))}
-            </tr>
-        </SkeletonTheme>
-    );
-};
+import SkeletonLoader from '../../../../components/SkeletonLoader';
 
 const Provision = () => {
     //New Integrations
@@ -613,7 +574,7 @@ const Provision = () => {
                     <div>
                         <DataTableWidget
                             isLoading={isProcessing}
-                            isLoadingComponent={<SkeletonLoading noofRows={headerProps1.length} />}
+                            isLoadingComponent={<SkeletonLoader noOfColumns={headerProps1.length} noOfRows={15} />}
                             id="linked_account"
                             onSearch={(query) => {
                                 setPageNo(1);
@@ -678,7 +639,7 @@ const Provision = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isAddProcessing}
-                        isLoadingComponent={<DevicesSkeletonLoading noofRows={headerProps2.length} />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps2.length} noOfRows={15} />}
                         id="devices_linked"
                         onSearch={(query) => {
                             setDevicePageNo(1);

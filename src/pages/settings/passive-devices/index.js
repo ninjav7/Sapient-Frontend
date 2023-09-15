@@ -3,7 +3,6 @@ import { Row, Col } from 'reactstrap';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { useAtom } from 'jotai';
 import { useHistory, Link, useParams } from 'react-router-dom';
 import { buildingData, userPermissionData } from '../../../store/globalState';
@@ -25,29 +24,8 @@ import EditPassiveDevice from './EditPassiveDevice';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getPassiveDeviceTableCSVExport } from '../../../utils/tablesExport';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
-import colorPalette from '../../../assets/scss/_colors.scss';
-import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
-
-const SkeletonLoading = ({ noofRows }) => {
-    const rowArray = Array.from({ length: noofRows });
-
-    return (
-        <SkeletonTheme
-            baseColor={colorPalette.primaryGray150}
-            highlightColor={colorPalette.baseBackground}
-            borderRadius={10}
-            height={30}>
-            <tr>
-                {rowArray.map((_, index) => (
-                    <th key={index}>
-                        <Skeleton count={15} />
-                    </th>
-                ))}
-            </tr>
-        </SkeletonTheme>
-    );
-};
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const PassiveDevices = () => {
     const history = useHistory();
@@ -482,7 +460,7 @@ const PassiveDevices = () => {
                     <DataTableWidget
                         isLoading={isDataFetching}
                         isFilterLoading={isFilterFetching}
-                        isLoadingComponent={<SkeletonLoading noofRows={headerProps.length + 1} />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={15} />}
                         id="smart_meter_list"
                         onSearch={(query) => {
                             setPageNo(1);
