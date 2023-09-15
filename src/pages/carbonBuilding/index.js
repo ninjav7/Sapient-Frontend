@@ -98,7 +98,7 @@ const CarbonBuilding = () => {
             bs.items = newList;
         });
         ComponentStore.update((s) => {
-            s.parent = 'carbon';
+            s.parent = 'carbon-buildings';
         });
     };
 

@@ -86,7 +86,7 @@ const MetricsTab = (props) => {
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
-                    if (response?.data.length > 0) {
+                    if (response?.data.length !== 0) {
                         const responseData = response?.data;
                         let recordToInsert = [];
 
@@ -126,9 +126,9 @@ const MetricsTab = (props) => {
 
                                 responseData.map((el) => {
                                     if (el?.data === '') {
-                                        firstList.data.push({ x: moment.utc(new Date(el?.time_stamp)), y: null });
-                                        secondList.data.push({ x: moment.utc(new Date(el?.time_stamp)), y: null });
-                                        thirdList.data.push({ x: moment.utc(new Date(el?.time_stamp)), y: null });
+                                        firstList.data.push({ x: new Date(el?.time_stamp), y: null });
+                                        secondList.data.push({ x: new Date(el?.time_stamp), y: null });
+                                        thirdList.data.push({ x: new Date(el?.time_stamp), y: null });
                                     } else {
                                         firstList.data.push({
                                             x: new Date(el?.time_stamp).getTime(),
@@ -163,9 +163,9 @@ const MetricsTab = (props) => {
 
                                 responseData.map((el) => {
                                     if (el?.data === '') {
-                                        firstList.data.push({ x: moment.utc(new Date(el?.time_stamp)), y: null });
-                                        secondList.data.push({ x: moment.utc(new Date(el?.time_stamp)), y: null });
-                                        thirdList.data.push({ x: moment.utc(new Date(el?.time_stamp)), y: null });
+                                        firstList.data.push({ x: new Date(el?.time_stamp), y: null });
+                                        secondList.data.push({ x: new Date(el?.time_stamp), y: null });
+                                        thirdList.data.push({ x: new Date(el?.time_stamp), y: null });
                                     } else {
                                         firstList.data.push({
                                             x: new Date(el?.time_stamp).getTime(),

@@ -163,10 +163,6 @@ const SideNav = () => {
     return (
         <div className="side-nav">
             {activeRoute.map((item, index) => {
-                if (location.pathname === '/carbon/portfolio/overview') {
-                    if (item.parent === 'carbon' && item.path.includes('/carbon/building/overview')) return;
-                }
-
                 if (item.path.includes(':bldgId')) {
                     item.path = item.path.split(':')[0].concat(bldgId);
                 }

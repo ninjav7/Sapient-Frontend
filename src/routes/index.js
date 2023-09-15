@@ -180,7 +180,7 @@ const carbonRoutes = {
             component: CarbonOverview,
             route: PrivateRoute,
             visibility: true,
-            parent: 'carbon',
+            parent: 'carbon-portfolio',
         },
         {
             path: '/carbon/building/overview/:bldgId',
@@ -188,7 +188,7 @@ const carbonRoutes = {
             component: CarbonBuilding,
             route: PrivateRoute,
             visibility: true,
-            parent: 'carbon',
+            parent: 'carbon-buildings',
         },
     ],
     icon: FeatherIcon.PieChart,
