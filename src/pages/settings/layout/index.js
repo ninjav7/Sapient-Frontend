@@ -40,8 +40,6 @@ const Layout = () => {
     const [modalShow, setModalShow] = useState(false);
     const handleModalOpen = () => setModalShow(true);
 
-    const [modelToShow, setModelToShow] = useState(1);
-    const [modalSpaceShow, setModalSpaceShow] = useState(false);
     const [spaceBody, setSpaceBody] = useState({
         floor_id: currentFloorId,
         building_id: bldgId,
@@ -118,6 +116,13 @@ const Layout = () => {
 
     const [floorName, setFloorName] = useState('');
     const [spaceName, setSpaceName] = useState('');
+
+    useEffect(() => {
+        if (!modalShow) {
+            setFloorName('');
+            setSpaceName('');
+        }
+    }, modalShow);
 
     const onClickForAllItems = async ({ nativeHandler, data }) => {
         setSelectedData({ nativeHandler, data });
