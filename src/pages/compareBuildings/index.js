@@ -37,7 +37,7 @@ const CompareBuildingsTable = ({
     return (
         <DataTableWidget
             isLoading={isLoadingBuildingData}
-            isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={15} />}
+            isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={10} />}
             id="compare-building"
             onSearch={(query) => setSearch(query)}
             rows={buildingsData}

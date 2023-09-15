@@ -574,7 +574,7 @@ const Provision = () => {
                     <div>
                         <DataTableWidget
                             isLoading={isProcessing}
-                            isLoadingComponent={<SkeletonLoader noOfColumns={headerProps1.length} noOfRows={15} />}
+                            isLoadingComponent={<SkeletonLoader noOfColumns={headerProps1.length} noOfRows={5} />}
                             id="linked_account"
                             onSearch={(query) => {
                                 setPageNo(1);

@@ -44,6 +44,7 @@ import DeletePanel from './DeletePanel';
 import UngroupAlert from './UngroupAlert';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
+import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const EditPanel = () => {
@@ -1274,7 +1275,13 @@ const EditPanel = () => {
                     ) : null}
                 </div>
                 {isPanelFetched ? (
-                    <Skeleton count={1} height={35} width={135} />
+                    <Skeleton
+                        baseColor={colorPalette.primaryGray150}
+                        highlightColor={colorPalette.baseBackground}
+                        count={1}
+                        height={35}
+                        width={135}
+                    />
                 ) : (
                     <div className="d-flex">
                         <div>
@@ -1311,7 +1318,13 @@ const EditPanel = () => {
                             <Typography.Body size={Typography.Sizes.md}>Name</Typography.Body>
                             <Brick sizeInRem={0.25} />
                             {isPanelFetched ? (
-                                <Skeleton count={1} height={35} width={250} />
+                                <Skeleton
+                                    baseColor={colorPalette.primaryGray150}
+                                    highlightColor={colorPalette.baseBackground}
+                                    count={1}
+                                    height={35}
+                                    width={250}
+                                />
                             ) : (
                                 <InputTooltip
                                     placeholder="Enter Panel Name"
@@ -1334,7 +1347,13 @@ const EditPanel = () => {
                             <Typography.Body size={Typography.Sizes.md}>Parent Panel</Typography.Body>
                             <Brick sizeInRem={0.25} />
                             {isPanelFetched ? (
-                                <Skeleton count={1} height={35} width={250} />
+                                <Skeleton
+                                    baseColor={colorPalette.primaryGray150}
+                                    highlightColor={colorPalette.baseBackground}
+                                    count={1}
+                                    height={35}
+                                    width={250}
+                                />
                             ) : (
                                 <Select
                                     placeholder="Select Parent Panel"
@@ -1358,7 +1377,13 @@ const EditPanel = () => {
                             <Typography.Body size={Typography.Sizes.md}>Location</Typography.Body>
                             <Brick sizeInRem={0.25} />
                             {isPanelFetched ? (
-                                <Skeleton count={1} height={35} width={475} />
+                                <Skeleton
+                                    baseColor={colorPalette.primaryGray150}
+                                    highlightColor={colorPalette.baseBackground}
+                                    count={1}
+                                    height={35}
+                                    width={475}
+                                />
                             ) : (
                                 <Select
                                     placeholder="Select Location"

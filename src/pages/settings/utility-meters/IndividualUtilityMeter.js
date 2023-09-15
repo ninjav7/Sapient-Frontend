@@ -589,7 +589,12 @@ const DeviceSensors = (props) => {
 
             {isFetchingSensors ? (
                 <div className="mt-2">
-                    <Skeleton count={8} height={40} />
+                    <Skeleton
+                        baseColor={colorPalette.primaryGray150}
+                        highlightColor={colorPalette.baseBackground}
+                        count={8}
+                        height={40}
+                    />
                 </div>
             ) : (
                 <Sensors data={sensorsList} {...props} />
