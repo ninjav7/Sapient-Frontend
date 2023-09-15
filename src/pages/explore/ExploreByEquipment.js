@@ -1129,7 +1129,7 @@ const ExploreByEquipment = () => {
                         <DataTableWidget
                             id="explore-by-equipment"
                             isLoading={isEquipDataFetching}
-                            isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length} noOfRows={20} />}
+                            isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={20} />}
                             isFilterLoading={isFiltersFetching}
                             onSearch={(e) => {
                                 setSearch(e);
