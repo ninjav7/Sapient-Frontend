@@ -24,14 +24,14 @@ const EditFloorModal = (props) => {
     const [apiBody, setApiBody] = useState({ parent_building: bldgId });
     const [floorsName, setFloorName] = useState(props.floorName);
     const [floor, setFloor] = useState([]);
+
     const [spaceName, setSpaceName] = useState('');
-    const [typeName, setTypeName] = useState('Room');
+    const [typeName, setTypeName] = useState('');
+
     const [floorModal, setFloorModal] = useAtom(closedEditFloorModal);
     const [floorid] = useAtom(floorIdState);
     const [floorNameApi, setFloorNameApi] = useState();
-    const [spaceBody, setSpaceBody] = useState({
-        building_id: bldgId,
-    });
+    const [spaceBody, setSpaceBody] = useState({});
 
     useEffect(() => {
         if (props.currentFloorId !== '' && props?.parentSpace !== '') {
@@ -44,6 +44,7 @@ const EditFloorModal = (props) => {
     useEffect(() => {
         setFloorName(props.floorName);
     }, [props.floorName]);
+
     useEffect(() => {
         setSpaceName(props.spaceName);
     }, [props.spaceName]);
@@ -51,6 +52,7 @@ const EditFloorModal = (props) => {
     useEffect(() => {
         setTypeName(props.typeId);
     }, [props.typeId]);
+
     useEffect(() => {
         setFloorNameApi({ name: floorsName });
     }, [floorsName]);
@@ -110,10 +112,18 @@ const EditFloorModal = (props) => {
                 setLoading(false);
             });
     };
-    const createSpacesAPI = async () => {
+
+    const createSpacesAPI = async (space_name, type_id, bldg_id) => {
+        if (!space_name || !type_id || !bldg_id) return;
+
         setLoading(true);
-        let params = `?building_id=${bldgId}`;
-        await addSpace(params, spaceBody)
+        let params = `?building_id=${bldg_id}`;
+        const obj = Object.assign({}, spaceBody);
+        obj.name = space_name;
+        obj.building_id = bldg_id;
+        obj.type_id = type_id;
+
+        await addSpace(params, obj)
             .then((res) => {
                 setLoading(false);
                 handleModalClose();
@@ -125,10 +135,18 @@ const EditFloorModal = (props) => {
                 setLoading(false);
             });
     };
-    const updateSpacesFunc = async () => {
+
+    const updateSpacesFunc = async (space_name, type_id, bldg_id) => {
+        if (!space_name || !type_id || !bldg_id) return;
+
         setLoading(true);
         const params = `?space_id=${props?.currentSpaceId}`;
-        await updateSpaces(params, spaceBody)
+        const obj = Object.assign({}, spaceBody);
+        obj.name = space_name;
+        obj.building_id = bldg_id;
+        obj.type_id = type_id;
+
+        await updateSpaces(params, obj)
             .then((res) => {
                 handleModalClose();
                 setLoading(false);
@@ -350,10 +368,10 @@ const EditFloorModal = (props) => {
                                     createFloorsFunc();
                                 }
                                 if (!props.editFloor && props?.modalType === 'spaces') {
-                                    createSpacesAPI();
+                                    createSpacesAPI(spaceName, typeName, bldgId);
                                 }
                                 if (props.editFloor && props?.modalType === 'spaces') {
-                                    updateSpacesFunc();
+                                    updateSpacesFunc(spaceName, typeName, bldgId);
                                 }
                             }}
                         />
