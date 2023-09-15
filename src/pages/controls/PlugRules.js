@@ -25,6 +25,7 @@ import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import Input from '../../sharedComponents/form/input/Input';
 import { fetchBuildingsList } from '../../services/buildings';
 import { getBuildingName } from '../../helpers/helpers';
+import colorPalette from '../../assets/scss/_colors.scss';
 
 import { ReactComponent as InactiveSVG } from '../../assets/icon/ban.svg';
 import { ReactComponent as ActiveSVG } from '../../assets/icon/circle-check.svg';
@@ -36,7 +37,7 @@ const buttonGroupFilterOptions = [
 ];
 
 const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
+    <SkeletonTheme baseColor={colorPalette.primaryGray150} highlightColor={colorPalette.baseBackground} height={35}>
         <tr>
             <th>
                 <Skeleton count={10} />
