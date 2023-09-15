@@ -16,34 +16,29 @@ import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import CreateUtilityMeters from './CreateUtilityMeters';
 import { deleteUtilityMeterData, getAllUtilityMetersServices } from './services';
+import colorPalette from '../../../assets/scss/_colors.scss';
 import { convertToMac } from './utils';
 import DeleteModal from './AlertModals';
 
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <th>
-                <Skeleton count={10} />
-            </th>
+const SkeletonLoading = ({ noofRows }) => {
+    const rowArray = Array.from({ length: noofRows });
 
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+    return (
+        <SkeletonTheme
+            baseColor={colorPalette.primaryGray150}
+            highlightColor={colorPalette.baseBackground}
+            borderRadius={10}
+            height={30}>
+            <tr>
+                {rowArray.map((_, index) => (
+                    <th key={index}>
+                        <Skeleton count={15} />
+                    </th>
+                ))}
+            </tr>
+        </SkeletonTheme>
+    );
+};
 
 const UtilityMeters = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -258,7 +253,7 @@ const UtilityMeters = () => {
                     <DataTableWidget
                         id="utility_meters_list"
                         isLoading={isDataFetching}
-                        isLoadingComponent={<SkeletonLoading />}
+                        isLoadingComponent={<SkeletonLoading noofRows={headerProps.length + 1} />}
                         onSearch={(query) => {
                             setPageNo(1);
                             setSearch(query);

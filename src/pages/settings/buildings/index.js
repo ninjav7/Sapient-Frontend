@@ -28,28 +28,27 @@ import { getBuildingsTableCSVExport } from '../../../utils/tablesExport';
 
 import CreateBuilding from './CreateBuilding';
 import { fetchBuildingList, getFiltersForBuildingsRequest } from './services';
+import colorPalette from '../../../assets/scss/_colors.scss';
 
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <th>
-                <Skeleton count={10} />
-            </th>
+const SkeletonLoading = ({ noofRows }) => {
+    const rowArray = Array.from({ length: noofRows });
 
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+    return (
+        <SkeletonTheme
+            baseColor={colorPalette.primaryGray150}
+            highlightColor={colorPalette.baseBackground}
+            borderRadius={10}
+            height={30}>
+            <tr>
+                {rowArray.map((_, index) => (
+                    <th key={index}>
+                        <Skeleton count={15} />
+                    </th>
+                ))}
+            </tr>
+        </SkeletonTheme>
+    );
+};
 
 const Buildings = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -476,7 +475,7 @@ const Buildings = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isDataFetching}
-                        isLoadingComponent={<SkeletonLoading />}
+                        isLoadingComponent={<SkeletonLoading noofRows={tableHeader.length} />}
                         id="buildings_list"
                         buttonGroupFilterOptions={[]}
                         onSearch={setSearch}

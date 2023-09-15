@@ -24,37 +24,25 @@ import Brick from '../../../sharedComponents/brick';
 import { formatConsumptionValue } from '../../../helpers/helpers';
 import './style.scss';
 
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <th>
-                <Skeleton count={10} />
-            </th>
+const SkeletonLoading = ({ noofRows }) => {
+    const rowArray = Array.from({ length: noofRows });
 
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-            <th>
-                <Skeleton count={10} />
-            </th>
-            <th>
-                <Skeleton count={10} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+    return (
+        <SkeletonTheme
+            baseColor={colorPalette.primaryGray150}
+            highlightColor={colorPalette.baseBackground}
+            borderRadius={10}
+            height={30}>
+            <tr>
+                {rowArray.map((_, index) => (
+                    <th key={index}>
+                        <Skeleton count={15} />
+                    </th>
+                ))}
+            </tr>
+        </SkeletonTheme>
+    );
+};
 
 const Accounts = () => {
     // Modal states
@@ -403,7 +391,7 @@ const Accounts = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isUserDataFetched}
-                        isLoadingComponent={<SkeletonLoading />}
+                        isLoadingComponent={<SkeletonLoading noofRows={headerProps.length} />}
                         id="admin-accounts"
                         onSearch={(query) => {
                             setPageNo(1);

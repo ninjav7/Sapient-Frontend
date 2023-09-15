@@ -25,44 +25,27 @@ import { Badge } from '../../../sharedComponents/badge';
 import { pageListSizes } from '../../../helpers/helpers';
 import { getActiveDeviceTableCSVExport } from '../../../utils/tablesExport';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+import colorPalette from '../../../assets/scss/_colors.scss';
 
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <th>
-                <Skeleton count={10} />
-            </th>
+const SkeletonLoading = ({ noofRows }) => {
+    const rowArray = Array.from({ length: noofRows });
 
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+    return (
+        <SkeletonTheme
+            baseColor={colorPalette.primaryGray150}
+            highlightColor={colorPalette.baseBackground}
+            borderRadius={10}
+            height={30}>
+            <tr>
+                {rowArray.map((_, index) => (
+                    <th key={index}>
+                        <Skeleton count={15} />
+                    </th>
+                ))}
+            </tr>
+        </SkeletonTheme>
+    );
+};
 
 const ActiveDevices = () => {
     const { bldgId } = useParams();
@@ -566,7 +549,7 @@ const ActiveDevices = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isDeviceProcessing}
-                        isLoadingComponent={<SkeletonLoading />}
+                        isLoadingComponent={<SkeletonLoading noofRows={headerProps.length} />}
                         isFilterLoading={isFilterFetching}
                         id="active_devices_list"
                         onSearch={(query) => {

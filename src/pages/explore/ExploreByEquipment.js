@@ -38,6 +38,7 @@ import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../explore/services';
 
+import colorPalette from '../../assets/scss/_colors.scss';
 import './style.css';
 import './styles.scss';
 
@@ -45,11 +46,15 @@ const SkeletonLoading = ({ noofRows }) => {
     const rowArray = Array.from({ length: noofRows });
 
     return (
-        <SkeletonTheme color="$primary-gray-1000" height={35}>
+        <SkeletonTheme
+            baseColor={colorPalette.primaryGray150}
+            highlightColor={colorPalette.baseBackground}
+            borderRadius={10}
+            height={30}>
             <tr>
                 {rowArray.map((_, index) => (
                     <th key={index}>
-                        <Skeleton count={5} />
+                        <Skeleton count={20} />
                     </th>
                 ))}
             </tr>

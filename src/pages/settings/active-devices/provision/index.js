@@ -39,65 +39,45 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import '../style.css';
 
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <td>
-                <Skeleton count={5} />
-            </td>
+const SkeletonLoading = ({ noofRows }) => {
+    const rowArray = Array.from({ length: noofRows });
 
-            <td>
-                <Skeleton count={5} />
-            </td>
+    return (
+        <SkeletonTheme
+            baseColor={colorPalette.primaryGray150}
+            highlightColor={colorPalette.baseBackground}
+            borderRadius={10}
+            height={30}>
+            <tr>
+                {rowArray.map((_, index) => (
+                    <th key={index}>
+                        <Skeleton count={15} />
+                    </th>
+                ))}
+            </tr>
+        </SkeletonTheme>
+    );
+};
 
-            <td>
-                <Skeleton count={5} />
-            </td>
+const DevicesSkeletonLoading = ({ noofRows }) => {
+    const rowArray = Array.from({ length: noofRows });
 
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-        </tr>
-    </SkeletonTheme>
-);
-
-const DevicesSkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-        </tr>
-    </SkeletonTheme>
-);
+    return (
+        <SkeletonTheme
+            baseColor={colorPalette.primaryGray150}
+            highlightColor={colorPalette.baseBackground}
+            borderRadius={10}
+            height={30}>
+            <tr>
+                {rowArray.map((_, index) => (
+                    <th key={index}>
+                        <Skeleton count={15} />
+                    </th>
+                ))}
+            </tr>
+        </SkeletonTheme>
+    );
+};
 
 const Provision = () => {
     //New Integrations
@@ -633,7 +613,7 @@ const Provision = () => {
                     <div>
                         <DataTableWidget
                             isLoading={isProcessing}
-                            isLoadingComponent={<SkeletonLoading />}
+                            isLoadingComponent={<SkeletonLoading noofRows={headerProps1.length} />}
                             id="linked_account"
                             onSearch={(query) => {
                                 setPageNo(1);
@@ -698,7 +678,7 @@ const Provision = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isAddProcessing}
-                        isLoadingComponent={<DevicesSkeletonLoading />}
+                        isLoadingComponent={<DevicesSkeletonLoading noofRows={headerProps2.length} />}
                         id="devices_linked"
                         onSearch={(query) => {
                             setDevicePageNo(1);

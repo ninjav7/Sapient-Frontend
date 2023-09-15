@@ -25,17 +25,22 @@ import { UserStore } from '../../store/UserStore';
 import { UNITS } from '../../constants/units';
 import { handleUnitConverstion } from '../settings/general-settings/utils';
 import { fetchCompareBuildingsV2 } from './services';
+import colorPalette from '../../assets/scss/_colors.scss';
 import './style.css';
 
 const SkeletonLoading = ({ noofRows }) => {
     const rowArray = Array.from({ length: noofRows });
 
     return (
-        <SkeletonTheme color="$primary-gray-1000" height={35}>
+        <SkeletonTheme
+            baseColor={colorPalette.primaryGray150}
+            highlightColor={colorPalette.baseBackground}
+            borderRadius={10}
+            height={30}>
             <tr>
                 {rowArray.map((_, index) => (
                     <th key={index}>
-                        <Skeleton count={10} />
+                        <Skeleton count={15} />
                     </th>
                 ))}
             </tr>
