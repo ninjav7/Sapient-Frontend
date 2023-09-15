@@ -25,6 +25,9 @@ import { UNITS } from '../../constants/units';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { UserStore } from '../../store/UserStore';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+import colorPalette from '../../assets/scss/_colors.scss';
 import './style.scss';
 
 const PortfolioOverview = () => {
@@ -44,6 +47,7 @@ const PortfolioOverview = () => {
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
+    const [isFetchingKPIsData, setFetchingKPIsData] = useState(false);
     const [overallData, setOverallData] = useState({
         total: {
             now: 0,
@@ -110,6 +114,7 @@ const PortfolioOverview = () => {
         if (startDate === null || endDate === null) return;
 
         const portfolioOverallData = async () => {
+            setFetchingKPIsData(true);
             const payload = {
                 date_from: encodeURIComponent(startDate),
                 date_to: encodeURIComponent(endDate),
@@ -124,7 +129,9 @@ const PortfolioOverview = () => {
                         setOverallData(response?.data);
                     }
                 })
-                .catch((error) => {});
+                .finally(() => {
+                    setFetchingKPIsData(false);
+                });
         };
 
         const portfolioEndUsesData = async () => {
@@ -237,14 +244,24 @@ const PortfolioOverview = () => {
             userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ? (
                 <>
                     <Row>
-                        <div>
+                        {isFetchingKPIsData ? (
+                            <Skeleton
+                                baseColor={colorPalette.primaryGray150}
+                                highlightColor={colorPalette.baseBackground}
+                                count={1}
+                                height={70}
+                                width={500}
+                                borderRadius={10}
+                                className="ml-2"
+                            />
+                        ) : (
                             <PortfolioKPIs
                                 totalBuilding={buildingListData.length !== 0 ? buildingListData.length : 0}
                                 overallData={overallData}
                                 daysCount={daysCount}
                                 userPrefUnits={userPrefUnits}
                             />
-                        </div>
+                        )}
                     </Row>
 
                     <Brick sizeInRem={1.5} />

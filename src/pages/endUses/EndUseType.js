@@ -17,12 +17,13 @@ import EndUsesKPIs from '../../sharedComponents/endUsesKPIs/EndUsesKPIs';
 import { fetchTrendType } from './utils';
 import { buildingData } from '../../store/globalState';
 import { KPI_UNITS } from '../../sharedComponents/KPIs';
-import colors from '../../assets/scss/_colors.scss';
+import Skeleton from 'react-loading-skeleton';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
 import { getWeatherData } from '../../services/weather';
+import colorPalette from '../../assets/scss/_colors.scss';
 import './style.css';
 
 const EndUseType = () => {
@@ -77,6 +78,7 @@ const EndUseType = () => {
 
     const [endUseName, setEndUseName] = useState('');
     const [endUsesData, setEndUsesData] = useState({});
+    const [isFetchingEndUseData, setFetchingEndUseData] = useState(false);
 
     const fetchEndUseType = (end_uses_type) => {
         return end_uses_type === 'hvac' ? 'HVAC' : end_uses_type.charAt(0).toUpperCase() + end_uses_type.slice(1);
@@ -109,7 +111,9 @@ const EndUseType = () => {
     };
 
     const endUsesDataFetch = async (endUseTypeRequest, time_zone) => {
+        setFetchingEndUseData(true);
         const payload = apiRequestBody(startDate, endDate, time_zone);
+
         await fetchEndUsesType(bldgId, endUseTypeRequest, payload)
             .then((res) => {
                 let response = res?.data?.data;
@@ -160,7 +164,9 @@ const EndUseType = () => {
                 };
                 setEndUsesData(obj);
             })
-            .catch((error) => {});
+            .finally(() => {
+                setFetchingEndUseData(false);
+            });
     };
 
     const fetchWeatherData = async (time_zone) => {
@@ -178,17 +184,17 @@ const EndUseType = () => {
                     const highTemp = {
                         type: LOW_MED_HIGH_TYPES.HIGH,
                         data: [],
-                        color: colors.datavizRed500,
+                        color: colorPalette.datavizRed500,
                     };
                     const avgTemp = {
                         type: LOW_MED_HIGH_TYPES.MED,
                         data: [],
-                        color: colors.primaryGray450,
+                        color: colorPalette.primaryGray450,
                     };
                     const lowTemp = {
                         type: LOW_MED_HIGH_TYPES.LOW,
                         data: [],
-                        color: colors.datavizBlue400,
+                        color: colorPalette.datavizBlue400,
                     };
                     response.data.forEach((record) => {
                         if (record.hasOwnProperty('temp')) avgTemp.data.push(record?.temp);
@@ -346,14 +352,25 @@ const EndUseType = () => {
             {endUseType === 'other' && <Header title="Other End Uses" type="page" />}
 
             <div className="mt-4">
-                <EndUsesKPIs data={endUsesData} />
+                {isFetchingEndUseData ? (
+                    <Skeleton
+                        baseColor={colorPalette.primaryGray150}
+                        highlightColor={colorPalette.baseBackground}
+                        count={1}
+                        height={135}
+                        width={800}
+                        borderRadius={10}
+                    />
+                ) : (
+                    <EndUsesKPIs data={endUsesData} />
+                )}
             </div>
 
             <div className="mt-4">
                 <ColumnChart
                     title={fetchEnduseTitle(endUseType)}
                     subTitle={'Energy Usage By Hour (kWh)'}
-                    colors={[colors.datavizMain2]}
+                    colors={[colorPalette.datavizMain2]}
                     categories={energyConsumptionsCategories}
                     tooltipUnit={KPI_UNITS.KWH}
                     series={energyConsumptionsData}

@@ -39,6 +39,7 @@ const EndUsesPage = () => {
     const [endUsesData, setEndUsesData] = useState([]);
     const [topEndUsesData, setTopEndUsesData] = useState([]);
     const [isFetchingData, setFetchingData] = useState(false);
+    const [isFetchingEndUseData, setFetchingEndUseData] = useState(false);
 
     const [endUseCategories, setEndUseCategories] = useState([]);
     const [stackedColumnChartCategories, setStackedColumnChartCategories] = useState([]);
@@ -72,6 +73,7 @@ const EndUsesPage = () => {
 
     const endUsesDataFetch = async (time_zone) => {
         setFetchingData(true);
+        setFetchingEndUseData(true);
 
         const params = `?building_id=${bldgId}`;
         const payload = apiRequestBody(startDate, endDate, time_zone);
@@ -147,6 +149,7 @@ const EndUsesPage = () => {
             })
             .finally(() => {
                 setFetchingData(false);
+                setFetchingEndUseData(false);
             });
     };
 
@@ -261,6 +264,7 @@ const EndUsesPage = () => {
                 dateFormat={dateFormat}
                 daysCount={daysCount}
                 isChartLoading={isChartLoading}
+                isFetchingEndUseData={isFetchingEndUseData}
             />
 
             <Brick sizeInRem={1.5} />

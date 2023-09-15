@@ -37,7 +37,12 @@ import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
 import { getWeatherData } from '../../services/weather';
 import EnergyConsumptionChart from './energy-consumption/EnergyConsumptionChart';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+import colorPalette from '../../assets/scss/_colors.scss';
 import './style.css';
+import Brick from '../../sharedComponents/brick';
+import { Row } from 'reactstrap';
 
 const BuildingOverview = () => {
     const { bldgId } = useParams();
@@ -54,6 +59,7 @@ const BuildingOverview = () => {
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
+    const [isFetchingKPIsData, setFetchingKPIsData] = useState(false);
     const [overallBldgData, setOverallBldgData] = useState({
         total: {
             now: 0,
@@ -192,6 +198,7 @@ const BuildingOverview = () => {
     };
 
     const buildingOverallData = async (time_zone) => {
+        setFetchingKPIsData(true);
         const payload = {
             bldg_id: bldgId,
             date_from: encodeURIComponent(startDate),
@@ -207,7 +214,9 @@ const BuildingOverview = () => {
                     setOverallBldgData(response?.data);
                 }
             })
-            .catch((error) => {});
+            .finally(() => {
+                setFetchingKPIsData(false);
+            });
     };
 
     const buildingEndUserData = async (time_zone) => {
@@ -573,9 +582,31 @@ const BuildingOverview = () => {
         <React.Fragment>
             <Header title="Building Overview" type="page" />
 
-            <div className="mt-4 mb-4">
-                <BuildingKPIs daysCount={daysCount} overallData={overallBldgData} userPrefUnits={userPrefUnits} />
-            </div>
+            <Brick sizeInRem={1.5} />
+
+            <Row>
+                {isFetchingKPIsData ? (
+                    <Skeleton
+                        baseColor={colorPalette.primaryGray150}
+                        highlightColor={colorPalette.baseBackground}
+                        count={1}
+                        height={70}
+                        width={425}
+                        borderRadius={10}
+                        className="ml-2"
+                    />
+                ) : (
+                    <div className="ml-2">
+                        <BuildingKPIs
+                            daysCount={daysCount}
+                            overallData={overallBldgData}
+                            userPrefUnits={userPrefUnits}
+                        />
+                    </div>
+                )}
+            </Row>
+
+            <Brick sizeInRem={1.5} />
 
             <div className="bldg-page-grid-style">
                 <div>
