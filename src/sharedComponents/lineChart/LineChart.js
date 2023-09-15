@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import './LineChart.scss';
+import { Spinner } from 'reactstrap';
 import Highcharts from 'highcharts/highstock';
 import _ from 'lodash';
 
@@ -23,6 +23,8 @@ import { UNITS } from '../../constants/units';
 import Brick from '../brick';
 import { UpperLegendComponent } from '../common/charts/components/UpperLegendComponent/UpperLegendComponent';
 import { usePlotBandsLegends } from '../common/charts/hooks/usePlotBandsLegends';
+
+import './LineChart.scss';
 
 HighchartsExporting(Highcharts);
 HighchartsData(Highcharts);
@@ -164,7 +166,11 @@ const LineChart = (props) => {
             <Brick sizeInRem={1} />
 
             {isLoadingData ? (
-                <EmptyLineChart />
+                <div className="line-chart-container w-100">
+                    <div className="line-chart-container-loader">
+                        <Spinner />
+                    </div>
+                </div>
             ) : (
                 <>
                     <HighchartsReact

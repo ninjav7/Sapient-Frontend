@@ -38,66 +38,7 @@ import colorPalette from '../../../../assets/scss/_colors.scss';
 import 'react-loading-skeleton/dist/skeleton.css';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import '../style.css';
-
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-        </tr>
-    </SkeletonTheme>
-);
-
-const DevicesSkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-
-            <td>
-                <Skeleton count={5} />
-            </td>
-        </tr>
-    </SkeletonTheme>
-);
+import SkeletonLoader from '../../../../components/SkeletonLoader';
 
 const Provision = () => {
     //New Integrations
@@ -633,7 +574,7 @@ const Provision = () => {
                     <div>
                         <DataTableWidget
                             isLoading={isProcessing}
-                            isLoadingComponent={<SkeletonLoading />}
+                            isLoadingComponent={<SkeletonLoader noOfColumns={headerProps1.length} noOfRows={5} />}
                             id="linked_account"
                             onSearch={(query) => {
                                 setPageNo(1);
@@ -698,7 +639,7 @@ const Provision = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isAddProcessing}
-                        isLoadingComponent={<DevicesSkeletonLoading />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps2.length} noOfRows={15} />}
                         id="devices_linked"
                         onSearch={(query) => {
                             setDevicePageNo(1);

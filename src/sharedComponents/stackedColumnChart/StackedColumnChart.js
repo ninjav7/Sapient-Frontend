@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import HighchartsExporting from 'highcharts/modules/exporting';
 import Highcharts from 'highcharts';
+import { Spinner } from 'reactstrap';
 import HighchartsData from 'highcharts/modules/export-data';
 import highchartsAccessibility from 'highcharts/modules/accessibility';
 import HighchartsReact from 'highcharts-react-official';
@@ -26,6 +27,7 @@ HighchartsData(Highcharts);
 highchartsAccessibility(Highcharts);
 
 const StackedColumnChart = (props) => {
+    const { isChartLoading = false } = props;
     const chartComponentRef = useRef(null);
 
     const handleDropDownOptionClicked = (name) => {
@@ -94,7 +96,15 @@ const StackedColumnChart = (props) => {
             </div>
             <Brick sizeInRem={1.5} />
 
-            <HighchartsReact highcharts={Highcharts} options={options(props)} ref={chartComponentRef} />
+            {isChartLoading ? (
+                <div className="stacked-column-container w-100">
+                    <div className="stacked-column-container-loader">
+                        <Spinner />
+                    </div>
+                </div>
+            ) : (
+                <HighchartsReact highcharts={Highcharts} options={options(props)} ref={chartComponentRef} />
+            )}
 
             {props.onMoreDetail && (
                 <Button

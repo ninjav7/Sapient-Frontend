@@ -38,10 +38,13 @@ const EndUsesPage = () => {
 
     const [endUsesData, setEndUsesData] = useState([]);
     const [topEndUsesData, setTopEndUsesData] = useState([]);
+    const [isFetchingData, setFetchingData] = useState(false);
+    const [isFetchingEndUseData, setFetchingEndUseData] = useState(false);
 
     const [endUseCategories, setEndUseCategories] = useState([]);
     const [stackedColumnChartCategories, setStackedColumnChartCategories] = useState([]);
     const [stackedColumnChartData, setStackedColumnChartData] = useState([]);
+    const [isChartLoading, setChartLoading] = useState(false);
 
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
 
@@ -69,8 +72,12 @@ const EndUsesPage = () => {
     };
 
     const endUsesDataFetch = async (time_zone) => {
+        setFetchingData(true);
+        setFetchingEndUseData(true);
+
         const params = `?building_id=${bldgId}`;
         const payload = apiRequestBody(startDate, endDate, time_zone);
+
         await fetchEndUses(params, payload)
             .then((res) => {
                 const response = res?.data?.data;
@@ -140,12 +147,17 @@ const EndUsesPage = () => {
 
                 setTopEndUsesData(endUsesList);
             })
-            .catch((error) => {});
+            .finally(() => {
+                setFetchingData(false);
+                setFetchingEndUseData(false);
+            });
     };
 
     const endUsesChartDataFetch = async (time_zone) => {
         setStackedColumnChartData([]);
+        setChartLoading(true);
         const payload = apiRequestBody(startDate, endDate, time_zone);
+
         await fetchEndUsesChart(bldgId, payload)
             .then((res) => {
                 let responseData = res?.data;
@@ -172,7 +184,9 @@ const EndUsesPage = () => {
                 setStackedColumnChartCategories(formattedTimestamp);
                 setStackedColumnChartData(formattedData);
             })
-            .catch((error) => {});
+            .finally(() => {
+                setChartLoading(false);
+            });
     };
 
     const updateBreadcrumbStore = () => {
@@ -249,6 +263,8 @@ const EndUsesPage = () => {
                 timeZone={timeZone}
                 dateFormat={dateFormat}
                 daysCount={daysCount}
+                isChartLoading={isChartLoading}
+                isFetchingEndUseData={isFetchingEndUseData}
             />
 
             <Brick sizeInRem={1.5} />
@@ -257,6 +273,7 @@ const EndUsesPage = () => {
                 title="Top Systems by Usage"
                 subtitle="Click explore to see more energy usage details."
                 data={topEndUsesData}
+                isDataLoading={isFetchingData}
             />
         </React.Fragment>
     );

@@ -32,6 +32,7 @@ const TimeOfDay = () => {
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [lineChartData, setLineChartData] = useState([]);
+    const [isFetchingData, setFetchingData] = useState(false);
 
     const [dateFilter, setDateRange] = useState({
         minDate: '',
@@ -39,10 +40,12 @@ const TimeOfDay = () => {
     });
 
     const [heatMapChartData, setHeatMapChartData] = useState([]);
+    const [isAvgConsumptionDataLoading, setAvgConsumptionDataLoading] = useState([]);
 
     const weekdaysChartHeight = '400px';
 
     const [energyConsumption, setEnergyConsumption] = useState([]);
+    const [isEnergyDataFetching, setEnergyDataFetching] = useState(false);
 
     const metric = [{ value: 'energy', label: 'Energy', unit: 'kWh', Consumption: 'Energy' }];
 
@@ -93,6 +96,7 @@ const TimeOfDay = () => {
 
         const endUsesByOfHour = async (is_plug_only) => {
             setEnergyConsumption([]);
+            setEnergyDataFetching(true);
 
             const params = `?building_id=${bldgId}${is_plug_only || is_plug_only === 'true' ? '' : `&off_hours=true`}`;
             const payload = apiRequestBody(startDate, endDate, time_zone);
@@ -120,12 +124,15 @@ const TimeOfDay = () => {
                         }
                     }
                 })
-                .catch((error) => {});
+                .finally(() => {
+                    setEnergyDataFetching(false);
+                });
         };
 
         const dailyUsageByHour = async () => {
             const payload = apiRequestBody(startDate, endDate, time_zone);
             setLineChartData([]);
+            setFetchingData(true);
 
             await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
@@ -190,11 +197,15 @@ const TimeOfDay = () => {
                     setLineChartData(chartDataToDisplay);
                     setDateRange(range);
                 })
-                .catch((error) => {});
+                .finally(() => {
+                    setFetchingData(false);
+                });
         };
 
         const averageUsageByHourFetch = async () => {
+            setAvgConsumptionDataLoading(true);
             const payload = apiRequestBody(startDate, endDate, time_zone);
+
             await fetchAvgDailyUsageByHour(bldgId, payload)
                 .then((res) => {
                     let response = res.data;
@@ -705,7 +716,10 @@ const TimeOfDay = () => {
 
                     setHeatMapChartData(heatMapData.reverse());
                 })
-                .catch((error) => {});
+                .catch((error) => {})
+                .finally(() => {
+                    setAvgConsumptionDataLoading(false);
+                });
         };
 
         endUsesByOfHour(isPlugOnly);
@@ -724,6 +738,7 @@ const TimeOfDay = () => {
                     energyConsumption={energyConsumption}
                     className={'h-100'}
                     isPlugOnly={isPlugOnly || isPlugOnly === 'true' ? true : false}
+                    isChartLoading={isEnergyDataFetching}
                 />
 
                 <HeatMapWidget
@@ -736,6 +751,7 @@ const TimeOfDay = () => {
                     labelsPosition={'top'}
                     className={'h-100'}
                     timeFormat={userPrefTimeFormat}
+                    isChartLoading={isAvgConsumptionDataLoading}
                 />
             </div>
 
@@ -747,6 +763,7 @@ const TimeOfDay = () => {
                 handleMoreClick={null}
                 dateRange={dateFilter}
                 data={lineChartData}
+                isLoadingData={isFetchingData}
                 tooltipUnit={metric[0].unit}
                 tooltipLabel={metric[0].label}
                 chartProps={{

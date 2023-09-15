@@ -14,10 +14,7 @@ import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import { getCompareBuildingTableCSVExport } from '../../utils/tablesExport';
 import { Badge } from '../../sharedComponents/badge';
 import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { timeZone } from '../../utils/helper';
-import { apiRequestBody } from '../../helpers/helpers';
-import { primaryGray1000 } from '../../assets/scss/_colors.scss';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import Brick from '../../sharedComponents/brick';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
@@ -26,33 +23,7 @@ import { UNITS } from '../../constants/units';
 import { handleUnitConverstion } from '../settings/general-settings/utils';
 import { fetchCompareBuildingsV2 } from './services';
 import './style.css';
-
-const SkeletonLoading = () => (
-    <SkeletonTheme color={primaryGray1000} height={35}>
-        <tr>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const CompareBuildingsTable = ({
     tableHeader,
@@ -66,7 +37,7 @@ const CompareBuildingsTable = ({
     return (
         <DataTableWidget
             isLoading={isLoadingBuildingData}
-            isLoadingComponent={<SkeletonLoading />}
+            isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={10} />}
             id="compare-building"
             onSearch={(query) => setSearch(query)}
             rows={buildingsData}
@@ -241,9 +212,9 @@ const CompareBuildings = () => {
                     setTopEnergyDensity(topVal);
                     setBuildingsData(responseData);
                 }
-                setIsLoadingBuildingData(false);
             })
-            .catch((error) => {
+            .catch((error) => {})
+            .finally(() => {
                 setIsLoadingBuildingData(false);
             });
     };

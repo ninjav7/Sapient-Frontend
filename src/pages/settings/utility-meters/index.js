@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { Row, Col } from 'reactstrap';
 import { Link, useParams } from 'react-router-dom';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import Brick from '../../../sharedComponents/brick';
 import { UserStore } from '../../../store/UserStore';
 import { pageListSizes } from '../../../helpers/helpers';
@@ -18,32 +17,7 @@ import CreateUtilityMeters from './CreateUtilityMeters';
 import { deleteUtilityMeterData, getAllUtilityMetersServices } from './services';
 import { convertToMac } from './utils';
 import DeleteModal from './AlertModals';
-
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const UtilityMeters = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -258,7 +232,7 @@ const UtilityMeters = () => {
                     <DataTableWidget
                         id="utility_meters_list"
                         isLoading={isDataFetching}
-                        isLoadingComponent={<SkeletonLoading />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={15} />}
                         onSearch={(query) => {
                             setPageNo(1);
                             setSearch(query);

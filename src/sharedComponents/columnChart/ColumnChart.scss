@@ -9,6 +9,14 @@
         position: relative;
     }
 
+    &-loader {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 45vh;
+        color: $primary-indigo-400;
+    }
+
     &-download-button {
         padding: 0 !important;
         height: 2.25rem;

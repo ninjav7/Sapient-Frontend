@@ -2,12 +2,13 @@ import React from 'react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import { Progress } from 'reactstrap';
-import Skeleton from 'react-loading-skeleton';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { TRENDS_BADGE_TYPES, TrendsBadge } from '../../../sharedComponents/trendsBadge';
 import { formatConsumptionValue } from '../../../helpers/helpers';
 import { percentageHandler } from '../../../utils/helper';
+import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const EnergyConsumptionChart = (props) => {
@@ -34,7 +35,13 @@ const EnergyConsumptionChart = (props) => {
             <div className="mb-2 energy-usage-chart-scroll-container">
                 <div className="EnergyConsumptionWidget-table d-block">
                     {isFetching ? (
-                        <Skeleton count={8} height={25} className="mb-2" />
+                        <SkeletonTheme
+                            baseColor={colorPalette.primaryGray150}
+                            highlightColor={colorPalette.baseBackground}
+                            borderRadius={10}
+                            height={25}>
+                            <Skeleton count={8} className="mb-2" />
+                        </SkeletonTheme>
                     ) : (
                         <table className="w-100 EnergyConsumptionWidget-widget-table-content align-items-baseline">
                             <tbody>

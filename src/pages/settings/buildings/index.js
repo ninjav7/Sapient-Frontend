@@ -9,9 +9,6 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 import { userPermissionData } from '../../../store/globalState';
 
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
-
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import Typography from '../../../sharedComponents/typography';
 import { Badge } from '../../../sharedComponents/badge';
@@ -28,28 +25,7 @@ import { getBuildingsTableCSVExport } from '../../../utils/tablesExport';
 
 import CreateBuilding from './CreateBuilding';
 import { fetchBuildingList, getFiltersForBuildingsRequest } from './services';
-
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const Buildings = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -476,7 +452,7 @@ const Buildings = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isDataFetching}
-                        isLoadingComponent={<SkeletonLoading />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={15} />}
                         id="buildings_list"
                         buttonGroupFilterOptions={[]}
                         onSearch={setSearch}

@@ -14,8 +14,6 @@ import 'react-datepicker/dist/react-datepicker.css';
 import _ from 'lodash';
 import { Badge } from '../../../sharedComponents/badge';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { allEquipmentDataGlobal, buildingData, equipmentDataGlobal } from '../../../store/globalState';
 import { useAtom } from 'jotai';
@@ -30,49 +28,13 @@ import {
     getLocationDataRequest,
     getMetadataRequest,
 } from '../../../services/equipment';
-import { primaryGray100 } from '../../../assets/scss/_colors.scss';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import Brick from '../../../sharedComponents/brick';
 import AddEquipment from './AddEquipment';
 import { UserStore } from '../../../store/UserStore';
 import { pageListSizes } from '../../../helpers/helpers';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
-
-const SkeletonLoading = () => (
-    <SkeletonTheme color={primaryGray100} height={35}>
-        <tr>
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const Equipment = () => {
     const [show, setShow] = useState(false);
@@ -703,7 +665,7 @@ const Equipment = () => {
                     <DataTableWidget
                         isLoading={isEquipDataFetched || isLoadingEndUseData}
                         isFilterLoading={isFilterFetching}
-                        isLoadingComponent={<SkeletonLoading />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={15} />}
                         id="equipment"
                         onSearch={(query) => {
                             setPageNo(1);

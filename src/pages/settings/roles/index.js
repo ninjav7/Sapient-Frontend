@@ -46,7 +46,11 @@ const RoleTable = ({ roleDataList, permissionData, setProcessing }) => {
                 </thead>
                 {setProcessing ? (
                     <tbody>
-                        <SkeletonTheme color="#202020" height={35}>
+                        <SkeletonTheme
+                            baseColor={colorPalette.primaryGray150}
+                            highlightColor={colorPalette.baseBackground}
+                            borderRadius={10}
+                            height={30}>
                             <tr>
                                 <td>
                                     <Skeleton count={5} />

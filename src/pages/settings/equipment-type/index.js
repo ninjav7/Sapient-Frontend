@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
 import CreateEquipType from './CreateEquipType';
@@ -19,32 +18,7 @@ import EditEquipType from './EditEquipType';
 import DeleteEquipType from './DeleteEquipType';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
-
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const EquipmentType = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -353,7 +327,7 @@ const EquipmentType = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isDataFetching}
-                        isLoadingComponent={<SkeletonLoading />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={15} />}
                         id="equipmentType_list"
                         onSearch={(query) => {
                             setPageNo(1);

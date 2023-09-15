@@ -3,7 +3,6 @@ import { Row, Col } from 'reactstrap';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { useAtom } from 'jotai';
 import { useHistory, Link, useParams } from 'react-router-dom';
 import { buildingData, userPermissionData } from '../../../store/globalState';
@@ -24,39 +23,9 @@ import DeletePassiveAlert from './DeletePassiveAlert';
 import EditPassiveDevice from './EditPassiveDevice';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getPassiveDeviceTableCSVExport } from '../../../utils/tablesExport';
-import 'react-loading-skeleton/dist/skeleton.css';
-import './style.css';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
-
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+import './style.css';
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const PassiveDevices = () => {
     const history = useHistory();
@@ -491,7 +460,7 @@ const PassiveDevices = () => {
                     <DataTableWidget
                         isLoading={isDataFetching}
                         isFilterLoading={isFilterFetching}
-                        isLoadingComponent={<SkeletonLoading />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={15} />}
                         id="smart_meter_list"
                         onSearch={(query) => {
                             setPageNo(1);

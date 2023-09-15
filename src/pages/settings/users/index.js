@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import { fetchMemberUserList, fetchUserFilters } from './service';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { useAtom } from 'jotai';
@@ -25,32 +24,7 @@ import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import Brick from '../../../sharedComponents/brick';
 import AddUser from './AddUser';
 import '../style.css';
-
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const Users = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -346,7 +320,7 @@ const Users = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isUserDataFetched}
-                        isLoadingComponent={<SkeletonLoading />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={15} />}
                         id="users"
                         onSearch={(query) => {
                             setPageNo(1);

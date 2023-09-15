@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import { Cookies } from 'react-cookie';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import Typography from '../../../sharedComponents/typography';
@@ -23,38 +22,7 @@ import AddCustomer from './addCustomer';
 import Brick from '../../../sharedComponents/brick';
 import { formatConsumptionValue } from '../../../helpers/helpers';
 import './style.scss';
-
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const Accounts = () => {
     // Modal states
@@ -403,7 +371,7 @@ const Accounts = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isUserDataFetched}
-                        isLoadingComponent={<SkeletonLoading />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length} noOfRows={15} />}
                         id="admin-accounts"
                         onSearch={(query) => {
                             setPageNo(1);

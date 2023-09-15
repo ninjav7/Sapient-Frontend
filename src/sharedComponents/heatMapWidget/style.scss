@@ -1,7 +1,7 @@
 @import '../../assets/scss/colors';
 
 .heatmap-chart-widget-wrapper {
-    border: .0625rem solid $primary-gray-200 !important;
+    border: 0.0625rem solid $primary-gray-200 !important;
     border-radius: 0.5rem;
 }
 
@@ -11,7 +11,7 @@
     }
 
     padding-right: 1rem;
-    margin-bottom: .3125rem;
+    margin-bottom: 0.3125rem;
 
     &-wrapper {
         .apexcharts-xaxis-label {
@@ -68,5 +68,22 @@
             line-height: 1.0625rem;
             color: $primary-gray-500;
         }
+    }
+}
+
+.heatmap-container {
+    padding: 0;
+    background: $base-white;
+    min-height: 50vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    &-loader {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 45vh;
+        color: $primary-indigo-400;
     }
 }

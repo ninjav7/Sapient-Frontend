@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Spinner } from 'reactstrap';
 import HighchartsExporting from 'highcharts/modules/exporting';
 import HighchartsData from 'highcharts/modules/export-data';
 import highchartsAccessibility from 'highcharts/modules/accessibility';
@@ -24,6 +25,7 @@ import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
 import { DOWNLOAD_TYPES } from '../constants';
 import { LOW_MED_HIGH_TYPES, PLOT_BANDS_TYPE } from '../common/charts/modules/contants';
 
+import colorPalette from '../../assets/scss/_colors.scss';
 import './ColumnChart.scss';
 
 HighchartsExporting(Highcharts);
@@ -42,6 +44,7 @@ const ColumnChart = (props) => {
         temperatureSeries,
         onMoreDetail,
         style,
+        isChartLoading = false,
     } = props;
 
     const chartComponentRef = useRef(null);
@@ -139,8 +142,13 @@ const ColumnChart = (props) => {
                 />
             </div>
             <Brick sizeInRem={1.5} />
-            <HighchartsReact highcharts={Highcharts} options={chartConfig} ref={chartComponentRef} />
-
+            {isChartLoading ? (
+                <div className="column-chart-loader">
+                    <Spinner />
+                </div>
+            ) : (
+                <HighchartsReact highcharts={Highcharts} options={chartConfig} ref={chartComponentRef} />
+            )}
             {onMoreDetail && (
                 <Button
                     className={cx('column-chart-more-detail', {

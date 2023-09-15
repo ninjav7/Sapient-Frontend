@@ -6,9 +6,6 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import { ComponentStore } from '../../../store/ComponentStore';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
-import './style.css';
 import { useAtom } from 'jotai';
 import { buildingData, userPermissionData } from '../../../store/globalState';
 import Brick from '../../../sharedComponents/brick';
@@ -25,44 +22,8 @@ import { Badge } from '../../../sharedComponents/badge';
 import { pageListSizes } from '../../../helpers/helpers';
 import { getActiveDeviceTableCSVExport } from '../../../utils/tablesExport';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
-
-const SkeletonLoading = () => (
-    <SkeletonTheme color="$primary-gray-1000" height={35}>
-        <tr>
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-
-            <th>
-                <Skeleton count={10} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
+import './style.css';
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const ActiveDevices = () => {
     const { bldgId } = useParams();
@@ -566,7 +527,7 @@ const ActiveDevices = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isDeviceProcessing}
-                        isLoadingComponent={<SkeletonLoading />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length} noOfRows={15} />}
                         isFilterLoading={isFilterFetching}
                         id="active_devices_list"
                         onSearch={(query) => {

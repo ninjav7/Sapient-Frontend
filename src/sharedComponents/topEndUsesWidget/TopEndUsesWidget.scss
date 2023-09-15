@@ -42,3 +42,22 @@
         }
     }
 }
+
+.end-uses-container {
+    padding: 0;
+    background: $base-white;
+    border: 0.0625rem solid $primary-gray-200;
+    border-radius: 0.625rem;
+    min-height: 50vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    &-loader {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 45vh;
+        color: $primary-indigo-400;
+    }
+}

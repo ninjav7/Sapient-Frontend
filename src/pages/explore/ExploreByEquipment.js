@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAtom } from 'jotai';
 import { useParams } from 'react-router-dom';
 import { Row, Col, UncontrolledTooltip, Progress, Spinner } from 'reactstrap';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 import { UserStore } from '../../store/UserStore';
 import { buildingData } from '../../store/globalState';
@@ -40,22 +39,7 @@ import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilt
 
 import './style.css';
 import './styles.scss';
-
-const SkeletonLoading = ({ noofRows }) => {
-    const rowArray = Array.from({ length: noofRows });
-
-    return (
-        <SkeletonTheme color="$primary-gray-1000" height={35}>
-            <tr>
-                {rowArray.map((_, index) => (
-                    <th key={index}>
-                        <Skeleton count={5} />
-                    </th>
-                ))}
-            </tr>
-        </SkeletonTheme>
-    );
-};
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
@@ -1145,7 +1129,7 @@ const ExploreByEquipment = () => {
                         <DataTableWidget
                             id="explore-by-equipment"
                             isLoading={isEquipDataFetching}
-                            isLoadingComponent={<SkeletonLoading noofRows={headerProps.length + 1} />}
+                            isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={20} />}
                             isFilterLoading={isFiltersFetching}
                             onSearch={(e) => {
                                 setSearch(e);

@@ -3,7 +3,9 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import { UNITS } from '../../../constants/units';
 import { UserStore } from '../../../store/UserStore';
+import Skeleton from 'react-loading-skeleton';
 import StackedColumnChart from '../../../sharedComponents/stackedColumnChart/StackedColumnChart';
+import colorPalette from '../../../assets/scss/_colors.scss';
 import './style.scss';
 
 const EndUsesCategory = ({ endUsesData }) => {
@@ -27,16 +29,19 @@ const EndUsesCategory = ({ endUsesData }) => {
     );
 };
 
-const EndUsesTypeWidget = ({
-    endUsesData,
-    stackedColumnChartData,
-    stackedColumnChartCategories,
-    endUseCategories,
-    xAxisObj,
-    timeZone,
-    dateFormat,
-    daysCount,
-}) => {
+const EndUsesTypeWidget = (props) => {
+    const {
+        endUsesData,
+        stackedColumnChartData,
+        stackedColumnChartCategories,
+        endUseCategories,
+        xAxisObj,
+        timeZone,
+        dateFormat,
+        daysCount,
+        isFetchingEndUseData = false,
+    } = props;
+
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
@@ -57,7 +62,19 @@ const EndUsesTypeWidget = ({
         <>
             <div className="enduse-type-widget-wrapper">
                 <div className="p-3">
-                    <EndUsesCategory endUsesData={endUsesData} />
+                    {isFetchingEndUseData ? (
+                        <Skeleton
+                            baseColor={colorPalette.primaryGray150}
+                            highlightColor={colorPalette.baseBackground}
+                            count={1}
+                            height={70}
+                            width={425}
+                            borderRadius={10}
+                            className="ml-2"
+                        />
+                    ) : (
+                        <EndUsesCategory endUsesData={endUsesData} />
+                    )}
                 </div>
 
                 <div>
@@ -72,6 +89,7 @@ const EndUsesTypeWidget = ({
                         xAxisCallBackValue={formatXaxis}
                         restChartProps={xAxisObj}
                         tooltipCallBackValue={toolTipFormatter}
+                        {...props}
                     />
                 </div>
             </div>

@@ -6,7 +6,6 @@ import { UserStore } from '../../store/UserStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 import Header from '../../components/Header';
 import Brick from '../../sharedComponents/brick';
@@ -31,22 +30,7 @@ import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 
 import './style.css';
 import './styles.scss';
-
-const SkeletonLoading = ({ noofRows }) => {
-    const rowArray = Array.from({ length: noofRows });
-
-    return (
-        <SkeletonTheme color="$primary-gray-1000" height={35}>
-            <tr>
-                {rowArray.map((_, index) => (
-                    <th key={index}>
-                        <Skeleton count={5} />
-                    </th>
-                ))}
-            </tr>
-        </SkeletonTheme>
-    );
-};
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const ExploreByBuildings = () => {
     const { download } = useCSVDownload();
@@ -813,7 +797,7 @@ const ExploreByBuildings = () => {
                         <DataTableWidget
                             id="explore-by-building"
                             isLoading={isExploreDataLoading}
-                            isLoadingComponent={<SkeletonLoading noofRows={tableHeader.length + 1} />}
+                            isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length + 1} noOfRows={10} />}
                             isFilterLoading={isFilterFetching}
                             onSearch={(e) => {
                                 setSearch(e);

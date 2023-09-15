@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Skeleton from 'react-loading-skeleton';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 import Typography from '../typography';
 import Brick from '../brick';
@@ -11,6 +11,7 @@ import { formatConsumptionValue } from '../../helpers/helpers';
 import { UNITS } from '../../constants/units';
 
 import { ReactComponent as TelescopeSVG } from '../assets/icons/telescope.svg';
+import colorPalette from '../../assets/scss/_colors.scss';
 import './TopConsumptionWidget.scss';
 
 const TopConsumptionWidget = ({
@@ -48,7 +49,13 @@ const TopConsumptionWidget = ({
 
             <div className={`${widgetType}-table d-block`}>
                 {isFetching ? (
-                    <Skeleton count={8} height={25} className="mb-2" />
+                    <SkeletonTheme
+                        baseColor={colorPalette.primaryGray150}
+                        highlightColor={colorPalette.baseBackground}
+                        borderRadius={10}
+                        height={25}>
+                        <Skeleton count={8} className="mb-2" />
+                    </SkeletonTheme>
                 ) : (
                     <>
                         {rows.length !== 0 ? (

@@ -34,6 +34,7 @@ import '../active-devices/styles.scss';
 import '../../../sharedComponents/breaker/Breaker.scss';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 import Sensors from './Sensors';
+import colorPalette from '../../../assets/scss/_colors.scss';
 
 const IndividualPassiveDevice = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -405,7 +406,12 @@ const IndividualPassiveDevice = () => {
                         <Typography.Subheader size={Typography.Sizes.sm}>Installed Location</Typography.Subheader>
                         <Brick sizeInRem={0.25} />
                         {isLocationFetched || isProcessing ? (
-                            <Skeleton count={1} height={35} />
+                            <Skeleton
+                                baseColor={colorPalette.primaryGray150}
+                                highlightColor={colorPalette.baseBackground}
+                                count={1}
+                                height={35}
+                            />
                         ) : (
                             <Select
                                 placeholder="Select Location"
@@ -504,7 +510,12 @@ const IndividualPassiveDevice = () => {
 
                     {isFetchingSensorData ? (
                         <div>
-                            <Skeleton count={8} height={40} />
+                            <Skeleton
+                                baseColor={colorPalette.primaryGray150}
+                                highlightColor={colorPalette.baseBackground}
+                                count={8}
+                                height={40}
+                            />
                         </div>
                     ) : (
                         <Sensors
