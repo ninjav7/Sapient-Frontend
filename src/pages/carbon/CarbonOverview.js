@@ -23,13 +23,10 @@ import { primaryGray1000 } from '../../assets/scss/_colors.scss';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import Typography from '../../sharedComponents/typography';
 
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-
 import { timeZone } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
-import 'react-loading-skeleton/dist/skeleton.css';
 import PortfolioKPIs from './PortfolioKPIs';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
@@ -38,36 +35,13 @@ import { UNITS } from '../../constants/units';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { UserStore } from '../../store/UserStore';
+import SkeletonLoader from '../../components/SkeletonLoader';
 import './style.scss';
 
 export const handleUnitConverstion = (value = 0, currentType = 'imp') => {
     if (currentType === 'si') value = value / 10.7639;
     return value;
 };
-
-const SkeletonLoading = () => (
-    <SkeletonTheme color={primaryGray1000} height={35}>
-        <tr>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
 
 const CarbonOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -367,7 +341,7 @@ const CarbonOverview = () => {
                         <Col xl={12}>
                             <DataTableWidget
                                 isLoading={isLoadingBuildingData}
-                                isLoadingComponent={<SkeletonLoading />}
+                                isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={5} />}
                                 id="carbon-compare-building"
                                 onSearch={(query) => setSearch(query)}
                                 rows={buildingsData}
