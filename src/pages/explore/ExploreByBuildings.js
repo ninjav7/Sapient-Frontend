@@ -19,7 +19,6 @@ import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 
 import { timeZone } from '../../utils/helper';
-import { UNITS } from '../../constants/units';
 import { exploreBldgMetrics, validateSeriesDataForBuildings } from './utils';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
@@ -712,11 +711,18 @@ const ExploreByBuildings = () => {
 
     const dataToRenderOnChart = validateSeriesDataForBuildings(selectedBldgIds, exploreBuildingsList, seriesData);
 
-    const tooltipUnitVal = selectedConsumption.includes('carbon')
-        ? userPrefUnits === 'si'
-            ? UNITS.KGS
-            : UNITS.LBS
-        : selectedUnit;
+    let tooltipUnitVal = selectedUnit;
+
+    if (selectedConsumption.includes('carbon')) {
+        tooltipUnitVal =
+            userPrefUnits === 'si'
+                ? selectedConsumption === 'carbon_emissions'
+                    ? 'kg'
+                    : 'kg/MWh'
+                : selectedConsumption === 'carbon_emissions'
+                ? 'lbs'
+                : 'lbs/MWh';
+    }
 
     return (
         <>

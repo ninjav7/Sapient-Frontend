@@ -24,7 +24,7 @@ export const utilityMeterModel = [
 
 export const shadowChartMetrics = [
     { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
-    { value: 'power', label: 'Power (kW)', unit: 'kW', Consumption: 'Power' },
+    { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
     { value: 'current', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
     { value: 'voltage', label: 'Voltage (V)', unit: 'V', Consumption: 'Voltage' },
     { value: 'apparent_power', label: 'Apparent Power (kVA)', unit: 'kVA', Consumption: 'Apparent Power' },
