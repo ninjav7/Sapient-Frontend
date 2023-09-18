@@ -285,6 +285,8 @@ const BreakerConfiguration = ({
         setNewEquipObj({});
         setSensorChartData([]);
         setConsumption(metric[0].value);
+        setSelectedUnit(metric[0].unit);
+        setSelectedConsumptionLabel(metric[0].Consumption);
         setFetchingSensorData(false);
         setSelectedDevicesList([]);
         setBreakersId([]);
