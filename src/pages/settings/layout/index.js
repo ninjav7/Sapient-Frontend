@@ -126,6 +126,9 @@ const Layout = () => {
     }, modalShow);
 
     const onClickForAllItems = async ({ nativeHandler, data }) => {
+        console.log('SSR nativeHandler => ', nativeHandler);
+        console.log('SSR data => ', data);
+
         setSelectedData({ nativeHandler, data });
         nativeHandler();
         if (!data.floor_id) {
@@ -201,44 +204,40 @@ const Layout = () => {
                         spaces={spaces}
                         floors={floorData}
                         buildingData={building}
-                        onColumnAdd={
-                            userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                ? (args) => {
-                                      if (args?.bdId !== undefined && args?.bdId !== '') {
-                                          handleModalOpen();
-                                          setEditFloor(false);
-                                          setModalType('floor');
-                                          setCurrentFloorId('');
-                                          setSpaceName('');
-                                          setFloorName('');
-                                          setCurrentSpaceId('');
-                                          setParentSpace('');
-                                          setTypeId('');
-                                      } else if (args?.floor_id !== undefined && args?.floor_id !== '') {
-                                          handleModalOpen();
-                                          setEditFloor(false);
-                                          setModalType('spaces');
-                                          setCurrentFloorId(args?.floor_id);
-                                          setSpaceName('');
-                                          setFloorName('');
-                                          setCurrentSpaceId('');
-                                          setParentSpace('');
-                                          setTypeId('');
-                                      } else {
-                                          handleModalOpen();
-                                          setEditFloor(false);
-                                          setModalType('spaces');
-                                          setCurrentFloorId(args?.parents);
-                                          setCurrentSpaceId(args?._id);
-                                          setSpaceName('');
-                                          setFloorName('');
-                                          setParentSpace(args?._id);
-                                          setTypeId('');
-                                      }
-                                  }
-                                : null
-                        }
+                        onColumnAdd={(args) => {
+                            console.log('SSR args => ', args);
+                            if (args?.bdId !== undefined && args?.bdId !== '') {
+                                handleModalOpen();
+                                setEditFloor(false);
+                                setModalType('floor');
+                                setCurrentFloorId('');
+                                setSpaceName('');
+                                setFloorName('');
+                                setCurrentSpaceId('');
+                                setParentSpace('');
+                                setTypeId('');
+                            } else if (args?.floor_id !== undefined && args?.floor_id !== '') {
+                                handleModalOpen();
+                                setEditFloor(false);
+                                setModalType('spaces');
+                                setCurrentFloorId(args?.floor_id);
+                                setSpaceName('');
+                                setFloorName('');
+                                setCurrentSpaceId('');
+                                setParentSpace('');
+                                setTypeId('');
+                            } else {
+                                handleModalOpen();
+                                setEditFloor(false);
+                                setModalType('spaces');
+                                setCurrentFloorId(args?.parents);
+                                setCurrentSpaceId(args?._id);
+                                setSpaceName('');
+                                setFloorName('');
+                                setParentSpace(args?._id);
+                                setTypeId('');
+                            }
+                        }}
                         onColumnNameEdit={
                             userPermission?.user_role === 'admin' ||
                             userPermission?.permissions?.permissions?.account_buildings_permission?.edit
