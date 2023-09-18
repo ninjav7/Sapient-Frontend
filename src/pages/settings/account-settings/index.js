@@ -67,6 +67,7 @@ const AccountSettings = () => {
             updateBuildingStore('portfolio', 'Portfolio', '');
         };
 
+        window.scrollTo(0, 0);
         updateBreadcrumbStore();
         updateBuilding();
     }, []);

@@ -568,6 +568,7 @@ const BuildingOverview = () => {
     }, [isWeatherChartVisible, startDate, endDate]);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         updateBreadcrumbStore();
     }, []);
 

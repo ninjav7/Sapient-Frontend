@@ -80,6 +80,7 @@ const Layout = () => {
                 s.parent = 'building-settings';
             });
         };
+        window.scrollTo(0, 0);
         updateBreadcrumbStore();
     }, []);
 

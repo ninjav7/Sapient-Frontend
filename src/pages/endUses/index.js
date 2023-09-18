@@ -245,6 +245,7 @@ const EndUsesPage = () => {
     }, [daysCount, userPrefTimeFormat, userPrefDateFormat]);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         updateBreadcrumbStore();
     }, []);
 

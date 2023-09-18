@@ -292,6 +292,7 @@ const EquipmentType = () => {
                 s.parent = 'account';
             });
         };
+        window.scrollTo(0, 0);
         updateBreadcrumbStore();
     }, []);
 

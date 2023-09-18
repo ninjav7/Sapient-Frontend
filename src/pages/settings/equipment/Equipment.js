@@ -345,6 +345,10 @@ const Equipment = () => {
     }, [buildingListData, bldgId]);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pageNo, pageSize]);
+
+    useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
@@ -360,6 +364,7 @@ const Equipment = () => {
                 s.parent = 'building-settings';
             });
         };
+        window.scrollTo(0, 0);
         updateBreadcrumbStore();
     }, []);
 

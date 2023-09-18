@@ -341,6 +341,7 @@ const IndividualPassiveDevice = () => {
     }, [buildingListData, bldgId]);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         updateBreadcrumbStore();
     }, []);
 
