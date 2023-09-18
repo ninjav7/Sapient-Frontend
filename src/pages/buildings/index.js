@@ -584,27 +584,20 @@ const BuildingOverview = () => {
 
             <Brick sizeInRem={1.5} />
 
-            <Row>
-                {isFetchingKPIsData ? (
-                    <Skeleton
-                        baseColor={colorPalette.primaryGray150}
-                        highlightColor={colorPalette.baseBackground}
-                        count={1}
-                        height={70}
-                        width={425}
-                        borderRadius={10}
-                        className="ml-2"
-                    />
-                ) : (
-                    <div className="ml-2">
-                        <BuildingKPIs
-                            daysCount={daysCount}
-                            overallData={overallBldgData}
-                            userPrefUnits={userPrefUnits}
-                        />
-                    </div>
-                )}
-            </Row>
+            {isFetchingKPIsData ? (
+                <Skeleton
+                    baseColor={colorPalette.primaryGray150}
+                    highlightColor={colorPalette.baseBackground}
+                    count={1}
+                    height={70}
+                    width={425}
+                    borderRadius={10}
+                />
+            ) : (
+                <div className="mw-100">
+                    <BuildingKPIs daysCount={daysCount} overallData={overallBldgData} userPrefUnits={userPrefUnits} />
+                </div>
+            )}
 
             <Brick sizeInRem={1.5} />
 

@@ -2,6 +2,7 @@ import { assignMeasureUnit, renderComponents } from '../columnChart/helper';
 import Typography from '../typography';
 import colorPalette from '../../assets/scss/_colors.scss';
 import React from 'react';
+import { formatConsumptionValue } from '../helpers/helper';
 
 const chartsBaseConfig = ({
     columnType,
@@ -54,19 +55,23 @@ const chartsBaseConfig = ({
                 {'{point.key}'}
             </Typography.Subheader>
         )} <table>`,
-        pointFormat: `<tr> <td style="color:{series.color};padding:0">
-            ${renderComponents(
-                <Typography.Header className="gray-900" size={Typography.Sizes.xs}>
-                    content
-                </Typography.Header>
-            ).replace('content', '<span style="color:{series.color};">{series.name}:</span>')}
-            </td><td class="d-flex align-items-center justify-content-end" style="padding:0; gap: 0.25rem;">${renderComponents(
-                <Typography.Header size={Typography.Sizes.xs}>{tooltipValuesKey}</Typography.Header>
-            )}${renderComponents(
-            <Typography.Subheader className="gray-550 mt-1" size={Typography.Sizes.sm}>
-                {tooltipUnit}
-            </Typography.Subheader>
-        )}</td></tr>`,
+        pointFormatter: function () {
+            const formattedValue = formatConsumptionValue(this.y, 2);
+
+            return `<tr> <td style="color:${this.series.color};padding:0">
+                ${renderComponents(
+                    <Typography.Header className="gray-900" size={Typography.Sizes.xs}>
+                        content
+                    </Typography.Header>
+                ).replace('content', `<span style="color:${this.series.color};">${this.series.name}:</span>`)}
+                </td><td class="d-flex align-items-center justify-content-end" style="padding:0; gap: 0.25rem;">${renderComponents(
+                    <Typography.Header size={Typography.Sizes.xs}>{formattedValue}</Typography.Header>
+                )}${renderComponents(
+                <Typography.Subheader className="gray-550 mt-1" size={Typography.Sizes.sm}>
+                    {tooltipUnit}
+                </Typography.Subheader>
+            )}</td></tr>`;
+        },
         footerFormat: '</table></div>',
         shared: true,
         useHTML: true,
