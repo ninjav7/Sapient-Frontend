@@ -52,8 +52,9 @@ const LayoutPage = () => {
     const openEditSpacePopup = () => setShowEditSpace(true);
 
     const [selectedFloorObj, setSelectedFloorObj] = useState({});
+
     const [selectedSpaceObj, setSelectedSpaceObj] = useState({});
-    console.log('SSR selectedSpaceObj => ', selectedSpaceObj);
+    const [defaultObjVal, setDefaultObjVal] = useState({});
 
     const notifyUser = (notifyType, notifyMessage) => {
         UserStore.update((s) => {
@@ -64,8 +65,11 @@ const LayoutPage = () => {
     };
 
     const fetchAllFloorData = async (bldg_id) => {
-        const params = `?building_id=${bldg_id}`;
         setFetchingFloor(true);
+        setFloorsList([]);
+        setSpacesList([]);
+
+        const params = `?building_id=${bldg_id}`;
 
         await getAllFloorsList(params)
             .then((res) => {
@@ -85,9 +89,10 @@ const LayoutPage = () => {
     };
 
     const fetchAllSpaceData = async (floor_id, bldg_id) => {
-        const params = `?floor_id=${floor_id}&building_id=${bldg_id}`;
         setFetchingSpace(true);
         setSpacesList([]);
+
+        const params = `?floor_id=${floor_id}&building_id=${bldg_id}`;
 
         await getAllSpacesList(params)
             .then((res) => {
@@ -158,9 +163,7 @@ const LayoutPage = () => {
     return (
         <React.Fragment>
             <Typography.Header size={Typography.Sizes.lg}>{`Layout`}</Typography.Header>
-
             <Brick sizeInRem={1.5} />
-
             <LayoutElements
                 spaces={spacesList}
                 floors={floorsList}
@@ -191,18 +194,21 @@ const LayoutPage = () => {
                     }
                     // When Edit Icon clicked from Space item list
                     else if (args?.type_id && args?.type_id !== '' && args?.building_id) {
-                        setSelectedSpaceObj({
+                        const selectedObj = {
                             _id: args?._id,
                             name: args?.name,
                             type_id: args?.type_id,
                             parents: args?.parents,
                             parent_space: args?.parent_space,
-                        });
+                        };
+                        setSelectedSpaceObj(selectedObj);
+                        setDefaultObjVal(selectedObj);
                         openEditSpacePopup();
                     }
                 }}
             />
 
+            {/* Add Floor */}
             <Floor
                 isModalOpen={showAddFloor}
                 openModal={openAddFloorPopup}
@@ -213,6 +219,7 @@ const LayoutPage = () => {
                 notifyUser={notifyUser}
             />
 
+            {/* Edit Floor */}
             <Floor
                 isModalOpen={showEditFloor}
                 openModal={openEditFloorPopup}
@@ -225,6 +232,7 @@ const LayoutPage = () => {
                 setSelectedFloorObj={setSelectedFloorObj}
             />
 
+            {/* Add Space */}
             <Space
                 isModalOpen={showAddSpace}
                 openModal={openAddSpacePopup}
@@ -238,6 +246,7 @@ const LayoutPage = () => {
                 setSpaceObj={setSelectedSpaceObj}
             />
 
+            {/* Edit Space */}
             <Space
                 isModalOpen={showEditSpace}
                 openModal={openEditSpacePopup}
@@ -249,6 +258,7 @@ const LayoutPage = () => {
                 notifyUser={notifyUser}
                 spaceObj={selectedSpaceObj}
                 setSpaceObj={setSelectedSpaceObj}
+                defaultObjVal={defaultObjVal}
             />
         </React.Fragment>
     );

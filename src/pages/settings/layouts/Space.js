@@ -10,6 +10,7 @@ import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 
+import { compareObjData } from '../../../helpers/helpers';
 import { addSpaceService, updateSpaceService, deleteSpaceService, getAllSpaceTypes } from './services';
 import DeleteModal from './DeleteModal';
 
@@ -25,6 +26,7 @@ const Space = (props) => {
         notifyUser,
         spaceObj = {},
         setSpaceObj,
+        defaultObjVal = {},
     } = props;
 
     const defaultErrorObj = {
@@ -47,8 +49,8 @@ const Space = (props) => {
 
         let alertObj = Object.assign({}, errorObj);
 
-        if (space_obj?.name === '') alertObj.name = `Please enter Space name. It cannot be empty.`;
-        if (space_obj?.type_id === '') alertObj.type_id = { text: `Please select Type.` };
+        if (!space_obj?.name || space_obj?.name === '') alertObj.name = `Please enter Space name. It cannot be empty.`;
+        if (!space_obj?.type_id || space_obj?.type_id === '') alertObj.type_id = { text: `Please select Type.` };
 
         setErrorObj(alertObj);
 
@@ -90,8 +92,8 @@ const Space = (props) => {
 
         let alertObj = Object.assign({}, errorObj);
 
-        if (space_obj?.name === '') alertObj.name = `Please enter Space name. It cannot be empty.`;
-        if (space_obj?.type === '') alertObj.type = `Please select Type.`;
+        if (!space_obj?.name || space_obj?.name === '') alertObj.name = `Please enter Space name. It cannot be empty.`;
+        if (!space_obj?.type_id || space_obj?.type_id === '') alertObj.type_id = { text: `Please select Type.` };
 
         setErrorObj(alertObj);
 
@@ -288,7 +290,7 @@ const Space = (props) => {
                                 onClick={() => {
                                     handleEditSpace(spaceObj, bldgId);
                                 }}
-                                disabled={isProcessing}
+                                disabled={isProcessing || compareObjData(defaultObjVal, spaceObj)}
                             />
                         )}
                     </div>
