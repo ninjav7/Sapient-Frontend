@@ -14,6 +14,7 @@ import { UserStore } from '../../../store/UserStore';
 import Brick from '../../../sharedComponents/brick';
 import LayoutElements from '../../../sharedComponents/layoutElements/LayoutElements';
 import Floor from './Floor';
+import Space from './Space';
 
 const LayoutPage = () => {
     const { bldgId } = useParams();
@@ -40,7 +41,18 @@ const LayoutPage = () => {
     const closeEditFloorPopup = () => setShowEditFloor(false);
     const openEditFloorPopup = () => setShowEditFloor(true);
 
+    // Add Space
+    const [showAddSpace, setShowAddSpace] = useState(false);
+    const closeAddSpacePopup = () => setShowAddSpace(false);
+    const openAddSpacePopup = () => setShowAddSpace(true);
+
+    // Edit Space
+    const [showEditSpace, setShowEditSpace] = useState(false);
+    const closeEditSpacePopup = () => setShowEditSpace(false);
+    const openEditSpacePopup = () => setShowEditSpace(true);
+
     const [selectedFloorObj, setSelectedFloorObj] = useState({});
+    const [selectedSpaceObj, setSelectedSpaceObj] = useState({});
 
     const notifyUser = (notifyType, notifyMessage) => {
         UserStore.update((s) => {
@@ -158,21 +170,34 @@ const LayoutPage = () => {
                     // When Plus Icon clicked from Building Root
                     if (args?.type === 'root' && args?.bldg_id) {
                         openAddFloorPopup();
-                    } else if (args?.parent_building && args?.floor_id) {
-                        alert(`Add Space Modal will popup.`);
+                    }
+                    // When Plus Icon clicked from Space Root
+                    else if (args?.parent_building && args?.floor_id) {
+                        setSelectedSpaceObj({
+                            parent_id: args?.floor_id,
+                        });
+                        openAddSpacePopup();
                     }
                 }}
                 onItemEdit={(args) => {
-                    console.log('SSR args => ', args);
-                    // When Plus Icon clicked from Building Root
-                    if (args?.floor_id && args?.floor_id !== '') {
+                    // When Edit Icon clicked from Floor item list
+                    if (args?.floor_id && args?.floor_id !== '' && args?.parent_building) {
                         setSelectedFloorObj({
                             floor_id: args?.floor_id,
                             floor_name: args?.name,
                         });
                         openEditFloorPopup();
-                    } else if (args?.parent_building && args?.floor_id) {
-                        alert(`Edit Space Modal will popup.`);
+                    }
+                    // When Edit Icon clicked from Space item list
+                    else if (args?.type_id && args?.type_id !== '' && args?.building_id) {
+                        setSelectedSpaceObj({
+                            _id: args?._id,
+                            name: args?.name,
+                            type_id: args?.type_id,
+                            parents: args?.parents,
+                            parent_space: args?.parent_space,
+                        });
+                        openEditSpacePopup();
                     }
                 }}
             />
@@ -197,6 +222,32 @@ const LayoutPage = () => {
                 notifyUser={notifyUser}
                 selectedFloorObj={selectedFloorObj}
                 setSelectedFloorObj={setSelectedFloorObj}
+            />
+
+            <Space
+                isModalOpen={showAddSpace}
+                openModal={openAddSpacePopup}
+                closeModal={closeAddSpacePopup}
+                operationType="ADD"
+                bldgId={bldgId}
+                fetchAllFloorData={fetchAllFloorData}
+                fetchAllSpaceData={fetchAllSpaceData}
+                notifyUser={notifyUser}
+                selectedSpaceObj={selectedSpaceObj}
+                setSelectedSpaceObj={setSelectedSpaceObj}
+            />
+
+            <Space
+                isModalOpen={showEditSpace}
+                openModal={openEditSpacePopup}
+                closeModal={closeEditSpacePopup}
+                operationType="EDIT"
+                bldgId={bldgId}
+                fetchAllFloorData={fetchAllFloorData}
+                fetchAllSpaceData={fetchAllSpaceData}
+                notifyUser={notifyUser}
+                selectedSpaceObj={selectedSpaceObj}
+                setSelectedSpaceObj={setSelectedSpaceObj}
             />
         </React.Fragment>
     );

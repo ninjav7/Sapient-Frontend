@@ -126,9 +126,6 @@ const Layout = () => {
     }, modalShow);
 
     const onClickForAllItems = async ({ nativeHandler, data }) => {
-        console.log('SSR nativeHandler => ', nativeHandler);
-        console.log('SSR data => ', data);
-
         setSelectedData({ nativeHandler, data });
         nativeHandler();
         if (!data.floor_id) {
@@ -205,7 +202,6 @@ const Layout = () => {
                         floors={floorData}
                         buildingData={building}
                         onColumnAdd={(args) => {
-                            console.log('SSR args => ', args);
                             if (args?.bdId !== undefined && args?.bdId !== '') {
                                 handleModalOpen();
                                 setEditFloor(false);
