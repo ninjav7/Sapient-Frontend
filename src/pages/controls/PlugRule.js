@@ -121,12 +121,10 @@ const indexOfDay = {
 };
 const formatAverageData = (data) => {
     const res = [];
-    let sum = 0;
     if (data.length) {
         data.forEach((el) => {
             const today = moment.utc(el.time_stamp);
             res.push({ x: today.unix() * 1000, y: el.consumption });
-            sum += el.consumption;
         });
     }
 
