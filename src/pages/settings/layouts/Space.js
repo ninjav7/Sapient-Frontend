@@ -86,8 +86,6 @@ const Space = (props) => {
                 .finally(() => {
                     setProcessing(false);
                     closeModal();
-                    setSpaceObj(defaultSpaceObj);
-                    setErrorObj(defaultErrorObj);
                 });
         }
     };
@@ -130,9 +128,6 @@ const Space = (props) => {
                 .finally(() => {
                     setProcessing(false);
                     closeModal();
-                    setSpaceObj(defaultSpaceObj);
-                    setErrorObj(defaultErrorObj);
-                    setSelectedSpaceObj({});
                 });
         }
     };
@@ -160,9 +155,7 @@ const Space = (props) => {
             .finally(() => {
                 setProcessing(false);
                 closeModal();
-                setSpaceObj(defaultSpaceObj);
-                setErrorObj(defaultErrorObj);
-                setSelectedSpaceObj({});
+
                 closeDeleteSpacePopup();
                 window.scroll(0, 0);
             });
@@ -203,6 +196,10 @@ const Space = (props) => {
 
     useEffect(() => {
         if (isModalOpen) fetchSpaceTypes();
+        if (!isModalOpen) {
+            setSpaceObj(defaultSpaceObj);
+            setErrorObj(defaultErrorObj);
+        }
     }, [isModalOpen]);
 
     useEffect(() => {

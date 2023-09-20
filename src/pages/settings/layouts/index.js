@@ -150,6 +150,10 @@ const LayoutPage = () => {
     }, [buildingListData, bldgId]);
 
     useEffect(() => {
+        if (!showAddSpace || !showEditSpace) setSelectedSpaceObj({});
+    }, [showAddSpace, showEditSpace]);
+
+    useEffect(() => {
         window.scrollTo(0, 0);
         updateBreadcrumbStore();
     }, []);
