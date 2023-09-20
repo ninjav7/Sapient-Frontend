@@ -44,6 +44,8 @@ const LayoutPage = () => {
     };
 
     const fetchAllFloorData = async (bldg_id) => {
+        console.log('SSR fetchAllFloorData API executed!');
+        console.log('SSR bldg_id => ', bldg_id);
         const params = `?building_id=${bldg_id}`;
         setFetchingFloor(true);
 
@@ -75,11 +77,11 @@ const LayoutPage = () => {
                 if (response?.success) {
                     if (response?.data.length !== 0) setSpacesList(response?.data);
                 } else {
-                    notifyUser(Notification.Types.success, 'Failed to fetch Spaces.');
+                    notifyUser(Notification.Types.error, 'Failed to fetch Spaces.');
                 }
             })
             .catch((error) => {
-                notifyUser(Notification.Types.success, 'Failed to fetch Spaces.');
+                notifyUser(Notification.Types.error, 'Failed to fetch Spaces.');
             })
             .finally(() => {
                 setFetchingSpace(false);
@@ -164,6 +166,7 @@ const LayoutPage = () => {
                 closeModal={closeAddFloorPopup}
                 bldgId={bldgId}
                 fetchAllFloorData={fetchAllFloorData}
+                notifyUser={notifyUser}
             />
         </React.Fragment>
     );
