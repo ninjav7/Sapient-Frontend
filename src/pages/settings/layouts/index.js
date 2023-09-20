@@ -53,6 +53,7 @@ const LayoutPage = () => {
 
     const [selectedFloorObj, setSelectedFloorObj] = useState({});
     const [selectedSpaceObj, setSelectedSpaceObj] = useState({});
+    console.log('SSR selectedSpaceObj => ', selectedSpaceObj);
 
     const notifyUser = (notifyType, notifyMessage) => {
         UserStore.update((s) => {
@@ -112,15 +113,6 @@ const LayoutPage = () => {
         }
     };
 
-    useEffect(() => {
-        if (bldgId) {
-            fetchAllFloorData(bldgId);
-            setRootObj((prevStateObj) => {
-                return { ...prevStateObj, bldg_id: bldgId };
-            });
-        }
-    }, [bldgId]);
-
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
             bs.items = [
@@ -137,6 +129,15 @@ const LayoutPage = () => {
     };
 
     useEffect(() => {
+        if (bldgId) {
+            fetchAllFloorData(bldgId);
+            setRootObj((prevStateObj) => {
+                return { ...prevStateObj, bldg_id: bldgId };
+            });
+        }
+    }, [bldgId]);
+
+    useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             if (bldgObj?.building_id)
@@ -148,10 +149,6 @@ const LayoutPage = () => {
                 );
         }
     }, [buildingListData, bldgId]);
-
-    useEffect(() => {
-        if (!showAddSpace || !showEditSpace) setSelectedSpaceObj({});
-    }, [showAddSpace, showEditSpace]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -237,8 +234,8 @@ const LayoutPage = () => {
                 fetchAllFloorData={fetchAllFloorData}
                 fetchAllSpaceData={fetchAllSpaceData}
                 notifyUser={notifyUser}
-                selectedSpaceObj={selectedSpaceObj}
-                setSelectedSpaceObj={setSelectedSpaceObj}
+                spaceObj={selectedSpaceObj}
+                setSpaceObj={setSelectedSpaceObj}
             />
 
             <Space
@@ -250,8 +247,8 @@ const LayoutPage = () => {
                 fetchAllFloorData={fetchAllFloorData}
                 fetchAllSpaceData={fetchAllSpaceData}
                 notifyUser={notifyUser}
-                selectedSpaceObj={selectedSpaceObj}
-                setSelectedSpaceObj={setSelectedSpaceObj}
+                spaceObj={selectedSpaceObj}
+                setSpaceObj={setSelectedSpaceObj}
             />
         </React.Fragment>
     );
