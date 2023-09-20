@@ -59,7 +59,7 @@ const Floor = (props) => {
                     }
                 })
                 .catch((err) => {
-                    notifyUser(Notification.Types.error, 'Failed to insert Floor.');
+                    notifyUser(Notification.Types.error, 'Failed to add Floor.');
                 })
                 .finally(() => {
                     setProcessing(false);
