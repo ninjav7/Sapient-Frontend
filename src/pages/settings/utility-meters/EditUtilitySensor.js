@@ -95,12 +95,7 @@ const MetricsTab = (props) => {
                             responseData.map((el) => {
                                 formattedData.push({
                                     x: new Date(el?.time_stamp).getTime(),
-                                    y:
-                                        el?.data === ''
-                                            ? null
-                                            : selected_consmption === 'energy'
-                                            ? +(el?.data / 1000).toFixed(2)
-                                            : el?.data,
+                                    y: el?.data === '' ? null : el?.data,
                                 });
                             });
                             recordToInsert = [
