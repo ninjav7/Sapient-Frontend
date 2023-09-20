@@ -34,7 +34,7 @@ const AddFloor = (props) => {
                 .then((res) => {
                     const response = res?.data;
                     if (response?.success) {
-                        notifyUser(Notification.Types.success, 'Floor created.');
+                        notifyUser(Notification.Types.success, 'Floor created successfully.');
                         fetchAllFloorData(bldg_id);
                     } else {
                         notifyUser(Notification.Types.error, 'Failed to insert Floor.');

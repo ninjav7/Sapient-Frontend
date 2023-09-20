@@ -44,8 +44,6 @@ const LayoutPage = () => {
     };
 
     const fetchAllFloorData = async (bldg_id) => {
-        console.log('SSR fetchAllFloorData API executed!');
-        console.log('SSR bldg_id => ', bldg_id);
         const params = `?building_id=${bldg_id}`;
         setFetchingFloor(true);
 
