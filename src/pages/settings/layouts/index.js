@@ -179,6 +179,7 @@ const LayoutPage = () => {
 
             <Floor
                 isModalOpen={showAddFloor}
+                openModal={openAddFloorPopup}
                 closeModal={closeAddFloorPopup}
                 operationType="ADD"
                 bldgId={bldgId}
@@ -188,6 +189,7 @@ const LayoutPage = () => {
 
             <Floor
                 isModalOpen={showEditFloor}
+                openModal={openEditFloorPopup}
                 closeModal={closeEditFloorPopup}
                 operationType="EDIT"
                 bldgId={bldgId}

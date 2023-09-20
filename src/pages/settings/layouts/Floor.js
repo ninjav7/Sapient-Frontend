@@ -9,13 +9,15 @@ import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 
-import { addFloorService, updateFloorService } from './services';
+import { addFloorService, deleteFloorService, updateFloorService } from './services';
+import DeleteModal from './DeleteModal';
 
 const Floor = (props) => {
     const {
         isModalOpen = false,
+        openModal,
         closeModal,
-        operationType = 'ADD',
+        operationType,
         bldgId,
         fetchAllFloorData,
         notifyUser,
@@ -26,6 +28,11 @@ const Floor = (props) => {
     const [floorName, setFloorName] = useState('');
     const [floorNameError, setFloorNameError] = useState(null);
     const [isProcessing, setProcessing] = useState(false);
+
+    // Delete Floor
+    const [showDeleteFloor, setShowDeleteFloor] = useState(false);
+    const closeDeleteFloorPopup = () => setShowDeleteFloor(false);
+    const openDeleteFloorPopup = () => setShowDeleteFloor(true);
 
     const handleCreateFloor = async (floor_name, bldg_id) => {
         if (!bldg_id) return;
@@ -99,105 +106,154 @@ const Floor = (props) => {
         }
     };
 
+    const handleDeleteFloor = async () => {
+        if (!selectedFloorObj?.floor_id) return;
+
+        setProcessing(true);
+        const params = `/${selectedFloorObj?.floor_id}/`;
+
+        await deleteFloorService(params)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    notifyUser(Notification.Types.success, response?.message);
+                    fetchAllFloorData(bldgId);
+                } else {
+                    notifyUser(Notification.Types.error, response?.message);
+                }
+            })
+            .catch((err) => {
+                notifyUser(Notification.Types.error, 'Failed to delete Floor.');
+            })
+            .finally(() => {
+                setProcessing(false);
+                closeModal();
+                setFloorName('');
+                setFloorNameError(null);
+                setSelectedFloorObj({});
+                closeDeleteFloorPopup();
+                window.scroll(0, 0);
+            });
+    };
+
+    const handleDeleteModalClose = () => {
+        closeDeleteFloorPopup();
+        openModal();
+    };
+
     useEffect(() => {
         if (selectedFloorObj?.floor_id) setFloorName(selectedFloorObj?.floor_name);
     }, [selectedFloorObj]);
 
     return (
-        <Modal show={isModalOpen} backdrop="static" keyboard={false} size="md" centered>
-            <div className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>
-                    {operationType === `ADD` ? `Add Floor` : `Edit Floor`}
-                </Typography.Header>
+        <>
+            <Modal show={isModalOpen} backdrop="static" keyboard={false} size="md" centered>
+                <div className="p-4">
+                    <Typography.Header size={Typography.Sizes.lg}>
+                        {operationType === `ADD` ? `Add Floor` : `Edit Floor`}
+                    </Typography.Header>
 
-                <Brick sizeInRem={2} />
+                    <Brick sizeInRem={2} />
 
-                <div>
-                    <Typography.Body size={Typography.Sizes.md}>{`Name`}</Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    <InputTooltip
-                        placeholder="Enter Name"
-                        labelSize={Typography.Sizes.md}
-                        value={floorName}
-                        onChange={(e) => {
-                            setFloorName(e.target.value);
-                            setFloorNameError(null);
-                        }}
-                        error={floorNameError}
-                    />
-                </div>
-
-                <Brick sizeInRem={1.25} />
-
-                <div>
-                    <Typography.Body size={Typography.Sizes.md}>{`Type`}</Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    <InputTooltip
-                        placeholder="Enter Name"
-                        labelSize={Typography.Sizes.md}
-                        disabled={true}
-                        value={`Floor`}
-                    />
-                    <Brick sizeInRem={0.25} />
-                    <Typography.Body size={Typography.Sizes.sm}>
-                        {`Only floors can be at the building root`}
-                    </Typography.Body>
-                </div>
-
-                {operationType === 'ADD' && <Brick sizeInRem={1.5} />}
-
-                {operationType === 'EDIT' && (
-                    <>
-                        <Brick sizeInRem={1.25} />
-                        <Button
-                            label="Delete Floor"
-                            size={Button.Sizes.md}
-                            type={Button.Type.secondaryDistructive}
-                            icon={<DeleteSVG />}
-                        />
-                        <Brick sizeInRem={1.35} />
-                    </>
-                )}
-
-                <div className="d-flex justify-content-between w-100">
-                    <Button
-                        label={`Cancel`}
-                        size={Button.Sizes.lg}
-                        type={Button.Type.secondaryGrey}
-                        className="w-100"
-                        onClick={() => {
-                            closeModal();
-                            setFloorName('');
-                            setFloorNameError(null);
-                        }}
-                    />
-                    {operationType === 'ADD' ? (
-                        <Button
-                            label={isProcessing ? `Saving...` : `Save`}
-                            size={Button.Sizes.lg}
-                            type={Button.Type.primary}
-                            className="w-100"
-                            onClick={() => {
-                                handleCreateFloor(floorName, bldgId);
+                    <div>
+                        <Typography.Body size={Typography.Sizes.md}>{`Name`}</Typography.Body>
+                        <Brick sizeInRem={0.25} />
+                        <InputTooltip
+                            placeholder="Enter Name"
+                            labelSize={Typography.Sizes.md}
+                            value={floorName}
+                            onChange={(e) => {
+                                setFloorName(e.target.value);
+                                setFloorNameError(null);
                             }}
-                            disabled={isProcessing}
+                            error={floorNameError}
                         />
-                    ) : (
-                        <Button
-                            label={isProcessing ? `Updating...` : `Update`}
-                            size={Button.Sizes.lg}
-                            type={Button.Type.primary}
-                            className="w-100"
-                            onClick={() => {
-                                handleEditFloor(floorName, bldgId, selectedFloorObj);
-                            }}
-                            disabled={isProcessing || selectedFloorObj?.floor_name === floorName}
+                    </div>
+
+                    <Brick sizeInRem={1.25} />
+
+                    <div>
+                        <Typography.Body size={Typography.Sizes.md}>{`Type`}</Typography.Body>
+                        <Brick sizeInRem={0.25} />
+                        <InputTooltip
+                            placeholder="Enter Name"
+                            labelSize={Typography.Sizes.md}
+                            disabled={true}
+                            value={`Floor`}
                         />
+                        <Brick sizeInRem={0.25} />
+                        <Typography.Body size={Typography.Sizes.sm}>
+                            {`Only floors can be at the building root`}
+                        </Typography.Body>
+                    </div>
+
+                    {operationType === 'ADD' && <Brick sizeInRem={1.5} />}
+
+                    {operationType === 'EDIT' && (
+                        <>
+                            <Brick sizeInRem={1.25} />
+                            <Button
+                                label="Delete Floor"
+                                size={Button.Sizes.md}
+                                type={Button.Type.secondaryDistructive}
+                                icon={<DeleteSVG />}
+                                onClick={() => {
+                                    closeModal();
+                                    openDeleteFloorPopup();
+                                }}
+                            />
+                            <Brick sizeInRem={1.35} />
+                        </>
                     )}
+
+                    <div className="d-flex justify-content-between w-100">
+                        <Button
+                            label={`Cancel`}
+                            size={Button.Sizes.lg}
+                            type={Button.Type.secondaryGrey}
+                            className="w-100"
+                            onClick={() => {
+                                closeModal();
+                                setFloorName('');
+                                setFloorNameError(null);
+                            }}
+                        />
+                        {operationType === 'ADD' ? (
+                            <Button
+                                label={isProcessing ? `Saving...` : `Save`}
+                                size={Button.Sizes.lg}
+                                type={Button.Type.primary}
+                                className="w-100"
+                                onClick={() => {
+                                    handleCreateFloor(floorName, bldgId);
+                                }}
+                                disabled={isProcessing}
+                            />
+                        ) : (
+                            <Button
+                                label={isProcessing ? `Updating...` : `Update`}
+                                size={Button.Sizes.lg}
+                                type={Button.Type.primary}
+                                className="w-100"
+                                onClick={() => {
+                                    handleEditFloor(floorName, bldgId, selectedFloorObj);
+                                }}
+                                disabled={isProcessing || selectedFloorObj?.floor_name === floorName}
+                            />
+                        )}
+                    </div>
+                    <Brick sizeInRem={0.25} />
                 </div>
-                <Brick sizeInRem={0.25} />
-            </div>
-        </Modal>
+            </Modal>
+
+            <DeleteModal
+                isModalOpen={showDeleteFloor}
+                onCancel={handleDeleteModalClose}
+                onSave={handleDeleteFloor}
+                deleteType="FLOOR"
+                isDeleting={isProcessing}
+            />
+        </>
     );
 };
 
