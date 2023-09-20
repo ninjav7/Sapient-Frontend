@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
 
-import Brick from '../../../../sharedComponents/brick';
-import { Button } from '../../../../sharedComponents/button';
-import Typography from '../../../../sharedComponents/typography';
-import { Notification } from '../../../../sharedComponents/notification';
-import InputTooltip from '../../../../sharedComponents/form/input/InputTooltip';
+import Brick from '../../../sharedComponents/brick';
+import { Button } from '../../../sharedComponents/button';
+import Typography from '../../../sharedComponents/typography';
+import { Notification } from '../../../sharedComponents/notification';
+import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 
-import { ReactComponent as DeleteSVG } from '../../../../assets/icon/delete.svg';
+import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 
-import { addFloorService, deleteFloorService, updateFloorService } from '../services';
-import DeleteModal from '../DeleteModal';
+import { addFloorService, deleteFloorService, updateFloorService } from './services';
+import DeleteModal from './DeleteModal';
 
 const Floor = (props) => {
     const {

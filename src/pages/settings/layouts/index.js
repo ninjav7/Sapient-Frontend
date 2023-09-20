@@ -13,7 +13,7 @@ import { Notification } from '../../../sharedComponents/notification';
 import { UserStore } from '../../../store/UserStore';
 import Brick from '../../../sharedComponents/brick';
 import LayoutElements from '../../../sharedComponents/layoutElements/LayoutElements';
-import Floor from './floors/Floor';
+import Floor from './Floor';
 import Space from './Space';
 
 const LayoutPage = () => {
