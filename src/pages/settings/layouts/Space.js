@@ -3,6 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
+import Select from '../../../sharedComponents/form/select';
 import Typography from '../../../sharedComponents/typography';
 import { Notification } from '../../../sharedComponents/notification';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
@@ -11,7 +12,6 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 
 import { addSpaceService, updateSpaceService, deleteSpaceService, getAllSpaceTypes } from './services';
 import DeleteModal from './DeleteModal';
-import Select from '../../../sharedComponents/form/select';
 
 const Space = (props) => {
     const {
@@ -23,20 +23,15 @@ const Space = (props) => {
         fetchAllFloorData,
         fetchAllSpaceData,
         notifyUser,
-        selectedSpaceObj = {},
+        spaceObj = {},
+        setSpaceObj,
     } = props;
-
-    const defaultSpaceObj = {
-        name: '',
-        type_id: '',
-    };
 
     const defaultErrorObj = {
         name: null,
         type_id: null,
     };
 
-    const [spaceObj, setSpaceObj] = useState(defaultSpaceObj);
     const [errorObj, setErrorObj] = useState(defaultErrorObj);
 
     const [spaceTypes, setSpaceTypes] = useState([]);
@@ -72,7 +67,7 @@ const Space = (props) => {
                 .then((res) => {
                     const response = res?.data;
                     if (response?.success) {
-                        notifyUser(Notification.Types.success, response?.message);
+                        notifyUser(Notification.Types.success, `Space created successfully.`);
                         fetchAllFloorData(bldg_id);
                         fetchAllSpaceData(space_obj?.parent_id, bldg_id);
                     } else {
@@ -85,6 +80,7 @@ const Space = (props) => {
                 .finally(() => {
                     setProcessing(false);
                     closeModal();
+                    setSpaceObj({});
                 });
         }
     };
@@ -115,7 +111,7 @@ const Space = (props) => {
                 .then((res) => {
                     const response = res?.data;
                     if (response?.success) {
-                        notifyUser(Notification.Types.success, response?.message);
+                        notifyUser(Notification.Types.success, `Space updated successfully.`);
                         fetchAllFloorData(bldg_id);
                         fetchAllSpaceData(space_obj?.parents, bldg_id);
                     } else {
@@ -128,23 +124,24 @@ const Space = (props) => {
                 .finally(() => {
                     setProcessing(false);
                     closeModal();
+                    setSpaceObj({});
                 });
         }
     };
 
     const handleDeleteSpace = async () => {
-        if (!selectedSpaceObj?._id) return;
+        if (!spaceObj?._id) return;
 
         setProcessing(true);
-        const params = `?space_id=${selectedSpaceObj?._id}`;
+        const params = `?space_id=${spaceObj?._id}`;
 
         await deleteSpaceService(params)
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
-                    notifyUser(Notification.Types.success, response?.message);
+                    notifyUser(Notification.Types.success, `Space created successfully.`);
                     fetchAllFloorData(bldgId);
-                    fetchAllSpaceData(selectedSpaceObj?.parents, bldgId);
+                    fetchAllSpaceData(spaceObj?.parents, bldgId);
                 } else {
                     notifyUser(Notification.Types.error, response?.message);
                 }
@@ -155,8 +152,8 @@ const Space = (props) => {
             .finally(() => {
                 setProcessing(false);
                 closeModal();
-
                 closeDeleteSpacePopup();
+                setSpaceObj({});
                 window.scroll(0, 0);
             });
     };
@@ -196,15 +193,8 @@ const Space = (props) => {
 
     useEffect(() => {
         if (isModalOpen) fetchSpaceTypes();
-        if (!isModalOpen) {
-            setSpaceObj(defaultSpaceObj);
-            setErrorObj(defaultErrorObj);
-        }
+        if (!isModalOpen) setErrorObj(defaultErrorObj);
     }, [isModalOpen]);
-
-    useEffect(() => {
-        if (selectedSpaceObj) setSpaceObj({ ...spaceObj, ...selectedSpaceObj });
-    }, [selectedSpaceObj]);
 
     return (
         <>
@@ -275,7 +265,6 @@ const Space = (props) => {
                             className="w-100"
                             onClick={() => {
                                 closeModal();
-                                setSpaceObj(defaultSpaceObj);
                                 setErrorObj(defaultErrorObj);
                             }}
                         />
