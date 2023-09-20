@@ -13,7 +13,7 @@ import { Notification } from '../../../sharedComponents/notification';
 import { UserStore } from '../../../store/UserStore';
 import Brick from '../../../sharedComponents/brick';
 import LayoutElements from '../../../sharedComponents/layoutElements/LayoutElements';
-import AddFloor from './floors/AddFloor';
+import Floor from './Floor';
 
 const LayoutPage = () => {
     const { bldgId } = useParams();
@@ -30,10 +30,17 @@ const LayoutPage = () => {
     const [spacesList, setSpacesList] = useState([]);
     const [isFetchingSpace, setFetchingSpace] = useState(false);
 
-    // Add Floor States
+    // Add Floor
     const [showAddFloor, setShowAddFloor] = useState(false);
     const closeAddFloorPopup = () => setShowAddFloor(false);
     const openAddFloorPopup = () => setShowAddFloor(true);
+
+    // Edit Floor
+    const [showEditFloor, setShowEditFloor] = useState(false);
+    const closeEditFloorPopup = () => setShowEditFloor(false);
+    const openEditFloorPopup = () => setShowEditFloor(true);
+
+    const [selectedFloorObj, setSelectedFloorObj] = useState({});
 
     const notifyUser = (notifyType, notifyMessage) => {
         UserStore.update((s) => {
@@ -103,7 +110,6 @@ const LayoutPage = () => {
     }, [bldgId]);
 
     const updateBreadcrumbStore = () => {
-        window.scrollTo(0, 0);
         BreadcrumbStore.update((bs) => {
             bs.items = [
                 {
@@ -149,7 +155,6 @@ const LayoutPage = () => {
                 isLoadingLastColumn={isFetchingFloor || isFetchingSpace}
                 onClickEachChild={[onClickForAllItems]}
                 onColumnAdd={(args) => {
-                    // console.log('SSR args => ', args);
                     // When Plus Icon clicked from Building Root
                     if (args?.type === 'root' && args?.bldg_id) {
                         openAddFloorPopup();
@@ -157,14 +162,39 @@ const LayoutPage = () => {
                         alert(`Add Space Modal will popup.`);
                     }
                 }}
+                onItemEdit={(args) => {
+                    console.log('SSR args => ', args);
+                    // When Plus Icon clicked from Building Root
+                    if (args?.floor_id && args?.floor_id !== '') {
+                        setSelectedFloorObj({
+                            floor_id: args?.floor_id,
+                            floor_name: args?.name,
+                        });
+                        openEditFloorPopup();
+                    } else if (args?.parent_building && args?.floor_id) {
+                        alert(`Edit Space Modal will popup.`);
+                    }
+                }}
             />
 
-            <AddFloor
+            <Floor
                 isModalOpen={showAddFloor}
                 closeModal={closeAddFloorPopup}
+                operationType="ADD"
                 bldgId={bldgId}
                 fetchAllFloorData={fetchAllFloorData}
                 notifyUser={notifyUser}
+            />
+
+            <Floor
+                isModalOpen={showEditFloor}
+                closeModal={closeEditFloorPopup}
+                operationType="EDIT"
+                bldgId={bldgId}
+                fetchAllFloorData={fetchAllFloorData}
+                notifyUser={notifyUser}
+                selectedFloorObj={selectedFloorObj}
+                setSelectedFloorObj={setSelectedFloorObj}
             />
         </React.Fragment>
     );
