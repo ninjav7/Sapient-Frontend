@@ -340,13 +340,22 @@ const PlugRule = () => {
 
         setConditionDisabledDays(disabledDays);
         if (selectedInitialyIds.length) {
-            fetchEstimateSensorSavings();
+            fetchEstimateSensorSavings(selectedInitialyIds);
         }
     }, [preparedScheduleData]);
+
+    useEffect(() => {
+        const linkedIds = selectedInitialyIds.filter((item) => !selectedIdsToUnlink.includes(item));
+        const res = [...selectedIdsToLink, ...linkedIds];
+        fetchEstimateSensorSavings(res);
+        getGraphData(res);
+    }, [selectedIdsToUnlink, selectedIdsToLink, selectedInitialyIds.length]);
+
     useEffect(() => {
         const Is24HoursFormat = timeFormat == '24h';
         setIs24Format(Is24HoursFormat);
     }, [currentData, buildingListData]);
+
     const groupedCurrentDataById = (actions) => {
         return (
             actions &&
@@ -522,20 +531,30 @@ const PlugRule = () => {
     const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
     const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
 
-    const getGraphData = async () => {
-        if (selectedInitialyIds.length) {
-            await getGraphDataRequest(selectedInitialyIds, currentData.id).then((res) => {
+    const getGraphData = async (ids) => {
+        if (ids.length) {
+            await getGraphDataRequest(ids, currentData.id).then((res) => {
                 if (res && res?.data) {
                     const formattedData = formatAverageData(res.data);
                     setRawLineChartData(res.data);
-                    let response = [{ name: `Average Energy demand`, data: formattedData }];
-                    getDateRange(res.data);
+                    let response;
+                    if (!_.isEmpty(formattedData)) {
+                        response = [{ name: `Average Energy demand`, data: formattedData }];
+                    } else {
+                        response = initialLineChartData();
+                    }
+                    if(res.data.length){
+                        getDateRange(res.data);
+                    }
                     setLineChartData(response);
                 }
             });
+        } else {
+            getDateRange(initialLineChartData()[0].data);
+            const response = initialLineChartData();
+            setLineChartData(response);
         }
     };
-
 
     useEffect(() => {
         if (selectedIdsToUnlink.length) {
@@ -903,22 +922,25 @@ const PlugRule = () => {
                 setIsProcessing(false);
             });
     };
-
-    const fetchEstimateSensorSavings = async () => {
+    const fetchEstimateSensorSavings = async (ids) => {
         const res = [];
-        const formattedSchedule = currentData?.action?.map((action) => {
-            const { action_day, action_time, action_type, ...rest } = action;
-            const preparedActionDays = action_day.map((day) => {
-                return daysOfWeekFull[day];
+        preparedScheduleData.forEach((currentCondition) => {
+            currentCondition.data.forEach((currentRow) => {
+                if (currentRow.action_day.length) {
+                    const { action_day, ...rest } = currentRow;
+                    const formattedActionDay = action_day.map((el) => {
+                        return daysOfWeekFull[el];
+                    });
+                    res.push({ ...rest, action_days: formattedActionDay });
+                }
             });
-            if (action_time) {
-                res.push({ action_time, action_type, action_days: preparedActionDays });
-            }
         });
 
-        await getEstimateSensorSavingsRequst(res, selectedInitialyIds, ruleId).then((res) => {
-            setEstimatedEnergySavings(res.data);
-        });
+        if (!_.isEmpty(res)) {
+            await getEstimateSensorSavingsRequst(res, ids, ruleId).then((res) => {
+                setEstimatedEnergySavings(res.data);
+            });
+        }
     };
 
     const addOptions = () => {
@@ -1493,8 +1515,9 @@ const PlugRule = () => {
             allSensors.filter((socket) => {
                 idOfSelectedSockets.push(socket.id);
             });
-            setRulesToUnLink({ rule_id: ruleId, sensor_id: idOfSelectedSockets });
-            setRulesToLink([]);
+            setRulesToLink({rule_id: '', sensor_id: []});
+            setSelectedIdsToLink([]);
+            setCheckedAllToLink(false);
             setSelectedInitialyIds([]);
             setTotalSocket(0);
         }
@@ -2149,7 +2172,7 @@ const PlugRule = () => {
         return res;
     };
     const getDateRange = (rawLineChartData) => {
-        if (!_.isEmpty(rawLineChartData?.data)) {
+        if (!_.isEmpty(rawLineChartData)) {
             const minDate = moment(rawLineChartData[0].time_stamp).utc(true).startOf('week');
             const maxDate = moment.utc(rawLineChartData[rawLineChartData.length - 1].time_stamp).endOf('isoweek');
             maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
@@ -2572,7 +2595,7 @@ const PlugRule = () => {
                                     unitInfo={{
                                         title: 'Estimated Annual Energy Savings',
                                         unit: UNITS.KWH,
-                                        value: Math.round(estimatedEnergySavings),
+                                        value: Math.round(estimatedEnergySavings) / 1000,
                                     }}
                                     chartProps={{
                                         tooltip: {
