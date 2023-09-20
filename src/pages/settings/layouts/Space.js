@@ -24,7 +24,6 @@ const Space = (props) => {
         fetchAllSpaceData,
         notifyUser,
         selectedSpaceObj = {},
-        setSelectedSpaceObj,
     } = props;
 
     const defaultSpaceObj = {
@@ -118,6 +117,7 @@ const Space = (props) => {
                     if (response?.success) {
                         notifyUser(Notification.Types.success, response?.message);
                         fetchAllFloorData(bldg_id);
+                        fetchAllSpaceData(space_obj?.parents, bldg_id);
                     } else {
                         notifyUser(Notification.Types.error, response?.message);
                     }
