@@ -8,6 +8,7 @@
                 border-top-right-radius: 0;
                 border-bottom-right-radius: 0;
                 border-right-width: 0.0313rem;
+                cursor: pointer;
             }
             .datepicker-wrapper {
                 border-top-left-radius: 0;
@@ -26,8 +27,8 @@
             color: $base-white;
             outline: none;
             box-shadow: none !important;
-            [class*="-placeholder"] {
-                color: $base-white !important;  
+            [class*='-placeholder'] {
+                color: $base-white !important;
             }
             & > .typography-wrapper,
             .single-value-custom .typography-wrapper {
