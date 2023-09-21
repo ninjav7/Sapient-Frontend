@@ -171,14 +171,25 @@ const LayoutPage = () => {
                 isLoadingLastColumn={isFetchingFloor || isFetchingSpace}
                 onClickEachChild={[onClickForAllItems]}
                 onColumnAdd={(args) => {
-                    // When Plus Icon clicked from Building Root
+                    // When adding Floor
                     if (args?.type === 'root' && args?.bldg_id) {
                         openAddFloorPopup();
                     }
-                    // When Plus Icon clicked from Space Root
+                    // When adding space inside floor
                     else if (args?.parent_building && args?.floor_id) {
                         setSelectedSpaceObj({
-                            parent_id: args?.floor_id,
+                            building_id: args?.parent_building,
+                            parents: args?.floor_id,
+                            parent_space: null,
+                        });
+                        openAddSpacePopup();
+                    }
+                    // When adding space inside parent space
+                    else if (args?._id && args?.parents) {
+                        setSelectedSpaceObj({
+                            building_id: args?.building_id,
+                            parents: args?.parents,
+                            parent_space: args?._id,
                         });
                         openAddSpacePopup();
                     }

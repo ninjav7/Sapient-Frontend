@@ -45,7 +45,7 @@ const Space = (props) => {
     const openDeleteSpacePopup = () => setShowDeleteSpace(true);
 
     const handleCreateSpace = async (space_obj, bldg_id) => {
-        if (!bldg_id || !space_obj?.parent_id) return;
+        if (!bldg_id || !space_obj?.parents) return;
 
         let alertObj = Object.assign({}, errorObj);
 
@@ -58,20 +58,14 @@ const Space = (props) => {
             setProcessing(true);
 
             const params = `?building_id=${bldg_id}`;
-            const payload = {
-                building_id: bldg_id,
-                parents: space_obj?.parent_id,
-                name: space_obj?.name,
-                type_id: space_obj?.type_id,
-            };
 
-            await addSpaceService(params, payload)
+            await addSpaceService(params, space_obj)
                 .then((res) => {
                     const response = res?.data;
                     if (response?.success) {
                         notifyUser(Notification.Types.success, `Space created successfully.`);
                         fetchAllFloorData(bldg_id);
-                        fetchAllSpaceData(space_obj?.parent_id, bldg_id);
+                        fetchAllSpaceData(space_obj?.parents, bldg_id);
                     } else {
                         notifyUser(Notification.Types.error, response?.message);
                     }
@@ -267,6 +261,7 @@ const Space = (props) => {
                             className="w-100"
                             onClick={() => {
                                 closeModal();
+                                setSpaceObj({});
                                 setErrorObj(defaultErrorObj);
                             }}
                         />
