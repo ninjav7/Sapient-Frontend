@@ -125,9 +125,10 @@ export const getExploreByBuildingTableCSVExport = (tableData, columns, userPrefU
                     arr.push(result);
                     break;
 
-                case 'energy_consumption':
+                case 'total_consumption':
                     const energy_consumption = tableRow['energy_consumption'];
-                    arr.push(`${energy_consumption?.now / 1000} kWh`);
+                    const energyValue = energy_consumption?.now / 1000;
+                    arr.push(`${energyValue ? energyValue.toFixed(2) : 0} kWh`);
                     break;
 
                 case 'change':
@@ -305,7 +306,10 @@ export const getCarbonCompareBuildingsTableCSVExport = (tableData, columns) => {
                     arr.push(formattedBldgName);
                     break;
                 case 'average_carbon_intensity':
-                    const preparedEnergyDestiny = tableRow.average_carbon_intensity!==null?`${tableRow.average_carbon_intensity.toFixed(2)} lbs/MWh`:`0 lbs/MWh`;
+                    const preparedEnergyDestiny =
+                        tableRow.average_carbon_intensity !== null
+                            ? `${tableRow.average_carbon_intensity.toFixed(2)} lbs/MWh`
+                            : `0 lbs/MWh`;
                     arr.push(preparedEnergyDestiny);
                     break;
                 case 'total_carbon_emissions':
