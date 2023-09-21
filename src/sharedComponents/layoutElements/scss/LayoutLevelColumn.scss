@@ -2,10 +2,10 @@
     border-right: 0.0625rem solid $primary-gray-200;
 
     &-children {
-        height: 49.0625rem;
+        min-height: 60vh;
         overflow: auto;
     }
-    
+
     &-no-items {
         text-align: center;
         padding-top: 10px;
