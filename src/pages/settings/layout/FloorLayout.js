@@ -69,6 +69,7 @@ const FloorLayout = (props) => {
                     closeModal();
                     setFloorName('');
                     setFloorNameError(null);
+                    window.scroll(0, 0);
                 });
         }
     };
@@ -105,6 +106,7 @@ const FloorLayout = (props) => {
                     setFloorName('');
                     setFloorNameError(null);
                     setSelectedFloorObj({});
+                    window.scroll(0, 0);
                 });
         }
     };

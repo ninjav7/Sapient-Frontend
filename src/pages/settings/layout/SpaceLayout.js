@@ -80,6 +80,7 @@ const SpaceLayout = (props) => {
                     setProcessing(false);
                     closeModal();
                     setSpaceObj({});
+                    window.scroll(0, 0);
                 });
         }
     };
@@ -124,6 +125,7 @@ const SpaceLayout = (props) => {
                     setProcessing(false);
                     closeModal();
                     setSpaceObj({});
+                    window.scroll(0, 0);
                 });
         }
     };
