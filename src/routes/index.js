@@ -8,7 +8,7 @@ import { isUserAuthenticated, isSuperUserAuthenticated } from '../helpers/authUt
 // Config Components
 import General from '../pages/settings/general-settings';
 import UtilityMeters from '../pages/settings/utility-meters';
-import Layout from '../pages/settings/layouts';
+import Layout from '../pages/settings/layout';
 import Equipment from '../pages/settings/equipment/Equipment';
 import EquipmentTypes from '../pages/settings/equipment-type';
 import SpaceTypes from '../pages/settings/space-types';
