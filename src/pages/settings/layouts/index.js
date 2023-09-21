@@ -13,8 +13,8 @@ import { Notification } from '../../../sharedComponents/notification';
 import { UserStore } from '../../../store/UserStore';
 import Brick from '../../../sharedComponents/brick';
 import LayoutElements from '../../../sharedComponents/layoutElements/LayoutElements';
-import Floor from './Floor';
-import Space from './Space';
+import FloorLayout from './FloorLayout';
+import SpaceLayout from './SpaceLayout';
 
 const LayoutPage = () => {
     const { bldgId } = useParams();
@@ -220,7 +220,7 @@ const LayoutPage = () => {
             />
 
             {/* Add Floor */}
-            <Floor
+            <FloorLayout
                 isModalOpen={showAddFloor}
                 openModal={openAddFloorPopup}
                 closeModal={closeAddFloorPopup}
@@ -231,7 +231,7 @@ const LayoutPage = () => {
             />
 
             {/* Edit Floor */}
-            <Floor
+            <FloorLayout
                 isModalOpen={showEditFloor}
                 openModal={openEditFloorPopup}
                 closeModal={closeEditFloorPopup}
@@ -244,7 +244,7 @@ const LayoutPage = () => {
             />
 
             {/* Add Space */}
-            <Space
+            <SpaceLayout
                 isModalOpen={showAddSpace}
                 openModal={openAddSpacePopup}
                 closeModal={closeAddSpacePopup}
@@ -258,7 +258,7 @@ const LayoutPage = () => {
             />
 
             {/* Edit Space */}
-            <Space
+            <SpaceLayout
                 isModalOpen={showEditSpace}
                 openModal={openEditSpacePopup}
                 closeModal={closeEditSpacePopup}

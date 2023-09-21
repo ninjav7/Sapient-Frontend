@@ -3,18 +3,16 @@ import Modal from 'react-bootstrap/Modal';
 
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
-import Select from '../../../sharedComponents/form/select';
 import Typography from '../../../sharedComponents/typography';
 import { Notification } from '../../../sharedComponents/notification';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 
-import { compareObjData } from '../../../helpers/helpers';
-import { addSpaceService, updateSpaceService, deleteSpaceService, getAllSpaceTypes } from './services';
-import DeleteModal from './DeleteModal';
+import { addFloorService, deleteFloorService, updateFloorService } from './services';
+import DeleteLayout from './DeleteLayout';
 
-const Space = (props) => {
+const FloorLayout = (props) => {
     const {
         isModalOpen = false,
         openModal,
@@ -22,182 +20,137 @@ const Space = (props) => {
         operationType,
         bldgId,
         fetchAllFloorData,
-        fetchAllSpaceData,
         notifyUser,
-        spaceObj = {},
-        setSpaceObj,
-        defaultObjVal = {},
+        selectedFloorObj = {},
+        setSelectedFloorObj,
     } = props;
 
-    const defaultErrorObj = {
-        name: null,
-        type_id: null,
-    };
-
-    const [errorObj, setErrorObj] = useState(defaultErrorObj);
-
-    const [spaceTypes, setSpaceTypes] = useState([]);
+    const [floorName, setFloorName] = useState('');
+    const [floorNameError, setFloorNameError] = useState(null);
     const [isProcessing, setProcessing] = useState(false);
 
-    // Delete Space
-    const [showDeleteSpace, setShowDeleteSpace] = useState(false);
-    const closeDeleteSpacePopup = () => setShowDeleteSpace(false);
-    const openDeleteSpacePopup = () => setShowDeleteSpace(true);
+    // Delete Floor
+    const [showDeleteFloor, setShowDeleteFloor] = useState(false);
+    const closeDeleteFloorPopup = () => setShowDeleteFloor(false);
+    const openDeleteFloorPopup = () => setShowDeleteFloor(true);
 
-    const handleCreateSpace = async (space_obj, bldg_id) => {
-        if (!bldg_id || !space_obj?.parents) return;
+    const handleCreateFloor = async (floor_name, bldg_id) => {
+        if (!bldg_id) return;
 
-        let alertObj = Object.assign({}, errorObj);
+        if (floor_name === '') setFloorNameError(`Please enter Floor name. It cannot be empty.`);
 
-        if (!space_obj?.name || space_obj?.name === '') alertObj.name = `Please enter Space name. It cannot be empty.`;
-        if (!space_obj?.type_id || space_obj?.type_id === '') alertObj.type_id = { text: `Please select Type.` };
-
-        setErrorObj(alertObj);
-
-        if (!alertObj.name && !alertObj.type_id) {
+        if (floor_name !== '') {
             setProcessing(true);
 
             const params = `?building_id=${bldg_id}`;
-
-            await addSpaceService(params, space_obj)
-                .then((res) => {
-                    const response = res?.data;
-                    if (response?.success) {
-                        notifyUser(Notification.Types.success, `Space created successfully.`);
-                        fetchAllFloorData(bldg_id);
-                        fetchAllSpaceData(space_obj?.parents, bldg_id);
-                    } else {
-                        notifyUser(Notification.Types.error, response?.message);
-                    }
-                })
-                .catch((err) => {
-                    notifyUser(Notification.Types.error, `Failed to add Space.`);
-                })
-                .finally(() => {
-                    setProcessing(false);
-                    closeModal();
-                    setSpaceObj({});
-                });
-        }
-    };
-
-    const handleEditSpace = async (space_obj, bldg_id) => {
-        if (!bldg_id || !spaceObj?._id) return;
-
-        let alertObj = Object.assign({}, errorObj);
-
-        if (!space_obj?.name || space_obj?.name === '') alertObj.name = `Please enter Space name. It cannot be empty.`;
-        if (!space_obj?.type_id || space_obj?.type_id === '') alertObj.type_id = { text: `Please select Type.` };
-
-        setErrorObj(alertObj);
-
-        if (!alertObj.name && !alertObj.type) {
-            setProcessing(true);
-
-            const params = `?space_id=${space_obj?._id}`;
             const payload = {
-                building_id: bldg_id,
-                name: space_obj?.name,
-                type_id: space_obj?.type_id,
-                parents: space_obj?.parents,
-                parent_space: space_obj?.parent_space,
+                parent_building: bldg_id,
+                name: floor_name.trim(),
             };
 
-            await updateSpaceService(params, payload)
+            await addFloorService(params, payload)
                 .then((res) => {
                     const response = res?.data;
                     if (response?.success) {
-                        notifyUser(Notification.Types.success, `Space updated successfully.`);
+                        notifyUser(Notification.Types.success, response?.message);
                         fetchAllFloorData(bldg_id);
-                        fetchAllSpaceData(space_obj?.parents, bldg_id);
                     } else {
                         notifyUser(Notification.Types.error, response?.message);
                     }
                 })
                 .catch((err) => {
-                    notifyUser(Notification.Types.error, `Failed to update Space.`);
+                    notifyUser(Notification.Types.error, 'Failed to add Floor.');
                 })
                 .finally(() => {
                     setProcessing(false);
                     closeModal();
-                    setSpaceObj({});
+                    setFloorName('');
+                    setFloorNameError(null);
                 });
         }
     };
 
-    const handleDeleteSpace = async () => {
-        if (!spaceObj?._id) return;
+    const handleEditFloor = async (floor_name, bldg_id, floorObj) => {
+        if (!bldg_id || !floorObj?.floor_id) return;
+
+        if (floor_name === '') setFloorNameError(`Please enter Floor Name. It cannot be empty.`);
+
+        if (floor_name !== '') {
+            setProcessing(true);
+
+            const params = `?floor_id=${floorObj?.floor_id}`;
+            const payload = {
+                name: floor_name.trim(),
+            };
+
+            await updateFloorService(params, payload)
+                .then((res) => {
+                    const response = res?.data;
+                    if (response?.success) {
+                        notifyUser(Notification.Types.success, response?.message);
+                        fetchAllFloorData(bldg_id);
+                    } else {
+                        notifyUser(Notification.Types.error, response?.message);
+                    }
+                })
+                .catch((err) => {
+                    notifyUser(Notification.Types.error, 'Failed to update Floor.');
+                })
+                .finally(() => {
+                    setProcessing(false);
+                    closeModal();
+                    setFloorName('');
+                    setFloorNameError(null);
+                    setSelectedFloorObj({});
+                });
+        }
+    };
+
+    const handleDeleteFloor = async () => {
+        if (!selectedFloorObj?.floor_id) return;
 
         setProcessing(true);
-        const params = `?space_id=${spaceObj?._id}`;
+        const params = `/${selectedFloorObj?.floor_id}/`;
 
-        await deleteSpaceService(params)
+        await deleteFloorService(params)
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
-                    notifyUser(Notification.Types.success, `Space deleted successfully.`);
+                    notifyUser(Notification.Types.success, response?.message);
                     fetchAllFloorData(bldgId);
-                    fetchAllSpaceData(spaceObj?.parents, bldgId);
                 } else {
                     notifyUser(Notification.Types.error, response?.message);
                 }
             })
             .catch((err) => {
-                notifyUser(Notification.Types.error, `Failed to delete Space.`);
+                notifyUser(Notification.Types.error, 'Failed to delete Floor.');
             })
             .finally(() => {
                 setProcessing(false);
                 closeModal();
-                closeDeleteSpacePopup();
-                setSpaceObj({});
+                setFloorName('');
+                setFloorNameError(null);
+                setSelectedFloorObj({});
+                closeDeleteFloorPopup();
                 window.scroll(0, 0);
             });
     };
 
-    const fetchSpaceTypes = async () => {
-        const params = `?ordered_by=name&sort_by=ace`;
-
-        await getAllSpaceTypes(params)
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    if (response?.data.length !== 0) {
-                        const mappedSpaceTypes = response?.data.map((el) => {
-                            return {
-                                label: el?.name,
-                                value: el?.id,
-                            };
-                        });
-                        setSpaceTypes(mappedSpaceTypes);
-                    }
-                }
-            })
-            .catch(() => {});
-    };
-
-    const handleChange = (key, value) => {
-        let obj = Object.assign({}, spaceObj);
-        setErrorObj({ ...errorObj, [key]: null });
-        obj[key] = value;
-        setSpaceObj(obj);
-    };
-
     const handleDeleteModalClose = () => {
-        closeDeleteSpacePopup();
+        closeDeleteFloorPopup();
         openModal();
     };
 
     useEffect(() => {
-        if (isModalOpen) fetchSpaceTypes();
-        if (!isModalOpen) setErrorObj(defaultErrorObj);
-    }, [isModalOpen]);
+        if (selectedFloorObj?.floor_id) setFloorName(selectedFloorObj?.floor_name);
+    }, [selectedFloorObj]);
 
     return (
         <>
             <Modal show={isModalOpen} backdrop="static" keyboard={false} size="md" centered>
                 <div className="p-4">
                     <Typography.Header size={Typography.Sizes.lg}>
-                        {operationType === `ADD` ? `Add Space` : `Edit Space`}
+                        {operationType === `ADD` ? `Add Floor` : `Edit Floor`}
                     </Typography.Header>
 
                     <Brick sizeInRem={2} />
@@ -208,11 +161,12 @@ const Space = (props) => {
                         <InputTooltip
                             placeholder="Enter Name"
                             labelSize={Typography.Sizes.md}
-                            value={spaceObj?.name}
-                            error={errorObj?.name}
+                            value={floorName}
                             onChange={(e) => {
-                                handleChange('name', e.target.value);
+                                setFloorName(e.target.value);
+                                setFloorNameError(null);
                             }}
+                            error={floorNameError}
                         />
                     </div>
 
@@ -221,32 +175,31 @@ const Space = (props) => {
                     <div>
                         <Typography.Body size={Typography.Sizes.md}>{`Type`}</Typography.Body>
                         <Brick sizeInRem={0.25} />
-                        <Select
-                            name="select"
-                            placeholder="Select Type"
-                            options={spaceTypes}
-                            currentValue={spaceTypes.filter((option) => option.value === spaceObj?.type_id)}
-                            isSearchable={true}
-                            error={errorObj?.type_id}
-                            onChange={(e) => {
-                                handleChange('type_id', e.value);
-                            }}
+                        <InputTooltip
+                            placeholder="Enter Name"
+                            labelSize={Typography.Sizes.md}
+                            disabled={true}
+                            value={`Floor`}
                         />
+                        <Brick sizeInRem={0.25} />
+                        <Typography.Body size={Typography.Sizes.sm}>
+                            {`Only floors can be at the building root`}
+                        </Typography.Body>
                     </div>
 
-                    {operationType === 'ADD' && <Brick sizeInRem={2.5} />}
+                    {operationType === 'ADD' && <Brick sizeInRem={1.5} />}
 
                     {operationType === 'EDIT' && (
                         <>
                             <Brick sizeInRem={1.25} />
                             <Button
-                                label="Delete Space"
+                                label="Delete Floor"
                                 size={Button.Sizes.md}
                                 type={Button.Type.secondaryDistructive}
                                 icon={<DeleteSVG />}
                                 onClick={() => {
                                     closeModal();
-                                    openDeleteSpacePopup();
+                                    openDeleteFloorPopup();
                                 }}
                             />
                             <Brick sizeInRem={1.35} />
@@ -261,8 +214,8 @@ const Space = (props) => {
                             className="w-100"
                             onClick={() => {
                                 closeModal();
-                                setSpaceObj({});
-                                setErrorObj(defaultErrorObj);
+                                setFloorName('');
+                                setFloorNameError(null);
                             }}
                         />
                         {operationType === 'ADD' ? (
@@ -272,7 +225,7 @@ const Space = (props) => {
                                 type={Button.Type.primary}
                                 className="w-100"
                                 onClick={() => {
-                                    handleCreateSpace(spaceObj, bldgId);
+                                    handleCreateFloor(floorName, bldgId);
                                 }}
                                 disabled={isProcessing}
                             />
@@ -283,9 +236,9 @@ const Space = (props) => {
                                 type={Button.Type.primary}
                                 className="w-100"
                                 onClick={() => {
-                                    handleEditSpace(spaceObj, bldgId);
+                                    handleEditFloor(floorName, bldgId, selectedFloorObj);
                                 }}
-                                disabled={isProcessing || compareObjData(defaultObjVal, spaceObj)}
+                                disabled={isProcessing || selectedFloorObj?.floor_name === floorName}
                             />
                         )}
                     </div>
@@ -293,15 +246,15 @@ const Space = (props) => {
                 </div>
             </Modal>
 
-            <DeleteModal
-                isModalOpen={showDeleteSpace}
+            <DeleteLayout
+                isModalOpen={showDeleteFloor}
                 onCancel={handleDeleteModalClose}
-                onSave={handleDeleteSpace}
-                deleteType="SPACE"
+                onSave={handleDeleteFloor}
+                deleteType="FLOOR"
                 isDeleting={isProcessing}
             />
         </>
     );
 };
 
-export default Space;
+export default FloorLayout;
