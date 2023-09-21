@@ -36,8 +36,26 @@
     overflow: visible !important;
 }
 
-.modal {
-    overflow: visible !important;
+.modal-content {
+    overflow: auto !important;
+    height: 100% !important;
+}
+
+.modal-content:hover {
+    overflow-y: auto !important;
+}
+
+.modal-content::-webkit-scrollbar {
+    width: 0.5rem;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background-color: $primary-gray-300;
+    border-radius: 0.25rem;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background-color: $base-white;
 }
 
 .flag-count-container {
