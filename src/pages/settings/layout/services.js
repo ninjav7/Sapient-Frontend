@@ -1,51 +1,48 @@
 import axiosInstance from '../../../services/axiosInstance';
 import {
     createFloors,
+    createSpace,
+    deleteFloor,
+    deleteSpace,
     getFloors,
-    getLayouts,
     getSpaces,
     getSpaceTypes,
-    createSpace,
-    updateSpace,
     updateFloor,
-    deleteSpace,
-    deleteFloor,
+    updateSpace,
 } from '../../../services/Network';
 
-export function addFloors(params, payload) {
-    return axiosInstance.post(`${createFloors}${params}`, payload).then((res) => res);
-}
-
-export function fetchFloors(params) {
+export function getAllFloorsList(params) {
     return axiosInstance.get(`${getFloors}${params}`).then((res) => res);
 }
 
-export function fetchSpaces(params) {
+export function getAllSpacesList(params) {
     return axiosInstance.get(`${getSpaces}${params}`).then((res) => res);
 }
 
-export function fetchSpaceTypes(params) {
+export function addFloorService(params, payload) {
+    return axiosInstance.post(`${createFloors}${params}`, payload).then((res) => res);
+}
+
+export function updateFloorService(params, payload) {
+    return axiosInstance.patch(`${updateFloor}${params}`, payload).then((res) => res);
+}
+
+export function deleteFloorService(params) {
+    return axiosInstance.delete(`${deleteFloor}${params}`).then((res) => res);
+}
+
+export function getAllSpaceTypes(params) {
     return axiosInstance.get(`${getSpaceTypes}${params}`).then((res) => res);
 }
 
-export function fetchLayouts(params) {
-    return axiosInstance.get(`${getLayouts}${params}`).then((res) => res);
-}
-
-export function addSpace(params, payload) {
+export function addSpaceService(params, payload) {
     return axiosInstance.post(`${createSpace}${params}`, payload).then((res) => res);
 }
 
-export function updateFloors(params, payload) {
-    return axiosInstance.patch(`${updateFloor}${params}`, payload).then((res) => res);
-}
-export function updateSpaces(params, payload) {
+export function updateSpaceService(params, payload) {
     return axiosInstance.patch(`${updateSpace}${params}`, payload).then((res) => res);
 }
-export function removeSpace(params) {
-    return axiosInstance.delete(`${deleteSpace}${params}`).then((res) => res);
-}
 
-export function removeFloor(params) {
-    return axiosInstance.delete(`${deleteFloor}${params}`).then((res) => res);
+export function deleteSpaceService(params) {
+    return axiosInstance.delete(`${deleteSpace}${params}`).then((res) => res);
 }

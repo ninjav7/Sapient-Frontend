@@ -1,87 +1,152 @@
-import React, { useEffect, useState } from 'react';
-import { Row, Col } from 'reactstrap';
+import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useParams } from 'react-router-dom';
-import '../style.css';
-import { BuildingStore } from '../../../store/BuildingStore';
+
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
-import { Cookies } from 'react-cookie';
-import EditFloorModal from './EditFloorModal';
-import DeleteModal from './DeleteModal';
-import { buildingData, deleteFloor, getFloorsData } from '../../../store/globalState';
-import { userPermissionData } from '../../../store/globalState';
-import LayoutElements from '../../../sharedComponents/layoutElements/LayoutElements';
-import Brick from '../../../sharedComponents/brick';
-import { fetchFloors, fetchSpaces, addSpace, removeFloor } from './services';
+
+import Typography from '../../../sharedComponents/typography';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+import { buildingData, userPermissionData } from '../../../store/globalState';
+import { getAllFloorsList, getAllSpacesList } from './services';
+import { Notification } from '../../../sharedComponents/notification';
+import { UserStore } from '../../../store/UserStore';
+import Brick from '../../../sharedComponents/brick';
+import LayoutElements from '../../../sharedComponents/layoutElements/LayoutElements';
+import FloorLayout from './FloorLayout';
+import SpaceLayout from './SpaceLayout';
 
-const Layout = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-    const [userPermission] = useAtom(userPermissionData);
-
+const LayoutPage = () => {
     const { bldgId } = useParams();
     const [buildingListData] = useAtom(buildingData);
+    const [userPermission] = useAtom(userPermissionData);
 
-    const [editFloor, setEditFloor] = useState(false);
-    // Saving API data
-    const [isLoadingLastColumn, setIsLoadingLastColumn] = useState(false);
-    const [spaces, setSpaces] = useState([]);
-    const [floor, setFloor] = useState([]);
-    const [floorid, setFloorid] = useState('');
-    const [currentFloorId, setCurrentFloorId] = useState('');
-    const [currentSpaceId, setCurrentSpaceId] = useState('');
-    const [parentSpace, setParentSpace] = useState('');
-    const [typeName, setTypeName] = useState('');
-    const [typeId, setTypeId] = useState('');
-    const [modalType, setModalType] = useState('');
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const canUserCreate = userPermission?.permissions?.permissions?.building_layout_permission?.create ?? false;
+    const canUserEdit = userPermission?.permissions?.permissions?.building_layout_permission?.edit ?? false;
+    const canUserDelete = userPermission?.permissions?.permissions?.building_layout_permission?.delete ?? false;
 
-    const [modalShow, setModalShow] = useState(false);
-    const handleModalOpen = () => setModalShow(true);
-
-    const [spaceBody, setSpaceBody] = useState({
-        floor_id: currentFloorId,
-        building_id: bldgId,
+    const [rootObj, setRootObj] = useState({
+        type: 'root',
+        bldg_id: bldgId,
     });
-    const [selectedData, setSelectedData] = useState({});
-    const getFloorsFunc = async () => {
-        const params = `?building_id=${bldgId}`;
-        await fetchFloors(params)
+
+    const [floorsList, setFloorsList] = useState([]);
+    const [isFetchingFloor, setFetchingFloor] = useState(false);
+
+    const [spacesList, setSpacesList] = useState([]);
+    const [isFetchingSpace, setFetchingSpace] = useState(false);
+
+    // Add Floor
+    const [showAddFloor, setShowAddFloor] = useState(false);
+    const closeAddFloorPopup = () => setShowAddFloor(false);
+    const openAddFloorPopup = () => setShowAddFloor(true);
+
+    // Edit Floor
+    const [showEditFloor, setShowEditFloor] = useState(false);
+    const closeEditFloorPopup = () => setShowEditFloor(false);
+    const openEditFloorPopup = () => setShowEditFloor(true);
+
+    // Add Space
+    const [showAddSpace, setShowAddSpace] = useState(false);
+    const closeAddSpacePopup = () => setShowAddSpace(false);
+    const openAddSpacePopup = () => setShowAddSpace(true);
+
+    // Edit Space
+    const [showEditSpace, setShowEditSpace] = useState(false);
+    const closeEditSpacePopup = () => setShowEditSpace(false);
+    const openEditSpacePopup = () => setShowEditSpace(true);
+
+    const [selectedFloorObj, setSelectedFloorObj] = useState({});
+
+    const [selectedSpaceObj, setSelectedSpaceObj] = useState({});
+    const [defaultObjVal, setDefaultObjVal] = useState({});
+
+    const notifyUser = (notifyType, notifyMessage) => {
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = notifyMessage;
+            s.notificationType = notifyType;
+        });
+    };
+
+    const fetchAllFloorData = async (bldg_id) => {
+        setFetchingFloor(true);
+        setFloorsList([]);
+        setSpacesList([]);
+
+        const params = `?building_id=${bldg_id}`;
+
+        await getAllFloorsList(params)
             .then((res) => {
-                const responseData = res?.data;
-                setFloorData(responseData?.data);
+                const response = res?.data;
+                if (response?.success) {
+                    if (response?.data.length !== 0) setFloorsList(response?.data);
+                } else {
+                    notifyUser(Notification.Types.success, 'Failed to fetch Floors.');
+                }
             })
-            .catch(() => {});
+            .catch((error) => {
+                notifyUser(Notification.Types.success, 'Failed to fetch Floors.');
+            })
+            .finally(() => {
+                setFetchingFloor(false);
+            });
+    };
+
+    const fetchAllSpaceData = async (floor_id, bldg_id) => {
+        setFetchingSpace(true);
+        setSpacesList([]);
+
+        const params = `?floor_id=${floor_id}&building_id=${bldg_id}`;
+
+        await getAllSpacesList(params)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    if (response?.data.length !== 0) setSpacesList(response?.data);
+                } else {
+                    notifyUser(Notification.Types.error, 'Failed to fetch Spaces.');
+                }
+            })
+            .catch((error) => {
+                notifyUser(Notification.Types.error, 'Failed to fetch Spaces.');
+            })
+            .finally(() => {
+                setFetchingSpace(false);
+            });
+    };
+
+    const onClickForAllItems = async ({ nativeHandler, data }) => {
+        nativeHandler();
+        if (data?.parent_building && data?.floor_id) {
+            fetchAllSpaceData(data?.floor_id, data?.parent_building);
+        }
+    };
+
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            bs.items = [
+                {
+                    label: 'Layout',
+                    path: '/settings/layout',
+                    active: true,
+                },
+            ];
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'building-settings';
+        });
     };
 
     useEffect(() => {
-        getFloorsFunc();
+        if (bldgId) {
+            fetchAllFloorData(bldgId);
+            setRootObj((prevStateObj) => {
+                return { ...prevStateObj, bldg_id: bldgId };
+            });
+        }
     }, [bldgId]);
-    const building = {
-        bdId: bldgId,
-    };
-    const [floorData, setFloorData] = useAtom(getFloorsData);
-
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            window.scrollTo(0, 0);
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Layout',
-                        path: '/settings/layout',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'building-settings';
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
 
     useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
@@ -96,211 +161,163 @@ const Layout = () => {
         }
     }, [buildingListData, bldgId]);
 
-    const createSpacesAPI = async () => {
-        let params = `?building_id=${bldgId}`;
-        await addSpace(params, spaceBody)
-            .then((res) => {
-                const responseData = res?.data;
-            })
-            .catch(() => {});
-    };
-
-    const [deletingFloor, setDeletingFloorModal] = useAtom(deleteFloor);
-    const handleDeleteClose = () => {
-        setDeletingFloorModal(false);
-    };
-
-    const [showDeleteAlert, setShowDeleteAlert] = useState(false);
-    const handleDeleteAlertClose = () => setShowDeleteAlert(false);
-    const handleDeleteAlertShow = () => setShowDeleteAlert(true);
-
-    const [floorName, setFloorName] = useState('');
-    const [spaceName, setSpaceName] = useState('');
-
     useEffect(() => {
-        if (!modalShow) {
-            setFloorName('');
-            setSpaceName('');
-        }
-    }, modalShow);
-
-    const onClickForAllItems = async ({ nativeHandler, data }) => {
-        setSelectedData({ nativeHandler, data });
-        nativeHandler();
-        if (!data.floor_id) {
-            return;
-        }
-
-        setIsLoadingLastColumn(true);
-        const params = `?floor_id=${data.floor_id}&building_id=${bldgId}`;
-        await fetchSpaces(params)
-            .then((res) => {
-                const responseData = res?.data;
-                setSpaces(responseData.data);
-                setIsLoadingLastColumn(false);
-            })
-            .catch(() => {
-                setIsLoadingLastColumn(false);
-            });
-    };
-
-    const handleModalClose = () => {
-        setModalShow(false);
-        setEditFloor(false);
-        setTypeId('');
-        setModalType('');
-        setFloorName('');
-        setSpaceName('');
-        setCurrentFloorId('');
-        setCurrentSpaceId('');
-    };
+        window.scrollTo(0, 0);
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>
-            <EditFloorModal
-                show={modalShow}
-                typeId={typeId}
-                editFloor={editFloor}
-                modalType={modalType}
-                floorName={floorName}
-                spaceName={spaceName}
-                parentSpace={parentSpace}
-                currentFloorId={currentFloorId}
-                currentSpaceId={currentSpaceId}
-                selectedData={selectedData}
-                getFloorsFunc={getFloorsFunc}
-                handleModalClose={handleModalClose}
-                handleDeleteAlertShow={handleDeleteAlertShow}
-                onClickForAllItems={onClickForAllItems}
-                setModalShow={setModalShow}
-            />
-
-            <DeleteModal
-                show={showDeleteAlert}
-                modalType={modalType}
-                currentFloorId={currentFloorId}
-                currentSpaceId={currentSpaceId}
-                getFloorsFunc={getFloorsFunc}
-                onClickForAllItems={onClickForAllItems}
-                selectedData={selectedData}
-                onHide={() => handleDeleteAlertClose()}
-            />
-
-            <Row className="page-title">
-                <Col className="header-container">
-                    <span className="heading-style">Layout</span>
-                </Col>
-            </Row>
+            <Typography.Header size={Typography.Sizes.lg}>{`Layout`}</Typography.Header>
             <Brick sizeInRem={1.5} />
+            <LayoutElements
+                spaces={spacesList}
+                floors={floorsList}
+                buildingData={rootObj}
+                isLoadingLastColumn={isFetchingFloor || isFetchingSpace}
+                onClickEachChild={[onClickForAllItems]}
+                onColumnAdd={
+                    isUserAdmin || canUserCreate
+                        ? (args) => {
+                              // When adding Floor
+                              if (args?.type === 'root' && args?.bldg_id) {
+                                  openAddFloorPopup();
+                              }
+                              // When adding space inside floor
+                              else if (args?.parent_building && args?.floor_id) {
+                                  setSelectedSpaceObj({
+                                      building_id: args?.parent_building,
+                                      parents: args?.floor_id,
+                                      parent_space: null,
+                                  });
+                                  openAddSpacePopup();
+                              }
+                              // When adding space inside parent space
+                              else if (args?._id && args?.parents) {
+                                  setSelectedSpaceObj({
+                                      building_id: args?.building_id,
+                                      parents: args?.parents,
+                                      parent_space: args?._id,
+                                  });
+                                  openAddSpacePopup();
+                              }
+                          }
+                        : null
+                }
+                onColumnNameEdit={
+                    isUserAdmin || canUserEdit
+                        ? (args) => {
+                              // When Edit Icon clicked from Floor item list
+                              if (args?.floor_id && args?.floor_id !== '' && args?.parent_building) {
+                                  setSelectedFloorObj({
+                                      floor_id: args?.floor_id,
+                                      floor_name: args?.name,
+                                  });
+                                  openEditFloorPopup();
+                              }
+                              // When Edit Icon clicked from Space item list
+                              else if (args?.type_id && args?.type_id !== '' && args?.building_id) {
+                                  const selectedObj = {
+                                      _id: args?._id,
+                                      name: args?.name,
+                                      type_id: args?.type_id,
+                                      parents: args?.parents,
+                                      parent_space: args?.parent_space,
+                                  };
+                                  setSelectedSpaceObj(selectedObj);
+                                  setDefaultObjVal(selectedObj);
+                                  openEditSpacePopup();
+                              }
+                          }
+                        : null
+                }
+                onItemEdit={
+                    isUserAdmin || canUserEdit
+                        ? (args) => {
+                              // When Edit Icon clicked from Floor item list
+                              if (args?.floor_id && args?.floor_id !== '' && args?.parent_building) {
+                                  setSelectedFloorObj({
+                                      floor_id: args?.floor_id,
+                                      floor_name: args?.name,
+                                  });
+                                  openEditFloorPopup();
+                              }
+                              // When Edit Icon clicked from Space item list
+                              else if (args?.type_id && args?.type_id !== '' && args?.building_id) {
+                                  const selectedObj = {
+                                      _id: args?._id,
+                                      name: args?.name,
+                                      type_id: args?.type_id,
+                                      parents: args?.parents,
+                                      parent_space: args?.parent_space,
+                                  };
+                                  setSelectedSpaceObj(selectedObj);
+                                  setDefaultObjVal(selectedObj);
+                                  openEditSpacePopup();
+                              }
+                          }
+                        : null
+                }
+            />
 
-            <Row>
-                <Col lg={12}>
-                    <LayoutElements
-                        isLoadingLastColumn={isLoadingLastColumn}
-                        spaces={spaces}
-                        floors={floorData}
-                        buildingData={building}
-                        onColumnAdd={
-                            userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                ? (args) => {
-                                      if (args?.bdId !== undefined && args?.bdId !== '') {
-                                          handleModalOpen();
-                                          setEditFloor(false);
-                                          setModalType('floor');
-                                          setCurrentFloorId('');
-                                          setSpaceName('');
-                                          setFloorName('');
-                                          setCurrentSpaceId('');
-                                          setParentSpace('');
-                                          setTypeId('');
-                                      } else if (args?.floor_id !== undefined && args?.floor_id !== '') {
-                                          handleModalOpen();
-                                          setEditFloor(false);
-                                          setModalType('spaces');
-                                          setCurrentFloorId(args?.floor_id);
-                                          setSpaceName('');
-                                          setFloorName('');
-                                          setCurrentSpaceId('');
-                                          setParentSpace('');
-                                          setTypeId('');
-                                      } else {
-                                          handleModalOpen();
-                                          setEditFloor(false);
-                                          setModalType('spaces');
-                                          setCurrentFloorId(args?.parents);
-                                          setCurrentSpaceId(args?._id);
-                                          setSpaceName('');
-                                          setFloorName('');
-                                          setParentSpace(args?._id);
-                                          setTypeId('');
-                                      }
-                                  }
-                                : null
-                        }
-                        onColumnNameEdit={
-                            userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                ? (args) => {
-                                      if (args?.bdId === undefined)
-                                          if (args?.floor_id !== undefined && args?.floor_id !== '') {
-                                              handleModalOpen();
-                                              setEditFloor(true);
-                                              setModalType('floor');
-                                              setCurrentFloorId(args?.floor_id);
-                                              setFloorName(args?.name);
-                                              setSpaceName('');
-                                              setCurrentSpaceId('');
-                                              setParentSpace('');
-                                              setTypeId('');
-                                          } else {
-                                              handleModalOpen();
-                                              setEditFloor(true);
-                                              setModalType('spaces');
-                                              setCurrentFloorId(args?.parents);
-                                              setFloorName('');
-                                              setSpaceName(args?.name);
-                                              setCurrentSpaceId(args?._id);
-                                              setParentSpace(args?.parent_space);
-                                              setTypeId(args?.type_id);
-                                          }
-                                  }
-                                : null
-                        }
-                        onItemEdit={
-                            userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                ? (args) => {
-                                      if (args?.floor_id !== undefined && args?.floor_id !== '') {
-                                          handleModalOpen();
-                                          setEditFloor(true);
-                                          setModalType('floor');
-                                          setCurrentFloorId(args?.floor_id);
-                                          setFloorName(args?.name);
-                                          setSpaceName('');
-                                          setCurrentSpaceId('');
-                                          setParentSpace('');
-                                          setTypeId('');
-                                      } else {
-                                          handleModalOpen();
-                                          setEditFloor(true);
-                                          setModalType('spaces');
-                                          setFloorName('');
-                                          setCurrentFloorId(args?.parents);
-                                          setSpaceName(args?.name);
-                                          setCurrentSpaceId(args?._id);
-                                          setParentSpace(args?.parent_space);
-                                          setTypeId(args?.type_id);
-                                      }
-                                  }
-                                : null
-                        }
-                        onClickEachChild={[onClickForAllItems]}
-                    />
-                </Col>
-            </Row>
+            {/* Add Floor */}
+            <FloorLayout
+                isModalOpen={showAddFloor}
+                openModal={openAddFloorPopup}
+                closeModal={closeAddFloorPopup}
+                operationType="ADD"
+                bldgId={bldgId}
+                fetchAllFloorData={fetchAllFloorData}
+                notifyUser={notifyUser}
+            />
+
+            {/* Edit Floor */}
+            <FloorLayout
+                isModalOpen={showEditFloor}
+                openModal={openEditFloorPopup}
+                closeModal={closeEditFloorPopup}
+                operationType="EDIT"
+                bldgId={bldgId}
+                fetchAllFloorData={fetchAllFloorData}
+                notifyUser={notifyUser}
+                selectedFloorObj={selectedFloorObj}
+                setSelectedFloorObj={setSelectedFloorObj}
+                isUserAdmin={isUserAdmin}
+                canUserDelete={canUserDelete}
+            />
+
+            {/* Add Space */}
+            <SpaceLayout
+                isModalOpen={showAddSpace}
+                openModal={openAddSpacePopup}
+                closeModal={closeAddSpacePopup}
+                operationType="ADD"
+                bldgId={bldgId}
+                fetchAllFloorData={fetchAllFloorData}
+                fetchAllSpaceData={fetchAllSpaceData}
+                notifyUser={notifyUser}
+                spaceObj={selectedSpaceObj}
+                setSpaceObj={setSelectedSpaceObj}
+            />
+
+            {/* Edit Space */}
+            <SpaceLayout
+                isModalOpen={showEditSpace}
+                openModal={openEditSpacePopup}
+                closeModal={closeEditSpacePopup}
+                operationType="EDIT"
+                bldgId={bldgId}
+                fetchAllFloorData={fetchAllFloorData}
+                fetchAllSpaceData={fetchAllSpaceData}
+                notifyUser={notifyUser}
+                spaceObj={selectedSpaceObj}
+                setSpaceObj={setSelectedSpaceObj}
+                defaultObjVal={defaultObjVal}
+                isUserAdmin={isUserAdmin}
+                canUserDelete={canUserDelete}
+            />
         </React.Fragment>
     );
 };
 
-export default Layout;
+export default LayoutPage;

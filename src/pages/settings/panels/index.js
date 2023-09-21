@@ -488,6 +488,7 @@ const Panels = () => {
                 s.parent = 'building-settings';
             });
         };
+        window.scrollTo(0, 0);
         updateBreadcrumbStore();
     }, []);
 

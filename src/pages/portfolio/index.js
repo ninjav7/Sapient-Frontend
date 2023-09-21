@@ -232,6 +232,7 @@ const PortfolioOverview = () => {
 
         updateBreadcrumbStore();
         updateBuildingData();
+        window.scrollTo(0, 0);
     }, []);
 
     return (

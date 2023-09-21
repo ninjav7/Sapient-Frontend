@@ -321,6 +321,7 @@ const NavLinks = () => {
                 .map((item, index) => {
                     if (!item.visibility) return;
                     if (item.name === 'Admin' && location.pathname !== '/super-user/accounts') return;
+                    if (location.pathname === '/super-user/accounts' && item.path !== '/super-user/accounts') return;
 
                     let className = '';
 

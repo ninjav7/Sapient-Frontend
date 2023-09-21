@@ -415,6 +415,7 @@ const Buildings = () => {
     }, [userPrefUnits]);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         updateBreadcrumbStore();
     }, []);
 
