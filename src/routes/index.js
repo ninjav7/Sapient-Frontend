@@ -8,8 +8,7 @@ import { isUserAuthenticated, isSuperUserAuthenticated } from '../helpers/authUt
 // Config Components
 import General from '../pages/settings/general-settings';
 import UtilityMeters from '../pages/settings/utility-meters';
-import Layout from '../pages/settings/layout';
-import Layouts from '../pages/settings/layouts';
+import Layout from '../pages/settings/layouts';
 import Equipment from '../pages/settings/equipment/Equipment';
 import EquipmentTypes from '../pages/settings/equipment-type';
 import SpaceTypes from '../pages/settings/space-types';
@@ -211,9 +210,9 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/layouts/:bldgId',
-            name: 'New Layout',
-            component: Layouts,
+            path: '/settings/layout/:bldgId',
+            name: 'Layout',
+            component: Layout,
             route: PrivateRoute,
             visibility: true,
             parent: 'building-settings',
@@ -361,14 +360,6 @@ const settingsRoutes = {
             route: PrivateRoute,
             visibility: true,
             parent: 'account',
-        },
-        {
-            path: '/settings/layout/:bldgId',
-            name: 'Layout',
-            component: Layout,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'building-settings',
         },
     ],
     icon: FeatherIcon.PieChart,

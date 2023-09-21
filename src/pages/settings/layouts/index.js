@@ -7,7 +7,7 @@ import { ComponentStore } from '../../../store/ComponentStore';
 
 import Typography from '../../../sharedComponents/typography';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
-import { buildingData } from '../../../store/globalState';
+import { buildingData, userPermissionData } from '../../../store/globalState';
 import { getAllFloorsList, getAllSpacesList } from './services';
 import { Notification } from '../../../sharedComponents/notification';
 import { UserStore } from '../../../store/UserStore';
@@ -19,6 +19,12 @@ import SpaceLayout from './SpaceLayout';
 const LayoutPage = () => {
     const { bldgId } = useParams();
     const [buildingListData] = useAtom(buildingData);
+    const [userPermission] = useAtom(userPermissionData);
+
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const canUserCreate = userPermission?.permissions?.permissions?.building_layout_permission?.create ?? false;
+    const canUserEdit = userPermission?.permissions?.permissions?.building_layout_permission?.edit ?? false;
+    const canUserDelete = userPermission?.permissions?.permissions?.building_layout_permission?.delete ?? false;
 
     const [rootObj, setRootObj] = useState({
         type: 'root',
@@ -170,76 +176,88 @@ const LayoutPage = () => {
                 buildingData={rootObj}
                 isLoadingLastColumn={isFetchingFloor || isFetchingSpace}
                 onClickEachChild={[onClickForAllItems]}
-                onColumnAdd={(args) => {
-                    // When adding Floor
-                    if (args?.type === 'root' && args?.bldg_id) {
-                        openAddFloorPopup();
-                    }
-                    // When adding space inside floor
-                    else if (args?.parent_building && args?.floor_id) {
-                        setSelectedSpaceObj({
-                            building_id: args?.parent_building,
-                            parents: args?.floor_id,
-                            parent_space: null,
-                        });
-                        openAddSpacePopup();
-                    }
-                    // When adding space inside parent space
-                    else if (args?._id && args?.parents) {
-                        setSelectedSpaceObj({
-                            building_id: args?.building_id,
-                            parents: args?.parents,
-                            parent_space: args?._id,
-                        });
-                        openAddSpacePopup();
-                    }
-                }}
-                onColumnNameEdit={(args) => {
-                    // When Edit Icon clicked from Floor item list
-                    if (args?.floor_id && args?.floor_id !== '' && args?.parent_building) {
-                        setSelectedFloorObj({
-                            floor_id: args?.floor_id,
-                            floor_name: args?.name,
-                        });
-                        openEditFloorPopup();
-                    }
-                    // When Edit Icon clicked from Space item list
-                    else if (args?.type_id && args?.type_id !== '' && args?.building_id) {
-                        const selectedObj = {
-                            _id: args?._id,
-                            name: args?.name,
-                            type_id: args?.type_id,
-                            parents: args?.parents,
-                            parent_space: args?.parent_space,
-                        };
-                        setSelectedSpaceObj(selectedObj);
-                        setDefaultObjVal(selectedObj);
-                        openEditSpacePopup();
-                    }
-                }}
-                onItemEdit={(args) => {
-                    // When Edit Icon clicked from Floor item list
-                    if (args?.floor_id && args?.floor_id !== '' && args?.parent_building) {
-                        setSelectedFloorObj({
-                            floor_id: args?.floor_id,
-                            floor_name: args?.name,
-                        });
-                        openEditFloorPopup();
-                    }
-                    // When Edit Icon clicked from Space item list
-                    else if (args?.type_id && args?.type_id !== '' && args?.building_id) {
-                        const selectedObj = {
-                            _id: args?._id,
-                            name: args?.name,
-                            type_id: args?.type_id,
-                            parents: args?.parents,
-                            parent_space: args?.parent_space,
-                        };
-                        setSelectedSpaceObj(selectedObj);
-                        setDefaultObjVal(selectedObj);
-                        openEditSpacePopup();
-                    }
-                }}
+                onColumnAdd={
+                    isUserAdmin || canUserCreate
+                        ? (args) => {
+                              // When adding Floor
+                              if (args?.type === 'root' && args?.bldg_id) {
+                                  openAddFloorPopup();
+                              }
+                              // When adding space inside floor
+                              else if (args?.parent_building && args?.floor_id) {
+                                  setSelectedSpaceObj({
+                                      building_id: args?.parent_building,
+                                      parents: args?.floor_id,
+                                      parent_space: null,
+                                  });
+                                  openAddSpacePopup();
+                              }
+                              // When adding space inside parent space
+                              else if (args?._id && args?.parents) {
+                                  setSelectedSpaceObj({
+                                      building_id: args?.building_id,
+                                      parents: args?.parents,
+                                      parent_space: args?._id,
+                                  });
+                                  openAddSpacePopup();
+                              }
+                          }
+                        : null
+                }
+                onColumnNameEdit={
+                    isUserAdmin || canUserEdit
+                        ? (args) => {
+                              // When Edit Icon clicked from Floor item list
+                              if (args?.floor_id && args?.floor_id !== '' && args?.parent_building) {
+                                  setSelectedFloorObj({
+                                      floor_id: args?.floor_id,
+                                      floor_name: args?.name,
+                                  });
+                                  openEditFloorPopup();
+                              }
+                              // When Edit Icon clicked from Space item list
+                              else if (args?.type_id && args?.type_id !== '' && args?.building_id) {
+                                  const selectedObj = {
+                                      _id: args?._id,
+                                      name: args?.name,
+                                      type_id: args?.type_id,
+                                      parents: args?.parents,
+                                      parent_space: args?.parent_space,
+                                  };
+                                  setSelectedSpaceObj(selectedObj);
+                                  setDefaultObjVal(selectedObj);
+                                  openEditSpacePopup();
+                              }
+                          }
+                        : null
+                }
+                onItemEdit={
+                    isUserAdmin || canUserEdit
+                        ? (args) => {
+                              // When Edit Icon clicked from Floor item list
+                              if (args?.floor_id && args?.floor_id !== '' && args?.parent_building) {
+                                  setSelectedFloorObj({
+                                      floor_id: args?.floor_id,
+                                      floor_name: args?.name,
+                                  });
+                                  openEditFloorPopup();
+                              }
+                              // When Edit Icon clicked from Space item list
+                              else if (args?.type_id && args?.type_id !== '' && args?.building_id) {
+                                  const selectedObj = {
+                                      _id: args?._id,
+                                      name: args?.name,
+                                      type_id: args?.type_id,
+                                      parents: args?.parents,
+                                      parent_space: args?.parent_space,
+                                  };
+                                  setSelectedSpaceObj(selectedObj);
+                                  setDefaultObjVal(selectedObj);
+                                  openEditSpacePopup();
+                              }
+                          }
+                        : null
+                }
             />
 
             {/* Add Floor */}
@@ -264,6 +282,8 @@ const LayoutPage = () => {
                 notifyUser={notifyUser}
                 selectedFloorObj={selectedFloorObj}
                 setSelectedFloorObj={setSelectedFloorObj}
+                isUserAdmin={isUserAdmin}
+                canUserDelete={canUserDelete}
             />
 
             {/* Add Space */}
@@ -293,6 +313,8 @@ const LayoutPage = () => {
                 spaceObj={selectedSpaceObj}
                 setSpaceObj={setSelectedSpaceObj}
                 defaultObjVal={defaultObjVal}
+                isUserAdmin={isUserAdmin}
+                canUserDelete={canUserDelete}
             />
         </React.Fragment>
     );

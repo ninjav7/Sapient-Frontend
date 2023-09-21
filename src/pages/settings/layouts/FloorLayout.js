@@ -10,6 +10,7 @@ import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 
 import { addFloorService, deleteFloorService, updateFloorService } from './services';
+
 import DeleteLayout from './DeleteLayout';
 
 const FloorLayout = (props) => {
@@ -23,6 +24,8 @@ const FloorLayout = (props) => {
         notifyUser,
         selectedFloorObj = {},
         setSelectedFloorObj,
+        isUserAdmin = false,
+        canUserDelete = false,
     } = props;
 
     const [floorName, setFloorName] = useState('');
@@ -187,9 +190,7 @@ const FloorLayout = (props) => {
                         </Typography.Body>
                     </div>
 
-                    {operationType === 'ADD' && <Brick sizeInRem={1.5} />}
-
-                    {operationType === 'EDIT' && (
+                    {operationType === 'EDIT' && (canUserDelete || isUserAdmin) && (
                         <>
                             <Brick sizeInRem={1.25} />
                             <Button
@@ -202,9 +203,10 @@ const FloorLayout = (props) => {
                                     openDeleteFloorPopup();
                                 }}
                             />
-                            <Brick sizeInRem={1.35} />
                         </>
                     )}
+
+                    <Brick sizeInRem={1.5} />
 
                     <div className="d-flex justify-content-between w-100">
                         <Button

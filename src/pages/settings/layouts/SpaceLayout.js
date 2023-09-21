@@ -12,6 +12,7 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 
 import { compareObjData } from '../../../helpers/helpers';
 import { addSpaceService, updateSpaceService, deleteSpaceService, getAllSpaceTypes } from './services';
+
 import DeleteLayout from './DeleteLayout';
 
 const SpaceLayout = (props) => {
@@ -27,6 +28,8 @@ const SpaceLayout = (props) => {
         spaceObj = {},
         setSpaceObj,
         defaultObjVal = {},
+        isUserAdmin = false,
+        canUserDelete = false,
     } = props;
 
     const defaultErrorObj = {
@@ -234,9 +237,7 @@ const SpaceLayout = (props) => {
                         />
                     </div>
 
-                    {operationType === 'ADD' && <Brick sizeInRem={2.5} />}
-
-                    {operationType === 'EDIT' && (
+                    {operationType === 'EDIT' && (canUserDelete || isUserAdmin) && (
                         <>
                             <Brick sizeInRem={1.25} />
                             <Button
@@ -249,9 +250,10 @@ const SpaceLayout = (props) => {
                                     openDeleteSpacePopup();
                                 }}
                             />
-                            <Brick sizeInRem={1.35} />
                         </>
                     )}
+
+                    <Brick sizeInRem={canUserDelete || isUserAdmin ? 1.5 : 2} />
 
                     <div className="d-flex justify-content-between w-100">
                         <Button
