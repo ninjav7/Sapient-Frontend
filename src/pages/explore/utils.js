@@ -16,6 +16,8 @@ export const exploreBldgMetrics = [
     },
 ];
 
+export const unitTypeConvertList = ['energy', 'current', 'voltage'];
+
 export const isEmptyObject = (obj) => {
     return Object.keys(obj).length === 0;
 };

@@ -18,7 +18,7 @@ import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 
 import { timeZone } from '../../utils/helper';
-import { exploreBldgMetrics, validateSeriesDataForBuildings } from './utils';
+import { exploreBldgMetrics, unitTypeConvertList, validateSeriesDataForBuildings } from './utils';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
@@ -367,7 +367,7 @@ const ExploreByBuildings = () => {
                         y:
                             el?.data === ''
                                 ? null
-                                : selectedConsumption === 'current' || selectedConsumption === 'voltage'
+                                : unitTypeConvertList.includes(selectedConsumption)
                                 ? el?.data / 1000
                                 : el?.data,
                     }));
@@ -431,7 +431,12 @@ const ExploreByBuildings = () => {
 
                             const newBldgsMappedData = response?.data.map((el) => ({
                                 x: new Date(el?.time_stamp).getTime(),
-                                y: el?.data === '' ? null : data_type === 'energy' ? el?.data / 1000 : el?.data,
+                                y:
+                                    el?.data === ''
+                                        ? null
+                                        : unitTypeConvertList.includes(data_type)
+                                        ? el?.data / 1000
+                                        : el?.data,
                             }));
 
                             newResponse.push({
