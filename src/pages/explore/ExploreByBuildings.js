@@ -27,10 +27,10 @@ import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../expl
 import { handleUnitConverstion } from '../settings/general-settings/utils';
 import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 import './style.css';
 import './styles.scss';
-import SkeletonLoader from '../../components/SkeletonLoader';
 
 const ExploreByBuildings = () => {
     const { download } = useCSVDownload();
@@ -159,7 +159,7 @@ const ExploreByBuildings = () => {
         },
         {
             name: 'Energy Consumption',
-            accessor: 'energy_consumption',
+            accessor: 'total_consumption',
             callbackValue: renderConsumption,
             onSort: (method, name) => setSortBy({ method, name }),
         },
