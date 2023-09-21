@@ -194,6 +194,29 @@ const LayoutPage = () => {
                         openAddSpacePopup();
                     }
                 }}
+                onColumnNameEdit={(args) => {
+                    // When Edit Icon clicked from Floor item list
+                    if (args?.floor_id && args?.floor_id !== '' && args?.parent_building) {
+                        setSelectedFloorObj({
+                            floor_id: args?.floor_id,
+                            floor_name: args?.name,
+                        });
+                        openEditFloorPopup();
+                    }
+                    // When Edit Icon clicked from Space item list
+                    else if (args?.type_id && args?.type_id !== '' && args?.building_id) {
+                        const selectedObj = {
+                            _id: args?._id,
+                            name: args?.name,
+                            type_id: args?.type_id,
+                            parents: args?.parents,
+                            parent_space: args?.parent_space,
+                        };
+                        setSelectedSpaceObj(selectedObj);
+                        setDefaultObjVal(selectedObj);
+                        openEditSpacePopup();
+                    }
+                }}
                 onItemEdit={(args) => {
                     // When Edit Icon clicked from Floor item list
                     if (args?.floor_id && args?.floor_id !== '' && args?.parent_building) {
