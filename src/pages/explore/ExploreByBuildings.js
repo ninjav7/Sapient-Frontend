@@ -363,7 +363,12 @@ const ExploreByBuildings = () => {
 
                     const newBldgMappedData = data.map((el) => ({
                         x: new Date(el?.time_stamp).getTime(),
-                        y: el?.data === '' ? null : selectedConsumption === 'energy' ? el?.data / 1000 : el?.data,
+                        y:
+                            el?.data === ''
+                                ? null
+                                : selectedConsumption === 'current' || selectedConsumption === 'voltage'
+                                ? el?.data / 1000
+                                : el?.data,
                     }));
 
                     const recordToInsert = {
