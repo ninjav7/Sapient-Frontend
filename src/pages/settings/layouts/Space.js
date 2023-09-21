@@ -135,7 +135,7 @@ const Space = (props) => {
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
-                    notifyUser(Notification.Types.success, `Space created successfully.`);
+                    notifyUser(Notification.Types.success, `Space deleted successfully.`);
                     fetchAllFloorData(bldgId);
                     fetchAllSpaceData(spaceObj?.parents, bldgId);
                 } else {
