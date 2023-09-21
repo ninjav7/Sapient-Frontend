@@ -27,10 +27,10 @@ import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../expl
 import { handleUnitConverstion } from '../settings/general-settings/utils';
 import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 import './style.css';
 import './styles.scss';
-import SkeletonLoader from '../../components/SkeletonLoader';
 
 const ExploreByBuildings = () => {
     const { download } = useCSVDownload();
@@ -125,13 +125,14 @@ const ExploreByBuildings = () => {
     });
 
     const renderConsumption = useCallback((row) => {
+        const energyValue = row?.energy_consumption?.now / 1000;
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {Math.round(row?.energy_consumption?.now / 1000)} kWh
+                    {energyValue ? Math.round(energyValue) : 0} kWh
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
-                <TinyBarChart percent={getAverageValue(row?.energy_consumption.now / 1000, bottom, top)} />
+                <TinyBarChart percent={getAverageValue(energyValue ? energyValue : 0, bottom, top)} />
             </>
         );
     });
@@ -158,7 +159,7 @@ const ExploreByBuildings = () => {
         },
         {
             name: 'Energy Consumption',
-            accessor: 'energy_consumption',
+            accessor: 'total_consumption',
             callbackValue: renderConsumption,
             onSort: (method, name) => setSortBy({ method, name }),
         },

@@ -133,6 +133,7 @@ const LayoutLevelColumn = (props) => {
             />
             <Brick sizeInRem={0.6875} />
             <div className={cx('layout-level-column-children', { 'is-loading': isLoading })}>{renderChildren()}</div>
+            <Brick sizeInRem={0.6875} />
         </div>
     );
 };
