@@ -543,7 +543,7 @@ const PlugRule = () => {
                     } else {
                         response = initialLineChartData();
                     }
-                    if(res.data.length){
+                    if (res.data.length) {
                         getDateRange(res.data);
                     }
                     setLineChartData(response);
@@ -926,12 +926,14 @@ const PlugRule = () => {
         const res = [];
         preparedScheduleData.forEach((currentCondition) => {
             currentCondition.data.forEach((currentRow) => {
-                if (currentRow.action_day.length) {
-                    const { action_day, ...rest } = currentRow;
-                    const formattedActionDay = action_day.map((el) => {
-                        return daysOfWeekFull[el];
-                    });
-                    res.push({ ...rest, action_days: formattedActionDay });
+                if (currentRow.action_type !== 2) {
+                    if (currentRow.action_day.length) {
+                        const { action_day, ...rest } = currentRow;
+                        const formattedActionDay = action_day.map((el) => {
+                            return daysOfWeekFull[el];
+                        });
+                        res.push({ ...rest, action_days: formattedActionDay });
+                    }
                 }
             });
         });
@@ -1515,7 +1517,7 @@ const PlugRule = () => {
             allSensors.filter((socket) => {
                 idOfSelectedSockets.push(socket.id);
             });
-            setRulesToLink({rule_id: '', sensor_id: []});
+            setRulesToLink({ rule_id: '', sensor_id: [] });
             setSelectedIdsToLink([]);
             setCheckedAllToLink(false);
             setSelectedInitialyIds([]);
