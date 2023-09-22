@@ -21,11 +21,13 @@ const FloorLayout = (props) => {
         operationType,
         bldgId,
         fetchAllFloorData,
+        fetchAllSpaceData,
         notifyUser,
         selectedFloorObj = {},
         setSelectedFloorObj,
         isUserAdmin = false,
         canUserDelete = false,
+        selectedFloorId,
     } = props;
 
     const [floorName, setFloorName] = useState('');
@@ -57,6 +59,7 @@ const FloorLayout = (props) => {
                     if (response?.success) {
                         notifyUser(Notification.Types.success, response?.message);
                         fetchAllFloorData(bldg_id);
+                        if (selectedFloorId) fetchAllSpaceData(selectedFloorId, bldg_id);
                     } else {
                         notifyUser(Notification.Types.error, response?.message);
                     }
@@ -93,6 +96,7 @@ const FloorLayout = (props) => {
                     if (response?.success) {
                         notifyUser(Notification.Types.success, response?.message);
                         fetchAllFloorData(bldg_id);
+                        if (selectedFloorId) fetchAllSpaceData(selectedFloorId, bldg_id);
                     } else {
                         notifyUser(Notification.Types.error, response?.message);
                     }
