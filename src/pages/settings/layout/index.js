@@ -34,6 +34,8 @@ const LayoutPage = () => {
     const [floorsList, setFloorsList] = useState([]);
     const [isFetchingFloor, setFetchingFloor] = useState(false);
 
+    const [selectedFloorId, setSelectedFloorId] = useState(null);
+
     const [spacesList, setSpacesList] = useState([]);
     const [isFetchingSpace, setFetchingSpace] = useState(false);
 
@@ -95,6 +97,7 @@ const LayoutPage = () => {
     };
 
     const fetchAllSpaceData = async (floor_id, bldg_id) => {
+        setSelectedFloorId(floor_id);
         setFetchingSpace(true);
         setSpacesList([]);
 
@@ -141,6 +144,7 @@ const LayoutPage = () => {
 
     useEffect(() => {
         if (bldgId) {
+            setSelectedFloorId(null);
             fetchAllFloorData(bldgId);
             setRootObj((prevStateObj) => {
                 return { ...prevStateObj, bldg_id: bldgId };
@@ -268,7 +272,9 @@ const LayoutPage = () => {
                 operationType="ADD"
                 bldgId={bldgId}
                 fetchAllFloorData={fetchAllFloorData}
+                fetchAllSpaceData={fetchAllSpaceData}
                 notifyUser={notifyUser}
+                selectedFloorId={selectedFloorId}
             />
 
             {/* Edit Floor */}
@@ -279,11 +285,13 @@ const LayoutPage = () => {
                 operationType="EDIT"
                 bldgId={bldgId}
                 fetchAllFloorData={fetchAllFloorData}
+                fetchAllSpaceData={fetchAllSpaceData}
                 notifyUser={notifyUser}
                 selectedFloorObj={selectedFloorObj}
                 setSelectedFloorObj={setSelectedFloorObj}
                 isUserAdmin={isUserAdmin}
                 canUserDelete={canUserDelete}
+                selectedFloorId={selectedFloorId}
             />
 
             {/* Add Space */}
