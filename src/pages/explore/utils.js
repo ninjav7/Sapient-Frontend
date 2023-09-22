@@ -16,7 +16,10 @@ export const exploreBldgMetrics = [
     },
 ];
 
-export const unitTypeConvertList = ['energy', 'current', 'voltage'];
+const unitTypesToBeConverted = ['energy', 'current', 'voltage'];
+
+export const calculateDataConvertion = (data, unit_type) =>
+    data === '' ? null : unitTypesToBeConverted.includes(unit_type) ? data / 1000 : data;
 
 export const isEmptyObject = (obj) => {
     return Object.keys(obj).length === 0;

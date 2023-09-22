@@ -18,7 +18,7 @@ import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 
 import { timeZone } from '../../utils/helper';
-import { exploreBldgMetrics, unitTypeConvertList, validateSeriesDataForBuildings } from './utils';
+import { exploreBldgMetrics, calculateDataConvertion, validateSeriesDataForBuildings } from './utils';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
@@ -362,23 +362,107 @@ const ExploreByBuildings = () => {
                     const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldg_id);
                     if (!bldgObj?.building_id || data.length === 0) return;
 
-                    const newBldgMappedData = data.map((el) => ({
-                        x: new Date(el?.time_stamp).getTime(),
-                        y:
-                            el?.data === ''
-                                ? null
-                                : unitTypeConvertList.includes(selectedConsumption)
-                                ? el?.data / 1000
-                                : el?.data,
-                    }));
+                    let recordToInsert = [];
 
-                    const recordToInsert = {
-                        id: bldgObj?.building_id,
-                        name: bldgObj?.building_name,
-                        data: newBldgMappedData,
-                    };
+                    if (selectedConsumption !== 'current' && selectedConsumption !== 'voltage') {
+                        const newBldgMappedData = data.map((el) => ({
+                            x: new Date(el?.time_stamp).getTime(),
+                            y: calculateDataConvertion(el?.data, selectedConsumption),
+                        }));
 
-                    setSeriesData([...seriesData, recordToInsert]);
+                        recordToInsert.push({
+                            id: bldgObj?.building_id,
+                            name: bldgObj?.building_name,
+                            data: newBldgMappedData,
+                        });
+                    } else {
+                        if (selectedConsumption === 'current') {
+                            const firstList = {
+                                id: bldgObj?.building_id,
+                                name: `${bldgObj?.building_name} - Amps_A`,
+                                data: [],
+                            };
+                            const secondList = {
+                                id: bldgObj?.building_id,
+                                name: `${bldgObj?.building_name} - Amps_B`,
+                                data: [],
+                            };
+                            const thirdList = {
+                                id: bldgObj?.building_id,
+                                name: `${bldgObj?.building_name} - Amps_C`,
+                                data: [],
+                            };
+
+                            data.map((el) => {
+                                if (el?.data === '') {
+                                    firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                    secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                    thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                } else {
+                                    firstList.data.push({
+                                        x: new Date(el?.time_stamp).getTime(),
+                                        y: calculateDataConvertion(el?.data?.Amps_A, selectedConsumption),
+                                    });
+                                    secondList.data.push({
+                                        x: new Date(el?.time_stamp).getTime(),
+                                        y: calculateDataConvertion(el?.data?.Amps_B, selectedConsumption),
+                                    });
+                                    thirdList.data.push({
+                                        x: new Date(el?.time_stamp).getTime(),
+                                        y: calculateDataConvertion(el?.data?.Amps_C, selectedConsumption),
+                                    });
+                                }
+                            });
+
+                            recordToInsert.push(firstList);
+                            recordToInsert.push(secondList);
+                            recordToInsert.push(thirdList);
+                        }
+                        if (selectedConsumption === 'voltage') {
+                            const firstList = {
+                                id: bldgObj?.building_id,
+                                name: `${bldgObj?.building_name} - Volts_A_N`,
+                                data: [],
+                            };
+                            const secondList = {
+                                id: bldgObj?.building_id,
+                                name: `${bldgObj?.building_name} - Volts_B_N`,
+                                data: [],
+                            };
+                            const thirdList = {
+                                id: bldgObj?.building_id,
+                                name: `${bldgObj?.building_name} - Volts_C_N`,
+                                data: [],
+                            };
+
+                            data.map((el) => {
+                                if (el?.data === '') {
+                                    firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                    secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                    thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                } else {
+                                    firstList.data.push({
+                                        x: new Date(el?.time_stamp).getTime(),
+                                        y: calculateDataConvertion(el?.data?.Volts_A_N, selectedConsumption),
+                                    });
+                                    secondList.data.push({
+                                        x: new Date(el?.time_stamp).getTime(),
+                                        y: calculateDataConvertion(el?.data?.Volts_B_N, selectedConsumption),
+                                    });
+                                    thirdList.data.push({
+                                        x: new Date(el?.time_stamp).getTime(),
+                                        y: calculateDataConvertion(el?.data?.Volts_C_N, selectedConsumption),
+                                    });
+                                }
+                            });
+
+                            recordToInsert.push(firstList);
+                            recordToInsert.push(secondList);
+                            recordToInsert.push(thirdList);
+                        }
+                    }
+
+                    setSeriesData([...seriesData, ...recordToInsert]);
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -386,7 +470,7 @@ const ExploreByBuildings = () => {
                             ? response?.message
                             : res
                             ? 'Unable to fetch data for selected Building.'
-                            : 'Unable to fetch data due to Internal Server Error!.';
+                            : 'Unable to fetch data due to Internal Server Error!';
                         s.notificationType = 'error';
                     });
                 }
@@ -394,7 +478,7 @@ const ExploreByBuildings = () => {
             .catch((err) => {
                 UserStore.update((s) => {
                     s.showNotification = true;
-                    s.notificationMessage = 'Unable to fetch data due to Internal Server Error!.';
+                    s.notificationMessage = 'Unable to selected Building!';
                     s.notificationType = 'error';
                 });
             });
@@ -429,21 +513,104 @@ const ExploreByBuildings = () => {
                             const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldgIDs[index]);
                             if (!bldgObj?.building_id) return;
 
-                            const newBldgsMappedData = response?.data.map((el) => ({
-                                x: new Date(el?.time_stamp).getTime(),
-                                y:
-                                    el?.data === ''
-                                        ? null
-                                        : unitTypeConvertList.includes(data_type)
-                                        ? el?.data / 1000
-                                        : el?.data,
-                            }));
+                            if (selectedConsumption !== 'current' && selectedConsumption !== 'voltage') {
+                                const newBldgsMappedData = response?.data.map((el) => ({
+                                    x: new Date(el?.time_stamp).getTime(),
+                                    y: calculateDataConvertion(el?.data, data_type),
+                                }));
 
-                            newResponse.push({
-                                id: bldgObj?.building_id,
-                                name: bldgObj?.building_name,
-                                data: newBldgsMappedData,
-                            });
+                                newResponse.push({
+                                    id: bldgObj?.building_id,
+                                    name: bldgObj?.building_name,
+                                    data: newBldgsMappedData,
+                                });
+                            } else {
+                                if (selectedConsumption === 'current') {
+                                    const firstList = {
+                                        id: bldgObj?.building_id,
+                                        name: `${bldgObj?.building_name} - Amps_A`,
+                                        data: [],
+                                    };
+                                    const secondList = {
+                                        id: bldgObj?.building_id,
+                                        name: `${bldgObj?.building_name} - Amps_B`,
+                                        data: [],
+                                    };
+                                    const thirdList = {
+                                        id: bldgObj?.building_id,
+                                        name: `${bldgObj?.building_name} - Amps_C`,
+                                        data: [],
+                                    };
+
+                                    response.data.map((el) => {
+                                        if (el?.data === '') {
+                                            firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                            secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                            thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                        } else {
+                                            firstList.data.push({
+                                                x: new Date(el?.time_stamp).getTime(),
+                                                y: calculateDataConvertion(el?.data?.Amps_A, selectedConsumption),
+                                            });
+                                            secondList.data.push({
+                                                x: new Date(el?.time_stamp).getTime(),
+                                                y: calculateDataConvertion(el?.data?.Amps_B, selectedConsumption),
+                                            });
+                                            thirdList.data.push({
+                                                x: new Date(el?.time_stamp).getTime(),
+                                                y: calculateDataConvertion(el?.data?.Amps_C, selectedConsumption),
+                                            });
+                                        }
+                                    });
+
+                                    newResponse.push(firstList);
+                                    newResponse.push(secondList);
+                                    newResponse.push(thirdList);
+                                }
+
+                                if (selectedConsumption === 'voltage') {
+                                    const firstList = {
+                                        id: bldgObj?.building_id,
+                                        name: `${bldgObj?.building_name} - Volts_A_N`,
+                                        data: [],
+                                    };
+                                    const secondList = {
+                                        id: bldgObj?.building_id,
+                                        name: `${bldgObj?.building_name} - Volts_B_N`,
+                                        data: [],
+                                    };
+                                    const thirdList = {
+                                        id: bldgObj?.building_id,
+                                        name: `${bldgObj?.building_name} - Volts_C_N`,
+                                        data: [],
+                                    };
+
+                                    response.data.map((el) => {
+                                        if (el?.data === '') {
+                                            firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                            secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                            thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                        } else {
+                                            firstList.data.push({
+                                                x: new Date(el?.time_stamp).getTime(),
+                                                y: calculateDataConvertion(el?.data?.Volts_A_N, selectedConsumption),
+                                            });
+                                            secondList.data.push({
+                                                x: new Date(el?.time_stamp).getTime(),
+                                                y: calculateDataConvertion(el?.data?.Volts_B_N, selectedConsumption),
+                                            });
+                                            thirdList.data.push({
+                                                x: new Date(el?.time_stamp).getTime(),
+                                                y: calculateDataConvertion(el?.data?.Volts_C_N, selectedConsumption),
+                                            });
+                                        }
+                                    });
+
+                                    newResponse.push(firstList);
+                                    newResponse.push(secondList);
+                                    newResponse.push(thirdList);
+                                }
+                            }
                         }
                     });
 
