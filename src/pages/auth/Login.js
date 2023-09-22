@@ -67,10 +67,31 @@ const Login = (props) => {
         setUserObj(obj);
     };
 
-    const routeToPortfolioPage = () => {
+    const redirectToPortfolioPage = () => {
         history.push({
             pathname: `/energy/portfolio/overview`,
         });
+    };
+
+    const renderRedirectToRoot = () => {
+        const isAuthTknValid = isUserAuthenticated();
+        setisAuthTokenValid(isAuthTknValid);
+        if (isAuthTknValid) {
+            history.push('/');
+        }
+    };
+
+    const handleAdminPortal = async () => {
+        UserStore.update((s) => {
+            s.error = false;
+            s.errorMessage = '';
+        });
+        await googleAuth()
+            .then((res) => {
+                let response = res.data;
+                window.open(response?.url, '_self');
+            })
+            .catch((error) => {});
     };
 
     const setSession = (userData) => {
@@ -80,7 +101,7 @@ const Login = (props) => {
             localStorage.setItem('vendorName', userData?.vendor_name);
             saveUserPreference(userData?.date_format, userData?.time_format, userData?.unit);
             cookies.set('user', JSON.stringify(userData), { path: '/' });
-            routeToPortfolioPage();
+            redirectToPortfolioPage();
         } else {
             cookies.remove('user', { path: '/' });
         }
@@ -125,27 +146,6 @@ const Login = (props) => {
         } else {
             setProcessing(false);
         }
-    };
-
-    const renderRedirectToRoot = () => {
-        const isAuthTknValid = isUserAuthenticated();
-        setisAuthTokenValid(isAuthTknValid);
-        if (isAuthTknValid) {
-            history.push('/');
-        }
-    };
-
-    const handleAdminPortal = async () => {
-        UserStore.update((s) => {
-            s.error = false;
-            s.errorMessage = '';
-        });
-        await googleAuth()
-            .then((res) => {
-                let response = res.data;
-                window.open(response?.url, '_self');
-            })
-            .catch((error) => {});
     };
 
     useEffect(() => {
