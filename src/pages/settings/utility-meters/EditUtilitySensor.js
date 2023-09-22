@@ -121,9 +121,9 @@ const MetricsTab = (props) => {
 
                                 responseData.map((el) => {
                                     if (el?.data === '') {
-                                        firstList.data.push({ x: new Date(el?.time_stamp), y: null });
-                                        secondList.data.push({ x: new Date(el?.time_stamp), y: null });
-                                        thirdList.data.push({ x: new Date(el?.time_stamp), y: null });
+                                        firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                        secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                        thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
                                     } else {
                                         firstList.data.push({
                                             x: new Date(el?.time_stamp).getTime(),
@@ -158,9 +158,9 @@ const MetricsTab = (props) => {
 
                                 responseData.map((el) => {
                                     if (el?.data === '') {
-                                        firstList.data.push({ x: new Date(el?.time_stamp), y: null });
-                                        secondList.data.push({ x: new Date(el?.time_stamp), y: null });
-                                        thirdList.data.push({ x: new Date(el?.time_stamp), y: null });
+                                        firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                        secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                        thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
                                     } else {
                                         firstList.data.push({
                                             x: new Date(el?.time_stamp).getTime(),
