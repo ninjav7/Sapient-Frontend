@@ -78,7 +78,7 @@ export function getGraphDataRequest(selectedIds, plugRuleId) {
             },
         })
         .then((res) => {
-            return res;
+            return res.data;
         });
 }
 
