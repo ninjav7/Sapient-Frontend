@@ -102,6 +102,7 @@ const Login = (props) => {
             saveUserPreference(userData?.date_format, userData?.time_format, userData?.unit);
             cookies.set('user', JSON.stringify(userData), { path: '/' });
             redirectToPortfolioPage();
+            window.location.reload();
         } else {
             cookies.remove('user', { path: '/' });
         }
