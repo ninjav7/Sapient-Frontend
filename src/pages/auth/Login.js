@@ -20,6 +20,7 @@ import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import Button from '../../sharedComponents/button/Button';
 import { Notification } from '../../sharedComponents/notification';
 
+import { validateEmail } from './utils';
 import { googleAuth } from './service';
 import { loginUser, googleLoginUser } from '../../redux/actions';
 import { isUserAuthenticated } from '../../helpers/authUtils';
@@ -109,12 +110,11 @@ const Login = (props) => {
     };
 
     const handleLogin = async () => {
-        setErrorMsg(null);
         setProcessing(true);
+        setErrorMsg(null);
 
         let alertObj = Object.assign({}, errorObj);
-
-        if (userObj?.email.length === 0 || !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,11})+$/.test(userObj?.email)) {
+        if (!validateEmail(userObj?.email)) {
             alertObj.email = `Please enter valid Email address.`;
         }
 

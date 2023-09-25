@@ -14,3 +14,21 @@ export const compareStrings = (str1, str2) => {
 };
 
 export const specialChartPattern = /[\.\,:;'"'`><\]\[}{_\/\|?\)\(=\+\-\*&%^$#@!~\\]/g;
+
+// Regular expression for email address validation
+const emailRegex =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+// Caching the regular expression
+const emailRegexCache = new Map();
+
+// Function to validate an email address.
+export const validateEmail = (email) => {
+    // If the regular expression is not already cached, compile it.
+    if (!emailRegexCache.has(emailRegex)) {
+        emailRegexCache.set(emailRegex, new RegExp(emailRegex));
+    }
+
+    // Use the cached regular expression to validate the email address.
+    return emailRegexCache.get(emailRegex).test(email);
+};
