@@ -124,7 +124,7 @@ const Login = (props) => {
 
         setErrorObj(alertObj);
 
-        if (!alertObj?.name && !alertObj?.password) {
+        if (!alertObj?.email && !alertObj?.password) {
             await axios
                 .post(`${BaseUrl}${signinV2}`, userObj)
                 .then((res) => {
