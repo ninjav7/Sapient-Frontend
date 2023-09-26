@@ -33,6 +33,11 @@ const GeneralBuildingSettings = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const [userPermission] = useAtom(userPermissionData);
+
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const canUserEdit = userPermission?.permissions?.permissions?.account_buildings_permission?.edit ?? false;
+    const canUserDelete = userPermission?.permissions?.permissions?.account_buildings_permission?.delete ?? false;
+
     const { bldgId } = useParams();
     const [selectedTimezone, setSelectedTimezone] = useState({});
     const [isEditing, setIsEditing] = useState(false);
@@ -632,10 +637,10 @@ const GeneralBuildingSettings = () => {
                 <Col lg={12}>
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <Typography.Header size={Typography.Sizes.lg}>General Building Settings</Typography.Header>
+                            <Typography.Header
+                                size={Typography.Sizes.lg}>{`General Building Settings`}</Typography.Header>
                         </div>
-                        {userPermission?.user_role === 'admin' ||
-                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                        {isUserAdmin || canUserEdit ? (
                             <div>
                                 <div className="d-flex">
                                     <Button
@@ -690,8 +695,7 @@ const GeneralBuildingSettings = () => {
                                     </Typography.Body>
                                 </div>
                                 <div className="col d-flex align-items-center">
-                                    {userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                    {isUserAdmin || canUserEdit ? (
                                         <Switch
                                             onChange={() => {
                                                 handleSwitchChange();
@@ -728,8 +732,7 @@ const GeneralBuildingSettings = () => {
                                     </Typography.Body>
                                 </div>
                                 <div className="col d-flex align-items-center">
-                                    {userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                    {isUserAdmin || canUserEdit ? (
                                         <Inputs
                                             type="text"
                                             placeholder="Enter Building Name"
@@ -763,8 +766,7 @@ const GeneralBuildingSettings = () => {
                                     </Typography.Body>
                                 </div>
                                 <div className="col d-flex align-items-center">
-                                    {userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                    {isUserAdmin || canUserEdit ? (
                                         <Select
                                             id="endUseSelect"
                                             placeholder="Select Building Type"
@@ -805,8 +807,7 @@ const GeneralBuildingSettings = () => {
                                     </Typography.Body>
                                 </div>
                                 <div className="col d-flex align-items-center">
-                                    {userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                    {isUserAdmin || canUserEdit ? (
                                         <InputTooltip
                                             type="number"
                                             onChange={(e) => {
@@ -842,11 +843,7 @@ const GeneralBuildingSettings = () => {
                                 <div className="col d-flex align-items-center">
                                     <Switch
                                         onChange={() => {
-                                            if (
-                                                userPermission?.user_role === 'admin' ||
-                                                userPermission?.permissions?.permissions?.account_buildings_permission
-                                                    ?.edit
-                                            ) {
+                                            if (isUserAdmin || canUserEdit) {
                                                 handlePlugChange();
                                             }
                                         }}
@@ -881,8 +878,7 @@ const GeneralBuildingSettings = () => {
                         <CardBody>
                             <div className="row">
                                 <div className="col d-flex align-items-center">
-                                    {userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                    {isUserAdmin || canUserEdit ? (
                                         <Inputs
                                             type="text"
                                             label="Street Address"
@@ -908,8 +904,7 @@ const GeneralBuildingSettings = () => {
                                     )}
                                 </div>
                                 <div className="col d-flex align-items-center">
-                                    {userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                    {isUserAdmin || canUserEdit ? (
                                         <Inputs
                                             type="text"
                                             label="Address 2 (optional)"
@@ -937,8 +932,7 @@ const GeneralBuildingSettings = () => {
 
                             <div className="row">
                                 <div className="col d-flex align-items-center">
-                                    {userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                    {isUserAdmin || canUserEdit ? (
                                         <Inputs
                                             type="text"
                                             label="City"
@@ -965,8 +959,7 @@ const GeneralBuildingSettings = () => {
                                 </div>
 
                                 <div className="col d-flex align-items-center">
-                                    {userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                    {isUserAdmin || canUserEdit ? (
                                         <Inputs
                                             type="text"
                                             label="State"
@@ -993,8 +986,7 @@ const GeneralBuildingSettings = () => {
                                 </div>
 
                                 <div className="col d-flex align-items-center">
-                                    {userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                    {isUserAdmin || canUserEdit ? (
                                         <Inputs
                                             type="string"
                                             label="Postal Code"
@@ -1043,8 +1035,7 @@ const GeneralBuildingSettings = () => {
                                     <Typography.Subheader size={Typography.Sizes.md}>TimeZone</Typography.Subheader>
                                 </div>
                                 <div className="col">
-                                    {userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                    {isUserAdmin || canUserEdit ? (
                                         <TimezoneSelect
                                             value={buildingDetails?.timezone ? buildingDetails?.timezone : ''}
                                             onChange={setSelectedTimezone}
@@ -1086,8 +1077,7 @@ const GeneralBuildingSettings = () => {
                                 <div className="ml-3">
                                     <>
                                         {/* Monday */}
-                                        {userPermission?.user_role === 'admin' ||
-                                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        {isUserAdmin || canUserEdit ? (
                                             <OperatingHours
                                                 timeZone={timeZone}
                                                 isOperating={!weekToggle['mon']}
@@ -1119,8 +1109,7 @@ const GeneralBuildingSettings = () => {
                                         )}
 
                                         {/* Tuesday */}
-                                        {userPermission?.user_role === 'admin' ||
-                                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        {isUserAdmin || canUserEdit ? (
                                             <OperatingHours
                                                 timeZone={timeZone}
                                                 isOperating={!weekToggle['tue']}
@@ -1152,8 +1141,7 @@ const GeneralBuildingSettings = () => {
                                         )}
 
                                         {/* Wednesday */}
-                                        {userPermission?.user_role === 'admin' ||
-                                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        {isUserAdmin || canUserEdit ? (
                                             <OperatingHours
                                                 timeZone={timeZone}
                                                 isOperating={!weekToggle['wed']}
@@ -1185,8 +1173,7 @@ const GeneralBuildingSettings = () => {
                                         )}
 
                                         {/* Thursday */}
-                                        {userPermission?.user_role === 'admin' ||
-                                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        {isUserAdmin || canUserEdit ? (
                                             <OperatingHours
                                                 timeZone={timeZone}
                                                 isOperating={!weekToggle['thu']}
@@ -1218,8 +1205,7 @@ const GeneralBuildingSettings = () => {
                                         )}
 
                                         {/* Friday */}
-                                        {userPermission?.user_role === 'admin' ||
-                                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        {isUserAdmin || canUserEdit ? (
                                             <OperatingHours
                                                 timeZone={timeZone}
                                                 isOperating={!weekToggle['fri']}
@@ -1251,8 +1237,7 @@ const GeneralBuildingSettings = () => {
                                         )}
 
                                         {/* Saturday */}
-                                        {userPermission?.user_role === 'admin' ||
-                                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        {isUserAdmin || canUserEdit ? (
                                             <OperatingHours
                                                 timeZone={timeZone}
                                                 isOperating={!weekToggle['sat']}
@@ -1284,8 +1269,7 @@ const GeneralBuildingSettings = () => {
                                         )}
 
                                         {/* Sunday */}
-                                        {userPermission?.user_role === 'admin' ||
-                                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        {isUserAdmin || canUserEdit ? (
                                             <OperatingHours
                                                 timeZone={timeZone}
                                                 isOperating={!weekToggle['sun']}
@@ -1325,8 +1309,7 @@ const GeneralBuildingSettings = () => {
 
             <Brick sizeInRem={2} />
 
-            {userPermission?.user_role === 'admin' ||
-            userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+            {isUserAdmin || canUserDelete ? (
                 <Row>
                     <Col lg={9}>
                         <div className="custom-card">
@@ -1335,7 +1318,7 @@ const GeneralBuildingSettings = () => {
                                     <Typography.Subheader
                                         size={Typography.Sizes.md}
                                         style={{ color: colorPalette.primaryGray550 }}>
-                                        Danger Zone
+                                        {`Danger Zone`}
                                     </Typography.Subheader>
                                 </div>
                             </CardHeader>
