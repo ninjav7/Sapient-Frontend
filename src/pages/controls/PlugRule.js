@@ -9,6 +9,7 @@ import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ButtonGroup } from '../../sharedComponents/buttonGroup';
 import { ComponentStore } from '../../store/ComponentStore';
+import { UncontrolledTooltip } from 'reactstrap';
 import Button from '../../sharedComponents/button/Button';
 import { Spinner } from 'reactstrap';
 import { fetchPlugRules, getEstimateSensorSavingsRequst } from '../../services/plugRules';
@@ -198,6 +199,7 @@ const PlugRule = () => {
         name: '',
         building_id: '',
         description: '',
+        current_job_log: [],
     };
     const [currentData, setCurrentData] = useState(initialCurrentData);
     const [activeBuildingId, setActiveBuildingId] = useState('');
@@ -2406,6 +2408,10 @@ const PlugRule = () => {
     useEffect(() => {
         confirmButtonDisabledState();
     }, [socketsTab, isChangedSocketsLinked, isChangedSocketsUnlinked]);
+    const currentJobLog =
+        currentData?.current_job_log?.length < 1
+            ? currentData.current_job_log[currentData?.current_job_log?.length - 1]
+            : currentData?.current_job_log[0];
     return (
         <>
             <div className="single-plug-rule-container">
@@ -2420,23 +2426,37 @@ const PlugRule = () => {
                         </div>
                     </div>
                     <div className="plug-rule-right-flex">
-                        {!isViewer && (
-                            <div className="plug-rule-switch-header">
-                                <Switch
-                                    onChange={() => {
-                                        handleSwitchChange();
-                                    }}
-                                    checked={currentData.is_active}
-                                    onColor={colorPalette.datavizBlue600}
-                                    uncheckedIcon={false}
-                                    checkedIcon={false}
-                                    className="react-switch"
-                                    height={20}
-                                    width={36}
-                                />
-                                <span className="ml-2 plug-rule-switch-font">Active</span>
-                            </div>
-                        )}
+                        <div>
+                            {!isViewer && (
+                                <div className="plug-rule-switch-header">
+                                    <Switch
+                                        onChange={() => {
+                                            handleSwitchChange();
+                                        }}
+                                        checked={currentData.is_active}
+                                        onColor={colorPalette.datavizBlue600}
+                                        uncheckedIcon={false}
+                                        checkedIcon={false}
+                                        className="react-switch"
+                                        height={20}
+                                        width={36}
+                                    />
+                                    <span className="ml-2 plug-rule-switch-font">Active</span>
+                                </div>
+                            )}
+                            <UncontrolledTooltip placement="top" target={'tooltip-1'}>
+                                {currentJobLog?.msg}
+                            </UncontrolledTooltip>
+
+                            <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center ">
+                                <span className="cursor-pointer" id={'tooltip-1'}>
+                                    Status: {currentData?.status}
+                                </span>
+                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.sm}>
+                                Last Update: {moment(currentJobLog?.time_stamp).format('MM/DD HH:mm:ss')}
+                            </Typography.Subheader>
+                        </div>
 
                         <div className="cancel-and-save-flex">
                             <button
