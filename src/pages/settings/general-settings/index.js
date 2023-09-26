@@ -18,7 +18,9 @@ import Button from '../../../sharedComponents/button/Button';
 import Inputs from '../../../sharedComponents/form/input/Input';
 import Select from '../../../sharedComponents/form/select';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
+
 import OperatingHours from './OperatingHours';
+import DeleteBldg from './DeleteBldg';
 
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 
@@ -78,6 +80,19 @@ const GeneralBuildingSettings = () => {
         sunFrom: '',
         sunTo: '',
     });
+
+    const [showDeleteModal, setShowDelete] = useState(false);
+    const closeDeleteAlert = () => setShowDelete(false);
+    const showDeleteAlert = () => setShowDelete(true);
+
+    const onSave = () => {
+        closeDeleteAlert();
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = 'Failed to delete this Building.';
+            s.notificationType = 'error';
+        });
+    };
 
     const operationTime = {
         operating_hours: {
@@ -1084,7 +1099,7 @@ const GeneralBuildingSettings = () => {
                                         label="Delete Building"
                                         size={Button.Sizes.md}
                                         type={Button.Type.secondaryDistructive}
-                                        // onClick={deleteBuildingHandler} -- Will be enabled once API is ready
+                                        onClick={showDeleteAlert}
                                         icon={<DeleteSVG />}
                                     />
                                 </div>
@@ -1093,6 +1108,8 @@ const GeneralBuildingSettings = () => {
                     </Col>
                 </Row>
             ) : null}
+
+            <DeleteBldg isModalOpen={showDeleteModal} onCancel={closeDeleteAlert} onSave={onSave} />
         </React.Fragment>
     );
 };
