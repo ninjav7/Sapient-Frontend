@@ -26,25 +26,15 @@ const OperatingHours = (props) => {
                 className="d-flex justify-content-start align-items-center"
                 style={{ opacity: props.isOperating ? '0.3' : '1' }}>
                 <div className="d-flex align-items-center mr-4">
-                    {isUserAdmin || canUserEdit ? (
-                        <Switch
-                            onChange={props.onSwitchToggle}
-                            checked={!props.isOperating}
-                            onColor={colorPalette.datavizBlue600}
-                            uncheckedIcon={false}
-                            checkedIcon={false}
-                            className="react-switch"
-                        />
-                    ) : (
-                        <Switch
-                            onChange={() => {}}
-                            checked={!props.isOperating}
-                            onColor={colorPalette.datavizBlue600}
-                            className="react-switch"
-                            uncheckedIcon={false}
-                            checkedIcon={false}
-                        />
-                    )}
+                    <Switch
+                        onChange={props.onSwitchToggle}
+                        checked={!props.isOperating}
+                        onColor={colorPalette.datavizBlue600}
+                        uncheckedIcon={false}
+                        checkedIcon={false}
+                        className="react-switch"
+                        disabled={!isUserAdmin || !canUserEdit}
+                    />
                 </div>
 
                 <div className="d-flex weekday-container justify-content-center mr-4">
