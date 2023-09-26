@@ -38,11 +38,6 @@ import { UserStore } from '../../store/UserStore';
 import SkeletonLoader from '../../components/SkeletonLoader';
 import './style.scss';
 
-export const handleUnitConverstion = (value = 0, currentType = 'imp') => {
-    if (currentType === 'si') value = value / 10.7639;
-    return value;
-};
-
 const CarbonOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
@@ -280,7 +275,7 @@ const CarbonOverview = () => {
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
                     {row?.average_carbon_intensity !== null ? parseFloat(row?.average_carbon_intensity).toFixed(2) : 0}{' '}
-                    {userPrefUnits === 'si' ? `${UNITS.ibs}/MWh` : `${UNITS.kg}/MWh`}
+                    {userPrefUnits === 'si' ? `${UNITS.kg}/MWh` : `${UNITS.ibs}/MWh`}
                 </Typography.Body>
             </>
         );
@@ -290,7 +285,7 @@ const CarbonOverview = () => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
                 {Math.round(row.total_carbon_emissions / 1000)}{' '}
-                {userPrefUnits === 'si' ? `${UNITS.ibs}` : `${UNITS.kg}`}
+                {userPrefUnits === 'si' ? `${UNITS.kg}` : `${UNITS.ibs}`}
             </Typography.Body>
         );
     };
