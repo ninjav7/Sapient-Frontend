@@ -49,10 +49,6 @@ const GeneralBuildingSettings = () => {
     const [buildingOperatingHours, setBuildingOperatingHours] = useState({});
 
     const [weekToggle, setWeekToggle] = useState({});
-    const [inputField, setInputField] = useState({
-        kWh: 0,
-        total_paid: 0,
-    });
 
     const [timeZone, setTimeZone] = useState('12');
     const [isProcessing, setProcessing] = useState(false);
@@ -245,7 +241,6 @@ const GeneralBuildingSettings = () => {
         await updateGeneralBuildingChange(params, payload)
             .then((res) => {
                 const response = res?.data;
-                console.log('SSR response => ', response);
                 if (response?.success) {
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -264,7 +259,6 @@ const GeneralBuildingSettings = () => {
                 }
             })
             .catch((error) => {
-                const response = error?.response;
                 UserStore.update((s) => {
                     s.showNotification = true;
                     s.notificationMessage = 'Unable to update Building Details.';
@@ -352,6 +346,8 @@ const GeneralBuildingSettings = () => {
 
     useEffect(() => {
         fetchBuildingType();
+        window.scrollTo(0, 0);
+        updateBreadcrumbStore();
     }, [bldgId]);
 
     useEffect(() => {
@@ -389,11 +385,6 @@ const GeneralBuildingSettings = () => {
                 );
         }
     }, [buildingListData, bldgId]);
-
-    useEffect(() => {
-        window.scrollTo(0, 0);
-        updateBreadcrumbStore();
-    }, [bldgId]);
 
     // Planned for Future Use
     // const getGooglePlacesAutocomplete = async () => {
