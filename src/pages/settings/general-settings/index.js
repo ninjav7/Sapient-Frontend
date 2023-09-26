@@ -48,7 +48,6 @@ const GeneralBuildingSettings = () => {
 
     const [buildingOperatingHours, setBuildingOperatingHours] = useState({});
 
-    const [render, setRender] = useState(false);
     const [weekToggle, setWeekToggle] = useState({});
     const [inputField, setInputField] = useState({
         kWh: 0,
@@ -379,50 +378,6 @@ const GeneralBuildingSettings = () => {
     }, [bldgId, buildingListData]);
 
     useEffect(() => {
-        let fixing = true;
-
-        const fetchBuildingData = async () => {
-            if (fixing) {
-                let data = {};
-                if (bldgId) {
-                    data = buildingListData.find((el) => el.building_id === bldgId);
-                    if (data === undefined) {
-                        return (fixing = false);
-                    }
-                    setInputField({
-                        ...inputField,
-                        active: data.active,
-                        name: data.building_name,
-                        square_footage: data.building_size,
-                        building_type: data.building_type,
-                        street_address: data.street_address,
-                        address_2: data.address_2,
-                        city: data.city,
-                        state: data.state,
-                        zip_code: data.zip_code,
-                        timezone: data.timezone,
-                        time_format: data.time_format,
-                        operating_hours: data.operating_hours,
-                    });
-                    const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
-
-                    setWeekToggle({
-                        mon: mon['stat'],
-                        tue: tue['stat'],
-                        wed: wed['stat'],
-                        thu: thu['stat'],
-                        fri: fri['stat'],
-                        sat: sat['stat'],
-                        sun: sun['stat'],
-                    });
-                }
-            }
-        };
-
-        fetchBuildingData();
-    }, [render]);
-
-    useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             if (bldgObj?.building_id)
@@ -438,7 +393,7 @@ const GeneralBuildingSettings = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
         updateBreadcrumbStore();
-    }, []);
+    }, [bldgId]);
 
     // Planned for Future Use
     // const getGooglePlacesAutocomplete = async () => {
