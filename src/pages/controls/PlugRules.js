@@ -357,7 +357,7 @@ const PlugRules = () => {
         return (
             <>
                 <UncontrolledTooltip placement="top" target={'tooltip-' + row.id}>
-                    {row.current_job_log[row.current_job_log.length - 1].msg}
+                    {row.current_job_log[row.current_job_log.length - 1]?.msg}
                 </UncontrolledTooltip>
 
                 <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center ">
@@ -370,9 +370,11 @@ const PlugRules = () => {
     };
     const renderTimeStamp = (row) => {
         return (
-                <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center">
-                    {moment(row.current_job_log[row.current_job_log.length - 1].time_stamp).format('MM/DD HH:mm:ss')}
-                </Typography.Subheader>
+            <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center">
+                {row.current_job_log[row.current_job_log.length - 1]?.time_stamp
+                    ? moment(row.current_job_log[row.current_job_log.length - 1]?.time_stamp).format('MM/DD HH:mm:ss')
+                    : ''}
+            </Typography.Subheader>
         );
     };
     const headerProps = [
