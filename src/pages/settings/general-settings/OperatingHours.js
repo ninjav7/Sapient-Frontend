@@ -16,6 +16,9 @@ import { startIntervalOption12, endIntervalOption12, startIntervalOption24, endI
 const OperatingHours = (props) => {
     const [userPermission] = useAtom(userPermissionData);
 
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const canUserEdit = userPermission?.permissions?.permissions?.account_buildings_permission?.edit ?? false;
+
     return (
         <>
             {props.weekDay !== 'Mon' && <Brick sizeInRem={1} />}
@@ -23,26 +26,15 @@ const OperatingHours = (props) => {
                 className="d-flex justify-content-start align-items-center"
                 style={{ opacity: props.isOperating ? '0.3' : '1' }}>
                 <div className="d-flex align-items-center mr-4">
-                    {userPermission?.user_role === 'admin' ||
-                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
-                        <Switch
-                            onChange={props.onSwitchToggle}
-                            checked={!props.isOperating}
-                            onColor={colorPalette.datavizBlue600}
-                            uncheckedIcon={false}
-                            checkedIcon={false}
-                            className="react-switch"
-                        />
-                    ) : (
-                        <Switch
-                            onChange={() => {}}
-                            checked={!props.isOperating}
-                            onColor={colorPalette.datavizBlue600}
-                            className="react-switch"
-                            uncheckedIcon={false}
-                            checkedIcon={false}
-                        />
-                    )}
+                    <Switch
+                        onChange={props.onSwitchToggle}
+                        checked={!props.isOperating}
+                        onColor={colorPalette.datavizBlue600}
+                        uncheckedIcon={false}
+                        checkedIcon={false}
+                        className="react-switch"
+                        disabled={!isUserAdmin || !canUserEdit}
+                    />
                 </div>
 
                 <div className="d-flex weekday-container justify-content-center mr-4">
@@ -53,8 +45,7 @@ const OperatingHours = (props) => {
 
                 <div className="d-flex align-items-center">
                     <div>
-                        {userPermission?.user_role === 'admin' ||
-                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                        {isUserAdmin || canUserEdit ? (
                             <Select
                                 defaultValue={props.startTime}
                                 options={props.timeZone === '12' ? startIntervalOption12 : startIntervalOption24}
@@ -71,8 +62,7 @@ const OperatingHours = (props) => {
                     </div>
 
                     <div>
-                        {userPermission?.user_role === 'admin' ||
-                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                        {isUserAdmin || canUserEdit ? (
                             <Select
                                 defaultValue={props.endTime}
                                 options={props.timeZone === '12' ? endIntervalOption12 : endIntervalOption24}
