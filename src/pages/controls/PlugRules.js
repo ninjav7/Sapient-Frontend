@@ -7,6 +7,8 @@ import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { ReactComponent as PlusSVG } from '../../assets/icon/plus.svg';
 import { Cookies } from 'react-cookie';
 import Modal from 'react-bootstrap/Modal';
+import moment from 'moment';
+import { UncontrolledTooltip } from 'reactstrap';
 import { fetchPlugRules, updatePlugRuleRequest, createPlugRuleRequest } from '../../services/plugRules';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
@@ -59,6 +61,12 @@ const SkeletonLoading = () => (
                 <Skeleton count={10} />
             </th>
 
+            <th>
+                <Skeleton count={10} />
+            </th>
+            <th>
+                <Skeleton count={10} />
+            </th>
             <th>
                 <Skeleton count={10} />
             </th>
@@ -345,12 +353,36 @@ const PlugRules = () => {
         );
     };
 
+    const renderJobLog = (row) => {
+        return (
+            <>
+                <UncontrolledTooltip placement="top" target={'tooltip-' + row.id}>
+                    {row.current_job_log[row.current_job_log.length - 1].msg}
+                </UncontrolledTooltip>
+
+                <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center ">
+                    <span className="cursor-pointer" id={'tooltip-' + row.id}>
+                        {row.status}
+                    </span>
+                </Typography.Subheader>
+            </>
+        );
+    };
+    const renderTimeStamp = (row) => {
+        return (
+                <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center">
+                    {moment(row.current_job_log[row.current_job_log.length - 1].time_stamp).format('MM/DD HH:mm:ss')}
+                </Typography.Subheader>
+        );
+    };
     const headerProps = [
         { name: 'Name', accessor: 'name', onSort: (method, name) => setSort({ method, name }) },
         { name: 'Description', accessor: 'description', onSort: (method, name) => setSort({ method, name }) },
         { name: 'Building', accessor: 'buildings' },
         { name: 'Status', accessor: 'status', callbackValue: renderStatus },
         { name: 'Days', accessor: 'days' },
+        { name: 'Schedule Status', accessor: 'current_job_log', callbackValue: renderJobLog },
+        { name: 'Timestamp', accessor: 'current_job_log', callbackValue: renderTimeStamp },
         { name: 'Socket Count', accessor: 'sensors_count', onSort: (method, name) => setSort({ method, name }) },
     ];
 
