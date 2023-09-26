@@ -502,7 +502,7 @@ const GeneralBuildingSettings = () => {
                                         placeholder={
                                             isUserAdmin || canUserEdit
                                                 ? `Enter Building Name`
-                                                : `Building Name Not Added`
+                                                : `Building name not added`
                                         }
                                         onChange={(e) => {
                                             handleChange('name', e.target.value);
@@ -547,7 +547,7 @@ const GeneralBuildingSettings = () => {
                                     ) : (
                                         <Inputs
                                             type="text"
-                                            placeholder="Building Type not selected"
+                                            placeholder="Building type not selected"
                                             className="w-100"
                                             value={bldgData?.building_type}
                                             disabled
@@ -585,7 +585,7 @@ const GeneralBuildingSettings = () => {
                                     ) : (
                                         <Inputs
                                             type="text"
-                                            placeholder="Building Size Not Added"
+                                            placeholder="Building size not added"
                                             className="w-100"
                                             value={Math.round(bldgData?.square_footage)}
                                             disabled
@@ -661,7 +661,7 @@ const GeneralBuildingSettings = () => {
                                         placeholder={
                                             isUserAdmin || !canUserEdit
                                                 ? `Enter Address 2 (optional)`
-                                                : `Address Not Added`
+                                                : `Address not added`
                                         }
                                         onChange={(e) => {
                                             handleChange('address_2', e.target.value);
@@ -680,7 +680,7 @@ const GeneralBuildingSettings = () => {
                                     <Inputs
                                         type="text"
                                         label="City"
-                                        placeholder={isUserAdmin || !canUserEdit ? `Enter City` : `City is Not Added`}
+                                        placeholder={isUserAdmin || !canUserEdit ? `Enter City` : `City is not added`}
                                         onChange={(e) => {
                                             handleChange('city', e.target.value);
                                         }}
@@ -694,7 +694,7 @@ const GeneralBuildingSettings = () => {
                                     <Inputs
                                         type="text"
                                         label="State"
-                                        placeholder={isUserAdmin || !canUserEdit ? `Enter State` : `State is Not Added`}
+                                        placeholder={isUserAdmin || !canUserEdit ? `Enter State` : `State is not added`}
                                         onChange={(e) => {
                                             handleChange('state', e.target.value);
                                         }}
@@ -709,7 +709,9 @@ const GeneralBuildingSettings = () => {
                                         type="string"
                                         label="Postal Code"
                                         placeholder={
-                                            isUserAdmin || !canUserEdit ? `Enter Postal Code` : `Zip is not added.`
+                                            isUserAdmin || !canUserEdit
+                                                ? `Enter Postal Code`
+                                                : `Postal code is not added.`
                                         }
                                         onChange={(e) => {
                                             handleChange('zip_code', e.target.value);
@@ -742,7 +744,7 @@ const GeneralBuildingSettings = () => {
                             <div className="row">
                                 <div className="col d-flex align-items-center">
                                     <Inputs
-                                        type="text"
+                                        type="number"
                                         label="Latitude"
                                         placeholder={
                                             isUserAdmin || !canUserEdit ? `Enter Latitude` : `Latitude not set`
@@ -758,7 +760,7 @@ const GeneralBuildingSettings = () => {
 
                                 <div className="col d-flex align-items-center">
                                     <Inputs
-                                        type="text"
+                                        type="number"
                                         label="Longitude"
                                         placeholder={
                                             isUserAdmin || !canUserEdit ? `Enter Longitude` : `Longitude not set`
