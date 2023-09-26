@@ -17,7 +17,7 @@ const OperatingHours = (props) => {
     const [userPermission] = useAtom(userPermissionData);
 
     const isUserAdmin = userPermission?.is_admin ?? false;
-    const canUserEdit = userPermission?.permissions?.permissions?.building_details_permission?.edit ?? false;
+    const canUserEdit = userPermission?.permissions?.permissions?.account_buildings_permission?.edit ?? false;
 
     return (
         <>
