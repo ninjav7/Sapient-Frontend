@@ -16,6 +16,9 @@ import { startIntervalOption12, endIntervalOption12, startIntervalOption24, endI
 const OperatingHours = (props) => {
     const [userPermission] = useAtom(userPermissionData);
 
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const canUserEdit = userPermission?.permissions?.permissions?.building_details_permission?.edit ?? false;
+
     return (
         <>
             {props.weekDay !== 'Mon' && <Brick sizeInRem={1} />}
@@ -23,8 +26,7 @@ const OperatingHours = (props) => {
                 className="d-flex justify-content-start align-items-center"
                 style={{ opacity: props.isOperating ? '0.3' : '1' }}>
                 <div className="d-flex align-items-center mr-4">
-                    {userPermission?.user_role === 'admin' ||
-                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                    {isUserAdmin || canUserEdit ? (
                         <Switch
                             onChange={props.onSwitchToggle}
                             checked={!props.isOperating}
@@ -53,8 +55,7 @@ const OperatingHours = (props) => {
 
                 <div className="d-flex align-items-center">
                     <div>
-                        {userPermission?.user_role === 'admin' ||
-                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                        {isUserAdmin || canUserEdit ? (
                             <Select
                                 defaultValue={props.startTime}
                                 options={props.timeZone === '12' ? startIntervalOption12 : startIntervalOption24}
@@ -71,8 +72,7 @@ const OperatingHours = (props) => {
                     </div>
 
                     <div>
-                        {userPermission?.user_role === 'admin' ||
-                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                        {isUserAdmin || canUserEdit ? (
                             <Select
                                 defaultValue={props.endTime}
                                 options={props.timeZone === '12' ? endIntervalOption12 : endIntervalOption24}

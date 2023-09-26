@@ -35,8 +35,8 @@ const GeneralBuildingSettings = () => {
     const [userPermission] = useAtom(userPermissionData);
 
     const isUserAdmin = userPermission?.is_admin ?? false;
-    const canUserEdit = userPermission?.permissions?.permissions?.account_buildings_permission?.edit ?? false;
-    const canUserDelete = userPermission?.permissions?.permissions?.account_buildings_permission?.delete ?? false;
+    const canUserEdit = userPermission?.permissions?.permissions?.building_details_permission?.edit ?? false;
+    const canUserDelete = userPermission?.permissions?.permissions?.building_details_permission?.delete ?? false;
 
     const { bldgId } = useParams();
     const [selectedTimezone, setSelectedTimezone] = useState({});
