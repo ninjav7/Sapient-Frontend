@@ -72,6 +72,21 @@ const LayoutPage = () => {
         });
     };
 
+    const sortedLayoutData = (dataList) => {
+        const sortedList = _.sortBy(dataList, (obj) => {
+            const name = obj?.name.toLowerCase();
+            const match = name.match(/(\D+)(\d+)/);
+
+            if (match) {
+                const [, prefix, number] = match;
+                return [prefix, _.padStart(number, 5, '0')];
+            }
+            return name;
+        });
+
+        return sortedList;
+    };
+
     const fetchAllFloorData = async (bldg_id) => {
         setFetchingFloor(true);
         setFloorsList([]);
@@ -83,7 +98,7 @@ const LayoutPage = () => {
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
-                    if (response?.data.length !== 0) setFloorsList(response?.data);
+                    if (response?.data.length !== 0) setFloorsList(sortedLayoutData(response?.data));
                 } else {
                     notifyUser(Notification.Types.success, 'Failed to fetch Floors.');
                 }
@@ -107,7 +122,7 @@ const LayoutPage = () => {
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
-                    if (response?.data.length !== 0) setSpacesList(response?.data);
+                    if (response?.data.length !== 0) setSpacesList(sortedLayoutData(response?.data));
                 } else {
                     notifyUser(Notification.Types.error, 'Failed to fetch Spaces.');
                 }
