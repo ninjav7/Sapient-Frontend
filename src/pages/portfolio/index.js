@@ -20,13 +20,14 @@ import { buildingData, userPermissionData } from '../../store/globalState';
 import { apiRequestBody } from '../../helpers/helpers';
 import Brick from '../../sharedComponents/brick';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
-import colors from '../../assets/scss/_colors.scss';
 import { UNITS } from '../../constants/units';
+import { validateIntervals } from '../../sharedComponents/helpers/helper';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { UserStore } from '../../store/UserStore';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import colors from '../../assets/scss/_colors.scss';
 import colorPalette from '../../assets/scss/_colors.scss';
 import './style.scss';
 
@@ -80,6 +81,8 @@ const PortfolioOverview = () => {
             },
         },
     });
+
+    const consumptionType = validateIntervals(daysCount);
 
     const formatXaxis = ({ value }) => {
         return moment.utc(value).format(`${dateFormat}`);
@@ -281,7 +284,7 @@ const PortfolioOverview = () => {
                         <Col xl={6}>
                             <ColumnChart
                                 title="Total Energy Consumption"
-                                subTitle="Hourly Energy Consumption (kWh)"
+                                subTitle={`${consumptionType} Energy Consumption (kWh)`}
                                 colors={[colors.datavizMain2, colors.datavizMain1]}
                                 categories={energyConsumptionsCategories}
                                 tooltipUnit={UNITS.KWH}

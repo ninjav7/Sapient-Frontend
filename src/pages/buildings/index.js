@@ -32,17 +32,17 @@ import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import EquipChartModal from '../chartModal/EquipChartModal';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import colors from '../../assets/scss/_colors.scss';
+import { validateIntervals } from '../../sharedComponents/helpers/helper';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
 import { getWeatherData } from '../../services/weather';
+import Brick from '../../sharedComponents/brick';
 import EnergyConsumptionChart from './energy-consumption/EnergyConsumptionChart';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import colorPalette from '../../assets/scss/_colors.scss';
 import './style.css';
-import Brick from '../../sharedComponents/brick';
-import { Row } from 'reactstrap';
 
 const BuildingOverview = () => {
     const { bldgId } = useParams();
@@ -58,6 +58,8 @@ const BuildingOverview = () => {
     const userPrefUnits = UserStore.useState((s) => s.unit);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+
+    const consumptionType = validateIntervals(daysCount);
 
     const [isFetchingKPIsData, setFetchingKPIsData] = useState(false);
     const [overallBldgData, setOverallBldgData] = useState({
@@ -621,7 +623,7 @@ const BuildingOverview = () => {
                         <>
                             <ColumnChart
                                 title="Total Energy Consumption"
-                                subTitle="Hourly Energy Consumption (kWh)"
+                                subTitle={`${consumptionType} Energy Consumption (kWh)`}
                                 onMoreDetail={() => handleRouteChange('/energy/end-uses/plug')}
                                 colors={[colors.datavizMain2]}
                                 categories={energyConsumptionsCategories}
@@ -632,7 +634,7 @@ const BuildingOverview = () => {
                                 xAxisCallBackValue={formatXaxis}
                                 restChartProps={xAxisObj}
                                 tooltipCallBackValue={toolTipFormatter}
-                                temperatureSeries={weatherData}
+                                // temperatureSeries={weatherData}
                                 plotBands={null}
                                 withTemp={isWeatherChartVisible}
                                 isChartLoading={isEnergyChartLoading}
@@ -673,7 +675,7 @@ const BuildingOverview = () => {
                             <div className="mt-4">
                                 <ColumnChart
                                     title="Total Energy Consumption"
-                                    subTitle="Hourly Energy Consumption (kWh)"
+                                    subTitle={`${consumptionType} Energy Consumption (kWh)`}
                                     onMoreDetail={() => handleRouteChange('/energy/end-uses')}
                                     colors={[colors.datavizMain2]}
                                     categories={energyConsumptionsCategories}
@@ -684,16 +686,16 @@ const BuildingOverview = () => {
                                     xAxisCallBackValue={formatXaxis}
                                     restChartProps={xAxisObj}
                                     tooltipCallBackValue={toolTipFormatter}
-                                    temperatureSeries={weatherData}
+                                    // temperatureSeries={weatherData}
                                     plotBands={null}
-                                    upperLegendsProps={{
-                                        weather: {
-                                            onClick: ({ withTemp }) => {
-                                                setWeatherChartVisibility(withTemp);
-                                            },
-                                            isAlwaysShown: true,
-                                        },
-                                    }}
+                                    // upperLegendsProps={{
+                                    //     weather: {
+                                    //         onClick: ({ withTemp }) => {
+                                    //             setWeatherChartVisibility(withTemp);
+                                    //         },
+                                    //         isAlwaysShown: true,
+                                    //     },
+                                    // }}
                                     withTemp={isWeatherChartVisible}
                                     isChartLoading={isEnergyChartLoading}
                                 />
