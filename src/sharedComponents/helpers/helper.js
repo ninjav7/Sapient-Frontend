@@ -258,6 +258,14 @@ const xaxisFilters = (daysCount, timezone) => {
 
 const formatConsumptionValue = (value, fixed) => value.toLocaleString(undefined, { maximumFractionDigits: fixed });
 
+const validateConsumptionIntervals = (daysCount) => {
+    console.log('SSR daysCount => ', daysCount);
+    let label = 'Hourly';
+    if (daysCount >= 31 && daysCount <= 94) label = 'Daily';
+    if (daysCount > 94) label = 'Monthly';
+    return label;
+};
+
 const xaxisCategoryByHour = [
     '12AM',
     '1AM',
@@ -305,4 +313,5 @@ export {
     formatConsumptionValue,
     xaxisCategoryByHour,
     renderElementIfValid,
+    validateConsumptionIntervals,
 };
