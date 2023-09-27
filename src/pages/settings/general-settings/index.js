@@ -770,6 +770,7 @@ const GeneralBuildingSettings = () => {
                                             handleChange('latitude', e.target.value);
                                         }}
                                         className="w-100"
+                                        inputClassName="custom-input-field"
                                         value={bldgData?.latitude}
                                         disabled={!(isSuperAdmin || canUserEdit)}
                                     />
@@ -786,6 +787,7 @@ const GeneralBuildingSettings = () => {
                                             handleChange('longitude', e.target.value);
                                         }}
                                         className="w-100"
+                                        inputClassName="custom-input-field"
                                         value={bldgData?.longitude}
                                         disabled={!(isSuperAdmin || canUserEdit)}
                                     />
