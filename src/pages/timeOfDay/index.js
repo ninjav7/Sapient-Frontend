@@ -780,6 +780,11 @@ const TimeOfDay = () => {
                                 );
                             },
                         },
+                        gridLineWidth: null,
+                        alternateGridColor: null,
+                    },
+                    yAxis: {
+                        gridLineWidth: 1,
                     },
                 }}
             />
