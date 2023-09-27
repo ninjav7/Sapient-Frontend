@@ -822,7 +822,7 @@ const GeneralBuildingSettings = () => {
                                         }}
                                         className="react-select-wrapper w-100"
                                         placeholder="Select TimeZone"
-                                        isdisabled={!(isSuperAdmin || canUserEdit)}
+                                        isDisabled={!(isSuperAdmin || canUserEdit)}
                                     />
                                 </div>
                             </div>
