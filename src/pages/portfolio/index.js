@@ -21,7 +21,7 @@ import { apiRequestBody } from '../../helpers/helpers';
 import Brick from '../../sharedComponents/brick';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import { UNITS } from '../../constants/units';
-import { validateConsumptionIntervals } from '../../sharedComponents/helpers/helper';
+import { validateIntervals } from '../../sharedComponents/helpers/helper';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { UserStore } from '../../store/UserStore';
@@ -82,7 +82,7 @@ const PortfolioOverview = () => {
         },
     });
 
-    const consumptionType = validateConsumptionIntervals(daysCount);
+    const consumptionType = validateIntervals(daysCount);
 
     const formatXaxis = ({ value }) => {
         return moment.utc(value).format(`${dateFormat}`);

@@ -32,7 +32,7 @@ import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import EquipChartModal from '../chartModal/EquipChartModal';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import colors from '../../assets/scss/_colors.scss';
-import { validateConsumptionIntervals } from '../../sharedComponents/helpers/helper';
+import { validateIntervals } from '../../sharedComponents/helpers/helper';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
@@ -59,7 +59,7 @@ const BuildingOverview = () => {
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
-    const consumptionType = validateConsumptionIntervals(daysCount);
+    const consumptionType = validateIntervals(daysCount);
 
     const [isFetchingKPIsData, setFetchingKPIsData] = useState(false);
     const [overallBldgData, setOverallBldgData] = useState({
