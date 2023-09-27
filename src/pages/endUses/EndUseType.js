@@ -379,16 +379,16 @@ const EndUseType = () => {
                     xAxisCallBackValue={formatXaxis}
                     restChartProps={xAxisObj}
                     tooltipCallBackValue={toolTipFormatter}
-                    temperatureSeries={weatherData}
+                    // temperatureSeries={weatherData}
                     plotBands={null}
-                    upperLegendsProps={{
-                        weather: {
-                            onClick: ({ withTemp }) => {
-                                setWeatherChartVisibility(withTemp);
-                            },
-                            isAlwaysShown: true,
-                        },
-                    }}
+                    // upperLegendsProps={{
+                    //     weather: {
+                    //         onClick: ({ withTemp }) => {
+                    //             setWeatherChartVisibility(withTemp);
+                    //         },
+                    //         isAlwaysShown: true,
+                    //     },
+                    // }}
                     withTemp={isWeatherChartVisible}
                     isChartLoading={isEnergyChartLoading}
                 />
