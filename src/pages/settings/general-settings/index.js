@@ -39,6 +39,8 @@ const GeneralBuildingSettings = () => {
     const [userPermission] = useAtom(userPermissionData);
 
     const isUserAdmin = userPermission?.is_admin ?? false;
+    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperAdmin = isUserAdmin || isSuperUser;
     const canUserEdit = userPermission?.permissions?.permissions?.account_buildings_permission?.edit ?? false;
     const canUserDelete = userPermission?.permissions?.permissions?.account_buildings_permission?.delete ?? false;
 
@@ -436,7 +438,7 @@ const GeneralBuildingSettings = () => {
                             <Typography.Header
                                 size={Typography.Sizes.lg}>{`General Building Settings`}</Typography.Header>
                         </div>
-                        {isUserAdmin || canUserEdit ? (
+                        {isSuperAdmin || canUserEdit ? (
                             <div>
                                 <div className="d-flex">
                                     <Button
@@ -494,7 +496,7 @@ const GeneralBuildingSettings = () => {
                                             handleChange('active', e);
                                         }}
                                         className="react-switch"
-                                        disabled={!isUserAdmin || !canUserEdit}
+                                        disabled={!(isSuperAdmin || canUserEdit)}
                                     />
                                 </div>
                             </div>
@@ -515,7 +517,7 @@ const GeneralBuildingSettings = () => {
                                     <Inputs
                                         type="text"
                                         placeholder={
-                                            isUserAdmin || canUserEdit
+                                            isSuperAdmin || canUserEdit
                                                 ? `Enter Building Name`
                                                 : `Building name not added`
                                         }
@@ -524,7 +526,7 @@ const GeneralBuildingSettings = () => {
                                         }}
                                         className="w-100"
                                         value={bldgData?.name}
-                                        disabled={!isUserAdmin || !canUserEdit}
+                                        disabled={!(isSuperAdmin || canUserEdit)}
                                     />
                                 </div>
                             </div>
@@ -540,7 +542,7 @@ const GeneralBuildingSettings = () => {
                                     </Typography.Body>
                                 </div>
                                 <div className="col d-flex align-items-center">
-                                    {isUserAdmin || canUserEdit ? (
+                                    {isSuperAdmin || canUserEdit ? (
                                         <Select
                                             id="endUseSelect"
                                             placeholder="Select Building Type"
@@ -586,7 +588,7 @@ const GeneralBuildingSettings = () => {
                                     </Typography.Body>
                                 </div>
                                 <div className="col d-flex align-items-center">
-                                    {isUserAdmin || canUserEdit ? (
+                                    {isSuperAdmin || canUserEdit ? (
                                         <InputTooltip
                                             type="number"
                                             onChange={(e) => {
@@ -630,7 +632,7 @@ const GeneralBuildingSettings = () => {
                                             handleChange('plug_only', e);
                                         }}
                                         className="react-switch"
-                                        disabled={!isUserAdmin || !canUserEdit}
+                                        disabled={!(isSuperAdmin || canUserEdit)}
                                     />
                                 </div>
                             </div>
@@ -659,14 +661,14 @@ const GeneralBuildingSettings = () => {
                                         type="text"
                                         label="Street Address"
                                         placeholder={
-                                            isUserAdmin || canUserEdit ? `Enter Address 1` : `Address not added`
+                                            isSuperAdmin || canUserEdit ? `Enter Address 1` : `Street Address not added`
                                         }
                                         onChange={(e) => {
                                             handleChange('street_address', e.target.value);
                                         }}
                                         className="w-100"
                                         value={bldgData?.street_address}
-                                        disabled={!isUserAdmin || !canUserEdit}
+                                        disabled={!(isSuperAdmin || canUserEdit)}
                                     />
                                 </div>
                                 <div className="col d-flex align-items-center">
@@ -674,7 +676,7 @@ const GeneralBuildingSettings = () => {
                                         type="text"
                                         label="Address 2 (optional)"
                                         placeholder={
-                                            isUserAdmin || !canUserEdit
+                                            isSuperAdmin || canUserEdit
                                                 ? `Enter Address 2 (optional)`
                                                 : `Address not added`
                                         }
@@ -683,7 +685,7 @@ const GeneralBuildingSettings = () => {
                                         }}
                                         className="w-100"
                                         value={bldgData?.address_2}
-                                        disabled={!isUserAdmin || !canUserEdit}
+                                        disabled={!(isSuperAdmin || canUserEdit)}
                                     />
                                 </div>
                             </div>
@@ -695,13 +697,13 @@ const GeneralBuildingSettings = () => {
                                     <Inputs
                                         type="text"
                                         label="City"
-                                        placeholder={isUserAdmin || !canUserEdit ? `Enter City` : `City is not added`}
+                                        placeholder={isSuperAdmin || canUserEdit ? `Enter City` : `City is not added`}
                                         onChange={(e) => {
                                             handleChange('city', e.target.value);
                                         }}
                                         className="w-100"
                                         value={bldgData?.city}
-                                        disabled={!isUserAdmin || !canUserEdit}
+                                        disabled={!(isSuperAdmin || canUserEdit)}
                                     />
                                 </div>
 
@@ -709,13 +711,13 @@ const GeneralBuildingSettings = () => {
                                     <Inputs
                                         type="text"
                                         label="State"
-                                        placeholder={isUserAdmin || !canUserEdit ? `Enter State` : `State is not added`}
+                                        placeholder={isSuperAdmin || canUserEdit ? `Enter State` : `State is not added`}
                                         onChange={(e) => {
                                             handleChange('state', e.target.value);
                                         }}
                                         className="w-100"
                                         value={bldgData?.state}
-                                        disabled={!isUserAdmin || !canUserEdit}
+                                        disabled={!(isSuperAdmin || canUserEdit)}
                                     />
                                 </div>
 
@@ -724,7 +726,7 @@ const GeneralBuildingSettings = () => {
                                         type="string"
                                         label="Postal Code"
                                         placeholder={
-                                            isUserAdmin || !canUserEdit
+                                            isSuperAdmin || canUserEdit
                                                 ? `Enter Postal Code`
                                                 : `Postal code is not added.`
                                         }
@@ -733,7 +735,7 @@ const GeneralBuildingSettings = () => {
                                         }}
                                         className="w-100"
                                         value={bldgData?.zip_code}
-                                        disabled={!isUserAdmin || !canUserEdit}
+                                        disabled={!(isSuperAdmin || canUserEdit)}
                                     />
                                 </div>
                             </div>
@@ -762,14 +764,15 @@ const GeneralBuildingSettings = () => {
                                         type="number"
                                         label="Latitude"
                                         placeholder={
-                                            isUserAdmin || !canUserEdit ? `Enter Latitude` : `Latitude not set`
+                                            isSuperAdmin || canUserEdit ? `Enter Latitude` : `Latitude not set`
                                         }
                                         onChange={(e) => {
                                             handleChange('latitude', e.target.value);
                                         }}
                                         className="w-100"
+                                        inputClassName="custom-input-field"
                                         value={bldgData?.latitude}
-                                        disabled={!isUserAdmin || !canUserEdit}
+                                        disabled={!(isSuperAdmin || canUserEdit)}
                                     />
                                 </div>
 
@@ -778,14 +781,15 @@ const GeneralBuildingSettings = () => {
                                         type="number"
                                         label="Longitude"
                                         placeholder={
-                                            isUserAdmin || !canUserEdit ? `Enter Longitude` : `Longitude not set`
+                                            isSuperAdmin || canUserEdit ? `Enter Longitude` : `Longitude not set`
                                         }
                                         onChange={(e) => {
                                             handleChange('longitude', e.target.value);
                                         }}
                                         className="w-100"
+                                        inputClassName="custom-input-field"
                                         value={bldgData?.longitude}
-                                        disabled={!isUserAdmin || !canUserEdit}
+                                        disabled={!(isSuperAdmin || canUserEdit)}
                                     />
                                 </div>
                             </div>
@@ -820,7 +824,7 @@ const GeneralBuildingSettings = () => {
                                         }}
                                         className="react-select-wrapper w-100"
                                         placeholder="Select TimeZone"
-                                        isDisabled={!isUserAdmin || !canUserEdit}
+                                        isDisabled={!(isSuperAdmin || canUserEdit)}
                                     />
                                 </div>
                             </div>
@@ -847,7 +851,7 @@ const GeneralBuildingSettings = () => {
                                 <div className="pl-3">
                                     <>
                                         {/* Monday */}
-                                        {isUserAdmin || canUserEdit ? (
+                                        {isSuperAdmin || canUserEdit ? (
                                             <OperatingHours
                                                 timeZone={timeZone}
                                                 isOperating={!weekToggle['mon']}
@@ -879,7 +883,7 @@ const GeneralBuildingSettings = () => {
                                         )}
 
                                         {/* Tuesday */}
-                                        {isUserAdmin || canUserEdit ? (
+                                        {isSuperAdmin || canUserEdit ? (
                                             <OperatingHours
                                                 timeZone={timeZone}
                                                 isOperating={!weekToggle['tue']}
@@ -911,7 +915,7 @@ const GeneralBuildingSettings = () => {
                                         )}
 
                                         {/* Wednesday */}
-                                        {isUserAdmin || canUserEdit ? (
+                                        {isSuperAdmin || canUserEdit ? (
                                             <OperatingHours
                                                 timeZone={timeZone}
                                                 isOperating={!weekToggle['wed']}
@@ -943,7 +947,7 @@ const GeneralBuildingSettings = () => {
                                         )}
 
                                         {/* Thursday */}
-                                        {isUserAdmin || canUserEdit ? (
+                                        {isSuperAdmin || canUserEdit ? (
                                             <OperatingHours
                                                 timeZone={timeZone}
                                                 isOperating={!weekToggle['thu']}
@@ -975,7 +979,7 @@ const GeneralBuildingSettings = () => {
                                         )}
 
                                         {/* Friday */}
-                                        {isUserAdmin || canUserEdit ? (
+                                        {isSuperAdmin || canUserEdit ? (
                                             <OperatingHours
                                                 timeZone={timeZone}
                                                 isOperating={!weekToggle['fri']}
@@ -1007,7 +1011,7 @@ const GeneralBuildingSettings = () => {
                                         )}
 
                                         {/* Saturday */}
-                                        {isUserAdmin || canUserEdit ? (
+                                        {isSuperAdmin || canUserEdit ? (
                                             <OperatingHours
                                                 timeZone={timeZone}
                                                 isOperating={!weekToggle['sat']}
@@ -1039,7 +1043,7 @@ const GeneralBuildingSettings = () => {
                                         )}
 
                                         {/* Sunday */}
-                                        {isUserAdmin || canUserEdit ? (
+                                        {isSuperAdmin || canUserEdit ? (
                                             <OperatingHours
                                                 timeZone={timeZone}
                                                 isOperating={!weekToggle['sun']}
@@ -1079,7 +1083,7 @@ const GeneralBuildingSettings = () => {
 
             <Brick sizeInRem={2} />
 
-            {isUserAdmin || canUserDelete ? (
+            {isSuperAdmin || canUserDelete ? (
                 <Row>
                     <Col lg={9}>
                         <div className="custom-card">
