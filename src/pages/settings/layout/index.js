@@ -23,6 +23,8 @@ const LayoutPage = () => {
     const [userPermission] = useAtom(userPermissionData);
 
     const isUserAdmin = userPermission?.is_admin ?? false;
+    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperAdmin = isUserAdmin || isSuperUser;
     const canUserCreate = userPermission?.permissions?.permissions?.building_layout_permission?.create ?? false;
     const canUserEdit = userPermission?.permissions?.permissions?.building_layout_permission?.edit ?? false;
     const canUserDelete = userPermission?.permissions?.permissions?.building_layout_permission?.delete ?? false;
@@ -197,7 +199,7 @@ const LayoutPage = () => {
                 isLoadingLastColumn={isFetchingFloor || isFetchingSpace}
                 onClickEachChild={[onClickForAllItems]}
                 onColumnAdd={
-                    isUserAdmin || canUserCreate
+                    isSuperAdmin || canUserCreate
                         ? (args) => {
                               // When adding Floor
                               if (args?.type === 'root' && args?.bldg_id) {
@@ -225,7 +227,7 @@ const LayoutPage = () => {
                         : null
                 }
                 onColumnNameEdit={
-                    isUserAdmin || canUserEdit
+                    isSuperAdmin || canUserEdit
                         ? (args) => {
                               // When Edit Icon clicked from Floor item list
                               if (args?.floor_id && args?.floor_id !== '' && args?.parent_building) {
@@ -252,7 +254,7 @@ const LayoutPage = () => {
                         : null
                 }
                 onItemEdit={
-                    isUserAdmin || canUserEdit
+                    isSuperAdmin || canUserEdit
                         ? (args) => {
                               // When Edit Icon clicked from Floor item list
                               if (args?.floor_id && args?.floor_id !== '' && args?.parent_building) {
@@ -305,7 +307,7 @@ const LayoutPage = () => {
                 notifyUser={notifyUser}
                 selectedFloorObj={selectedFloorObj}
                 setSelectedFloorObj={setSelectedFloorObj}
-                isUserAdmin={isUserAdmin}
+                isSuperAdmin={isSuperAdmin}
                 canUserDelete={canUserDelete}
                 selectedFloorId={selectedFloorId}
             />
@@ -337,7 +339,7 @@ const LayoutPage = () => {
                 spaceObj={selectedSpaceObj}
                 setSpaceObj={setSelectedSpaceObj}
                 defaultObjVal={defaultObjVal}
-                isUserAdmin={isUserAdmin}
+                isSuperAdmin={isSuperAdmin}
                 canUserDelete={canUserDelete}
             />
         </React.Fragment>
