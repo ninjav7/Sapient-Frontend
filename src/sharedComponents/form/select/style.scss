@@ -111,6 +111,7 @@
                 &:focus {
                     box-shadow: none;
                     border-color: $primary-gray-200;
+                    cursor: text;
                 }
             }
         }
