@@ -38,9 +38,9 @@ const TopNav = () => {
             group: null,
             options: [
                 {
-                    icon: <PortfolioSVG className="p-0 square" />,
                     label: 'Admin Portolio',
                     value: 'portfolio',
+                    icon: <PortfolioSVG className="p-0 square" />,
                 },
             ],
         },
@@ -52,45 +52,54 @@ const TopNav = () => {
             group: 'All Clients',
             options: [
                 {
-                    label: '#1119 East Hanover',
-                    value: '6345b8906038220590483725',
-                    timezone: 'US/Eastern',
+                    label: 'DCPS',
+                    value: '62dfe3650d5ed14486f94f3a',
                     iconForSelected: <BuildingSVG className="p-0 square" />,
-                    plug_only: false,
                 },
                 {
-                    label: '#216 Springfield',
-                    value: '6345d0aec48e248d25f49730',
-                    timezone: 'US/Eastern',
+                    label: 'Data Science',
+                    value: '634420dfc7aee079e93327ee',
                     iconForSelected: <BuildingSVG className="p-0 square" />,
-                    plug_only: false,
                 },
                 {
-                    label: '#2288 NYC Broadway',
-                    value: '6346e0d70885b5dbd8c5a557',
-                    timezone: 'US/Eastern',
+                    label: 'Simply Dev',
+                    value: '649ed973c04f9cf6922a322d',
                     iconForSelected: <BuildingSVG className="p-0 square" />,
-                    plug_only: false,
                 },
                 {
-                    label: '#2742 NYC 6th Ave',
-                    value: '6346f28f31b103f419237dba',
-                    timezone: 'US/Eastern',
+                    label: 'Luxottica',
+                    value: '63443428c7aee079e93327f4',
                     iconForSelected: <BuildingSVG className="p-0 square" />,
-                    plug_only: false,
                 },
                 {
-                    label: '#787 White Plains',
-                    value: '6346c188c48e248d25f49774',
-                    timezone: 'US/Eastern',
+                    label: 'Colorado School of Mines',
+                    value: '639b316eb21b361c2f3ddd9f',
                     iconForSelected: <BuildingSVG className="p-0 square" />,
-                    plug_only: false,
                 },
             ],
         },
     ];
 
+    const portfolioObj = {
+        value: 'portfolio',
+        label: 'Admin Portolio',
+        icon: <PortfolioSVG className="p-0 square white-icon" />,
+    };
+
+    const [selectedBldgObj, setSelectedBldgObj] = useState(portfolioObj);
+
     const [activeBldgList, setActiveBldgList] = useState(false);
+
+    const handleBldgSwitcherChange = (vendor_id) => {
+        if (vendor_id === 'portfolio') {
+            setSelectedBldgObj(portfolioObj);
+            return;
+        }
+
+        const allVendors = buildingsList[2].options;
+        const vendorObj = allVendors.find((record) => record?.value === vendor_id);
+        setSelectedBldgObj(vendorObj);
+    };
 
     const getUserPermissionDetail = async () => {
         await fetchPermissions().then((res) => {
@@ -154,15 +163,10 @@ const TopNav = () => {
             <div className="d-flex align-items-center ml-2 mr-4">
                 <BuildingSwitcher
                     options={buildingsList}
-                    currentValue={{
-                        value: 'portfolio',
-                        label: 'Admin Portolio',
-                        timezone: '',
-                        icon: <PortfolioSVG className="p-0 square white-icon" />,
-                    }}
+                    currentValue={selectedBldgObj}
                     listType={'vendor'}
                     wrapperProps={{ style: { width: '12vw' } }}
-                    onChange={() => {}}
+                    onChange={(e) => handleBldgSwitcherChange(e.value)}
                 />
             </div>
             <NavLinks />
