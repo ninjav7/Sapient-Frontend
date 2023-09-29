@@ -658,6 +658,11 @@ const EquipChartModal = ({
                                                             userPrefTimeFormat
                                                         ),
                                                     },
+                                                    gridLineWidth: null,
+                                                    alternateGridColor: null,
+                                                },
+                                                yAxis: {
+                                                    gridLineWidth: 1,
                                                 },
                                             }}
                                         />

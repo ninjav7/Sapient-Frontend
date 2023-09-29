@@ -918,6 +918,7 @@ const ExploreByBuildings = () => {
                             subTitle={''}
                             tooltipUnit={tooltipUnitVal}
                             tooltipLabel={selectedConsumptionLabel}
+                            disableDefaultPlotBands={true}
                             data={dataToRenderOnChart}
                             chartProps={{
                                 navigator: {
@@ -933,9 +934,6 @@ const ExploreByBuildings = () => {
                                             },
                                         },
                                     },
-                                },
-                                tooltip: {
-                                    xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
                                 },
                                 xAxis: {
                                     gridLineWidth: 0,
@@ -964,6 +962,9 @@ const ExploreByBuildings = () => {
                                         gridLineWidth: 0,
                                     },
                                 ],
+                                tooltip: {
+                                    xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
+                                },
                             }}
                         />
                     )}

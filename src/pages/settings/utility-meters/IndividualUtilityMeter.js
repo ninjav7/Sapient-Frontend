@@ -278,24 +278,11 @@ const DeviceHeader = (props) => {
             <div className="d-flex">
                 <div>
                     <Button
-                        label="Cancel"
+                        label="Close"
                         size={Button.Sizes.md}
                         type={Button.Type.secondaryGrey}
                         onClick={redirectToMainPage}
                     />
-                </div>
-                <div>
-                    {userPermission?.user_role === 'admin' ||
-                    userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ? (
-                        <Button
-                            label={'Save'}
-                            size={Button.Sizes.md}
-                            type={Button.Type.primary}
-                            onClick={redirectToMainPage}
-                            className="ml-2"
-                            disabled={true}
-                        />
-                    ) : null}
                 </div>
             </div>
         </div>
