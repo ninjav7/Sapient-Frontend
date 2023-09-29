@@ -962,6 +962,7 @@ const EditPanel = () => {
 
     const savePanelData = async () => {
         setIsProcessing(true);
+
         const params = `?panel_id=${panelId}`;
         const panel_obj = {
             name: panelObj?.panel_name,
@@ -969,14 +970,35 @@ const EditPanel = () => {
             space_id: panelObj?.location_id,
         };
         if (panelObj?.starting_breaker) panel_obj.starting_breaker = panelObj?.starting_breaker;
+
         await updatePanelDetails(params, panel_obj)
             .then((res) => {
-                setIsProcessing(false);
-                history.push({
-                    pathname: `/settings/panels/${bldgId}`,
-                });
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Panel updated successfully.';
+                        s.notificationType = 'success';
+                    });
+                    history.push({
+                        pathname: `/settings/panels/${bldgId}`,
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Failed to update Panel due to Internal Server Error.';
+                        s.notificationType = 'error';
+                    });
+                }
             })
             .catch(() => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to update Panel due to Internal Server Error.';
+                    s.notificationType = 'error';
+                });
+            })
+            .finally(() => {
                 setIsProcessing(false);
             });
     };
@@ -1301,7 +1323,7 @@ const EditPanel = () => {
                                     type={Button.Type.primary}
                                     onClick={savePanelData}
                                     className="ml-2"
-                                    disabled={comparePanelData(panelObj, originalPanelObj)}
+                                    disabled={comparePanelData(panelObj, originalPanelObj) || isProcessing}
                                 />
                             ) : null}
                         </div>
