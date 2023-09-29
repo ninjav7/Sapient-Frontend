@@ -7,6 +7,7 @@ import { Option } from '../form/select/customComponents';
 
 import { removeProps, stringOrNumberPropTypes } from '../helpers/helper';
 import './BuildingSwitcher.scss';
+import SelectNavBar from '../form/select-navbar';
 
 const createGroup = (groupName, options, setValue) => {
     return {
@@ -67,6 +68,8 @@ const defaultSearch = (data, value) => {
 };
 
 const BuildingSwitcher = (props) => {
+    const { listType = 'building' } = props;
+
     const options = props.options.map(({ group, options }) =>
         createGroup(
             group,
@@ -79,25 +82,48 @@ const BuildingSwitcher = (props) => {
     );
 
     const filteredProps = removeProps(props, 'wrapperProps');
+    const filterOption = useCallback(() => true, []);
 
     return (
-        <div className="building-switcher-wrapper" {...props?.wrapperProps}>
-            <Select
-                {...filteredProps}
-                options={options}
-                isSearchable={true}
-                type={DROPDOWN_INPUT_TYPES.Icon}
-                customSearchCallback={({ data, query }) => defaultSearch(data, query.value)}
-                searchFieldsProps={{
-                    placeholder: 'Filter Buildings',
-                    wrapper: {
-                        className: 'building-switcher-search-field',
-                    },
-                }}
-                searchNoResults="No buildings found"
-                filterOption={useCallback(() => true, [])}
-            />
-        </div>
+        <>
+            {listType === 'building' ? (
+                <div className="building-switcher-wrapper" {...props?.wrapperProps}>
+                    <Select
+                        {...filteredProps}
+                        options={options}
+                        isSearchable={true}
+                        type={DROPDOWN_INPUT_TYPES.Icon}
+                        customSearchCallback={({ data, query }) => defaultSearch(data, query.value)}
+                        searchFieldsProps={{
+                            placeholder: 'Filter Buildings',
+                            wrapper: {
+                                className: 'building-switcher-search-field',
+                            },
+                        }}
+                        searchNoResults={'No buildings found'}
+                        filterOption={filterOption}
+                    />
+                </div>
+            ) : (
+                <div className="building-switcher-wrapper" {...props?.wrapperProps}>
+                    <SelectNavBar
+                        {...filteredProps}
+                        options={options}
+                        isSearchable={true}
+                        type={DROPDOWN_INPUT_TYPES.Icon}
+                        customSearchCallback={({ data, query }) => defaultSearch(data, query.value)}
+                        searchFieldsProps={{
+                            placeholder: 'Filter Clients',
+                            wrapper: {
+                                className: 'building-switcher-search-field',
+                            },
+                        }}
+                        searchNoResults={'No clients found'}
+                        filterOption={filterOption}
+                    />
+                </div>
+            )}
+        </>
     );
 };
 
@@ -127,6 +153,7 @@ BuildingSwitcher.propTypes = {
         value: stringOrNumberPropTypes,
     }),
     wrapperProps: PropTypes.any,
+    listType: PropTypes.string,
 };
 
 export default BuildingSwitcher;
