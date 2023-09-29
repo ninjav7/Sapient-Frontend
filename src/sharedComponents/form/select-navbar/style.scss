@@ -114,6 +114,8 @@
             padding-bottom: 0;
 
             input {
+                background-color: $base-background;
+                border: 1px solid $primary-gray-500;
                 &:focus {
                     box-shadow: none;
                     border-color: $primary-gray-200;
@@ -177,4 +179,8 @@
             gap: 0.625rem;
         }
     }
+}
+
+.selector-text-style {
+    color: $base-background !important;
 }

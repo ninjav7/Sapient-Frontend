@@ -42,7 +42,7 @@ const OptionTypo = ({ isOptionComponent, children, supportText }) => (
     <>
         <Typography.Body
             size={isOptionComponent ? Typography.Sizes.md : Typography.Sizes.lg}
-            className="flex-grow-1 text-white">
+            className="flex-grow-1 selector-text-style">
             {children}
             {supportText && <span className="react-select-option-support-text">{supportText}</span>}
         </Typography.Body>
