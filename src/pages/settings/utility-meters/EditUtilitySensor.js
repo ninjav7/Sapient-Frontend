@@ -335,6 +335,11 @@ const MetricsTab = (props) => {
                                                     userPrefTimeFormat
                                                 ),
                                             },
+                                            gridLineWidth: null,
+                                            alternateGridColor: null,
+                                        },
+                                        yAxis: {
+                                            gridLineWidth: 1,
                                         },
                                     }}
                                 />
