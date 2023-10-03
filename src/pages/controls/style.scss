@@ -11,10 +11,29 @@
 .card-alignment {
     margin-left: 20px !important;
 }
-.plug-rules-body {
-    .bg-grey path {
-        fill: $primary-gray-450;
-    }
+.bg-grey path {
+    fill: $primary-gray-450;
+    width: 12px;
+    height: 12px;
+}
+.bg-red path {
+    width: 12px;
+    height: 12px;
+    fill: $error-500;
+}
+
+.tooltip-inner {
+    max-width: 400px !important;
+}
+.tooltip-for-sockets {
+    display: flex;
+    flex-direction: column;
+}
+.tooltip-for-sockets-item {
+    display: flex;
+    text-align: left;
+    flex-direction: column;
+    border-bottom: 1px solid #fff;
 }
 
 .sockets-modal-container-style {

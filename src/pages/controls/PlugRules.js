@@ -9,6 +9,7 @@ import { Cookies } from 'react-cookie';
 import Modal from 'react-bootstrap/Modal';
 import moment from 'moment';
 import { UncontrolledTooltip } from 'reactstrap';
+import { UserStore } from '../../store/UserStore';
 import { fetchPlugRules, updatePlugRuleRequest, createPlugRuleRequest } from '../../services/plugRules';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
@@ -75,6 +76,9 @@ const SkeletonLoading = () => (
 );
 
 const PlugRules = () => {
+    const { timeFormat } = UserStore.useState((s) => ({
+        timeFormat: s.timeFormat,
+    }));
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -94,6 +98,7 @@ const PlugRules = () => {
     };
     const handleAddRuleShow = () => setShowAddRule(true);
     const { download } = useCSVDownload();
+    const [is24Format, setIs24Format] = useState(false);
 
     const activeBuildingId = localStorage.getItem('buildingId');
     const [skeletonLoading, setSkeletonLoading] = useState(true);
@@ -369,10 +374,13 @@ const PlugRules = () => {
         );
     };
     const renderTimeStamp = (row) => {
+        const Is24HoursFormat = timeFormat == '24h';
         return (
             <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center">
                 {row.current_job_log[row.current_job_log.length - 1]?.time_stamp
-                    ? moment(row.current_job_log[row.current_job_log.length - 1]?.time_stamp).format('MM/DD HH:mm:ss')
+                    ? moment(row.current_job_log[row.current_job_log.length - 1]?.time_stamp).format(
+                        Is24HoursFormat ? `HH:mm:ss MM/DD 'YY` : `hh:mm A MM/DD 'YY`
+                      )
                     : ''}
             </Typography.Subheader>
         );
