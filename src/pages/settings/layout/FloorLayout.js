@@ -25,7 +25,7 @@ const FloorLayout = (props) => {
         notifyUser,
         selectedFloorObj = {},
         setSelectedFloorObj,
-        isUserAdmin = false,
+        isSuperAdmin = false,
         canUserDelete = false,
         selectedFloorId,
     } = props;
@@ -196,7 +196,7 @@ const FloorLayout = (props) => {
                         </Typography.Body>
                     </div>
 
-                    {operationType === 'EDIT' && (canUserDelete || isUserAdmin) && (
+                    {operationType === 'EDIT' && (canUserDelete || isSuperAdmin) && (
                         <>
                             <Brick sizeInRem={1.25} />
                             <Button

@@ -258,6 +258,20 @@ const xaxisFilters = (daysCount, timezone) => {
 
 const formatConsumptionValue = (value, fixed) => value.toLocaleString(undefined, { maximumFractionDigits: fixed });
 
+const validateIntervals = (daysCount) => {
+    let label = 'Hourly';
+    if (daysCount >= 31 && daysCount <= 94) label = 'Daily';
+    if (daysCount > 94) label = 'Monthly';
+    return label;
+};
+
+const validateIntervalsForEndUse = (daysCount) => {
+    let label = 'Hour';
+    if (daysCount >= 31 && daysCount <= 94) label = 'Day';
+    if (daysCount > 94) label = 'Month';
+    return label;
+};
+
 const xaxisCategoryByHour = [
     '12AM',
     '1AM',
@@ -305,4 +319,6 @@ export {
     formatConsumptionValue,
     xaxisCategoryByHour,
     renderElementIfValid,
+    validateIntervals,
+    validateIntervalsForEndUse,
 };

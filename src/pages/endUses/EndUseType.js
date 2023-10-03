@@ -19,6 +19,7 @@ import { buildingData } from '../../store/globalState';
 import { KPI_UNITS } from '../../sharedComponents/KPIs';
 import Skeleton from 'react-loading-skeleton';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
+import { validateIntervalsForEndUse } from '../../sharedComponents/helpers/helper';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
@@ -36,6 +37,8 @@ const EndUseType = () => {
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+
+    const consumptionType = validateIntervalsForEndUse(daysCount);
 
     const [buildingListData] = useAtom(buildingData);
     const [isPlugOnly, setIsPlugOnly] = useState(false);
@@ -369,7 +372,7 @@ const EndUseType = () => {
             <div className="mt-4">
                 <ColumnChart
                     title={fetchEnduseTitle(endUseType)}
-                    subTitle={'Energy Usage By Hour (kWh)'}
+                    subTitle={`Energy Usage By ${consumptionType} (kWh)`}
                     colors={[colorPalette.datavizMain2]}
                     categories={energyConsumptionsCategories}
                     tooltipUnit={KPI_UNITS.KWH}
@@ -379,16 +382,16 @@ const EndUseType = () => {
                     xAxisCallBackValue={formatXaxis}
                     restChartProps={xAxisObj}
                     tooltipCallBackValue={toolTipFormatter}
-                    temperatureSeries={weatherData}
+                    // temperatureSeries={weatherData}
                     plotBands={null}
-                    upperLegendsProps={{
-                        weather: {
-                            onClick: ({ withTemp }) => {
-                                setWeatherChartVisibility(withTemp);
-                            },
-                            isAlwaysShown: true,
-                        },
-                    }}
+                    // upperLegendsProps={{
+                    //     weather: {
+                    //         onClick: ({ withTemp }) => {
+                    //             setWeatherChartVisibility(withTemp);
+                    //         },
+                    //         isAlwaysShown: true,
+                    //     },
+                    // }}
                     withTemp={isWeatherChartVisible}
                     isChartLoading={isEnergyChartLoading}
                 />

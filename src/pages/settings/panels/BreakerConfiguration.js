@@ -2057,6 +2057,11 @@ const BreakerConfiguration = ({
                                                             userPrefTimeFormat
                                                         ),
                                                     },
+                                                    gridLineWidth: null,
+                                                    alternateGridColor: null,
+                                                },
+                                                yAxis: {
+                                                    gridLineWidth: 1,
                                                 },
                                             }}
                                         />

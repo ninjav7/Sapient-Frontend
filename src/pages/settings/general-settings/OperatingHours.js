@@ -1,20 +1,24 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Switch from 'react-switch';
-import DatePicker from 'react-datepicker';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
-import 'react-datepicker/dist/react-datepicker.css';
-import 'react-time-picker/dist/TimePicker.css';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
-import './styles.scss';
 import Inputs from '../../../sharedComponents/form/input/Input';
 import Select from '../../../sharedComponents/form/select';
 import { startIntervalOption12, endIntervalOption12, startIntervalOption24, endIntervalOption24 } from './timeInterval';
+import 'react-datepicker/dist/react-datepicker.css';
+import 'react-time-picker/dist/TimePicker.css';
+import './styles.scss';
 
 const OperatingHours = (props) => {
     const [userPermission] = useAtom(userPermissionData);
+
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperAdmin = isUserAdmin || isSuperUser;
+    const canUserEdit = userPermission?.permissions?.permissions?.account_buildings_permission?.edit ?? false;
 
     return (
         <>
@@ -23,26 +27,15 @@ const OperatingHours = (props) => {
                 className="d-flex justify-content-start align-items-center"
                 style={{ opacity: props.isOperating ? '0.3' : '1' }}>
                 <div className="d-flex align-items-center mr-4">
-                    {userPermission?.user_role === 'admin' ||
-                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
-                        <Switch
-                            onChange={props.onSwitchToggle}
-                            checked={!props.isOperating}
-                            onColor={colorPalette.datavizBlue600}
-                            uncheckedIcon={false}
-                            checkedIcon={false}
-                            className="react-switch"
-                        />
-                    ) : (
-                        <Switch
-                            onChange={() => {}}
-                            checked={!props.isOperating}
-                            onColor={colorPalette.datavizBlue600}
-                            className="react-switch"
-                            uncheckedIcon={false}
-                            checkedIcon={false}
-                        />
-                    )}
+                    <Switch
+                        onChange={props.onSwitchToggle}
+                        checked={!props.isOperating}
+                        onColor={colorPalette.datavizBlue600}
+                        uncheckedIcon={false}
+                        checkedIcon={false}
+                        className="react-switch"
+                        disabled={!(isSuperAdmin || canUserEdit)}
+                    />
                 </div>
 
                 <div className="d-flex weekday-container justify-content-center mr-4">
@@ -53,8 +46,7 @@ const OperatingHours = (props) => {
 
                 <div className="d-flex align-items-center">
                     <div>
-                        {userPermission?.user_role === 'admin' ||
-                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                        {isSuperAdmin || canUserEdit ? (
                             <Select
                                 defaultValue={props.startTime}
                                 options={props.timeZone === '12' ? startIntervalOption12 : startIntervalOption24}
@@ -71,8 +63,7 @@ const OperatingHours = (props) => {
                     </div>
 
                     <div>
-                        {userPermission?.user_role === 'admin' ||
-                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                        {isSuperAdmin || canUserEdit ? (
                             <Select
                                 defaultValue={props.endTime}
                                 options={props.timeZone === '12' ? endIntervalOption12 : endIntervalOption24}

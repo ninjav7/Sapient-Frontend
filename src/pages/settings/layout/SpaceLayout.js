@@ -28,7 +28,7 @@ const SpaceLayout = (props) => {
         spaceObj = {},
         setSpaceObj,
         defaultObjVal = {},
-        isUserAdmin = false,
+        isSuperAdmin = false,
         canUserDelete = false,
     } = props;
 
@@ -239,7 +239,7 @@ const SpaceLayout = (props) => {
                         />
                     </div>
 
-                    {operationType === 'EDIT' && (canUserDelete || isUserAdmin) && (
+                    {operationType === 'EDIT' && (canUserDelete || isSuperAdmin) && (
                         <>
                             <Brick sizeInRem={1.25} />
                             <Button
@@ -255,7 +255,7 @@ const SpaceLayout = (props) => {
                         </>
                     )}
 
-                    <Brick sizeInRem={canUserDelete || isUserAdmin ? 1.5 : 2} />
+                    <Brick sizeInRem={canUserDelete || isSuperAdmin ? 1.5 : 2} />
 
                     <div className="d-flex justify-content-between w-100">
                         <Button

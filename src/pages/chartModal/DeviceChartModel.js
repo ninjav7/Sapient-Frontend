@@ -237,6 +237,11 @@ const DeviceChartModel = ({
                                 labels: {
                                     format: formatXaxisForHighCharts(daysCount, userPrefDateFormat, userPrefTimeFormat),
                                 },
+                                gridLineWidth: null,
+                                alternateGridColor: null,
+                            },
+                            yAxis: {
+                                gridLineWidth: 1,
                             },
                         }}
                     />
