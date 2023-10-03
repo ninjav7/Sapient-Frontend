@@ -173,7 +173,7 @@ const SecondaryTopNavBar = () => {
     };
 
     const getBuildingList = async () => {
-        const allBuildingsList = buildingListData.map((record) => ({
+        const allBuildingsList = buildingListData?.map((record) => ({
             label: record?.building_name,
             value: record?.building_id,
             timezone: record?.timezone,

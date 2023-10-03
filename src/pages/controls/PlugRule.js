@@ -2498,23 +2498,29 @@ const PlugRule = () => {
                                     <span className="ml-2 plug-rule-switch-font">Active</span>
                                 </div>
                             )}
-                            <UncontrolledTooltip placement="top" target={'tooltip-1'}>
-                                {currentJobLog[0]?.msg}
-                            </UncontrolledTooltip>
+                            {currentData?.status && (
+                                <>
+                                    <UncontrolledTooltip placement="top" target={'tooltip-status'}>
+                                        {currentJobLog[0]?.msg}
+                                    </UncontrolledTooltip>
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.sm}
+                                        className="justify-content-center ">
+                                        <span className="cursor-pointer" id={'tooltip-status'}>
+                                            Status: {currentData?.status}
+                                        </span>
+                                    </Typography.Subheader>
+                                </>
+                            )}
 
-                            <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center ">
-                                <span className="cursor-pointer" id={'tooltip-1'}>
-                                    Status: {currentData?.status}
-                                </span>
-                            </Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.sm}>
-                                Last Update:
-                                {currentJobLog[0]?.time_stamp
-                                    ? moment(currentJobLog[0]?.time_stamp).format(
-                                          is24Format ? `HH:mm:ss MM/DD 'YY` : `hh:mm A MM/DD 'YY`
-                                      )
-                                    : ''}
-                            </Typography.Subheader>
+                            {currentJobLog[0]?.time_stamp && (
+                                <Typography.Subheader size={Typography.Sizes.sm}>
+                                    Last Update:
+                                    {moment(currentJobLog[0]?.time_stamp).format(
+                                        is24Format ? `HH:mm:ss MM/DD 'YY` : `hh:mm A MM/DD 'YY`
+                                    )}
+                                </Typography.Subheader>
+                            )}
                         </div>
 
                         <div className="cancel-and-save-flex">
