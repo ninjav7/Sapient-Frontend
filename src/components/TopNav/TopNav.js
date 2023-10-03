@@ -33,6 +33,10 @@ const TopNav = () => {
     const [userPermissionDataNow, setUserPermissionDataNow] = useAtom(userPermissionData);
     const pageRefresh = BuildingListStore.useState((s) => s.fetchBuildingList);
 
+    const isUserAdmin = userPermissionDataNow?.is_admin ?? false;
+    const isSuperUser = userPermissionDataNow?.is_superuser ?? false;
+    const isSuperAdmin = isUserAdmin || isSuperUser;
+
     // PLT-867 - Mock data for Vendor Selector
     const buildingsList = [
         {
@@ -163,15 +167,17 @@ const TopNav = () => {
             <Logo />
             <div className="energy-top-nav__vertical-separator" />
             {/* PLT-867 - Vendor Selector   */}
-            {/* <div className="d-flex align-items-center ml-2 mr-4">
-                <BuildingSwitcher
-                    options={buildingsList}
-                    currentValue={selectedBldgObj}
-                    listType={'vendor'}
-                    wrapperProps={{ style: { width: '12vw' } }}
-                    onChange={(e) => handleBldgSwitcherChange(e.value)}
-                />
-            </div> */}
+            {/* {isSuperAdmin && (
+                <div className="d-flex align-items-center ml-2 mr-4">
+                    <BuildingSwitcher
+                        options={buildingsList}
+                        currentValue={selectedBldgObj}
+                        listType={'vendor'}
+                        wrapperProps={{ style: { width: '12vw' } }}
+                        onChange={(e) => handleBldgSwitcherChange(e.value)}
+                    />
+                </div>
+            )} */}
             <NavLinks />
             <Control />
         </div>
