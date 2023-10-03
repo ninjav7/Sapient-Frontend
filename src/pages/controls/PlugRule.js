@@ -26,6 +26,9 @@ import { userPermissionData } from '../../store/globalState';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useHistory, useParams } from 'react-router-dom';
 import Select from '../../sharedComponents/form/select';
+import { ReactComponent as CheckedSVG } from '../../assets/icon/circle-check.svg';
+import { ReactComponent as CircleXmarkSVG } from '../../assets/icon/circle-xmark.svg';
+import { ReactComponent as WarningSVG } from '../../assets/icon/warning.svg';
 import _ from 'lodash';
 import colorPalette from '../../assets/scss/_colors.scss';
 import {
@@ -1327,6 +1330,7 @@ const PlugRule = () => {
         if (activeBuildingId?.length) {
             fetchFiltersForSensorsUnlinked();
             fetchUnLinkedSocketRules();
+            fetchLinkedSocketIds();
         }
     }, [
         activeBuildingId,
@@ -1352,6 +1356,7 @@ const PlugRule = () => {
         if (activeBuildingId?.length) {
             fetchFiltersForSensorsLinked();
             fetchLinkedSocketRules();
+            fetchLinkedSocketIds();
         }
     }, [
         activeBuildingId,
@@ -1550,6 +1555,54 @@ const PlugRule = () => {
 
     const renderTagCell = (row) => {
         return (row.tag || []).map((tag, key) => <Badge text={tag} key={key} className="ml-1" />);
+    };
+    const renderScheduleStatus = (row) => {
+        const time_format = is24Format ? `HH:mm:ss D MMM 'YY` : `hh:mm A D MMM 'YY`;
+        let icon = '';
+        if (row.scheduler_status == 'OK') {
+            icon = <CheckedSVG />;
+        } else if (row.scheduler_status == 'Partial') {
+            icon = <WarningSVG />;
+        } else if (row.scheduler_status == 'Failed') {
+            icon = <CircleXmarkSVG />;
+        }
+
+        return (
+            <div id={row.id}>
+                <UncontrolledTooltip placement="top" target={`tooltip-${row.id}`}>
+                    <div className="tooltip-for-sockets">
+                        {row.current_job_log.map((el) => {
+                            return (
+                                <div className="tooltip-for-sockets-item" id={el.kasa_socket_condition_id}>
+                                    <span className="flex" style={{ fontSize: '10px' }}>
+                                        Condition ID: {el.kasa_socket_condition_id}
+                                    </span>
+                                    <span style={{ fontSize: '10px' }}>Err Code: {el.response.err_code}</span>
+                                    <span style={{ fontSize: '10px' }}>
+                                        Time Stamp: {moment(el.response.time_stamp).format(time_format)}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </UncontrolledTooltip>
+
+                <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center ">
+                    <span className="cursor-pointer" id={`tooltip-${row.id}`}>
+                        {icon}
+                    </span>
+                </Typography.Subheader>
+            </div>
+        );
+    };
+    const renderTimeStamp = (row) => {
+        const sortedData = row.current_job_log.sort((x, y) => {
+            return new Date(x.response.time_stamp) < new Date(y.response.time_stamp) ? 1 : -1;
+        });
+        const res = sortedData[0]?.response
+            ? moment(sortedData[0].response?.time_stamp).format(is24Format ? `HH:mm:ss MM/DD 'YY` : `hh:mm A MM/DD 'YY`)
+            : '';
+        return res;
     };
 
     const renderLastUsedCell = (row, childrenTemplate) => {
@@ -2408,10 +2461,11 @@ const PlugRule = () => {
     useEffect(() => {
         confirmButtonDisabledState();
     }, [socketsTab, isChangedSocketsLinked, isChangedSocketsUnlinked]);
-    const currentJobLog =
-        currentData?.current_job_log?.length < 1
-            ? currentData.current_job_log[currentData?.current_job_log?.length - 1]
-            : currentData?.current_job_log[0];
+
+    const currentJobLog = currentData?.current_job_log?.sort((x, y) => {
+        return new Date(x.response?.time_stamp) < new Date(y.response?.time_stamp) ? 1 : -1;
+    });
+
     return (
         <>
             <div className="single-plug-rule-container">
@@ -2445,7 +2499,7 @@ const PlugRule = () => {
                                 </div>
                             )}
                             <UncontrolledTooltip placement="top" target={'tooltip-1'}>
-                                {currentJobLog?.msg}
+                                {currentJobLog[0]?.msg}
                             </UncontrolledTooltip>
 
                             <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center ">
@@ -2454,7 +2508,12 @@ const PlugRule = () => {
                                 </span>
                             </Typography.Subheader>
                             <Typography.Subheader size={Typography.Sizes.sm}>
-                                Last Update: {moment(currentJobLog?.time_stamp).format('MM/DD HH:mm:ss')}
+                                Last Update:
+                                {currentJobLog[0]?.time_stamp
+                                    ? moment(currentJobLog[0]?.time_stamp).format(
+                                          is24Format ? `HH:mm:ss MM/DD 'YY` : `hh:mm A MM/DD 'YY`
+                                      )
+                                    : ''}
                             </Typography.Subheader>
                         </div>
 
@@ -2742,6 +2801,16 @@ const PlugRule = () => {
                                             callbackValue: renderTagCell,
                                         },
                                         {
+                                            name: 'Schedule Status',
+                                            accessor: 'status',
+                                            callbackValue: renderScheduleStatus,
+                                        },
+                                        {
+                                            name: 'Timestamp',
+                                            accessor: 'Timestamp',
+                                            callbackValue: renderTimeStamp,
+                                        },
+                                        {
                                             name: 'Last Data',
                                             accessor: 'last_data',
                                             callbackValue: renderLastUsedCell,
@@ -2851,6 +2920,16 @@ const PlugRule = () => {
                                             name: 'Tags',
                                             accessor: 'tags',
                                             callbackValue: renderTagCell,
+                                        },
+                                        {
+                                            name: 'Schedule Status',
+                                            accessor: 'status',
+                                            callbackValue: renderScheduleStatus,
+                                        },
+                                        {
+                                            name: 'Timestamp',
+                                            accessor: 'Timestamp',
+                                            callbackValue: renderTimeStamp,
                                         },
                                         {
                                             name: 'Last Data',
