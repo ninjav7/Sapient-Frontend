@@ -392,7 +392,7 @@ const PlugRules = () => {
         { name: 'Status', accessor: 'status', callbackValue: renderStatus },
         { name: 'Days', accessor: 'days' },
         { name: 'Schedule Status', accessor: 'current_job_log', callbackValue: renderJobLog },
-        { name: 'Timestamp', accessor: 'current_job_log', callbackValue: renderTimeStamp },
+        { name: 'Timestamp', accessor: 'name_lower', callbackValue: renderTimeStamp },
         { name: 'Socket Count', accessor: 'sensors_count', onSort: (method, name) => setSort({ method, name }) },
     ];
 
