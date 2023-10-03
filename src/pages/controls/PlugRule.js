@@ -412,7 +412,6 @@ const PlugRule = () => {
     const fetchPlugRulesData = async () => {
         const params = '';
         await fetchPlugRules(params, '').then((res) => {
-            console.log('res.data.data', res.data.data);
             setIsFetchedPlugRulesData(true);
             const plugRules = res.data.data;
             plugRules &&
@@ -460,7 +459,6 @@ const PlugRule = () => {
             let response = Object.assign({}, res.data.data[0]);
             response.building_id = response?.building[0]?.building_id;
             setActiveBuildingId(response.building_id);
-            console.log('response765756756765', response);
             setCurrentData(response);
             const scheduleData = groupedCurrentDataById(response.action);
             setPreparedScheduleData(scheduleData);
