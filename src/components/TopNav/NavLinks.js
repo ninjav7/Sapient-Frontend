@@ -28,7 +28,6 @@ const NavLinks = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [topNavRoutes, setTopNavRoutes] = useState([]);
 
-    const isUserAdmin = userPermission?.is_admin ?? false;
     const isSuperUser = userPermission?.is_superuser ?? false;
     const isEnergyTabVisible = userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ?? false;
     const isExploreTabVisible = userPermission?.permissions?.permissions?.explore_general_permission?.view ?? false;
@@ -305,30 +304,12 @@ const NavLinks = () => {
                             handlePathChange(item?.path);
                         }}>
                         <div className="d-flex align-items-center">
-                            {item.name === 'Energy' && (
-                                <div>
-                                    <Circlebolt className={`navbar-icons-style ${className}`} />
-                                </div>
-                            )}
-                            {item.name === 'Control' && (
-                                <div>
-                                    <Toggleon className={`navbar-icons-style ${className}`} />
-                                </div>
-                            )}
-                            {item.name === 'Carbon' && (
-                                <div>
-                                    <CarbonCo2 className={`navbar-icons-style ${className}`} />
-                                </div>
-                            )}
-                            {item.name === 'Explore' && (
-                                <div>
-                                    <Telescope className={`navbar-icons-style ${className}`} />
-                                </div>
-                            )}
+                            {item.name === 'Energy' && <Circlebolt className={`navbar-icons-style ${className}`} />}
+                            {item.name === 'Control' && <Toggleon className={`navbar-icons-style ${className}`} />}
+                            {item.name === 'Carbon' && <CarbonCo2 className={`navbar-icons-style ${className}`} />}
+                            {item.name === 'Explore' && <Telescope className={`navbar-icons-style ${className}`} />}
                             {item.name === 'Admin' && (
-                                <div>
-                                    <User className={`navbar-icons-style ${className}`} width={18} height={19} />
-                                </div>
+                                <User className={`navbar-icons-style ${className}`} width={18} height={19} />
                             )}
                             <div className={`navbar-heading ml-2 ${className}`}>{routeName}</div>
                         </div>
