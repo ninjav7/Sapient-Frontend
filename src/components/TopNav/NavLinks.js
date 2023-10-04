@@ -21,37 +21,24 @@ import './styles.scss';
 const NavLinks = () => {
     const location = useLocation();
     const history = useHistory();
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
-    const [buildingListData] = useAtom(buildingData);
 
+    const [buildingListData] = useAtom(buildingData);
     const [userPermission] = useAtom(userPermissionData);
-    const [userPermisionBuildingEnergy, setuserPermisionBuildingEnergy] = useState('');
-    const [userPermisionBuildingCarbon, setuserPermisionBuildingCarbon] = useState('');
-    const [userPermisionBuildingControl, setuserPermisionBuildingControl] = useState('');
-    const [userPermissionBuildingExplore, setuserPermissionBuildingExplore] = useState('');
+
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const [topNavRoutes, setTopNavRoutes] = useState([]);
+
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isEnergyTabVisible = userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ?? false;
+    const isExploreTabVisible = userPermission?.permissions?.permissions?.explore_general_permission?.view ?? false;
+    const isControlTabVisible = userPermission?.permissions?.permissions?.control_control_permission?.view ?? false;
+    const isCarbonTabVisible = userPermission?.permissions?.permissions?.carbon_portfolio_permission?.view ?? false;
 
     const ENERGY_TAB = '/energy/portfolio/overview';
     const CARBON_TAB = '/carbon/portfolio/overview';
     const CONTROL_TAB = '/control/plug-rules';
     const EXPLORE_TAB = '/explore-page/by-buildings';
-
-    const routeToControlPage = () => {
-        history.push({
-            pathname: `/control/plug-rules`,
-        });
-    };
-
-    const routeToPortfolioPage = () => {
-        history.push({
-            pathname: `/energy/portfolio/overview`,
-        });
-    };
-
-    const routeToCarbonPage = () => {
-        history.push({
-            pathname: `/carbon/portfolio/overview`,
-        });
-    };
 
     const configRoutes = [
         '/settings/general',
@@ -63,11 +50,29 @@ const NavLinks = () => {
         '/settings/utility-monitors',
     ];
 
+    const redirectToPortfolioPage = () => {
+        history.push({
+            pathname: `/energy/portfolio/overview`,
+        });
+    };
+
+    const redirectToControlPage = () => {
+        history.push({
+            pathname: `/control/plug-rules`,
+        });
+    };
+
+    const redirectToCarbonPage = () => {
+        history.push({
+            pathname: `/carbon/portfolio/overview`,
+        });
+    };
+
     const handleEnergyClick = () => {
         const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
 
         if (!bldgObj?.active) {
-            routeToPortfolioPage();
+            redirectToPortfolioPage();
             updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
             return;
         }
@@ -102,7 +107,7 @@ const NavLinks = () => {
                 }
             });
         } else {
-            routeToPortfolioPage();
+            redirectToPortfolioPage();
             updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
         }
     };
@@ -110,7 +115,7 @@ const NavLinks = () => {
     const handleCarbonClick = () => {
         const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
         if (!bldgObj?.active) {
-            routeToCarbonPage();
+            redirectToCarbonPage();
             updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
             return;
         }
@@ -147,7 +152,7 @@ const NavLinks = () => {
                 }
             });
         } else {
-            routeToCarbonPage();
+            redirectToCarbonPage();
             updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
         }
     };
@@ -156,15 +161,15 @@ const NavLinks = () => {
         const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
         if (bldgObj) {
             if (!bldgObj?.active) {
-                routeToPortfolioPage();
+                redirectToPortfolioPage();
                 updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
                 return;
             } else {
-                routeToControlPage();
+                redirectToControlPage();
                 return;
             }
         } else {
-            routeToControlPage();
+            redirectToControlPage();
         }
     };
 
@@ -217,38 +222,18 @@ const NavLinks = () => {
     };
 
     const handleSideNavChange = (componentName) => {
-        if (componentName === 'Energy') {
-            ComponentStore.update((s) => {
-                s.parent = 'portfolio';
-            });
-        }
-        if (componentName === 'Carbon') {
-            ComponentStore.update((s) => {
-                s.parent = 'carbon';
-            });
-        }
-        if (componentName === 'Control') {
-            ComponentStore.update((s) => {
-                s.parent = 'control';
-            });
-        }
-        if (componentName === 'Explore') {
-            ComponentStore.update((s) => {
-                s.parent = 'explore';
-            });
-        }
-        if (componentName === 'account') {
-            ComponentStore.update((s) => {
-                s.parent = 'account';
-            });
-        }
-        if (componentName === 'building-settings') {
-            ComponentStore.update((s) => {
-                s.parent = 'building-settings';
-            });
-        } else {
-            return;
-        }
+        const parent = {
+            portfolio: 'Energy',
+            carbon: 'Carbon',
+            control: 'Control',
+            explore: 'Explore',
+            account: 'account',
+            buildingSettings: 'building-settings',
+        };
+
+        ComponentStore.update((s) => {
+            s.parent = parent[componentName];
+        });
     };
 
     const handlePathChange = (pathName) => {
@@ -267,115 +252,89 @@ const NavLinks = () => {
                 break;
             default:
                 history.push({
-                    pathname: `${pathName}`,
+                    pathname: pathName,
                 });
                 break;
         }
     };
 
     useEffect(() => {
-        if (userPermission?.user_role !== 'admin') {
-            if (!userPermission?.permissions?.permissions?.explore_general_permission?.view) {
-                setuserPermissionBuildingExplore('Explore');
-            }
-            if (!userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
-                setuserPermisionBuildingEnergy('Energy');
-            }
-            if (!userPermission?.permissions?.permissions?.control_control_permission?.view) {
-                setuserPermisionBuildingControl('Control');
-            }
-            if (!userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
-                setuserPermisionBuildingCarbon('Carbon');
-            }
-            if (userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
-                setuserPermisionBuildingEnergy('');
-            }
-            if (userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
-                setuserPermisionBuildingCarbon('');
-            }
-            if (userPermission?.permissions?.permissions?.control_control_permission?.view) {
-                setuserPermisionBuildingControl('');
-            }
-            if (userPermission?.permissions?.permissions?.explore_general_permission?.view) {
-                setuserPermissionBuildingExplore('');
-            }
-        }
-        if (userPermission?.user_role === 'admin') {
-            setuserPermisionBuildingEnergy('');
-            setuserPermisionBuildingCarbon('');
-            setuserPermissionBuildingExplore('');
-            setuserPermisionBuildingControl('');
-        }
-    }, [userPermission]);
+        if (!authProtectedRoutes || authProtectedRoutes.length === 0) return;
+
+        const tabVisibilityMap = {
+            Energy: isEnergyTabVisible || isSuperUser,
+            Carbon: isCarbonTabVisible || isSuperUser,
+            Control: isControlTabVisible || isSuperUser,
+            Explore: isExploreTabVisible || isSuperUser,
+        };
+
+        const newRoutesList = authProtectedRoutes.filter((route) => {
+            return tabVisibilityMap[route?.name];
+        });
+
+        setTopNavRoutes(newRoutesList);
+    }, [authProtectedRoutes, isEnergyTabVisible, isCarbonTabVisible, isControlTabVisible, isExploreTabVisible]);
 
     return (
         <div className="top-nav-routes-list d-flex align-items-center">
-            {authProtectedRoutes
-                .filter(
-                    (item) =>
-                        item?.name !== userPermissionBuildingExplore &&
-                        item?.name !== userPermisionBuildingEnergy &&
-                        item?.name !== userPermisionBuildingControl &&
-                        item?.name !== userPermisionBuildingCarbon
-                )
-                .map((item, index) => {
-                    if (!item.visibility) return;
-                    if (item.name === 'Admin' && location.pathname !== '/super-user/accounts') return;
-                    if (location.pathname === '/super-user/accounts' && item.path !== '/super-user/accounts') return;
+            {topNavRoutes.map((item, index) => {
+                if (!item.visibility) return;
+                if (item.name === 'Admin' && location.pathname !== '/super-user/accounts') return;
+                if (location.pathname === '/super-user/accounts' && item.path !== '/super-user/accounts') return;
 
-                    let className = '';
+                let className = '';
 
-                    // For SuperUser Route no split is required
-                    if (item.name === 'Admin') {
-                        className = 'active';
-                    } else {
-                        const str1 = item.path.split('/')[1];
-                        const str2 = location.pathname.split('/')[1];
-                        const active = str1.localeCompare(str2);
-                        className = active === 0 ? 'active' : '';
-                    }
+                // For SuperUser Route no split is required
+                if (item.name === 'Admin') {
+                    className = 'active';
+                } else {
+                    const str1 = item.path.split('/')[1];
+                    const str2 = location.pathname.split('/')[1];
+                    const active = str1.localeCompare(str2);
+                    className = active === 0 ? 'active' : '';
+                }
 
-                    const routeName = item?.name === 'Admin' ? 'Accounts' : item?.name;
+                const routeName = item?.name === 'Admin' ? 'Accounts' : item?.name;
 
-                    return (
-                        <div
-                            key={index}
-                            className={`d-flex align-items-center mouse-pointer navbar-head-container ${className}`}
-                            onClick={() => {
-                                handleSideNavChange(item.name);
-                                handlePathChange(item.path);
-                            }}>
-                            <div className="d-flex align-items-center">
-                                {item.name === 'Energy' && (
-                                    <div>
-                                        <Circlebolt className={`navbar-icons-style ${className}`} />
-                                    </div>
-                                )}
-                                {item.name === 'Control' && (
-                                    <div>
-                                        <Toggleon className={`navbar-icons-style ${className}`} />
-                                    </div>
-                                )}
-                                {item.name === 'Carbon' && (
-                                    <div>
-                                        <CarbonCo2 className={`navbar-icons-style ${className}`} />
-                                    </div>
-                                )}
-                                {item.name === 'Explore' && (
-                                    <div>
-                                        <Telescope className={`navbar-icons-style ${className}`} />
-                                    </div>
-                                )}
-                                {item.name === 'Admin' && (
-                                    <div>
-                                        <User className={`navbar-icons-style ${className}`} width={18} height={19} />
-                                    </div>
-                                )}
-                                <div className={`navbar-heading ml-2 ${className}`}>{routeName}</div>
-                            </div>
+                return (
+                    <div
+                        key={index}
+                        className={`d-flex align-items-center mouse-pointer navbar-head-container ${className}`}
+                        onClick={() => {
+                            handleSideNavChange(item?.name);
+                            handlePathChange(item?.path);
+                        }}>
+                        <div className="d-flex align-items-center">
+                            {item.name === 'Energy' && (
+                                <div>
+                                    <Circlebolt className={`navbar-icons-style ${className}`} />
+                                </div>
+                            )}
+                            {item.name === 'Control' && (
+                                <div>
+                                    <Toggleon className={`navbar-icons-style ${className}`} />
+                                </div>
+                            )}
+                            {item.name === 'Carbon' && (
+                                <div>
+                                    <CarbonCo2 className={`navbar-icons-style ${className}`} />
+                                </div>
+                            )}
+                            {item.name === 'Explore' && (
+                                <div>
+                                    <Telescope className={`navbar-icons-style ${className}`} />
+                                </div>
+                            )}
+                            {item.name === 'Admin' && (
+                                <div>
+                                    <User className={`navbar-icons-style ${className}`} width={18} height={19} />
+                                </div>
+                            )}
+                            <div className={`navbar-heading ml-2 ${className}`}>{routeName}</div>
                         </div>
-                    );
-                })}
+                    </div>
+                );
+            })}
         </div>
     );
 };
