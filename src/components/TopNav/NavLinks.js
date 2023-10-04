@@ -222,18 +222,38 @@ const NavLinks = () => {
     };
 
     const handleSideNavChange = (componentName) => {
-        const parent = {
-            portfolio: 'Energy',
-            carbon: 'Carbon',
-            control: 'Control',
-            explore: 'Explore',
-            account: 'account',
-            buildingSettings: 'building-settings',
-        };
-
-        ComponentStore.update((s) => {
-            s.parent = parent[componentName];
-        });
+        if (componentName === 'Energy') {
+            ComponentStore.update((s) => {
+                s.parent = 'portfolio';
+            });
+        }
+        if (componentName === 'Carbon') {
+            ComponentStore.update((s) => {
+                s.parent = 'carbon';
+            });
+        }
+        if (componentName === 'Control') {
+            ComponentStore.update((s) => {
+                s.parent = 'control';
+            });
+        }
+        if (componentName === 'Explore') {
+            ComponentStore.update((s) => {
+                s.parent = 'explore';
+            });
+        }
+        if (componentName === 'account') {
+            ComponentStore.update((s) => {
+                s.parent = 'account';
+            });
+        }
+        if (componentName === 'building-settings') {
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
+            });
+        } else {
+            return;
+        }
     };
 
     const handlePathChange = (pathName) => {
