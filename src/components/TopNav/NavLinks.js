@@ -38,6 +38,7 @@ const NavLinks = () => {
     const CARBON_TAB = '/carbon/portfolio/overview';
     const CONTROL_TAB = '/control/plug-rules';
     const EXPLORE_TAB = '/explore-page/by-buildings';
+    const SUPER_USER_ROUTE = '/super-user/accounts';
 
     const configRoutes = [
         '/settings/general',
@@ -265,6 +266,7 @@ const NavLinks = () => {
             Carbon: isCarbonTabVisible || isSuperUser,
             Control: isControlTabVisible || isSuperUser,
             Explore: isExploreTabVisible || isSuperUser,
+            Admin: isSuperUser || location.pathname === SUPER_USER_ROUTE,
         };
 
         const newRoutesList = authProtectedRoutes.filter((route) => {
@@ -272,14 +274,21 @@ const NavLinks = () => {
         });
 
         setTopNavRoutes(newRoutesList);
-    }, [authProtectedRoutes, isEnergyTabVisible, isCarbonTabVisible, isControlTabVisible, isExploreTabVisible]);
+    }, [
+        authProtectedRoutes,
+        isSuperUser,
+        isEnergyTabVisible,
+        isCarbonTabVisible,
+        isControlTabVisible,
+        isExploreTabVisible,
+    ]);
 
     return (
         <div className="top-nav-routes-list d-flex align-items-center">
             {topNavRoutes.map((item, index) => {
                 if (!item.visibility) return;
-                if (item.name === 'Admin' && location.pathname !== '/super-user/accounts') return;
-                if (location.pathname === '/super-user/accounts' && item.path !== '/super-user/accounts') return;
+                if (item.name === 'Admin' && location.pathname !== SUPER_USER_ROUTE) return;
+                if (location.pathname === SUPER_USER_ROUTE && item.path !== SUPER_USER_ROUTE) return;
 
                 let className = '';
 
