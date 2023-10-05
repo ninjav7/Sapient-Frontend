@@ -30,8 +30,10 @@ const CarbonBuilding = () => {
     const history = useHistory();
     const [kpiMetrics, setKpiMetrics] = useState({
         average: { now: 0, old: 0, change: 0 },
-        current_carbon_intensity: { now: 0, old: 0, change: 0 },
+        current_carbon_intensity: { now: 0, old: 0 },
         total: { now: 0, old: 0, change: 0 },
+        egrid_emission_factor: 0,
+        average_carbon_intensity: { now: 0, old: 0, change: 0 },
     });
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -41,7 +43,7 @@ const CarbonBuilding = () => {
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
-    const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
+    const [dateFormatLocal, setDateFormat] = useState('MM/DD HH:00');
 
     const [xAxisObj, setXAxisObj] = useState({
         xAxis: {
@@ -72,9 +74,36 @@ const CarbonBuilding = () => {
         carbon: true,
         energy: true,
     });
+    const [timeFormatChanged, setTimeFormatChanged] = useState(false);
+    const [dateFormatChanged, setDateFormatChanged] = useState('');
+    const [unitFormatChanged, setUnitFormatChanged] = useState(false);
+    const { dateFormat, timeFormat, unit } = UserStore.useState((s) => ({
+        dateFormat: s.dateFormat,
+        timeFormat: s.timeFormat,
+        unit: s.unit,
+    }));
+
+    useEffect(() => {
+        if (dateFormat) {
+            setDateFormatChanged(dateFormat);
+        }
+        if (timeFormat) {
+            setTimeFormatChanged(timeFormat);
+        }
+        if (unit) {
+            setUnitFormatChanged(unit);
+        }
+    }, [dateFormat, timeFormat, unit]);
+
+    useEffect(() => {
+        let time_zone = 'US/Eastern';
+        fetchMetricsKpi();
+        buildingConsumptionChartEnergy(time_zone);
+        buildingEnergyConsumptionChartCarbon(time_zone);
+    }, [timeFormatChanged, dateFormatChanged, unitFormatChanged]);
 
     const formatXaxis = ({ value }) => {
-        return moment.utc(value).format(`${dateFormat}`);
+        return moment.utc(value).format(`${dateFormatLocal}`);
     };
 
     const toolTipFormatter = ({ value }) => {
@@ -109,8 +138,8 @@ const CarbonBuilding = () => {
             setXAxisObj(xaxisObj);
         };
 
-        const getFormattedChartDates = (days_count, timeFormat, dateFormat) => {
-            const date_format = xaxisLabelsFormat(days_count, timeFormat, dateFormat);
+        const getFormattedChartDates = (days_count, timeFormat, dateFormatLocal) => {
+            const date_format = xaxisLabelsFormat(days_count, timeFormat, dateFormatLocal);
             setDateFormat(date_format);
         };
 

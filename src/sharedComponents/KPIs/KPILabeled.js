@@ -37,7 +37,7 @@ const KPILabeled = ({
                 <div className="d-flex">
                     <p className="KPI-component-text"> {value} </p>
                     <div className="KPI-component-unit"> {unit} </div>
-                    <TrendsBadge value={badgePrecentage} type={type} />
+                    {badgePrecentage && <TrendsBadge value={badgePrecentage} type={type} />}
                 </div>
             </div>
         </div>

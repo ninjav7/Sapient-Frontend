@@ -37,7 +37,7 @@ export function fetchEnergyConsumption(bldgId, payload) {
 }
 
 export function fetchEnergyConsumptionV2(payload, metric) {
-    let params = `?date_from=${payload?.date_from}&date_to=${payload?.date_to}&timezone=${payload?.tz_info}`;
+    let params = `?date_from=${payload?.date_from}&date_to=${payload?.date_to}&tz_info=${payload?.tz_info}`;
     if (metric) {
         params += `&metric=${metric}`;
     }
