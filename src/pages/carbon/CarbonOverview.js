@@ -284,7 +284,7 @@ const CarbonOverview = () => {
     const renderTotalConsumption = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {Math.round(row.total_carbon_emissions / 1000)}{' '}
+                {Math.round(row.total_carbon_emissions)}{' '}
                 {userPrefUnits === 'si' ? `${UNITS.kg}` : `${UNITS.ibs}`}
             </Typography.Body>
         );
