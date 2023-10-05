@@ -16,7 +16,7 @@ const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0, use
 
                 <KPILabeled
                     title={`Total Carbon Emissions`}
-                    value={formatConsumptionValue(overalldata?.total?.now / 1000, 2)}
+                    value={formatConsumptionValue(overalldata?.total?.now, 2)}
                     badgePrecentage={percentageHandler(overalldata.total.now, overalldata.total.old)}
                     unit={`${userPrefUnits === 'si' ? `${UNITS.kg}` : `${UNITS.ibs}`}`}
                     tooltipText={

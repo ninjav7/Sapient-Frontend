@@ -18,6 +18,7 @@ import { BaseUrl, assignSensorsToRule } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
+import { timeZone } from '../../utils/helper';
 import './style.scss';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
@@ -121,7 +122,7 @@ const PlugRules = () => {
     const handleAddRuleShow = () => setShowAddRule(true);
     const { download } = useCSVDownload();
     const [is24Format, setIs24Format] = useState(false);
-
+    const bldgTImeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const activeBuildingId = localStorage.getItem('buildingId');
     const [skeletonLoading, setSkeletonLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -130,6 +131,7 @@ const PlugRules = () => {
     const [pageRefresh, setPageRefresh] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timezoneToUse = bldgId !== 'portfolio' ? bldgTImeZone : timeZone;
     const initialSortingState = { name: 'name', method: 'ace' };
     const [sortBy, setSort] = useState(initialSortingState);
     const initialBuildingValue = bldgId !== 'portfolio' ? bldgId : '';
@@ -229,6 +231,7 @@ const PlugRules = () => {
                 rule_search: search,
                 order_by: sortBy.name,
                 sort_by: sortBy.method,
+                tz_info: timezoneToUse,
             },
         };
 
