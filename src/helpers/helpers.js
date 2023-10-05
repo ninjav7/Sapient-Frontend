@@ -13,6 +13,24 @@ export const convertToUserLocalTime = (UTCtime) => {
     return isoFormat;
 };
 
+export const prepareTimeAndDateFormat = (dateFormat, timeFormat) => {
+    let format = '';
+    if (dateFormat == 'DD-MM-YYYY') {
+        if (timeFormat == '12h') {
+            format = `DD/MM/YYYY hh:mm A `;
+        } else if(timeFormat == '24h') {
+            format = `DD/MM/YYYY HH:mm:ss`;
+        }
+    } else if (dateFormat == 'MM-DD-YYYY') {
+        if (timeFormat == '12h') {
+            format = `MM/DD/YYYY hh:mm A `;
+        } else if(timeFormat == '24h') {
+            format = `MM/DD/YYYY HH:mm:ss`;
+        }
+    }
+    return format;
+};
+
 export const handleDateFormat = (customDate, dateType) => {
     if (dateType === 'startDate' && customDate === null) {
         let startDate = new Date();

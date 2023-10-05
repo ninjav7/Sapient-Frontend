@@ -8,6 +8,7 @@ import { ReactComponent as PlusSVG } from '../../assets/icon/plus.svg';
 import { Cookies } from 'react-cookie';
 import Modal from 'react-bootstrap/Modal';
 import moment from 'moment';
+import { prepareTimeAndDateFormat } from '../../helpers/helpers';
 import { UncontrolledTooltip } from 'reactstrap';
 import { UserStore } from '../../store/UserStore';
 import { fetchPlugRules, updatePlugRuleRequest, createPlugRuleRequest } from '../../services/plugRules';
@@ -76,13 +77,34 @@ const SkeletonLoading = () => (
 );
 
 const PlugRules = () => {
-    const { timeFormat } = UserStore.useState((s) => ({
-        timeFormat: s.timeFormat,
-    }));
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
     const [search, setSearch] = useState('');
+    const [timeFormatChanged, setTimeFormatChanged] = useState(false);
+    const [dateFormatChanged, setDateFormatChanged] = useState('');
+    const [unitFormatChanged, setUnitFormatChanged] = useState(false);
+    const { dateFormat, timeFormat, unit } = UserStore.useState((s) => ({
+        dateFormat: s.dateFormat,
+        timeFormat: s.timeFormat,
+        unit: s.unit,
+    }));
+
+    useEffect(() => {
+        if (dateFormat) {
+            setDateFormatChanged(dateFormat);
+        }
+        if (timeFormat) {
+            setTimeFormatChanged(timeFormat);
+        }
+        if (unit) {
+            setUnitFormatChanged(unit);
+        }
+    }, [dateFormat, timeFormat, unit]);
+
+    useEffect(() => {
+        fetchPlugRuleData();
+    }, [timeFormatChanged, dateFormatChanged, unitFormatChanged]);
 
     // Add Rule Model
     const [showAddRule, setShowAddRule] = useState(false);
@@ -374,12 +396,11 @@ const PlugRules = () => {
         );
     };
     const renderTimeStamp = (row) => {
-        const Is24HoursFormat = timeFormat == '24h';
         return (
             <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center">
                 {row.current_job_log[row.current_job_log.length - 1]?.time_stamp
                     ? moment(row.current_job_log[row.current_job_log.length - 1]?.time_stamp).format(
-                        Is24HoursFormat ? `HH:mm:ss MM/DD 'YY` : `hh:mm A MM/DD 'YY`
+                          prepareTimeAndDateFormat(dateFormat, timeFormat)
                       )
                     : ''}
             </Typography.Subheader>
