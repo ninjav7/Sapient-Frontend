@@ -10,5 +10,4 @@ export const saveUserPreference = (dateFormat, timeFormat, unit) => {
         store.timeFormat = timeFormat;
         store.unit = unit;
     });
-    window.location.reload();
 };

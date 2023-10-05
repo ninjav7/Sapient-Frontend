@@ -18,6 +18,7 @@ import { ConditionGroup } from '../../sharedComponents/conditionGroup';
 import { useNotification } from '../../sharedComponents/notification/useNotification';
 import { Notification } from '../../sharedComponents/notification/Notification';
 import colors from '../../assets/scss/_colors.scss';
+import { prepareTimeAndDateFormat } from '../../helpers/helpers';
 import { UserStore } from '../../store/UserStore';
 import { UNITS } from '../../constants/units';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
@@ -183,8 +184,10 @@ const PlugRule = () => {
         rule_id: '',
         sensor_id: [],
     });
-    const { timeFormat } = UserStore.useState((s) => ({
+    const { dateFormat, timeFormat, unit } = UserStore.useState((s) => ({
+        dateFormat: s.dateFormat,
         timeFormat: s.timeFormat,
+        unit: s.unit,
     }));
     const [userPermission] = useAtom(userPermissionData);
     const isViewer = userPermission?.user_role === 'member';
@@ -535,6 +538,28 @@ const PlugRule = () => {
     const [sensorsIdNow, setSensorIdNow] = useState('');
     const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
     const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
+    const [timeFormatChanged, setTimeFormatChanged] = useState(false);
+    const [dateFormatChanged, setDateFormatChanged] = useState('');
+    const [unitFormatChanged, setUnitFormatChanged] = useState(false);
+
+    useEffect(() => {
+        if (dateFormat) {
+            setDateFormatChanged(dateFormat);
+        }
+        if (timeFormat) {
+            setTimeFormatChanged(timeFormat);
+        }
+        if (unit) {
+            setUnitFormatChanged(unit);
+        }
+    }, [dateFormat, timeFormat, unit]);
+
+    useEffect(() => {
+        fetchPlugRuleDetail();
+        fetchUnLinkedSocketRules();
+        fetchLinkedSocketRules();
+        fetchLinkedSocketIds();
+    }, [timeFormatChanged, dateFormatChanged, unitFormatChanged]);
 
     const getGraphData = async (ids) => {
         if (ids.length) {
@@ -823,17 +848,6 @@ const PlugRule = () => {
         }
 
         setIsUnsavedChanges(false);
-    };
-    const handleClickConfirmSelectionToUnlink = () => {
-        handleSaveClicked();
-        setIsUnsavedChanges(true);
-        setShowConfirmSelectionToUnlink(false);
-    };
-
-    const handleClickConfirmSelectionToLink = () => {
-        handleSaveClicked();
-        setIsUnsavedChanges(true);
-        setShowConfirmSelectionToLink(false);
     };
 
     const handleRuleLinkStateChange = (value, rule) => {
@@ -1600,7 +1614,7 @@ const PlugRule = () => {
             return new Date(x.response.time_stamp) < new Date(y.response.time_stamp) ? 1 : -1;
         });
         const res = sortedData[0]?.response
-            ? moment(sortedData[0].response?.time_stamp).format(is24Format ? `HH:mm:ss MM/DD 'YY` : `hh:mm A MM/DD 'YY`)
+            ? moment(sortedData[0].response?.time_stamp).format(prepareTimeAndDateFormat(dateFormat, timeFormat))
             : '';
         return res;
     };
@@ -2515,9 +2529,9 @@ const PlugRule = () => {
 
                             {currentJobLog[0]?.time_stamp && (
                                 <Typography.Subheader size={Typography.Sizes.sm}>
-                                    Last Update:
+                                    Last Update:{' '}
                                     {moment(currentJobLog[0]?.time_stamp).format(
-                                        is24Format ? `HH:mm:ss MM/DD 'YY` : `hh:mm A MM/DD 'YY`
+                                        prepareTimeAndDateFormat(dateFormat, timeFormat)
                                     )}
                                 </Typography.Subheader>
                             )}
