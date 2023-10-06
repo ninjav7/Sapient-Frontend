@@ -23,8 +23,8 @@ export function fetchPlugRules(params, searchParams) {
         return res;
     });
 }
-export function fetchPlugRuleDetails(ruleId) {
-    return axiosInstance.get(`${plugRuleDetails}?rule_id=${ruleId}`).then((res) => {
+export function fetchPlugRuleDetails(ruleId, tz_info) {
+    return axiosInstance.get(`${plugRuleDetails}?rule_id=${ruleId}&tz_info=${tz_info}`).then((res) => {
         return res;
     });
 }
