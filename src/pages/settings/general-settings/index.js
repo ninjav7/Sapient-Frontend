@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import Switch from 'react-switch';
+import Modal from 'react-bootstrap/Modal';
 import { useParams } from 'react-router-dom';
 import TimezoneSelect from 'react-timezone-select';
 import { Row, Col, CardBody, CardHeader } from 'reactstrap';
@@ -32,6 +33,25 @@ import '../../../sharedComponents/form/select/style.scss';
 import '../style.css';
 import './styles.scss';
 
+const UserAlertPopup = (props) => {
+    const { isModalOpen = false, onCancel } = props;
+
+    return (
+        <Modal show={isModalOpen} onHide={onCancel} centered backdrop="static" keyboard={false}>
+            <Modal.Body className="p-4">
+                <Typography.Header size={Typography.Sizes.lg}>{`Building Update Error`}</Typography.Header>
+                <Brick sizeInRem={2} />
+                <Typography.Body size={Typography.Sizes.lg}>
+                    {`Missing Latitude or Longitude information for the Building. Please add details before saving.`}
+                </Typography.Body>
+            </Modal.Body>
+            <Modal.Footer className="pb-4 pr-4">
+                <Button label="Close" size={Button.Sizes.lg} type={Button.Type.primaryDistructive} onClick={onCancel} />
+            </Modal.Footer>
+        </Modal>
+    );
+};
+
 const GeneralBuildingSettings = () => {
     const { bldgId } = useParams();
 
@@ -48,6 +68,7 @@ const GeneralBuildingSettings = () => {
     const userPrefTimeZone = UserStore.useState((s) => s.timeFormat);
 
     const [bldgData, setBldgData] = useState({});
+    const [errorObj, setErrorObj] = useState({});
     const [buildingTypes, setBuildingTypes] = useState([]);
 
     const [buildingOperatingHours, setBuildingOperatingHours] = useState({});
@@ -86,6 +107,10 @@ const GeneralBuildingSettings = () => {
     const [showDeleteModal, setShowDelete] = useState(false);
     const closeDeleteAlert = () => setShowDelete(false);
     const showDeleteAlert = () => setShowDelete(true);
+
+    const [showAlertModal, setShowAlert] = useState(false);
+    const closeAlertPopup = () => setShowAlert(false);
+    const showAlertPopup = () => setShowAlert(true);
 
     const onSave = () => {
         closeDeleteAlert();
@@ -221,70 +246,88 @@ const GeneralBuildingSettings = () => {
     };
 
     const onBuildingDetailsSave = async (bld_id, bldg_data) => {
-        setProcessing(true);
+        if (!bld_id) return;
 
-        const params = `/${bld_id}`;
+        let alertObj = Object.assign({}, errorObj);
 
-        let payload = {
-            info: {
-                name: bldg_data?.name,
-                building_type_id: bldg_data?.building_type_id,
-                plug_only: bldg_data?.plug_only,
-                square_footage: bldg_data?.square_footage,
-                timezone: bldg_data?.timezone,
-                active: bldg_data?.active,
-            },
-            address: {
-                street_address: bldg_data?.street_address,
-                address_2: bldg_data?.address_2,
-                city: bldg_data?.city,
-                state: bldg_data?.state,
-                zip_code: bldg_data?.zip_code,
-                latitude: bldg_data?.latitude,
-                longitude: bldg_data?.longitude,
-            },
-            operating_hours: operationTime.operating_hours,
-        };
-
-        // Handle Square Footage / Meter change with converstion check and fix
-        if (payload?.info?.square_footage === '') payload.info.square_footage = 0;
-
-        if (userPrefUnits === 'si' && payload?.info?.square_footage !== '') {
-            payload.info.square_footage = Number(convertToFootage(payload?.info?.square_footage));
-        } else {
-            payload.info.square_footage = Number(payload.info.square_footage);
+        if (bldg_data?.latitude === '' || bldg_data?.longitude === '') {
+            if (!(bldg_data?.latitude === '' && bldg_data?.longitude === '')) {
+                if (bldg_data?.latitude === '')
+                    alertObj.latitude = 'Please enter Latitude details. It cannot be empty.';
+                if (bldg_data?.longitude === '')
+                    alertObj.longitude = 'Please enter Longitude details. It cannot be empty.';
+                showAlertPopup();
+            }
         }
 
-        await updateGeneralBuildingChange(params, payload)
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = response?.message;
-                        s.notificationType = 'success';
-                    });
-                    BuildingListStore.update((s) => {
-                        s.fetchBuildingList = true;
-                    });
-                } else {
+        setErrorObj(alertObj);
+
+        if (!alertObj.latitude && !alertObj.longitude) {
+            setProcessing(true);
+
+            const params = `/${bld_id}`;
+
+            let payload = {
+                info: {
+                    name: bldg_data?.name,
+                    building_type_id: bldg_data?.building_type_id,
+                    plug_only: bldg_data?.plug_only,
+                    square_footage: bldg_data?.square_footage,
+                    timezone: bldg_data?.timezone,
+                    active: bldg_data?.active,
+                },
+                address: {
+                    street_address: bldg_data?.street_address,
+                    address_2: bldg_data?.address_2,
+                    city: bldg_data?.city,
+                    state: bldg_data?.state,
+                    zip_code: bldg_data?.zip_code,
+                    latitude: bldg_data?.latitude,
+                    longitude: bldg_data?.longitude,
+                },
+                operating_hours: operationTime.operating_hours,
+            };
+
+            // Handle Square Footage / Meter change with converstion check and fix
+            if (payload?.info?.square_footage === '') payload.info.square_footage = 0;
+
+            if (userPrefUnits === 'si' && payload?.info?.square_footage !== '') {
+                payload.info.square_footage = Number(convertToFootage(payload?.info?.square_footage));
+            } else {
+                payload.info.square_footage = Number(payload.info.square_footage);
+            }
+
+            await updateGeneralBuildingChange(params, payload)
+                .then((res) => {
+                    const response = res?.data;
+                    if (response?.success) {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message;
+                            s.notificationType = 'success';
+                        });
+                        BuildingListStore.update((s) => {
+                            s.fetchBuildingList = true;
+                        });
+                    } else {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = 'Unable to update Building Details.';
+                            s.notificationType = 'error';
+                        });
+                    }
+                })
+                .catch((error) => {
                     UserStore.update((s) => {
                         s.showNotification = true;
                         s.notificationMessage = 'Unable to update Building Details.';
                         s.notificationType = 'error';
                     });
-                }
-            })
-            .catch((error) => {
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Unable to update Building Details.';
-                    s.notificationType = 'error';
+                })
+                .finally(() => {
+                    setProcessing(false);
                 });
-            })
-            .finally(() => {
-                setProcessing(false);
-            });
+        }
     };
 
     const operatingHoursChangeHandler = (date, day, type1, type2) => {
@@ -759,35 +802,43 @@ const GeneralBuildingSettings = () => {
 
                         <CardBody>
                             <div className="row">
-                                <div className="col d-flex align-items-center">
-                                    <Inputs
+                                <div className="col">
+                                    <Typography.Body size={Typography.Sizes.sm}>{`Latitude`}</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
+                                    <InputTooltip
                                         type="number"
-                                        label="Latitude"
+                                        className="w-100"
+                                        inputClassName="custom-input-field"
                                         placeholder={
                                             isSuperAdmin || canUserEdit ? `Enter Latitude` : `Latitude not set`
                                         }
                                         onChange={(e) => {
                                             handleChange('latitude', e.target.value);
+                                            setErrorObj({ ...errorObj, latitude: null });
                                         }}
-                                        className="w-100"
-                                        inputClassName="custom-input-field"
+                                        error={errorObj?.latitude}
+                                        labelSize={Typography.Sizes.md}
                                         value={bldgData?.latitude}
                                         disabled={!(isSuperAdmin || canUserEdit)}
                                     />
                                 </div>
 
-                                <div className="col d-flex align-items-center">
-                                    <Inputs
+                                <div className="col">
+                                    <Typography.Body size={Typography.Sizes.sm}>{`Longitude`}</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
+                                    <InputTooltip
                                         type="number"
-                                        label="Longitude"
+                                        className="w-100"
+                                        inputClassName="custom-input-field"
                                         placeholder={
                                             isSuperAdmin || canUserEdit ? `Enter Longitude` : `Longitude not set`
                                         }
                                         onChange={(e) => {
                                             handleChange('longitude', e.target.value);
+                                            setErrorObj({ ...errorObj, longitude: null });
                                         }}
-                                        className="w-100"
-                                        inputClassName="custom-input-field"
+                                        error={errorObj?.longitude}
+                                        labelSize={Typography.Sizes.md}
                                         value={bldgData?.longitude}
                                         disabled={!(isSuperAdmin || canUserEdit)}
                                     />
@@ -1114,6 +1165,7 @@ const GeneralBuildingSettings = () => {
             ) : null}
 
             <DeleteBldg isModalOpen={showDeleteModal} onCancel={closeDeleteAlert} onSave={onSave} />
+            <UserAlertPopup isModalOpen={showAlertModal} onCancel={closeAlertPopup} />
         </React.Fragment>
     );
 };
