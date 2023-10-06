@@ -45,6 +45,7 @@ const Accounts = () => {
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [sortBy, setSortBy] = useState({});
+    const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
     const fetchTrendBadgeType = (now, old) => {
         if (now > old) return TRENDS_BADGE_TYPES.UPWARD_TREND;
@@ -127,6 +128,7 @@ const Accounts = () => {
     }, [search, offlineData, pageNo, pageSize, sortBy]);
 
     const handleDownloadCsv = async () => {
+        setDownloadingCSVData(true);
         const params = `?timezone=${timeZone}`;
         await fetchCustomerList(params)
             .then((res) => {
@@ -136,7 +138,10 @@ const Accounts = () => {
                     getCustomerListCSVExport(responseData?.data, headerProps)
                 );
             })
-            .catch((error) => {});
+            .catch((error) => {})
+            .finally(() => {
+                setDownloadingCSVData(false);
+            });
     };
 
     const redirectToVendorPage = async (vendorID) => {
@@ -380,6 +385,7 @@ const Accounts = () => {
                             setSearch(query);
                         }}
                         onDownload={() => handleDownloadCsv()}
+                        isCSVDownloading={isCSVDownloading}
                         buttonGroupFilterOptions={[{ label: 'Active' }, { label: 'Inactive' }, { label: 'All' }]}
                         onStatus={setSelectedStatus}
                         onPageSize={(currentPageSize) => {
