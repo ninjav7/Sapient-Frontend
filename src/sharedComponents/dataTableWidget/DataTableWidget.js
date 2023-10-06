@@ -269,7 +269,7 @@ const DataTableWidget = (props) => {
                     />
                     <div className="ml-auto data-table-widget-action-button-wrapper">
                         {!props.disableColumnDragging && <DraggableColumns onSortEnd={onSortEnd} headers={headers} />}
-                        {props.onDownload && <DownloadButton onClick={props.onDownload} />}
+                        {props.onDownload && <DownloadButton onClick={props.onDownload} {...props} />}
                     </div>
                 </div>
 
