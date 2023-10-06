@@ -127,8 +127,8 @@ const Accounts = () => {
     }, [search, offlineData, pageNo, pageSize, sortBy]);
 
     const handleDownloadCsv = async () => {
-        const search = '';
-        await fetchCustomerList(search)
+        const params = `?timezone=${timeZone}`;
+        await fetchCustomerList(params)
             .then((res) => {
                 const responseData = res.data;
                 download(

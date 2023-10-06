@@ -720,7 +720,7 @@ export const getCustomerListCSVExport = (tableData, columns) => {
 
                 case 'total_usage':
                     const energy = tableRow['total_usage'];
-                    arr.push(`${energy} kWh`);
+                    arr.push(`${(energy / 1000).toFixed(2)} kWh`);
                     break;
 
                 default:
