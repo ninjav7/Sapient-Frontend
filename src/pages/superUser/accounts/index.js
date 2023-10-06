@@ -130,6 +130,7 @@ const Accounts = () => {
     const handleDownloadCsv = async () => {
         setDownloadingCSVData(true);
         const params = `?timezone=${timeZone}`;
+
         await fetchCustomerList(params)
             .then((res) => {
                 const responseData = res.data;

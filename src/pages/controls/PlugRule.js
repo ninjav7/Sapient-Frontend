@@ -235,6 +235,7 @@ const PlugRule = () => {
     const [socketsTab, setSocketsTab] = useState(0);
     const [linkedSocketsTabData, setLinkedSocketsTabData] = useState([]);
     const [unlinkedSocketsTabData, setUnlinkedSocketsTabData] = useState([]);
+    const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
     const [isDeleting, setIsDeleting] = useState(false);
     const [allData, setAllData] = useState([]);
@@ -1192,6 +1193,7 @@ const PlugRule = () => {
     };
 
     const handleDownloadCsvLinkedTab = async () => {
+        setDownloadingCSVData(true);
         const sorting = sortByLinkedTab.method &&
             sortByLinkedTab.name && {
                 order_by: sortByLinkedTab.name,
@@ -1226,10 +1228,14 @@ const PlugRule = () => {
                     getSocketsForPlugRulePageTableCSVExport(responseData.data, headerPropsLinkedTab)
                 );
             })
-            .catch((error) => {});
+            .catch((error) => {})
+            .finally(() => {
+                setDownloadingCSVData(false);
+            });
     };
 
     const handleDownloadCsvUnlinkedTab = async () => {
+        setDownloadingCSVData(true);
         const sorting = sortByUnlinkedTab.method &&
             sortByUnlinkedTab.name && {
                 order_by: sortByUnlinkedTab.name,
@@ -1264,7 +1270,10 @@ const PlugRule = () => {
                     getSocketsForPlugRulePageTableCSVExport(responseData.data, headerPropsUnlinkedTab)
                 );
             })
-            .catch((error) => {});
+            .catch((error) => {})
+            .finally(() => {
+                setDownloadingCSVData(false);
+            });
     };
     useEffect(() => {
         fetchLinkedSocketRules();
@@ -2780,6 +2789,7 @@ const PlugRule = () => {
                                         { label: 'Unselected' },
                                     ]}
                                     onDownload={() => handleDownloadCsvLinkedTab()}
+                                    isCSVDownloading={isCSVDownloading}
                                     onStatus={setSelectedRuleFilter}
                                     rows={linkedSocketsTabData}
                                     searchResultRows={linkedSocketsTabData}
@@ -2901,6 +2911,7 @@ const PlugRule = () => {
                                         { label: 'Unselected' },
                                     ]}
                                     onDownload={() => handleDownloadCsvUnlinkedTab()}
+                                    isCSVDownloading={isCSVDownloading}
                                     onStatus={setSelectedRuleFilter}
                                     rows={unlinkedSocketsTabData}
                                     searchResultRows={unlinkedSocketsTabData}

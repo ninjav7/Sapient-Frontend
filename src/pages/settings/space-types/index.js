@@ -47,6 +47,7 @@ const SpaceTypes = () => {
 
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
+    const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
     const [spaceTypesData, setSpaceTypesData] = useState([]);
     const [isDataFetching, setDataFetching] = useState(false);
@@ -102,6 +103,8 @@ const SpaceTypes = () => {
     };
 
     const handleDownloadCsv = async () => {
+        setDownloadingCSVData(true);
+
         await getSpaceTypesList('')
             .then((res) => {
                 const response = res?.data;
@@ -112,7 +115,10 @@ const SpaceTypes = () => {
                     );
                 }
             })
-            .catch(() => {});
+            .catch(() => {})
+            .finally(() => {
+                setDownloadingCSVData(false);
+            });
     };
 
     const currentRow = () => {
@@ -239,6 +245,7 @@ const SpaceTypes = () => {
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         onDownload={() => handleDownloadCsv()}
+                        isCSVDownloading={isCSVDownloading}
                         headers={headerProps}
                         currentPage={pageNo}
                         onChangePage={setPageNo}

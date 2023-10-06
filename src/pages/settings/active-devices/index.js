@@ -49,6 +49,7 @@ const ActiveDevices = () => {
     const [firmWareString, setFirmWareString] = useState([]);
     const [hardWareString, setHardWareString] = useState([]);
     const [filterOptions, setFilterOptions] = useState([]);
+    const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
     const modifySensorFilter = (fractions) => {
         const numerators = [];
@@ -370,14 +371,19 @@ const ActiveDevices = () => {
     };
 
     const handleDownloadCsv = async () => {
+        setDownloadingCSVData(true);
         const params = `?building_id=${bldgId}`;
+
         await getSingleActiveDevice(params)
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getActiveDeviceTableCSVExport(responseData, headerProps);
                 download(`${bldgName}_Active_Devices_${new Date().toISOString().split('T')[0]}`, csvData);
             })
-            .catch(() => {});
+            .catch(() => {})
+            .finally(() => {
+                setDownloadingCSVData(false);
+            });
     };
 
     const renderDeviceStatus = (row) => {
@@ -543,6 +549,7 @@ const ActiveDevices = () => {
                         searchResultRows={currentRow()}
                         filterOptions={filterOptions}
                         onDownload={() => handleDownloadCsv()}
+                        isCSVDownloading={isCSVDownloading}
                         headers={headerProps}
                         currentPage={pageNo}
                         onChangePage={setPageNo}
