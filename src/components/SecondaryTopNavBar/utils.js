@@ -31,6 +31,6 @@ export const isPathInSettingsRoutes = (path, routes) => {
     return routes.some((route) => path.includes(route));
 };
 
-export const portfolioRoutes = ['/energy/portfolio/overview', '/energy/compare-buildings'];
+export const portfolioRoutes = ['/energy/portfolio/overview'];
 
 export const buildingRoutes = ['/energy/building/overview', '/energy/end-uses', '/energy/time-of-day'];
