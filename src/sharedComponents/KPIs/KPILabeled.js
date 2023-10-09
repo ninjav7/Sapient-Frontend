@@ -37,7 +37,7 @@ const KPILabeled = ({
                 <div className="d-flex">
                     <p className="KPI-component-text"> {value} </p>
                     <div className="KPI-component-unit"> {unit} </div>
-                    <TrendsBadge value={badgePrecentage} type={type} />
+                    {badgePrecentage !== undefined ? <TrendsBadge value={badgePrecentage} type={type} /> : null}
                 </div>
             </div>
         </div>
@@ -47,7 +47,7 @@ const KPILabeled = ({
 KPILabeled.propTypes = {
     title: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    badgePrecentage: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    badgePrecentage: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     tooltipText: PropTypes.string,
     tooltipId: PropTypes.string,
     unit: PropTypes.string.isRequired,
