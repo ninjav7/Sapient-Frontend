@@ -10,6 +10,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ButtonGroup } from '../../sharedComponents/buttonGroup';
 import { ComponentStore } from '../../store/ComponentStore';
 import { UncontrolledTooltip } from 'reactstrap';
+import { BuildingStore } from '../../store/BuildingStore';
 import Button from '../../sharedComponents/button/Button';
 import { Spinner } from 'reactstrap';
 import { fetchPlugRules, getEstimateSensorSavingsRequst } from '../../services/plugRules';
@@ -309,7 +310,7 @@ const PlugRule = () => {
     const [dateRangeAverageData, setDateRangeAverageData] = useState({});
     const [sortByLinkedTab, setSortByLinkedTab] = useState(initialSortingState);
     const [sortByUnlinkedTab, setSortByUnlinkedTab] = useState(initialSortingState);
-
+    const bldgTImeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [allSearchData, setAllSearchData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     const [totalItemsLinked, setTotalItemsLinked] = useState(0);
@@ -414,7 +415,7 @@ const PlugRule = () => {
         }
     };
     const fetchPlugRulesData = async () => {
-        const params = '';
+        const params = `?tz_info=${bldgTImeZone}`;
         await fetchPlugRules(params, '').then((res) => {
             setIsFetchedPlugRulesData(true);
             const plugRules = res.data.data;
@@ -456,7 +457,7 @@ const PlugRule = () => {
     }, [currentData.name]);
 
     const fetchPlugRuleDetail = async () => {
-        await fetchPlugRuleDetails(ruleId).then((res) => {
+        await fetchPlugRuleDetails(ruleId, bldgTImeZone).then((res) => {
             if (res.status) {
                 setSkeletonLoading(false);
             }
@@ -2524,7 +2525,7 @@ const PlugRule = () => {
                             {currentData?.status && (
                                 <>
                                     <UncontrolledTooltip placement="top" target={'tooltip-status'}>
-                                        {currentJobLog[0]?.msg}
+                                        {currentJobLog && currentJobLog[0]?.msg}
                                     </UncontrolledTooltip>
                                     <Typography.Subheader
                                         size={Typography.Sizes.sm}
@@ -2536,7 +2537,7 @@ const PlugRule = () => {
                                 </>
                             )}
 
-                            {currentJobLog[0]?.time_stamp && (
+                            {currentJobLog && currentJobLog[0]?.time_stamp && (
                                 <Typography.Subheader size={Typography.Sizes.sm}>
                                     Last Update:{' '}
                                     {moment(currentJobLog[0]?.time_stamp).format(
