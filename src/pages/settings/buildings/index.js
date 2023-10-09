@@ -34,6 +34,7 @@ const Buildings = () => {
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
+    const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
     const { download } = useCSVDownload();
 
@@ -253,6 +254,7 @@ const Buildings = () => {
     };
 
     const handleDownloadCsv = async (user_pref_units) => {
+        setDownloadingCSVData(true);
         const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
         const search = '';
@@ -270,7 +272,10 @@ const Buildings = () => {
                     );
                 }
             })
-            .catch((error) => {});
+            .catch((error) => {})
+            .finally(() => {
+                setDownloadingCSVData(false);
+            });
     };
 
     const fetchGeneralBuildingData = async (user_pref_units) => {
@@ -461,6 +466,7 @@ const Buildings = () => {
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         onDownload={() => handleDownloadCsv(userPrefUnits)}
+                        isCSVDownloading={isCSVDownloading}
                         filterOptions={filterOptions}
                         headers={tableHeader}
                         filters={filtersValues}

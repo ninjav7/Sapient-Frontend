@@ -62,6 +62,7 @@ const ExploreByEquipment = () => {
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [totalItems, setTotalItems] = useState(0);
+    const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
     const [selectedEquipIds, setSelectedEquipIds] = useState([]);
     const [filterObj, setFilterObj] = useState({});
@@ -276,6 +277,7 @@ const ExploreByEquipment = () => {
     };
 
     const handleDownloadCsv = async () => {
+        setDownloadingCSVData(true);
         const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
 
@@ -300,6 +302,9 @@ const ExploreByEquipment = () => {
                     s.notificationMessage = 'Data failed to export in CSV.';
                     s.notificationType = 'error';
                 });
+            })
+            .finally(() => {
+                setDownloadingCSVData(false);
             });
     };
 
@@ -1141,6 +1146,7 @@ const ExploreByEquipment = () => {
                             searchResultRows={currentRow()}
                             filterOptions={filterOptions}
                             onDownload={() => handleDownloadCsv()}
+                            isCSVDownloading={isCSVDownloading}
                             headers={headerProps}
                             customExcludedHeaders={['Panel Name', 'Breakers', 'Notes']}
                             customCheckAll={() => (

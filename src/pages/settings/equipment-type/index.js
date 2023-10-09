@@ -48,6 +48,7 @@ const EquipmentType = () => {
 
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
+    const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
     const [equipTypeData, setEquipTypeData] = useState([]);
     const [isDataFetching, setDataFetching] = useState(false);
@@ -189,6 +190,8 @@ const EquipmentType = () => {
     }, [search]);
 
     const handleDownloadCsv = async () => {
+        setDownloadingCSVData(true);
+
         await getEquipTypeData()
             .then((res) => {
                 const responseData = res?.data?.data;
@@ -197,7 +200,10 @@ const EquipmentType = () => {
                     getEquipTypeTableCSVExport(responseData, headerProps)
                 );
             })
-            .catch(() => {});
+            .catch(() => {})
+            .finally(() => {
+                setDownloadingCSVData(false);
+            });
     };
 
     const currentRow = () => {
@@ -343,6 +349,7 @@ const EquipmentType = () => {
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         onDownload={() => handleDownloadCsv()}
+                        isCSVDownloading={isCSVDownloading}
                         headers={headerProps}
                         filterOptions={filterOptions}
                         currentPage={pageNo}

@@ -41,6 +41,7 @@ const PassiveDevices = () => {
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [totalItems, setTotalItems] = useState(0);
+    const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
     // Add Device Modal states
     const [isAddDeviceModalOpen, setAddDeviceDeviceModal] = useState(false);
@@ -282,14 +283,19 @@ const PassiveDevices = () => {
     };
 
     const handleDownloadCsv = async () => {
-        let params = `?building_id=${bldgId}`;
+        setDownloadingCSVData(true);
+        const params = `?building_id=${bldgId}`;
+
         await getSinglePassiveDevice(params)
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getPassiveDeviceTableCSVExport(responseData, headerProps);
                 download(`${bldgName}_Smart Meter_${new Date().toISOString().split('T')[0]}`, csvData);
             })
-            .catch(() => {});
+            .catch(() => {})
+            .finally(() => {
+                setDownloadingCSVData(false);
+            });
     };
 
     const renderDeviceStatus = (row) => {
@@ -475,6 +481,7 @@ const PassiveDevices = () => {
                         searchResultRows={currentRow()}
                         filterOptions={filterOptions}
                         onDownload={() => handleDownloadCsv()}
+                        isCSVDownloading={isCSVDownloading}
                         headers={headerProps}
                         currentPage={pageNo}
                         onChangePage={setPageNo}

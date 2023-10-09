@@ -57,6 +57,8 @@ const ExploreByBuildings = () => {
     const [isFetchingChartData, setFetchingChartData] = useState(false);
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
 
+    const [isCSVDownloading, setDownloadingCSVData] = useState(false);
+
     let top = '';
     let bottom = '';
 
@@ -183,6 +185,7 @@ const ExploreByBuildings = () => {
     ]);
 
     const handleDownloadCsv = async () => {
+        setDownloadingCSVData(true);
         const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'total_consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
         const start_date = encodeURIComponent(startDate);
@@ -216,6 +219,9 @@ const ExploreByBuildings = () => {
                     s.notificationMessage = 'Data failed to export in CSV.';
                     s.notificationType = 'error';
                 });
+            })
+            .finally(() => {
+                setDownloadingCSVData(false);
             });
     };
 
@@ -988,6 +994,7 @@ const ExploreByBuildings = () => {
                             searchResultRows={currentRow()}
                             filterOptions={filterOptions}
                             onDownload={() => handleDownloadCsv()}
+                            isCSVDownloading={isCSVDownloading}
                             headers={tableHeader}
                             customCheckAll={() => (
                                 <Checkbox

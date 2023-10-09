@@ -52,6 +52,7 @@ const Panels = () => {
 
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
+    const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
     const [totalItems, setTotalItems] = useState(0);
     const [selectedFilter, setSelectedFilter] = useState(0);
@@ -122,14 +123,19 @@ const Panels = () => {
     };
 
     const handleDownloadCsv = async () => {
-        let params = `?building_id=${bldgId}`;
+        const params = `?building_id=${bldgId}`;
+        setDownloadingCSVData(true);
+
         await getPanelsList(params)
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getPanelsTableCSVExport(responseData, headerProps);
                 download(`${bldgName}_Panels_${new Date().toISOString().split('T')[0]}`, csvData);
             })
-            .catch(() => {});
+            .catch(() => {})
+            .finally(() => {
+                setDownloadingCSVData(false);
+            });
     };
 
     const deletePanel = async (panelId) => {
@@ -545,6 +551,7 @@ const Panels = () => {
                         searchResultRows={currentRow()}
                         filterOptions={filterOptions}
                         onDownload={handleDownloadCsv}
+                        isCSVDownloading={isCSVDownloading}
                         headers={headerProps}
                         currentPage={pageNo}
                         onChangePage={setPageNo}

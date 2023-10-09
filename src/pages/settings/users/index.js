@@ -49,6 +49,7 @@ const Users = () => {
     const [selectedStatus, setSelectedStatus] = useState(0);
     const [filterOptions, setFilterOptions] = useState([]);
     const [permissionRoleIds, setPermissionRoleIds] = useState([]);
+    const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
     const handleStatusCheck = (record) => {
         return (record.status = record?.is_verified ? (record?.is_active ? 'Active' : 'Inactive') : 'Pending');
@@ -253,7 +254,9 @@ const Users = () => {
     ];
 
     const handleDownloadCsv = async () => {
+        setDownloadingCSVData(true);
         const params = `?timezone=${timeZone}`;
+
         await fetchMemberUserList(params)
             .then((res) => {
                 const response = res?.data;
@@ -271,7 +274,10 @@ const Users = () => {
                     }
                 }
             })
-            .catch((e) => {});
+            .catch((e) => {})
+            .finally(() => {
+                setDownloadingCSVData(false);
+            });
     };
 
     useEffect(() => {
@@ -350,6 +356,7 @@ const Users = () => {
                             setPageSize(currentPageSize);
                         }}
                         onDownload={() => handleDownloadCsv()}
+                        isCSVDownloading={isCSVDownloading}
                         pageListSizes={pageListSizes}
                         totalCount={(() => {
                             return totalItems;

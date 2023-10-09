@@ -73,6 +73,7 @@ const Equipment = () => {
     const [preparedEndUseData, setPreparedEndUseData] = useState({});
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
+    const [isCSVDownloading, setDownloadingCSVData] = useState(false);
     const [showDeleteEquipmentModal, setShowDeleteEquipmentModal] = useState(false);
     const [rowToDelete, setRowToDelete] = useState();
     const [isDeleting, setIsDeleting] = useState(false);
@@ -590,6 +591,7 @@ const Equipment = () => {
     ];
 
     const handleDownloadCsv = async () => {
+        setDownloadingCSVData(true);
         const sorting = sortBy.method &&
             sortBy.name && {
                 order_by: sortBy.name,
@@ -622,6 +624,9 @@ const Equipment = () => {
             })
             .catch((error) => {
                 setIsProcessing(false);
+            })
+            .finally(() => {
+                setDownloadingCSVData(false);
             });
     };
     const handleDeleteRowClicked = (row) => {
@@ -693,6 +698,7 @@ const Equipment = () => {
                                 : null
                         }
                         onDownload={() => handleDownloadCsv()}
+                        isCSVDownloading={isCSVDownloading}
                         headers={headerProps}
                         buttonGroupFilterOptions={[]}
                         onPageSize={setPageSize}
