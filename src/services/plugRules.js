@@ -16,6 +16,7 @@ import {
     getFiltersForSensors,
     reassignSensorsToRule,
     getSensorLastUsed,
+    getPlugRuleStatus,
 } from './Network';
 
 export function fetchPlugRules(params, searchParams) {
@@ -80,6 +81,13 @@ export function getGraphDataRequest(selectedIds, plugRuleId) {
         .then((res) => {
             return res.data;
         });
+}
+
+export function getPlugRuleStatusRequest(plugRuleId) {
+    let params = `?rule_id=${plugRuleId}`;
+    return axiosInstance.get(`${getPlugRuleStatus}${params}`, {}).then((res) => {
+        return res.data;
+    });
 }
 
 export function getListSensorsForBuildingsRequest(page_size, pageNo, ruleId, activeBuildingId, getParams) {

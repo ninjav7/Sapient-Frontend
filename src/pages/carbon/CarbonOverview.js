@@ -148,7 +148,7 @@ const CarbonOverview = () => {
         };
 
         portfolioBuilidingsData();
-        portfolioOverallData();
+
     }, [startDate, endDate, userPrefUnits]);
 
     const [isKPIsLoading, setIsKPIsLoading] = useState(false);
