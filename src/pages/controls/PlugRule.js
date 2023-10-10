@@ -29,6 +29,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { useHistory, useParams } from 'react-router-dom';
 import Select from '../../sharedComponents/form/select';
 import { ReactComponent as CheckedSVG } from '../../assets/icon/circle-check.svg';
+import { ReactComponent as ReloadSVG } from '../../assets/icon/arrow-rotate-left.svg';
 import { ReactComponent as CircleXmarkSVG } from '../../assets/icon/circle-xmark.svg';
 import { ReactComponent as WarningSVG } from '../../assets/icon/warning.svg';
 import _ from 'lodash';
@@ -48,6 +49,7 @@ import {
     fetchPlugRuleDetails,
     deletePlugRuleRequest,
     getGraphDataRequest,
+    getPlugRuleStatusRequest,
     linkSensorsToRuleRequest,
     listLinkSocketRulesRequest,
     unlinkSocketRequest,
@@ -153,7 +155,14 @@ const notificationUnlinkedData = (count, name) => {
         title: `${count} ${count == 1 ? 'socket has' : 'sockets have'} been unlinked from ${name} `,
     };
 };
-
+const initialStatus = {
+    completed: [],
+    failed: [],
+    last_updated: '',
+    msg: '',
+    rule_status: '',
+    total_sockets: [],
+};
 const PlugRule = () => {
     const isLoadingLinkedRef = useRef(false);
     const isLoadingUnlinkedRef = useRef(false);
@@ -310,7 +319,7 @@ const PlugRule = () => {
     const [dateRangeAverageData, setDateRangeAverageData] = useState({});
     const [sortByLinkedTab, setSortByLinkedTab] = useState(initialSortingState);
     const [sortByUnlinkedTab, setSortByUnlinkedTab] = useState(initialSortingState);
-    const bldgTImeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const [currentBuilding, setCurrentBuilding] = useState();
     const [allSearchData, setAllSearchData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     const [totalItemsLinked, setTotalItemsLinked] = useState(0);
@@ -319,7 +328,8 @@ const PlugRule = () => {
     useEffect(() => {
         buildingListData.forEach((el) => {
             if (el.building_id === activeBuildingId) {
-                setBldgTimeZone(el.timezone);
+                console.log('el.,', el);
+                setCurrentBuilding(el.timezone);
             }
         });
     }, [buildingListData, activeBuildingId]);
@@ -359,6 +369,7 @@ const PlugRule = () => {
         const res = [...selectedIdsToLink, ...linkedIds];
         fetchEstimateSensorSavings(res);
         getGraphData(res);
+        getStatus();
     }, [selectedIdsToUnlink, selectedIdsToLink, selectedInitialyIds.length]);
 
     useEffect(() => {
@@ -415,17 +426,19 @@ const PlugRule = () => {
         }
     };
     const fetchPlugRulesData = async () => {
-        const params = `?tz_info=${bldgTImeZone}`;
-        await fetchPlugRules(params, '').then((res) => {
-            setIsFetchedPlugRulesData(true);
-            const plugRules = res.data.data;
-            plugRules &&
-                plugRules.forEach((plugRule) => {
-                    if (plugRule.name == currentData.name) {
-                        setActiveBuildingId(plugRule.buildings[0]?.building_id);
-                    }
-                });
-        });
+        if (currentBuilding) {
+            const params = `?tz_info=${currentBuilding}`;
+            await fetchPlugRules(params, '').then((res) => {
+                setIsFetchedPlugRulesData(true);
+                const plugRules = res.data.data;
+                plugRules &&
+                    plugRules.forEach((plugRule) => {
+                        if (plugRule.name == currentData.name) {
+                            setActiveBuildingId(plugRule.buildings[0]?.building_id);
+                        }
+                    });
+            });
+        }
     };
     useEffect(() => {
         calculateOffHoursPlots();
@@ -450,24 +463,26 @@ const PlugRule = () => {
         if (!isFetchedPlugRulesData) {
             fetchPlugRulesData();
         }
-    }, [isFetchedPlugRulesData]);
+    }, [isFetchedPlugRulesData, currentBuilding]);
 
     useEffect(() => {
         updateBreadcrumbStore();
     }, [currentData.name]);
 
     const fetchPlugRuleDetail = async () => {
-        await fetchPlugRuleDetails(ruleId, bldgTImeZone).then((res) => {
-            if (res.status) {
-                setSkeletonLoading(false);
-            }
-            let response = Object.assign({}, res.data.data[0]);
-            response.building_id = response?.building[0]?.building_id;
-            setActiveBuildingId(response.building_id);
-            setCurrentData(response);
-            const scheduleData = groupedCurrentDataById(response.action);
-            setPreparedScheduleData(scheduleData);
-        });
+        if (currentBuilding) {
+            await fetchPlugRuleDetails(ruleId, currentBuilding).then((res) => {
+                if (res.status) {
+                    setSkeletonLoading(false);
+                }
+                let response = Object.assign({}, res.data.data[0]);
+                response.building_id = response?.building[0]?.building_id;
+                setActiveBuildingId(response.building_id);
+                setCurrentData(response);
+                const scheduleData = groupedCurrentDataById(response.action);
+                setPreparedScheduleData(scheduleData);
+            });
+        }
     };
 
     const deletePlugRule = async () => {
@@ -520,7 +535,7 @@ const PlugRule = () => {
     const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = useState(true);
     const [spaceTypeFilterStringUnlinked, setSpaceTypeFilterStringUnlinked] = useState('');
     const [spaceTypeFilterStringLinked, setSpaceTypeFilterStringLinked] = useState('');
-
+    const [plugRuleStatus, setPlugRuleStatus] = useState(initialStatus);
     const [spaceTypeTypeFilterStringUnlinked, setSpaceTypeTypeFilterStringUnlinked] = useState('');
     const [spaceTypeTypeFilterStringLinked, setSpaceTypeTypeFilterStringLinked] = useState('');
 
@@ -542,8 +557,8 @@ const PlugRule = () => {
     const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
     const [timeFormatChanged, setTimeFormatChanged] = useState(false);
     const [dateFormatChanged, setDateFormatChanged] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const [unitFormatChanged, setUnitFormatChanged] = useState(false);
-
     useEffect(() => {
         if (dateFormat) {
             setDateFormatChanged(dateFormat);
@@ -561,8 +576,15 @@ const PlugRule = () => {
         fetchUnLinkedSocketRules();
         fetchLinkedSocketRules();
         fetchLinkedSocketIds();
-    }, [timeFormatChanged, dateFormatChanged, unitFormatChanged]);
+    }, [timeFormatChanged, dateFormatChanged, unitFormatChanged, currentBuilding]);
 
+    const getStatus = async () => {
+        setIsLoading(true);
+        await getPlugRuleStatusRequest(ruleId).then((res) => {
+            setPlugRuleStatus(res);
+            setIsLoading(false);
+        });
+    };
     const getGraphData = async (ids) => {
         if (ids.length) {
             await getGraphDataRequest(ids, currentData.id).then((res) => {
@@ -2504,6 +2526,11 @@ const PlugRule = () => {
                         </div>
                     </div>
                     <div className="plug-rule-right-flex">
+                        <div className={`icon-container ${isLoading ? 'loading' : ''}`}>
+                            <div onClick={() => getStatus()}>
+                                <ReloadSVG className={`fas fa-spinner ${isLoading ? 'rotate' : ''}`} />
+                            </div>
+                        </div>
                         <div>
                             {!isViewer && (
                                 <div className="plug-rule-switch-header">
@@ -2525,22 +2552,38 @@ const PlugRule = () => {
                             {currentData?.status && (
                                 <>
                                     <UncontrolledTooltip placement="top" target={'tooltip-status'}>
-                                        {currentJobLog && currentJobLog[0]?.msg}
+                                        <div className="tooltip-for-sockets">
+                                            <div className="tooltip-for-sockets-item">
+                                                <span className="flex" style={{ fontSize: '10px' }}>
+                                                    Message: {plugRuleStatus.msg}
+                                                </span>
+
+                                                <span className="flex" style={{ fontSize: '10px' }}>
+                                                    Total sensor count: {plugRuleStatus.total_sockets.length}
+                                                </span>
+                                                <span style={{ fontSize: '10px' }}>
+                                                    Success Count: {plugRuleStatus.completed.length}
+                                                </span>
+                                                <span style={{ fontSize: '10px' }}>
+                                                    Failure Count: {plugRuleStatus.failed.length}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </UncontrolledTooltip>
                                     <Typography.Subheader
                                         size={Typography.Sizes.sm}
                                         className="justify-content-center ">
                                         <span className="cursor-pointer" id={'tooltip-status'}>
-                                            Status: {currentData?.status}
+                                            Status: {plugRuleStatus?.rule_status}
                                         </span>
                                     </Typography.Subheader>
                                 </>
                             )}
 
-                            {currentJobLog && currentJobLog[0]?.time_stamp && (
+                            {plugRuleStatus && plugRuleStatus.last_updated && (
                                 <Typography.Subheader size={Typography.Sizes.sm}>
                                     Last Update:{' '}
-                                    {moment(currentJobLog[0]?.time_stamp).format(
+                                    {moment(plugRuleStatus.last_updated).format(
                                         prepareTimeAndDateFormat(dateFormat, timeFormat)
                                     )}
                                 </Typography.Subheader>

@@ -21,6 +21,21 @@
     height: 12px;
     fill: $error-500;
 }
+.icon-container:hover {
+    cursor: pointer;
+}
+.loading .rotate {
+    animation: rotate 0.5s linear infinite;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(-360deg);
+    }
+}
 
 .tooltip-inner {
     max-width: 400px !important;
@@ -186,7 +201,7 @@
 .single-plug-rule-container {
     padding: 16px 45px;
     width: auto;
-    height: 100px;
+    height: auto;
     background: #f9fafb;
     border-bottom: 1px solid #f9fafb;
 

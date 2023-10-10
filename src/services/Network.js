@@ -212,6 +212,7 @@ export const unLinkSocket = '/api/energy/plug_rule/unlink-socket';
 export const graphData = '/api/energy/plug_rule/average-sensor-usage';
 export const getSensorLastUsed = '/api/energy/plug_rule/sensor-last-used';
 export const linkSocket = '/api/user_role/plug_rule/link_socket';
+export const getPlugRuleStatus = '/api/v2/control/plug_rule/status'
 
 // weather api
 export const getWeather = '/api/weather/';
