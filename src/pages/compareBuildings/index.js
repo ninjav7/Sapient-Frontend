@@ -223,23 +223,6 @@ const CompareBuildings = () => {
         download('Compare_Buildings', getCompareBuildingTableCSVExport(buildingsData, tableHeader));
     };
 
-    const updateBreadcrumbStore = () => {
-        BreadcrumbStore.update((bs) => {
-            let newList = [
-                {
-                    label: 'Compare Buildings',
-                    path: '/energy/compare-buildings',
-                    active: true,
-                },
-            ];
-            bs.items = newList;
-        });
-        ComponentStore.update((s) => {
-            s.parent = 'portfolio';
-        });
-        updateBuildingStore('portfolio', 'Portfolio', '');
-    };
-
     useEffect(() => {
         if (userPrefUnits) {
             let newHeaderList = tableHeader;
@@ -265,15 +248,9 @@ const CompareBuildings = () => {
         fetchCompareBuildingsData(search, ordered_by, sort_by, userPrefUnits);
     }, [search, sortBy, daysCount, userPrefUnits]);
 
-    useEffect(() => {
-        entryPoint = 'entered';
-        updateBreadcrumbStore();
-    }, []);
-
     return (
         <React.Fragment>
-            <Header title="Compare Buildings" type="page" />
-            <Row className="mt-4">
+            <Row>
                 <Col lg={12}>
                     <CompareBuildingsTable
                         tableHeader={tableHeader}

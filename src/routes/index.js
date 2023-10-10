@@ -36,7 +36,6 @@ const VerifyAccount = React.lazy(() => import('../pages/auth/VerifyAccount'));
 
 // Energy-Portfolio Components
 const Portfolio = React.lazy(() => import('../pages/portfolio'));
-const CompareBuildings = React.lazy(() => import('../pages/compareBuildings'));
 const ExploreBuildingPeak = React.lazy(() => import('../pages/peakDemand/ExploreBuildingPeak'));
 
 // Energy-Buildings Components
@@ -112,14 +111,6 @@ const portfolioRoutes = {
             path: '/energy/portfolio/overview',
             name: 'Portfolio Overview',
             component: Portfolio,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'portfolio',
-        },
-        {
-            path: '/energy/compare-buildings',
-            name: 'Compare Buildings',
-            component: CompareBuildings,
             route: PrivateRoute,
             visibility: true,
             parent: 'portfolio',

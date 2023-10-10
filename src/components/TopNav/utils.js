@@ -7,5 +7,4 @@ export const routesForAccountSettings = [
     '/settings/space-types',
     '/energy/portfolio/overview',
     '/explore-page/by-buildings',
-    '/energy/compare-buildings',
 ];

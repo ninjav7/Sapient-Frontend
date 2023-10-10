@@ -15,6 +15,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import 'react-loading-skeleton/dist/skeleton.css';
 import PortfolioKPIs from './PortfolioKPIs';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
+import CompareBuildings from '../compareBuildings';
 import { useAtom } from 'jotai';
 import { buildingData, userPermissionData } from '../../store/globalState';
 import { apiRequestBody } from '../../helpers/helpers';
@@ -270,7 +271,7 @@ const PortfolioOverview = () => {
 
                     <Brick sizeInRem={1.5} />
 
-                    <Row className="container-gap">
+                    <Row>
                         <Col xl={6}>
                             <EnergyConsumptionByEndUse
                                 title="Energy Consumption by End Use"
@@ -296,6 +297,14 @@ const PortfolioOverview = () => {
                                 tooltipCallBackValue={toolTipFormatter}
                                 isChartLoading={isEnergyChartLoading}
                             />
+                        </Col>
+                    </Row>
+
+                    <Brick sizeInRem={1.5} />
+
+                    <Row>
+                        <Col xl={12}>
+                            <CompareBuildings />
                         </Col>
                     </Row>
                 </>
