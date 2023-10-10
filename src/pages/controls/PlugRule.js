@@ -328,8 +328,7 @@ const PlugRule = () => {
     useEffect(() => {
         buildingListData.forEach((el) => {
             if (el.building_id === activeBuildingId) {
-                console.log('el.,', el);
-                setCurrentBuilding(el.timezone);
+                setBldgTimeZone(el.timezone);
             }
         });
     }, [buildingListData, activeBuildingId]);
@@ -426,19 +425,19 @@ const PlugRule = () => {
         }
     };
     const fetchPlugRulesData = async () => {
-        if (currentBuilding) {
-            const params = `?tz_info=${currentBuilding}`;
-            await fetchPlugRules(params, '').then((res) => {
-                setIsFetchedPlugRulesData(true);
-                const plugRules = res.data.data;
-                plugRules &&
-                    plugRules.forEach((plugRule) => {
-                        if (plugRule.name == currentData.name) {
-                            setActiveBuildingId(plugRule.buildings[0]?.building_id);
-                        }
-                    });
-            });
-        }
+        let time_zone = 'US/Eastern';
+
+        const params = `?tz_info=${time_zone}`;
+        await fetchPlugRules(params, '').then((res) => {
+            setIsFetchedPlugRulesData(true);
+            const plugRules = res.data.data;
+            plugRules &&
+                plugRules.forEach((plugRule) => {
+                    if (plugRule.name == currentData.name) {
+                        setActiveBuildingId(plugRule.buildings[0]?.building_id);
+                    }
+                });
+        });
     };
     useEffect(() => {
         calculateOffHoursPlots();
@@ -452,7 +451,7 @@ const PlugRule = () => {
             setIsChangedRuleDetails(false);
             fetchPlugRuleDetail();
         }
-    }, [ruleId]);
+    }, [ruleId, bldgTimeZone]);
 
     const filterHandler = (setter, options) => {
         setter(options.map(({ value }) => value));
@@ -470,19 +469,18 @@ const PlugRule = () => {
     }, [currentData.name]);
 
     const fetchPlugRuleDetail = async () => {
-        if (currentBuilding) {
-            await fetchPlugRuleDetails(ruleId, currentBuilding).then((res) => {
-                if (res.status) {
-                    setSkeletonLoading(false);
-                }
-                let response = Object.assign({}, res.data.data[0]);
-                response.building_id = response?.building[0]?.building_id;
-                setActiveBuildingId(response.building_id);
-                setCurrentData(response);
-                const scheduleData = groupedCurrentDataById(response.action);
-                setPreparedScheduleData(scheduleData);
-            });
-        }
+        let time_zone = 'US/Eastern';
+        await fetchPlugRuleDetails(ruleId, time_zone).then((res) => {
+            if (res.status) {
+                setSkeletonLoading(false);
+            }
+            let response = Object.assign({}, res.data.data[0]);
+            response.building_id = response?.building[0]?.building_id;
+            setActiveBuildingId(response.building_id);
+            setCurrentData(response);
+            const scheduleData = groupedCurrentDataById(response.action);
+            setPreparedScheduleData(scheduleData);
+        });
     };
 
     const deletePlugRule = async () => {
@@ -576,7 +574,7 @@ const PlugRule = () => {
         fetchUnLinkedSocketRules();
         fetchLinkedSocketRules();
         fetchLinkedSocketIds();
-    }, [timeFormatChanged, dateFormatChanged, unitFormatChanged, currentBuilding]);
+    }, [timeFormatChanged, dateFormatChanged, unitFormatChanged, currentBuilding, activeBuildingId, bldgTimeZone]);
 
     const getStatus = async () => {
         setIsLoading(true);
