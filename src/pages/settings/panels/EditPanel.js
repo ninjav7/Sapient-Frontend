@@ -1453,6 +1453,10 @@ const EditPanel = () => {
                 }
                 states={panelStates}
                 mainBreaker={panelType === 'disconnect' ? null : mainBreakerConfig}
+                mainBreakerEdit={() => {
+                    alert('OnEdit Sudhanshu');
+                    console.log('OnEdit Sudhanshu');
+                }}
                 dangerZoneProps={{
                     labelButton: 'Reset all Equipment & Device Links',
                     onClickButton: (event) => handleUnlinkAlertShow(),
