@@ -362,6 +362,8 @@ const ExploreByBuildings = () => {
         await fetchExploreBuildingChart(params, bldg_id)
             .then((res) => {
                 const response = res?.data;
+                const { metadata } = res?.data;
+
                 if (response?.success) {
                     const { data } = response;
 
@@ -370,18 +372,10 @@ const ExploreByBuildings = () => {
 
                     let recordToInsert = [];
 
-                    if (selectedConsumption !== 'current' && selectedConsumption !== 'voltage') {
-                        const newBldgMappedData = data.map((el) => ({
-                            x: new Date(el?.time_stamp).getTime(),
-                            y: calculateDataConvertion(el?.data, selectedConsumption),
-                        }));
-
-                        recordToInsert.push({
-                            id: bldgObj?.building_id,
-                            name: bldgObj?.building_name,
-                            data: newBldgMappedData,
-                        });
-                    } else {
+                    if (
+                        metadata?.device_types === 'shadow meter' &&
+                        (selectedConsumption === 'current' || selectedConsumption === 'voltage')
+                    ) {
                         if (selectedConsumption === 'current') {
                             const firstList = {
                                 id: bldgObj?.building_id,
@@ -400,7 +394,7 @@ const ExploreByBuildings = () => {
                             };
 
                             data.map((el) => {
-                                if (el?.data === '') {
+                                if (el?.data === '' && el?.data !== 0) {
                                     firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
                                     secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
                                     thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
@@ -442,7 +436,7 @@ const ExploreByBuildings = () => {
                             };
 
                             data.map((el) => {
-                                if (el?.data === '') {
+                                if (el?.data === '' && el?.data !== 0) {
                                     firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
                                     secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
                                     thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
@@ -466,6 +460,17 @@ const ExploreByBuildings = () => {
                             recordToInsert.push(secondList);
                             recordToInsert.push(thirdList);
                         }
+                    } else {
+                        const newBldgMappedData = data.map((el) => ({
+                            x: new Date(el?.time_stamp).getTime(),
+                            y: calculateDataConvertion(el?.data, selectedConsumption),
+                        }));
+
+                        recordToInsert.push({
+                            id: bldgObj?.building_id,
+                            name: bldgObj?.building_name,
+                            data: newBldgMappedData,
+                        });
                     }
 
                     setSeriesData([...seriesData, ...recordToInsert]);
@@ -515,22 +520,15 @@ const ExploreByBuildings = () => {
 
                     promiseResponse.forEach((record, index) => {
                         const response = record?.data;
+                        const { metadata } = record?.data;
                         if (response?.success && response?.data.length !== 0) {
                             const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldgIDs[index]);
                             if (!bldgObj?.building_id) return;
 
-                            if (selectedConsumption !== 'current' && selectedConsumption !== 'voltage') {
-                                const newBldgsMappedData = response?.data.map((el) => ({
-                                    x: new Date(el?.time_stamp).getTime(),
-                                    y: calculateDataConvertion(el?.data, data_type),
-                                }));
-
-                                newResponse.push({
-                                    id: bldgObj?.building_id,
-                                    name: bldgObj?.building_name,
-                                    data: newBldgsMappedData,
-                                });
-                            } else {
+                            if (
+                                metadata?.device_types === 'shadow meter' &&
+                                (selectedConsumption === 'current' || selectedConsumption === 'voltage')
+                            ) {
                                 if (selectedConsumption === 'current') {
                                     const firstList = {
                                         id: bldgObj?.building_id,
@@ -549,7 +547,7 @@ const ExploreByBuildings = () => {
                                     };
 
                                     response.data.map((el) => {
-                                        if (el?.data === '') {
+                                        if (el?.data === '' && el?.data !== 0) {
                                             firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
                                             secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
                                             thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
@@ -592,7 +590,7 @@ const ExploreByBuildings = () => {
                                     };
 
                                     response.data.map((el) => {
-                                        if (el?.data === '') {
+                                        if (el?.data === '' && el?.data !== 0) {
                                             firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
                                             secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
                                             thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
@@ -616,6 +614,17 @@ const ExploreByBuildings = () => {
                                     newResponse.push(secondList);
                                     newResponse.push(thirdList);
                                 }
+                            } else {
+                                const newBldgsMappedData = response?.data.map((el) => ({
+                                    x: new Date(el?.time_stamp).getTime(),
+                                    y: calculateDataConvertion(el?.data, data_type),
+                                }));
+
+                                newResponse.push({
+                                    id: bldgObj?.building_id,
+                                    name: bldgObj?.building_name,
+                                    data: newBldgsMappedData,
+                                });
                             }
                         }
                     });
