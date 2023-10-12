@@ -31,6 +31,13 @@ const Panels = () => {
     const { download } = useCSVDownload();
     const [userPermission] = useAtom(userPermissionData);
 
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperAdmin = isUserAdmin || isSuperUser;
+    const canUserCreate = userPermission?.permissions?.permissions?.building_panels_permission?.create ?? false;
+    const canUserEdit = userPermission?.permissions?.permissions?.building_panels_permission?.edit ?? false;
+    const canUserDelete = userPermission?.permissions?.permissions?.building_panels_permission?.delete ?? false;
+
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
 
@@ -263,10 +270,7 @@ const Panels = () => {
     };
 
     const handleAbleToDeleteRow = () => {
-        return (
-            userPermission?.user_role === 'admin' ||
-            userPermission?.permissions?.permissions?.building_panels_permission?.delete
-        );
+        return isSuperAdmin || canUserDelete;
     };
 
     const getFilters = async () => {
@@ -437,8 +441,7 @@ const Panels = () => {
                         <div>
                             <Typography.Header size={Typography.Sizes.lg}>Panels</Typography.Header>
                         </div>
-                        {userPermission?.user_role === 'admin' ||
-                        userPermission?.permissions?.permissions?.building_panels_permission?.create ? (
+                        {isSuperAdmin || canUserCreate ? (
                             <div className="d-flex">
                                 <Button
                                     label={'Add Panel'}
@@ -476,18 +479,8 @@ const Panels = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
-                        onEditRow={
-                            userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
-                                ? (record, id, row) => handleClick(row)
-                                : null
-                        }
-                        onDeleteRow={
-                            userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
-                                ? (record, id, row) => handlePanelDelete(row)
-                                : null
-                        }
+                        onEditRow={isSuperAdmin || canUserEdit ? (record, id, row) => handleClick(row) : null}
+                        onDeleteRow={isSuperAdmin || canUserDelete ? (record, id, row) => handlePanelDelete(row) : null}
                         isDeletable={(row) => handleAbleToDeleteRow()}
                         totalCount={(() => {
                             if (selectedFilter === 0) {
