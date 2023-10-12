@@ -73,6 +73,7 @@ const CarbonBuilding = () => {
     const [legendObj, setLegendObj] = useState({
         carbon: true,
         energy: true,
+        egrid: true,
     });
     const [timeFormatChanged, setTimeFormatChanged] = useState(false);
     const [dateFormatChanged, setDateFormatChanged] = useState('');
@@ -97,10 +98,25 @@ const CarbonBuilding = () => {
 
     useEffect(() => {
         let time_zone = 'US/Eastern';
-        fetchMetricsKpi();
-        buildingConsumptionChartEnergy(time_zone);
-        buildingEnergyConsumptionChartCarbon(time_zone);
-    }, [timeFormatChanged, dateFormatChanged, unitFormatChanged]);
+        if (bldgId && buildingListData.length) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id) {
+                if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
+            }
+            fetchMetricsKpi();
+            buildingConsumptionChartEnergy(time_zone);
+            buildingEnergyConsumptionChartCarbon(time_zone);
+        }
+    }, [
+        timeFormatChanged,
+        dateFormatChanged,
+        unitFormatChanged,
+        buildingListData,
+        startDate,
+        endDate,
+        bldgId,
+        userPrefUnits,
+    ]);
 
     const formatXaxis = ({ value }) => {
         return moment.utc(value).format(`${dateFormatLocal}`);
@@ -148,47 +164,29 @@ const CarbonBuilding = () => {
     }, [daysCount, userPrefTimeFormat, userPrefDateFormat]);
 
     useEffect(() => {
-        if (startDate === null || endDate === null) return;
-
-        let time_zone = 'US/Eastern';
-
-        if (bldgId) {
-            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
-
-            if (bldgObj?.building_id) {
-                if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
-                updateBuildingStore(
-                    bldgObj?.building_id,
-                    bldgObj?.building_name,
-                    bldgObj?.timezone,
-                    bldgObj?.plug_only
-                );
-            }
-        }
-        fetchMetricsKpi();
-        buildingConsumptionChartEnergy(time_zone);
-        buildingEnergyConsumptionChartCarbon(time_zone);
-    }, [startDate, endDate, bldgId, userPrefUnits]);
-
-    useEffect(() => {
         updateBreadcrumbStore();
     }, []);
 
     const fetchMetricsKpi = async () => {
-        const payload = {
-            building_id: bldgId,
-            metric: 'carbon',
-            date_from: startDate,
-            date_to: endDate,
-            tz_info: time_zone,
-        };
-        await fetchMetricsKpiBuildingPage(payload).then((res) => {
-            setKpiMetrics(res.data);
-        });
+        let time_zone = 'US/Eastern';
+
+        if (bldgId && buildingListData.length) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id) {
+                if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
+            }
+            const payload = {
+                building_id: bldgId,
+                metric: 'carbon',
+                date_from: startDate,
+                date_to: endDate,
+                tz_info: time_zone,
+            };
+            await fetchMetricsKpiBuildingPage(payload).then((res) => {
+                setKpiMetrics(res.data);
+            });
+        }
     };
-    useEffect(() => {
-        fetchMetricsKpi();
-    }, [bldgId]);
 
     useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
@@ -283,21 +281,50 @@ const CarbonBuilding = () => {
         if (carbonIntensity[0].name) {
             mergedList[1] = carbonIntensity[0];
         }
+        if (kpiMetrics?.egrid_emission_factor) {
+            const preparedEgridData = Array.from(
+                { length: carbonIntensity[0]?.data.length },
+                () => kpiMetrics.egrid_emission_factor
+            );
+
+            let egridEmissionData = {
+                name: 'eGRID',
+                data: preparedEgridData,
+                type: 'spline',
+                yAxis: 1,
+                color: colors.datavizMain5,
+                tooltip: {
+                    valueSuffix: userPrefUnits == 'si' ? ' kgs/MWh' : ' lbs/MWh',
+                },
+            };
+
+            mergedList[2] = egridEmissionData;
+        }
         setChartsData(mergedList);
-    }, [energyConsumptionsData, carbonIntensity]);
+    }, [energyConsumptionsData, carbonIntensity, kpiMetrics]);
 
     useEffect(() => {
-        if (legendObj?.carbon && legendObj?.energy) {
-            setDataToDisplay(chartsData);
-        }
-        if (!legendObj?.carbon && !legendObj?.energy) setDataToDisplay([]);
-        if (legendObj?.carbon && !legendObj?.energy) {
-            let obj = chartsData.find((el) => el?.name === 'Carbon');
-            setDataToDisplay([obj]);
-        }
-        if (!legendObj?.carbon && legendObj?.energy) {
-            let obj = chartsData.find((el) => el?.name === 'Energy');
-            setDataToDisplay([obj]);
+        let res = [];
+        if (chartsData.length) {
+            if (legendObj?.carbon) {
+                let obj = chartsData.find((el) => el?.name === 'Carbon');
+                if (obj) {
+                    res.push(obj);
+                }
+            }
+            if (legendObj?.energy) {
+                let obj = chartsData.find((el) => el?.name === 'Energy');
+                if (obj) {
+                    res.push(obj);
+                }
+            }
+            if (legendObj.egrid) {
+                let obj = chartsData.find((el) => el?.name === 'eGRID');
+                if (obj) {
+                    res.push(obj);
+                }
+            }
+            setDataToDisplay(res);
         }
     }, [legendObj, chartsData]);
 
@@ -310,7 +337,7 @@ const CarbonBuilding = () => {
             </div>
             <div className="mt-4">
                 <ColumnLineChart
-                    colors={[colors.datavizMain2, colors.datavizMain1]}
+                    colors={[colors.datavizMain2, colors.datavizMain5, colors.datavizMain1]}
                     categories={carbonConsumptionsCategories}
                     tooltipUnit={UNITS.KWH}
                     carbonUnits={userPrefUnits}
@@ -328,6 +355,12 @@ const CarbonBuilding = () => {
                             type: 'column',
                             color: colors.datavizMain2,
                             onClick: (event) => handleLegendStatusChange('energy', !event),
+                        },
+                        {
+                            label: `eGRID Emission Factor (${userPrefUnits == 'si' ? 'kgs/MWh' : 'lbs/MWh'})`,
+                            color: colors.datavizMain5,
+                            type: 'spline',
+                            onClick: (event) => handleLegendStatusChange('eGRID', !event),
                         },
                     ]}
                     timeZone={timeZone}

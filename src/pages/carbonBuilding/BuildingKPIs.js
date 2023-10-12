@@ -73,7 +73,7 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
                 title={`eGrid Emissions Factor ${
                     userPrefUnits === 'si' ? `${UNITS.kg}` : `${UNITS.ibs}`
                 } / ${`${UNITS.mwh}`}`}
-                value={(overalldata?.egrid_emission_factor).toFixed(2)}
+                value={overalldata?.egrid_emission_factor && (overalldata?.egrid_emission_factor).toFixed(2)}
                 unit={`${userPrefUnits === 'si' ? `${UNITS.kg}` : `${UNITS.ibs}`} / ${`${UNITS.mwh}`}`}
                 tooltipText={`The annual average emissions factor for this building's postal code using eGRID2021 standards.`}
                 tooltipId="egrid-emission-factor"
