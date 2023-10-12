@@ -131,11 +131,17 @@ const TimeOfDay = () => {
         };
 
         const dailyUsageByHour = async () => {
-            const payload = apiRequestBody(startDate, endDate, time_zone);
-            setLineChartData([]);
             setFetchingData(true);
+            setLineChartData([]);
 
-            await fetchBuilidingHourly(bldgId, payload)
+            const payload = {
+                bldg_id: bldgId,
+                date_from: encodeURIComponent(startDate),
+                date_to: encodeURIComponent(endDate),
+                tz_info: time_zone,
+            };
+
+            await fetchBuilidingHourly(payload)
                 .then((res) => {
                     const response = res?.data;
 
