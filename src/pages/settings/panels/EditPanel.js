@@ -49,8 +49,6 @@ import { UserStore } from '../../../store/UserStore';
 import { DangerZone } from '../../../sharedComponents/dangerZone';
 import DeletePanel from './DeletePanel';
 import UngroupAlert from './UngroupAlert';
-import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
-import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
@@ -65,7 +63,6 @@ const EditPanel = () => {
     const isUserAdmin = userPermission?.is_admin ?? false;
     const isSuperUser = userPermission?.is_superuser ?? false;
     const isSuperAdmin = isUserAdmin || isSuperUser;
-    const canUserCreate = userPermission?.permissions?.permissions?.building_panels_permission?.create ?? false;
     const canUserEdit = userPermission?.permissions?.permissions?.building_panels_permission?.edit ?? false;
     const canUserDelete = userPermission?.permissions?.permissions?.building_panels_permission?.delete ?? false;
 
@@ -1531,10 +1528,14 @@ const EditPanel = () => {
                 mainBreakerEdit={() => {
                     if (panelObj?.panel_id) openPanelConfigModal();
                 }}
-                dangerZoneProps={{
-                    labelButton: 'Reset all Equipment & Device Links',
-                    onClickButton: (event) => handleUnlinkAlertShow(),
-                }}
+                dangerZoneProps={
+                    isSuperAdmin || canUserEdit || canUserDelete
+                        ? {
+                              labelButton: 'Reset all Equipment & Device Links',
+                              onClickButton: () => handleUnlinkAlertShow(),
+                          }
+                        : null
+                }
                 onEdit={(props) => {
                     const breakerObj = breakersList.find((el) => el?.id === props._id);
                     setSelectedBreakerObj(breakerObj);
