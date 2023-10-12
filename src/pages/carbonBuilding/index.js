@@ -165,7 +165,7 @@ const CarbonBuilding = () => {
                 );
             }
         }
-
+        fetchMetricsKpi();
         buildingConsumptionChartEnergy(time_zone);
         buildingEnergyConsumptionChartCarbon(time_zone);
     }, [startDate, endDate, bldgId, userPrefUnits]);
