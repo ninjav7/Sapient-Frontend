@@ -1326,6 +1326,26 @@ const EditPanel = () => {
     };
 
     useEffect(() => {
+        if (panelObj?.panel_id) {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Panels',
+                        path: `/settings/panels/${bldgId}`,
+                        active: false,
+                    },
+                    {
+                        label: panelObj?.panel_name,
+                        path: '/settings/panels/edit-panel/distribution',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        }
+    }, [panelObj]);
+
+    useEffect(() => {
         const links = [];
         let breakerCountToAdd;
         panelType === 'distribution' ? (breakerCountToAdd = 2) : (breakerCountToAdd = 1);

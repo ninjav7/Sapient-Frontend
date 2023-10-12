@@ -93,7 +93,7 @@ const PanelConfiguration = (props) => {
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         className="w-100"
-                        disabled={panelObj?.rated_amps === panelData?.rated_amps}
+                        disabled={panelObj?.rated_amps === panelData?.rated_amps || isProcessing}
                         onClick={handlePanelUpdate}
                     />
                 </div>
