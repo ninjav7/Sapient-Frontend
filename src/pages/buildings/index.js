@@ -240,8 +240,13 @@ const BuildingOverview = () => {
 
     const buildingHourlyData = async (time_zone) => {
         setIsAvgConsumptionDataLoading(true);
-        const payload = apiRequestBody(startDate, endDate, time_zone);
-        await fetchBuilidingHourly(bldgId, payload)
+        const payload = {
+            bldg_id: bldgId,
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: time_zone,
+        };
+        await fetchBuilidingHourly(payload)
             .then((res) => {
                 let response = res?.data;
                 let weekDaysResData = response[0]?.weekdays;
