@@ -27,6 +27,7 @@ const Panel = (props) => {
         numberOfBreakers,
         startingBreaker,
         mainBreaker,
+        mainBreakerEdit = null,
         nodes = [],
         isEditable,
         onPanelEditClick,
@@ -118,6 +119,7 @@ const Panel = (props) => {
                             {...mainBreaker}
                             items={mainBreaker.items.map(({ id, status }) => ({ id, status }))}
                             isMain
+                            onEdit={isEditingMode && mainBreakerEdit}
                         />
                     )}
 

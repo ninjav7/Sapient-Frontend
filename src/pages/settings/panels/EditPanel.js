@@ -38,6 +38,7 @@ import Select from '../../../sharedComponents/form/select';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import BreakerConfiguration from './BreakerConfiguration';
 import UnlinkAllBreakers from './UnlinkAllBreakers';
+import PanelConfiguration from './PanelConfiguration';
 import { UserStore } from '../../../store/UserStore';
 import { DangerZone } from '../../../sharedComponents/dangerZone';
 import DeletePanel from './DeletePanel';
@@ -63,6 +64,11 @@ const EditPanel = () => {
     const closeBreakerConfigModal = () => setBreakerConfigModalState(false);
     const openBreakerConfigModal = () => setBreakerConfigModalState(true);
     const [activeTab, setActiveTab] = useState('edit-breaker');
+
+    // Edit Panel Modal
+    const [showPanelConfigModal, setPanelConfigModalState] = useState(false);
+    const closePanelConfigModal = () => setPanelConfigModalState(false);
+    const openPanelConfigModal = () => setPanelConfigModalState(true);
 
     // Unlink Alert Modal
     const [showUnlinkAlert, setShowUnlinkAlert] = useState(false);
@@ -1453,6 +1459,9 @@ const EditPanel = () => {
                 }
                 states={panelStates}
                 mainBreaker={panelType === 'disconnect' ? null : mainBreakerConfig}
+                mainBreakerEdit={() => {
+                    if (panelObj?.panel_id) openPanelConfigModal();
+                }}
                 dangerZoneProps={{
                     labelButton: 'Reset all Equipment & Device Links',
                     onClickButton: (event) => handleUnlinkAlertShow(),
@@ -1551,6 +1560,14 @@ const EditPanel = () => {
                 showUnlinkAlert={showUnlinkAlert}
                 handleUnlinkAlertClose={handleUnlinkAlertClose}
                 unLinkAllBreakers={unLinkAllBreakers}
+            />
+
+            <PanelConfiguration
+                showPanelConfigModal={showPanelConfigModal}
+                closePanelConfigModal={closePanelConfigModal}
+                panelObj={panelObj}
+                bldgId={bldgId}
+                fetchSinglePanelData={fetchSinglePanelData}
             />
 
             <DeletePanel

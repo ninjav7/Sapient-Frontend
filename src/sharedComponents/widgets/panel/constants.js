@@ -9,6 +9,7 @@ const PROP_TYPES = {
         startingBreaker: PropTypes.any,
         numberOfBreakers: PropTypes.object,
         mainBreaker: PropTypes.any.isRequired,
+        mainBreakerEdit: PropTypes.any,
 
         //callBacks
         //breakerProps, breakerData, children - args
