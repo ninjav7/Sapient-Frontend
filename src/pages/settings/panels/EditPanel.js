@@ -61,6 +61,14 @@ const EditPanel = () => {
     const { panelId } = useParams();
 
     const [userPermission] = useAtom(userPermissionData);
+
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperAdmin = isUserAdmin || isSuperUser;
+    const canUserCreate = userPermission?.permissions?.permissions?.building_panels_permission?.create ?? false;
+    const canUserEdit = userPermission?.permissions?.permissions?.building_panels_permission?.edit ?? false;
+    const canUserDelete = userPermission?.permissions?.permissions?.building_panels_permission?.delete ?? false;
+
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [isBreakerApiTrigerred, setBreakerAPITrigerred] = useState(false);
 
@@ -1412,8 +1420,7 @@ const EditPanel = () => {
                             />
                         </div>
                         <div>
-                            {userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.building_panels_permission?.edit ? (
+                            {isSuperAdmin || canUserEdit ? (
                                 <Button
                                     label={isProcessing ? 'Saving' : 'Save'}
                                     size={Button.Sizes.md}
@@ -1452,12 +1459,7 @@ const EditPanel = () => {
                                     }}
                                     labelSize={Typography.Sizes.md}
                                     value={panelObj?.panel_name}
-                                    disabled={
-                                        !(
-                                            userPermission?.user_role === 'admin' ||
-                                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
-                                        )
-                                    }
+                                    disabled={!(isSuperAdmin || canUserEdit)}
                                 />
                             )}
                         </div>
@@ -1482,12 +1484,7 @@ const EditPanel = () => {
                                         handleChange('parent_id', e.value);
                                     }}
                                     isSearchable={true}
-                                    isDisabled={
-                                        !(
-                                            userPermission?.user_role === 'admin' ||
-                                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
-                                        )
-                                    }
+                                    isDisabled={!(isSuperAdmin || canUserEdit)}
                                 />
                             )}
                         </div>
@@ -1514,12 +1511,7 @@ const EditPanel = () => {
                                         handleChange('location_id', e.value);
                                     }}
                                     isSearchable={true}
-                                    isDisabled={
-                                        !(
-                                            userPermission?.user_role === 'admin' ||
-                                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
-                                        )
-                                    }
+                                    isDisabled={!(isSuperAdmin || canUserEdit)}
                                 />
                             )}
                         </div>
@@ -1533,10 +1525,7 @@ const EditPanel = () => {
                 typeOptions={panelTypeList}
                 typeProps={breakerType}
                 numberOfBreakers={breakerCountObj}
-                isEditable={
-                    userPermission?.user_role === 'admin' ||
-                    userPermission?.permissions?.permissions?.building_panels_permission?.edit
-                }
+                isEditable={isSuperAdmin || canUserEdit}
                 states={panelStates}
                 mainBreaker={panelType === 'disconnect' ? null : mainBreakerConfig}
                 mainBreakerEdit={() => {
@@ -1603,18 +1592,20 @@ const EditPanel = () => {
 
             <Brick sizeInRem={2} />
 
-            <Row>
-                <Col lg={10}>
-                    <div>
-                        <DangerZone
-                            title="Danger Zone"
-                            labelButton="Delete Panel"
-                            iconButton={<DeleteSVG />}
-                            onClickButton={(event) => handleDeletePanelAlertShow()}
-                        />
-                    </div>
-                </Col>
-            </Row>
+            {(isSuperAdmin || canUserDelete) && (
+                <Row>
+                    <Col lg={10}>
+                        <div>
+                            <DangerZone
+                                title="Danger Zone"
+                                labelButton="Delete Panel"
+                                iconButton={<DeleteSVG />}
+                                onClickButton={() => handleDeletePanelAlertShow()}
+                            />
+                        </div>
+                    </Col>
+                </Row>
+            )}
 
             <BreakerConfiguration
                 showBreakerConfigModal={showBreakerConfigModal}
