@@ -47,7 +47,6 @@ import { DateRangeStore } from '../../../store/DateRangeStore';
 import { getSensorGraphData } from '../passive-devices/services';
 import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../../helpers/helpers';
 import { Spinner } from 'reactstrap';
-import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import './breaker-config-styles.scss';
 
 const BreakerConfiguration = ({
@@ -66,7 +65,6 @@ const BreakerConfiguration = ({
     setActiveTab,
     isEditingMode,
     setBreakerUpdateId,
-    panelDevicesList,
 }) => {
     const [activeEquipTab, setActiveEquipTab] = useState('equip');
 
@@ -431,14 +429,6 @@ const BreakerConfiguration = ({
                 obj.voltage = getVoltageConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
                 obj.phase_configuration = getPhaseConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
             }
-
-            if (defaultBreakerType === 'equipment') {
-                obj.equipment_link = [];
-                setNewEquipObj({
-                    id: 'unlabeled',
-                    name: 'Unlabeled',
-                });
-            }
         }
 
         // Type 3 & Type 4
@@ -722,21 +712,9 @@ const BreakerConfiguration = ({
             breakerObjThree.device_link = thirdBreakerObj?.device_link;
         }
 
-        if (breakerObjOne?.equipment_link && breakerObjOne?.equipment_link[0] === 'unlabeled') {
-            delete breakerObjOne.equipment_link;
-        }
-
-        if (breakerObjTwo?.equipment_link && breakerObjTwo?.equipment_link[0] === 'unlabeled') {
-            delete breakerObjTwo.equipment_link;
-        }
-
-        if (breakerObjThree?.equipment_link && breakerObjThree?.equipment_link[0] === 'unlabeled') {
-            delete breakerObjThree.equipment_link;
-        }
-
-        if (breakerObjOne?.breaker_id && Object.keys(breakerObjOne).length > 1) breakersList.push(breakerObjOne);
-        if (breakerObjTwo?.breaker_id && Object.keys(breakerObjTwo).length > 1) breakersList.push(breakerObjTwo);
-        if (breakerObjThree?.breaker_id && Object.keys(breakerObjThree).length > 1) breakersList.push(breakerObjThree);
+        breakersList.push(breakerObjOne);
+        if (breakerObjTwo?.breaker_id) breakersList.push(breakerObjTwo);
+        if (breakerObjThree?.breaker_id) breakersList.push(breakerObjThree);
 
         let breakerTypeUpdateList = [];
 
@@ -761,17 +739,16 @@ const BreakerConfiguration = ({
 
         const promisesList = [];
 
-        if (!(breakerTypeObj?.type === 'blank' || breakerTypeObj?.type === 'unwired') && breakersList.length !== 0) {
+        if (!(breakerTypeObj?.type === 'blank' || breakerTypeObj?.type === 'unwired')) {
             const promiseOne = updateBreakerDetails(params, breakersList);
             promisesList.push(promiseOne);
         }
 
         if (breakerTypeObj?.notes || breakerTypeObj?.type || breakerTypeObj?.type === 'equipment') {
             let params = '';
-            if (update_type === 'forceSave') {
+            if (update_type === 'forceUpdate') {
                 params = `?force_save=true`;
-                if (parentBreakerObj?.equipment_link.length !== 0 && newEquipObj.id === 'unlabeled')
-                    breakerTypeObj.equipment_id = parentBreakerObj?.equipment_link[0];
+                if (existingEquipId !== '') breakerTypeObj.equipment_id = existingEquipId;
             }
             const promiseTwo = updateBreakersTypeLink(breakerTypeObj, params);
             promisesList.push(promiseTwo);
@@ -808,6 +785,10 @@ const BreakerConfiguration = ({
     };
 
     const onSaveButonClick = () => {
+        if (parentBreakerObj?.type !== 'unlabeled' && firstBreakerObj?.type === 'unlabeled') {
+            validateUnlabledChange();
+            return;
+        }
         if (currentEquipObj?.id && newEquipObj?.id && currentEquipObj?.id !== newEquipObj?.id) {
             closeBreakerConfigModal();
             openReassignAlert();
@@ -1124,12 +1105,11 @@ const BreakerConfiguration = ({
     }, [debouncedThirdSearch]);
 
     useEffect(() => {
-        const newList = panelDevicesList.concat(passiveDevicesList);
-        const filteredList = [...new Set(newList.map(JSON.stringify))].map(JSON.parse);
-        setFirstPassiveDevicesList(filteredList);
-        setSecondPassiveDevicesList(filteredList);
-        setThirdPassiveDevicesList(filteredList);
-    }, [passiveDevicesList, panelDevicesList]);
+        const newList = passiveDevicesList;
+        setFirstPassiveDevicesList(newList);
+        setSecondPassiveDevicesList(newList);
+        setThirdPassiveDevicesList(newList);
+    }, [passiveDevicesList]);
 
     useEffect(() => {
         if (!selectedBreakerObj?.id) return;
@@ -1182,7 +1162,7 @@ const BreakerConfiguration = ({
 
     useEffect(() => {
         if (selectedDevicesList.length === 0) return;
-        const newList = selectedDevicesList.concat(panelDevicesList, passiveDevicesList);
+        const newList = selectedDevicesList.concat(passiveDevicesList);
         const filteredList = [...new Set(newList.map(JSON.stringify))].map(JSON.parse);
         setFirstPassiveDevicesList(filteredList);
         setSecondPassiveDevicesList(filteredList);
@@ -1219,7 +1199,7 @@ const BreakerConfiguration = ({
                                 {firstBreakerObj?.breaker_type === 3 &&
                                     `Breakers ${firstBreakerObj?.breaker_number}, ${secondBreakerObj?.breaker_number}, ${thirdBreakerObj?.breaker_number}`}
                             </Typography.Header>
-                            <div className="d-flex justify-content-start mouse-pointer">
+                            <div className="d-flex justify-content-start mouse-pointer ">
                                 {isEditingMode && (
                                     <Typography.Subheader
                                         size={Typography.Sizes.md}
@@ -1238,24 +1218,6 @@ const BreakerConfiguration = ({
                                     onClick={() => setActiveTab('metrics')}>
                                     {`Metrics`}
                                 </Typography.Subheader>
-                                {parentBreakerObj?.flag && parentBreakerObj?.flag.length !== 0 && (
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        className={`typography-wrapper ml-4 ${
-                                            activeTab === 'issues' ? 'active-tab-style' : ''
-                                        }`}
-                                        onClick={() => setActiveTab('issues')}>
-                                        <div className="d-flex justify-content-center">
-                                            {`Issues`}
-                                            <StatusBadge
-                                                text={`${parentBreakerObj?.flag.length}`}
-                                                type={StatusBadge.Type.warning}
-                                                className="flag-count-container ml-1 mb-1"
-                                                textStyle="flag-count-text"
-                                            />
-                                        </div>
-                                    </Typography.Subheader>
-                                )}
                             </div>
                         </div>
                         <div className="d-flex">
@@ -1545,7 +1507,7 @@ const BreakerConfiguration = ({
                                                     </div>
                                                     <Brick sizeInRem={1.5} />
                                                     <div className="d-flex justify-content-between custom-space-between">
-                                                        <div className="w-100">
+                                                        <div className="w-100 mr-4">
                                                             <Typography.Body size={Typography.Sizes.md}>
                                                                 Equipment Type
                                                             </Typography.Body>
@@ -1961,7 +1923,7 @@ const BreakerConfiguration = ({
                                             </div>
                                         )}
 
-                                        <div className="d-flex justify-content-between custom-space-between">
+                                        <div className="d-flex justify-content-between">
                                             <div className="w-100">
                                                 <Button
                                                     label="Reset Configuration"
@@ -1972,7 +1934,7 @@ const BreakerConfiguration = ({
                                                         handleUnlinkAlertShow();
                                                     }}
                                                     icon={<UnlinkOldSVG />}
-                                                    className="w-100"
+                                                    className="w-100 mr-3"
                                                 />
                                             </div>
 
@@ -1991,13 +1953,13 @@ const BreakerConfiguration = ({
                                                         }
                                                     }}
                                                     icon={<DeleteSVG />}
-                                                    className="w-100"
+                                                    className="w-100 ml-3"
                                                 />
                                             </div>
                                         </div>
 
                                         {firstBreakerObj?.breaker_type !== 1 && (
-                                            <div className="float-right">
+                                            <div className="float-right mr-2">
                                                 <Brick sizeInRem={0.25} />
                                                 <Typography.Body size={Typography.Sizes.sm} className="txt-warn-color">
                                                     Grouped breakers cannot be deleted

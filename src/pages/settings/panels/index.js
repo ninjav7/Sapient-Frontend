@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, UncontrolledTooltip } from 'reactstrap';
+import React, { useState, useEffect } from 'react';
+import { Row, Col } from 'reactstrap';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -7,13 +7,13 @@ import { deleteCurrentPanel, fetchPanelsFilter, getPanelsData, getPanelsList } f
 import Brick from '../../../sharedComponents/brick';
 import Modal from 'react-bootstrap/Modal';
 import { useAtom } from 'jotai';
-import { buildingData, userPermissionData } from '../../../store/globalState';
+import { userPermissionData } from '../../../store/globalState';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { pageListSizes } from '../../../helpers/helpers';
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { getPanelsTableCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import CreatePanel from './CreatePanel';
@@ -31,8 +31,7 @@ const Panels = () => {
     const { download } = useCSVDownload();
     const [userPermission] = useAtom(userPermissionData);
 
-    const { bldgId } = useParams();
-    const [buildingListData] = useAtom(buildingData);
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
 
     const [search, setSearch] = useState('');
@@ -101,14 +100,9 @@ const Panels = () => {
             panelVoltageSelected
         )
             .then((res) => {
-                const response = res?.data;
-                if (response && response?.data.length !== 0) {
-                    for (const element of response?.data) {
-                        element.bldg_id = bldgId;
-                    }
-                }
-                setPanelsData(response?.data);
-                setTotalItems(response?.total_data);
+                const responseData = res?.data;
+                setPanelsData(responseData?.data);
+                setTotalItems(responseData?.total_data);
                 setDataFetching(false);
             })
             .catch(() => {
@@ -118,7 +112,7 @@ const Panels = () => {
 
     const handleClick = (el) => {
         history.push({
-            pathname: `/settings/panels/edit-panel/${el?.bldg_id}/${el?.panel_type}/${el?.panel_id}`,
+            pathname: `/settings/panels/edit-panel/${el?.panel_type}/${el?.panel_id}`,
         });
     };
 
@@ -138,7 +132,7 @@ const Panels = () => {
             });
     };
 
-    const deletePanel = async (panelId) => {
+    const deletePanel = async (panelId, bldg_id) => {
         setIsDeleting(true);
         const params = `?panel_id=${panelId}`;
         await deleteCurrentPanel(params)
@@ -149,7 +143,7 @@ const Panels = () => {
                 fetchPanelsDataWithFilter();
                 if (response?.success) {
                     history.push({
-                        pathname: `/settings/panels/${bldgId}`,
+                        pathname: `/settings/panels/${bldg_id}`,
                     });
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -179,24 +173,9 @@ const Panels = () => {
             });
     };
 
-    const renderPanelFlags = (row) => {
-        return (
-            <>
-                {row?.flag_count && row?.flag_count !== 0 ? (
-                    <StatusBadge
-                        text={`${row?.flag_count}`}
-                        type={StatusBadge.Type.warning}
-                        className="flag-container"
-                        textStyle="flag-text"
-                    />
-                ) : null}
-            </>
-        );
-    };
-
     const renderPanelName = (row) => {
         return (
-            <Link to={`/settings/panels/edit-panel/${row?.bldg_id}/${row?.panel_type}/${row?.panel_id}`}>
+            <Link to={`/settings/panels/edit-panel/${row?.panel_type}/${row?.panel_id}`}>
                 <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
                     {row?.panel_name === '' ? '-' : row?.panel_name}
                 </div>
@@ -207,42 +186,6 @@ const Panels = () => {
     const renderPanelLocation = (row) => {
         return <Typography.Body size={Typography.Sizes.md}>{row?.location ? row?.location : '-'} </Typography.Body>;
     };
-
-    const renderPassiveDevices = useCallback((row) => {
-        const slicedArr = row?.connected_devices.slice(1);
-        return (
-            <div className="tags-row-content">
-                <Badge
-                    text={
-                        <>
-                            <span className="gray-950">
-                                {row?.connected_devices[0] ? row.connected_devices[0]?.device_identifier : 'none'}
-                            </span>
-                        </>
-                    }
-                />
-                {slicedArr?.length > 0 ? (
-                    <>
-                        <Badge
-                            text={
-                                <span className="gray-950" id={`tags-badge-${row.panel_id}`}>
-                                    +{slicedArr.length}
-                                </span>
-                            }
-                        />
-                        <UncontrolledTooltip
-                            placement="top"
-                            target={`tags-badge-${row.panel_id}`}
-                            className="tags-tooltip">
-                            {slicedArr.map((el) => {
-                                return <Badge text={<span className="gray-950">{el?.device_identifier}</span>} />;
-                            })}
-                        </UncontrolledTooltip>
-                    </>
-                ) : null}
-            </div>
-        );
-    });
 
     const renderLinkedBreakers = (row) => {
         return (
@@ -271,12 +214,6 @@ const Panels = () => {
 
     const headerProps = [
         {
-            name: 'Flags',
-            accessor: 'panel_flags',
-            callbackValue: renderPanelFlags,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
             name: 'Name',
             accessor: 'panel_name',
             callbackValue: renderPanelName,
@@ -286,12 +223,6 @@ const Panels = () => {
             name: 'Location',
             accessor: 'location',
             callbackValue: renderPanelLocation,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Passive Device ID',
-            accessor: 'passive_devices',
-            callbackValue: renderPassiveDevices,
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
@@ -498,19 +429,6 @@ const Panels = () => {
         updateBreadcrumbStore();
     }, []);
 
-    useEffect(() => {
-        if (bldgId && buildingListData.length !== 0) {
-            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
-            if (bldgObj?.building_id)
-                updateBuildingStore(
-                    bldgObj?.building_id,
-                    bldgObj?.building_name,
-                    bldgObj?.timezone,
-                    bldgObj?.plug_only
-                );
-        }
-    }, [buildingListData, bldgId]);
-
     return (
         <React.Fragment>
             <Row>
@@ -610,7 +528,7 @@ const Panels = () => {
                         type={Button.Type.primaryDistructive}
                         disabled={isDeleting}
                         onClick={() => {
-                            deletePanel(panelToDelete);
+                            deletePanel(panelToDelete, bldgId);
                         }}
                     />
                 </Modal.Footer>

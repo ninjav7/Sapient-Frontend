@@ -217,7 +217,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/panels/edit-panel/:bldgId/:panelType/:panelId',
+            path: '/settings/panels/edit-panel/:panelType/:panelId',
             name: 'Edit Panel',
             component: EditPanel,
             route: PrivateRoute,

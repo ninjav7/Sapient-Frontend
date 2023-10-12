@@ -155,7 +155,7 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
 
     const redirectUserToPanelPage = (panel_type, panel_id) => {
         history.push({
-            pathname: `/settings/panels/edit-panel/${bldgId}/${panel_type}/${panel_id}`,
+            pathname: `/settings/panels/edit-panel/${panel_type}/${panel_id}`,
         });
     };
 
