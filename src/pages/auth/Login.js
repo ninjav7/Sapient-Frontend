@@ -84,7 +84,7 @@ const Login = (props) => {
         });
         await googleAuth()
             .then((res) => {
-                let response = res.data;
+                const response = res?.data;
                 window.open(response?.url, '_self');
             })
             .catch((error) => {});
