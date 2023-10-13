@@ -360,7 +360,7 @@ const CarbonBuilding = () => {
                             label: `eGRID Emission Factor (${userPrefUnits == 'si' ? 'kgs/MWh' : 'lbs/MWh'})`,
                             color: colors.datavizMain5,
                             type: 'spline',
-                            onClick: (event) => handleLegendStatusChange('eGRID', !event),
+                            onClick: (event) => handleLegendStatusChange('egrid', !event),
                         },
                     ]}
                     timeZone={timeZone}
