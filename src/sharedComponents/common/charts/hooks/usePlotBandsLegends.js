@@ -11,7 +11,7 @@ const usePlotBandsLegends = ({ plotBandsProp, plotBandsLegends }) => {
         setPlotBands(plotBandsProp);
     }, [plotBandsProp]);
     const renderPlotBandsLegends = useCallback(
-        plotBandsLegends.map((plotLegend) => {
+        plotBandsLegends?.map((plotLegend) => {
             let styles;
 
             let label, color, onClick;
