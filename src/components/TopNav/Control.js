@@ -63,6 +63,7 @@ const Control = () => {
         ComponentStore.update((s) => {
             s.parent = '';
         });
+        history.replace('/');
         window.location.reload();
     };
 

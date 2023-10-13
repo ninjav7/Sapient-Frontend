@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Cookies } from 'react-cookie';
 import { Col, FormGroup } from 'reactstrap';
 import { connect } from 'react-redux';
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { Link, useHistory, useParams, useLocation } from 'react-router-dom';
 
 import { UserStore } from '../../store/UserStore';
 import { saveUserPreference } from '../../helpers/saveUserPreference';
@@ -32,6 +32,7 @@ import './auth.scss';
 
 const Login = (props) => {
     const history = useHistory();
+    const location = useLocation();
 
     const [_isMounted, set_isMounted] = useState(false);
     const [isAuthTokenValid, setisAuthTokenValid] = useState();
@@ -68,12 +69,6 @@ const Login = (props) => {
         setUserObj(obj);
     };
 
-    const redirectToPortfolioPage = () => {
-        history.push({
-            pathname: `/energy/portfolio/overview`,
-        });
-    };
-
     const renderRedirectToRoot = () => {
         const isAuthTknValid = isUserAuthenticated();
         setisAuthTokenValid(isAuthTknValid);
@@ -95,14 +90,16 @@ const Login = (props) => {
             .catch((error) => {});
     };
 
-    const setSession = (userData) => {
+    const setSession = (userData, pathToPush) => {
         let cookies = new Cookies();
 
         if (userData) {
             localStorage.setItem('vendorName', userData?.vendor_name);
             saveUserPreference(userData?.date_format, userData?.time_format, userData?.unit);
             cookies.set('user', JSON.stringify(userData), { path: '/' });
-            redirectToPortfolioPage();
+            history.push({
+                pathname: `${pathToPush}`,
+            });
             window.location.reload();
         } else {
             cookies.remove('user', { path: '/' });
@@ -112,6 +109,8 @@ const Login = (props) => {
     const handleLogin = async () => {
         setProcessing(true);
         setErrorMsg(null);
+
+        const pathToPush = location?.state?.from?.pathname ?? '/';
 
         let alertObj = Object.assign({}, errorObj);
         if (!validateEmail(userObj?.email)) {
@@ -130,7 +129,7 @@ const Login = (props) => {
                 .then((res) => {
                     const response = res?.data;
                     if (response?.success) {
-                        if (response?.data) setSession(response?.data);
+                        if (response?.data) setSession(response?.data, pathToPush);
                     } else {
                         const errorMsg = response?.message ?? `Unable to Login.`;
                         setErrorMsg(errorMsg);
