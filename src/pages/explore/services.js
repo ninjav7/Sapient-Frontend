@@ -58,13 +58,13 @@ export function fetchExploreEquipmentList(
         tz_info: timeZone,
     };
 
-    if (conAPIFlag !== '')
+    if (conAPIFlag && conAPIFlag !== '')
         payload['consumption_range'] = {
             gte: (Number(minConValue) - 1) * 1000,
             lte: (Number(maxConValue) + 1) * 1000,
         };
 
-    if (perAPIFlag !== '')
+    if (perAPIFlag && perAPIFlag !== '')
         payload['change'] = {
             gte: Number(minPerValue) - 0.5,
             lte: Number(maxPerValue) + 0.5,
