@@ -53,7 +53,7 @@ export const initialFilterState = {
 };
 
 const DataTableWidget = (props) => {
-    const { customExcludedHeaders = [] } = props;
+    const { customExcludedHeaders = [], showExternalButton = false, externalButtonObj = {} } = props;
 
     const [excludedHeaderLocalStorage, setExcludedHeadersLocalStorage] = useLocalStorage(
         `${LOCAL_STORAGE.EXCLUDED_HEADERS}${props.id && '-' + props.id}`,
@@ -268,8 +268,22 @@ const DataTableWidget = (props) => {
                         isFilterLoading={props?.isFilterLoading}
                     />
                     <div className="ml-auto data-table-widget-action-button-wrapper">
-                        {!props.disableColumnDragging && <DraggableColumns onSortEnd={onSortEnd} headers={headers} />}
-                        {props.onDownload && <DownloadButton onClick={props.onDownload} {...props} />}
+                        {showExternalButton ? (
+                            <Button
+                                label={externalButtonObj?.label}
+                                size={Button.Sizes.md}
+                                type={Button.Type.secondaryGrey}
+                                onClick={externalButtonObj?.onClick}
+                                disabled={externalButtonObj?.isBtnDisabled ? externalButtonObj?.isBtnDisabled : false}
+                            />
+                        ) : (
+                            <>
+                                {!props.disableColumnDragging && (
+                                    <DraggableColumns onSortEnd={onSortEnd} headers={headers} />
+                                )}
+                                {props.onDownload && <DownloadButton onClick={props.onDownload} {...props} />}
+                            </>
+                        )}
                     </div>
                 </div>
 
