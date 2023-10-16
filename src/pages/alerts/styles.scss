@@ -1,0 +1,15 @@
+@import '../../assets/scss/colors';
+
+.alerts-header-wrapper {
+    width: 100%;
+    height: 7rem;
+    background: $primary-gray-50;
+    border-bottom: 0.0625rem solid $primary-gray-200;
+    padding: 2rem 2rem 0rem 2rem;
+}
+
+.active-tab {
+    border-bottom: 0.125rem solid $dataviz-blue-600;
+    color: $dataviz-blue-600 !important;
+    width: fit-content;
+}
