@@ -78,10 +78,6 @@ export function fetchExploreEquipmentList(
     if (selectedBreakers && selectedBreakers.length !== 0) payload['breaker_number'] = selectedBreakers;
     if (selectedNotes && selectedNotes.length === 1) payload['has_note'] = selectedNotes[0];
 
-    console.log('SSR payload => ', payload);
-    console.log('SSR conAPIFlag => ', conAPIFlag);
-    console.log('SSR perAPIFlag => ', perAPIFlag);
-
     return axiosInstance.post(`${getExploreEquipmentList}${params}`, payload).then((res) => {
         return res;
     });
