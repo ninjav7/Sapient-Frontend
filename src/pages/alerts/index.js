@@ -70,6 +70,10 @@ const OpenAlerts = () => {
 
     const [checkedAll, setCheckedAll] = useState(false);
 
+    const handleAcknowledgement = () => {
+        alert('Acknowledged');
+    };
+
     const currentRow = () => {
         return openAlertsList;
     };
@@ -108,6 +112,12 @@ const OpenAlerts = () => {
                 totalCount={(() => {
                     return openAlertsCount;
                 })()}
+                showExternalButton={true}
+                externalButtonObj={{
+                    label: 'Acknowledged',
+                    onClick: handleAcknowledgement,
+                    isBtnDisabled: false,
+                }}
             />
         </div>
     );
@@ -121,6 +131,10 @@ const ClosedAlerts = () => {
     const [pageSize, setPageSize] = useState(10);
 
     const [checkedAll, setCheckedAll] = useState(false);
+
+    const handleUnacknowledgement = () => {
+        alert('Unacknowledged');
+    };
 
     const currentRow = () => {
         return closedAlertsList;
@@ -160,6 +174,12 @@ const ClosedAlerts = () => {
                 totalCount={(() => {
                     return closedAlertsCount;
                 })()}
+                showExternalButton={true}
+                externalButtonObj={{
+                    label: 'Unacknowledged',
+                    onClick: handleUnacknowledgement,
+                    isBtnDisabled: false,
+                }}
             />
         </div>
     );
