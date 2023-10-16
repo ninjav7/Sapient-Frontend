@@ -11,7 +11,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 
 import { ReactComponent as PlusSVG } from '../../assets/icon/plus.svg';
 
-import { openAlertsHeaderProps, closedAlertsHeaderProps } from './constants';
+import { openAlertsHeaderProps, closedAlertsHeaderProps, alertSettingsHeaderProps } from './constants';
 
 import colorPalette from '../../assets/scss/_colors.scss';
 import './styles.scss';
@@ -62,7 +62,7 @@ const AlertHeader = (props) => {
 };
 
 const OpenAlerts = () => {
-    const [openAlertsList, setOpenAlersList] = useState([]);
+    const [openAlertsList, setOpenAlertsList] = useState([]);
     const [openAlertsCount, setOpenAlertListsCount] = useState(0);
 
     const [pageNo, setPageNo] = useState(1);
@@ -124,7 +124,7 @@ const OpenAlerts = () => {
 };
 
 const ClosedAlerts = () => {
-    const [closedAlertsList, setClosedAlersList] = useState([]);
+    const [closedAlertsList, setClosedAlertsList] = useState([]);
     const [closedAlertsCount, setClosedAlertListsCount] = useState(0);
 
     const [pageNo, setPageNo] = useState(1);
@@ -186,7 +186,44 @@ const ClosedAlerts = () => {
 };
 
 const AlertSettings = () => {
-    return <div className="custom-padding">Alert Settings Tab</div>;
+    const [alertSettingsList, setAlertSettingsList] = useState([]);
+    const [alertSettingsCount, setAlertSettingsCount] = useState(0);
+
+    const [pageNo, setPageNo] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
+    const [checkedAll, setCheckedAll] = useState(false);
+
+    const currentRow = () => {
+        return alertSettingsList;
+    };
+
+    return (
+        <div className="custom-padding">
+            <DataTableWidget
+                id="alert_settings_list"
+                onSearch={(query) => {}}
+                onStatus={(value) => {}}
+                buttonGroupFilterOptions={[]}
+                isCSVDownloading={false}
+                onDownload={() => alert('Download CSV')}
+                rows={currentRow()}
+                disableColumnDragging={true}
+                searchResultRows={currentRow()}
+                headers={alertSettingsHeaderProps}
+                filterOptions={[]}
+                currentPage={pageNo}
+                onChangePage={setPageNo}
+                pageSize={pageSize}
+                onPageSize={setPageSize}
+                onDeleteRow={() => alert('Delete record')}
+                isDeletable={true}
+                totalCount={(() => {
+                    return alertSettingsCount;
+                })()}
+            />
+        </div>
+    );
 };
 
 const Alerts = () => {
