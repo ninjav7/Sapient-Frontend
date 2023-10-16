@@ -11,7 +11,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 
 import { ReactComponent as PlusSVG } from '../../assets/icon/plus.svg';
 
-import { openAlertsHeaderProps } from './constants';
+import { openAlertsHeaderProps, closedAlertsHeaderProps } from './constants';
 
 import colorPalette from '../../assets/scss/_colors.scss';
 import './styles.scss';
@@ -114,7 +114,55 @@ const OpenAlerts = () => {
 };
 
 const ClosedAlerts = () => {
-    return <div className="custom-padding">Closed Alerts Tab</div>;
+    const [closedAlertsList, setClosedAlersList] = useState([]);
+    const [closedAlertsCount, setClosedAlertListsCount] = useState(0);
+
+    const [pageNo, setPageNo] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
+    const [checkedAll, setCheckedAll] = useState(false);
+
+    const currentRow = () => {
+        return closedAlertsList;
+    };
+
+    return (
+        <div className="custom-padding">
+            <DataTableWidget
+                id="closed_alerts_list"
+                onSearch={(query) => {}}
+                onStatus={(value) => {}}
+                buttonGroupFilterOptions={[]}
+                rows={currentRow()}
+                disableColumnDragging={true}
+                searchResultRows={currentRow()}
+                headers={closedAlertsHeaderProps}
+                filterOptions={[]}
+                customCheckAll={() => (
+                    <Checkbox
+                        label=""
+                        type="checkbox"
+                        id="open_alerts"
+                        name="open_alerts"
+                        checked={checkedAll}
+                        onChange={() => {
+                            setCheckedAll(!checkedAll);
+                        }}
+                    />
+                )}
+                customCheckboxForCell={(record) => (
+                    <Checkbox label="" type="checkbox" id="kasa_device_check" name="kasa_device_check" />
+                )}
+                currentPage={pageNo}
+                onChangePage={setPageNo}
+                pageSize={pageSize}
+                onPageSize={setPageSize}
+                totalCount={(() => {
+                    return closedAlertsCount;
+                })()}
+            />
+        </div>
+    );
 };
 
 const AlertSettings = () => {

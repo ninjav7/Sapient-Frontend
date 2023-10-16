@@ -8,3 +8,22 @@ export const openAlertsHeaderProps = [
         accessor: 'timestamps',
     },
 ];
+
+export const closedAlertsHeaderProps = [
+    {
+        name: 'Target',
+        accessor: 'target',
+    },
+    {
+        name: 'Target Type',
+        accessor: 'target_type',
+    },
+    {
+        name: 'Condition',
+        accessor: 'condition',
+    },
+    {
+        name: 'Timestamps',
+        accessor: 'timestamps',
+    },
+];
