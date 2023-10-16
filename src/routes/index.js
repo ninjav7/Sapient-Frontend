@@ -52,6 +52,9 @@ const TimeOfDay = React.lazy(() => import('../pages/timeOfDay'));
 const CarbonOverview = React.lazy(() => import('../pages/carbon/CarbonOverview'));
 const CarbonBuilding = React.lazy(() => import('../pages/carbonBuilding'));
 
+// Alerts Component
+const Alerts = React.lazy(() => import('../pages/alerts'));
+
 // Control Components
 const PlugRule = React.lazy(() => import('../pages/controls/PlugRule'));
 const PlugRules = React.lazy(() => import('../pages/controls/PlugRules'));
@@ -180,6 +183,26 @@ const carbonRoutes = {
             route: PrivateRoute,
             visibility: true,
             parent: 'carbon-buildings',
+        },
+    ],
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+};
+
+// Alerts Routes
+const alertsRoutes = {
+    path: '/alerts/portfolio',
+    name: 'Alerts',
+    component: Alerts,
+    visibility: false,
+    children: [
+        {
+            path: '/alerts/portfolio',
+            name: 'Alerts',
+            component: Alerts,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'alerts',
         },
     ],
     icon: FeatherIcon.PieChart,
@@ -533,6 +556,7 @@ const allRoutes = [
     rootRoute,
     portfolioRoutes,
     settingsRoutes,
+    alertsRoutes,
     controlRoutes,
     carbonRoutes,
     exploreRoutes,
@@ -540,7 +564,15 @@ const allRoutes = [
     authRoutes,
 ];
 
-const authProtectedRoutes = [portfolioRoutes, settingsRoutes, carbonRoutes, controlRoutes, exploreRoutes, adminRoutes];
+const authProtectedRoutes = [
+    portfolioRoutes,
+    settingsRoutes,
+    alertsRoutes,
+    carbonRoutes,
+    controlRoutes,
+    exploreRoutes,
+    adminRoutes,
+];
 
 const allFlattenRoutes = flattenRoutes(allRoutes);
 

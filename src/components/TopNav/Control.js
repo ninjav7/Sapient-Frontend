@@ -4,8 +4,9 @@ import { Cookies } from 'react-cookie';
 import { useLocation, useHistory } from 'react-router-dom';
 import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 
-import { ReactComponent as Gear } from '../../assets/icon/gear.svg';
-import { ReactComponent as ProfilePhoto } from '../../assets/icon/user.svg';
+import { ReactComponent as GearSVG } from '../../assets/icon/gear.svg';
+import { ReactComponent as BellSVG } from '../../assets/icon/bell.svg';
+import { ReactComponent as ProfilePhotoSVG } from '../../assets/icon/user.svg';
 import { ReactComponent as PreferencesSVG } from '../../assets/icon/top-nav/preferences.svg';
 import { ReactComponent as LogoutSVG } from '../../assets/icon/top-nav/logout.svg';
 
@@ -67,11 +68,6 @@ const Control = () => {
         window.location.reload();
     };
 
-    const handleSettingsClick = () => {
-        handleRouteChange();
-        handleSideNavChange();
-    };
-
     const dropdownMenuStyle = {
         zIndex: 2000,
     };
@@ -112,6 +108,20 @@ const Control = () => {
         history.push({
             pathname: `${pathName}`,
         });
+    };
+
+    const handleAlertClick = () => {
+        history.push({
+            pathname: `/alerts/portfolio`,
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'alerts';
+        });
+    };
+
+    const handleSettingsClick = () => {
+        handleRouteChange();
+        handleSideNavChange();
     };
 
     useEffect(() => {
@@ -310,16 +320,36 @@ const Control = () => {
                 <div className="d-flex align-items-center">
                     {/* Portfolio / Building Settings are not for super-user  */}
                     {pageType !== 'super-user' && (
-                        <div
-                            className={`float-right h-100 mr-3 navbar-head-container d-flex align-items-center ${
-                                pageType === 'settings' ? 'active ' : ''
-                            }`}>
-                            {userPermission?.email && (
-                                <button className="btn btn-sm" onClick={handleSettingsClick}>
-                                    <Gear className={`navbar-icons-style ${pageType === 'settings' ? 'active' : ''}`} />
-                                </button>
-                            )}
-                        </div>
+                        <>
+                            <div
+                                className={`float-right h-100 navbar-head-container d-flex align-items-center ${
+                                    pageType === 'alerts' ? 'active ' : ''
+                                }`}>
+                                {userPermission?.email && (
+                                    <button className="btn btn-sm" onClick={handleAlertClick}>
+                                        <BellSVG
+                                            width={20}
+                                            height={20}
+                                            className={`navbar-icons-style ${pageType === 'alerts' ? 'active' : ''}`}
+                                        />
+                                    </button>
+                                )}
+                            </div>
+                            <div
+                                className={`float-right h-100 mr-3 navbar-head-container d-flex align-items-center ${
+                                    pageType === 'settings' ? 'active ' : ''
+                                }`}>
+                                {userPermission?.email && (
+                                    <button className="btn btn-sm" onClick={handleSettingsClick}>
+                                        <GearSVG
+                                            width={20}
+                                            height={20}
+                                            className={`navbar-icons-style ${pageType === 'settings' ? 'active' : ''}`}
+                                        />
+                                    </button>
+                                )}
+                            </div>
+                        </>
                     )}
 
                     <Dropdown
@@ -328,7 +358,7 @@ const Control = () => {
                         className="mouse-pointer navbar-head-container ">
                         <DropdownToggle tag="div" className=" mr-3 user-profile-container">
                             <div className="profile-container mr-2">
-                                <ProfilePhoto className="profile-photo" />
+                                <ProfilePhotoSVG className="profile-photo" />
                             </div>
                             <div className="user-name">{userName}</div>
                         </DropdownToggle>

@@ -13,3 +13,4 @@ export const ComponentStore = new Store({
 // explore
 // account
 // building-settings
+// alerts
