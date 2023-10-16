@@ -3,17 +3,21 @@ import { Row, Col } from 'reactstrap';
 
 import Typography from '../../sharedComponents/typography';
 import { Button } from '../../sharedComponents/button';
+import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
+import { Checkbox } from '../../sharedComponents/form/checkbox';
 
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 
 import { ReactComponent as PlusSVG } from '../../assets/icon/plus.svg';
 
+import { openAlertsHeaderProps } from './constants';
+
 import colorPalette from '../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const AlertHeader = (props) => {
-    const { activeTab = false, setActiveTab } = props;
+    const { activeTab = false, handleTabSwitch } = props;
 
     return (
         <div className="alerts-header-wrapper d-flex flex-column justify-content-between">
@@ -29,30 +33,27 @@ const AlertHeader = (props) => {
 
             <div className="d-flex">
                 <Typography.Header
+                    id="0"
                     size={Typography.Sizes.xs}
                     className={`mouse-pointer mr-4 ${activeTab === 0 ? `active-tab` : ``}`}
                     style={{ color: colorPalette.primaryGray500 }}
-                    onClick={() => {
-                        setActiveTab(0);
-                    }}>
+                    onClick={handleTabSwitch}>
                     {`Open Alerts`}
                 </Typography.Header>
                 <Typography.Header
+                    id="1"
                     size={Typography.Sizes.xs}
                     className={`mouse-pointer mr-4 ${activeTab === 1 ? `active-tab` : ``}`}
                     style={{ color: colorPalette.primaryGray500 }}
-                    onClick={() => {
-                        setActiveTab(1);
-                    }}>
+                    onClick={handleTabSwitch}>
                     {`Closed Alerts`}
                 </Typography.Header>
                 <Typography.Header
+                    id="2"
                     size={Typography.Sizes.xs}
                     className={`mouse-pointer mr-4 ${activeTab === 2 ? `active-tab` : ``}`}
                     style={{ color: colorPalette.primaryGray500 }}
-                    onClick={() => {
-                        setActiveTab(2);
-                    }}>
+                    onClick={handleTabSwitch}>
                     {`Alert Settings`}
                 </Typography.Header>
             </div>
@@ -60,8 +61,72 @@ const AlertHeader = (props) => {
     );
 };
 
+const OpenAlerts = () => {
+    const [openAlertsList, setOpenAlersList] = useState([]);
+    const [openAlertsCount, setOpenAlertListsCount] = useState(0);
+
+    const [pageNo, setPageNo] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
+    const [checkedAll, setCheckedAll] = useState(false);
+
+    const currentRow = () => {
+        return openAlertsList;
+    };
+
+    return (
+        <div className="custom-padding">
+            <DataTableWidget
+                id="open_alerts_list"
+                onSearch={(query) => {}}
+                onStatus={(value) => {}}
+                buttonGroupFilterOptions={[]}
+                rows={currentRow()}
+                disableColumnDragging={true}
+                searchResultRows={currentRow()}
+                headers={openAlertsHeaderProps}
+                filterOptions={[]}
+                customCheckAll={() => (
+                    <Checkbox
+                        label=""
+                        type="checkbox"
+                        id="open_alerts"
+                        name="open_alerts"
+                        checked={checkedAll}
+                        onChange={() => {
+                            setCheckedAll(!checkedAll);
+                        }}
+                    />
+                )}
+                customCheckboxForCell={(record) => (
+                    <Checkbox label="" type="checkbox" id="kasa_device_check" name="kasa_device_check" />
+                )}
+                currentPage={pageNo}
+                onChangePage={setPageNo}
+                pageSize={pageSize}
+                onPageSize={setPageSize}
+                totalCount={(() => {
+                    return openAlertsCount;
+                })()}
+            />
+        </div>
+    );
+};
+
+const ClosedAlerts = () => {
+    return <div className="custom-padding">Closed Alerts Tab</div>;
+};
+
+const AlertSettings = () => {
+    return <div className="custom-padding">Alert Settings Tab</div>;
+};
+
 const Alerts = () => {
     const [activeTab, setActiveTab] = useState(0);
+
+    const handleTabSwitch = (event) => {
+        setActiveTab(+event.target.id);
+    };
 
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
@@ -87,7 +152,15 @@ const Alerts = () => {
         <React.Fragment>
             <Row>
                 <Col lg={12}>
-                    <AlertHeader activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <AlertHeader activeTab={activeTab} handleTabSwitch={handleTabSwitch} />
+                </Col>
+            </Row>
+
+            <Row>
+                <Col lg={12}>
+                    {activeTab === 0 && <OpenAlerts />}
+                    {activeTab === 1 && <ClosedAlerts />}
+                    {activeTab === 2 && <AlertSettings />}
                 </Col>
             </Row>
         </React.Fragment>
