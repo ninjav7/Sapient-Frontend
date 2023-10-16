@@ -58,13 +58,13 @@ export function fetchExploreEquipmentList(
         tz_info: timeZone,
     };
 
-    if (conAPIFlag !== '')
+    if (conAPIFlag && conAPIFlag !== '')
         payload['consumption_range'] = {
             gte: (Number(minConValue) - 1) * 1000,
             lte: (Number(maxConValue) + 1) * 1000,
         };
 
-    if (perAPIFlag !== '')
+    if (perAPIFlag && perAPIFlag !== '')
         payload['change'] = {
             gte: Number(minPerValue) - 0.5,
             lte: Number(maxPerValue) + 0.5,
@@ -77,6 +77,10 @@ export function fetchExploreEquipmentList(
     if (selectedPanels && selectedPanels.length !== 0) payload['panel'] = selectedPanels;
     if (selectedBreakers && selectedBreakers.length !== 0) payload['breaker_number'] = selectedBreakers;
     if (selectedNotes && selectedNotes.length === 1) payload['has_note'] = selectedNotes[0];
+
+    console.log('SSR payload => ', payload);
+    console.log('SSR conAPIFlag => ', conAPIFlag);
+    console.log('SSR perAPIFlag => ', perAPIFlag);
 
     return axiosInstance.post(`${getExploreEquipmentList}${params}`, payload).then((res) => {
         return res;
