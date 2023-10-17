@@ -79,6 +79,7 @@ const AlertHeader = (props) => {
 const OpenAlerts = () => {
     const [openAlertsList, setOpenAlertsList] = useState(openAlertsMockData);
     const [openAlertsCount, setOpenAlertListsCount] = useState(0);
+    const [toBeAcknowledged, setToBeAcknowledged] = useState([]);
 
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -170,7 +171,7 @@ const OpenAlerts = () => {
                 externalButtonObj={{
                     label: 'Acknowledged',
                     onClick: handleAcknowledgement,
-                    isBtnDisabled: false,
+                    isBtnDisabled: toBeAcknowledged.length === 0,
                 }}
             />
         </div>
