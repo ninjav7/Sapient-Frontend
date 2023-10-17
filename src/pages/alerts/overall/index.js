@@ -16,6 +16,7 @@ import { openAlertsHeaderProps, closedAlertsHeaderProps, alertSettingsHeaderProp
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
+import { openAlertsMockData } from './mock';
 
 const AlertHeader = (props) => {
     const history = useHistory();
@@ -72,7 +73,7 @@ const AlertHeader = (props) => {
 };
 
 const OpenAlerts = () => {
-    const [openAlertsList, setOpenAlertsList] = useState([]);
+    const [openAlertsList, setOpenAlertsList] = useState(openAlertsMockData);
     const [openAlertsCount, setOpenAlertListsCount] = useState(0);
 
     const [pageNo, setPageNo] = useState(1);
@@ -134,7 +135,7 @@ const OpenAlerts = () => {
 };
 
 const ClosedAlerts = () => {
-    const [closedAlertsList, setClosedAlertsList] = useState([]);
+    const [closedAlertsList, setClosedAlertsList] = useState(openAlertsMockData);
     const [closedAlertsCount, setClosedAlertListsCount] = useState(0);
 
     const [pageNo, setPageNo] = useState(1);

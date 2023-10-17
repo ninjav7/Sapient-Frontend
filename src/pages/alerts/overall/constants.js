@@ -1,7 +1,15 @@
 export const openAlertsHeaderProps = [
     {
-        name: 'Alert Description',
-        accessor: 'alert_description',
+        name: 'Target',
+        accessor: 'target',
+    },
+    {
+        name: 'Target Type',
+        accessor: 'target_type',
+    },
+    {
+        name: 'Condition',
+        accessor: 'condition',
     },
     {
         name: 'Timestamps',
