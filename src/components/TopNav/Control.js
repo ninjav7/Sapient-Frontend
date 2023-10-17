@@ -112,7 +112,7 @@ const Control = () => {
 
     const handleAlertClick = () => {
         history.push({
-            pathname: `/alerts/portfolio`,
+            pathname: `/alerts/overall`,
         });
         ComponentStore.update((s) => {
             s.parent = 'alerts';

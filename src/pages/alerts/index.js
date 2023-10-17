@@ -238,7 +238,7 @@ const Alerts = () => {
             let newList = [
                 {
                     label: 'Alerts',
-                    path: '/alerts/portfolio',
+                    path: '/alerts/overall',
                     active: true,
                 },
             ];
