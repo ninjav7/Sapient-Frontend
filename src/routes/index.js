@@ -54,6 +54,8 @@ const CarbonBuilding = React.lazy(() => import('../pages/carbonBuilding'));
 
 // Alerts Component
 const Alerts = React.lazy(() => import('../pages/alerts/overall'));
+const AddAlert = React.lazy(() => import('../pages/alerts/add-alerts'));
+const EditAlert = React.lazy(() => import('../pages/alerts/edit-alerts'));
 
 // Control Components
 const PlugRule = React.lazy(() => import('../pages/controls/PlugRule'));
@@ -215,7 +217,7 @@ const alertsRoutes = {
         {
             path: '/alerts/add-alert',
             name: 'Add Alert',
-            component: Alerts,
+            component: AddAlert,
             route: PrivateRoute,
             visibility: false,
             parent: 'alerts',
@@ -223,7 +225,7 @@ const alertsRoutes = {
         {
             path: '/alerts/edit-alert',
             name: 'Edit Alert',
-            component: Alerts,
+            component: EditAlert,
             route: PrivateRoute,
             visibility: false,
             parent: 'alerts',

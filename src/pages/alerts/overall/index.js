@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
+import { useHistory } from 'react-router-dom';
 
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
@@ -17,6 +18,7 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const AlertHeader = (props) => {
+    const history = useHistory();
     const { activeTab = false, handleTabSwitch } = props;
 
     return (
@@ -27,7 +29,15 @@ const AlertHeader = (props) => {
                     style={{ color: colorPalette.primaryGray700 }}
                     className="font-weight-bold">{`Alerts`}</Typography.Header>
                 <div className="d-flex">
-                    <Button label={'Add Alert'} size={Button.Sizes.md} type={Button.Type.primary} icon={<PlusSVG />} />
+                    <Button
+                        label={'Add Alert'}
+                        size={Button.Sizes.md}
+                        type={Button.Type.primary}
+                        icon={<PlusSVG />}
+                        onClick={() => {
+                            history.push({ pathname: '/alerts/add-alert' });
+                        }}
+                    />
                 </div>
             </div>
 
