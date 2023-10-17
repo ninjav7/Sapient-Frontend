@@ -207,15 +207,7 @@ const alertsRoutes = {
             parent: 'alerts',
         },
         {
-            path: '/alerts/by-building',
-            name: 'Building Alerts',
-            component: Alerts,
-            route: PrivateRoute,
-            visibility: false,
-            parent: 'alerts',
-        },
-        {
-            path: '/alerts/add-alert',
+            path: '/alerts/overall/add-alert',
             name: 'Add Alert',
             component: AddAlert,
             route: PrivateRoute,
@@ -223,7 +215,7 @@ const alertsRoutes = {
             parent: 'alerts',
         },
         {
-            path: '/alerts/edit-alert',
+            path: '/alerts/overall/edit-alert',
             name: 'Edit Alert',
             component: EditAlert,
             route: PrivateRoute,

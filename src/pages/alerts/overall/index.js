@@ -35,7 +35,7 @@ const AlertHeader = (props) => {
                         type={Button.Type.primary}
                         icon={<PlusSVG />}
                         onClick={() => {
-                            history.push({ pathname: '/alerts/add-alert' });
+                            history.push({ pathname: '/alerts/overall/add-alert' });
                         }}
                     />
                 </div>
