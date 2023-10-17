@@ -15,6 +15,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import 'react-loading-skeleton/dist/skeleton.css';
 import PortfolioKPIs from './PortfolioKPIs';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
+import Typography from '../../sharedComponents/typography';
 import CompareBuildings from '../compareBuildings';
 import { useAtom } from 'jotai';
 import { buildingData, userPermissionData } from '../../store/globalState';
@@ -300,10 +301,15 @@ const PortfolioOverview = () => {
                         </Col>
                     </Row>
 
-                    <Brick sizeInRem={1.5} />
+                    <Brick sizeInRem={2} />
 
                     <Row>
                         <Col xl={12}>
+                            <Typography.Header
+                                size={Typography.Sizes.lg}
+                                className="font-weight-bold">{`Compare Buildings`}</Typography.Header>
+
+                            <Brick sizeInRem={1.5} />
                             <CompareBuildings />
                         </Col>
                     </Row>
