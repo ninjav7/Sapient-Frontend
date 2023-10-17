@@ -171,7 +171,7 @@ const OpenAlerts = () => {
                 externalButtonObj={{
                     label: 'Acknowledged',
                     onClick: handleAcknowledgement,
-                    isBtnDisabled: toBeAcknowledged.length === 0,
+                    isBtnDisabled: toBeAcknowledged.length !== 0,
                 }}
             />
         </div>
