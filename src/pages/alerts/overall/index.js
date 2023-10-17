@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 
-import Typography from '../../sharedComponents/typography';
-import { Button } from '../../sharedComponents/button';
-import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
-import { Checkbox } from '../../sharedComponents/form/checkbox';
+import Typography from '../../../sharedComponents/typography';
+import { Button } from '../../../sharedComponents/button';
+import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
+import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { ComponentStore } from '../../store/ComponentStore';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { ComponentStore } from '../../../store/ComponentStore';
 
-import { ReactComponent as PlusSVG } from '../../assets/icon/plus.svg';
+import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 
 import { openAlertsHeaderProps, closedAlertsHeaderProps, alertSettingsHeaderProps } from './constants';
 
-import colorPalette from '../../assets/scss/_colors.scss';
+import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const AlertHeader = (props) => {

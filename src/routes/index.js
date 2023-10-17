@@ -53,7 +53,7 @@ const CarbonOverview = React.lazy(() => import('../pages/carbon/CarbonOverview')
 const CarbonBuilding = React.lazy(() => import('../pages/carbonBuilding'));
 
 // Alerts Component
-const Alerts = React.lazy(() => import('../pages/alerts'));
+const Alerts = React.lazy(() => import('../pages/alerts/overall'));
 
 // Control Components
 const PlugRule = React.lazy(() => import('../pages/controls/PlugRule'));
@@ -209,7 +209,7 @@ const alertsRoutes = {
             name: 'Building Alerts',
             component: Alerts,
             route: PrivateRoute,
-            visibility: true,
+            visibility: false,
             parent: 'alerts',
         },
         {
