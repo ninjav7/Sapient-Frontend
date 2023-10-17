@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import moment from 'moment';
 import { Row, Col } from 'reactstrap';
 import { useHistory } from 'react-router-dom';
 
@@ -7,16 +8,19 @@ import { Button } from '../../../sharedComponents/button';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
+import { UserStore } from '../../../store/UserStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
+import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/assets/icons/building-type.svg';
+import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 
-import { openAlertsHeaderProps, closedAlertsHeaderProps, alertSettingsHeaderProps } from './constants';
+import { alertSettingsHeaderProps } from './constants';
+import { openAlertsMockData } from './mock';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-import { openAlertsMockData } from './mock';
 
 const AlertHeader = (props) => {
     const history = useHistory();
@@ -72,7 +76,7 @@ const AlertHeader = (props) => {
     );
 };
 
-const OpenAlerts = () => {
+const OpenAlerts = ({ handleLastActiveDate }) => {
     const [openAlertsList, setOpenAlertsList] = useState(openAlertsMockData);
     const [openAlertsCount, setOpenAlertListsCount] = useState(0);
 
@@ -83,6 +87,26 @@ const OpenAlerts = () => {
 
     const handleAcknowledgement = () => {
         alert('Acknowledged');
+    };
+
+    const renderAlertType = (row) => {
+        return (
+            <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
+                {row?.target_type === 'Building' ? (
+                    <BuildingTypeSVG className="p-0 square" />
+                ) : (
+                    <EquipmentTypeSVG className="p-0 square" />
+                )}
+                <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
+                    {`${row?.target}`}
+                </Typography.Body>
+            </div>
+        );
+    };
+
+    const renderAlertTimestamp = (row) => {
+        const data = moment(row?.timestamps).fromNow();
+        return <Typography.Body size={Typography.Sizes.lg}>{data}</Typography.Body>;
     };
 
     const currentRow = () => {
@@ -99,7 +123,26 @@ const OpenAlerts = () => {
                 rows={currentRow()}
                 disableColumnDragging={true}
                 searchResultRows={currentRow()}
-                headers={openAlertsHeaderProps}
+                headers={[
+                    {
+                        name: 'Target',
+                        accessor: 'target',
+                        callbackValue: renderAlertType,
+                    },
+                    {
+                        name: 'Target Type',
+                        accessor: 'target_type',
+                    },
+                    {
+                        name: 'Condition',
+                        accessor: 'condition',
+                    },
+                    {
+                        name: 'Timestamps',
+                        accessor: 'timestamps',
+                        callbackValue: renderAlertTimestamp,
+                    },
+                ]}
                 filterOptions={[]}
                 customCheckAll={() => (
                     <Checkbox
@@ -134,7 +177,7 @@ const OpenAlerts = () => {
     );
 };
 
-const ClosedAlerts = () => {
+const ClosedAlerts = ({ handleLastActiveDate }) => {
     const [closedAlertsList, setClosedAlertsList] = useState(openAlertsMockData);
     const [closedAlertsCount, setClosedAlertListsCount] = useState(0);
 
@@ -145,6 +188,26 @@ const ClosedAlerts = () => {
 
     const handleUnacknowledgement = () => {
         alert('Unacknowledged');
+    };
+
+    const renderAlertType = (row) => {
+        return (
+            <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
+                {row?.target_type === 'Building' ? (
+                    <BuildingTypeSVG className="p-0 square" />
+                ) : (
+                    <EquipmentTypeSVG className="p-0 square" />
+                )}
+                <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
+                    {`${row?.target}`}
+                </Typography.Body>
+            </div>
+        );
+    };
+
+    const renderAlertTimestamp = (row) => {
+        const data = moment(row?.timestamps).fromNow();
+        return <Typography.Body size={Typography.Sizes.lg}>{data}</Typography.Body>;
     };
 
     const currentRow = () => {
@@ -161,7 +224,26 @@ const ClosedAlerts = () => {
                 rows={currentRow()}
                 disableColumnDragging={true}
                 searchResultRows={currentRow()}
-                headers={closedAlertsHeaderProps}
+                headers={[
+                    {
+                        name: 'Target',
+                        accessor: 'target',
+                        callbackValue: renderAlertType,
+                    },
+                    {
+                        name: 'Target Type',
+                        accessor: 'target_type',
+                    },
+                    {
+                        name: 'Condition',
+                        accessor: 'condition',
+                    },
+                    {
+                        name: 'Timestamps',
+                        accessor: 'timestamps',
+                        callbackValue: renderAlertTimestamp,
+                    },
+                ]}
                 filterOptions={[]}
                 customCheckAll={() => (
                     <Checkbox
@@ -240,6 +322,26 @@ const AlertSettings = () => {
 const Alerts = () => {
     const [activeTab, setActiveTab] = useState(0);
 
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+
+    function isValidDate(d) {
+        return d instanceof Date && !isNaN(d);
+    }
+
+    const handleLastActiveDate = (last_login) => {
+        let dt = '';
+        if (isValidDate(new Date(last_login)) && last_login != null) {
+            const last_dt = new Date(last_login);
+            const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
+            const timeFormat = userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`;
+            dt = moment.utc(last_dt).format(`${dateFormat} 'YY @ ${timeFormat}`);
+        } else {
+            dt = 'Never';
+        }
+        return dt;
+    };
+
     const handleTabSwitch = (event) => {
         setActiveTab(+event.target.id);
     };
@@ -274,8 +376,8 @@ const Alerts = () => {
 
             <Row>
                 <Col lg={12}>
-                    {activeTab === 0 && <OpenAlerts />}
-                    {activeTab === 1 && <ClosedAlerts />}
+                    {activeTab === 0 && <OpenAlerts handleLastActiveDate={handleLastActiveDate} />}
+                    {activeTab === 1 && <ClosedAlerts handleLastActiveDate={handleLastActiveDate} />}
                     {activeTab === 2 && <AlertSettings />}
                 </Col>
             </Row>

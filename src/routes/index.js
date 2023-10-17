@@ -199,14 +199,6 @@ const alertsRoutes = {
     visibility: false,
     children: [
         {
-            path: '/alerts/overall',
-            name: 'Alerts',
-            component: Alerts,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'alerts',
-        },
-        {
             path: '/alerts/overall/add-alert',
             name: 'Add Alert',
             component: AddAlert,
@@ -220,6 +212,14 @@ const alertsRoutes = {
             component: EditAlert,
             route: PrivateRoute,
             visibility: false,
+            parent: 'alerts',
+        },
+        {
+            path: '/alerts/overall',
+            name: 'Alerts',
+            component: Alerts,
+            route: PrivateRoute,
+            visibility: true,
             parent: 'alerts',
         },
     ],
