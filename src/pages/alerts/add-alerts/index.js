@@ -65,6 +65,373 @@ const CreateAlertHeader = (props) => {
     );
 };
 
+const RemoveAlert = () => {
+    return (
+        <Row>
+            <Col lg={9}>
+                <div className="custom-card">
+                    <CardHeader>
+                        <Typography.Subheader size={Typography.Sizes.md} style={{ color: colorPalette.primaryGray550 }}>
+                            {`Danger Zone`}
+                        </Typography.Subheader>
+                    </CardHeader>
+
+                    <CardBody>
+                        <Button
+                            label="Remove Alert"
+                            size={Button.Sizes.md}
+                            type={Button.Type.primaryDistructive}
+                            icon={<DeleteSVG />}
+                            onClick={() => {
+                                alert('Alert removed.');
+                            }}
+                        />
+                    </CardBody>
+                </div>
+            </Col>
+        </Row>
+    );
+};
+
+const ConfigureAlerts = (props) => {
+    const { targetType, setTargetType } = props;
+
+    return (
+        <>
+            <Row>
+                <Col lg={9}>
+                    <div className="custom-card">
+                        <CardHeader>
+                            <Typography.Subheader
+                                size={Typography.Sizes.md}
+                                style={{ color: colorPalette.primaryGray550 }}>
+                                {`Target`}
+                            </Typography.Subheader>
+                        </CardHeader>
+                        <CardBody>
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    {`Select a Target Type`}
+                                </Typography.Subheader>
+
+                                <Brick sizeInRem={1.25} />
+
+                                <div className="d-flex" style={{ gap: '0.75rem' }}>
+                                    <div
+                                        className={`d-flex align-items-center mouse-pointer ${
+                                            targetType === 'building'
+                                                ? `target-type-container-active`
+                                                : `target-type-container`
+                                        }`}
+                                        onClick={() => setTargetType('building')}>
+                                        <BuildingTypeSVG className="p-0 square" width={20} height={20} />
+                                        <Typography.Subheader
+                                            size={Typography.Sizes.md}
+                                            style={{ color: colorPalette.primaryGray700 }}>
+                                            {`Building`}
+                                        </Typography.Subheader>
+                                    </div>
+
+                                    <div
+                                        className={`d-flex align-items-center mouse-pointer ${
+                                            targetType === 'equipment'
+                                                ? `target-type-container-active`
+                                                : `target-type-container`
+                                        }`}
+                                        onClick={() => setTargetType('equipment')}>
+                                        <EquipmentTypeSVG className="p-0 square" width={20} height={20} />
+                                        <Typography.Subheader
+                                            size={Typography.Sizes.md}
+                                            style={{ color: colorPalette.primaryGray700 }}>
+                                            {`Equipment`}
+                                        </Typography.Subheader>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {targetType && <hr />}
+
+                            {targetType === 'building' && (
+                                <div>
+                                    <Typography.Subheader size={Typography.Sizes.md}>
+                                        {`Select a Target`}
+                                    </Typography.Subheader>
+
+                                    <Brick sizeInRem={1.25} />
+
+                                    <div className="d-flex justify-content-between w-100" style={{ gap: '1.25rem' }}>
+                                        <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
+                                            <Select
+                                                id="endUseSelect"
+                                                placeholder="Select Building Type"
+                                                name="select"
+                                                isSearchable={true}
+                                                options={[]}
+                                                className="w-100"
+                                            />
+
+                                            <Select
+                                                id="endUseSelect"
+                                                placeholder="Select Building"
+                                                name="select"
+                                                isSearchable={true}
+                                                options={[]}
+                                                className="w-100"
+                                            />
+                                        </div>
+
+                                        <div className="d-flex" style={{ gap: '0.75rem' }}>
+                                            <Button
+                                                label={'Cancel'}
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.secondaryGrey}
+                                                className="w-100"
+                                            />
+                                            <Button
+                                                label={'Add target'}
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.primary}
+                                                className="w-100"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {targetType === 'equipment' && (
+                                <div>
+                                    <Typography.Subheader size={Typography.Sizes.md}>
+                                        {`Select a Target`}
+                                    </Typography.Subheader>
+
+                                    <Brick sizeInRem={1.25} />
+
+                                    <Select
+                                        id="endUseSelect"
+                                        placeholder="Select Building"
+                                        name="select"
+                                        isSearchable={true}
+                                        options={[]}
+                                        className="w-25"
+                                    />
+
+                                    <Brick sizeInRem={1.25} />
+
+                                    <div className="d-flex justify-content-between w-100" style={{ gap: '1.25rem' }}>
+                                        <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
+                                            <Select
+                                                id="endUseSelect"
+                                                placeholder="Select Equipment Type"
+                                                name="select"
+                                                isSearchable={true}
+                                                options={[]}
+                                                className="w-100"
+                                            />
+
+                                            <Select
+                                                id="endUseSelect"
+                                                placeholder="Select Equipment"
+                                                name="select"
+                                                isSearchable={true}
+                                                options={[]}
+                                                className="w-100"
+                                            />
+                                        </div>
+
+                                        <div className="d-flex" style={{ gap: '0.75rem' }}>
+                                            <Button
+                                                label={'Cancel'}
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.secondaryGrey}
+                                                className="w-100"
+                                            />
+                                            <Button
+                                                label={'Add target'}
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.primary}
+                                                className="w-100"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </CardBody>
+                    </div>
+                </Col>
+            </Row>
+
+            <Brick sizeInRem={2} />
+
+            <Row>
+                <Col lg={9}>
+                    <div className="custom-card">
+                        <CardHeader>
+                            <Typography.Subheader
+                                size={Typography.Sizes.md}
+                                style={{ color: colorPalette.primaryGray550 }}>
+                                {`Condition`}
+                            </Typography.Subheader>
+                        </CardHeader>
+                        <CardBody>
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    {`Select a Condition`}
+                                </Typography.Subheader>
+
+                                <Brick sizeInRem={1.25} />
+
+                                <div className="d-flex w-100">
+                                    <div className="d-flex w-25" style={{ gap: '0.75rem' }}>
+                                        <Select
+                                            id="endUseSelect"
+                                            placeholder="Select a Condition"
+                                            name="select"
+                                            isSearchable={true}
+                                            options={[]}
+                                            className="w-100"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </CardBody>
+                    </div>
+                </Col>
+            </Row>
+
+            <Brick sizeInRem={2} />
+
+            <RemoveAlert />
+        </>
+    );
+};
+
+const NotificationSettings = (props) => {
+    const { notifyType, setNotifyType } = props;
+
+    return (
+        <>
+            <Row>
+                <Col lg={9}>
+                    <div className="custom-card">
+                        <CardHeader>
+                            <Typography.Subheader
+                                size={Typography.Sizes.md}
+                                style={{ color: colorPalette.primaryGray550 }}>
+                                {`Alert Preview`}
+                            </Typography.Subheader>
+                        </CardHeader>
+                        <CardBody>
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.md}>{`Target Type`}</Typography.Subheader>
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Body
+                                    size={Typography.Sizes.md}
+                                    className="text-muted">{`Building`}</Typography.Body>
+                            </div>
+
+                            <Brick sizeInRem={1} />
+
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.md}>{`Target`}</Typography.Subheader>
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Body
+                                    size={Typography.Sizes.md}
+                                    className="text-muted">{`123 Main St. Portland, OR`}</Typography.Body>
+                            </div>
+
+                            <Brick sizeInRem={1} />
+
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.md}>{`Condition`}</Typography.Subheader>
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Body
+                                    size={Typography.Sizes.md}
+                                    className="text-muted">{`Energy consumption for the month is above 75% of 10,000 kWh `}</Typography.Body>
+                            </div>
+                        </CardBody>
+                    </div>
+                </Col>
+            </Row>
+
+            <Brick sizeInRem={2} />
+
+            <Row>
+                <Col lg={9}>
+                    <Typography.Header
+                        size={Typography.Sizes.xs}>{`Add Notification Method (optional)`}</Typography.Header>
+                    <Brick sizeInRem={0.25} />
+                    <Typography.Body
+                        size={
+                            Typography.Sizes.md
+                        }>{`These are all notification methods available given your selected target and condition.`}</Typography.Body>
+                </Col>
+            </Row>
+
+            <Brick sizeInRem={2} />
+
+            <Row>
+                <Col lg={9}>
+                    <div className="custom-card">
+                        <CardHeader>
+                            <Typography.Subheader
+                                size={Typography.Sizes.md}
+                                style={{ color: colorPalette.primaryGray550 }}>
+                                {`Notification Method (optional)`}
+                            </Typography.Subheader>
+                        </CardHeader>
+                        <CardBody>
+                            <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
+                                <div
+                                    className={`d-flex align-items-center mouse-pointer ${
+                                        notifyType === 'none' ? `notify-container-active` : `notify-container`
+                                    }`}
+                                    onClick={() => setNotifyType('none')}>
+                                    <BanSVG className="p-0 square" width={20} height={20} />
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}
+                                        style={{ color: colorPalette.primaryGray700 }}>
+                                        {`None`}
+                                    </Typography.Subheader>
+                                </div>
+
+                                <div
+                                    className={`d-flex align-items-center mouse-pointer ${
+                                        notifyType === 'user' ? `notify-container-active` : `notify-container`
+                                    }`}
+                                    onClick={() => setNotifyType('user')}>
+                                    <UserProfileSVG className="p-0 square" width={18} height={18} />
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}
+                                        style={{ color: colorPalette.primaryGray700 }}>
+                                        {`User`}
+                                    </Typography.Subheader>
+                                </div>
+
+                                <div
+                                    className={`d-flex align-items-center mouse-pointer ${
+                                        notifyType === 'email' ? `notify-container-active` : `notify-container`
+                                    }`}
+                                    onClick={() => setNotifyType('email')}>
+                                    <EmailAddressSVG className="p-0 square" width={20} height={20} />
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}
+                                        style={{ color: colorPalette.primaryGray700 }}>
+                                        {`Email Address`}
+                                    </Typography.Subheader>
+                                </div>
+                            </div>
+                        </CardBody>
+                    </div>
+                </Col>
+            </Row>
+
+            <Brick sizeInRem={2} />
+
+            <RemoveAlert />
+        </>
+    );
+};
+
 const AddAlerts = () => {
     const [activeTab, setActiveTab] = useState(0);
 
@@ -105,399 +472,8 @@ const AddAlerts = () => {
             </Row>
 
             <div className="custom-padding">
-                {activeTab === 0 && (
-                    <>
-                        <Row>
-                            <Col lg={9}>
-                                <div className="custom-card">
-                                    <CardHeader>
-                                        <Typography.Subheader
-                                            size={Typography.Sizes.md}
-                                            style={{ color: colorPalette.primaryGray550 }}>
-                                            {`Target`}
-                                        </Typography.Subheader>
-                                    </CardHeader>
-                                    <CardBody>
-                                        <div>
-                                            <Typography.Subheader size={Typography.Sizes.md}>
-                                                {`Select a Target Type`}
-                                            </Typography.Subheader>
-
-                                            <Brick sizeInRem={1.25} />
-
-                                            <div className="d-flex" style={{ gap: '0.75rem' }}>
-                                                <div
-                                                    className={`d-flex align-items-center mouse-pointer ${
-                                                        targetType === 'building'
-                                                            ? `target-type-container-active`
-                                                            : `target-type-container`
-                                                    }`}
-                                                    onClick={() => setTargetType('building')}>
-                                                    <BuildingTypeSVG className="p-0 square" width={20} height={20} />
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        style={{ color: colorPalette.primaryGray700 }}>
-                                                        {`Building`}
-                                                    </Typography.Subheader>
-                                                </div>
-
-                                                <div
-                                                    className={`d-flex align-items-center mouse-pointer ${
-                                                        targetType === 'equipment'
-                                                            ? `target-type-container-active`
-                                                            : `target-type-container`
-                                                    }`}
-                                                    onClick={() => setTargetType('equipment')}>
-                                                    <EquipmentTypeSVG className="p-0 square" width={20} height={20} />
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        style={{ color: colorPalette.primaryGray700 }}>
-                                                        {`Equipment`}
-                                                    </Typography.Subheader>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {targetType && <hr />}
-
-                                        {targetType === 'building' && (
-                                            <div>
-                                                <Typography.Subheader size={Typography.Sizes.md}>
-                                                    {`Select a Target`}
-                                                </Typography.Subheader>
-
-                                                <Brick sizeInRem={1.25} />
-
-                                                <div
-                                                    className="d-flex justify-content-between w-100"
-                                                    style={{ gap: '1.25rem' }}>
-                                                    <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
-                                                        <Select
-                                                            id="endUseSelect"
-                                                            placeholder="Select Building Type"
-                                                            name="select"
-                                                            isSearchable={true}
-                                                            options={[]}
-                                                            className="w-100"
-                                                        />
-
-                                                        <Select
-                                                            id="endUseSelect"
-                                                            placeholder="Select Building"
-                                                            name="select"
-                                                            isSearchable={true}
-                                                            options={[]}
-                                                            className="w-100"
-                                                        />
-                                                    </div>
-
-                                                    <div className="d-flex" style={{ gap: '0.75rem' }}>
-                                                        <Button
-                                                            label={'Cancel'}
-                                                            size={Button.Sizes.md}
-                                                            type={Button.Type.secondaryGrey}
-                                                            className="w-100"
-                                                        />
-                                                        <Button
-                                                            label={'Add target'}
-                                                            size={Button.Sizes.md}
-                                                            type={Button.Type.primary}
-                                                            className="w-100"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {targetType === 'equipment' && (
-                                            <div>
-                                                <Typography.Subheader size={Typography.Sizes.md}>
-                                                    {`Select a Target`}
-                                                </Typography.Subheader>
-
-                                                <Brick sizeInRem={1.25} />
-
-                                                <Select
-                                                    id="endUseSelect"
-                                                    placeholder="Select Building"
-                                                    name="select"
-                                                    isSearchable={true}
-                                                    options={[]}
-                                                    className="w-25"
-                                                />
-
-                                                <Brick sizeInRem={1.25} />
-
-                                                <div
-                                                    className="d-flex justify-content-between w-100"
-                                                    style={{ gap: '1.25rem' }}>
-                                                    <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
-                                                        <Select
-                                                            id="endUseSelect"
-                                                            placeholder="Select Equipment Type"
-                                                            name="select"
-                                                            isSearchable={true}
-                                                            options={[]}
-                                                            className="w-100"
-                                                        />
-
-                                                        <Select
-                                                            id="endUseSelect"
-                                                            placeholder="Select Equipment"
-                                                            name="select"
-                                                            isSearchable={true}
-                                                            options={[]}
-                                                            className="w-100"
-                                                        />
-                                                    </div>
-
-                                                    <div className="d-flex" style={{ gap: '0.75rem' }}>
-                                                        <Button
-                                                            label={'Cancel'}
-                                                            size={Button.Sizes.md}
-                                                            type={Button.Type.secondaryGrey}
-                                                            className="w-100"
-                                                        />
-                                                        <Button
-                                                            label={'Add target'}
-                                                            size={Button.Sizes.md}
-                                                            type={Button.Type.primary}
-                                                            className="w-100"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </CardBody>
-                                </div>
-                            </Col>
-                        </Row>
-
-                        <Brick sizeInRem={2} />
-
-                        <Row>
-                            <Col lg={9}>
-                                <div className="custom-card">
-                                    <CardHeader>
-                                        <Typography.Subheader
-                                            size={Typography.Sizes.md}
-                                            style={{ color: colorPalette.primaryGray550 }}>
-                                            {`Condition`}
-                                        </Typography.Subheader>
-                                    </CardHeader>
-                                    <CardBody>
-                                        <div>
-                                            <Typography.Subheader size={Typography.Sizes.md}>
-                                                {`Select a Condition`}
-                                            </Typography.Subheader>
-
-                                            <Brick sizeInRem={1.25} />
-
-                                            <div className="d-flex w-100">
-                                                <div className="d-flex w-25" style={{ gap: '0.75rem' }}>
-                                                    <Select
-                                                        id="endUseSelect"
-                                                        placeholder="Select a Condition"
-                                                        name="select"
-                                                        isSearchable={true}
-                                                        options={[]}
-                                                        className="w-100"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </CardBody>
-                                </div>
-                            </Col>
-                        </Row>
-
-                        <Brick sizeInRem={2} />
-
-                        <Row>
-                            <Col lg={9}>
-                                <div className="custom-card">
-                                    <CardHeader>
-                                        <Typography.Subheader
-                                            size={Typography.Sizes.md}
-                                            style={{ color: colorPalette.primaryGray550 }}>
-                                            {`Danger Zone`}
-                                        </Typography.Subheader>
-                                    </CardHeader>
-
-                                    <CardBody>
-                                        <Button
-                                            label="Remove Alert"
-                                            size={Button.Sizes.md}
-                                            type={Button.Type.primaryDistructive}
-                                            icon={<DeleteSVG />}
-                                            onClick={() => {
-                                                alert('Alert removed.');
-                                            }}
-                                        />
-                                    </CardBody>
-                                </div>
-                            </Col>
-                        </Row>
-                    </>
-                )}
-
-                {activeTab === 1 && (
-                    <>
-                        <Row>
-                            <Col lg={9}>
-                                <div className="custom-card">
-                                    <CardHeader>
-                                        <Typography.Subheader
-                                            size={Typography.Sizes.md}
-                                            style={{ color: colorPalette.primaryGray550 }}>
-                                            {`Alert Preview`}
-                                        </Typography.Subheader>
-                                    </CardHeader>
-                                    <CardBody>
-                                        <div>
-                                            <Typography.Subheader
-                                                size={Typography.Sizes.md}>{`Target Type`}</Typography.Subheader>
-                                            <Brick sizeInRem={0.25} />
-                                            <Typography.Body
-                                                size={Typography.Sizes.md}
-                                                className="text-muted">{`Building`}</Typography.Body>
-                                        </div>
-
-                                        <Brick sizeInRem={1} />
-
-                                        <div>
-                                            <Typography.Subheader
-                                                size={Typography.Sizes.md}>{`Target`}</Typography.Subheader>
-                                            <Brick sizeInRem={0.25} />
-                                            <Typography.Body
-                                                size={Typography.Sizes.md}
-                                                className="text-muted">{`123 Main St. Portland, OR`}</Typography.Body>
-                                        </div>
-
-                                        <Brick sizeInRem={1} />
-
-                                        <div>
-                                            <Typography.Subheader
-                                                size={Typography.Sizes.md}>{`Condition`}</Typography.Subheader>
-                                            <Brick sizeInRem={0.25} />
-                                            <Typography.Body
-                                                size={Typography.Sizes.md}
-                                                className="text-muted">{`Energy consumption for the month is above 75% of 10,000 kWh `}</Typography.Body>
-                                        </div>
-                                    </CardBody>
-                                </div>
-                            </Col>
-                        </Row>
-
-                        <Brick sizeInRem={2} />
-
-                        <Row>
-                            <Col lg={9}>
-                                <Typography.Header
-                                    size={
-                                        Typography.Sizes.xs
-                                    }>{`Add Notification Method (optional)`}</Typography.Header>
-                                <Brick sizeInRem={0.25} />
-                                <Typography.Body
-                                    size={
-                                        Typography.Sizes.md
-                                    }>{`These are all notification methods available given your selected target and condition.`}</Typography.Body>
-                            </Col>
-                        </Row>
-
-                        <Brick sizeInRem={2} />
-
-                        <Row>
-                            <Col lg={9}>
-                                <div className="custom-card">
-                                    <CardHeader>
-                                        <Typography.Subheader
-                                            size={Typography.Sizes.md}
-                                            style={{ color: colorPalette.primaryGray550 }}>
-                                            {`Notification Method (optional)`}
-                                        </Typography.Subheader>
-                                    </CardHeader>
-                                    <CardBody>
-                                        <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                                            <div
-                                                className={`d-flex align-items-center mouse-pointer ${
-                                                    notifyType === 'none'
-                                                        ? `notify-container-active`
-                                                        : `notify-container`
-                                                }`}
-                                                onClick={() => setNotifyType('none')}>
-                                                <BanSVG className="p-0 square" width={20} height={20} />
-                                                <Typography.Subheader
-                                                    size={Typography.Sizes.md}
-                                                    style={{ color: colorPalette.primaryGray700 }}>
-                                                    {`None`}
-                                                </Typography.Subheader>
-                                            </div>
-
-                                            <div
-                                                className={`d-flex align-items-center mouse-pointer ${
-                                                    notifyType === 'user'
-                                                        ? `notify-container-active`
-                                                        : `notify-container`
-                                                }`}
-                                                onClick={() => setNotifyType('user')}>
-                                                <UserProfileSVG className="p-0 square" width={18} height={18} />
-                                                <Typography.Subheader
-                                                    size={Typography.Sizes.md}
-                                                    style={{ color: colorPalette.primaryGray700 }}>
-                                                    {`User`}
-                                                </Typography.Subheader>
-                                            </div>
-
-                                            <div
-                                                className={`d-flex align-items-center mouse-pointer ${
-                                                    notifyType === 'email'
-                                                        ? `notify-container-active`
-                                                        : `notify-container`
-                                                }`}
-                                                onClick={() => setNotifyType('email')}>
-                                                <EmailAddressSVG className="p-0 square" width={20} height={20} />
-                                                <Typography.Subheader
-                                                    size={Typography.Sizes.md}
-                                                    style={{ color: colorPalette.primaryGray700 }}>
-                                                    {`Email Address`}
-                                                </Typography.Subheader>
-                                            </div>
-                                        </div>
-                                    </CardBody>
-                                </div>
-                            </Col>
-                        </Row>
-
-                        <Brick sizeInRem={2} />
-
-                        <Row>
-                            <Col lg={9}>
-                                <div className="custom-card">
-                                    <CardHeader>
-                                        <Typography.Subheader
-                                            size={Typography.Sizes.md}
-                                            style={{ color: colorPalette.primaryGray550 }}>
-                                            {`Danger Zone`}
-                                        </Typography.Subheader>
-                                    </CardHeader>
-
-                                    <CardBody>
-                                        <Button
-                                            label="Remove Alert"
-                                            size={Button.Sizes.md}
-                                            type={Button.Type.primaryDistructive}
-                                            icon={<DeleteSVG />}
-                                            onClick={() => {
-                                                alert('Alert removed.');
-                                            }}
-                                        />
-                                    </CardBody>
-                                </div>
-                            </Col>
-                        </Row>
-                    </>
-                )}
+                {activeTab === 0 && <ConfigureAlerts targetType={targetType} setTargetType={setTargetType} />}
+                {activeTab === 1 && <NotificationSettings notifyType={notifyType} setNotifyType={setNotifyType} />}
             </div>
         </React.Fragment>
     );
