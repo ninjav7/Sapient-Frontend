@@ -326,7 +326,10 @@ const Control = () => {
                                     pageType === 'alerts' ? 'active ' : ''
                                 }`}>
                                 {userPermission?.email && (
-                                    <button className="btn btn-sm" onClick={handleAlertClick}>
+                                    <button className="btn btn-sm position-relative" onClick={handleAlertClick}>
+                                        <div className="notification-style rounded-circle bg-danger d-flex justify-content-center align-items-center">
+                                            {`0`}
+                                        </div>
                                         <BellSVG
                                             width={20}
                                             height={20}

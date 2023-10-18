@@ -117,3 +117,14 @@
         fill: $base-white;
     }
 }
+
+.notification-style {
+    position: absolute;
+    color: $base-white;
+    min-width: 1rem;
+    min-height: 1rem;
+    font-size: 0.65rem;
+    bottom: 0;
+    right: 0;
+    transform: translate(7%, -75%);
+}
