@@ -278,14 +278,13 @@ const CarbonBuilding = () => {
         if (energyConsumptionsData[0].name) {
             mergedList[0] = energyConsumptionsData[0];
         }
-        if (carbonIntensity[0].name) {
+        if (carbonIntensity[0]?.name) {
             mergedList[1] = carbonIntensity[0];
         }
         if (kpiMetrics?.egrid_emission_factor) {
-            const preparedEgridData = Array.from(
-                { length: carbonIntensity[0]?.data.length },
-                () => kpiMetrics.egrid_emission_factor
-            );
+            const preparedEgridData =
+                carbonIntensity[0]?.data &&
+                Array.from({ length: carbonIntensity[0]?.data.length }, () => kpiMetrics.egrid_emission_factor);
 
             let egridEmissionData = {
                 name: 'eGRID',

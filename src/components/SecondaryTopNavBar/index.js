@@ -214,7 +214,7 @@ const SecondaryTopNavBar = () => {
             icon: <BuildingSVG className="p-0 square" />,
         };
         setSelectedBuilding(bldgObj);
-    }, [bldgId]);
+    }, [bldgId, bldgName, bldgTimeZone]);
 
     return (
         <React.Fragment>
