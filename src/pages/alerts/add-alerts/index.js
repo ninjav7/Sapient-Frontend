@@ -48,7 +48,7 @@ const CreateAlertHeader = (props) => {
                 <Typography.Body
                     className={`mouse-pointer ${activeTab === 0 ? `` : `text-muted`}`}
                     size={Typography.Sizes.lg}
-                    style={{ color: activeTab === 0 ? colorPalette.primaryGray900 : colorPalette.primaryGray500 }}
+                    style={{ color: activeTab === 0 ? colorPalette.baseBlack : colorPalette.primaryGray500 }}
                     onClick={() => setActiveTab(0)}>{`Select Target and Condition`}</Typography.Body>
 
                 <div className="arrow-line-style"></div>
