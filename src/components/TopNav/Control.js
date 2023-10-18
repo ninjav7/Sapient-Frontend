@@ -100,7 +100,10 @@ const Control = () => {
         if (currentPath.includes('/control/plug-rules') || currentPath.includes('/carbon/portfolio/overview')) {
             bldgId === 'portfolio' ? (pathName = accountRoutes[0]) : (pathName = `${configRoutes[0]}/${bldgId}`);
         } else {
-            routesForAccountSettings.includes(currentPath) || currentPath.includes(accountChildRoutes[0])
+            console.log('SSR else block executed!', currentPath);
+            routesForAccountSettings.includes(currentPath) ||
+            currentPath.includes(accountChildRoutes[0]) ||
+            currentPath.includes('/alerts')
                 ? (pathName = accountRoutes[0])
                 : (pathName = `${configRoutes[0]}/${bldgId}`);
         }
