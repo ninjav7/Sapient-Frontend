@@ -102,14 +102,14 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
                 title={`Difference in Emissions Reporting Factor`}
                 value={(overalldata?.egrid_emission_factor - overalldata.average_carbon_intensity.now).toFixed(2)}
                 badgePrecentage={percentageHandler(
-                    overalldata?.egrid_emission_factor - overalldata.average_carbon_intensity.now,
-                    overalldata?.egrid_emission_factor
+                    overalldata?.egrid_emission_factor,
+                    overalldata.average_carbon_intensity.now
                 )}
                 unit={`${userPrefUnits === 'si' ? `${UNITS.kg}` : `${UNITS.ibs}`} / ${`${UNITS.mwh}`}`}
                 tooltipText={`The difference in carbon emissions factor between eGrid annual averages and real-time carbon intensity.`}
                 tooltipId="change-in-emissions"
                 type={
-                    overalldata?.total?.now >= overalldata?.total?.old
+                    overalldata.average_carbon_intensity.now >= overalldata?.egrid_emission_factor
                         ? TRENDS_BADGE_TYPES.UPWARD_TREND
                         : TRENDS_BADGE_TYPES.DOWNWARD_TREND
                 }
