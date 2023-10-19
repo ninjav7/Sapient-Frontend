@@ -23,7 +23,7 @@ const OpenAlerts = (props) => {
 
     const handleAcknowledgement = (selectedIds) => {
         handleAlertAcknowledgement('acknowledged', selectedIds);
-        // alert(`Total Alerts will be Acknowledged : ${selectedIds.length}`);
+        setSelectedAlertIds([]);
     };
 
     const renderAlertType = (row) => {

@@ -23,7 +23,7 @@ const ClosedAlerts = (props) => {
 
     const handleUnacknowledgement = (selectedIds) => {
         handleAlertAcknowledgement('unacknowledged', selectedIds);
-        // alert(`Total Alerts will be Unacknowledged : ${selectedIds.length}`);
+        setSelectedAlertIds([]);
     };
 
     const renderAlertType = (row) => {
