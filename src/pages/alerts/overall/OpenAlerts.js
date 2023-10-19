@@ -4,6 +4,7 @@ import moment from 'moment';
 import Typography from '../../../sharedComponents/typography';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../../sharedComponents/form/checkbox';
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/assets/icons/building-type.svg';
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
@@ -67,6 +68,8 @@ const OpenAlerts = (props) => {
         <div className="custom-padding">
             <DataTableWidget
                 id="open_alerts_list"
+                isLoading={isProcessing}
+                isLoadingComponent={<SkeletonLoader noOfColumns={5} noOfRows={10} />}
                 onSearch={(query) => {}}
                 onStatus={(value) => {}}
                 buttonGroupFilterOptions={[]}
