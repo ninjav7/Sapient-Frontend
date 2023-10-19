@@ -8,14 +8,13 @@ import { Checkbox } from '../../../sharedComponents/form/checkbox';
 import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/assets/icons/building-type.svg';
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 
-import { openAlertsMockData } from './mock';
-
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
-const ClosedAlerts = () => {
+const ClosedAlerts = (props) => {
+    const { alertsList = [], isProcessing = false } = props;
+
     const [selectedAlertIds, setSelectedAlertIds] = useState([]);
-    const [closedAlertsList, setClosedAlertsList] = useState(openAlertsMockData);
 
     const [count, setCount] = useState(0);
     const [pageNo, setPageNo] = useState(1);
@@ -61,7 +60,7 @@ const ClosedAlerts = () => {
     };
 
     const currentRow = () => {
-        return closedAlertsList;
+        return alertsList;
     };
 
     return (
@@ -101,12 +100,12 @@ const ClosedAlerts = () => {
                         type="checkbox"
                         id="closed_alerts"
                         name="closed_alerts"
-                        checked={selectedAlertIds.length === closedAlertsList.length}
-                        value={selectedAlertIds.length === closedAlertsList.length}
+                        checked={selectedAlertIds.length === alertsList.length}
+                        value={selectedAlertIds.length === alertsList.length}
                         onClick={(e) => {
-                            handleSelectAllAlerts(e.target.value, closedAlertsList);
+                            handleSelectAllAlerts(e.target.value, alertsList);
                         }}
-                        disabled={closedAlertsList.length === 0}
+                        disabled={alertsList.length === 0}
                     />
                 )}
                 customCheckboxForCell={(record) => (
