@@ -167,6 +167,7 @@ const PlugRule = () => {
     const isLoadingLinkedRef = useRef(false);
     const isLoadingUnlinkedRef = useRef(false);
     const isLoadingRef = useRef(false);
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const { ruleId } = useParams();
     const { download } = useCSVDownload();
     const [bldgTimeZone, setBldgTimeZone] = useState(null);
@@ -319,7 +320,6 @@ const PlugRule = () => {
     const [dateRangeAverageData, setDateRangeAverageData] = useState({});
     const [sortByLinkedTab, setSortByLinkedTab] = useState(initialSortingState);
     const [sortByUnlinkedTab, setSortByUnlinkedTab] = useState(initialSortingState);
-    const [currentBuilding, setCurrentBuilding] = useState();
     const [allSearchData, setAllSearchData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     const [totalItemsLinked, setTotalItemsLinked] = useState(0);
@@ -327,11 +327,11 @@ const PlugRule = () => {
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
     useEffect(() => {
         buildingListData.forEach((el) => {
-            if (el.building_id === activeBuildingId) {
+            if (el.building_id === bldgId) {
                 setBldgTimeZone(el.timezone);
             }
         });
-    }, [buildingListData, activeBuildingId]);
+    }, [buildingListData, bldgId]);
     const preparedBuildingListData = () => {
         const copyBuildingListData = [...buildingListData];
         const res = copyBuildingListData.map((el) => {
@@ -368,8 +368,11 @@ const PlugRule = () => {
         const res = [...selectedIdsToLink, ...linkedIds];
         fetchEstimateSensorSavings(res);
         getGraphData(res);
-        getStatus();
     }, [selectedIdsToUnlink, selectedIdsToLink, selectedInitialyIds.length]);
+
+    useEffect(() => {
+        getStatus();
+    }, [selectedInitialyIds.length]);
 
     useEffect(() => {
         const Is24HoursFormat = timeFormat == '24h';
@@ -424,26 +427,10 @@ const PlugRule = () => {
             }
         }
     };
-    const fetchPlugRulesData = async () => {
-        let time_zone = 'US/Eastern';
-
-        const params = `?tz_info=${time_zone}`;
-        await fetchPlugRules(params, '').then((res) => {
-            setIsFetchedPlugRulesData(true);
-            const plugRules = res.data.data;
-            plugRules &&
-                plugRules.forEach((plugRule) => {
-                    if (plugRule.name == currentData.name) {
-                        setActiveBuildingId(plugRule.buildings[0]?.building_id);
-                    }
-                });
-        });
-    };
     useEffect(() => {
         calculateOffHoursPlots();
     }, [preparedScheduleData, currentData, rawLineChartData, lineChartData, dateRangeAverageData]);
     useEffect(() => {
-        generateHours();
         if (ruleId == 'create-plug-rule') {
             setIsCreateRuleMode(true);
         } else {
@@ -451,7 +438,11 @@ const PlugRule = () => {
             setIsChangedRuleDetails(false);
             fetchPlugRuleDetail();
         }
-    }, [ruleId, bldgTimeZone]);
+    }, [bldgTimeZone]);
+
+    useEffect(() => {
+        generateHours();
+    }, [dateFormat, timeFormat, unit]);
 
     const filterHandler = (setter, options) => {
         setter(options.map(({ value }) => value));
@@ -459,28 +450,24 @@ const PlugRule = () => {
     };
 
     useEffect(() => {
-        if (!isFetchedPlugRulesData) {
-            fetchPlugRulesData();
-        }
-    }, [isFetchedPlugRulesData, currentBuilding]);
-
-    useEffect(() => {
         updateBreadcrumbStore();
     }, [currentData.name]);
 
     const fetchPlugRuleDetail = async () => {
-        let time_zone = 'US/Eastern';
-        await fetchPlugRuleDetails(ruleId, time_zone).then((res) => {
-            if (res.status) {
-                setSkeletonLoading(false);
-            }
-            let response = Object.assign({}, res.data.data[0]);
-            response.building_id = response?.building[0]?.building_id;
-            setActiveBuildingId(response.building_id);
-            setCurrentData(response);
-            const scheduleData = groupedCurrentDataById(response.action);
-            setPreparedScheduleData(scheduleData);
-        });
+        if (bldgTimeZone) {
+            let time_zone = bldgTimeZone;
+
+            await fetchPlugRuleDetails(ruleId, time_zone).then((res) => {
+                if (res.status) {
+                    setSkeletonLoading(false);
+                }
+                let response = Object.assign({}, res.data.data[0]);
+                response.building_id = response?.building[0]?.building_id;
+                setCurrentData(response);
+                const scheduleData = groupedCurrentDataById(response.action);
+                setPreparedScheduleData(scheduleData);
+            });
+        }
     };
 
     const deletePlugRule = async () => {
@@ -517,11 +504,6 @@ const PlugRule = () => {
     };
 
     const [lineChartData, setLineChartData] = useState(initialLineChartData());
-    useEffect(() => {
-        if (currentData?.building_id?.length && currentData?.building_id !== 'create-plug-rule') {
-            setActiveBuildingId(currentData.building_id);
-        }
-    }, [currentData.building_id]);
 
     const [macTypeFilterStringUnlinked, setMacTypeFilterStringUnlinked] = useState('');
     const [macTypeFilterStringLinked, setMacTypeFilterStringLinked] = useState('');
@@ -553,28 +535,7 @@ const PlugRule = () => {
     const [sensorsIdNow, setSensorIdNow] = useState('');
     const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
     const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
-    const [timeFormatChanged, setTimeFormatChanged] = useState(false);
-    const [dateFormatChanged, setDateFormatChanged] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [unitFormatChanged, setUnitFormatChanged] = useState(false);
-    useEffect(() => {
-        if (dateFormat) {
-            setDateFormatChanged(dateFormat);
-        }
-        if (timeFormat) {
-            setTimeFormatChanged(timeFormat);
-        }
-        if (unit) {
-            setUnitFormatChanged(unit);
-        }
-    }, [dateFormat, timeFormat, unit]);
-
-    useEffect(() => {
-        fetchPlugRuleDetail();
-        fetchUnLinkedSocketRules();
-        fetchLinkedSocketRules();
-        fetchLinkedSocketIds();
-    }, [timeFormatChanged, dateFormatChanged, unitFormatChanged, currentBuilding, activeBuildingId, bldgTimeZone]);
 
     const getStatus = async () => {
         setIsLoading(true);
@@ -584,8 +545,8 @@ const PlugRule = () => {
         });
     };
     const getGraphData = async (ids) => {
-        if (ids.length) {
-            await getGraphDataRequest(ids, currentData.id).then((res) => {
+        if (ids.length && bldgTimeZone) {
+            await getGraphDataRequest(ids, currentData.id, bldgTimeZone).then((res) => {
                 if (res && res?.data) {
                     const formattedData = formatAverageData(res.data);
                     setRawLineChartData(res.data);
@@ -763,7 +724,7 @@ const PlugRule = () => {
         listOfsocketsToReassign &&
             (await reassignSensorsToRuleRequest({
                 rule_id: ruleId,
-                building_id: activeBuildingId,
+                building_id: bldgId,
                 sensor_id: listOfsocketsToReassign,
             }).then((res) => {
                 setIsSetInitiallySocketsCountLinked(false);
@@ -889,7 +850,7 @@ const PlugRule = () => {
                 setCheckedToUnlinkAll(true);
             }
 
-            let recordToLink = { ...rulesToLink };
+            let recordToLink = _.cloneDeep(rulesToLink);
             recordToLink.rule_id = currentData.id;
             recordToLink.sensor_id.filter((el) => el.id !== rule.id);
 
@@ -979,8 +940,8 @@ const PlugRule = () => {
             });
         });
 
-        if (!_.isEmpty(res)) {
-            await getEstimateSensorSavingsRequst(res, ids, ruleId).then((res) => {
+        if (!_.isEmpty(res) && bldgTimeZone) {
+            await getEstimateSensorSavingsRequst(res, ids, ruleId, bldgTimeZone).then((res) => {
                 setEstimatedEnergySavings(res.data);
             });
         }
@@ -1159,8 +1120,8 @@ const PlugRule = () => {
     }, [macOptions]);
 
     const fetchLinkedSocketIds = async () => {
-        activeBuildingId &&
-            listLinkSocketRulesRequest(ruleId, activeBuildingId).then((res) => {
+        bldgId &&
+            listLinkSocketRulesRequest(ruleId, bldgId).then((res) => {
                 const { sensor_id } = res.data.data;
                 setListSocketsIds(sensor_id || []);
             });
@@ -1175,11 +1136,11 @@ const PlugRule = () => {
 
         isLoadingUnlinkedRef.current = true;
 
-        activeBuildingId &&
+        bldgId &&
             (await getUnlinkedSocketRules(
                 pageSizeUnlinked,
                 pageNoUnlinked,
-                activeBuildingId,
+                bldgId,
                 equipmentTypeFilterStringUnlinked,
                 macTypeFilterStringUnlinked,
                 locationTypeFilterString,
@@ -1224,7 +1185,7 @@ const PlugRule = () => {
         await getUnlinkedSocketRules(
             pageSizeLinked,
             pageNoLinked,
-            activeBuildingId,
+            bldgId,
             equipmentTypeFilterStringLinked,
             macTypeFilterStringLinked,
             locationTypeFilterString,
@@ -1266,7 +1227,7 @@ const PlugRule = () => {
         await getUnlinkedSocketRules(
             pageSizeUnlinked,
             pageNoUnlinked,
-            activeBuildingId,
+            bldgId,
             equipmentTypeFilterStringUnlinked,
             macTypeFilterStringUnlinked,
             locationTypeFilterString,
@@ -1296,12 +1257,6 @@ const PlugRule = () => {
                 setDownloadingCSVData(false);
             });
     };
-    useEffect(() => {
-        fetchLinkedSocketRules();
-    }, [searchLinked]);
-    useEffect(() => {
-        fetchUnLinkedSocketRules();
-    }, [searchUnlinked]);
 
     const fetchLinkedSocketRules = async () => {
         const sorting = sortByLinkedTab.method &&
@@ -1310,11 +1265,11 @@ const PlugRule = () => {
                 sort_by: sortByLinkedTab.method,
             };
         isLoadingLinkedRef.current = true;
-        activeBuildingId &&
+        bldgId &&
             (await getUnlinkedSocketRules(
                 pageSizeLinked,
                 pageNoLinked,
-                activeBuildingId,
+                bldgId,
                 equipmentTypeFilterStringLinked,
                 macTypeFilterStringLinked,
                 locationTypeFilterString,
@@ -1371,13 +1326,16 @@ const PlugRule = () => {
         if (ruleId === null) {
             return;
         }
-        if (activeBuildingId?.length) {
+        if (bldgId?.length) {
             fetchFiltersForSensorsUnlinked();
             fetchUnLinkedSocketRules();
-            fetchLinkedSocketIds();
         }
     }, [
-        activeBuildingId,
+        dateFormat,
+        timeFormat,
+        unit,
+        searchUnlinked,
+        bldgId,
         equipmentTypeFilterStringUnlinked,
         macTypeFilterStringUnlinked,
         locationTypeFilterString,
@@ -1397,13 +1355,17 @@ const PlugRule = () => {
         if (ruleId === null) {
             return;
         }
-        if (activeBuildingId?.length) {
+        if (bldgId?.length) {
             fetchFiltersForSensorsLinked();
             fetchLinkedSocketRules();
             fetchLinkedSocketIds();
         }
     }, [
-        activeBuildingId,
+        dateFormat,
+        timeFormat,
+        unit,
+        searchLinked,
+        bldgId,
         equipmentTypeFilterStringLinked,
         locationTypeFilterString,
         locationTypeFilterString,
@@ -1442,11 +1404,11 @@ const PlugRule = () => {
         isLoadingLinkedRef.current = true;
 
         if (checkedAllToUnlink) {
-            activeBuildingId &&
+            bldgId &&
                 (await getUnlinkedSocketRules(
                     pageSizeLinked,
                     pageNoLinked,
-                    activeBuildingId,
+                    bldgId,
                     equipmentTypeFilterStringLinked,
                     macTypeFilterStringLinked,
                     locationTypeFilterString,
@@ -1482,7 +1444,7 @@ const PlugRule = () => {
             await getUnlinkedSocketRules(
                 pageSizeLinked,
                 pageNoLinked,
-                activeBuildingId,
+                bldgId,
                 equipmentTypeFilterStringLinked,
                 macTypeFilterStringLinked,
                 locationTypeFilterString,
@@ -1526,11 +1488,11 @@ const PlugRule = () => {
                 sort_by: sortByUnlinkedTab.method,
             };
         if (checkedAllToLink) {
-            activeBuildingId &&
+            bldgId &&
                 (await getUnlinkedSocketRules(
                     pageSizeUnlinked,
                     pageNoUnlinked,
-                    activeBuildingId,
+                    bldgId,
                     equipmentTypeFilterStringUnlinked,
                     macTypeFilterStringUnlinked,
                     locationTypeFilterString,
@@ -1710,48 +1672,22 @@ const PlugRule = () => {
             setShowSocketsModal(true);
             return;
         }
-        if (isCreateRuleMode) {
-            const isValid = validatePlugRuleForm(currentData);
-            if (isValid) {
-                let currentDataCopy = Object.assign({}, currentData);
+        Promise.allSettled([
+            // isChangedSockets && updateSocketUnlink(),
+            isChangedSocketsUnlinked && reassignSensorsToRule(),
+            isChangedRuleDetails && updatePlugRuleData(),
+        ]).then((value) => {
+            setRulesToLink({ ruleId: '', sensor_id: [] });
+            setRulesToUnLink({ ruleId: '', sensor_id: [] });
+            setIsChangedRuleDetails(false);
+            setIsChangedSocketsUnlinked(false);
+            setIsChangedSocketsLinked(false);
+            fetchLinkedSocketIds();
+            fetchFiltersForSensorsUnlinked();
+            fetchFiltersForSensorsLinked();
+            fetchPlugRuleDetail();
+        });
 
-                const formattedSchedule = [];
-                preparedScheduleData.forEach((currentCondition) => {
-                    currentCondition.data.forEach((currentRow) => {
-                        formattedSchedule.push(currentRow);
-                    });
-                });
-                currentDataCopy.action = formattedSchedule;
-                currentDataCopy.building_id = [currentData.building_id || localStorage.getItem('buildingId')];
-                openSnackbar({ ...notificationCreateData, type: Notification.Types.success, duration: 5000 });
-                await createPlugRuleRequest(currentDataCopy)
-                    .then((res) => {
-                        const { data } = res;
-                        history.push({
-                            pathname: `/control/plug-rules/${data.data.plug_rule_id}`,
-                        });
-                    })
-                    .catch((error) => {
-                        setIsProcessing(false);
-                    });
-            }
-        } else {
-            Promise.allSettled([
-                // isChangedSockets && updateSocketUnlink(),
-                isChangedSocketsUnlinked && reassignSensorsToRule(),
-                isChangedRuleDetails && updatePlugRuleData(),
-            ]).then((value) => {
-                setRulesToLink({ ruleId: '', sensor_id: [] });
-                setRulesToUnLink({ ruleId: '', sensor_id: [] });
-                setIsChangedRuleDetails(false);
-                setIsChangedSocketsUnlinked(false);
-                setIsChangedSocketsLinked(false);
-                fetchLinkedSocketIds();
-                fetchFiltersForSensorsUnlinked();
-                fetchFiltersForSensorsLinked();
-                fetchPlugRuleDetail();
-            });
-        }
         setIsUnsavedChanges(false);
     };
 
@@ -1778,7 +1714,7 @@ const PlugRule = () => {
         isLoadingUnlinkedRef.current = true;
         setFetchingFilters(true);
         await getFiltersForSensorsRequest({
-            activeBuildingId,
+            activeBuildingId: bldgId,
             macTypeFilterString: macTypeFilterStringUnlinked,
             equipmentTypeFilterString: equipmentTypeFilterStringUnlinked,
             sensorTypeFilterString: sensorTypeFilterStringUnlinked,
@@ -1915,7 +1851,7 @@ const PlugRule = () => {
         isLoadingLinkedRef.current = true;
         setFetchingFilters(true);
         await getFiltersForSensorsRequest({
-            activeBuildingId,
+            activeBuildingId: bldgId,
             macTypeFilterString: macTypeFilterStringLinked,
             equipmentTypeFilterString: equipmentTypeFilterStringLinked,
             sensorTypeFilterString: sensorTypeFilterStringLinked,

@@ -44,9 +44,9 @@ export function updatePlugRuleRequest(currentData) {
     });
 }
 
-export function getEstimateSensorSavingsRequst(schedule, selectedIds, plugRuleId) {
+export function getEstimateSensorSavingsRequst(schedule, selectedIds, plugRuleId,time_zone) {
     const sensors = selectedIds.join('%2B');
-    let params = `?plug_rule_id=${plugRuleId}&timezone=US%2FEastern&sensor_id=${sensors}`;
+    let params = `?plug_rule_id=${plugRuleId}&timezone=${time_zone}&sensor_id=${sensors}`;
 
     return axiosInstance.post(`${getEstimateSensorSavings}${params}`, schedule).then((res) => {
         return res.data;
@@ -67,13 +67,13 @@ export function deletePlugRuleRequest(ruleId) {
     });
 }
 
-export function getGraphDataRequest(selectedIds, plugRuleId) {
+export function getGraphDataRequest(selectedIds, plugRuleId,time_zone) {
     let params = `?plug_rule_id=${plugRuleId}`;
     return axiosInstance
         .get(`${graphData}${params}`, {
             params: {
                 //@TODO Hardcoded because it doesn't have default values on backend side, but we don't need them right now.
-                tz_info: 'US/Eastern',
+                tz_info: time_zone,
                 num_of_days: 14,
                 sensors: selectedIds.join('+'),
             },

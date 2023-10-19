@@ -14,7 +14,8 @@ import { UserStore } from '../../store/UserStore';
 import { fetchPlugRules, updatePlugRuleRequest, createPlugRuleRequest } from '../../services/plugRules';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
-import { BaseUrl, assignSensorsToRule } from '../../services/Network';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import { buildingData } from '../../store/globalState';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -79,33 +80,26 @@ const SkeletonLoading = () => (
 
 const PlugRules = () => {
     let cookies = new Cookies();
+    const [buildingListData] = useAtom(buildingData);
     let userdata = cookies.get('user');
 
     const [search, setSearch] = useState('');
-    const [timeFormatChanged, setTimeFormatChanged] = useState(false);
-    const [dateFormatChanged, setDateFormatChanged] = useState('');
-    const [unitFormatChanged, setUnitFormatChanged] = useState(false);
+
     const { dateFormat, timeFormat, unit } = UserStore.useState((s) => ({
         dateFormat: s.dateFormat,
         timeFormat: s.timeFormat,
         unit: s.unit,
     }));
 
-    useEffect(() => {
-        if (dateFormat) {
-            setDateFormatChanged(dateFormat);
-        }
-        if (timeFormat) {
-            setTimeFormatChanged(timeFormat);
-        }
-        if (unit) {
-            setUnitFormatChanged(unit);
-        }
-    }, [dateFormat, timeFormat, unit]);
-
-    useEffect(() => {
-        fetchPlugRuleData();
-    }, [timeFormatChanged, dateFormatChanged, unitFormatChanged]);
+    const getBuildingList = () => {
+        const allBuildingsList = buildingListData?.map((record) => ({
+            label: record?.building_name,
+            value: record?.building_id,
+            timezone: record?.timezone,
+            plug_only: record?.plug_only,
+        }));
+        return allBuildingsList;
+    };
 
     // Add Rule Model
     const [showAddRule, setShowAddRule] = useState(false);
@@ -119,11 +113,9 @@ const PlugRules = () => {
             description: '',
         });
     };
-    const handleAddRuleShow = () => setShowAddRule(true);
     const { download } = useCSVDownload();
-    const [is24Format, setIs24Format] = useState(false);
     const bldgTImeZone = BuildingStore.useState((s) => s.BldgTimeZone);
-    const activeBuildingId = localStorage.getItem('buildingId');
+    const activeBuildingId =  BuildingStore.useState((s) => s.BldgId);
     const [skeletonLoading, setSkeletonLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
     const [nameError, setNameError] = useState('');
@@ -183,27 +175,23 @@ const PlugRules = () => {
             await createPlugRuleRequest(newRuleData)
                 .then((res) => {
                     setIsProcessing(false);
-
-                    redirectToPlugRulePage(res.data.plug_rule_id);
+                    handleOpenPlugRuleAfterCreation(res.data);
                 })
                 .catch((error) => {
                     setIsProcessing(false);
                 });
         }
     };
+    const [buildingListDataLocal, setBuildingListDataLocal] = useState([]);
 
     const getBuildingData = async () => {
         await fetchBuildingsList(false).then((res) => {
             let data = res.data;
             const formattedData = formatBuildingListData(data);
 
-            setBuildingListData(formattedData);
+            setBuildingListDataLocal(formattedData);
         });
     };
-
-    // Building List Data Globally
-    const [buildingListData, setBuildingListData] = useState([]);
-
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
@@ -262,12 +250,12 @@ const PlugRules = () => {
     };
 
     const handleDownloadCsv = async () => {
-        download('Plug_Rules', getPlugRulesTableCSVExport(dataForCSV(), headerProps, buildingListData));
+        download('Plug_Rules', getPlugRulesTableCSVExport(dataForCSV(), headerProps, buildingListDataLocal));
     };
 
     useEffect(() => {
         fetchPlugRuleData();
-    }, [activeBuildingId, search, sortBy.method, sortBy.name]);
+    }, [activeBuildingId, search, sortBy.method, sortBy.name, dateFormat, timeFormat, unit]);
 
     const history = useHistory();
 
@@ -275,6 +263,27 @@ const PlugRules = () => {
         history.push({
             pathname: `/control/plug-rules/${ruleId}`,
         });
+    };
+    const handleOpenPlugRuleAfterCreation = (data) => {
+        if (bldgId == 'portfolio') {
+            const allBuildings = getBuildingList();
+            const bldgObj = allBuildings.find((record) => record?.value === data.building_id[0]);
+            updateBuildingStore(bldgObj?.value, bldgObj?.label, bldgObj?.timezone, bldgObj?.plug_only);
+            redirectToPlugRulePage(data.plug_rule_id);
+        } else {
+            redirectToPlugRulePage(data.plug_rule_id);
+        }
+    };
+
+    const handleOpenPlugRule = (rule) => {
+        if (bldgId == 'portfolio') {
+            const allBuildings = getBuildingList();
+            const bldgObj = allBuildings.find((record) => record?.value === rule.buildings[0].building_id);
+            updateBuildingStore(bldgObj?.value, bldgObj?.label, bldgObj?.timezone, bldgObj?.plug_only);
+            redirectToPlugRulePage(rule.id);
+        } else {
+            redirectToPlugRulePage(rule.id);
+        }
     };
 
     const formatBuildingListData = (data) => {
@@ -306,7 +315,7 @@ const PlugRules = () => {
         onChange: (event) => {
             handleCreatePlugRuleChange('building_id', event.value);
         },
-        options: buildingListData,
+        options: buildingListDataLocal,
     };
 
     if (buildingError?.text?.length) {
@@ -324,7 +333,7 @@ const PlugRules = () => {
                     className={'p-0'}
                     type={ButtonSC.Type.link}
                     label={row.name}
-                    onClick={() => redirectToPlugRulePage(row.id)}
+                    onClick={() => handleOpenPlugRule(row)}
                 />
             );
 
@@ -332,7 +341,7 @@ const PlugRules = () => {
                 <Typography.Body size={Typography.Sizes.md}>{newRow.description || '-'}</Typography.Body>
             );
             const preparedBuildingInfo = newRow.buildings ? newRow.buildings[0]?.building_id : '';
-            const buildingName = getBuildingName(buildingListData, preparedBuildingInfo);
+            const buildingName = getBuildingName(buildingListDataLocal, preparedBuildingInfo);
             newRow.buildings = <Typography.Body size={Typography.Sizes.md}>{buildingName || ''}</Typography.Body>;
 
             newRow.days = (
@@ -406,8 +415,7 @@ const PlugRules = () => {
         return (
             <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center">
                 {row.current_job_log && row.current_job_log[row.current_job_log.length - 1]?.time_stamp
-                    ? moment(localTime)
-                          .format(prepareTimeAndDateFormat(dateFormat, timeFormat))
+                    ? moment(localTime).format(prepareTimeAndDateFormat(dateFormat, timeFormat))
                     : ''}
             </Typography.Subheader>
         );
