@@ -17,6 +17,9 @@ import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/ass
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
+import { fetchBuildingList } from '../../settings/buildings/services';
+import { getAllBuildingTypes } from '../../settings/general-settings/services';
+
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
@@ -96,6 +99,53 @@ const RemoveAlert = () => {
 const ConfigureAlerts = (props) => {
     const { targetType, setTargetType } = props;
 
+    const [buildingsList, setBuildingsList] = useState([]);
+    const [buildingTypeList, setBuildingTypeList] = useState([]);
+
+    const [equipmentsList, setEquipmentsList] = useState([]);
+    const [equipmentTypeList, setEquipmentTypeList] = useState([]);
+
+    const fetchBuildingType = async () => {
+        await getAllBuildingTypes()
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    const responseData = response?.data?.data;
+                    if (responseData.length !== 0) {
+                        const newMappedData = responseData.map((el) => ({
+                            label: el?.building_type,
+                            value: el?.building_type_id,
+                        }));
+                        setBuildingTypeList(newMappedData);
+                    }
+                }
+            })
+            .catch((error) => {});
+    };
+
+    const fetchBuildingsList = async () => {
+        await fetchBuildingList()
+            .then((res) => {
+                const responseData = res?.data;
+                if (responseData && responseData.length !== 0) {
+                    const newMappedBldgData = responseData.map((el) => ({
+                        label: el?.building_name,
+                        value: el?.building_id,
+                        building_type_id: el?.building_type_id,
+                    }));
+                    setBuildingsList(newMappedBldgData);
+                }
+            })
+            .catch(() => {});
+    };
+
+    useEffect(() => {
+        if (targetType) {
+            fetchBuildingType();
+            fetchBuildingsList();
+        }
+    }, [targetType]);
+
     return (
         <>
             <Row>
@@ -166,7 +216,7 @@ const ConfigureAlerts = (props) => {
                                                 placeholder="Select Building Type"
                                                 name="select"
                                                 isSearchable={true}
-                                                options={[]}
+                                                options={buildingTypeList}
                                                 className="w-100"
                                             />
 
