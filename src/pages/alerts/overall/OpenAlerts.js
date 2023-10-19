@@ -13,7 +13,7 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const OpenAlerts = (props) => {
-    const { alertsList = [], isProcessing = false } = props;
+    const { alertsList = [], isProcessing = false, handleAlertAcknowledgement } = props;
 
     const [selectedAlertIds, setSelectedAlertIds] = useState([]);
 
@@ -22,7 +22,8 @@ const OpenAlerts = (props) => {
     const [pageSize, setPageSize] = useState(10);
 
     const handleAcknowledgement = (selectedIds) => {
-        alert(`Total Alerts will be Acknowledged : ${selectedIds.length}`);
+        handleAlertAcknowledgement('acknowledged', selectedIds);
+        // alert(`Total Alerts will be Acknowledged : ${selectedIds.length}`);
     };
 
     const renderAlertType = (row) => {

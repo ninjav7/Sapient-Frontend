@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 
+import { UserStore } from '../../../store/UserStore';
 import { AlertsStore } from '../../../store/AlertStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -10,7 +11,7 @@ import ClosedAlerts from './ClosedAlerts';
 import AlertSettings from './AlertSettings';
 import AlertPageHeader from './AlertPageHeader';
 
-import { fetchAlertsList } from '../services';
+import { fetchAlertsList, updateAlertAcknowledgement } from '../services';
 
 import './styles.scss';
 
@@ -63,6 +64,40 @@ const Alerts = () => {
             });
     };
 
+    const handleAlertAcknowledgement = async (actionType, payload = []) => {
+        if (!actionType) return;
+
+        const params = `?action=${actionType}`;
+
+        await updateAlertAcknowledgement(params, payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = `${response?.message} successfully.`;
+                        s.notificationType = 'success';
+                    });
+                    if (actionType === 'acknowledged') getAllAlerts('open');
+                    if (actionType === 'unacknowledged') getAllAlerts('close');
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Failed to update Alert status.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch(() => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Failed to update Alert status due to Internal Server Error.';
+                    s.notificationType = 'error';
+                });
+            })
+            .finally(() => {});
+    };
+
     useEffect(() => {
         updateBreadcrumbStore();
     }, []);
@@ -82,8 +117,20 @@ const Alerts = () => {
 
             <Row>
                 <Col lg={12}>
-                    {activeTab === 0 && <OpenAlerts alertsList={openAlertsList} isProcessing={isFetchingData} />}
-                    {activeTab === 1 && <ClosedAlerts alertsList={closedAlertsList} isProcessing={isFetchingData} />}
+                    {activeTab === 0 && (
+                        <OpenAlerts
+                            alertsList={openAlertsList}
+                            isProcessing={isFetchingData}
+                            handleAlertAcknowledgement={handleAlertAcknowledgement}
+                        />
+                    )}
+                    {activeTab === 1 && (
+                        <ClosedAlerts
+                            alertsList={closedAlertsList}
+                            isProcessing={isFetchingData}
+                            handleAlertAcknowledgement={handleAlertAcknowledgement}
+                        />
+                    )}
                     {activeTab === 2 && <AlertSettings />}
                 </Col>
             </Row>

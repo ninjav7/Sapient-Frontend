@@ -232,3 +232,4 @@ export const compareBuildingsV2 = '/api/v2/metrics/portfolio/compare-buildings';
 
 // Alerts API's
 export const listAlerts = '/api/v2/alerts';
+export const alertAcknowledgement = '/api/v2/alerts/mark-acknowledgement';
