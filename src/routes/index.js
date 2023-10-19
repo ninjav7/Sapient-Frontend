@@ -52,6 +52,11 @@ const TimeOfDay = React.lazy(() => import('../pages/timeOfDay'));
 const CarbonOverview = React.lazy(() => import('../pages/carbon/CarbonOverview'));
 const CarbonBuilding = React.lazy(() => import('../pages/carbonBuilding'));
 
+// Alerts Component
+const Alerts = React.lazy(() => import('../pages/alerts/overall'));
+const AddAlert = React.lazy(() => import('../pages/alerts/add-alerts'));
+const EditAlert = React.lazy(() => import('../pages/alerts/edit-alerts'));
+
 // Control Components
 const PlugRule = React.lazy(() => import('../pages/controls/PlugRule'));
 const PlugRules = React.lazy(() => import('../pages/controls/PlugRules'));
@@ -180,6 +185,42 @@ const carbonRoutes = {
             route: PrivateRoute,
             visibility: true,
             parent: 'carbon-buildings',
+        },
+    ],
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+};
+
+// Alerts Routes
+const alertsRoutes = {
+    path: '/alerts/overall',
+    name: 'Alerts',
+    component: Alerts,
+    visibility: false,
+    children: [
+        {
+            path: '/alerts/overall/add-alert',
+            name: 'Add Alert',
+            component: AddAlert,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'alerts',
+        },
+        {
+            path: '/alerts/overall/edit-alert',
+            name: 'Edit Alert',
+            component: EditAlert,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'alerts',
+        },
+        {
+            path: '/alerts/overall',
+            name: 'Alerts',
+            component: Alerts,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'alerts',
         },
     ],
     icon: FeatherIcon.PieChart,
@@ -533,6 +574,7 @@ const allRoutes = [
     rootRoute,
     portfolioRoutes,
     settingsRoutes,
+    alertsRoutes,
     controlRoutes,
     carbonRoutes,
     exploreRoutes,
@@ -540,7 +582,15 @@ const allRoutes = [
     authRoutes,
 ];
 
-const authProtectedRoutes = [portfolioRoutes, settingsRoutes, carbonRoutes, controlRoutes, exploreRoutes, adminRoutes];
+const authProtectedRoutes = [
+    portfolioRoutes,
+    settingsRoutes,
+    alertsRoutes,
+    carbonRoutes,
+    controlRoutes,
+    exploreRoutes,
+    adminRoutes,
+];
 
 const allFlattenRoutes = flattenRoutes(allRoutes);
 

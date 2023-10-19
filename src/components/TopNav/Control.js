@@ -4,19 +4,23 @@ import { Cookies } from 'react-cookie';
 import { useLocation, useHistory } from 'react-router-dom';
 import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 
-import { ReactComponent as Gear } from '../../assets/icon/gear.svg';
-import { ReactComponent as ProfilePhoto } from '../../assets/icon/user.svg';
+import { ReactComponent as GearSVG } from '../../assets/icon/gear.svg';
+import { ReactComponent as BellSVG } from '../../assets/icon/bell.svg';
+import { ReactComponent as ProfilePhotoSVG } from '../../assets/icon/user.svg';
 import { ReactComponent as PreferencesSVG } from '../../assets/icon/top-nav/preferences.svg';
 import { ReactComponent as LogoutSVG } from '../../assets/icon/top-nav/logout.svg';
 
 import { ComponentStore } from '../../store/ComponentStore';
 import { userPermissionData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
+import { AlertsStore } from '../../store/AlertStore';
 
 import { routesForAccountSettings } from './utils';
 import { accountChildRoutes } from '../SecondaryTopNavBar/utils';
 
 import UserPreferences from './user-preference/UserPreferences';
+
+import { fetchAlertsList } from '../../pages/alerts/services';
 
 import './styles.scss';
 
@@ -27,6 +31,7 @@ const Control = () => {
     const user = cookies.get('user');
 
     const [userPermission] = useAtom(userPermissionData);
+    const isSuperUser = userPermission?.is_superuser ?? false;
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     // User Preference Modal
@@ -38,6 +43,7 @@ const Control = () => {
 
     const [pageType, setPageType] = useState('');
     const [userName, setUserName] = useState('');
+    const openAlertsCount = AlertsStore.useState((s) => s.alertCount);
 
     const [accountRoutes, setAccountRoutes] = useState([
         '/settings/account',
@@ -65,11 +71,6 @@ const Control = () => {
         });
         history.replace('/');
         window.location.reload();
-    };
-
-    const handleSettingsClick = () => {
-        handleRouteChange();
-        handleSideNavChange();
     };
 
     const dropdownMenuStyle = {
@@ -104,7 +105,9 @@ const Control = () => {
         if (currentPath.includes('/control/plug-rules') || currentPath.includes('/carbon/portfolio/overview')) {
             bldgId === 'portfolio' ? (pathName = accountRoutes[0]) : (pathName = `${configRoutes[0]}/${bldgId}`);
         } else {
-            routesForAccountSettings.includes(currentPath) || currentPath.includes(accountChildRoutes[0])
+            routesForAccountSettings.includes(currentPath) ||
+            currentPath.includes(accountChildRoutes[0]) ||
+            currentPath.includes('/alerts')
                 ? (pathName = accountRoutes[0])
                 : (pathName = `${configRoutes[0]}/${bldgId}`);
         }
@@ -114,6 +117,33 @@ const Control = () => {
         });
     };
 
+    const handleAlertClick = () => {
+        history.push({
+            pathname: `/alerts/overall`,
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'alerts';
+        });
+    };
+
+    const handleSettingsClick = () => {
+        handleRouteChange();
+        handleSideNavChange();
+    };
+
+    const getOpenAlerts = async () => {
+        await fetchAlertsList('open')
+            .then((res) => {
+                const response = res?.data;
+                if (response && response.length !== 0) {
+                    AlertsStore.update((s) => {
+                        s.alertCount = response.length;
+                    });
+                }
+            })
+            .catch(() => {});
+    };
+
     useEffect(() => {
         if (user?.user_id) {
             user?.name ? setUserName(user?.name) : setUserName(`User`);
@@ -121,6 +151,7 @@ const Control = () => {
     }, [user]);
 
     useEffect(() => {
+        getOpenAlerts();
         if (userPermission?.user_role !== 'admin') {
             if (!userPermission?.permissions?.permissions?.account_general_permission?.view) {
                 setAccountRoutes((el) =>
@@ -310,16 +341,43 @@ const Control = () => {
                 <div className="d-flex align-items-center">
                     {/* Portfolio / Building Settings are not for super-user  */}
                     {pageType !== 'super-user' && (
-                        <div
-                            className={`float-right h-100 mr-3 navbar-head-container d-flex align-items-center ${
-                                pageType === 'settings' ? 'active ' : ''
-                            }`}>
-                            {userPermission?.email && (
-                                <button className="btn btn-sm" onClick={handleSettingsClick}>
-                                    <Gear className={`navbar-icons-style ${pageType === 'settings' ? 'active' : ''}`} />
-                                </button>
+                        <>
+                            {isSuperUser && (
+                                <div
+                                    className={`float-right h-100 navbar-head-container d-flex align-items-center ${
+                                        pageType === 'alerts' ? 'active ' : ''
+                                    }`}>
+                                    {userPermission?.email && (
+                                        <button className="btn btn-sm position-relative" onClick={handleAlertClick}>
+                                            <div className="notification-style rounded-circle bg-danger d-flex justify-content-center align-items-center">
+                                                {openAlertsCount}
+                                            </div>
+                                            <BellSVG
+                                                width={20}
+                                                height={20}
+                                                className={`navbar-icons-style ${
+                                                    pageType === 'alerts' ? 'active' : ''
+                                                }`}
+                                            />
+                                        </button>
+                                    )}
+                                </div>
                             )}
-                        </div>
+                            <div
+                                className={`float-right h-100 mr-3 navbar-head-container d-flex align-items-center ${
+                                    pageType === 'settings' ? 'active ' : ''
+                                }`}>
+                                {userPermission?.email && (
+                                    <button className="btn btn-sm" onClick={handleSettingsClick}>
+                                        <GearSVG
+                                            width={20}
+                                            height={20}
+                                            className={`navbar-icons-style ${pageType === 'settings' ? 'active' : ''}`}
+                                        />
+                                    </button>
+                                )}
+                            </div>
+                        </>
                     )}
 
                     <Dropdown
@@ -328,7 +386,7 @@ const Control = () => {
                         className="mouse-pointer navbar-head-container ">
                         <DropdownToggle tag="div" className=" mr-3 user-profile-container">
                             <div className="profile-container mr-2">
-                                <ProfilePhoto className="profile-photo" />
+                                <ProfilePhotoSVG className="profile-photo" />
                             </div>
                             <div className="user-name">{userName}</div>
                         </DropdownToggle>
