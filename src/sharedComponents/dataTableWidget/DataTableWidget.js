@@ -76,6 +76,15 @@ const DataTableWidget = (props) => {
     const [rows, setRows] = useState(props.rows);
     const [selectedRows, setSelectedRows] = useState([]);
     const [searchedRows, setSearchedRows] = useState([]);
+    useEffect(() => {
+        const preparedOrderHeaders = [...props.headers].sort(function (a, b) {
+            return (
+                orderHeaders.findIndex(({ name }) => name === a.name) -
+                orderHeaders.findIndex(({ name }) => name === b.name)
+            );
+        });
+        setHeaders(preparedOrderHeaders);
+    }, [JSON.stringify(orderedHeaders)]);
 
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [selectedFiltersValues, setSelectedFiltersValues] = useState(_.cloneDeep(initialFilterState));

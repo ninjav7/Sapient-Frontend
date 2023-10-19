@@ -49,8 +49,11 @@ const CarbonOverview = () => {
     const [sortBy, setSortBy] = useState({});
     const [search, setSearch] = useState('');
 
+    const userPrefUnits = UserStore.useState((s) => s.unit);
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
-    const [tableHeader, setTableHeader] = useState([
+    const tableHeader = [
         {
             name: 'Name',
             accessor: 'building_name',
@@ -82,7 +85,7 @@ const CarbonOverview = () => {
             callbackValue: (row) => renderSquareFootage(row),
             onSort: (method, name) => setSortBy({ method, name }),
         },
-    ]);
+    ];
 
     const [isLoadingBuildingData, setIsLoadingBuildingData] = useState(false);
     let entryPoint = '';
@@ -90,10 +93,6 @@ const CarbonOverview = () => {
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
-
-    const userPrefUnits = UserStore.useState((s) => s.unit);
-    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
-    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [overalldata, setOveralldata] = useState({
         total_building: 0,
@@ -103,17 +102,6 @@ const CarbonOverview = () => {
             old: 0,
         },
     });
-    useEffect(() => {
-        if (userPrefUnits) {
-            let newHeaderList = tableHeader;
-            newHeaderList.forEach((record) => {
-                if (record?.accessor === 'building_size') {
-                    record.name = `${userPrefUnits === 'si' ? `Sq. M.` : `Sq. Ft.`}`;
-                }
-            });
-            setTableHeader(newHeaderList);
-        }
-    }, [userPrefUnits]);
     const portfolioOverallData = async () => {
         setIsKPIsLoading(true);
         let payload = {
@@ -148,7 +136,6 @@ const CarbonOverview = () => {
         };
 
         portfolioBuilidingsData();
-
     }, [startDate, endDate, userPrefUnits]);
 
     const [isKPIsLoading, setIsKPIsLoading] = useState(false);
@@ -267,7 +254,10 @@ const CarbonOverview = () => {
     };
 
     const handleDownloadCsv = async () => {
-        download('Compare_Buildings', getCarbonCompareBuildingsTableCSVExport(buildingsData, tableHeader));
+        download(
+            'Compare_Buildings',
+            getCarbonCompareBuildingsTableCSVExport(buildingsData, tableHeader(userPrefUnits))
+        );
     };
 
     const renderAverageEmissionRate = (row) => {
@@ -284,8 +274,7 @@ const CarbonOverview = () => {
     const renderTotalConsumption = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {Math.round(row.total_carbon_emissions)}{' '}
-                {userPrefUnits === 'si' ? `${UNITS.kg}` : `${UNITS.ibs}`}
+                {Math.round(row.total_carbon_emissions)} {userPrefUnits === 'si' ? `${UNITS.kg}` : `${UNITS.ibs}`}
             </Typography.Body>
         );
     };
