@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 
-import { UserStore } from '../../../store/UserStore';
+import { AlertsStore } from '../../../store/AlertStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 
@@ -20,9 +20,6 @@ const Alerts = () => {
 
     const [openAlertsList, setOpenAlertsList] = useState([]);
     const [closedAlertsList, setClosedAlertsList] = useState([]);
-
-    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
-    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const handleTabSwitch = (event) => {
         setActiveTab(+event.target.id);
@@ -51,8 +48,13 @@ const Alerts = () => {
             .then((res) => {
                 const response = res?.data;
                 if (response && response.length !== 0) {
-                    alertType === 'open' && setOpenAlertsList(response);
-                    alertType === 'close' && setClosedAlertsList(response);
+                    if (alertType === 'open') {
+                        setOpenAlertsList(response);
+                        AlertsStore.update((s) => {
+                            s.alertCount = response.length;
+                        });
+                    }
+                    if (alertType === 'close') setClosedAlertsList(response);
                 }
             })
             .catch(() => {})

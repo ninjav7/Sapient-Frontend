@@ -13,11 +13,14 @@ import { ReactComponent as LogoutSVG } from '../../assets/icon/top-nav/logout.sv
 import { ComponentStore } from '../../store/ComponentStore';
 import { userPermissionData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
+import { AlertsStore } from '../../store/AlertStore';
 
 import { routesForAccountSettings } from './utils';
 import { accountChildRoutes } from '../SecondaryTopNavBar/utils';
 
 import UserPreferences from './user-preference/UserPreferences';
+
+import { fetchAlertsList } from '../../pages/alerts/services';
 
 import './styles.scss';
 
@@ -40,6 +43,7 @@ const Control = () => {
 
     const [pageType, setPageType] = useState('');
     const [userName, setUserName] = useState('');
+    const openAlertsCount = AlertsStore.useState((s) => s.alertCount);
 
     const [accountRoutes, setAccountRoutes] = useState([
         '/settings/account',
@@ -127,6 +131,19 @@ const Control = () => {
         handleSideNavChange();
     };
 
+    const getOpenAlerts = async () => {
+        await fetchAlertsList('open')
+            .then((res) => {
+                const response = res?.data;
+                if (response && response.length !== 0) {
+                    AlertsStore.update((s) => {
+                        s.alertCount = 0;
+                    });
+                }
+            })
+            .catch(() => {});
+    };
+
     useEffect(() => {
         if (user?.user_id) {
             user?.name ? setUserName(user?.name) : setUserName(`User`);
@@ -134,6 +151,7 @@ const Control = () => {
     }, [user]);
 
     useEffect(() => {
+        getOpenAlerts();
         if (userPermission?.user_role !== 'admin') {
             if (!userPermission?.permissions?.permissions?.account_general_permission?.view) {
                 setAccountRoutes((el) =>
@@ -332,7 +350,7 @@ const Control = () => {
                                     {userPermission?.email && (
                                         <button className="btn btn-sm position-relative" onClick={handleAlertClick}>
                                             <div className="notification-style rounded-circle bg-danger d-flex justify-content-center align-items-center">
-                                                {`0`}
+                                                {openAlertsCount}
                                             </div>
                                             <BellSVG
                                                 width={20}
