@@ -14,17 +14,15 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const OpenAlerts = () => {
+    const [selectedAlertIds, setSelectedAlertIds] = useState([]);
     const [openAlertsList, setOpenAlertsList] = useState(openAlertsMockData);
-    const [openAlertsCount, setOpenAlertListsCount] = useState(0);
-    const [toBeAcknowledged, setToBeAcknowledged] = useState([]);
 
+    const [count, setCount] = useState(0);
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(10);
 
-    const [checkedAll, setCheckedAll] = useState(false);
-
-    const handleAcknowledgement = () => {
-        alert('Acknowledged');
+    const handleAcknowledgement = (selectedIds) => {
+        alert(`Total Alerts will be Acknowledged : ${selectedIds.length}`);
     };
 
     const renderAlertType = (row) => {
@@ -45,6 +43,21 @@ const OpenAlerts = () => {
     const renderAlertTimestamp = (row) => {
         const data = moment(row?.timestamps).fromNow();
         return <Typography.Body size={Typography.Sizes.lg}>{data}</Typography.Body>;
+    };
+
+    const handleAlertSelect = (isCurrentlyChecked, alertObj, currentSelectedAlertIds) => {
+        if (alertObj?.id) {
+            const newSelectedAlertIds =
+                isCurrentlyChecked === 'false'
+                    ? [...currentSelectedAlertIds, alertObj.id]
+                    : currentSelectedAlertIds.filter((el) => el !== alertObj.id);
+            setSelectedAlertIds(newSelectedAlertIds);
+        }
+    };
+
+    const handleSelectAllAlerts = (isCurrentlyChecked, alertsList) => {
+        const selectedAlertIds = isCurrentlyChecked === 'false' ? alertsList.map((el) => el?.id) : [];
+        setSelectedAlertIds(selectedAlertIds);
     };
 
     const currentRow = () => {
@@ -88,27 +101,41 @@ const OpenAlerts = () => {
                         type="checkbox"
                         id="open_alerts"
                         name="open_alerts"
-                        checked={checkedAll}
-                        onChange={() => {
-                            setCheckedAll(!checkedAll);
+                        checked={selectedAlertIds.length === openAlertsList.length}
+                        value={selectedAlertIds.length === openAlertsList.length}
+                        onClick={(e) => {
+                            handleSelectAllAlerts(e.target.value, openAlertsList);
                         }}
+                        disabled={openAlertsList.length === 0}
                     />
                 )}
                 customCheckboxForCell={(record) => (
-                    <Checkbox label="" type="checkbox" id="kasa_device_check" name="kasa_device_check" />
+                    <Checkbox
+                        label=""
+                        type="checkbox"
+                        id="open_alerts_check"
+                        name="open_alerts_check"
+                        checked={selectedAlertIds.includes(record?.id)}
+                        value={selectedAlertIds.includes(record?.id)}
+                        onClick={(e) => {
+                            handleAlertSelect(e.target.value, record, selectedAlertIds);
+                        }}
+                    />
                 )}
                 currentPage={pageNo}
                 onChangePage={setPageNo}
                 pageSize={pageSize}
                 onPageSize={setPageSize}
                 totalCount={(() => {
-                    return openAlertsCount;
+                    return count;
                 })()}
                 showExternalButton={true}
                 externalButtonObj={{
                     label: 'Acknowledged',
-                    onClick: handleAcknowledgement,
-                    isBtnDisabled: toBeAcknowledged.length !== 0,
+                    onClick: () => {
+                        handleAcknowledgement(selectedAlertIds);
+                    },
+                    isBtnDisabled: selectedAlertIds.length === 0,
                 }}
             />
         </div>
