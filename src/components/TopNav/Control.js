@@ -28,6 +28,7 @@ const Control = () => {
     const user = cookies.get('user');
 
     const [userPermission] = useAtom(userPermissionData);
+    const isSuperUser = userPermission?.is_superuser ?? false;
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     // User Preference Modal
@@ -100,7 +101,6 @@ const Control = () => {
         if (currentPath.includes('/control/plug-rules') || currentPath.includes('/carbon/portfolio/overview')) {
             bldgId === 'portfolio' ? (pathName = accountRoutes[0]) : (pathName = `${configRoutes[0]}/${bldgId}`);
         } else {
-            console.log('SSR else block executed!', currentPath);
             routesForAccountSettings.includes(currentPath) ||
             currentPath.includes(accountChildRoutes[0]) ||
             currentPath.includes('/alerts')
@@ -324,23 +324,27 @@ const Control = () => {
                     {/* Portfolio / Building Settings are not for super-user  */}
                     {pageType !== 'super-user' && (
                         <>
-                            <div
-                                className={`float-right h-100 navbar-head-container d-flex align-items-center ${
-                                    pageType === 'alerts' ? 'active ' : ''
-                                }`}>
-                                {userPermission?.email && (
-                                    <button className="btn btn-sm position-relative" onClick={handleAlertClick}>
-                                        <div className="notification-style rounded-circle bg-danger d-flex justify-content-center align-items-center">
-                                            {`0`}
-                                        </div>
-                                        <BellSVG
-                                            width={20}
-                                            height={20}
-                                            className={`navbar-icons-style ${pageType === 'alerts' ? 'active' : ''}`}
-                                        />
-                                    </button>
-                                )}
-                            </div>
+                            {isSuperUser && (
+                                <div
+                                    className={`float-right h-100 navbar-head-container d-flex align-items-center ${
+                                        pageType === 'alerts' ? 'active ' : ''
+                                    }`}>
+                                    {userPermission?.email && (
+                                        <button className="btn btn-sm position-relative" onClick={handleAlertClick}>
+                                            <div className="notification-style rounded-circle bg-danger d-flex justify-content-center align-items-center">
+                                                {`0`}
+                                            </div>
+                                            <BellSVG
+                                                width={20}
+                                                height={20}
+                                                className={`navbar-icons-style ${
+                                                    pageType === 'alerts' ? 'active' : ''
+                                                }`}
+                                            />
+                                        </button>
+                                    )}
+                                </div>
+                            )}
                             <div
                                 className={`float-right h-100 mr-3 navbar-head-container d-flex align-items-center ${
                                     pageType === 'settings' ? 'active ' : ''
