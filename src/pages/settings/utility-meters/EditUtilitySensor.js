@@ -10,6 +10,7 @@ import { Button } from '../../../sharedComponents/button';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import colorPalette from '../../../assets/scss/_colors.scss';
+import { Checkbox } from '../../../sharedComponents/form/checkbox';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { DeviceDetails } from './IndividualUtilityMeter';
 import LineChart from '../../../sharedComponents/lineChart/LineChart';
@@ -371,6 +372,20 @@ const ConfigureTab = (props) => {
         );
     };
 
+    const BuildingMeterToolTip = () => {
+        return (
+            <div>
+                <UncontrolledTooltip placement="bottom" target={'tooltip-for-bldg-meter'}>
+                    {`Select the Building Meter checkbox if this sensor is monitoring a building utility pulse input. Checking this box will include this sensor’s data in total building calculations.`}
+                </UncontrolledTooltip>
+
+                <button type="button" className="tooltip-button" id={'tooltip-for-bldg-meter'}>
+                    <TooltipIcon className="tooltip-icon" />
+                </button>
+            </div>
+        );
+    };
+
     const resetLocationforSensor = () => {
         handleChange('service_location', 'null');
     };
@@ -464,6 +479,11 @@ const ConfigureTab = (props) => {
                                 value={bldgName}
                                 disabled={true}
                             />
+                            <Brick sizeInRem={0.25} />
+                            <div className="d-flex align-items-center">
+                                <Checkbox label="Building Meter" size={Checkbox.Sizes.sm} disabled={false} />
+                                <BuildingMeterToolTip />
+                            </div>
                         </div>
 
                         <div className="w-100">
@@ -484,8 +504,8 @@ const ConfigureTab = (props) => {
 
                     <div className="d-flex form-gap">
                         <div className="w-100">
-                            <div className="d-flex">
-                                <Typography.Body size={Typography.Sizes.md}>Submeter Location</Typography.Body>
+                            <div className="d-flex align-items-center">
+                                <Typography.Body size={Typography.Sizes.md}>{`Submeter Location`}</Typography.Body>
                                 <LocationToolTip />
                             </div>
                             <Brick sizeInRem={0.25} />
@@ -563,10 +583,15 @@ const ConfigureTab = (props) => {
                                 value={bldgName}
                                 disabled={true}
                             />
+                            <Brick sizeInRem={0.25} />
+                            <div className="d-flex align-items-center">
+                                <Checkbox label="Building Meter" size={Checkbox.Sizes.sm} disabled={false} />
+                                <BuildingMeterToolTip />
+                            </div>
                         </div>
 
                         <div className="w-100">
-                            <div className="d-flex">
+                            <div className="d-flex align-items-center">
                                 <Typography.Body size={Typography.Sizes.md}>Submeter Location</Typography.Body>
                                 <LocationToolTip />
                             </div>
