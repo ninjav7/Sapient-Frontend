@@ -481,7 +481,12 @@ const ConfigureTab = (props) => {
                             />
                             <Brick sizeInRem={0.25} />
                             <div className="d-flex align-items-center">
-                                <Checkbox label="Building Meter" size={Checkbox.Sizes.sm} disabled={false} />
+                                <Checkbox
+                                    label="Building Meter"
+                                    size={Checkbox.Sizes.sm}
+                                    disabled={false}
+                                    checked={sensorObj?.service_location ?? false}
+                                />
                                 <BuildingMeterToolTip />
                             </div>
                         </div>
@@ -500,7 +505,7 @@ const ConfigureTab = (props) => {
                         </div>
                     </div>
 
-                    <Brick sizeInRem={2} />
+                    <Brick sizeInRem={1.5} />
 
                     <div className="d-flex form-gap">
                         <div className="w-100">
@@ -585,7 +590,12 @@ const ConfigureTab = (props) => {
                             />
                             <Brick sizeInRem={0.25} />
                             <div className="d-flex align-items-center">
-                                <Checkbox label="Building Meter" size={Checkbox.Sizes.sm} disabled={false} />
+                                <Checkbox
+                                    label="Building Meter"
+                                    size={Checkbox.Sizes.sm}
+                                    disabled={false}
+                                    checked={sensorObj?.service_location ?? false}
+                                />
                                 <BuildingMeterToolTip />
                             </div>
                         </div>
