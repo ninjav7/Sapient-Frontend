@@ -387,7 +387,7 @@ const ConfigureTab = (props) => {
     };
 
     const resetLocationforSensor = () => {
-        handleChange('service_location', 'null');
+        handleChange('service_location', null);
     };
 
     useEffect(() => {
@@ -592,7 +592,7 @@ const ConfigureTab = (props) => {
 
                         <div className="w-100">
                             <div className="d-flex align-items-center">
-                                <Typography.Body size={Typography.Sizes.md}>Submeter Location</Typography.Body>
+                                <Typography.Body size={Typography.Sizes.md}>{`Submeter Location`}</Typography.Body>
                                 <LocationToolTip />
                             </div>
                             <Brick sizeInRem={0.25} />
@@ -653,7 +653,7 @@ const EditUtilitySensor = (props) => {
         pulse_weight: null,
     };
 
-    const [sensorObj, setSensorObj] = useState(null);
+    const [sensorObj, setSensorObj] = useState({});
     const [sensorErrorObj, setSensorErrorObj] = useState(defaultSensorError);
     const [isSensorUpdating, setSensorUpdating] = useState(false);
 
@@ -724,7 +724,7 @@ const EditUtilitySensor = (props) => {
 
     useEffect(() => {
         if (!showModal) {
-            setSensorObj(null);
+            setSensorObj({});
             setSensorErrorObj(defaultSensorError);
         }
     }, [showModal]);
