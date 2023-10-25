@@ -97,7 +97,7 @@ const RemoveAlert = () => {
 };
 
 const ConfigureAlerts = (props) => {
-    const { targetType, setTargetType } = props;
+    const { alertObj = {}, handleChange } = props;
 
     const [buildingsList, setBuildingsList] = useState([]);
     const [buildingTypeList, setBuildingTypeList] = useState([]);
@@ -140,11 +140,11 @@ const ConfigureAlerts = (props) => {
     };
 
     useEffect(() => {
-        if (targetType) {
+        if (alertObj?.type === 'building') {
             fetchBuildingType();
             fetchBuildingsList();
         }
-    }, [targetType]);
+    }, [alertObj]);
 
     return (
         <>
@@ -169,11 +169,11 @@ const ConfigureAlerts = (props) => {
                                 <div className="d-flex" style={{ gap: '0.75rem' }}>
                                     <div
                                         className={`d-flex align-items-center mouse-pointer ${
-                                            targetType === 'building'
+                                            alertObj?.type === 'building'
                                                 ? `target-type-container-active`
                                                 : `target-type-container`
                                         }`}
-                                        onClick={() => setTargetType('building')}>
+                                        onClick={() => handleChange('type', 'building')}>
                                         <BuildingTypeSVG className="p-0 square" width={20} height={20} />
                                         <Typography.Subheader
                                             size={Typography.Sizes.md}
@@ -184,11 +184,11 @@ const ConfigureAlerts = (props) => {
 
                                     <div
                                         className={`d-flex align-items-center mouse-pointer ${
-                                            targetType === 'equipment'
+                                            alertObj?.type === 'equipment'
                                                 ? `target-type-container-active`
                                                 : `target-type-container`
                                         }`}
-                                        onClick={() => setTargetType('equipment')}>
+                                        onClick={() => handleChange('type', 'equipment')}>
                                         <EquipmentTypeSVG className="p-0 square" width={20} height={20} />
                                         <Typography.Subheader
                                             size={Typography.Sizes.md}
@@ -199,9 +199,9 @@ const ConfigureAlerts = (props) => {
                                 </div>
                             </div>
 
-                            {targetType && <hr />}
+                            {alertObj?.type && <hr />}
 
-                            {targetType === 'building' && (
+                            {alertObj?.type === 'building' && (
                                 <div>
                                     <Typography.Subheader size={Typography.Sizes.md}>
                                         {`Select a Target`}
@@ -211,7 +211,7 @@ const ConfigureAlerts = (props) => {
 
                                     <div className="d-flex justify-content-between w-100" style={{ gap: '1.25rem' }}>
                                         <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
-                                            <Select
+                                            <Select.Multi
                                                 id="endUseSelect"
                                                 placeholder="Select Building Type"
                                                 name="select"
@@ -220,12 +220,12 @@ const ConfigureAlerts = (props) => {
                                                 className="w-100"
                                             />
 
-                                            <Select
+                                            <Select.Multi
                                                 id="endUseSelect"
                                                 placeholder="Select Building"
                                                 name="select"
                                                 isSearchable={true}
-                                                options={[]}
+                                                options={buildingsList}
                                                 className="w-100"
                                             />
                                         </div>
@@ -248,7 +248,7 @@ const ConfigureAlerts = (props) => {
                                 </div>
                             )}
 
-                            {targetType === 'equipment' && (
+                            {alertObj?.type === 'equipment' && (
                                 <div>
                                     <Typography.Subheader size={Typography.Sizes.md}>
                                         {`Select a Target`}
@@ -485,8 +485,17 @@ const NotificationSettings = (props) => {
 const AddAlerts = () => {
     const [activeTab, setActiveTab] = useState(0);
 
-    const [targetType, setTargetType] = useState(null);
     const [notifyType, setNotifyType] = useState('none');
+
+    const [alertObj, setAlertObj] = useState({
+        type: '',
+    });
+
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, alertObj);
+        obj[key] = value;
+        setAlertObj(obj);
+    };
 
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
@@ -522,7 +531,7 @@ const AddAlerts = () => {
             </Row>
 
             <div className="custom-padding">
-                {activeTab === 0 && <ConfigureAlerts targetType={targetType} setTargetType={setTargetType} />}
+                {activeTab === 0 && <ConfigureAlerts alertObj={alertObj} handleChange={handleChange} />}
                 {activeTab === 1 && <NotificationSettings notifyType={notifyType} setNotifyType={setNotifyType} />}
             </div>
         </React.Fragment>
