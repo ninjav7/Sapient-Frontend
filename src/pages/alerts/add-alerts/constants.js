@@ -19,13 +19,44 @@ export const defaultAlertObj = {
         target_value: '',
     },
 };
+
 export const conditionLevelsList = [
     {
-        label: 'above',
+        label: 'Above',
         value: 'above',
     },
     {
-        label: 'below',
+        label: 'Below',
         value: 'below',
+    },
+];
+
+export const filtersForEnergyConsumption = [
+    {
+        label: 'Number',
+        value: 'number',
+    },
+    {
+        label: 'Previous Month',
+        value: 'previous_month',
+    },
+    {
+        label: 'Previous Year',
+        value: 'previous_year',
+    },
+];
+
+export const filtersForPeakDemand = [
+    {
+        label: 'Number',
+        value: 'number',
+    },
+    {
+        label: 'Previous Month',
+        value: 'previous_month',
+    },
+    {
+        label: 'Past 12 month',
+        value: 'past_12_month',
     },
 ];
