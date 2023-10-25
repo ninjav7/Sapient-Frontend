@@ -834,11 +834,12 @@ const PlugRule = () => {
     };
 
     const handleRuleLinkStateChange = (value, rule) => {
+        let recordToLink;
         if (value === 'false') {
             if (checkedAllToLink) {
                 setCheckedToUnlinkAll(false);
             }
-            let recordToLink = { ...rulesToLink };
+            recordToLink = { ...rulesToLink };
             recordToLink.rule_id = currentData.id;
             recordToLink.sensor_id = [...recordToLink.sensor_id, rule.id];
             setRulesToLink(recordToLink);
@@ -850,9 +851,10 @@ const PlugRule = () => {
                 setCheckedToUnlinkAll(true);
             }
 
-            let recordToLink = _.cloneDeep(rulesToLink);
+            recordToLink = _.cloneDeep(rulesToLink);
             recordToLink.rule_id = currentData.id;
-            recordToLink.sensor_id.filter((el) => el.id !== rule.id);
+            const filteredData = recordToLink.sensor_id.filter((el) => el !== rule.id);
+            recordToLink.sensor_id = filteredData;
 
             setRulesToLink(recordToLink);
 
@@ -864,7 +866,11 @@ const PlugRule = () => {
         setSelectedIdsToLink((prevState) => {
             return isAdding ? [...prevState, rule.id] : prevState.filter((sensorId) => sensorId !== rule.id);
         });
-        setIsChangedSocketsUnlinked(true);
+        if (_.isEmpty(recordToLink.sensor_id)) {
+            setIsChangedSocketsUnlinked(false);
+        } else {
+            setIsChangedSocketsUnlinked(true);
+        }
     };
     const handleRuleStateChangeUnlink = (value, rule) => {
         if (value === 'true') {
@@ -893,11 +899,17 @@ const PlugRule = () => {
         }
 
         const isAdding = value === 'false';
+        const newSelectedIdsToUnlink = isAdding
+            ? selectedIdsToUnlink.filter((sensorId) => sensorId !== rule.id)
+            : [...selectedIdsToUnlink, rule.id];
 
-        setSelectedIdsToUnlink((prevState) => {
-            return isAdding ? prevState.filter((sensorId) => sensorId !== rule.id) : [...prevState, rule.id];
-        });
-        setIsChangedSocketsLinked(true);
+        if (_.isEmpty(newSelectedIdsToUnlink)) {
+            setIsChangedSocketsLinked(false);
+        } else {
+            setIsChangedSocketsLinked(true);
+        }
+        setSelectedIdsToUnlink(newSelectedIdsToUnlink);
+
     };
 
     const updatePlugRuleData = async () => {
@@ -1648,16 +1660,17 @@ const PlugRule = () => {
         const dataUnassign = [];
         const idSocketsToAssign = [];
         const socketsToReassign = [];
-        allSensors.forEach((sensor) => {
-            if (rulesToLink?.sensor_id?.includes(sensor.id)) {
-                if (sensor.assigned_rule_id && sensor.assigned_rule_id !== ruleId) {
-                    socketsToReassign.push(sensor.id);
-                    dataUnassign.push(sensor);
-                } else {
-                    idSocketsToAssign.push(sensor.id);
+        allSensors &&
+            allSensors.forEach((sensor) => {
+                if (rulesToLink?.sensor_id?.includes(sensor.id)) {
+                    if (sensor.assigned_rule_id && sensor.assigned_rule_id !== ruleId) {
+                        socketsToReassign.push(sensor.id);
+                        dataUnassign.push(sensor);
+                    } else {
+                        idSocketsToAssign.push(sensor.id);
+                    }
                 }
-            }
-        });
+            });
         setDataToUnassign(dataUnassign);
         setSocketsToReassign(socketsToReassign);
         if (dataUnassign.length) {
@@ -2480,7 +2493,9 @@ const PlugRule = () => {
                                         height={20}
                                         width={36}
                                     />
-                                    <span className="ml-2 plug-rule-switch-font">Active</span>
+                                    <span className="ml-2 plug-rule-switch-font">
+                                        {currentData.is_active ? 'Active' : 'Inactive'}
+                                    </span>
                                 </div>
                             )}
                             {currentData?.status && (
