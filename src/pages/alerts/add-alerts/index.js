@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, CardBody, CardHeader } from 'reactstrap';
 import { useHistory } from 'react-router-dom';
+import Skeleton from 'react-loading-skeleton';
+import _ from 'lodash';
 
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
@@ -102,9 +104,8 @@ const RemoveAlert = () => {
 const ConfigureAlerts = (props) => {
     const { alertObj = {}, handleChange, handleConditionChange, updateAlertWithBuildingData } = props;
 
-    console.log('SSR alertObj => ', alertObj);
-
     const [targetType, setTargetType] = useState('');
+    const [isFetchingData, setFetching] = useState(false);
 
     const [buildingsList, setBuildingsList] = useState([]);
     const [buildingTypeList, setBuildingTypeList] = useState([]);
@@ -114,6 +115,8 @@ const ConfigureAlerts = (props) => {
 
     useEffect(() => {
         if (targetType === 'building') {
+            setFetching(true);
+
             const promiseOne = getAllBuildingTypes();
             const promiseTwo = fetchBuildingsList(false);
 
@@ -143,7 +146,10 @@ const ConfigureAlerts = (props) => {
                         }
                     }
                 })
-                .catch(() => {});
+                .catch(() => {})
+                .finally(() => {
+                    setFetching(false);
+                });
         }
     }, [targetType]);
 
@@ -216,51 +222,57 @@ const ConfigureAlerts = (props) => {
 
                                     <Brick sizeInRem={1.25} />
 
-                                    <div className="d-flex justify-content-between w-100" style={{ gap: '1.25rem' }}>
-                                        <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
-                                            <Select.Multi
-                                                id="endUseSelect"
-                                                placeholder="Select Building Type"
-                                                name="select"
-                                                className="w-100"
-                                                isSearchable={true}
-                                                options={buildingTypeList}
-                                                onChange={(selectedBldgTypeList) => {
-                                                    handleChange('typesList', selectedBldgTypeList);
-                                                }}
-                                                value={alertObj?.typesList ?? []}
-                                            />
+                                    {isFetchingData ? (
+                                        <Skeleton count={2} width={1000} height={20} />
+                                    ) : (
+                                        <div
+                                            className="d-flex justify-content-between w-100"
+                                            style={{ gap: '1.25rem' }}>
+                                            <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
+                                                <Select.Multi
+                                                    id="endUseSelect"
+                                                    placeholder="Select Building Type"
+                                                    name="select"
+                                                    className="w-100"
+                                                    isSearchable={true}
+                                                    options={buildingTypeList}
+                                                    onChange={(selectedBldgTypeList) => {
+                                                        handleChange('typesList', selectedBldgTypeList);
+                                                    }}
+                                                    value={alertObj?.typesList ?? []}
+                                                />
 
-                                            <Select.Multi
-                                                id="endUseSelect"
-                                                placeholder="Select Building"
-                                                name="select"
-                                                className="w-100"
-                                                isSearchable={true}
-                                                options={buildingsList}
-                                                onChange={(selectedBldgTypeList) => {
-                                                    handleChange('lists', selectedBldgTypeList);
-                                                }}
-                                                value={alertObj?.lists ?? []}
-                                            />
-                                        </div>
+                                                <Select.Multi
+                                                    id="endUseSelect"
+                                                    placeholder="Select Building"
+                                                    name="select"
+                                                    className="w-100"
+                                                    isSearchable={true}
+                                                    options={buildingsList}
+                                                    onChange={(selectedBldgTypeList) => {
+                                                        handleChange('lists', selectedBldgTypeList);
+                                                    }}
+                                                    value={alertObj?.lists ?? []}
+                                                />
+                                            </div>
 
-                                        <div className="d-flex" style={{ gap: '0.75rem' }}>
-                                            <Button
-                                                label={'Cancel'}
-                                                size={Button.Sizes.md}
-                                                type={Button.Type.secondaryGrey}
-                                                className="w-100"
-                                            />
-                                            <Button
-                                                label={'Add target'}
-                                                size={Button.Sizes.md}
-                                                type={Button.Type.primary}
-                                                className="w-100"
-                                                disabled={alertObj?.lists && alertObj?.lists.length === 0}
-                                            />
+                                            <div className="d-flex" style={{ gap: '0.75rem' }}>
+                                                <Button
+                                                    label={'Cancel'}
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.secondaryGrey}
+                                                    className="w-100"
+                                                />
+                                                <Button
+                                                    label={'Add target'}
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.primary}
+                                                    className="w-100"
+                                                    disabled={alertObj?.lists && alertObj?.lists.length === 0}
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             )}
 
@@ -536,10 +548,13 @@ const AddAlerts = () => {
     const [notifyType, setNotifyType] = useState('none');
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
 
-    console.log('SSR alertObj => ', alertObj);
-
     const handleChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
+
+        if (key === 'alertType') {
+            obj = _.cloneDeep(defaultAlertObj);
+        }
+
         obj[key] = value;
         setAlertObj(obj);
     };
