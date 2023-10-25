@@ -376,7 +376,7 @@ const ConfigureTab = (props) => {
         return (
             <div>
                 <UncontrolledTooltip placement="bottom" target={'tooltip-for-bldg-meter'}>
-                    {`Select the Building Meter checkbox if this sensor is monitoring a building utility pulse input. Checking this box will include this sensor’s data in total building calculations.`}
+                    {`Select the Building Meter checkbox if this sensor is monitoring a building utility input. Checking this box will include this sensor’s data in total building calculations.`}
                 </UncontrolledTooltip>
 
                 <button type="button" className="tooltip-button" id={'tooltip-for-bldg-meter'}>
@@ -485,7 +485,12 @@ const ConfigureTab = (props) => {
                                     label="Building Meter"
                                     size={Checkbox.Sizes.sm}
                                     disabled={false}
-                                    checked={sensorObj?.service_location ?? false}
+                                    checked={sensorObj?.building_meter}
+                                    value={sensorObj?.building_meter}
+                                    onClick={(e) => {
+                                        const value = e.target.value === 'true' ? false : true;
+                                        handleChange('building_meter', value);
+                                    }}
                                 />
                                 <BuildingMeterToolTip />
                             </div>
@@ -594,7 +599,12 @@ const ConfigureTab = (props) => {
                                     label="Building Meter"
                                     size={Checkbox.Sizes.sm}
                                     disabled={false}
-                                    checked={sensorObj?.service_location ?? false}
+                                    checked={sensorObj?.building_meter}
+                                    value={sensorObj?.building_meter}
+                                    onClick={(e) => {
+                                        const value = e.target.value === 'true' ? false : true;
+                                        handleChange('building_meter', value);
+                                    }}
                                 />
                                 <BuildingMeterToolTip />
                             </div>
@@ -693,6 +703,7 @@ const EditUtilitySensor = (props) => {
                 utility_meter_make: sensorObj?.utility_meter_make,
                 utility_meter_model: sensorObj?.utility_meter_model,
                 utility_meter_serial_number: sensorObj?.utility_meter_serial_number,
+                building_meter: sensorObj?.building_meter,
             };
 
             if (sensorObj?.service_location !== '') payload.service_location = sensorObj?.service_location;

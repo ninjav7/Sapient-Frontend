@@ -647,7 +647,13 @@ const IndividualUtilityMeter = () => {
             .then((res) => {
                 const response = res?.data;
                 if (response?.success && response?.data) {
-                    setSensorsList(response?.data);
+                    const newMappedData = response?.data.map((el) => {
+                        return {
+                            ...el,
+                            building_meter: el?.building_meter ?? false,
+                        };
+                    });
+                    setSensorsList(newMappedData);
                 }
                 setFetchingSensors(false);
             })
