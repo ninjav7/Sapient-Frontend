@@ -33,7 +33,7 @@
 }
 
 .target-type-container {
-    width: 8rem;
+    width: fit-content;
     height: 2.75rem;
     border-radius: 0.45rem;
     border: 0.0625rem solid $primary-gray-450;
@@ -42,7 +42,7 @@
 }
 
 .target-type-container-active {
-    width: 8rem;
+    width: fit-content;
     height: 2.75rem;
     border-radius: 0.45rem;
     border: 0.125rem solid $primary-indigo-600;
