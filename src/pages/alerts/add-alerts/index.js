@@ -6,6 +6,7 @@ import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
 import Brick from '../../../sharedComponents/brick';
 import Select from '../../../sharedComponents/form/select';
+import Inputs from '../../../sharedComponents/form/input/Input';
 
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -17,8 +18,10 @@ import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/ass
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
-import { fetchBuildingList } from '../../settings/buildings/services';
+import { fetchBuildingsList } from '../../../services/buildings';
 import { getAllBuildingTypes } from '../../settings/general-settings/services';
+
+import { alertConditions, conditionLevelsList, defaultAlertObj } from './constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
@@ -97,7 +100,11 @@ const RemoveAlert = () => {
 };
 
 const ConfigureAlerts = (props) => {
-    const { alertObj = {}, handleChange } = props;
+    const { alertObj = {}, handleChange, handleConditionChange, updateAlertWithBuildingData } = props;
+
+    console.log('SSR alertObj => ', alertObj);
+
+    const [targetType, setTargetType] = useState('');
 
     const [buildingsList, setBuildingsList] = useState([]);
     const [buildingTypeList, setBuildingTypeList] = useState([]);
@@ -105,46 +112,40 @@ const ConfigureAlerts = (props) => {
     const [equipmentsList, setEquipmentsList] = useState([]);
     const [equipmentTypeList, setEquipmentTypeList] = useState([]);
 
-    const fetchBuildingType = async () => {
-        await getAllBuildingTypes()
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    const responseData = response?.data?.data;
-                    if (responseData.length !== 0) {
-                        const newMappedData = responseData.map((el) => ({
-                            label: el?.building_type,
-                            value: el?.building_type_id,
-                        }));
-                        setBuildingTypeList(newMappedData);
-                    }
-                }
-            })
-            .catch((error) => {});
-    };
-
-    const fetchBuildingsList = async () => {
-        await fetchBuildingList()
-            .then((res) => {
-                const responseData = res?.data;
-                if (responseData && responseData.length !== 0) {
-                    const newMappedBldgData = responseData.map((el) => ({
-                        label: el?.building_name,
-                        value: el?.building_id,
-                        building_type_id: el?.building_type_id,
-                    }));
-                    setBuildingsList(newMappedBldgData);
-                }
-            })
-            .catch(() => {});
-    };
-
     useEffect(() => {
-        if (alertObj?.type === 'building') {
-            fetchBuildingType();
-            fetchBuildingsList();
+        if (targetType === 'building') {
+            const promiseOne = getAllBuildingTypes();
+            const promiseTwo = fetchBuildingsList(false);
+
+            Promise.all([promiseOne, promiseTwo])
+                .then((res) => {
+                    const response = res;
+
+                    if (response && response[0]?.status === 200 && response[1]?.status === 200) {
+                        const buildingTypesResponse = response[0]?.data?.data?.data;
+                        const buildingsListResponse = response[1]?.data;
+
+                        if (buildingTypesResponse && buildingsListResponse) {
+                            const newMappedBuildingTypesData = buildingTypesResponse.map((el) => ({
+                                label: el?.building_type,
+                                value: el?.building_type_id,
+                            }));
+                            setBuildingTypeList(newMappedBuildingTypesData);
+
+                            const newMappedBldgsData = buildingsListResponse.map((el) => ({
+                                label: el?.building_name,
+                                value: el?.building_id,
+                                building_type_id: el?.building_type_id,
+                            }));
+                            setBuildingsList(newMappedBldgsData);
+
+                            updateAlertWithBuildingData(newMappedBuildingTypesData, newMappedBldgsData);
+                        }
+                    }
+                })
+                .catch(() => {});
         }
-    }, [alertObj]);
+    }, [targetType]);
 
     return (
         <>
@@ -169,11 +170,14 @@ const ConfigureAlerts = (props) => {
                                 <div className="d-flex" style={{ gap: '0.75rem' }}>
                                     <div
                                         className={`d-flex align-items-center mouse-pointer ${
-                                            alertObj?.type === 'building'
+                                            alertObj?.alertType === 'building'
                                                 ? `target-type-container-active`
                                                 : `target-type-container`
                                         }`}
-                                        onClick={() => handleChange('type', 'building')}>
+                                        onClick={() => {
+                                            setTargetType('building');
+                                            handleChange('alertType', 'building');
+                                        }}>
                                         <BuildingTypeSVG className="p-0 square" width={20} height={20} />
                                         <Typography.Subheader
                                             size={Typography.Sizes.md}
@@ -184,11 +188,14 @@ const ConfigureAlerts = (props) => {
 
                                     <div
                                         className={`d-flex align-items-center mouse-pointer ${
-                                            alertObj?.type === 'equipment'
+                                            alertObj?.alertType === 'equipment'
                                                 ? `target-type-container-active`
                                                 : `target-type-container`
                                         }`}
-                                        onClick={() => handleChange('type', 'equipment')}>
+                                        onClick={() => {
+                                            setTargetType('equipment');
+                                            handleChange('alertType', 'equipment');
+                                        }}>
                                         <EquipmentTypeSVG className="p-0 square" width={20} height={20} />
                                         <Typography.Subheader
                                             size={Typography.Sizes.md}
@@ -199,9 +206,9 @@ const ConfigureAlerts = (props) => {
                                 </div>
                             </div>
 
-                            {alertObj?.type && <hr />}
+                            {alertObj?.alertType && <hr />}
 
-                            {alertObj?.type === 'building' && (
+                            {alertObj?.alertType === 'building' && (
                                 <div>
                                     <Typography.Subheader size={Typography.Sizes.md}>
                                         {`Select a Target`}
@@ -215,18 +222,26 @@ const ConfigureAlerts = (props) => {
                                                 id="endUseSelect"
                                                 placeholder="Select Building Type"
                                                 name="select"
+                                                className="w-100"
                                                 isSearchable={true}
                                                 options={buildingTypeList}
-                                                className="w-100"
+                                                onChange={(selectedBldgTypeList) => {
+                                                    handleChange('typesList', selectedBldgTypeList);
+                                                }}
+                                                value={alertObj?.typesList ?? []}
                                             />
 
                                             <Select.Multi
                                                 id="endUseSelect"
                                                 placeholder="Select Building"
                                                 name="select"
+                                                className="w-100"
                                                 isSearchable={true}
                                                 options={buildingsList}
-                                                className="w-100"
+                                                onChange={(selectedBldgTypeList) => {
+                                                    handleChange('lists', selectedBldgTypeList);
+                                                }}
+                                                value={alertObj?.lists ?? []}
                                             />
                                         </div>
 
@@ -242,13 +257,14 @@ const ConfigureAlerts = (props) => {
                                                 size={Button.Sizes.md}
                                                 type={Button.Type.primary}
                                                 className="w-100"
+                                                disabled={alertObj?.lists && alertObj?.lists.length === 0}
                                             />
                                         </div>
                                     </div>
                                 </div>
                             )}
 
-                            {alertObj?.type === 'equipment' && (
+                            {alertObj?.alertType === 'equipment' && (
                                 <div>
                                     <Typography.Subheader size={Typography.Sizes.md}>
                                         {`Select a Target`}
@@ -330,17 +346,50 @@ const ConfigureAlerts = (props) => {
 
                                 <Brick sizeInRem={1.25} />
 
-                                <div className="d-flex w-100">
-                                    <div className="d-flex w-25" style={{ gap: '0.75rem' }}>
+                                <div className="d-flex w-100 align-items-center" style={{ gap: '0.75rem' }}>
+                                    <div style={{ width: '35%' }}>
                                         <Select
                                             id="endUseSelect"
                                             placeholder="Select a Condition"
                                             name="select"
-                                            isSearchable={true}
-                                            options={[]}
+                                            options={alertObj?.alertType === '' ? [] : alertConditions}
                                             className="w-100"
+                                            onChange={(e) => {
+                                                handleConditionChange('type', e.value);
+                                            }}
+                                            currentValue={alertConditions.filter(
+                                                (option) => option.value === alertObj?.conditions?.type
+                                            )}
                                         />
                                     </div>
+                                    {alertObj?.alertType !== '' && (
+                                        <>
+                                            <div style={{ width: '15%' }}>
+                                                <Select
+                                                    id="condition_lvl"
+                                                    name="select"
+                                                    options={conditionLevelsList}
+                                                    className="w-100"
+                                                    onChange={(e) => {
+                                                        handleConditionChange('level', e.value);
+                                                    }}
+                                                    currentValue={conditionLevelsList.filter(
+                                                        (option) => option.value === alertObj?.conditions?.level
+                                                    )}
+                                                />
+                                            </div>
+                                            <Inputs
+                                                type="number"
+                                                className="custom-input-width"
+                                                inputClassName="custom-input-field"
+                                                value={alertObj?.conditions?.target_value}
+                                                onChange={(e) => {
+                                                    handleConditionChange('target_value', e.target.value);
+                                                }}
+                                            />
+                                            <span>{`kWh`}</span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </CardBody>
@@ -484,16 +533,27 @@ const NotificationSettings = (props) => {
 
 const AddAlerts = () => {
     const [activeTab, setActiveTab] = useState(0);
-
     const [notifyType, setNotifyType] = useState('none');
+    const [alertObj, setAlertObj] = useState(defaultAlertObj);
 
-    const [alertObj, setAlertObj] = useState({
-        type: '',
-    });
+    console.log('SSR alertObj => ', alertObj);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
         obj[key] = value;
+        setAlertObj(obj);
+    };
+
+    const handleConditionChange = (key, value) => {
+        let obj = Object.assign({}, alertObj);
+        obj.conditions[key] = value;
+        setAlertObj(obj);
+    };
+
+    const updateAlertWithBuildingData = (bldg_type_list, bldgs_list) => {
+        let obj = Object.assign({}, alertObj);
+        obj.typesList = bldg_type_list ?? [];
+        obj.lists = bldgs_list ?? [];
         setAlertObj(obj);
     };
 
@@ -531,7 +591,14 @@ const AddAlerts = () => {
             </Row>
 
             <div className="custom-padding">
-                {activeTab === 0 && <ConfigureAlerts alertObj={alertObj} handleChange={handleChange} />}
+                {activeTab === 0 && (
+                    <ConfigureAlerts
+                        alertObj={alertObj}
+                        handleChange={handleChange}
+                        handleConditionChange={handleConditionChange}
+                        updateAlertWithBuildingData={updateAlertWithBuildingData}
+                    />
+                )}
                 {activeTab === 1 && <NotificationSettings notifyType={notifyType} setNotifyType={setNotifyType} />}
             </div>
         </React.Fragment>
