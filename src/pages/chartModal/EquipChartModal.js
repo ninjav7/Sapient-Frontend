@@ -326,7 +326,7 @@ const EquipChartModal = ({
                         };
                     });
 
-                    const locationData = location.map((el) => {
+                    const locationDataLocal = location.map((el) => {
                         return {
                             label: el?.location_name,
                             value: el?.location_id,
@@ -340,10 +340,11 @@ const EquipChartModal = ({
                             end_use_name: el?.end_use_name,
                         };
                     });
+                    const sortedLocationData = locationDataLocal.slice().sort((a, b) => a.label.localeCompare(b.label));
 
                     setEquipmentTypeData(equipTypeData);
                     setEndUse(endUseData);
-                    setLocationData(locationData);
+                    setLocationData(sortedLocationData);
                 })
                 .finally(() => {});
         };
