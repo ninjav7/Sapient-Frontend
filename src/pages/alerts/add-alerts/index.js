@@ -496,9 +496,9 @@ const ConfigureAlerts = (props) => {
                                                         type="number"
                                                         className="custom-input-width"
                                                         inputClassName="custom-input-field"
-                                                        value={alertObj?.conditions?.target_value}
+                                                        value={alertObj?.condition?.thresholdValue}
                                                         onChange={(e) => {
-                                                            handleConditionChange('target_value', e.target.value);
+                                                            handleConditionChange('thresholdValue', e.target.value);
                                                         }}
                                                     />
                                                 </div>
@@ -520,11 +520,16 @@ const ConfigureAlerts = (props) => {
                                                     id="50-percent-alert"
                                                     name="50-percent-alert"
                                                     size="md"
-                                                    // checked={selectedAlertIds.length === alertsList.length}
-                                                    // value={selectedAlertIds.length === alertsList.length}
-                                                    // onClick={(e) => {
-                                                    //     handleSelectAllAlerts(e.target.value, alertsList);
-                                                    // }}
+                                                    checked={alertObj?.condition?.threshold50}
+                                                    value={alertObj?.condition?.threshold50}
+                                                    onClick={(e) => {
+                                                        const value = e.target.value;
+                                                        if (value === 'false')
+                                                            handleConditionChange('threshold50', true);
+
+                                                        if (value === 'true')
+                                                            handleConditionChange('threshold50', false);
+                                                    }}
                                                 />
                                                 <Checkbox
                                                     label="Alert at 75%"
@@ -532,11 +537,16 @@ const ConfigureAlerts = (props) => {
                                                     id="75-percent-alert"
                                                     name="75-percent-alert"
                                                     size="md"
-                                                    // checked={selectedAlertIds.length === alertsList.length}
-                                                    // value={selectedAlertIds.length === alertsList.length}
-                                                    // onClick={(e) => {
-                                                    //     handleSelectAllAlerts(e.target.value, alertsList);
-                                                    // }}
+                                                    checked={alertObj?.condition?.threshold75}
+                                                    value={alertObj?.condition?.threshold75}
+                                                    onClick={(e) => {
+                                                        const value = e.target.value;
+                                                        if (value === 'false')
+                                                            handleConditionChange('threshold75', true);
+
+                                                        if (value === 'true')
+                                                            handleConditionChange('threshold75', false);
+                                                    }}
                                                 />
                                             </div>
                                         )}
@@ -548,11 +558,13 @@ const ConfigureAlerts = (props) => {
                                                 id="90-percent-alert"
                                                 name="90-percent-alert"
                                                 size="md"
-                                                // checked={selectedAlertIds.length === alertsList.length}
-                                                // value={selectedAlertIds.length === alertsList.length}
-                                                // onClick={(e) => {
-                                                //     handleSelectAllAlerts(e.target.value, alertsList);
-                                                // }}
+                                                checked={alertObj?.condition?.threshold90}
+                                                value={alertObj?.condition?.threshold90}
+                                                onClick={(e) => {
+                                                    const value = e.target.value;
+                                                    if (value === 'false') handleConditionChange('threshold90', true);
+                                                    if (value === 'true') handleConditionChange('threshold90', false);
+                                                }}
                                             />
                                         )}
                                     </>

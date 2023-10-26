@@ -21,6 +21,9 @@ export const defaultAlertObj = {
         level: 'above',
         filterType: 'number',
         thresholdValue: '',
+        threshold50: false,
+        threshold75: false,
+        threshold90: false,
         submitted: false,
     },
 };
