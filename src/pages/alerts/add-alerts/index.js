@@ -494,6 +494,7 @@ const ConfigureAlerts = (props) => {
                                                 <div>
                                                     <Inputs
                                                         type="number"
+                                                        placeholder="Enter value"
                                                         className="custom-input-width"
                                                         inputClassName="custom-input-field"
                                                         value={alertObj?.condition?.thresholdValue}
