@@ -10,13 +10,18 @@ export const alertConditions = [
 ];
 
 export const defaultAlertObj = {
-    alertType: '',
-    typesList: [],
-    lists: [],
-    conditions: {
+    target: {
+        type: '',
+        typesList: [],
+        lists: [],
+        submitted: false,
+    },
+    condition: {
         type: '',
         level: 'above',
-        target_value: '',
+        filterType: 'number',
+        thresholdValue: '',
+        submitted: false,
     },
 };
 

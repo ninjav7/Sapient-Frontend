@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, CardBody, CardHeader } from 'reactstrap';
+import _ from 'lodash';
 import { useHistory } from 'react-router-dom';
 import Skeleton from 'react-loading-skeleton';
-import _ from 'lodash';
+import { Row, Col, CardBody, CardHeader } from 'reactstrap';
+import { UncontrolledTooltip } from 'reactstrap';
 
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
@@ -15,6 +16,8 @@ import { ComponentStore } from '../../../store/ComponentStore';
 
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as BanSVG } from '../../../assets/icon/ban.svg';
+import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
+import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 import { ReactComponent as UserProfileSVG } from '../../../assets/icon/user-profile.svg';
 import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/assets/icons/building-type.svg';
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
@@ -23,10 +26,39 @@ import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/ass
 import { fetchBuildingsList } from '../../../services/buildings';
 import { getAllBuildingTypes } from '../../settings/general-settings/services';
 
-import { alertConditions, conditionLevelsList, defaultAlertObj } from './constants';
+import { alertConditions, conditionLevelsList, defaultAlertObj, filtersForEnergyConsumption } from './constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
+import { Checkbox } from '../../../sharedComponents/form/checkbox';
+
+const TargetToolTip = () => {
+    return (
+        <div>
+            <UncontrolledTooltip placement="bottom" target={'tooltip-for-target'}>
+                {`Target Tooltip.`}
+            </UncontrolledTooltip>
+
+            <button type="button" className="tooltip-button" id={'tooltip-for-target'}>
+                <TooltipIcon className="tooltip-icon" />
+            </button>
+        </div>
+    );
+};
+
+const ConditionToolTip = () => {
+    return (
+        <div>
+            <UncontrolledTooltip placement="bottom" target={'tooltip-for-condition'}>
+                {`Condition Tooltip.`}
+            </UncontrolledTooltip>
+
+            <button type="button" className="tooltip-button" id={'tooltip-for-condition'}>
+                <TooltipIcon className="tooltip-icon" />
+            </button>
+        </div>
+    );
+};
 
 const CreateAlertHeader = (props) => {
     const { activeTab, setActiveTab } = props;
@@ -102,7 +134,7 @@ const RemoveAlert = () => {
 };
 
 const ConfigureAlerts = (props) => {
-    const { alertObj = {}, handleChange, handleConditionChange, updateAlertWithBuildingData } = props;
+    const { alertObj = {}, handleTargetChange, handleConditionChange, updateAlertWithBuildingData } = props;
 
     const [targetType, setTargetType] = useState('');
     const [isFetchingData, setFetching] = useState(false);
@@ -112,6 +144,18 @@ const ConfigureAlerts = (props) => {
 
     const [equipmentsList, setEquipmentsList] = useState([]);
     const [equipmentTypeList, setEquipmentTypeList] = useState([]);
+
+    const renderTargetedBuildingsList = (alert_obj) => {
+        const targetListCount = alert_obj?.target?.lists?.length ?? 0;
+
+        if (targetListCount === 0) {
+            return 'No building selected.';
+        } else if (targetListCount === 1) {
+            return alertObj.target.lists[0].label;
+        } else if (targetListCount > 1) {
+            return `${targetListCount} buildings selected.`;
+        }
+    };
 
     useEffect(() => {
         if (targetType === 'building') {
@@ -159,179 +203,218 @@ const ConfigureAlerts = (props) => {
                 <Col lg={9}>
                     <div className="custom-card">
                         <CardHeader>
-                            <Typography.Subheader
-                                size={Typography.Sizes.md}
-                                style={{ color: colorPalette.primaryGray550 }}>
-                                {`Target`}
-                            </Typography.Subheader>
+                            <div className="d-flex align-items-baseline">
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    style={{ color: colorPalette.primaryGray550 }}>
+                                    {`Target`}
+                                </Typography.Subheader>
+                                <TargetToolTip />
+                            </div>
                         </CardHeader>
                         <CardBody>
-                            <div>
-                                <Typography.Subheader size={Typography.Sizes.md}>
-                                    {`Select a Target Type`}
-                                </Typography.Subheader>
-
-                                <Brick sizeInRem={1.25} />
-
-                                <div className="d-flex" style={{ gap: '0.75rem' }}>
-                                    <div
-                                        className={`d-flex align-items-center mouse-pointer ${
-                                            alertObj?.alertType === 'building'
-                                                ? `target-type-container-active`
-                                                : `target-type-container`
-                                        }`}
-                                        onClick={() => {
-                                            setTargetType('building');
-                                            handleChange('alertType', 'building');
-                                        }}>
-                                        <BuildingTypeSVG className="p-0 square" width={20} height={20} />
+                            {alertObj?.target?.submitted ? (
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <div>
                                         <Typography.Subheader
-                                            size={Typography.Sizes.md}
-                                            style={{ color: colorPalette.primaryGray700 }}>
-                                            {`Building`}
-                                        </Typography.Subheader>
+                                            size={Typography.Sizes.md}>{`Target`}</Typography.Subheader>
+                                        <Brick sizeInRem={0.25} />
+                                        <Typography.Body size={Typography.Sizes.md} className="text-muted">
+                                            {renderTargetedBuildingsList(alertObj)}
+                                        </Typography.Body>
                                     </div>
-
-                                    <div
-                                        className={`d-flex align-items-center mouse-pointer ${
-                                            alertObj?.alertType === 'equipment'
-                                                ? `target-type-container-active`
-                                                : `target-type-container`
-                                        }`}
-                                        onClick={() => {
-                                            setTargetType('equipment');
-                                            handleChange('alertType', 'equipment');
-                                        }}>
-                                        <EquipmentTypeSVG className="p-0 square" width={20} height={20} />
-                                        <Typography.Subheader
-                                            size={Typography.Sizes.md}
-                                            style={{ color: colorPalette.primaryGray700 }}>
-                                            {`Equipment`}
-                                        </Typography.Subheader>
+                                    <div>
+                                        <PenSVG
+                                            className="mouse-pointer"
+                                            width={17}
+                                            height={17}
+                                            onClick={() => {
+                                                handleTargetChange('submitted', !alertObj?.target?.submitted);
+                                            }}
+                                        />
                                     </div>
                                 </div>
-                            </div>
+                            ) : (
+                                <>
+                                    <div>
+                                        <Typography.Subheader size={Typography.Sizes.md}>
+                                            {`Select a Target Type`}
+                                        </Typography.Subheader>
 
-                            {alertObj?.alertType && <hr />}
+                                        <Brick sizeInRem={1.25} />
 
-                            {alertObj?.alertType === 'building' && (
-                                <div>
-                                    <Typography.Subheader size={Typography.Sizes.md}>
-                                        {`Select a Target`}
-                                    </Typography.Subheader>
-
-                                    <Brick sizeInRem={1.25} />
-
-                                    {isFetchingData ? (
-                                        <Skeleton count={2} width={1000} height={20} />
-                                    ) : (
-                                        <div
-                                            className="d-flex justify-content-between w-100"
-                                            style={{ gap: '1.25rem' }}>
-                                            <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
-                                                <Select.Multi
-                                                    id="endUseSelect"
-                                                    placeholder="Select Building Type"
-                                                    name="select"
-                                                    className="w-100"
-                                                    isSearchable={true}
-                                                    options={buildingTypeList}
-                                                    onChange={(selectedBldgTypeList) => {
-                                                        handleChange('typesList', selectedBldgTypeList);
-                                                    }}
-                                                    value={alertObj?.typesList ?? []}
-                                                />
-
-                                                <Select.Multi
-                                                    id="endUseSelect"
-                                                    placeholder="Select Building"
-                                                    name="select"
-                                                    className="w-100"
-                                                    isSearchable={true}
-                                                    options={buildingsList}
-                                                    onChange={(selectedBldgTypeList) => {
-                                                        handleChange('lists', selectedBldgTypeList);
-                                                    }}
-                                                    value={alertObj?.lists ?? []}
-                                                />
+                                        <div className="d-flex" style={{ gap: '0.75rem' }}>
+                                            <div
+                                                className={`d-flex align-items-center mouse-pointer ${
+                                                    alertObj?.target?.type === 'building'
+                                                        ? `target-type-container-active`
+                                                        : `target-type-container`
+                                                }`}
+                                                onClick={() => {
+                                                    setTargetType('building');
+                                                    handleTargetChange('type', 'building');
+                                                }}>
+                                                <BuildingTypeSVG className="p-0 square" width={20} height={20} />
+                                                <Typography.Subheader
+                                                    size={Typography.Sizes.md}
+                                                    style={{ color: colorPalette.primaryGray700 }}>
+                                                    {`Building`}
+                                                </Typography.Subheader>
                                             </div>
 
-                                            <div className="d-flex" style={{ gap: '0.75rem' }}>
-                                                <Button
-                                                    label={'Cancel'}
-                                                    size={Button.Sizes.md}
-                                                    type={Button.Type.secondaryGrey}
-                                                    className="w-100"
-                                                />
-                                                <Button
-                                                    label={'Add target'}
-                                                    size={Button.Sizes.md}
-                                                    type={Button.Type.primary}
-                                                    className="w-100"
-                                                    disabled={alertObj?.lists && alertObj?.lists.length === 0}
-                                                />
+                                            <div
+                                                className={`d-flex align-items-center mouse-pointer ${
+                                                    alertObj?.target?.type === 'equipment'
+                                                        ? `target-type-container-active`
+                                                        : `target-type-container`
+                                                }`}
+                                                onClick={() => {
+                                                    setTargetType('equipment');
+                                                    handleTargetChange('type', 'equipment');
+                                                }}>
+                                                <EquipmentTypeSVG className="p-0 square" width={20} height={20} />
+                                                <Typography.Subheader
+                                                    size={Typography.Sizes.md}
+                                                    style={{ color: colorPalette.primaryGray700 }}>
+                                                    {`Equipment`}
+                                                </Typography.Subheader>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {alertObj?.target?.type && <hr />}
+
+                                    {alertObj?.target?.type === 'building' && (
+                                        <div>
+                                            <Typography.Subheader size={Typography.Sizes.md}>
+                                                {`Select a Target`}
+                                            </Typography.Subheader>
+
+                                            <Brick sizeInRem={1.25} />
+
+                                            {isFetchingData ? (
+                                                <Skeleton count={2} width={1000} height={20} />
+                                            ) : (
+                                                <div
+                                                    className="d-flex justify-content-between w-100"
+                                                    style={{ gap: '1.25rem' }}>
+                                                    <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
+                                                        <Select.Multi
+                                                            id="endUseSelect"
+                                                            placeholder="Select Building Type"
+                                                            name="select"
+                                                            className="w-100"
+                                                            isSearchable={true}
+                                                            options={buildingTypeList}
+                                                            onChange={(selectedBldgTypeList) => {
+                                                                handleTargetChange('typesList', selectedBldgTypeList);
+                                                            }}
+                                                            value={alertObj?.target?.typesList ?? []}
+                                                        />
+
+                                                        <Select.Multi
+                                                            id="endUseSelect"
+                                                            placeholder="Select Building"
+                                                            name="select"
+                                                            className="w-100"
+                                                            isSearchable={true}
+                                                            options={buildingsList}
+                                                            onChange={(selectedBldgTypeList) => {
+                                                                handleTargetChange('lists', selectedBldgTypeList);
+                                                            }}
+                                                            value={alertObj?.target?.lists ?? []}
+                                                        />
+                                                    </div>
+
+                                                    <div className="d-flex" style={{ gap: '0.75rem' }}>
+                                                        <Button
+                                                            label={'Cancel'}
+                                                            size={Button.Sizes.md}
+                                                            type={Button.Type.secondaryGrey}
+                                                            className="w-100"
+                                                        />
+                                                        <Button
+                                                            label={'Add target'}
+                                                            size={Button.Sizes.md}
+                                                            type={Button.Type.primary}
+                                                            className="w-100"
+                                                            onClick={() => {
+                                                                handleTargetChange(
+                                                                    'submitted',
+                                                                    !alertObj?.target.submitted
+                                                                );
+                                                            }}
+                                                            disabled={
+                                                                alertObj?.target?.lists &&
+                                                                alertObj?.target?.lists.length === 0
+                                                            }
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {alertObj?.alertType === 'equipment' && (
+                                        <div>
+                                            <Typography.Subheader size={Typography.Sizes.md}>
+                                                {`Select a Target`}
+                                            </Typography.Subheader>
+
+                                            <Brick sizeInRem={1.25} />
+
+                                            <Select
+                                                id="endUseSelect"
+                                                placeholder="Select Building"
+                                                name="select"
+                                                isSearchable={true}
+                                                options={[]}
+                                                className="w-25"
+                                            />
+
+                                            <Brick sizeInRem={1.25} />
+
+                                            <div
+                                                className="d-flex justify-content-between w-100"
+                                                style={{ gap: '1.25rem' }}>
+                                                <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
+                                                    <Select
+                                                        id="endUseSelect"
+                                                        placeholder="Select Equipment Type"
+                                                        name="select"
+                                                        isSearchable={true}
+                                                        options={[]}
+                                                        className="w-100"
+                                                    />
+
+                                                    <Select
+                                                        id="endUseSelect"
+                                                        placeholder="Select Equipment"
+                                                        name="select"
+                                                        isSearchable={true}
+                                                        options={[]}
+                                                        className="w-100"
+                                                    />
+                                                </div>
+
+                                                <div className="d-flex" style={{ gap: '0.75rem' }}>
+                                                    <Button
+                                                        label={'Cancel'}
+                                                        size={Button.Sizes.md}
+                                                        type={Button.Type.secondaryGrey}
+                                                        className="w-100"
+                                                    />
+                                                    <Button
+                                                        label={'Add target'}
+                                                        size={Button.Sizes.md}
+                                                        type={Button.Type.primary}
+                                                        className="w-100"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                     )}
-                                </div>
-                            )}
-
-                            {alertObj?.alertType === 'equipment' && (
-                                <div>
-                                    <Typography.Subheader size={Typography.Sizes.md}>
-                                        {`Select a Target`}
-                                    </Typography.Subheader>
-
-                                    <Brick sizeInRem={1.25} />
-
-                                    <Select
-                                        id="endUseSelect"
-                                        placeholder="Select Building"
-                                        name="select"
-                                        isSearchable={true}
-                                        options={[]}
-                                        className="w-25"
-                                    />
-
-                                    <Brick sizeInRem={1.25} />
-
-                                    <div className="d-flex justify-content-between w-100" style={{ gap: '1.25rem' }}>
-                                        <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
-                                            <Select
-                                                id="endUseSelect"
-                                                placeholder="Select Equipment Type"
-                                                name="select"
-                                                isSearchable={true}
-                                                options={[]}
-                                                className="w-100"
-                                            />
-
-                                            <Select
-                                                id="endUseSelect"
-                                                placeholder="Select Equipment"
-                                                name="select"
-                                                isSearchable={true}
-                                                options={[]}
-                                                className="w-100"
-                                            />
-                                        </div>
-
-                                        <div className="d-flex" style={{ gap: '0.75rem' }}>
-                                            <Button
-                                                label={'Cancel'}
-                                                size={Button.Sizes.md}
-                                                type={Button.Type.secondaryGrey}
-                                                className="w-100"
-                                            />
-                                            <Button
-                                                label={'Add target'}
-                                                size={Button.Sizes.md}
-                                                type={Button.Type.primary}
-                                                className="w-100"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                                </>
                             )}
                         </CardBody>
                     </div>
@@ -344,11 +427,14 @@ const ConfigureAlerts = (props) => {
                 <Col lg={9}>
                     <div className="custom-card">
                         <CardHeader>
-                            <Typography.Subheader
-                                size={Typography.Sizes.md}
-                                style={{ color: colorPalette.primaryGray550 }}>
-                                {`Condition`}
-                            </Typography.Subheader>
+                            <div className="d-flex align-items-baseline">
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    style={{ color: colorPalette.primaryGray550 }}>
+                                    {`Condition`}
+                                </Typography.Subheader>
+                                <ConditionToolTip />
+                            </div>
                         </CardHeader>
                         <CardBody>
                             <div>
@@ -364,19 +450,19 @@ const ConfigureAlerts = (props) => {
                                             id="endUseSelect"
                                             placeholder="Select a Condition"
                                             name="select"
-                                            options={alertObj?.alertType === '' ? [] : alertConditions}
+                                            options={alertObj?.target?.type === '' ? [] : alertConditions}
                                             className="w-100"
                                             onChange={(e) => {
                                                 handleConditionChange('type', e.value);
                                             }}
                                             currentValue={alertConditions.filter(
-                                                (option) => option.value === alertObj?.conditions?.type
+                                                (option) => option.value === alertObj?.condition?.type
                                             )}
                                         />
                                     </div>
-                                    {alertObj?.alertType !== '' && (
+                                    {alertObj?.target?.type !== '' && (
                                         <>
-                                            <div style={{ width: '15%' }}>
+                                            <div style={{ width: '25%' }}>
                                                 <Select
                                                     id="condition_lvl"
                                                     name="select"
@@ -386,23 +472,91 @@ const ConfigureAlerts = (props) => {
                                                         handleConditionChange('level', e.value);
                                                     }}
                                                     currentValue={conditionLevelsList.filter(
-                                                        (option) => option.value === alertObj?.conditions?.level
+                                                        (option) => option.value === alertObj?.condition?.level
                                                     )}
                                                 />
                                             </div>
-                                            <Inputs
-                                                type="number"
-                                                className="custom-input-width"
-                                                inputClassName="custom-input-field"
-                                                value={alertObj?.conditions?.target_value}
-                                                onChange={(e) => {
-                                                    handleConditionChange('target_value', e.target.value);
-                                                }}
-                                            />
-                                            <span>{`kWh`}</span>
+                                            <div style={{ width: '25%' }}>
+                                                <Select
+                                                    id="filter_type"
+                                                    name="select"
+                                                    options={filtersForEnergyConsumption}
+                                                    className="w-100"
+                                                    onChange={(e) => {
+                                                        handleConditionChange('filterType', e.value);
+                                                    }}
+                                                    currentValue={filtersForEnergyConsumption.filter(
+                                                        (option) => option.value === alertObj?.condition?.filterType
+                                                    )}
+                                                />
+                                            </div>
+                                            {alertObj?.condition?.filterType === 'number' && (
+                                                <div>
+                                                    <Inputs
+                                                        type="number"
+                                                        className="custom-input-width"
+                                                        inputClassName="custom-input-field"
+                                                        value={alertObj?.conditions?.target_value}
+                                                        onChange={(e) => {
+                                                            handleConditionChange('target_value', e.target.value);
+                                                        }}
+                                                    />
+                                                </div>
+                                            )}
+                                            {alertObj?.condition?.filterType === 'number' && <span>{`kWh`}</span>}
                                         </>
                                     )}
                                 </div>
+
+                                {alertObj?.condition?.filterType !== 'number' && (
+                                    <>
+                                        <Brick sizeInRem={1.25} />
+
+                                        {alertObj?.condition?.type === 'energy_consumption' && (
+                                            <div className="d-flex" style={{ gap: '1rem' }}>
+                                                <Checkbox
+                                                    label="Alert at 50%"
+                                                    type="checkbox"
+                                                    id="50-percent-alert"
+                                                    name="50-percent-alert"
+                                                    size="md"
+                                                    // checked={selectedAlertIds.length === alertsList.length}
+                                                    // value={selectedAlertIds.length === alertsList.length}
+                                                    // onClick={(e) => {
+                                                    //     handleSelectAllAlerts(e.target.value, alertsList);
+                                                    // }}
+                                                />
+                                                <Checkbox
+                                                    label="Alert at 75%"
+                                                    type="checkbox"
+                                                    id="75-percent-alert"
+                                                    name="75-percent-alert"
+                                                    size="md"
+                                                    // checked={selectedAlertIds.length === alertsList.length}
+                                                    // value={selectedAlertIds.length === alertsList.length}
+                                                    // onClick={(e) => {
+                                                    //     handleSelectAllAlerts(e.target.value, alertsList);
+                                                    // }}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {alertObj?.condition?.type === 'peak_demand' && (
+                                            <Checkbox
+                                                label="Alert at 90%"
+                                                type="checkbox"
+                                                id="90-percent-alert"
+                                                name="90-percent-alert"
+                                                size="md"
+                                                // checked={selectedAlertIds.length === alertsList.length}
+                                                // value={selectedAlertIds.length === alertsList.length}
+                                                // onClick={(e) => {
+                                                //     handleSelectAllAlerts(e.target.value, alertsList);
+                                                // }}
+                                            />
+                                        )}
+                                    </>
+                                )}
                             </div>
                         </CardBody>
                     </div>
@@ -443,11 +597,11 @@ const NotificationSettings = (props) => {
                             <Brick sizeInRem={1} />
 
                             <div>
-                                <Typography.Subheader size={Typography.Sizes.md}>{`Target`}</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.md}>{`Building`}</Typography.Subheader>
                                 <Brick sizeInRem={0.25} />
-                                <Typography.Body
-                                    size={Typography.Sizes.md}
-                                    className="text-muted">{`123 Main St. Portland, OR`}</Typography.Body>
+                                <Typography.Body size={Typography.Sizes.md} className="text-muted">
+                                    {`123 Main St. Portland, OR`}
+                                </Typography.Body>
                             </div>
 
                             <Brick sizeInRem={1} />
@@ -547,28 +701,25 @@ const AddAlerts = () => {
     const [activeTab, setActiveTab] = useState(0);
     const [notifyType, setNotifyType] = useState('none');
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
+    console.log('SSR alertObj => ', alertObj);
 
-    const handleChange = (key, value) => {
+    const handleTargetChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
-
-        if (key === 'alertType') {
-            obj = _.cloneDeep(defaultAlertObj);
-        }
-
-        obj[key] = value;
+        if (key === 'type') obj = _.cloneDeep(defaultAlertObj);
+        obj.target[key] = value;
         setAlertObj(obj);
     };
 
     const handleConditionChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
-        obj.conditions[key] = value;
+        obj.condition[key] = value;
         setAlertObj(obj);
     };
 
     const updateAlertWithBuildingData = (bldg_type_list, bldgs_list) => {
         let obj = Object.assign({}, alertObj);
-        obj.typesList = bldg_type_list ?? [];
-        obj.lists = bldgs_list ?? [];
+        obj.target.typesList = bldg_type_list ?? [];
+        obj.target.lists = bldgs_list ?? [];
         setAlertObj(obj);
     };
 
@@ -609,7 +760,7 @@ const AddAlerts = () => {
                 {activeTab === 0 && (
                     <ConfigureAlerts
                         alertObj={alertObj}
-                        handleChange={handleChange}
+                        handleTargetChange={handleTargetChange}
                         handleConditionChange={handleConditionChange}
                         updateAlertWithBuildingData={updateAlertWithBuildingData}
                     />
