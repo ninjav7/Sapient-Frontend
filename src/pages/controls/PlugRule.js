@@ -2223,7 +2223,7 @@ const PlugRule = () => {
     };
     const getDateRange = (rawLineChartData) => {
         if (!_.isEmpty(rawLineChartData)) {
-            const minDate = moment(rawLineChartData[0].time_stamp).utc(true).startOf('week');
+            const minDate = moment.utc(rawLineChartData[0].time_stamp).startOf('week');
             const maxDate = moment.utc(rawLineChartData[rawLineChartData.length - 1].time_stamp).endOf('isoweek');
             maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
             setDateRangeAverageData({
@@ -2384,8 +2384,8 @@ const PlugRule = () => {
 
     const getOffperiodsWithRealDate = (result) => {
         const dateRange = dateRangeAverageData;
-        const maxdateString = new Date(dateRange.maxDate);
-        const mindateString = new Date(dateRange.minDate);
+        const maxdateString = moment.utc(dateRange.maxDate);
+        const mindateString = moment.utc(dateRange.minDate);
         const rangeDates = getDatesInRange(mindateString, maxdateString);
         const offPeriods = [];
         rangeDates.forEach((day) => {
