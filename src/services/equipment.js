@@ -22,7 +22,6 @@ export function getEqupmentDataRequest(
     locationTypeFilterString,
     floorTypeFilterString,
     spaceTypeFilterString,
-    spaceTypeTypeFilterString,
     tagsFilterString,
     getParams,
     withPagination
@@ -38,7 +37,6 @@ export function getEqupmentDataRequest(
     const filteredData = {
         floor_id: floorTypeFilterString,
         space_id: spaceTypeFilterString,
-        space_type_id: spaceTypeTypeFilterString,
     };
     if (equipmentTypeFilterString.length) {
         filteredData['equipment_types'] = equipmentTypeFilterString;
@@ -149,7 +147,6 @@ export function getFiltersForEquipmentRequest(args) {
                     end_use: args.endUseFilterString,
                     floor_id: args.floorTypeFilterString,
                     space_id: args.spaceTypeFilterString,
-                    space_type_id: args.spaceTypeTypeFilterString,
                     tags: args.tagsFilterString,
                 },
                 _.identity

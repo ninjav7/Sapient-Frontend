@@ -163,9 +163,9 @@ const Equipment = () => {
     const [isLoadingEndUseData, setIsLoadingEndUseData] = useState(true);
     const [isFilterFetching, setFetchingFilters] = useState(false);
 
-    const [floorTypeFilterString, setFloorTypeFilterString] = useState('');
-    const [spaceFilterString, setSpaceFilterString] = useState('');
-    const [spaceTypeFilterString, setSpaceTypeFilterString] = useState('');
+    const [floorString, setFloorString] = useState([]);
+    const [spaceString, setSpaceString] = useState([]);
+
     const [tagsFilterString, setTagsTypeFilterString] = useState('');
 
     const [equpimentDataNow, setEqupimentDataNow] = useAtom(equipmentDataGlobal);
@@ -250,9 +250,8 @@ const Equipment = () => {
             endUseFilterString,
             deviceIdFilterString,
             locationTypeFilterString,
-            floorTypeFilterString,
-            spaceFilterString,
-            spaceTypeFilterString,
+            floorString,
+            spaceString,
             tagsFilterString,
             {
                 ...sorting,
@@ -414,13 +413,20 @@ const Equipment = () => {
             deviceMacAddress,
             equipmentTypeFilterString,
             endUseFilterString,
-            floorTypeFilterString,
-            spaceTypeFilterString,
-            spaceTypeFilterString,
+            floorTypeFilterString:floorString,
+            spaceTypeFilterString:spaceString,
             tagsFilterString,
         });
 
         filters.data.forEach((filterOptions) => {
+
+            const sortedFloors = filterOptions?.installed_floor
+                .slice()
+                .sort((a, b) => a.floor_name.localeCompare(b.floor_name));
+            const sortedSpaces = filterOptions?.installed_space
+                .slice()
+                .sort((a, b) => a.space_name.localeCompare(b.space_name));
+
             const filterOptionsFetched = [
                 {
                     label: 'Equipment Type',
@@ -483,6 +489,52 @@ const Equipment = () => {
                     onClose: (options) => filterHandler(setTagsTypeFilterString, options),
                     onDelete: () => setTagsTypeFilterString(''),
                 },
+                {
+                    label: 'Floors',
+                    value: 'floor',
+                    placeholder: 'All Floors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: sortedFloors.map((filterItem) => ({
+                        value: filterItem.floor_id,
+                        label: filterItem.floor_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let sensors = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                sensors.push(opt[i].value);
+                            }
+                            setFloorString(sensors);
+                        }
+                    },
+                    onDelete: () => {
+                        setFloorString([]);
+                    },
+                },
+                {
+                    label: 'Spaces',
+                    value: 'space',
+                    placeholder: 'All Spaces',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: sortedSpaces.map((filterItem) => ({
+                        value: filterItem.space_id,
+                        label: filterItem.space_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let sensors = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                sensors.push(opt[i].value);
+                            }
+                            setSpaceString(sensors);
+                        }
+                    },
+                    onDelete: () => {
+                        setSpaceString([]);
+                    },
+                },
             ];
 
             setFilterOptions(filterOptionsFetched);
@@ -504,9 +556,8 @@ const Equipment = () => {
         equipmentTypeFilterString,
         endUseFilterString,
         locationTypeFilterString,
-        floorTypeFilterString,
-        spaceFilterString,
-        spaceTypeFilterString,
+        floorString,
+        spaceString,
         tagsFilterString,
     ]);
 
@@ -605,9 +656,8 @@ const Equipment = () => {
             equipmentTypeFilterString,
             deviceIdFilterString,
             locationTypeFilterString,
-            floorTypeFilterString,
-            spaceFilterString,
-            spaceTypeFilterString,
+            floorString,
+            spaceString,
             tagsFilterString,
             {
                 ...sorting,
