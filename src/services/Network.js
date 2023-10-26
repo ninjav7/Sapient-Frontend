@@ -1,4 +1,4 @@
-export const BaseUrl = 'https://4qb1l6k7of.execute-api.us-east-2.amazonaws.com/dev/';
+export const BaseUrl = 'https://sapient-dev-service.stacksapien.com';
 export const SingularityBaseUrl = 'https://api.singularity.energy/v2/';
 // Auth
 export const signin = '/api/user_role/user/signin';
