@@ -1639,6 +1639,7 @@ const EditPanel = () => {
                 panelObj={panelObj}
                 bldgId={bldgId}
                 fetchSinglePanelData={fetchSinglePanelData}
+                fetchBreakersData={fetchBreakersData}
             />
 
             <DeletePanel
