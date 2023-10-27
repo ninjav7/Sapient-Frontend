@@ -139,11 +139,23 @@ const ConfigureAlerts = (props) => {
     const [targetType, setTargetType] = useState('');
     const [isFetchingData, setFetching] = useState(false);
 
+    const [originalBuildingList, setOriginalBuildingsList] = useState([]); // Fetched from backend
     const [buildingsList, setBuildingsList] = useState([]);
     const [buildingTypeList, setBuildingTypeList] = useState([]);
 
     const [equipmentsList, setEquipmentsList] = useState([]);
     const [equipmentTypeList, setEquipmentTypeList] = useState([]);
+
+    const handleBldgTypeListUpdate = (newBldgTypeList = [], originalBldgList) => {
+        let newBldgList = [];
+        if (newBldgTypeList.length !== 0) {
+            originalBldgList.forEach((bldgObj) => {
+                const isExist = newBldgTypeList.some((bldgTypeObj) => bldgTypeObj?.value === bldgObj?.building_type_id);
+                if (isExist) newBldgList.push(bldgObj);
+            });
+        }
+        setBuildingsList(newBldgList);
+    };
 
     const renderTargetedBuildingsList = (alert_obj) => {
         const targetListCount = alert_obj?.target?.lists?.length ?? 0;
@@ -184,6 +196,7 @@ const ConfigureAlerts = (props) => {
                                 value: el?.building_id,
                                 building_type_id: el?.building_type_id,
                             }));
+                            setOriginalBuildingsList(newMappedBldgsData);
                             setBuildingsList(newMappedBldgsData);
 
                             updateAlertWithBuildingData(newMappedBuildingTypesData, newMappedBldgsData);
@@ -217,7 +230,7 @@ const ConfigureAlerts = (props) => {
                                 <div className="d-flex justify-content-between align-items-center">
                                     <div>
                                         <Typography.Subheader
-                                            size={Typography.Sizes.md}>{`Target`}</Typography.Subheader>
+                                            size={Typography.Sizes.md}>{`Building`}</Typography.Subheader>
                                         <Brick sizeInRem={0.25} />
                                         <Typography.Body size={Typography.Sizes.md} className="text-muted">
                                             {renderTargetedBuildingsList(alertObj)}
@@ -299,7 +312,7 @@ const ConfigureAlerts = (props) => {
                                                     <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
                                                         <div className="w-100">
                                                             <Typography.Body size={Typography.Sizes.sm}>
-                                                                {`Select Building Type`}
+                                                                {`Building Type`}
                                                             </Typography.Body>
                                                             <Brick sizeInRem={0.25} />
                                                             <Select.Multi
@@ -309,11 +322,13 @@ const ConfigureAlerts = (props) => {
                                                                 className="w-100"
                                                                 isSearchable={true}
                                                                 options={buildingTypeList}
-                                                                onChange={(selectedBldgTypeList) => {
-                                                                    handleTargetChange(
-                                                                        'typesList',
-                                                                        selectedBldgTypeList
+                                                                onChange={(newBldgTypeList) => {
+                                                                    handleTargetChange('lists', []);
+                                                                    handleBldgTypeListUpdate(
+                                                                        newBldgTypeList,
+                                                                        originalBuildingList
                                                                     );
+                                                                    handleTargetChange('typesList', newBldgTypeList);
                                                                 }}
                                                                 value={alertObj?.target?.typesList ?? []}
                                                             />
@@ -321,7 +336,7 @@ const ConfigureAlerts = (props) => {
 
                                                         <div className="w-100">
                                                             <Typography.Body size={Typography.Sizes.sm}>
-                                                                {`Select Building`}
+                                                                {`Building`}
                                                             </Typography.Body>
                                                             <Brick sizeInRem={0.25} />
                                                             <Select.Multi
@@ -735,7 +750,6 @@ const AddAlerts = () => {
     const [activeTab, setActiveTab] = useState(0);
     const [notifyType, setNotifyType] = useState('none');
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
-    console.log('SSR alertObj => ', alertObj);
 
     const handleTargetChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
