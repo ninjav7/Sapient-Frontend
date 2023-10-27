@@ -15,6 +15,7 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
+import { ReactComponent as KWH_SVG } from '../../../assets/icon/kwh.svg';
 import { ReactComponent as BanSVG } from '../../../assets/icon/ban.svg';
 import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
@@ -480,67 +481,64 @@ const ConfigureAlerts = (props) => {
 
                                 <Brick sizeInRem={1.25} />
 
-                                <div className="d-flex w-100 align-items-center" style={{ gap: '0.75rem' }}>
-                                    <div style={{ width: '35%' }}>
-                                        <Select
-                                            id="endUseSelect"
-                                            placeholder="Select a Condition"
-                                            name="select"
-                                            options={alertObj?.target?.type === '' ? [] : alertConditions}
-                                            className="w-100"
-                                            onChange={(e) => {
-                                                handleConditionChange('type', e.value);
-                                            }}
-                                            currentValue={alertConditions.filter(
-                                                (option) => option.value === alertObj?.condition?.type
-                                            )}
-                                        />
-                                    </div>
+                                {/* <div className="d-flex w-100 align-items-center" style={{ gap: '0.75rem' }}> */}
+                                <div
+                                    className={`container-grid${
+                                        alertObj?.condition?.filterType === `number` ? `-with-value` : ``
+                                    }`}>
+                                    <Select
+                                        id="endUseSelect"
+                                        placeholder="Select a Condition"
+                                        name="select"
+                                        options={alertObj?.target?.type === '' ? [] : alertConditions}
+                                        className="w-100"
+                                        onChange={(e) => {
+                                            handleConditionChange('type', e.value);
+                                        }}
+                                        currentValue={alertConditions.filter(
+                                            (option) => option.value === alertObj?.condition?.type
+                                        )}
+                                    />
+
                                     {alertObj?.target?.type !== '' && (
                                         <>
-                                            <div style={{ width: '25%' }}>
-                                                <Select
-                                                    id="condition_lvl"
-                                                    name="select"
-                                                    options={conditionLevelsList}
-                                                    className="w-100"
-                                                    onChange={(e) => {
-                                                        handleConditionChange('level', e.value);
-                                                    }}
-                                                    currentValue={conditionLevelsList.filter(
-                                                        (option) => option.value === alertObj?.condition?.level
-                                                    )}
-                                                />
-                                            </div>
-                                            <div style={{ width: '25%' }}>
-                                                <Select
-                                                    id="filter_type"
-                                                    name="select"
-                                                    options={filtersForEnergyConsumption}
-                                                    className="w-100"
-                                                    onChange={(e) => {
-                                                        handleConditionChange('filterType', e.value);
-                                                    }}
-                                                    currentValue={filtersForEnergyConsumption.filter(
-                                                        (option) => option.value === alertObj?.condition?.filterType
-                                                    )}
-                                                />
-                                            </div>
+                                            <Select
+                                                id="condition_lvl"
+                                                name="select"
+                                                options={conditionLevelsList}
+                                                className="w-100"
+                                                onChange={(e) => {
+                                                    handleConditionChange('level', e.value);
+                                                }}
+                                                currentValue={conditionLevelsList.filter(
+                                                    (option) => option.value === alertObj?.condition?.level
+                                                )}
+                                            />
+                                            <Select
+                                                id="filter_type"
+                                                name="select"
+                                                options={filtersForEnergyConsumption}
+                                                className="w-100"
+                                                onChange={(e) => {
+                                                    handleConditionChange('filterType', e.value);
+                                                }}
+                                                currentValue={filtersForEnergyConsumption.filter(
+                                                    (option) => option.value === alertObj?.condition?.filterType
+                                                )}
+                                            />
                                             {alertObj?.condition?.filterType === 'number' && (
-                                                <div>
-                                                    <Inputs
-                                                        type="number"
-                                                        placeholder="Enter value"
-                                                        className="custom-input-width"
-                                                        inputClassName="custom-input-field"
-                                                        value={alertObj?.condition?.thresholdValue}
-                                                        onChange={(e) => {
-                                                            handleConditionChange('thresholdValue', e.target.value);
-                                                        }}
-                                                    />
-                                                </div>
+                                                <Inputs
+                                                    type="number"
+                                                    placeholder="Enter value"
+                                                    className="custom-input-width w-100"
+                                                    inputClassName="custom-input-field"
+                                                    value={alertObj?.condition?.thresholdValue}
+                                                    onChange={(e) => {
+                                                        handleConditionChange('thresholdValue', e.target.value);
+                                                    }}
+                                                    elementEnd={<KWH_SVG />}
+                                                />
                                             )}
-                                            {alertObj?.condition?.filterType === 'number' && <span>{`kWh`}</span>}
                                         </>
                                     )}
                                 </div>
