@@ -295,60 +295,81 @@ const ConfigureAlerts = (props) => {
                                             {isFetchingData ? (
                                                 <Skeleton count={2} width={1000} height={20} />
                                             ) : (
-                                                <div
-                                                    className="d-flex justify-content-between w-100"
-                                                    style={{ gap: '1.25rem' }}>
+                                                <div className="d-flex w-100 justify-content-between">
                                                     <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
-                                                        <Select.Multi
-                                                            id="endUseSelect"
-                                                            placeholder="Select Building Type"
-                                                            name="select"
-                                                            className="w-100"
-                                                            isSearchable={true}
-                                                            options={buildingTypeList}
-                                                            onChange={(selectedBldgTypeList) => {
-                                                                handleTargetChange('typesList', selectedBldgTypeList);
-                                                            }}
-                                                            value={alertObj?.target?.typesList ?? []}
-                                                        />
+                                                        <div className="w-100">
+                                                            <Typography.Body size={Typography.Sizes.sm}>
+                                                                {`Select Building Type`}
+                                                            </Typography.Body>
+                                                            <Brick sizeInRem={0.25} />
+                                                            <Select.Multi
+                                                                id="endUseSelect"
+                                                                placeholder="Select Building Type"
+                                                                name="select"
+                                                                className="w-100"
+                                                                isSearchable={true}
+                                                                options={buildingTypeList}
+                                                                onChange={(selectedBldgTypeList) => {
+                                                                    handleTargetChange(
+                                                                        'typesList',
+                                                                        selectedBldgTypeList
+                                                                    );
+                                                                }}
+                                                                value={alertObj?.target?.typesList ?? []}
+                                                            />
+                                                        </div>
 
-                                                        <Select.Multi
-                                                            id="endUseSelect"
-                                                            placeholder="Select Building"
-                                                            name="select"
-                                                            className="w-100"
-                                                            isSearchable={true}
-                                                            options={buildingsList}
-                                                            onChange={(selectedBldgTypeList) => {
-                                                                handleTargetChange('lists', selectedBldgTypeList);
-                                                            }}
-                                                            value={alertObj?.target?.lists ?? []}
-                                                        />
+                                                        <div className="w-100">
+                                                            <Typography.Body size={Typography.Sizes.sm}>
+                                                                {`Select Building`}
+                                                            </Typography.Body>
+                                                            <Brick sizeInRem={0.25} />
+                                                            <Select.Multi
+                                                                id="endUseSelect"
+                                                                placeholder="Select Building"
+                                                                name="select"
+                                                                className="w-100"
+                                                                isSearchable={true}
+                                                                options={buildingsList}
+                                                                onChange={(selectedBldgTypeList) => {
+                                                                    handleTargetChange('lists', selectedBldgTypeList);
+                                                                }}
+                                                                value={alertObj?.target?.lists ?? []}
+                                                            />
+                                                        </div>
                                                     </div>
 
-                                                    <div className="d-flex" style={{ gap: '0.75rem' }}>
-                                                        <Button
-                                                            label={'Cancel'}
-                                                            size={Button.Sizes.md}
-                                                            type={Button.Type.secondaryGrey}
-                                                            className="w-100"
-                                                        />
-                                                        <Button
-                                                            label={'Add target'}
-                                                            size={Button.Sizes.md}
-                                                            type={Button.Type.primary}
-                                                            className="w-100"
-                                                            onClick={() => {
-                                                                handleTargetChange(
-                                                                    'submitted',
-                                                                    !alertObj?.target.submitted
-                                                                );
-                                                            }}
-                                                            disabled={
-                                                                alertObj?.target?.lists &&
-                                                                alertObj?.target?.lists.length === 0
-                                                            }
-                                                        />
+                                                    <div>
+                                                        <Brick sizeInRem={1.35} />
+                                                        <div
+                                                            className="d-flex"
+                                                            style={{
+                                                                gap: '0.5rem',
+                                                                maxHeight: '2.25rem',
+                                                            }}>
+                                                            <Button
+                                                                label={'Cancel'}
+                                                                size={Button.Sizes.md}
+                                                                type={Button.Type.secondaryGrey}
+                                                                className="w-100"
+                                                            />
+                                                            <Button
+                                                                label={'Add target'}
+                                                                size={Button.Sizes.md}
+                                                                type={Button.Type.primary}
+                                                                className="w-100"
+                                                                onClick={() => {
+                                                                    handleTargetChange(
+                                                                        'submitted',
+                                                                        !alertObj?.target.submitted
+                                                                    );
+                                                                }}
+                                                                disabled={
+                                                                    alertObj?.target?.lists &&
+                                                                    alertObj?.target?.lists.length === 0
+                                                                }
+                                                            />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )}
