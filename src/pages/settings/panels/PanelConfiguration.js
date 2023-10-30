@@ -3,10 +3,10 @@ import Modal from 'react-bootstrap/Modal';
 
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
-import Select from '../../../sharedComponents/form/select';
-import Typography from '../../../sharedComponents/typography';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { Notification } from '../../../sharedComponents/notification/Notification';
+import Typography from '../../../sharedComponents/typography';
+import Select from '../../../sharedComponents/form/select';
 
 import { compareObjData } from '../../../helpers/helpers';
 import { voltsOption } from './utils';

@@ -233,7 +233,7 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
                             onChange={(e) => {
                                 handleChange('voltage', e.value);
                             }}
-                            isSearchable={false}
+                            isSearchable={true}
                             error={errorObj?.voltage}
                         />
                     </div>
@@ -257,7 +257,7 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
                             onChange={(e) => {
                                 handleChange('panel_type', e.value);
                             }}
-                            isSearchable={false}
+                            isSearchable={true}
                             error={errorObj?.panel_type}
                         />
                     </div>
