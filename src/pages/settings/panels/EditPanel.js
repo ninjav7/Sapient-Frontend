@@ -34,6 +34,7 @@ import {
     getVoltageConfigValue,
     validateConfiguredEquip,
     validateDevicesForBreaker,
+    voltsOption,
 } from './utils';
 import { comparePanelData } from './utils';
 import { userPermissionData } from '../../../store/globalState';
@@ -44,7 +45,7 @@ import Select from '../../../sharedComponents/form/select';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import BreakerConfiguration from './BreakerConfiguration';
 import UnlinkAllBreakers from './UnlinkAllBreakers';
-import PanelConfiguration from './PanelConfiguration';
+import PanelConfiguration, { VoltageChangeAlert } from './PanelConfiguration';
 import { UserStore } from '../../../store/UserStore';
 import { DangerZone } from '../../../sharedComponents/dangerZone';
 import DeletePanel from './DeletePanel';
@@ -79,6 +80,11 @@ const EditPanel = () => {
     const [showPanelConfigModal, setPanelConfigModalState] = useState(false);
     const closePanelConfigModal = () => setPanelConfigModalState(false);
     const openPanelConfigModal = () => setPanelConfigModalState(true);
+
+    // Panel Voltage Change Alert Modal
+    const [showAlertModal, setShowAlert] = useState(false);
+    const closeAlertPopup = () => setShowAlert(false);
+    const showAlertPopup = () => setShowAlert(true);
 
     // Unlink Alert Modal
     const [showUnlinkAlert, setShowUnlinkAlert] = useState(false);
@@ -147,6 +153,11 @@ const EditPanel = () => {
         isEditingModeState: false,
         isViewDeviceIdsState: false,
     });
+
+    const [panelData, setPanelData] = useState({});
+    const [isUpdating, setUpdating] = useState(false);
+
+    const [allowedVoltagesList, setAllowedVoltagesList] = useState(voltsOption);
 
     const onCancelClick = () => {
         history.push({
@@ -1330,6 +1341,88 @@ const EditPanel = () => {
         window.scrollTo(0, 0);
     };
 
+    const handlePanelUpdate = async () => {
+        if (!panelData?.panel_id) return;
+
+        setUpdating(true);
+
+        const params = `?panel_id=${panelData?.panel_id}`;
+        let payload = {};
+
+        if (panelObj?.rated_amps !== panelData?.rated_amps) payload.rated_amps = panelData?.rated_amps;
+        if (panelObj?.voltage !== panelData?.voltage) payload.voltage = panelData?.voltage;
+
+        await updatePanelDetails(params, payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Panel configuration updated successfully.';
+                        s.notificationType = 'success';
+                    });
+                    fetchSinglePanelData(panelData?.panel_id, bldgId);
+                    fetchBreakersData(panelData?.panel_id, bldgId);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Failed to update Panel configuration due to Internal Server Error.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch(() => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to update Panel configuration due to Internal Server Error.';
+                    s.notificationType = 'error';
+                });
+            })
+            .finally(() => {
+                setUpdating(false);
+                setPanelData({});
+                closePanelConfigModal();
+                closeAlertPopup();
+            });
+    };
+
+    const updatePanelConfiguration = () => {
+        if (!panelData?.panel_id) return;
+
+        if (panelObj?.voltage !== panelData?.voltage) {
+            closePanelConfigModal();
+            showAlertPopup();
+        } else {
+            handlePanelUpdate();
+        }
+    };
+
+    const onCancelVoltageChange = () => {
+        closeAlertPopup();
+        setPanelData({});
+    };
+
+    useEffect(() => {
+        if (!breakersList || !panelObj || breakersList.length === 0 || !panelObj.voltage) return;
+
+        if (panelObj.voltage === '120/240') {
+            setAllowedVoltagesList(voltsOption);
+        } else {
+            const hasNonType1Breaker = breakersList.some((el) => el?.breaker_type !== 1);
+
+            if (hasNonType1Breaker) {
+                const allowedVoltagesListWithout120240 = allowedVoltagesList.filter((el) => el.value !== '120/240');
+                setAllowedVoltagesList(allowedVoltagesListWithout120240);
+            } else {
+                setAllowedVoltagesList(voltsOption);
+            }
+        }
+    }, [panelObj, breakersList]);
+
+    useEffect(() => {
+        if (showPanelConfigModal && panelObj?.panel_id) setPanelData(panelObj);
+    }, [showPanelConfigModal]);
+
     useEffect(() => {
         if (panelObj?.panel_id) {
             BreadcrumbStore.update((bs) => {
@@ -1636,11 +1729,20 @@ const EditPanel = () => {
             <PanelConfiguration
                 showPanelConfigModal={showPanelConfigModal}
                 closePanelConfigModal={closePanelConfigModal}
-                panelObj={panelObj}
-                bldgId={bldgId}
-                fetchSinglePanelData={fetchSinglePanelData}
-                fetchBreakersData={fetchBreakersData}
-                breakersList={breakersList}
+                originalPanelObj={panelObj}
+                panelData={panelData}
+                setPanelData={setPanelData}
+                updatePanelConfiguration={updatePanelConfiguration}
+                isUpdating={isUpdating}
+                allowedVoltagesList={allowedVoltagesList}
+            />
+
+            <VoltageChangeAlert
+                isModalOpen={showAlertModal}
+                onCancel={closeAlertPopup}
+                handlePanelUpdate={handlePanelUpdate}
+                onCancelVoltageChange={onCancelVoltageChange}
+                isUpdating={isUpdating}
             />
 
             <DeletePanel
