@@ -6,6 +6,7 @@ import { Button } from '../../../sharedComponents/button';
 import Select from '../../../sharedComponents/form/select';
 import Typography from '../../../sharedComponents/typography';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
+import { Notification } from '../../../sharedComponents/notification/Notification';
 
 import { compareObjData } from '../../../helpers/helpers';
 
@@ -19,17 +20,18 @@ export const VoltageChangeAlert = (props) => {
 
                 <Brick sizeInRem={2} />
 
-                <Typography.Body size={Typography.Sizes.lg}>
-                    {`Updating the panel voltage will automatically update the breaker voltages which will impact power and energy calculations.`}
-                </Typography.Body>
+                <Notification
+                    type={Notification.Types.warning}
+                    component={Notification.ComponentTypes.alert}
+                    isShownCloseBtn={false}
+                    actionButtons={
+                        <Typography.Body size={Typography.Sizes.lg}>
+                            {`Updating the panel voltage will automatically update the breaker voltages which will impact power and energy calculations.`}
+                        </Typography.Body>
+                    }
+                />
 
-                <Brick sizeInRem={1} />
-
-                <Typography.Body size={Typography.Sizes.lg}>
-                    {`Are you sure you want to change panel voltage ?`}
-                </Typography.Body>
-
-                <Brick sizeInRem={2.5} />
+                <Brick sizeInRem={2} />
 
                 <div className="d-flex justify-content-between w-100">
                     <Button
