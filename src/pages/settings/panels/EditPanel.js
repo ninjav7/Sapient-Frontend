@@ -1640,6 +1640,7 @@ const EditPanel = () => {
                 bldgId={bldgId}
                 fetchSinglePanelData={fetchSinglePanelData}
                 fetchBreakersData={fetchBreakersData}
+                breakersList={breakersList}
             />
 
             <DeletePanel

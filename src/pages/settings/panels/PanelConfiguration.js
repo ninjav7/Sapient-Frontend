@@ -14,6 +14,36 @@ import { updatePanelDetails } from './services';
 import { voltsOption } from './utils';
 import { compareObjData } from '../../../helpers/helpers';
 
+const VoltageChangeAlert = (props) => {
+    const { isModalOpen = false, onCancel } = props;
+
+    return (
+        <Modal show={isModalOpen} onHide={onCancel} centered backdrop="static" keyboard={false}>
+            <Modal.Body className="p-4">
+                <Typography.Header size={Typography.Sizes.lg}>{`Panel Voltage Update Warning`}</Typography.Header>
+                <Brick sizeInRem={2} />
+                <Typography.Body size={Typography.Sizes.lg}>
+                    {`Updating the panel voltage will automatically update the breaker voltages which will impact power and energy calculations.`}
+                </Typography.Body>
+            </Modal.Body>
+            <Modal.Footer className="pb-4 pr-4">
+                <Button
+                    label="Cancel"
+                    size={Button.Sizes.lg}
+                    type={Button.Type.primaryDistructive}
+                    onClick={onCancel}
+                />
+                <Button
+                    label="Update"
+                    size={Button.Sizes.lg}
+                    type={Button.Type.primaryDistructive}
+                    onClick={onCancel}
+                />
+            </Modal.Footer>
+        </Modal>
+    );
+};
+
 const PanelConfiguration = (props) => {
     const {
         showPanelConfigModal = false,
@@ -22,10 +52,13 @@ const PanelConfiguration = (props) => {
         bldgId,
         fetchSinglePanelData,
         fetchBreakersData,
+        breakersList = [],
     } = props;
 
     const [panelData, setPanelData] = useState({});
     const [isProcessing, setIsProcessing] = useState(false);
+
+    const [allowedVoltagesList, setAllowedVoltagesList] = useState(voltsOption);
 
     const handlePanelUpdate = async () => {
         if (!panelData?.panel_id) return;
@@ -72,6 +105,23 @@ const PanelConfiguration = (props) => {
     };
 
     useEffect(() => {
+        if (!breakersList || !panelObj || breakersList.length === 0 || !panelObj.voltage) return;
+
+        if (panelObj.voltage === '120/240') {
+            setAllowedVoltagesList(voltsOption);
+        } else {
+            const hasNonType1Breaker = breakersList.some((el) => el?.breaker_type !== 1);
+
+            if (hasNonType1Breaker) {
+                const allowedVoltagesListWithout120240 = allowedVoltagesList.filter((el) => el.value !== '120/240');
+                setAllowedVoltagesList(allowedVoltagesListWithout120240);
+            } else {
+                setAllowedVoltagesList(voltsOption);
+            }
+        }
+    }, [panelObj, breakersList]);
+
+    useEffect(() => {
         if (showPanelConfigModal && panelObj?.panel_id) setPanelData(panelObj);
     }, [showPanelConfigModal]);
 
@@ -101,8 +151,8 @@ const PanelConfiguration = (props) => {
                     <Brick sizeInRem={0.25} />
                     <Select
                         placeholder="Select Volts"
-                        options={voltsOption}
-                        currentValue={voltsOption.filter((option) => option.value === panelData?.voltage)}
+                        options={allowedVoltagesList}
+                        currentValue={allowedVoltagesList.filter((option) => option?.value === panelData?.voltage)}
                         onChange={(e) => {
                             setPanelData({ ...panelData, voltage: e.value });
                         }}
