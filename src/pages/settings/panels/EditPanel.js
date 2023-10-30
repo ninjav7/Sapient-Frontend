@@ -157,8 +157,6 @@ const EditPanel = () => {
     const [panelData, setPanelData] = useState({});
     const [isUpdating, setUpdating] = useState(false);
 
-    const [allowedVoltagesList, setAllowedVoltagesList] = useState(voltsOption);
-
     const onCancelClick = () => {
         history.push({
             pathname: `/settings/panels/${bldgId}`,
@@ -1403,23 +1401,6 @@ const EditPanel = () => {
     };
 
     useEffect(() => {
-        if (!breakersList || !panelObj || breakersList.length === 0 || !panelObj.voltage) return;
-
-        if (panelObj.voltage === '120/240') {
-            setAllowedVoltagesList(voltsOption);
-        } else {
-            const hasNonType1Breaker = breakersList.some((el) => el?.breaker_type !== 1);
-
-            if (hasNonType1Breaker) {
-                const allowedVoltagesListWithout120240 = allowedVoltagesList.filter((el) => el.value !== '120/240');
-                setAllowedVoltagesList(allowedVoltagesListWithout120240);
-            } else {
-                setAllowedVoltagesList(voltsOption);
-            }
-        }
-    }, [panelObj, breakersList]);
-
-    useEffect(() => {
         if (showPanelConfigModal && panelObj?.panel_id) setPanelData(panelObj);
     }, [showPanelConfigModal]);
 
@@ -1734,7 +1715,7 @@ const EditPanel = () => {
                 setPanelData={setPanelData}
                 updatePanelConfiguration={updatePanelConfiguration}
                 isUpdating={isUpdating}
-                allowedVoltagesList={allowedVoltagesList}
+                breakersList={breakersList}
             />
 
             <VoltageChangeAlert

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 
 import Brick from '../../../sharedComponents/brick';
@@ -9,6 +9,7 @@ import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { Notification } from '../../../sharedComponents/notification/Notification';
 
 import { compareObjData } from '../../../helpers/helpers';
+import { voltsOption } from './utils';
 
 export const VoltageChangeAlert = (props) => {
     const { isModalOpen = false, onCancel, handlePanelUpdate, onCancelVoltageChange, isUpdating } = props;
@@ -67,8 +68,26 @@ const PanelConfiguration = (props) => {
         setPanelData,
         updatePanelConfiguration,
         isUpdating = false,
-        allowedVoltagesList = [],
+        breakersList = [],
     } = props;
+
+    const [voltageError, setVoltageError] = useState(null);
+    const [tripleBreakerExist, setTripleBreakerExist] = useState(false);
+
+    const handleVoltageChange = (original_voltage, new_selected_voltage, has_three_phase_breaker) => {
+        if (original_voltage !== '120/240' && new_selected_voltage === '120/240' && has_three_phase_breaker) {
+            setVoltageError({
+                text: `Error: Cannot select 120/140V configuration with 3-phase breakers. Update breaker configurations to 2-pole or single phase first.`,
+            });
+        }
+    };
+
+    useEffect(() => {
+        if (breakersList && breakersList.length !== 0) {
+            const hasTripleBreaker = breakersList.some((el) => el?.breaker_type === 3);
+            setTripleBreakerExist(hasTripleBreaker);
+        }
+    }, [breakersList]);
 
     return (
         <Modal show={showPanelConfigModal} onHide={closePanelConfigModal} backdrop="static" keyboard={false} centered>
@@ -96,12 +115,15 @@ const PanelConfiguration = (props) => {
                     <Brick sizeInRem={0.25} />
                     <Select
                         placeholder="Select Volts"
-                        options={allowedVoltagesList}
-                        currentValue={allowedVoltagesList.filter((option) => option?.value === panelData?.voltage)}
+                        options={voltsOption}
+                        currentValue={voltsOption.filter((option) => option?.value === panelData?.voltage)}
                         onChange={(e) => {
+                            setVoltageError(null);
                             setPanelData({ ...panelData, voltage: e.value });
+                            handleVoltageChange(originalPanelObj?.voltage, e.value, tripleBreakerExist);
                         }}
                         isSearchable={false}
+                        error={voltageError}
                     />
                 </div>
 
@@ -116,6 +138,7 @@ const PanelConfiguration = (props) => {
                         onClick={() => {
                             closePanelConfigModal();
                             setPanelData({});
+                            setVoltageError(null);
                         }}
                     />
 
@@ -124,7 +147,7 @@ const PanelConfiguration = (props) => {
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         className="w-100"
-                        disabled={compareObjData(originalPanelObj, panelData) || isUpdating}
+                        disabled={compareObjData(originalPanelObj, panelData) || voltageError}
                         onClick={updatePanelConfiguration}
                     />
                 </div>
