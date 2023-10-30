@@ -1,59 +1,93 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import Typography from '../../../sharedComponents/typography';
+
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
-import { UserStore } from '../../../store/UserStore';
-import { updatePanelDetails } from './services';
+import { Notification } from '../../../sharedComponents/notification/Notification';
+import Typography from '../../../sharedComponents/typography';
+import Select from '../../../sharedComponents/form/select';
+
+import { compareObjData } from '../../../helpers/helpers';
+import { voltsOption } from './utils';
+
+export const VoltageChangeAlert = (props) => {
+    const { isModalOpen = false, onCancel, handlePanelUpdate, onCancelVoltageChange, isUpdating } = props;
+
+    return (
+        <Modal show={isModalOpen} onHide={onCancel} centered backdrop="static" keyboard={false} size="md">
+            <div className="p-4">
+                <Typography.Header size={Typography.Sizes.lg}>{`Panel Voltage Change`}</Typography.Header>
+
+                <Brick sizeInRem={2} />
+
+                <Notification
+                    type={Notification.Types.warning}
+                    component={Notification.ComponentTypes.alert}
+                    isShownCloseBtn={false}
+                    actionButtons={
+                        <Typography.Body size={Typography.Sizes.lg}>
+                            {`Updating the panel voltage will automatically update the breaker voltages which will impact power and energy calculations.`}
+                        </Typography.Body>
+                    }
+                />
+
+                <Brick sizeInRem={2} />
+
+                <div className="d-flex justify-content-between w-100">
+                    <Button
+                        label="Cancel"
+                        size={Button.Sizes.lg}
+                        type={Button.Type.secondaryGrey}
+                        className="w-100"
+                        onClick={onCancelVoltageChange}
+                    />
+
+                    <Button
+                        label={isUpdating ? 'Updating...' : 'Update'}
+                        size={Button.Sizes.lg}
+                        type={Button.Type.primary}
+                        className="w-100"
+                        onClick={handlePanelUpdate}
+                        disabled={isUpdating}
+                    />
+                </div>
+
+                <Brick sizeInRem={0.5} />
+            </div>
+        </Modal>
+    );
+};
 
 const PanelConfiguration = (props) => {
-    const { showPanelConfigModal = false, closePanelConfigModal, panelObj, bldgId, fetchSinglePanelData } = props;
+    const {
+        showPanelConfigModal = false,
+        closePanelConfigModal,
+        originalPanelObj = {},
+        panelData = {},
+        setPanelData,
+        updatePanelConfiguration,
+        isUpdating = false,
+        breakersList = [],
+    } = props;
 
-    const [panelData, setPanelData] = useState({});
-    const [isProcessing, setIsProcessing] = useState(false);
+    const [voltageError, setVoltageError] = useState(null);
+    const [tripleBreakerExist, setTripleBreakerExist] = useState(false);
 
-    const handlePanelUpdate = async () => {
-        if (!panelData?.panel_id) return;
-
-        setIsProcessing(true);
-        const params = `?panel_id=${panelData?.panel_id}`;
-
-        await updatePanelDetails(params, { rated_amps: panelData?.rated_amps })
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = 'Rated Amps for Panel updated successfully.';
-                        s.notificationType = 'success';
-                    });
-                    fetchSinglePanelData(panelData?.panel_id, bldgId);
-                } else {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = 'Failed to update Rated Amps for Panel due to Internal Server Error.';
-                        s.notificationType = 'error';
-                    });
-                }
-            })
-            .catch(() => {
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Unable to update Rated Amps for Panel due to Internal Server Error.';
-                    s.notificationType = 'error';
-                });
-            })
-            .finally(() => {
-                setIsProcessing(false);
-                setPanelData({});
-                closePanelConfigModal();
+    const handleVoltageChange = (original_voltage, new_selected_voltage, has_three_phase_breaker) => {
+        if (original_voltage !== '120/240' && new_selected_voltage === '120/240' && has_three_phase_breaker) {
+            setVoltageError({
+                text: `Error: Cannot select 120/140V configuration with 3-phase breakers. Update breaker configurations to 2-pole or single phase first.`,
             });
+        }
     };
 
     useEffect(() => {
-        if (showPanelConfigModal && panelObj?.panel_id) setPanelData(panelObj);
-    }, [showPanelConfigModal]);
+        if (breakersList && breakersList.length !== 0) {
+            const hasTripleBreaker = breakersList.some((el) => el?.breaker_type === 3);
+            setTripleBreakerExist(hasTripleBreaker);
+        }
+    }, [breakersList]);
 
     return (
         <Modal show={showPanelConfigModal} onHide={closePanelConfigModal} backdrop="static" keyboard={false} centered>
@@ -74,6 +108,25 @@ const PanelConfiguration = (props) => {
                     value={panelData?.rated_amps}
                 />
 
+                <Brick sizeInRem={1.5} />
+
+                <div className="w-100">
+                    <Typography.Body size={Typography.Sizes.md}>Volts</Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                    <Select
+                        placeholder="Select Volts"
+                        options={voltsOption}
+                        currentValue={voltsOption.filter((option) => option?.value === panelData?.voltage)}
+                        onChange={(e) => {
+                            setVoltageError(null);
+                            setPanelData({ ...panelData, voltage: e.value });
+                            handleVoltageChange(originalPanelObj?.voltage, e.value, tripleBreakerExist);
+                        }}
+                        isSearchable={false}
+                        error={voltageError}
+                    />
+                </div>
+
                 <Brick sizeInRem={2.5} />
 
                 <div className="d-flex justify-content-between w-100">
@@ -85,20 +138,21 @@ const PanelConfiguration = (props) => {
                         onClick={() => {
                             closePanelConfigModal();
                             setPanelData({});
+                            setVoltageError(null);
                         }}
                     />
 
                     <Button
-                        label={isProcessing ? 'Updating...' : 'Update'}
+                        label={isUpdating ? 'Updating...' : 'Update'}
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         className="w-100"
-                        disabled={panelObj?.rated_amps === panelData?.rated_amps || isProcessing}
-                        onClick={handlePanelUpdate}
+                        disabled={compareObjData(originalPanelObj, panelData) || voltageError}
+                        onClick={updatePanelConfiguration}
                     />
                 </div>
 
-                <Brick sizeInRem={1} />
+                <Brick sizeInRem={0.5} />
             </div>
         </Modal>
     );

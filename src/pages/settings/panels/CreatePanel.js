@@ -233,7 +233,7 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
                             onChange={(e) => {
                                 handleChange('voltage', e.value);
                             }}
-                            isSearchable={true}
+                            isSearchable={false}
                             error={errorObj?.voltage}
                         />
                     </div>
@@ -251,13 +251,13 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
                         </Typography.Body>
                         <Brick sizeInRem={0.25} />
                         <Select
-                            placeholder="Select Panel Types"
+                            placeholder="Select Panel Type"
                             options={panelType}
                             currentValue={panelType.filter((option) => option.value === panelObj?.panel_type)}
                             onChange={(e) => {
                                 handleChange('panel_type', e.value);
                             }}
-                            isSearchable={true}
+                            isSearchable={false}
                             error={errorObj?.panel_type}
                         />
                     </div>
