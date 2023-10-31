@@ -159,15 +159,15 @@ const ConfigureAlerts = (props) => {
     };
 
     const renderTargetedBuildingsList = (alert_obj) => {
-        const targetListCount = alert_obj?.target?.lists?.length ?? 0;
+        const count = alert_obj?.target?.lists?.length ?? 0;
 
-        if (targetListCount === 0) {
-            return 'No building selected.';
-        } else if (targetListCount === 1) {
-            return alertObj.target.lists[0].label;
-        } else if (targetListCount > 1) {
-            return `${targetListCount} buildings selected.`;
-        }
+        let label = '';
+
+        if (count === 0) label = `No building selected.`;
+        else if (count === 1) label = alertObj.target.lists[0].label;
+        else if (count > 1) label = `${count} buildings selected.`;
+
+        return label;
     };
 
     useEffect(() => {
@@ -332,6 +332,7 @@ const ConfigureAlerts = (props) => {
                                                                     handleTargetChange('typesList', newBldgTypeList);
                                                                 }}
                                                                 value={alertObj?.target?.typesList ?? []}
+                                                                menuPlacement="auto"
                                                             />
                                                         </div>
 
@@ -351,6 +352,7 @@ const ConfigureAlerts = (props) => {
                                                                     handleTargetChange('lists', selectedBldgTypeList);
                                                                 }}
                                                                 value={alertObj?.target?.lists ?? []}
+                                                                menuPlacement="auto"
                                                             />
                                                         </div>
                                                     </div>
@@ -407,6 +409,7 @@ const ConfigureAlerts = (props) => {
                                                 isSearchable={true}
                                                 options={[]}
                                                 className="w-25"
+                                                menuPlacement="auto"
                                             />
 
                                             <Brick sizeInRem={1.25} />
@@ -422,6 +425,7 @@ const ConfigureAlerts = (props) => {
                                                         isSearchable={true}
                                                         options={[]}
                                                         className="w-100"
+                                                        menuPlacement="auto"
                                                     />
 
                                                     <Select
@@ -431,6 +435,7 @@ const ConfigureAlerts = (props) => {
                                                         isSearchable={true}
                                                         options={[]}
                                                         className="w-100"
+                                                        menuPlacement="auto"
                                                     />
                                                 </div>
 
@@ -498,6 +503,8 @@ const ConfigureAlerts = (props) => {
                                         currentValue={alertConditions.filter(
                                             (option) => option.value === alertObj?.condition?.type
                                         )}
+                                        isDisabled={alertObj?.target?.type === ''}
+                                        menuPlacement="auto"
                                     />
 
                                     {alertObj?.target?.type !== '' && (
@@ -513,6 +520,7 @@ const ConfigureAlerts = (props) => {
                                                 currentValue={conditionLevelsList.filter(
                                                     (option) => option.value === alertObj?.condition?.level
                                                 )}
+                                                menuPlacement="auto"
                                             />
                                             <Select
                                                 id="filter_type"
@@ -525,6 +533,7 @@ const ConfigureAlerts = (props) => {
                                                 currentValue={filtersForEnergyConsumption.filter(
                                                     (option) => option.value === alertObj?.condition?.filterType
                                                 )}
+                                                menuPlacement="auto"
                                             />
                                             {alertObj?.condition?.filterType === 'number' && (
                                                 <Inputs
@@ -611,8 +620,6 @@ const ConfigureAlerts = (props) => {
             </Row>
 
             <Brick sizeInRem={2} />
-
-            <RemoveAlert />
         </>
     );
 };
@@ -738,8 +745,6 @@ const NotificationSettings = (props) => {
             </Row>
 
             <Brick sizeInRem={2} />
-
-            <RemoveAlert />
         </>
     );
 };
