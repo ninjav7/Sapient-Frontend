@@ -251,7 +251,7 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
                         </Typography.Body>
                         <Brick sizeInRem={0.25} />
                         <Select
-                            placeholder="Select Panel Types"
+                            placeholder="Select Panel Type"
                             options={panelType}
                             currentValue={panelType.filter((option) => option.value === panelObj?.panel_type)}
                             onChange={(e) => {
