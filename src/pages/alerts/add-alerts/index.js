@@ -178,9 +178,13 @@ const RemoveAlert = () => {
 };
 
 const ConfigureAlerts = (props) => {
-    const { alertObj = {}, handleTargetChange, handleConditionChange, updateAlertWithBuildingData } = props;
-
-    console.log('SSR alertObj => ', alertObj);
+    const {
+        alertObj = {},
+        handleTargetChange,
+        handleConditionChange,
+        updateAlertWithBuildingData,
+        setTypeSelectedLabel,
+    } = props;
 
     const [targetType, setTargetType] = useState('');
     const [isFetchingData, setFetching] = useState(false);
@@ -215,6 +219,11 @@ const ConfigureAlerts = (props) => {
 
         return label;
     };
+
+    useEffect(() => {
+        const label = renderTargetedBuildingsList(alertObj, buildingsList);
+        setTypeSelectedLabel(label);
+    }, [alertObj?.target?.lists, buildingsList]);
 
     useEffect(() => {
         if (targetType === 'building') {
@@ -681,7 +690,9 @@ const ConfigureAlerts = (props) => {
 };
 
 const NotificationSettings = (props) => {
-    const { notifyType, setNotifyType } = props;
+    const { notifyType, setNotifyType, alertObj = {}, typeSelectedLabel = '' } = props;
+
+    const targetType = alertObj?.target?.type === `building` ? `Building` : `Equipment`;
 
     return (
         <>
@@ -699,18 +710,18 @@ const NotificationSettings = (props) => {
                             <div>
                                 <Typography.Subheader size={Typography.Sizes.md}>{`Target Type`}</Typography.Subheader>
                                 <Brick sizeInRem={0.25} />
-                                <Typography.Body
-                                    size={Typography.Sizes.md}
-                                    className="text-muted">{`Building`}</Typography.Body>
+                                <Typography.Body size={Typography.Sizes.md} className="text-muted">
+                                    {targetType}
+                                </Typography.Body>
                             </div>
 
                             <Brick sizeInRem={1} />
 
                             <div>
-                                <Typography.Subheader size={Typography.Sizes.md}>{`Building`}</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.md}>{targetType}</Typography.Subheader>
                                 <Brick sizeInRem={0.25} />
                                 <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                    {`123 Main St. Portland, OR`}
+                                    {typeSelectedLabel && typeSelectedLabel}
                                 </Typography.Body>
                             </div>
 
@@ -809,6 +820,7 @@ const AddAlerts = () => {
     const [activeTab, setActiveTab] = useState(0);
     const [notifyType, setNotifyType] = useState('none');
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
+    const [typeSelectedLabel, setTypeSelectedLabel] = useState(null);
 
     const handleTargetChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
@@ -899,9 +911,17 @@ const AddAlerts = () => {
                         handleTargetChange={handleTargetChange}
                         handleConditionChange={handleConditionChange}
                         updateAlertWithBuildingData={updateAlertWithBuildingData}
+                        setTypeSelectedLabel={setTypeSelectedLabel}
                     />
                 )}
-                {activeTab === 1 && <NotificationSettings notifyType={notifyType} setNotifyType={setNotifyType} />}
+                {activeTab === 1 && (
+                    <NotificationSettings
+                        notifyType={notifyType}
+                        setNotifyType={setNotifyType}
+                        alertObj={alertObj}
+                        typeSelectedLabel={typeSelectedLabel}
+                    />
+                )}
             </div>
         </React.Fragment>
     );
