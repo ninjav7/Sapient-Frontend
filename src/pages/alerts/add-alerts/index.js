@@ -19,6 +19,7 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as KWH_SVG } from '../../../assets/icon/kwh.svg';
 import { ReactComponent as BanSVG } from '../../../assets/icon/ban.svg';
 import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
+import { ReactComponent as CheckMarkSVG } from '../../../assets/icon/check-mark.svg';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 import { ReactComponent as UserProfileSVG } from '../../../assets/icon/user-profile.svg';
 import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/assets/icons/building-type.svg';
@@ -125,7 +126,14 @@ const CreateAlertHeader = (props) => {
                     style={{
                         color: activeTab === 0 ? colorPalette.baseBlack : colorPalette.primaryGray500,
                     }}>
-                    {`Select Target and Condition`}
+                    {isAlertConfigured ? (
+                        <>
+                            <CheckMarkSVG className="mouse-pointer mr-2" width={15} height={15} />
+                            <span className="active-header-style">{`Select Target and Condition`}</span>
+                        </>
+                    ) : (
+                        `Select Target and Condition`
+                    )}
                 </Typography.Body>
 
                 <div className="arrow-line-style"></div>
