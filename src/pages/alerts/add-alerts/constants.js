@@ -28,6 +28,16 @@ export const defaultAlertObj = {
     },
 };
 
+export const defaultConditionObj = {
+    type: '',
+    level: 'above',
+    filterType: 'number',
+    thresholdValue: '',
+    threshold50: false,
+    threshold75: false,
+    threshold90: false,
+};
+
 export const conditionLevelsList = [
     {
         label: 'Above',

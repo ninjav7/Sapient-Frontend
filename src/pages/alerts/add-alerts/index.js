@@ -10,6 +10,7 @@ import { Button } from '../../../sharedComponents/button';
 import Brick from '../../../sharedComponents/brick';
 import Select from '../../../sharedComponents/form/select';
 import Inputs from '../../../sharedComponents/form/input/Input';
+import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -27,11 +28,16 @@ import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/ass
 import { fetchBuildingsList } from '../../../services/buildings';
 import { getAllBuildingTypes } from '../../settings/general-settings/services';
 
-import { alertConditions, conditionLevelsList, defaultAlertObj, filtersForEnergyConsumption } from './constants';
+import {
+    alertConditions,
+    conditionLevelsList,
+    defaultAlertObj,
+    defaultConditionObj,
+    filtersForEnergyConsumption,
+} from './constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
 const TargetToolTip = () => {
     return (
@@ -62,7 +68,7 @@ const ConditionToolTip = () => {
 };
 
 const CreateAlertHeader = (props) => {
-    const { activeTab, setActiveTab } = props;
+    const { activeTab, setActiveTab, isAlertConfigured = false } = props;
 
     const history = useHistory();
 
@@ -74,31 +80,60 @@ const CreateAlertHeader = (props) => {
                     style={{ color: colorPalette.primaryGray700 }}
                     className="font-weight-bold">{`Create New Alert`}</Typography.Header>
                 <div className="d-flex" style={{ gap: '0.75rem' }}>
-                    <Button
-                        label={'Cancel'}
-                        size={Button.Sizes.md}
-                        type={Button.Type.secondaryGrey}
-                        onClick={() => {
-                            history.push({ pathname: '/alerts/overall' });
-                        }}
-                    />
-                    <Button label={'Next'} size={Button.Sizes.md} type={Button.Type.primary} disabled />
+                    {activeTab === 0 ? (
+                        <Button
+                            label={'Cancel'}
+                            size={Button.Sizes.md}
+                            type={Button.Type.secondaryGrey}
+                            onClick={() => {
+                                history.push({ pathname: '/alerts/overall' });
+                            }}
+                        />
+                    ) : (
+                        <Button
+                            label={'Back'}
+                            size={Button.Sizes.md}
+                            type={Button.Type.secondaryGrey}
+                            onClick={() => setActiveTab(0)}
+                        />
+                    )}
+
+                    {activeTab === 0 ? (
+                        <Button
+                            label={'Next'}
+                            size={Button.Sizes.md}
+                            type={Button.Type.primary}
+                            onClick={() => setActiveTab(1)}
+                            disabled={!isAlertConfigured}
+                        />
+                    ) : (
+                        <Button
+                            label={'Save'}
+                            size={Button.Sizes.md}
+                            type={Button.Type.primary}
+                            onClick={() => {
+                                alert('Alert created.');
+                            }}
+                        />
+                    )}
                 </div>
             </div>
             <div className="arrow-tabs-container d-flex align-items-center">
                 <Typography.Body
                     className={`mouse-pointer ${activeTab === 0 ? `` : `text-muted`}`}
                     size={Typography.Sizes.lg}
-                    style={{ color: activeTab === 0 ? colorPalette.baseBlack : colorPalette.primaryGray500 }}
-                    onClick={() => setActiveTab(0)}>{`Select Target and Condition`}</Typography.Body>
+                    style={{
+                        color: activeTab === 0 ? colorPalette.baseBlack : colorPalette.primaryGray500,
+                    }}>
+                    {`Select Target and Condition`}
+                </Typography.Body>
 
                 <div className="arrow-line-style"></div>
 
                 <Typography.Body
                     className={`mouse-pointer ${activeTab === 1 ? `` : `text-muted`}`}
                     size={Typography.Sizes.lg}
-                    style={{ color: activeTab === 1 ? colorPalette.primaryGray900 : colorPalette.primaryGray500 }}
-                    onClick={() => setActiveTab(1)}>
+                    style={{ color: activeTab === 1 ? colorPalette.primaryGray900 : colorPalette.primaryGray500 }}>
                     {`Add Notification Methods`}
                 </Typography.Body>
             </div>
@@ -137,6 +172,8 @@ const RemoveAlert = () => {
 const ConfigureAlerts = (props) => {
     const { alertObj = {}, handleTargetChange, handleConditionChange, updateAlertWithBuildingData } = props;
 
+    console.log('SSR alertObj => ', alertObj);
+
     const [targetType, setTargetType] = useState('');
     const [isFetchingData, setFetching] = useState(false);
 
@@ -158,12 +195,13 @@ const ConfigureAlerts = (props) => {
         setBuildingsList(newBldgList);
     };
 
-    const renderTargetedBuildingsList = (alert_obj) => {
+    const renderTargetedBuildingsList = (alert_obj, buildingsList = []) => {
         const count = alert_obj?.target?.lists?.length ?? 0;
 
         let label = '';
 
         if (count === 0) label = `No building selected.`;
+        else if (count === buildingsList.length) label = `All Buildings selected.`;
         else if (count === 1) label = alertObj.target.lists[0].label;
         else if (count > 1) label = `${count} buildings selected.`;
 
@@ -234,7 +272,7 @@ const ConfigureAlerts = (props) => {
                                             size={Typography.Sizes.md}>{`Building`}</Typography.Subheader>
                                         <Brick sizeInRem={0.25} />
                                         <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                            {renderTargetedBuildingsList(alertObj)}
+                                            {renderTargetedBuildingsList(alertObj, buildingsList)}
                                         </Typography.Body>
                                     </div>
                                     <div>
@@ -370,6 +408,16 @@ const ConfigureAlerts = (props) => {
                                                                 size={Button.Sizes.md}
                                                                 type={Button.Type.secondaryGrey}
                                                                 className="w-100"
+                                                                onClick={() => {
+                                                                    handleTargetChange(
+                                                                        'submitted',
+                                                                        !alertObj?.target.submitted
+                                                                    );
+                                                                }}
+                                                                disabled={
+                                                                    alertObj?.target?.lists.length === 0 ||
+                                                                    alertObj?.target?.typesList.length === 0
+                                                                }
                                                             />
                                                             <Button
                                                                 label={'Add target'}
@@ -756,13 +804,27 @@ const AddAlerts = () => {
 
     const handleTargetChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
-        if (key === 'type') obj = _.cloneDeep(defaultAlertObj);
+        // if (key === 'type') obj = _.cloneDeep(defaultAlertObj);
         obj.target[key] = value;
         setAlertObj(obj);
     };
 
     const handleConditionChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
+
+        // When condition Type change
+        if (key === 'type') {
+            obj.condition = _.cloneDeep(defaultConditionObj);
+        }
+
+        // When condition filter-type change
+        if (key === 'filterType') {
+            obj.condition.threshold50 = false;
+            obj.condition.threshold75 = false;
+            obj.condition.threshold90 = false;
+            obj.condition.thresholdValue = '';
+        }
+
         obj.condition[key] = value;
         setAlertObj(obj);
     };
@@ -795,6 +857,17 @@ const AddAlerts = () => {
         });
     };
 
+    const isAlertConfigured =
+        alertObj?.target?.type !== '' &&
+        alertObj?.target?.lists.length !== 0 &&
+        alertObj?.target?.submitted &&
+        alertObj?.condition?.type !== '' &&
+        ((alertObj?.condition?.filterType === 'number' && alertObj?.condition?.thresholdValue !== '') ||
+            (alertObj?.condition?.filterType !== 'number' &&
+                (alertObj?.condition?.threshold50 ||
+                    alertObj?.condition?.threshold75 ||
+                    alertObj?.condition?.threshold90)));
+
     useEffect(() => {
         updateBreadcrumbStore();
     }, []);
@@ -803,7 +876,11 @@ const AddAlerts = () => {
         <React.Fragment>
             <Row>
                 <Col lg={12}>
-                    <CreateAlertHeader activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <CreateAlertHeader
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                        isAlertConfigured={isAlertConfigured}
+                    />
                 </Col>
             </Row>
 
