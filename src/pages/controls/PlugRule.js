@@ -184,6 +184,7 @@ const PlugRule = () => {
     const [equipmentTypeFilterStringUnlinked, setEquipmentTypeFilterStringUnlinked] = useState('');
     const [equipmentTypeFilterStringLinked, setEquipmentTypeFilterStringLinked] = useState('');
     const searchTouchedRef = useRef(false);
+    const [showOffHours, setShowOffHours] = useState(true);
     const [searchLinked, setSearchLinked] = useState('');
     const [searchUnlinked, setSearchUnlinked] = useState('');
     const [openSnackbar] = useNotification();
@@ -372,7 +373,7 @@ const PlugRule = () => {
 
     useEffect(() => {
         getStatus();
-    }, [selectedInitialyIds.length]);
+    }, [selectedInitialyIds.length, bldgTimeZone]);
 
     useEffect(() => {
         const Is24HoursFormat = timeFormat == '24h';
@@ -538,11 +539,13 @@ const PlugRule = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const getStatus = async () => {
-        setIsLoading(true);
-        await getPlugRuleStatusRequest(ruleId).then((res) => {
-            setPlugRuleStatus(res);
-            setIsLoading(false);
-        });
+        if (bldgTimeZone) {
+            setIsLoading(true);
+            await getPlugRuleStatusRequest(ruleId, bldgTimeZone).then((res) => {
+                setPlugRuleStatus(res);
+                setIsLoading(false);
+            });
+        }
     };
     const getGraphData = async (ids) => {
         if (ids.length && bldgTimeZone) {
@@ -909,7 +912,6 @@ const PlugRule = () => {
             setIsChangedSocketsLinked(true);
         }
         setSelectedIdsToUnlink(newSelectedIdsToUnlink);
-
     };
 
     const updatePlugRuleData = async () => {
@@ -2678,21 +2680,17 @@ const PlugRule = () => {
                                     }))}
                                     dateRange={dateRangeAverageData}
                                     height={200}
-                                    plotBands={offHoursPlots}
+                                    plotBands={showOffHours ? offHoursPlots : []}
                                     customDownloadCsvHandler={() => {
                                         handleDownloadCsvAverageEnergyDemand();
                                     }}
                                     title={'Average Energy Demand'}
                                     subTitle={'Last 2 Weeks'}
                                     plotBandsLegends={[
-                                        { label: 'Plug Rule Off-Hours', color: 'rgb(16 24 40 / 25%)' },
                                         {
-                                            label: 'After-Hours',
-                                            color: {
-                                                background: 'rgba(180, 35, 24, 0.1)',
-                                                borderColor: colors.error700,
-                                            },
-                                            onClick: () => {},
+                                            label: 'Plug Rule Off-Hours',
+                                            color: 'rgb(16 24 40 / 25%)',
+                                            onClick: (event) => setShowOffHours(!event),
                                         },
                                     ]}
                                     unitInfo={{

@@ -44,7 +44,7 @@ export function updatePlugRuleRequest(currentData) {
     });
 }
 
-export function getEstimateSensorSavingsRequst(schedule, selectedIds, plugRuleId,time_zone) {
+export function getEstimateSensorSavingsRequst(schedule, selectedIds, plugRuleId, time_zone) {
     const sensors = selectedIds.join('%2B');
     let params = `?plug_rule_id=${plugRuleId}&timezone=${time_zone}&sensor_id=${sensors}`;
 
@@ -67,7 +67,7 @@ export function deletePlugRuleRequest(ruleId) {
     });
 }
 
-export function getGraphDataRequest(selectedIds, plugRuleId,time_zone) {
+export function getGraphDataRequest(selectedIds, plugRuleId, time_zone) {
     let params = `?plug_rule_id=${plugRuleId}`;
     return axiosInstance
         .get(`${graphData}${params}`, {
@@ -83,8 +83,8 @@ export function getGraphDataRequest(selectedIds, plugRuleId,time_zone) {
         });
 }
 
-export function getPlugRuleStatusRequest(plugRuleId) {
-    let params = `?rule_id=${plugRuleId}`;
+export function getPlugRuleStatusRequest(plugRuleId, time_zone) {
+    let params = `?rule_id=${plugRuleId}&tz_info=${time_zone}    `;
     return axiosInstance.get(`${getPlugRuleStatus}${params}`, {}).then((res) => {
         return res.data;
     });
@@ -173,6 +173,15 @@ export function getUnlinkedSocketRules(
     }
 
     const tags = tagsFilterString ? tagsFilterString?.join('+') : tagsFilterString;
+    let preparedAssignedRule = null;
+    if (assignedRuleFilterString) {
+        preparedAssignedRule = encodeURI(assignedRuleFilterString?.join('+'));
+    } else if (isGetOnlyLinked) {
+        preparedAssignedRule = plugRuleId;
+    }else{
+        preparedAssignedRule = 'other';
+
+    }
 
     return axiosInstance
         .get(`${getListSensorsForBuildings}${params}`, {
@@ -188,9 +197,7 @@ export function getUnlinkedSocketRules(
                     space_type_id: spaceTypeTypeFilterString
                         ? encodeURI(spaceTypeTypeFilterString?.join('+'))
                         : spaceTypeTypeFilterString,
-                    assigned_rule: assignedRuleFilterString
-                        ? encodeURI(assignedRuleFilterString?.join('+'))
-                        : assignedRuleFilterString,
+                    assigned_rule: preparedAssignedRule,
                     mac_address: macTypeFilterString ? encodeURI(macTypeFilterString?.join('+')) : macTypeFilterString,
                     location: locationTypeFilterString
                         ? encodeURI(locationTypeFilterString?.join('+'))
@@ -202,7 +209,6 @@ export function getUnlinkedSocketRules(
                     sensor_number: sensorTypeFilterString
                         ? encodeURI(sensorTypeFilterString?.join('+'))
                         : sensorTypeFilterString,
-                    assigned_rule: isGetOnlyLinked ? plugRuleId : 'other',
                     plug_rule_id: !isGetOnlyLinked ? plugRuleId : null,
                     ...getParams,
                 },
