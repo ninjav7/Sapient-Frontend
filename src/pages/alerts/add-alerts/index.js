@@ -617,66 +617,58 @@ const ConfigureAlerts = (props) => {
                                     )}
                                 </div>
 
-                                {alertObj?.condition?.filterType !== 'number' && (
-                                    <>
-                                        <Brick sizeInRem={1.25} />
+                                <Brick sizeInRem={1.25} />
 
-                                        {alertObj?.condition?.type === 'energy_consumption' && (
-                                            <div className="d-flex" style={{ gap: '1rem' }}>
-                                                <Checkbox
-                                                    label="Alert at 50%"
-                                                    type="checkbox"
-                                                    id="50-percent-alert"
-                                                    name="50-percent-alert"
-                                                    size="md"
-                                                    checked={alertObj?.condition?.threshold50}
-                                                    value={alertObj?.condition?.threshold50}
-                                                    onClick={(e) => {
-                                                        const value = e.target.value;
-                                                        if (value === 'false')
-                                                            handleConditionChange('threshold50', true);
+                                {alertObj?.condition?.type === 'energy_consumption' && (
+                                    <div className="d-flex" style={{ gap: '1rem' }}>
+                                        <Checkbox
+                                            label="Alert at 50%"
+                                            type="checkbox"
+                                            id="50-percent-alert"
+                                            name="50-percent-alert"
+                                            size="md"
+                                            checked={alertObj?.condition?.threshold50}
+                                            value={alertObj?.condition?.threshold50}
+                                            onClick={(e) => {
+                                                const value = e.target.value;
+                                                if (value === 'false') handleConditionChange('threshold50', true);
 
-                                                        if (value === 'true')
-                                                            handleConditionChange('threshold50', false);
-                                                    }}
-                                                />
-                                                <Checkbox
-                                                    label="Alert at 75%"
-                                                    type="checkbox"
-                                                    id="75-percent-alert"
-                                                    name="75-percent-alert"
-                                                    size="md"
-                                                    checked={alertObj?.condition?.threshold75}
-                                                    value={alertObj?.condition?.threshold75}
-                                                    onClick={(e) => {
-                                                        const value = e.target.value;
-                                                        if (value === 'false')
-                                                            handleConditionChange('threshold75', true);
+                                                if (value === 'true') handleConditionChange('threshold50', false);
+                                            }}
+                                        />
+                                        <Checkbox
+                                            label="Alert at 75%"
+                                            type="checkbox"
+                                            id="75-percent-alert"
+                                            name="75-percent-alert"
+                                            size="md"
+                                            checked={alertObj?.condition?.threshold75}
+                                            value={alertObj?.condition?.threshold75}
+                                            onClick={(e) => {
+                                                const value = e.target.value;
+                                                if (value === 'false') handleConditionChange('threshold75', true);
 
-                                                        if (value === 'true')
-                                                            handleConditionChange('threshold75', false);
-                                                    }}
-                                                />
-                                            </div>
-                                        )}
+                                                if (value === 'true') handleConditionChange('threshold75', false);
+                                            }}
+                                        />
+                                    </div>
+                                )}
 
-                                        {alertObj?.condition?.type === 'peak_demand' && (
-                                            <Checkbox
-                                                label="Alert at 90%"
-                                                type="checkbox"
-                                                id="90-percent-alert"
-                                                name="90-percent-alert"
-                                                size="md"
-                                                checked={alertObj?.condition?.threshold90}
-                                                value={alertObj?.condition?.threshold90}
-                                                onClick={(e) => {
-                                                    const value = e.target.value;
-                                                    if (value === 'false') handleConditionChange('threshold90', true);
-                                                    if (value === 'true') handleConditionChange('threshold90', false);
-                                                }}
-                                            />
-                                        )}
-                                    </>
+                                {alertObj?.condition?.type === 'peak_demand' && (
+                                    <Checkbox
+                                        label="Alert at 90%"
+                                        type="checkbox"
+                                        id="90-percent-alert"
+                                        name="90-percent-alert"
+                                        size="md"
+                                        checked={alertObj?.condition?.threshold90}
+                                        value={alertObj?.condition?.threshold90}
+                                        onClick={(e) => {
+                                            const value = e.target.value;
+                                            if (value === 'false') handleConditionChange('threshold90', true);
+                                            if (value === 'true') handleConditionChange('threshold90', false);
+                                        }}
+                                    />
                                 )}
                             </div>
                         </CardBody>
