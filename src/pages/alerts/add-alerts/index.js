@@ -46,11 +46,11 @@ import './styles.scss';
 const TargetToolTip = () => {
     return (
         <div>
-            <UncontrolledTooltip placement="bottom" target={'tooltip-for-target'}>
+            <UncontrolledTooltip placement="bottom" target="tooltip-for-target">
                 {`Target Tooltip.`}
             </UncontrolledTooltip>
 
-            <button type="button" className="tooltip-button" id={'tooltip-for-target'}>
+            <button type="button" className="tooltip-button" id="tooltip-for-target">
                 <TooltipIcon className="tooltip-icon" />
             </button>
         </div>
