@@ -187,11 +187,14 @@ const ConfigureAlerts = (props) => {
     } = props;
 
     const [targetType, setTargetType] = useState('');
+    console.log('SSR targetType => ', targetType);
     const [isFetchingData, setFetching] = useState(false);
 
     const [originalBuildingList, setOriginalBuildingsList] = useState([]); // Fetched from backend
     const [buildingsList, setBuildingsList] = useState([]);
+    console.log('SSR buildingsList => ', buildingsList);
     const [buildingTypeList, setBuildingTypeList] = useState([]);
+    console.log('SSR buildingTypeList => ', buildingTypeList);
 
     const [equipmentsList, setEquipmentsList] = useState([]);
     const [equipmentTypeList, setEquipmentTypeList] = useState([]);
@@ -221,9 +224,13 @@ const ConfigureAlerts = (props) => {
     };
 
     useEffect(() => {
-        const label = renderTargetedBuildingsList(alertObj, buildingsList);
+        if (alertObj?.target?.type) setTargetType(alertObj?.target?.type);
+    }, [alertObj?.target?.type]);
+
+    useEffect(() => {
+        const label = renderTargetedBuildingsList(alertObj, originalBuildingList);
         setTypeSelectedLabel(label);
-    }, [alertObj?.target?.lists, buildingsList]);
+    }, [alertObj?.target?.lists, originalBuildingList]);
 
     useEffect(() => {
         if (targetType === 'building') {
@@ -264,6 +271,8 @@ const ConfigureAlerts = (props) => {
                     setFetching(false);
                 });
         }
+        if (targetType === 'equipment') {
+        }
     }, [targetType]);
 
     return (
@@ -289,7 +298,7 @@ const ConfigureAlerts = (props) => {
                                             size={Typography.Sizes.md}>{`Building`}</Typography.Subheader>
                                         <Brick sizeInRem={0.25} />
                                         <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                            {renderTargetedBuildingsList(alertObj, buildingsList)}
+                                            {renderTargetedBuildingsList(alertObj, originalBuildingList)}
                                         </Typography.Body>
                                     </div>
                                     <div>
@@ -353,14 +362,18 @@ const ConfigureAlerts = (props) => {
 
                                     {alertObj?.target?.type && <hr />}
 
-                                    {alertObj?.target?.type === 'building' && (
-                                        <div>
+                                    {alertObj?.target?.type && (
+                                        <>
                                             <Typography.Subheader size={Typography.Sizes.md}>
                                                 {`Select a Target`}
                                             </Typography.Subheader>
 
                                             <Brick sizeInRem={1.25} />
+                                        </>
+                                    )}
 
+                                    {alertObj?.target?.type === 'building' && (
+                                        <div>
                                             {isFetchingData ? (
                                                 <Skeleton count={2} width={1000} height={20} />
                                             ) : (
@@ -459,66 +472,66 @@ const ConfigureAlerts = (props) => {
                                         </div>
                                     )}
 
-                                    {alertObj?.alertType === 'equipment' && (
+                                    {alertObj?.target?.type === 'equipment' && (
                                         <div>
-                                            <Typography.Subheader size={Typography.Sizes.md}>
-                                                {`Select a Target`}
-                                            </Typography.Subheader>
-
-                                            <Brick sizeInRem={1.25} />
-
-                                            <Select
-                                                id="endUseSelect"
-                                                placeholder="Select Building"
-                                                name="select"
-                                                isSearchable={true}
-                                                options={[]}
-                                                className="w-25"
-                                                menuPlacement="auto"
-                                            />
-
-                                            <Brick sizeInRem={1.25} />
-
-                                            <div
-                                                className="d-flex justify-content-between w-100"
-                                                style={{ gap: '1.25rem' }}>
-                                                <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
+                                            {isFetchingData ? (
+                                                <Skeleton count={2} width={1000} height={20} />
+                                            ) : (
+                                                <div>
                                                     <Select
                                                         id="endUseSelect"
-                                                        placeholder="Select Equipment Type"
+                                                        placeholder="Select Building"
                                                         name="select"
                                                         isSearchable={true}
                                                         options={[]}
-                                                        className="w-100"
+                                                        className="w-25"
                                                         menuPlacement="auto"
                                                     />
 
-                                                    <Select
-                                                        id="endUseSelect"
-                                                        placeholder="Select Equipment"
-                                                        name="select"
-                                                        isSearchable={true}
-                                                        options={[]}
-                                                        className="w-100"
-                                                        menuPlacement="auto"
-                                                    />
-                                                </div>
+                                                    <Brick sizeInRem={1.25} />
 
-                                                <div className="d-flex" style={{ gap: '0.75rem' }}>
-                                                    <Button
-                                                        label={'Cancel'}
-                                                        size={Button.Sizes.md}
-                                                        type={Button.Type.secondaryGrey}
-                                                        className="w-100"
-                                                    />
-                                                    <Button
-                                                        label={'Add target'}
-                                                        size={Button.Sizes.md}
-                                                        type={Button.Type.primary}
-                                                        className="w-100"
-                                                    />
+                                                    <div
+                                                        className="d-flex justify-content-between w-100"
+                                                        style={{ gap: '1.25rem' }}>
+                                                        <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
+                                                            <Select
+                                                                id="endUseSelect"
+                                                                placeholder="Select Equipment Type"
+                                                                name="select"
+                                                                isSearchable={true}
+                                                                options={[]}
+                                                                className="w-100"
+                                                                menuPlacement="auto"
+                                                            />
+
+                                                            <Select
+                                                                id="endUseSelect"
+                                                                placeholder="Select Equipment"
+                                                                name="select"
+                                                                isSearchable={true}
+                                                                options={[]}
+                                                                className="w-100"
+                                                                menuPlacement="auto"
+                                                            />
+                                                        </div>
+
+                                                        <div className="d-flex" style={{ gap: '0.75rem' }}>
+                                                            <Button
+                                                                label={'Cancel'}
+                                                                size={Button.Sizes.md}
+                                                                type={Button.Type.secondaryGrey}
+                                                                className="w-100"
+                                                            />
+                                                            <Button
+                                                                label={'Add target'}
+                                                                size={Button.Sizes.md}
+                                                                type={Button.Type.primary}
+                                                                className="w-100"
+                                                            />
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )}
                                         </div>
                                     )}
                                 </>
@@ -572,7 +585,7 @@ const ConfigureAlerts = (props) => {
                                         menuPlacement="auto"
                                     />
 
-                                    {alertObj?.target?.type !== '' && (
+                                    {alertObj?.condition?.type !== '' && (
                                         <>
                                             <Select
                                                 id="condition_lvl"
@@ -816,7 +829,6 @@ const AddAlerts = () => {
 
     const handleTargetChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
-        // if (key === 'type') obj = _.cloneDeep(defaultAlertObj);
         obj.target[key] = value;
         setAlertObj(obj);
     };

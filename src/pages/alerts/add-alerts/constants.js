@@ -26,6 +26,9 @@ export const defaultAlertObj = {
         threshold90: false,
         submitted: false,
     },
+    notification: {
+        method: 'none',
+    },
 };
 
 export const defaultConditionObj = {
