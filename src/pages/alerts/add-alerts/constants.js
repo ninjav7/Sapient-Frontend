@@ -104,3 +104,10 @@ export const alertObjDefaultConfig = {
         method: 'none',
     },
 };
+
+const customComparator = (value1, value2, key) => {
+    if (key === 'type' && key.startsWith('target.')) {
+        return true; // Exclude comparison of obj.target.type
+    }
+    return undefined;
+};
