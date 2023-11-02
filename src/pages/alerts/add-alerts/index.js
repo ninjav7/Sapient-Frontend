@@ -12,6 +12,7 @@ import Select from '../../../sharedComponents/form/select';
 import Inputs from '../../../sharedComponents/form/input/Input';
 import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
+import { UserStore } from '../../../store/UserStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 
@@ -26,6 +27,7 @@ import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/ass
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
+import { createAlertServiceAPI } from '../services';
 import { fetchBuildingsList } from '../../../services/buildings';
 import { getAllBuildingTypes } from '../../settings/general-settings/services';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
@@ -70,7 +72,7 @@ const ConditionToolTip = () => {
 };
 
 const CreateAlertHeader = (props) => {
-    const { activeTab, setActiveTab, isAlertConfigured = false } = props;
+    const { activeTab, setActiveTab, isAlertConfigured = false, onAlertCreate } = props;
 
     const history = useHistory();
 
@@ -113,9 +115,7 @@ const CreateAlertHeader = (props) => {
                             label={'Save'}
                             size={Button.Sizes.md}
                             type={Button.Type.primary}
-                            onClick={() => {
-                                alert('Alert created.');
-                            }}
+                            onClick={onAlertCreate}
                         />
                     )}
                 </div>
@@ -955,6 +955,65 @@ const AddAlerts = () => {
         setAlertObj(obj);
     };
 
+    const handleCreateAlert = async (alert_obj) => {
+        if (!alert_obj) return;
+
+        let payload = {
+            target: alert_obj?.target?.type,
+            // building_id: 'string',
+            target_type: alert_obj?.target?.typesList.map((item) => item?.value),
+            target_list: alert_obj?.target?.lists.map((item) => item?.value),
+            condition: alert_obj?.condition?.type,
+            // condition_interval_period: 1,
+            condition_type: alert_obj?.condition?.level,
+            threshold_at: [],
+            notify_type: alert_obj?.notification?.method,
+            // notify_to: 'string',
+            // notify_condition: 'immediate',
+            // notify_in: 0,
+            // snooze: 0,
+        };
+
+        if (alert_obj?.condition?.level === 'number' && alert_obj?.condition?.thresholdValue) {
+            payload.condition_threshold = alert_obj?.condition?.thresholdValue;
+        }
+
+        if (alert_obj?.condition?.threshold50) payload.threshold_at.push(50);
+        if (alert_obj?.condition?.threshold75) payload.threshold_at.push(75);
+        if (alert_obj?.condition?.threshold90) payload.threshold_at.push(90);
+
+        if (alert_obj?.condition?.filterType !== 'number') {
+            if (alert_obj?.condition?.filterType.includes('month')) payload.condition_interval = 'month';
+            if (alert_obj?.condition?.filterType.includes('year')) payload.condition_interval = 'year';
+        }
+
+        await createAlertServiceAPI(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Alert created successfully.';
+                        s.notificationType = 'success';
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Failed to create Alert.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch(() => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Failed to create Alert status due to Internal Server Error.';
+                    s.notificationType = 'error';
+                });
+            })
+            .finally(() => {});
+    };
+
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
@@ -996,6 +1055,9 @@ const AddAlerts = () => {
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
                         isAlertConfigured={isAlertConfigured}
+                        onAlertCreate={() => {
+                            handleCreateAlert(alertObj);
+                        }}
                     />
                 </Col>
             </Row>
