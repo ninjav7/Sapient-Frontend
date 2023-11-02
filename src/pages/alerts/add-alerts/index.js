@@ -707,16 +707,6 @@ const NotificationSettings = (props) => {
 
         if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
 
-        if (alert_obj?.condition?.threshold50 || alert_obj?.condition?.threshold75) {
-            if (alert_obj?.condition?.threshold50 && alert_obj?.condition?.threshold75) {
-                text += ` 50% and 75% of `;
-            } else {
-                if (alert_obj?.condition?.threshold50) text += ` 50% of `;
-                if (alert_obj?.condition?.threshold75) text += ` 75% of `;
-            }
-        }
-        if (alert_obj?.condition?.threshold90) text += ` 90% of `;
-
         if (alertObj?.condition?.filterType === 'number' && alert_obj?.condition?.thresholdValue)
             text += ` ${formatConsumptionValue(+alert_obj?.condition?.thresholdValue, 2)} kWh`;
 
