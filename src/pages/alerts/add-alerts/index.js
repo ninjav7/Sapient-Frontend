@@ -187,7 +187,6 @@ const ConfigureAlerts = (props) => {
         setTypeSelectedLabel,
     } = props;
 
-    const [targetType, setTargetType] = useState('');
     const [isFetchingData, setFetching] = useState(false);
 
     const [buildingsList, setBuildingsList] = useState([]);
@@ -223,16 +222,12 @@ const ConfigureAlerts = (props) => {
     };
 
     useEffect(() => {
-        if (alertObj?.target?.type) setTargetType(alertObj?.target?.type);
-    }, [alertObj?.target?.type]);
-
-    useEffect(() => {
         const label = renderTargetedBuildingsList(alertObj, originalBuildingsList);
         setTypeSelectedLabel(label);
     }, [alertObj?.target?.lists, originalBuildingsList]);
 
     useEffect(() => {
-        if (targetType === 'building') {
+        if (alertObj?.target?.type === 'building') {
             setFetching(true);
 
             const promiseOne = getAllBuildingTypes();
@@ -278,7 +273,7 @@ const ConfigureAlerts = (props) => {
                     setFetching(false);
                 });
         }
-    }, [targetType]);
+    }, [alertObj?.target?.type]);
 
     return (
         <>
@@ -334,7 +329,6 @@ const ConfigureAlerts = (props) => {
                                                         : `target-type-container`
                                                 }`}
                                                 onClick={() => {
-                                                    setTargetType('building');
                                                     handleTargetChange('type', 'building');
                                                 }}>
                                                 <BuildingTypeSVG className="p-0 square" width={20} height={20} />
@@ -352,7 +346,6 @@ const ConfigureAlerts = (props) => {
                                                         : `target-type-container`
                                                 }`}
                                                 onClick={() => {
-                                                    setTargetType('equipment');
                                                     handleTargetChange('type', 'equipment');
                                                 }}>
                                                 <EquipmentTypeSVG className="p-0 square" width={20} height={20} />
