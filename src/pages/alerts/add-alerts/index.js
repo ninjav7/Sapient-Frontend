@@ -187,19 +187,17 @@ const ConfigureAlerts = (props) => {
     } = props;
 
     const [targetType, setTargetType] = useState('');
-    console.log('SSR targetType => ', targetType);
     const [isFetchingData, setFetching] = useState(false);
 
-    const [originalBuildingList, setOriginalBuildingsList] = useState([]); // Fetched from backend
     const [buildingsList, setBuildingsList] = useState([]);
-    console.log('SSR buildingsList => ', buildingsList);
+    const [originalBuildingsList, setOriginalBuildingsList] = useState([]);
+
     const [buildingTypeList, setBuildingTypeList] = useState([]);
-    console.log('SSR buildingTypeList => ', buildingTypeList);
 
     const [equipmentsList, setEquipmentsList] = useState([]);
     const [equipmentTypeList, setEquipmentTypeList] = useState([]);
 
-    const handleBldgTypeListUpdate = (newBldgTypeList = [], originalBldgList) => {
+    const filteredBuildingsList = (newBldgTypeList = [], originalBldgList) => {
         let newBldgList = [];
         if (newBldgTypeList.length !== 0) {
             originalBldgList.forEach((bldgObj) => {
@@ -207,7 +205,7 @@ const ConfigureAlerts = (props) => {
                 if (isExist) newBldgList.push(bldgObj);
             });
         }
-        setBuildingsList(newBldgList);
+        return newBldgList;
     };
 
     const renderTargetedBuildingsList = (alert_obj, buildingsList = []) => {
@@ -228,9 +226,9 @@ const ConfigureAlerts = (props) => {
     }, [alertObj?.target?.type]);
 
     useEffect(() => {
-        const label = renderTargetedBuildingsList(alertObj, originalBuildingList);
+        const label = renderTargetedBuildingsList(alertObj, originalBuildingsList);
         setTypeSelectedLabel(label);
-    }, [alertObj?.target?.lists, originalBuildingList]);
+    }, [alertObj?.target?.lists, originalBuildingsList]);
 
     useEffect(() => {
         if (targetType === 'building') {
@@ -262,7 +260,15 @@ const ConfigureAlerts = (props) => {
                             setOriginalBuildingsList(newMappedBldgsData);
                             setBuildingsList(newMappedBldgsData);
 
-                            updateAlertWithBuildingData(newMappedBuildingTypesData, newMappedBldgsData);
+                            if (alertObj?.target?.typesList.length === 0 && alertObj?.target?.lists.length === 0) {
+                                updateAlertWithBuildingData(newMappedBuildingTypesData, newMappedBldgsData);
+                            } else {
+                                const newFilteredBldgsList = filteredBuildingsList(
+                                    alertObj?.target?.typesList,
+                                    newMappedBldgsData
+                                );
+                                if (newFilteredBldgsList) setBuildingsList(newFilteredBldgsList);
+                            }
                         }
                     }
                 })
@@ -270,8 +276,6 @@ const ConfigureAlerts = (props) => {
                 .finally(() => {
                     setFetching(false);
                 });
-        }
-        if (targetType === 'equipment') {
         }
     }, [targetType]);
 
@@ -298,7 +302,7 @@ const ConfigureAlerts = (props) => {
                                             size={Typography.Sizes.md}>{`Building`}</Typography.Subheader>
                                         <Brick sizeInRem={0.25} />
                                         <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                            {renderTargetedBuildingsList(alertObj, originalBuildingList)}
+                                            {renderTargetedBuildingsList(alertObj, originalBuildingsList)}
                                         </Typography.Body>
                                     </div>
                                     <div>
@@ -393,9 +397,11 @@ const ConfigureAlerts = (props) => {
                                                                 options={buildingTypeList}
                                                                 onChange={(newBldgTypeList) => {
                                                                     handleTargetChange('lists', []);
-                                                                    handleBldgTypeListUpdate(
-                                                                        newBldgTypeList,
-                                                                        originalBuildingList
+                                                                    setBuildingsList(
+                                                                        filteredBuildingsList(
+                                                                            newBldgTypeList,
+                                                                            originalBuildingsList
+                                                                        )
                                                                     );
                                                                     handleTargetChange('typesList', newBldgTypeList);
                                                                 }}
