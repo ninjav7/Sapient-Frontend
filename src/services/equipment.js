@@ -34,19 +34,18 @@ export function getEqupmentDataRequest(
     if (getParams.order_by && getParams.sort_by) {
         params += `&ordered_by=${getParams.order_by}&sort_by=${getParams.sort_by}`;
     }
-    const filteredData = {
-        floor_id: floorTypeFilterString,
-        space_id: spaceTypeFilterString,
-    };
-    if (equipmentTypeFilterString.length) {
-        filteredData['equipment_types'] = equipmentTypeFilterString;
-    }
-    if (macAddressFilterString.length) {
-        filteredData['device_id'] = macAddressFilterString;
-    }
-    if (tagsFilterString.length) {
-        filteredData['tags'] = tagsFilterString;
-    }
+
+    const filteredData = _.pickBy(
+        {
+            floor_id: floorTypeFilterString,
+            space_id: spaceTypeFilterString,
+            tags: tagsFilterString,
+            equipment_types: equipmentTypeFilterString,
+            device_id: macAddressFilterString,
+            ...getParams,
+        },
+        _.identity
+    );
     if (endUseFilterString.length) {
         filteredData['end_uses'] = endUseFilterString;
     }
@@ -143,10 +142,10 @@ export function getFiltersForEquipmentRequest(args) {
                     query_collection: 'equipment',
                     building_id: args.bldgId,
                     mac_address: macAddressQuery,
-                    equipment_types: args.equipmentTypeFilterString,
+                    equipment_types:args.equipmentTypeFilterString? encodeURI(args.equipmentTypeFilterString?.join('+')):null,
                     end_use: args.endUseFilterString,
-                    floor_id: args.floorTypeFilterString,
-                    space_id: args.spaceTypeFilterString,
+                    floor_id: encodeURI(args.floorTypeFilterString?.join('+')),
+                    space_id: encodeURI(args.spaceTypeFilterString?.join('+')),
                     tags: args.tagsFilterString,
                 },
                 _.identity
