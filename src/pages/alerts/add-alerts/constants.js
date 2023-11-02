@@ -1,10 +1,10 @@
 export const alertConditions = [
     {
-        label: 'Energy consumption for current month is',
+        label: 'Energy consumption for the month is',
         value: 'energy_consumption',
     },
     {
-        label: 'Peak demand for current month is',
+        label: 'Peak demand for the month is',
         value: 'peak_demand',
     },
 ];

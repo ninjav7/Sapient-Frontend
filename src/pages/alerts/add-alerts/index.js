@@ -28,6 +28,7 @@ import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/ass
 
 import { fetchBuildingsList } from '../../../services/buildings';
 import { getAllBuildingTypes } from '../../settings/general-settings/services';
+import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
 import {
     alertConditions,
@@ -701,9 +702,38 @@ const ConfigureAlerts = (props) => {
 };
 
 const NotificationSettings = (props) => {
-    const { notifyType, setNotifyType, alertObj = {}, typeSelectedLabel = '' } = props;
+    const { alertObj = {}, typeSelectedLabel = '', handleConditionChange, handleNotificationChange } = props;
 
     const targetType = alertObj?.target?.type === `building` ? `Building` : `Equipment`;
+
+    const renderAlertCondition = (alert_obj) => {
+        let text = '';
+
+        let alertType = alertConditions.find((el) => el?.value === alert_obj?.condition?.type);
+        if (alertType) text += alertType?.label;
+
+        if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
+
+        if (alert_obj?.condition?.threshold50 || alert_obj?.condition?.threshold75) {
+            if (alert_obj?.condition?.threshold50 && alert_obj?.condition?.threshold75) {
+                text += ` 50% and 75% of `;
+            } else {
+                if (alert_obj?.condition?.threshold50) text += ` 50% of `;
+                if (alert_obj?.condition?.threshold75) text += ` 75% of `;
+            }
+        }
+        if (alert_obj?.condition?.threshold90) text += ` 90% of `;
+
+        if (alertObj?.condition?.filterType === 'number' && alert_obj?.condition?.thresholdValue)
+            text += ` ${formatConsumptionValue(+alert_obj?.condition?.thresholdValue, 2)} kWh`;
+
+        if (alertObj?.condition?.filterType !== 'number') {
+            let alertFilter = filtersForEnergyConsumption.find((el) => el?.value === alertObj?.condition?.filterType);
+            if (alertFilter) text += ` ${alertFilter?.label}`;
+        }
+
+        return `${text}.`;
+    };
 
     return (
         <>
@@ -736,15 +766,69 @@ const NotificationSettings = (props) => {
                                 </Typography.Body>
                             </div>
 
-                            <Brick sizeInRem={1} />
+                            <Brick sizeInRem={0.5} />
 
                             <div>
                                 <Typography.Subheader size={Typography.Sizes.md}>{`Condition`}</Typography.Subheader>
                                 <Brick sizeInRem={0.25} />
-                                <Typography.Body
-                                    size={Typography.Sizes.md}
-                                    className="text-muted">{`Energy consumption for the month is above 75% of 10,000 kWh `}</Typography.Body>
+                                <Typography.Body size={Typography.Sizes.md} className="text-muted">
+                                    {renderAlertCondition(alertObj)}
+                                </Typography.Body>
                             </div>
+
+                            <Brick sizeInRem={1} />
+
+                            {alertObj?.condition?.type === 'energy_consumption' && (
+                                <div className="d-flex" style={{ gap: '1rem' }}>
+                                    <Checkbox
+                                        label="Alert at 50%"
+                                        type="checkbox"
+                                        id="50-percent-alert"
+                                        name="50-percent-alert"
+                                        size="md"
+                                        checked={alertObj?.condition?.threshold50}
+                                        value={alertObj?.condition?.threshold50}
+                                        onClick={(e) => {
+                                            const value = e.target.value;
+                                            if (value === 'false') handleConditionChange('threshold50', true);
+
+                                            if (value === 'true') handleConditionChange('threshold50', false);
+                                        }}
+                                    />
+                                    <Checkbox
+                                        label="Alert at 75%"
+                                        type="checkbox"
+                                        id="75-percent-alert"
+                                        name="75-percent-alert"
+                                        size="md"
+                                        checked={alertObj?.condition?.threshold75}
+                                        value={alertObj?.condition?.threshold75}
+                                        onClick={(e) => {
+                                            const value = e.target.value;
+                                            if (value === 'false') handleConditionChange('threshold75', true);
+
+                                            if (value === 'true') handleConditionChange('threshold75', false);
+                                        }}
+                                    />
+                                </div>
+                            )}
+
+                            {alertObj?.condition?.type === 'peak_demand' && (
+                                <Checkbox
+                                    label="Alert at 90%"
+                                    type="checkbox"
+                                    id="90-percent-alert"
+                                    name="90-percent-alert"
+                                    size="md"
+                                    checked={alertObj?.condition?.threshold90}
+                                    value={alertObj?.condition?.threshold90}
+                                    onClick={(e) => {
+                                        const value = e.target.value;
+                                        if (value === 'false') handleConditionChange('threshold90', true);
+                                        if (value === 'true') handleConditionChange('threshold90', false);
+                                    }}
+                                />
+                            )}
                         </CardBody>
                     </div>
                 </Col>
@@ -780,9 +864,11 @@ const NotificationSettings = (props) => {
                             <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
                                 <div
                                     className={`d-flex align-items-center mouse-pointer ${
-                                        notifyType === 'none' ? `notify-container-active` : `notify-container`
+                                        alertObj?.notification?.method === 'none'
+                                            ? `notify-container-active`
+                                            : `notify-container`
                                     }`}
-                                    onClick={() => setNotifyType('none')}>
+                                    onClick={() => handleNotificationChange('method', 'none')}>
                                     <BanSVG className="p-0 square" width={20} height={20} />
                                     <Typography.Subheader
                                         size={Typography.Sizes.md}
@@ -793,9 +879,11 @@ const NotificationSettings = (props) => {
 
                                 <div
                                     className={`d-flex align-items-center mouse-pointer ${
-                                        notifyType === 'user' ? `notify-container-active` : `notify-container`
+                                        alertObj?.notification?.method === 'user'
+                                            ? `notify-container-active`
+                                            : `notify-container`
                                     }`}
-                                    onClick={() => setNotifyType('user')}>
+                                    onClick={() => handleNotificationChange('method', 'user')}>
                                     <UserProfileSVG className="p-0 square" width={18} height={18} />
                                     <Typography.Subheader
                                         size={Typography.Sizes.md}
@@ -806,9 +894,11 @@ const NotificationSettings = (props) => {
 
                                 <div
                                     className={`d-flex align-items-center mouse-pointer ${
-                                        notifyType === 'email' ? `notify-container-active` : `notify-container`
+                                        alertObj?.notification?.method === 'email'
+                                            ? `notify-container-active`
+                                            : `notify-container`
                                     }`}
-                                    onClick={() => setNotifyType('email')}>
+                                    onClick={() => handleNotificationChange('method', 'email')}>
                                     <EmailAddressSVG className="p-0 square" width={20} height={20} />
                                     <Typography.Subheader
                                         size={Typography.Sizes.md}
@@ -829,7 +919,6 @@ const NotificationSettings = (props) => {
 
 const AddAlerts = () => {
     const [activeTab, setActiveTab] = useState(0);
-    const [notifyType, setNotifyType] = useState('none');
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
     const [typeSelectedLabel, setTypeSelectedLabel] = useState(null);
 
@@ -856,6 +945,13 @@ const AddAlerts = () => {
         }
 
         obj.condition[key] = value;
+        setAlertObj(obj);
+    };
+
+    const handleNotificationChange = (key, value) => {
+        let obj = Object.assign({}, alertObj);
+
+        obj.notification[key] = value;
         setAlertObj(obj);
     };
 
@@ -893,10 +989,7 @@ const AddAlerts = () => {
         alertObj?.target?.submitted &&
         alertObj?.condition?.type !== '' &&
         ((alertObj?.condition?.filterType === 'number' && alertObj?.condition?.thresholdValue !== '') ||
-            (alertObj?.condition?.filterType !== 'number' &&
-                (alertObj?.condition?.threshold50 ||
-                    alertObj?.condition?.threshold75 ||
-                    alertObj?.condition?.threshold90)));
+            alertObj?.condition?.filterType !== 'number');
 
     useEffect(() => {
         updateBreadcrumbStore();
@@ -924,12 +1017,13 @@ const AddAlerts = () => {
                         setTypeSelectedLabel={setTypeSelectedLabel}
                     />
                 )}
+
                 {activeTab === 1 && (
                     <NotificationSettings
-                        notifyType={notifyType}
-                        setNotifyType={setNotifyType}
                         alertObj={alertObj}
                         typeSelectedLabel={typeSelectedLabel}
+                        handleConditionChange={handleConditionChange}
+                        handleNotificationChange={handleNotificationChange}
                     />
                 )}
             </div>
