@@ -20,6 +20,14 @@ const DEFAULT_LIST_PAGE_SIZES = [
         label: '20 Rows',
         value: '20',
     },
+    {
+        label: '50 Rows',
+        value: '50',
+    },
+    {
+        label: '100 Rows',
+        value: '100',
+    },
 ];
 
 const Pagination = (props) => {
@@ -44,7 +52,7 @@ const Pagination = (props) => {
     });
 
     if (!isAlwaysShown && (currentPage === 0 || paginationRange.length < 2)) {
-       return null;
+        return null;
     }
 
     const onNext = () => {
