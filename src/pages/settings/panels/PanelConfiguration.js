@@ -77,7 +77,7 @@ const PanelConfiguration = (props) => {
     const handleVoltageChange = (original_voltage, new_selected_voltage, has_three_phase_breaker) => {
         if (original_voltage !== '120/240' && new_selected_voltage === '120/240' && has_three_phase_breaker) {
             setVoltageError({
-                text: `Error: Cannot select 120/140V configuration with 3-phase breakers. Update breaker configurations to 2-pole or single phase first.`,
+                text: `Error: Cannot select 120/240V configuration with 3-phase breakers. Update breaker configurations to 2-pole or single phase first.`,
             });
         }
     };
