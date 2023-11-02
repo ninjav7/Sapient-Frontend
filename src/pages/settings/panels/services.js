@@ -73,7 +73,7 @@ export function getBreakersList(params) {
     return axiosInstance.get(`${getBreakers}${params}`).then((res) => res);
 }
 
-export function getEquipmentsList(params, payload = {}) {
+export function getEquipmentsList(params = '', payload = {}) {
     return axiosInstance.post(`${generalEquipments}${params}`, payload).then((res) => res);
 }
 
