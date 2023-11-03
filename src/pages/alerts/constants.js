@@ -51,6 +51,7 @@ export const defaultAlertObj = {
         type: '',
         typesList: [],
         lists: [],
+        building_ids: [],
         submitted: false,
     },
     condition: {
