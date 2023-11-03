@@ -907,6 +907,7 @@ const AddAlerts = () => {
 
     const handleTargetChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
+        if (key === 'type' && obj?.target?.type !== value) obj = _.cloneDeep(defaultAlertObj);
         obj.target[key] = value;
         setAlertObj(obj);
     };

@@ -82,30 +82,7 @@ export const filtersForPeakDemand = [
     },
 ];
 
-// For comparision
-export const alertObjDefaultConfig = {
-    target: {
-        type: '',
-        typesList: [],
-        lists: [],
-        submitted: false,
-    },
-    condition: {
-        type: '',
-        level: 'above',
-        filterType: 'number',
-        thresholdValue: '',
-        threshold50: false,
-        threshold75: false,
-        threshold90: false,
-        submitted: false,
-    },
-    notification: {
-        method: 'none',
-    },
-};
-
-const customComparator = (value1, value2, key) => {
+export const customComparator = (value1, value2, key) => {
     if (key === 'type' && key.startsWith('target.')) {
         return true; // Exclude comparison of obj.target.type
     }
