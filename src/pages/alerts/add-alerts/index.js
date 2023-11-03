@@ -33,12 +33,12 @@ import { getAllBuildingTypes } from '../../settings/general-settings/services';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
 import {
-    alertConditions,
+    bldgAlertConditions,
     conditionLevelsList,
     defaultAlertObj,
     defaultConditionObj,
     filtersForEnergyConsumption,
-} from './constants';
+} from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
@@ -573,12 +573,12 @@ const ConfigureAlerts = (props) => {
                                         id="endUseSelect"
                                         placeholder="Select a Condition"
                                         name="select"
-                                        options={alertObj?.target?.type === '' ? [] : alertConditions}
+                                        options={alertObj?.target?.type === '' ? [] : bldgAlertConditions}
                                         className="w-100"
                                         onChange={(e) => {
                                             handleConditionChange('type', e.value);
                                         }}
-                                        currentValue={alertConditions.filter(
+                                        currentValue={bldgAlertConditions.filter(
                                             (option) => option.value === alertObj?.condition?.type
                                         )}
                                         isDisabled={alertObj?.target?.type === ''}
@@ -702,7 +702,7 @@ const NotificationSettings = (props) => {
     const renderAlertCondition = (alert_obj) => {
         let text = '';
 
-        let alertType = alertConditions.find((el) => el?.value === alert_obj?.condition?.type);
+        let alertType = bldgAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
         if (alertType) text += alertType?.label;
 
         if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;

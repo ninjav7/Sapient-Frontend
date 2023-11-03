@@ -1,4 +1,5 @@
-export const alertConditions = [
+// Building Alert Conditions
+export const bldgAlertConditions = [
     {
         label: 'Energy consumption for the month is',
         value: 'energy_consumption',
@@ -6,6 +7,42 @@ export const alertConditions = [
     {
         label: 'Peak demand for the month is',
         value: 'peak_demand',
+    },
+];
+
+// Equipment Alert Conditions
+export const equipAlertConditions = [
+    {
+        label: 'RMS Current is',
+        value: 'rms_current',
+    },
+    {
+        label: 'Min Current is',
+        value: 'min_current',
+    },
+    {
+        label: 'Max Current is',
+        value: 'max_current',
+    },
+    {
+        label: 'Peak Power is',
+        value: 'peak_power',
+    },
+    {
+        label: 'Average Power is',
+        value: 'average_power',
+    },
+    {
+        label: 'Energy consumption is',
+        value: 'energy_consumption',
+    },
+    {
+        label: 'Phase Imbalance',
+        value: 'phase_imbalance',
+    },
+    {
+        label: 'Shortcycling',
+        value: 'shortcycling',
     },
 ];
 
