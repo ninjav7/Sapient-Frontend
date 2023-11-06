@@ -128,6 +128,9 @@ export function getFiltersForSensorsRequest(args) {
                     space_id: args.spaceTypeFilterString
                         ? encodeURI(args.spaceTypeFilterString?.join('+'))
                         : args.spaceTypeFilterString,
+                    scheduler_status: args.schedulerStatusString
+                        ? encodeURI(args.schedulerStatusString?.join('+'))
+                        : args.schedulerStatusString,
                     space_type_id: args.spaceTypeTypeFilterString
                         ? encodeURI(args.spaceTypeTypeFilterString?.join('+'))
                         : args.spaceTypeTypeFilterString,
@@ -155,6 +158,7 @@ export function getUnlinkedSocketRules(
     spaceTypeTypeFilterString,
     assignedRuleFilterString,
     tagsFilterString,
+    scheduleStatusString,
     withPagination,
     getParams,
     isGetOnlyLinked,
@@ -178,9 +182,8 @@ export function getUnlinkedSocketRules(
         preparedAssignedRule = encodeURI(assignedRuleFilterString?.join('+'));
     } else if (isGetOnlyLinked) {
         preparedAssignedRule = plugRuleId;
-    }else{
+    } else {
         preparedAssignedRule = 'other';
-
     }
 
     return axiosInstance
@@ -203,6 +206,9 @@ export function getUnlinkedSocketRules(
                         ? encodeURI(locationTypeFilterString?.join('+'))
                         : locationTypeFilterString,
                     tags: tags,
+                    scheduler_status: scheduleStatusString
+                        ? encodeURI(scheduleStatusString?.join('+'))
+                        : scheduleStatusString,
                     equipment_types: equpimentTypeFilterString
                         ? encodeURI(equpimentTypeFilterString?.join('+'))
                         : equpimentTypeFilterString,
