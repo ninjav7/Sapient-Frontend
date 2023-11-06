@@ -31,6 +31,7 @@ import { bldgAlertConditions, defaultAlertObj, defaultConditionObj, filtersForEn
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 import { getEquipTypeData } from '../../settings/equipment-type/services';
+import { getEquipmentsList } from '../../settings/panels/services';
 
 const CreateAlertHeader = (props) => {
     const { activeTab, setActiveTab, isAlertConfigured = false, onAlertCreate } = props;
@@ -152,6 +153,9 @@ const ConfigureAlerts = (props) => {
     const [equipmentsList, setEquipmentsList] = useState([]);
     const [equipmentTypeList, setEquipmentTypeList] = useState([]);
 
+    console.log('SSRai buildingsList => ', buildingsList);
+    console.log('SSRai equipmentTypeList => ', equipmentTypeList);
+
     const filteredBuildingsList = (newBldgTypeList = [], originalBldgList) => {
         let newBldgList = [];
         if (newBldgTypeList.length !== 0) {
@@ -177,6 +181,39 @@ const ConfigureAlerts = (props) => {
     };
 
     useEffect(() => {
+        if (buildingsList.length !== 0 && alertObj?.target?.type === 'equipment') {
+            let promisesList = [];
+
+            buildingsList.forEach((el) => {
+                if (el?.value) promisesList.push(getEquipmentsList(`?building_id=${el?.value}`));
+            });
+
+            Promise.all(promisesList)
+                .then((res) => {
+                    const response = res;
+                    let newMappedEquipmentList = [];
+
+                    response.forEach((record, index) => {
+                        if (record?.status === 200) {
+                            const responseData = record?.data?.data;
+                            if (responseData) {
+                                const equipmentsList = responseData.map((el) => ({
+                                    label: `${el?.equipments_name} [${buildingsList[index]?.label}]`,
+                                    value: el?.equipments_id,
+                                    building_id: buildingsList[index]?.value,
+                                }));
+                                newMappedEquipmentList = [...newMappedEquipmentList, ...equipmentsList];
+                            }
+                        }
+                    });
+                    newMappedEquipmentList && setEquipmentsList(newMappedEquipmentList);
+                })
+                .catch(() => {})
+                .finally(() => {});
+        }
+    }, [buildingsList]);
+
+    useEffect(() => {
         const label = renderTargetedBuildingsList(alertObj, originalBuildingsList);
         setTypeSelectedLabel(label);
     }, [alertObj?.target?.lists, originalBuildingsList]);
@@ -184,6 +221,8 @@ const ConfigureAlerts = (props) => {
     useEffect(() => {
         if (alertObj?.target?.type === 'building') {
             setFetching(true);
+            setOriginalBuildingsList([]);
+            setBuildingsList([]);
 
             const promiseOne = getAllBuildingTypes();
             const promiseTwo = fetchBuildingsList(false);
@@ -231,6 +270,7 @@ const ConfigureAlerts = (props) => {
 
         if (alertObj?.target?.type === 'equipment') {
             setFetching(true);
+            setOriginalBuildingsList([]);
             setBuildingsList([]);
 
             const promiseOne = fetchBuildingsList(false);
@@ -243,9 +283,6 @@ const ConfigureAlerts = (props) => {
                     if (response && response[0]?.status === 200 && response[1]?.status === 200) {
                         const buildingsListResponse = response[0]?.data ?? [];
                         const equipTypesResponse = response[1]?.data?.data ?? [];
-
-                        console.log('SSR buildingsListResponse => ', buildingsListResponse);
-                        console.log('SSR equipTypesResponse => ', equipTypesResponse);
 
                         if (buildingsListResponse && equipTypesResponse) {
                             const newMappedBldgsData = buildingsListResponse.map((el) => ({
