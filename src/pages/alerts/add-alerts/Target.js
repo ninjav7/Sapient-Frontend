@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import Skeleton from 'react-loading-skeleton';
 import { CardBody, CardHeader, UncontrolledTooltip } from 'reactstrap';
@@ -45,6 +45,14 @@ const Target = (props) => {
         filteredBuildingsList,
         setBuildingsList,
     } = props;
+
+    const [selectedBldgsForEquip, setSelectedBldgsForEquip] = useState([]);
+
+    useEffect(() => {
+        if (alertObj?.target?.type !== 'equipment' && selectedBldgsForEquip.length !== 0) {
+            setSelectedBldgsForEquip([]);
+        }
+    }, [alertObj?.target?.type]);
 
     return (
         <div className="custom-card">
@@ -246,10 +254,11 @@ const Target = (props) => {
                                                 className="w-100"
                                                 isSearchable={buildingsList && buildingsList.length > 5}
                                                 options={buildingsList}
-                                                onChange={(selectedBldgTypeList) => {
-                                                    handleTargetChange('lists', selectedBldgTypeList);
+                                                onChange={setSelectedBldgsForEquip}
+                                                onMenuClose={() => {
+                                                    handleTargetChange('buildingIDs', selectedBldgsForEquip);
                                                 }}
-                                                value={alertObj?.target?.lists ?? []}
+                                                value={alertObj?.target?.buildingIDs ?? []}
                                                 menuPlacement="auto"
                                             />
                                         </div>

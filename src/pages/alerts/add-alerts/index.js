@@ -231,6 +231,7 @@ const ConfigureAlerts = (props) => {
 
         if (alertObj?.target?.type === 'equipment') {
             setFetching(true);
+            setBuildingsList([]);
 
             const promiseOne = fetchBuildingsList(false);
             const promiseTwo = getEquipTypeData();
@@ -508,6 +509,7 @@ const NotificationSettings = (props) => {
 const AddAlerts = () => {
     const [activeTab, setActiveTab] = useState(0);
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
+    console.log('SSR alertObj => ', alertObj);
     const [typeSelectedLabel, setTypeSelectedLabel] = useState(null);
 
     const handleTargetChange = (key, value) => {
