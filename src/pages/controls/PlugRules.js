@@ -115,7 +115,7 @@ const PlugRules = () => {
     };
     const { download } = useCSVDownload();
     const bldgTImeZone = BuildingStore.useState((s) => s.BldgTimeZone);
-    const activeBuildingId =  BuildingStore.useState((s) => s.BldgId);
+    const activeBuildingId = BuildingStore.useState((s) => s.BldgId);
     const [skeletonLoading, setSkeletonLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
     const [nameError, setNameError] = useState('');
@@ -408,15 +408,14 @@ const PlugRules = () => {
         );
     };
     const renderTimeStamp = (row) => {
-        let dateInUtc =
-            row.current_job_log && moment.utc(row.current_job_log[row.current_job_log.length - 1]?.time_stamp).toDate();
-        var localTime = moment(dateInUtc).local().format('YYYY-MM-DD HH:mm:ss');
-
+        let dateInUtc = row.current_job_log
+            ? moment(row.current_job_log[row.current_job_log.length - 1]?.time_stamp).format(
+                  prepareTimeAndDateFormat(dateFormat, timeFormat)
+              )
+            : '';
         return (
             <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center">
-                {row.current_job_log && row.current_job_log[row.current_job_log.length - 1]?.time_stamp
-                    ? moment(localTime).format(prepareTimeAndDateFormat(dateFormat, timeFormat))
-                    : ''}
+                {dateInUtc}
             </Typography.Subheader>
         );
     };

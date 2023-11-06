@@ -529,6 +529,8 @@ const PlugRule = () => {
     const [assignedRuleFilterStringUnlinked, setAssignedRuleFilterStringUnlinked] = useState('');
     const [assignedRuleFilterStringLinked, setAssignedRuleFilterStringLinked] = useState('');
     const [tagsFilterStringUnlinked, setTagsFilterStringUnlinked] = useState('');
+    const [schedulerStatusStringLinked, setSchedulerStatusStringLinked] = useState('');
+    const [schedulerStatusStringUninked, setSchedulerStatusStringUninked] = useState('');
     const [tagsFilterStringLinked, setTagsFilterStringLinked] = useState('');
     const [lastUsedDataFilterStringUnlinked, setLastUsedDataFilterStringUnlinked] = useState('');
     const [lastUsedDataFilterStringLinked, setLastUsedDataFilterStringLinked] = useState('');
@@ -1164,6 +1166,7 @@ const PlugRule = () => {
                 spaceTypeTypeFilterStringUnlinked,
                 assignedRuleFilterStringUnlinked,
                 tagsFilterStringUnlinked,
+                schedulerStatusStringUninked,
                 true,
                 {
                     ...sorting,
@@ -1209,6 +1212,7 @@ const PlugRule = () => {
             spaceTypeTypeFilterStringLinked,
             assignedRuleFilterStringLinked,
             tagsFilterStringLinked,
+            schedulerStatusStringLinked,
             false,
             {
                 ...sorting,
@@ -1251,6 +1255,7 @@ const PlugRule = () => {
             spaceTypeTypeFilterStringUnlinked,
             assignedRuleFilterStringUnlinked,
             tagsFilterStringUnlinked,
+            schedulerStatusStringUninked,
             false,
             {
                 ...sorting,
@@ -1293,6 +1298,7 @@ const PlugRule = () => {
                 spaceTypeTypeFilterStringLinked,
                 assignedRuleFilterStringLinked,
                 tagsFilterStringLinked,
+                schedulerStatusStringLinked,
                 true,
                 {
                     ...sorting,
@@ -1358,6 +1364,7 @@ const PlugRule = () => {
         spaceTypeFilterStringUnlinked,
         assignedRuleFilterStringUnlinked,
         tagsFilterStringUnlinked,
+        schedulerStatusStringUninked,
         spaceTypeTypeFilterStringUnlinked,
         sortByUnlinkedTab.method,
         sortByUnlinkedTab.name,
@@ -1389,6 +1396,7 @@ const PlugRule = () => {
         spaceTypeFilterStringLinked,
         assignedRuleFilterStringLinked,
         tagsFilterStringLinked,
+        schedulerStatusStringLinked,
         spaceTypeTypeFilterStringLinked,
         sortByLinkedTab.method,
         sortByLinkedTab.name,
@@ -1432,6 +1440,7 @@ const PlugRule = () => {
                     spaceTypeTypeFilterStringLinked,
                     assignedRuleFilterStringLinked,
                     tagsFilterStringLinked,
+                    schedulerStatusStringLinked,
                     false,
                     {
                         ...sorting,
@@ -1468,6 +1477,7 @@ const PlugRule = () => {
                 spaceTypeTypeFilterStringLinked,
                 assignedRuleFilterStringLinked,
                 tagsFilterStringLinked,
+                schedulerStatusStringLinked,
                 false,
                 {
                     ...sorting,
@@ -1516,6 +1526,7 @@ const PlugRule = () => {
                     spaceTypeTypeFilterStringUnlinked,
                     assignedRuleFilterStringUnlinked,
                     tagsFilterStringUnlinked,
+                    schedulerStatusStringUninked,
                     false,
                     {
                         ...sorting,
@@ -1736,6 +1747,7 @@ const PlugRule = () => {
             floorTypeFilterString: floorTypeFilterStringUnlinked,
             spaceTypeFilterString: spaceTypeFilterStringUnlinked,
             spaceTypeTypeFilterString: spaceTypeTypeFilterStringUnlinked,
+            schedulerStatusString: schedulerStatusStringUninked,
             isGetOnlyLinked: false,
             plugRuleId: ruleId,
         }).then((filters) => {
@@ -1843,6 +1855,18 @@ const PlugRule = () => {
                           onDelete: () => setTagsFilterStringUnlinked(''),
                       },
                       {
+                          label: 'Schedule status',
+                          value: 'scheduler_status',
+                          placeholder: 'All statuses',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.scheduler_status.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setSchedulerStatusStringUninked, options),
+                          onDelete: () => setSchedulerStatusStringUninked(''),
+                      },
+                      {
                           label: 'Last used data',
                           value: 'last_used_data',
                           placeholder: 'All last used data',
@@ -1872,6 +1896,7 @@ const PlugRule = () => {
             sensorTypeFilterString: sensorTypeFilterStringLinked,
             floorTypeFilterString: floorTypeFilterStringLinked,
             spaceTypeFilterString: spaceTypeFilterStringLinked,
+            schedulerStatusString: schedulerStatusStringLinked,
             spaceTypeTypeFilterString: spaceTypeTypeFilterStringLinked,
             isGetOnlyLinked: true,
             plugRuleId: ruleId,
@@ -1978,6 +2003,18 @@ const PlugRule = () => {
                           })),
                           onClose: (options) => filterHandler(setTagsFilterStringLinked, options),
                           onDelete: () => setTagsFilterStringLinked(''),
+                      },
+                      {
+                          label: 'Schedule status',
+                          value: 'scheduler_status',
+                          placeholder: 'All statuses',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.scheduler_status.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setSchedulerStatusStringLinked, options),
+                          onDelete: () => setSchedulerStatusStringLinked(''),
                       },
                       {
                           label: 'Last used data',
@@ -2696,7 +2733,7 @@ const PlugRule = () => {
                                     unitInfo={{
                                         title: 'Estimated Annual Energy Savings',
                                         unit: UNITS.KWH,
-                                        value: Math.round(estimatedEnergySavings) / 1000,
+                                        value: estimatedEnergySavings,
                                     }}
                                     chartProps={{
                                         tooltip: {
