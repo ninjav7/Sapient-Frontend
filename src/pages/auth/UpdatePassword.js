@@ -192,7 +192,7 @@ const Confirm = (props) => {
 
     const handleAccept = () => {
         setTermsRead(true);
-        setTermsAcceptance(!isTermsAccepted); // PLT-1703: Temperory disabled the functionality
+        setTermsAcceptance(true); // PLT-1703: Temperory disabled the functionality
         handleModalClose();
     };
 
