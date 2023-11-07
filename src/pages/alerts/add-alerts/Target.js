@@ -15,7 +15,6 @@ import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-import { equipmentType } from '../../../services/Network';
 
 const TargetToolTip = () => {
     return (

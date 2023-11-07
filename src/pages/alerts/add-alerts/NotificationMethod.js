@@ -6,18 +6,19 @@ import Brick from '../../../sharedComponents/brick';
 import Select from '../../../sharedComponents/form/select';
 import Typography from '../../../sharedComponents/typography';
 import Inputs from '../../../sharedComponents/form/input/Input';
+import Radio from '../../../sharedComponents/form/radio/Radio';
+import { Checkbox } from '../../../sharedComponents/form/checkbox';
+import { Button } from '../../../sharedComponents/button';
 
 import { ReactComponent as BanSVG } from '../../../assets/icon/ban.svg';
 import { ReactComponent as MinutesSVG } from '../../../assets/icon/minutes.svg';
 import { ReactComponent as UserProfileSVG } from '../../../assets/icon/user-profile.svg';
 import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
+import { fetchMemberUserList } from '../../settings/users/service';
+
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-import { fetchMemberUserList } from '../../settings/users/service';
-import Radio from '../../../sharedComponents/form/radio/Radio';
-import { Checkbox } from '../../../sharedComponents/form/checkbox';
-import { Button } from '../../../sharedComponents/button';
 
 const NotificationMethod = (props) => {
     const { alertObj = {}, handleNotificationChange } = props;
