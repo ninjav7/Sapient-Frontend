@@ -312,6 +312,64 @@ const PlugRule = () => {
     const initialSortingState = { name: '', method: '' };
     const [hoursNew, setHoursNew] = useState([]);
 
+    const initialLineChartData = () => {
+        const res = [];
+        const data = Object.values(daysOfWeekFull);
+
+        data.forEach((el) => {
+            for (let i = 0; i <= 23; i++) {
+                const today = moment().utc();
+                const from_date = today.startOf('week').startOf('isoWeek');
+                let timeWithHours = '';
+                if (el === 'Sunday') {
+                    from_date.day(el).add(1, 'weeks');
+                } else {
+                    from_date.day(el);
+                }
+                timeWithHours = from_date.set({ hour: i, minute: 0 });
+                res.push({ x: moment.utc(timeWithHours).unix() * 1000, y: 0 });
+            }
+        });
+        let response = [{ name: `Average Energy demand`, data: res }];
+
+        return response;
+    };
+
+    const [lineChartData, setLineChartData] = useState(initialLineChartData());
+    const [macTypeFilterStringUnlinked, setMacTypeFilterStringUnlinked] = useState('');
+    const [macTypeFilterStringLinked, setMacTypeFilterStringLinked] = useState('');
+    const [rawLineChartData, setRawLineChartData] = useState([]);
+    const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
+    const [floorTypeFilterStringUnlinked, setFloorTypeFilterStringUnlinked] = useState('');
+    const [floorTypeFilterStringLinked, setFloorTypeFilterStringLinked] = useState('');
+    const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = useState(true);
+    const [spaceTypeFilterStringUnlinked, setSpaceTypeFilterStringUnlinked] = useState('');
+    const [spaceTypeFilterStringLinked, setSpaceTypeFilterStringLinked] = useState('');
+    const [plugRuleStatus, setPlugRuleStatus] = useState(initialStatus);
+    const [spaceTypeTypeFilterStringUnlinked, setSpaceTypeTypeFilterStringUnlinked] = useState('');
+    const [spaceTypeTypeFilterStringLinked, setSpaceTypeTypeFilterStringLinked] = useState('');
+    const [filterOptionsUnlinked, setFilterOptionsUnlinked] = useState([]);
+    const [filterOptionsLinked, setFilterOptionsLinked] = useState([]);
+    const [isFilterFetching, setFetchingFilters] = useState(false);
+    const [sensorTypeFilterStringUnlinked, setSensorTypeFilterStringUnlinked] = useState('');
+    const [sensorTypeFilterStringLinked, setSensorTypeFilterStringLinked] = useState('');
+    const [countUnlinkedSockets, setCountUnlinkedSockets] = useState(null);
+    const [countLinkedSockets, setCountLinkedSockets] = useState(0);
+    const [isSetInitiallySocketsCountLinked, setIsSetInitiallySocketsCountLinked] = useState(false);
+    const [isSetInitiallySocketsCountUnlinked, setIsSetInitiallySocketsCountUnlinked] = useState(false);
+    const [assignedRuleFilterStringUnlinked, setAssignedRuleFilterStringUnlinked] = useState('');
+    const [assignedRuleFilterStringLinked, setAssignedRuleFilterStringLinked] = useState('');
+    const [tagsFilterStringUnlinked, setTagsFilterStringUnlinked] = useState('');
+    const [schedulerStatusStringLinked, setSchedulerStatusStringLinked] = useState('');
+    const [schedulerStatusStringUninked, setSchedulerStatusStringUninked] = useState('');
+    const [tagsFilterStringLinked, setTagsFilterStringLinked] = useState('');
+    const [lastUsedDataFilterStringUnlinked, setLastUsedDataFilterStringUnlinked] = useState('');
+    const [lastUsedDataFilterStringLinked, setLastUsedDataFilterStringLinked] = useState('');
+    const [sensorsIdNow, setSensorIdNow] = useState('');
+    const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
+    const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
     const [selectedInitialyIds, setSelectedInitialyIds] = useState([]);
     const [selectedIdsToUnlink, setSelectedIdsToUnlink] = useState([]);
     const [selectedIdsToLink, setSelectedIdsToLink] = useState([]);
@@ -340,6 +398,28 @@ const PlugRule = () => {
         });
         return res;
     };
+    const fetchEstimateSensorSavings = async (ids) => {
+        const res = [];
+        preparedScheduleData.forEach((currentCondition) => {
+            currentCondition.data.forEach((currentRow) => {
+                if (currentRow.action_type !== 2) {
+                    if (currentRow.action_day.length) {
+                        const { action_day, ...rest } = currentRow;
+                        const formattedActionDay = action_day.map((el) => {
+                            return daysOfWeekFull[el];
+                        });
+                        res.push({ ...rest, action_days: formattedActionDay });
+                    }
+                }
+            });
+        });
+
+        if (!_.isEmpty(res) && bldgTimeZone) {
+            await getEstimateSensorSavingsRequst(res, ids, ruleId, bldgTimeZone).then((res) => {
+                setEstimatedEnergySavings(res.data);
+            });
+        }
+    };
     useEffect(() => {
         const preparedScheduleDataCopy = preparedScheduleData ? [...preparedScheduleData] : [];
         const workingDaysPerCondition = {};
@@ -364,12 +444,68 @@ const PlugRule = () => {
         }
     }, [preparedScheduleData]);
 
+    const getDateRange = (rawLineChartData) => {
+        if (!_.isEmpty(rawLineChartData)) {
+            const minDate = moment.utc(rawLineChartData[0].time_stamp).startOf('week');
+            const maxDate = moment.utc(rawLineChartData[rawLineChartData.length - 1].time_stamp).endOf('isoweek');
+            maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
+            setDateRangeAverageData({
+                minDate: minDate.unix() * 1000,
+                maxDate: maxDate.unix() * 1000,
+            });
+        } else {
+            const minDate = moment().utc().startOf('isoweek');
+            const maxDate = moment().utc().endOf('isoweek');
+            maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
+            minDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+            minDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+            setDateRangeAverageData({
+                minDate: minDate.unix() * 1000,
+                maxDate: maxDate.unix() * 1000,
+            });
+        }
+    };
+    const getGraphData = async (ids) => {
+        if (ids.length && bldgTimeZone) {
+            await getGraphDataRequest(ids, currentData.id, bldgTimeZone).then((res) => {
+                if (res && res?.data) {
+                    const formattedData = formatAverageData(res.data);
+                    setRawLineChartData(res.data);
+                    let response;
+                    if (!_.isEmpty(formattedData)) {
+                        response = [{ name: `Average Energy demand`, data: formattedData }];
+                    } else {
+                        response = initialLineChartData();
+                    }
+                    if (res.data.length) {
+                        getDateRange(res.data);
+                    }
+                    setLineChartData(response);
+                }
+            });
+        } else {
+            getDateRange(initialLineChartData()[0].data);
+            const response = initialLineChartData();
+            setLineChartData(response);
+        }
+    };
+
     useEffect(() => {
         const linkedIds = selectedInitialyIds.filter((item) => !selectedIdsToUnlink.includes(item));
         const res = [...selectedIdsToLink, ...linkedIds];
         fetchEstimateSensorSavings(res);
         getGraphData(res);
     }, [selectedIdsToUnlink, selectedIdsToLink, selectedInitialyIds.length]);
+
+    const getStatus = async () => {
+        if (bldgTimeZone) {
+            setIsLoading(true);
+            await getPlugRuleStatusRequest(ruleId, bldgTimeZone).then((res) => {
+                setPlugRuleStatus(res);
+                setIsLoading(false);
+            });
+        }
+    };
 
     useEffect(() => {
         getStatus();
@@ -391,11 +527,6 @@ const PlugRule = () => {
                 return acc;
             }, [])
         );
-    };
-    const formatBuildingListData = (data) => {
-        return data.map((el) => {
-            return { value: el.building_id, label: el.building_name };
-        });
     };
 
     const updateBreadcrumbStore = () => {
@@ -428,9 +559,293 @@ const PlugRule = () => {
             }
         }
     };
+    const getSoonestOnDateWithTime = (currentOff, week) => {
+        let onDay = 0;
+        let onTime = 0;
+        let isSearchedDay = false;
+        week.forEach((dayOfWeek, index) => {
+            if (currentOff < index && dayOfWeek.turnOn && !isSearchedDay) {
+                onDay = index;
+                onTime = dayOfWeek.turnOn;
+                isSearchedDay = true;
+            }
+        });
+        return { isSearchedDay, onDay, onTime };
+    };
+
+    const getOffPeriodsForOffTimeLater = (week) => {
+        const res = [];
+        week?.length &&
+            week.forEach((dayOfWeek, index) => {
+                if (dayOfWeek.turnOn < dayOfWeek.turnOff) {
+                    const { isSearchedDay, onDay, onTime } = getSoonestOnDateWithTime(index, week);
+                    if (isSearchedDay) {
+                        res.push({
+                            day: index,
+                            currentOffDay: index,
+                            nextOnDay: onDay,
+                            currentOffTime: dayOfWeek.turnOff,
+                            nextOnTime: onTime,
+                        });
+                    }
+                }
+            });
+        return res;
+    };
+
+    const getFirstLastOffPeriodDayAndTime = (week) => {
+        let firstOnDay,
+            firstOnTime,
+            isLastOffAction = false,
+            lastOffTime = '',
+            lastOffDay = null;
+        if (!_.isEmpty(week)) {
+            const copyWeekReverse = [...week];
+            copyWeekReverse.length = 7;
+            const reverseWeek = copyWeekReverse.reverse();
+            const copyWeek = [...week];
+            copyWeek.length = 7;
+            for (let i = 0; i < (reverseWeek || []).length; i++) {
+                const currentDay = reverseWeek[i];
+                if (currentDay?.turnOn && !isLastOffAction) {
+                    if (currentDay?.turnOn < currentDay?.turnOff) {
+                        isLastOffAction = true;
+                        lastOffDay = reverseWeek.length - i - 1;
+                        lastOffTime = currentDay.turnOff;
+                    }
+                    break;
+                }
+                if (currentDay?.turnOn && isLastOffAction) {
+                    if (currentDay?.turnOn < currentDay?.turnOff) {
+                        isLastOffAction = true;
+                        lastOffDay = reverseWeek.length - i - 1;
+                        lastOffTime = currentDay.turnOff;
+                    }
+                    break;
+                }
+                if (!currentDay || !currentDay?.turnOff) continue;
+                if (currentDay?.turnOff) {
+                    isLastOffAction = true;
+                    lastOffDay = reverseWeek.length - i - 1;
+                    lastOffTime = currentDay.turnOff;
+                    const arrayToSearch = reverseWeek.slice(i + 1);
+                    if (
+                        arrayToSearch.findIndex((nextDay) => nextDay?.turnOn) <
+                        arrayToSearch.findIndex((nextDay) => nextDay?.turnOff)
+                    ) {
+                        break;
+                    }
+                }
+            }
+
+            for (let i = 0; i < (copyWeek || []).length; i++) {
+                const currentDay = copyWeek[i];
+
+                if (!currentDay || !currentDay?.turnOn) continue;
+                if (currentDay?.turnOn && !firstOnDay) {
+                    firstOnDay = i;
+                    firstOnTime = currentDay.turnOn;
+                    break;
+                }
+            }
+
+            if (typeof firstOnDay !== 'number') {
+                firstOnDay = lastOffDay;
+                firstOnTime = lastOffTime;
+            }
+        }
+        return { isLastOffAction, lastOffDay, lastOffTime, firstOnDay, firstOnTime };
+    };
+    const checkIfDayInOffRange = (day, result) => {
+        let offDayArray = [];
+        result.forEach((el) => {
+            if (el.day == day) {
+                offDayArray.push(el);
+            }
+        });
+        return offDayArray;
+    };
+    function getDatesInRange(startDate, stopDate) {
+        var dateArray = [];
+        var currentDate = moment(startDate);
+        var stopDate = moment(stopDate);
+        while (currentDate <= stopDate) {
+            dateArray.push(moment(currentDate).format('YYYY-MM-DD'));
+            currentDate = moment(currentDate).add(1, 'days');
+        }
+        return dateArray;
+    }
+
+    const getOffperiodsWithRealDate = (result) => {
+        const dateRange = dateRangeAverageData;
+        const maxdateString = moment.utc(dateRange.maxDate);
+        const mindateString = moment.utc(dateRange.minDate);
+        const rangeDates = getDatesInRange(mindateString, maxdateString);
+        const offPeriods = [];
+        rangeDates.forEach((day) => {
+            const currentWeekDay = moment(day).weekday();
+            const weekDayOffScheduleArray = checkIfDayInOffRange(currentWeekDay, result);
+            weekDayOffScheduleArray.forEach((weekDayOffSchedule) => {
+                if (!_.isEmpty(weekDayOffSchedule)) {
+                    let timeDiff;
+
+                    if (weekDayOffSchedule?.nextOnDay >= weekDayOffSchedule?.currentOffDay) {
+                        timeDiff = weekDayOffSchedule?.nextOnDay - weekDayOffSchedule?.currentOffDay;
+                    } else if (weekDayOffSchedule?.nextOnDay < weekDayOffSchedule?.currentOffDay) {
+                        timeDiff = 6 - weekDayOffSchedule?.currentOffDay + weekDayOffSchedule?.nextOnDay + 1;
+                    }
+                    const nextTurnOnDay = moment.utc(day, 'YYYY-MM-DD').add(timeDiff, 'days').format('YYYY-MM-DD');
+                    const from = moment.utc(day + ' ' + weekDayOffSchedule?.currentOffTime).unix();
+                    const to = moment.utc(nextTurnOnDay + ' ' + weekDayOffSchedule?.nextOnTime).unix();
+                    offPeriods.push({
+                        type: LineChart.PLOT_BANDS_TYPE.off_hours,
+                        from: from * 1000,
+                        to: to * 1000,
+                    });
+                }
+            });
+        });
+        setOffHoursPlots(offPeriods);
+    };
+
+    const calculateOffHoursPlots = () => {
+        let weekWithSchedule = [];
+        const copyOfPreparedScheduleData = [...preparedScheduleData];
+        copyOfPreparedScheduleData
+            .filter(
+                (el) =>
+                    !el.data.find((groupId) => {
+                        return groupId.is_deleted;
+                    })
+            )
+            .map((groupId) => {
+                groupId.data.forEach((el) => {
+                    switch (el.action_type) {
+                        case 0:
+                            el.action_day.forEach((day) => {
+                                weekWithSchedule[indexOfDay[day]] = {
+                                    ...weekWithSchedule[indexOfDay[day]],
+                                    turnOff: el.action_time,
+                                };
+                            });
+
+                            break;
+                        case 1:
+                            el.action_day.forEach((day) => {
+                                weekWithSchedule[indexOfDay[day]] = {
+                                    ...weekWithSchedule[indexOfDay[day]],
+                                    turnOn: el.action_time,
+                                };
+                            });
+                            break;
+                    }
+                });
+            });
+
+        let result = [];
+        for (let i = 0; i < weekWithSchedule.length; i++) {
+            let currentOff = weekWithSchedule[i]?.turnOff;
+            let currentOffDay = i;
+            let nextOn;
+            let nextOnDay;
+            if (weekWithSchedule[i] !== undefined) {
+                if (i === weekWithSchedule.length - 1) {
+                    nextOn = weekWithSchedule[0]?.turnOn;
+                    nextOnDay = weekWithSchedule.length - 1;
+                } else {
+                    for (let j = i; j < weekWithSchedule.length; j++) {
+                        if (weekWithSchedule[j]?.turnOn) {
+                            if (weekWithSchedule[j]?.turnOn >= weekWithSchedule[j]?.turnOff) {
+                                nextOnDay = j;
+                                nextOn = weekWithSchedule[j]?.turnOn;
+                                break;
+                            } else {
+                                if (weekWithSchedule[j + 1]?.turnOn) {
+                                    nextOnDay = j + 1;
+                                    if (weekWithSchedule[j + 1]) {
+                                        nextOn = weekWithSchedule[j + 1]?.turnOn;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!currentOff) {
+                continue;
+            }
+            if (!nextOn) {
+                if (i === weekWithSchedule.length - 1) {
+                    nextOn = weekWithSchedule[0]?.turnOn;
+                    nextOnDay = i;
+                } else {
+                    nextOn = weekWithSchedule[i + 1]?.turnOn;
+                    nextOnDay = i + 1;
+                }
+            }
+            if (currentOff && nextOn) {
+                if (currentOffDay < nextOnDay) {
+                    result.push({
+                        day: i,
+                        currentOffDay,
+                        nextOnDay,
+                        currentOffTime: currentOff,
+                        nextOnTime: nextOn,
+                    });
+                } else if (currentOffDay === nextOnDay && nextOn > currentOff) {
+                    result.push({
+                        day: i,
+                        currentOffDay,
+                        nextOnDay,
+                        currentOffTime: currentOff,
+                        nextOnTime: nextOn,
+                    });
+                }
+            }
+        }
+        const { isLastOffAction, lastOffDay, lastOffTime, firstOnDay, firstOnTime } =
+            getFirstLastOffPeriodDayAndTime(weekWithSchedule);
+        if (isLastOffAction) {
+            result.push({
+                day: lastOffDay,
+                currentOffDay: lastOffDay,
+                nextOnDay: 6,
+                currentOffTime: lastOffTime,
+                nextOnTime: '23:59',
+            });
+            result.push({
+                day: 0,
+                currentOffDay: 0,
+                nextOnDay: firstOnDay,
+                currentOffTime: '00:00',
+                nextOnTime: firstOnTime,
+            });
+        }
+        const theSameDayOffLater = getOffPeriodsForOffTimeLater(weekWithSchedule);
+        result.push(...theSameDayOffLater);
+        getOffperiodsWithRealDate(result);
+    };
     useEffect(() => {
         calculateOffHoursPlots();
     }, [preparedScheduleData, currentData, rawLineChartData, lineChartData, dateRangeAverageData]);
+
+    const fetchPlugRuleDetail = async () => {
+        if (bldgTimeZone) {
+            let time_zone = bldgTimeZone;
+
+            await fetchPlugRuleDetails(ruleId, time_zone).then((res) => {
+                if (res.status) {
+                    setSkeletonLoading(false);
+                }
+                let response = Object.assign({}, res.data.data[0]);
+                response.building_id = response?.building[0]?.building_id;
+                setCurrentData(response);
+                const scheduleData = groupedCurrentDataById(response.action);
+                setPreparedScheduleData(scheduleData);
+            });
+        }
+    };
     useEffect(() => {
         if (ruleId == 'create-plug-rule') {
             setIsCreateRuleMode(true);
@@ -454,23 +869,6 @@ const PlugRule = () => {
         updateBreadcrumbStore();
     }, [currentData.name]);
 
-    const fetchPlugRuleDetail = async () => {
-        if (bldgTimeZone) {
-            let time_zone = bldgTimeZone;
-
-            await fetchPlugRuleDetails(ruleId, time_zone).then((res) => {
-                if (res.status) {
-                    setSkeletonLoading(false);
-                }
-                let response = Object.assign({}, res.data.data[0]);
-                response.building_id = response?.building[0]?.building_id;
-                setCurrentData(response);
-                const scheduleData = groupedCurrentDataById(response.action);
-                setPreparedScheduleData(scheduleData);
-            });
-        }
-    };
-
     const deletePlugRule = async () => {
         setIsDeleting(true);
         await deletePlugRuleRequest(ruleId).then((res) => {
@@ -481,98 +879,83 @@ const PlugRule = () => {
             }
         });
     };
-    const initialLineChartData = () => {
-        const res = [];
-        const data = Object.values(daysOfWeekFull);
 
-        data.forEach((el) => {
-            for (let i = 0; i <= 23; i++) {
-                const today = moment().utc();
-                const from_date = today.startOf('week').startOf('isoWeek');
-                let timeWithHours = '';
-                if (el === 'Sunday') {
-                    from_date.day(el).add(1, 'weeks');
-                } else {
-                    from_date.day(el);
-                }
-                timeWithHours = from_date.set({ hour: i, minute: 0 });
-                res.push({ x: moment.utc(timeWithHours).unix() * 1000, y: 0 });
-            }
-        });
-        let response = [{ name: `Average Energy demand`, data: res }];
-
-        return response;
+    const renderTagCell = (row) => {
+        return (row.tag || []).map((tag, key) => <Badge text={tag} key={key} className="ml-1" />);
     };
-
-    const [lineChartData, setLineChartData] = useState(initialLineChartData());
-
-    const [macTypeFilterStringUnlinked, setMacTypeFilterStringUnlinked] = useState('');
-    const [macTypeFilterStringLinked, setMacTypeFilterStringLinked] = useState('');
-    const [rawLineChartData, setRawLineChartData] = useState([]);
-    const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
-
-    const [floorTypeFilterStringUnlinked, setFloorTypeFilterStringUnlinked] = useState('');
-    const [floorTypeFilterStringLinked, setFloorTypeFilterStringLinked] = useState('');
-    const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = useState(true);
-    const [spaceTypeFilterStringUnlinked, setSpaceTypeFilterStringUnlinked] = useState('');
-    const [spaceTypeFilterStringLinked, setSpaceTypeFilterStringLinked] = useState('');
-    const [plugRuleStatus, setPlugRuleStatus] = useState(initialStatus);
-    const [spaceTypeTypeFilterStringUnlinked, setSpaceTypeTypeFilterStringUnlinked] = useState('');
-    const [spaceTypeTypeFilterStringLinked, setSpaceTypeTypeFilterStringLinked] = useState('');
-
-    const [sensorTypeFilterStringUnlinked, setSensorTypeFilterStringUnlinked] = useState('');
-    const [sensorTypeFilterStringLinked, setSensorTypeFilterStringLinked] = useState('');
-    const [countUnlinkedSockets, setCountUnlinkedSockets] = useState(null);
-    const [countLinkedSockets, setCountLinkedSockets] = useState(0);
-    const [isSetInitiallySocketsCountLinked, setIsSetInitiallySocketsCountLinked] = useState(false);
-    const [isSetInitiallySocketsCountUnlinked, setIsSetInitiallySocketsCountUnlinked] = useState(false);
-    const [assignedRuleFilterStringUnlinked, setAssignedRuleFilterStringUnlinked] = useState('');
-    const [assignedRuleFilterStringLinked, setAssignedRuleFilterStringLinked] = useState('');
-    const [tagsFilterStringUnlinked, setTagsFilterStringUnlinked] = useState('');
-    const [schedulerStatusStringLinked, setSchedulerStatusStringLinked] = useState('');
-    const [schedulerStatusStringUninked, setSchedulerStatusStringUninked] = useState('');
-    const [tagsFilterStringLinked, setTagsFilterStringLinked] = useState('');
-    const [lastUsedDataFilterStringUnlinked, setLastUsedDataFilterStringUnlinked] = useState('');
-    const [lastUsedDataFilterStringLinked, setLastUsedDataFilterStringLinked] = useState('');
-
-    const [sensorsIdNow, setSensorIdNow] = useState('');
-    const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
-    const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-
-    const getStatus = async () => {
-        if (bldgTimeZone) {
-            setIsLoading(true);
-            await getPlugRuleStatusRequest(ruleId, bldgTimeZone).then((res) => {
-                setPlugRuleStatus(res);
-                setIsLoading(false);
-            });
+    const renderScheduleStatus = (row) => {
+        const time_format = is24Format ? `HH:mm:ss D MMM 'YY` : `hh:mm A D MMM 'YY`;
+        let icon = '';
+        if (row.scheduler_status == 'OK') {
+            icon = <CheckedSVG />;
+        } else if (row.scheduler_status == 'Partial') {
+            icon = <WarningSVG />;
+        } else if (row.scheduler_status == 'Failed') {
+            icon = <CircleXmarkSVG />;
         }
+
+        return (
+            <div id={row.id}>
+                <UncontrolledTooltip placement="top" target={`tooltip-${row.id}`}>
+                    <div className="tooltip-for-sockets">
+                        {row.current_job_log &&
+                            row?.current_job_log.map((el) => {
+                                return (
+                                    <div className="tooltip-for-sockets-item" id={el.kasa_socket_condition_id}>
+                                        <span className="flex" style={{ fontSize: '10px' }}>
+                                            Condition ID: {el.kasa_socket_condition_id}
+                                        </span>
+                                        <span style={{ fontSize: '10px' }}>Err Code: {el.response.err_code}</span>
+                                        <span style={{ fontSize: '10px' }}>
+                                            Time Stamp: {moment(el.response.time_stamp).format(time_format)}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                    </div>
+                </UncontrolledTooltip>
+
+                <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center ">
+                    <span className="cursor-pointer" id={`tooltip-${row.id}`}>
+                        {icon}
+                    </span>
+                </Typography.Subheader>
+            </div>
+        );
     };
-    const getGraphData = async (ids) => {
-        if (ids.length && bldgTimeZone) {
-            await getGraphDataRequest(ids, currentData.id, bldgTimeZone).then((res) => {
-                if (res && res?.data) {
-                    const formattedData = formatAverageData(res.data);
-                    setRawLineChartData(res.data);
-                    let response;
-                    if (!_.isEmpty(formattedData)) {
-                        response = [{ name: `Average Energy demand`, data: formattedData }];
-                    } else {
-                        response = initialLineChartData();
-                    }
-                    if (res.data.length) {
-                        getDateRange(res.data);
-                    }
-                    setLineChartData(response);
-                }
+    const renderTimeStamp = (row) => {
+        const sortedData =
+            row.current_job_log &&
+            row.current_job_log.sort((x, y) => {
+                return new Date(x.response.time_stamp) < new Date(y.response.time_stamp) ? 1 : -1;
             });
-        } else {
-            getDateRange(initialLineChartData()[0].data);
-            const response = initialLineChartData();
-            setLineChartData(response);
-        }
+        const res =
+            sortedData && sortedData[0]?.response
+                ? moment(sortedData[0].response?.time_stamp).format(prepareTimeAndDateFormat(dateFormat, timeFormat))
+                : '';
+        return res;
     };
+
+    const renderLastUsedCell = (row, childrenTemplate) => {
+        const { last_used_data } = row;
+
+        return childrenTemplate(last_used_data ? moment(last_used_data).fromNow() : '');
+    };
+
+    const renderAssignRule = useCallback(
+        (row, childrenTemplate) => childrenTemplate(row.assigned_rules?.length === 0 ? 'None' : row.assigned_rules),
+        []
+    );
+
+    const renderEquipType = useCallback((row) => {
+        return <Badge text={<span className="gray-950">{row.equipment_type_name}</span>} />;
+    }, []);
+
+    const renderLocation = useCallback((row, childrenTemplate) => {
+        const location = [row.installed_floor, row.installed_space];
+
+        return childrenTemplate(location.join(' - '));
+    }, []);
 
     useEffect(() => {
         if (selectedIdsToUnlink.length) {
@@ -585,6 +968,20 @@ const PlugRule = () => {
             setShowConfirmSelectionToLink(true);
         }
     }, [selectedIdsToLink]);
+
+    const handleCurrentDataChange = (key, value) => {
+        let obj = Object.assign({}, currentData);
+        obj[key] = value;
+        if (key == 'building_id' && value) {
+            setBuildingError({ text: '' });
+        }
+        if (key == 'name' && value) {
+            setNameError(false);
+        }
+        setCurrentData(obj);
+        setIsChangedRuleDetails(true);
+    };
+
     const handleSwitchChange = () => {
         let obj = currentData;
         obj.is_active = !currentData.is_active;
@@ -599,18 +996,6 @@ const PlugRule = () => {
         }
     }, [isChangedRuleDetails, isChangedSocketsUnlinked, isChangedSocketsLinked]);
 
-    const handleCurrentDataChange = (key, value) => {
-        let obj = Object.assign({}, currentData);
-        obj[key] = value;
-        if (key == 'building_id' && value) {
-            setBuildingError({ text: '' });
-        }
-        if (key == 'name' && value) {
-            setNameError(false);
-        }
-        setCurrentData(obj);
-        setIsChangedRuleDetails(true);
-    };
     const handleScheduleDayChange = (day, condition_group_id) => {
         let currentObj = [...preparedScheduleData];
 
@@ -708,6 +1093,121 @@ const PlugRule = () => {
         setPreparedScheduleData(resArray);
         setIsChangedRuleDetails(true);
         setShowDeleteConditionModal(false);
+    };
+    const fetchUnLinkedSocketRules = async () => {
+        const sorting = sortByUnlinkedTab.method &&
+            sortByUnlinkedTab.name && {
+                order_by: sortByUnlinkedTab.name,
+                sort_by: sortByUnlinkedTab.method,
+            };
+
+        isLoadingUnlinkedRef.current = true;
+
+        bldgId &&
+            (await getUnlinkedSocketRules(
+                pageSizeUnlinked,
+                pageNoUnlinked,
+                bldgId,
+                equipmentTypeFilterStringUnlinked,
+                macTypeFilterStringUnlinked,
+                locationTypeFilterString,
+                sensorTypeFilterStringUnlinked,
+                floorTypeFilterStringUnlinked,
+                spaceTypeFilterStringUnlinked,
+                spaceTypeTypeFilterStringUnlinked,
+                assignedRuleFilterStringUnlinked,
+                tagsFilterStringUnlinked,
+                schedulerStatusStringUninked,
+                true,
+                {
+                    ...sorting,
+                },
+                false,
+                ruleId,
+                searchUnlinked
+            ).then((res) => {
+                isLoadingUnlinkedRef.current = false;
+
+                let response = res.data;
+                setAllSensors(response?.data);
+
+                setUnlinkedSocketRuleSuccess(res.status);
+
+                let unLinkedData = [];
+                setCountUnlinkedSockets(response?.total_data);
+                setIsSetInitiallySocketsCountUnlinked(true);
+
+                setUnlinkedSocketsTabData(response?.data);
+                setTotalItemsUnlinked(response?.total_data);
+            }));
+    };
+
+    const fetchLinkedSocketRules = async () => {
+        const sorting = sortByLinkedTab.method &&
+            sortByLinkedTab.name && {
+                order_by: sortByLinkedTab.name,
+                sort_by: sortByLinkedTab.method,
+            };
+        isLoadingLinkedRef.current = true;
+        bldgId &&
+            (await getUnlinkedSocketRules(
+                pageSizeLinked,
+                pageNoLinked,
+                bldgId,
+                equipmentTypeFilterStringLinked,
+                macTypeFilterStringLinked,
+                locationTypeFilterString,
+                sensorTypeFilterStringLinked,
+                floorTypeFilterStringLinked,
+                spaceTypeFilterStringLinked,
+                spaceTypeTypeFilterStringLinked,
+                assignedRuleFilterStringLinked,
+                tagsFilterStringLinked,
+                schedulerStatusStringLinked,
+                true,
+                {
+                    ...sorting,
+                },
+                true,
+                ruleId,
+                searchLinked
+            )
+                .then((res) => {
+                    isLoadingLinkedRef.current = false;
+                    let response = res.data;
+                    let linkedIds = [];
+
+                    if (res.success) {
+                        setTotalSocket(response.total_data);
+                    }
+
+                    response.data.forEach((record) => {
+                        linkedIds.push(record.id);
+                    });
+                    if (response.data.length > 0) {
+                        setCheckedToUnlinkAll(true);
+                    } else {
+                        setCheckedToUnlinkAll(false);
+                    }
+                    if (!_.isEqual(selectedInitialyIds, linkedIds)) {
+                        setSelectedInitialyIds(linkedIds || []);
+                    }
+                    setLinkedSocketsTabData(response.data);
+                    // if (!isSetInitiallySocketsCountLinked) {
+                    setCountLinkedSockets(response.total_data);
+                    setIsSetInitiallySocketsCountLinked(true);
+                    // }
+                    setTotalItemsLinked(response?.total_data);
+                })
+                .catch((error) => {}));
+    };
+
+    const fetchLinkedSocketIds = async () => {
+        bldgId &&
+            listLinkSocketRulesRequest(ruleId, bldgId).then((res) => {
+                const { sensor_id } = res.data.data;
+                setListSocketsIds(sensor_id || []);
+            });
     };
 
     const reassignSensorsToRule = async () => {
@@ -828,6 +1328,330 @@ const PlugRule = () => {
         setSocketsToReassign(newSocketsToReassign);
     };
 
+    const fetchFiltersForSensorsUnlinked = async () => {
+        isLoadingUnlinkedRef.current = true;
+        setFetchingFilters(true);
+        await getFiltersForSensorsRequest({
+            activeBuildingId: bldgId,
+            macTypeFilterString: macTypeFilterStringUnlinked,
+            equipmentTypeFilterString: equipmentTypeFilterStringUnlinked,
+            sensorTypeFilterString: sensorTypeFilterStringUnlinked,
+            floorTypeFilterString: floorTypeFilterStringUnlinked,
+            spaceTypeFilterString: spaceTypeFilterStringUnlinked,
+            spaceTypeTypeFilterString: spaceTypeTypeFilterStringUnlinked,
+            schedulerStatusString: schedulerStatusStringUninked,
+            isGetOnlyLinked: false,
+            plugRuleId: ruleId,
+        }).then((filters) => {
+            const filterOptions = filters.data?.length ? filters.data[0] : filters.data;
+            const filterOptionsFetched = !_.isEmpty(filterOptions)
+                ? [
+                      {
+                          label: 'Equipment Type',
+                          value: 'equipmentType',
+                          placeholder: 'All Equipment Types',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.equipment_type.map((filterItem) => ({
+                              value: filterItem.equipment_type_id,
+                              label: filterItem.equipment_type_name,
+                          })),
+                          onClose: (options) => filterHandler(setEquipmentTypeFilterStringUnlinked, options),
+                          onDelete: () => {
+                              setEquipmentTypeFilterStringUnlinked('');
+                          },
+                      },
+                      {
+                          label: 'Floor',
+                          value: 'floor',
+                          placeholder: 'All Floors',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_floor.map((filterItem) => ({
+                              value: filterItem.floor_id,
+                              label: filterItem.floor_name,
+                          })),
+                          onClose: (options) => filterHandler(setFloorTypeFilterStringUnlinked, options),
+                          onDelete: () => setFloorTypeFilterStringUnlinked(''),
+                      },
+                      {
+                          label: 'Space',
+                          value: 'space',
+                          placeholder: 'All Spaces',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_space.map((filterItem) => ({
+                              value: filterItem.space_id,
+                              label: filterItem.space_name,
+                          })),
+                          onClose: (options) => filterHandler(setSpaceTypeFilterStringUnlinked, options),
+                          onDelete: () => setSpaceTypeFilterStringUnlinked(''),
+                      },
+                      {
+                          label: 'Space Type',
+                          value: 'spaceType',
+                          placeholder: 'All Space Types',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_space_type.map((filterItem) => ({
+                              value: filterItem.space_type_id,
+                              label: filterItem.space_type_name,
+                          })),
+                          onClose: (options) => filterHandler(setSpaceTypeTypeFilterStringUnlinked, options),
+                          onDelete: () => setSpaceTypeTypeFilterStringUnlinked(''),
+                      },
+                      {
+                          label: 'MAC Address',
+                          value: 'macAddresses',
+                          placeholder: 'All Mac addresses',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.mac_address.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setMacTypeFilterStringUnlinked, options),
+                          onDelete: () => {
+                              setMacTypeFilterStringUnlinked('');
+                          },
+                      },
+                      {
+                          label: 'Sensors',
+                          value: 'sensor_count',
+                          placeholder: 'All Sensors',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.sensor_count.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setSensorTypeFilterStringUnlinked, options),
+                          onDelete: () => setSensorTypeFilterStringUnlinked(''),
+                      },
+                      {
+                          label: 'Assigned rule',
+                          value: 'assigned_rule',
+                          placeholder: 'All assigned rule',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.assigned_rule.map((filterItem) => ({
+                              value: filterItem.plug_rule_id,
+                              label: filterItem.plug_rule_name,
+                          })),
+                          onClose: (options) => filterHandler(setAssignedRuleFilterStringUnlinked, options),
+                          onDelete: () => setAssignedRuleFilterStringUnlinked(''),
+                      },
+                      {
+                          label: 'Tags',
+                          value: 'tags',
+                          placeholder: 'All tags',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.tags.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setTagsFilterStringUnlinked, options),
+                          onDelete: () => setTagsFilterStringUnlinked(''),
+                      },
+                      {
+                          label: 'Schedule status',
+                          value: 'scheduler_status',
+                          placeholder: 'All statuses',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.scheduler_status.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setSchedulerStatusStringUninked, options),
+                          onDelete: () => setSchedulerStatusStringUninked(''),
+                      },
+                      {
+                          label: 'Last used data',
+                          value: 'last_used_data',
+                          placeholder: 'All last used data',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.last_used_data.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setLastUsedDataFilterStringUnlinked, options),
+                          onDelete: () => setLastUsedDataFilterStringUnlinked(''),
+                      },
+                  ]
+                : [];
+            setFilterOptionsUnlinked(filterOptionsFetched);
+        });
+        setFetchingFilters(false);
+        isLoadingUnlinkedRef.current = false;
+    };
+    const fetchFiltersForSensorsLinked = async () => {
+        isLoadingLinkedRef.current = true;
+        setFetchingFilters(true);
+        await getFiltersForSensorsRequest({
+            activeBuildingId: bldgId,
+            macTypeFilterString: macTypeFilterStringLinked,
+            equipmentTypeFilterString: equipmentTypeFilterStringLinked,
+            sensorTypeFilterString: sensorTypeFilterStringLinked,
+            floorTypeFilterString: floorTypeFilterStringLinked,
+            spaceTypeFilterString: spaceTypeFilterStringLinked,
+            schedulerStatusString: schedulerStatusStringLinked,
+            spaceTypeTypeFilterString: spaceTypeTypeFilterStringLinked,
+            isGetOnlyLinked: true,
+            plugRuleId: ruleId,
+        }).then((filters) => {
+            const filterOptions = filters.data?.length ? filters.data[0] : filters.data;
+            const filterOptionsFetched = !_.isEmpty(filterOptions)
+                ? [
+                      {
+                          label: 'Equipment Type',
+                          value: 'equipmentType',
+                          placeholder: 'All Equipment Types',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.equipment_type.map((filterItem) => ({
+                              value: filterItem.equipment_type_id,
+                              label: filterItem.equipment_type_name,
+                          })),
+                          onClose: (options) => filterHandler(setEquipmentTypeFilterStringLinked, options),
+                          onDelete: () => {
+                              setEquipmentTypeFilterStringLinked('');
+                          },
+                      },
+                      {
+                          label: 'Floor',
+                          value: 'floor',
+                          placeholder: 'All Floors',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_floor.map((filterItem) => ({
+                              value: filterItem.floor_id,
+                              label: filterItem.floor_name,
+                          })),
+                          onClose: (options) => filterHandler(setFloorTypeFilterStringLinked, options),
+                          onDelete: () => setFloorTypeFilterStringLinked(''),
+                      },
+                      {
+                          label: 'Space',
+                          value: 'space',
+                          placeholder: 'All Spaces',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_space.map((filterItem) => ({
+                              value: filterItem.space_id,
+                              label: filterItem.space_name,
+                          })),
+                          onClose: (options) => filterHandler(setSpaceTypeFilterStringLinked, options),
+                          onDelete: () => setSpaceTypeFilterStringLinked(''),
+                      },
+                      {
+                          label: 'Space Type',
+                          value: 'spaceType',
+                          placeholder: 'All Space Types',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_space_type.map((filterItem) => ({
+                              value: filterItem.space_type_id,
+                              label: filterItem.space_type_name,
+                          })),
+                          onClose: (options) => filterHandler(setSpaceTypeTypeFilterStringLinked, options),
+                          onDelete: () => setSpaceTypeTypeFilterStringLinked(''),
+                      },
+                      {
+                          label: 'MAC Address',
+                          value: 'macAddresses',
+                          placeholder: 'All Mac addresses',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.mac_address.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setMacTypeFilterStringLinked, options),
+                          onDelete: () => {
+                              setMacTypeFilterStringLinked('');
+                          },
+                      },
+                      {
+                          label: 'Sensors',
+                          value: 'sensor_count',
+                          placeholder: 'All Sensors',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.sensor_count.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setSensorTypeFilterStringLinked, options),
+                          onDelete: () => setSensorTypeFilterStringLinked(''),
+                      },
+                      {
+                          label: 'Assigned rule',
+                          value: 'assigned_rule',
+                          placeholder: 'All assigned rule',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.assigned_rule.map((filterItem) => ({
+                              value: filterItem.plug_rule_id,
+                              label: filterItem.plug_rule_name,
+                          })),
+                          onClose: (options) => filterHandler(setAssignedRuleFilterStringLinked, options),
+                          onDelete: () => setAssignedRuleFilterStringLinked(''),
+                      },
+                      {
+                          label: 'Tags',
+                          value: 'tags',
+                          placeholder: 'All tags',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.tags.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setTagsFilterStringLinked, options),
+                          onDelete: () => setTagsFilterStringLinked(''),
+                      },
+                      {
+                          label: 'Schedule status',
+                          value: 'scheduler_status',
+                          placeholder: 'All statuses',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.scheduler_status.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setSchedulerStatusStringLinked, options),
+                          onDelete: () => setSchedulerStatusStringLinked(''),
+                      },
+                      {
+                          label: 'Last used data',
+                          value: 'last_used_data',
+                          placeholder: 'All last used data',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.last_used_data.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setLastUsedDataFilterStringLinked, options),
+                          onDelete: () => setLastUsedDataFilterStringLinked(''),
+                      },
+                  ]
+                : [];
+            setFilterOptionsLinked(filterOptionsFetched);
+        });
+        setFetchingFilters(false);
+        isLoadingLinkedRef.current = false;
+    };
+
+    const handleSaveClicked = async () => {
+        const { isAssignedToAnotherRule } = handleCheckIfSocketAssignedToAnotherRule(rulesToLink);
+        if (isAssignedToAnotherRule) {
+            setShowSocketsModal(true);
+            return;
+        }
+        Promise.allSettled([
+            // isChangedSockets && updateSocketUnlink(),
+            isChangedSocketsUnlinked && reassignSensorsToRule(),
+            isChangedRuleDetails && updatePlugRuleData(),
+        ]).then((value) => {
+            setRulesToLink({ ruleId: '', sensor_id: [] });
+            setRulesToUnLink({ ruleId: '', sensor_id: [] });
+            setIsChangedRuleDetails(false);
+            setIsChangedSocketsUnlinked(false);
+            setIsChangedSocketsLinked(false);
+            fetchLinkedSocketIds();
+            fetchFiltersForSensorsUnlinked();
+            fetchFiltersForSensorsLinked();
+            fetchPlugRuleDetail();
+        });
+
+        setIsUnsavedChanges(false);
+    };
+
     const handleClickConfirmSelection = (tabId) => {
         if (tabId == 0) {
             isChangedSocketsLinked && updateSocketUnlink();
@@ -939,28 +1763,6 @@ const PlugRule = () => {
             .catch((error) => {
                 setIsProcessing(false);
             });
-    };
-    const fetchEstimateSensorSavings = async (ids) => {
-        const res = [];
-        preparedScheduleData.forEach((currentCondition) => {
-            currentCondition.data.forEach((currentRow) => {
-                if (currentRow.action_type !== 2) {
-                    if (currentRow.action_day.length) {
-                        const { action_day, ...rest } = currentRow;
-                        const formattedActionDay = action_day.map((el) => {
-                            return daysOfWeekFull[el];
-                        });
-                        res.push({ ...rest, action_days: formattedActionDay });
-                    }
-                }
-            });
-        });
-
-        if (!_.isEmpty(res) && bldgTimeZone) {
-            await getEstimateSensorSavingsRequst(res, ids, ruleId, bldgTimeZone).then((res) => {
-                setEstimatedEnergySavings(res.data);
-            });
-        }
     };
 
     const addOptions = () => {
@@ -1088,8 +1890,6 @@ const PlugRule = () => {
             callbackValue: renderLastUsedCell,
         },
     ];
-    const [removeEqupimentTypesDuplication, setRemoveEqupimentTypesDuplication] = useState();
-
     const dataForCSV = () => {
         let newPlugRuleData = [];
 
@@ -1105,90 +1905,6 @@ const PlugRule = () => {
             newPlugRuleData = allSensors;
         }
         return newPlugRuleData;
-    };
-    const uniqueMacIds = [];
-    const [removeMacDuplication, setRemoveMacDuplication] = useState();
-
-    const removeDuplicates = () => {
-        setRemoveEqupimentTypesDuplication(_.uniqBy(options, 'label'));
-    };
-
-    const removeMacDuplicates = () => {
-        const uniqueMac = macOptions.filter((element) => {
-            const isDuplicate = uniqueMacIds.includes(element?.device_link);
-
-            if (!isDuplicate) {
-                uniqueMacIds.push(element?.device_link);
-                return true;
-            }
-            return false;
-        });
-
-        setRemoveMacDuplication(uniqueMac);
-    };
-
-    useEffect(() => {
-        removeDuplicates();
-    }, [options]);
-
-    useEffect(() => {
-        removeMacDuplicates();
-    }, [macOptions]);
-
-    const fetchLinkedSocketIds = async () => {
-        bldgId &&
-            listLinkSocketRulesRequest(ruleId, bldgId).then((res) => {
-                const { sensor_id } = res.data.data;
-                setListSocketsIds(sensor_id || []);
-            });
-    };
-
-    const fetchUnLinkedSocketRules = async () => {
-        const sorting = sortByUnlinkedTab.method &&
-            sortByUnlinkedTab.name && {
-                order_by: sortByUnlinkedTab.name,
-                sort_by: sortByUnlinkedTab.method,
-            };
-
-        isLoadingUnlinkedRef.current = true;
-
-        bldgId &&
-            (await getUnlinkedSocketRules(
-                pageSizeUnlinked,
-                pageNoUnlinked,
-                bldgId,
-                equipmentTypeFilterStringUnlinked,
-                macTypeFilterStringUnlinked,
-                locationTypeFilterString,
-                sensorTypeFilterStringUnlinked,
-                floorTypeFilterStringUnlinked,
-                spaceTypeFilterStringUnlinked,
-                spaceTypeTypeFilterStringUnlinked,
-                assignedRuleFilterStringUnlinked,
-                tagsFilterStringUnlinked,
-                schedulerStatusStringUninked,
-                true,
-                {
-                    ...sorting,
-                },
-                false,
-                ruleId,
-                searchUnlinked
-            ).then((res) => {
-                isLoadingUnlinkedRef.current = false;
-
-                let response = res.data;
-                setAllSensors(response?.data);
-
-                setUnlinkedSocketRuleSuccess(res.status);
-
-                let unLinkedData = [];
-                setCountUnlinkedSockets(response?.total_data);
-                setIsSetInitiallySocketsCountUnlinked(true);
-
-                setUnlinkedSocketsTabData(response?.data);
-                setTotalItemsUnlinked(response?.total_data);
-            }));
     };
 
     const handleDownloadCsvLinkedTab = async () => {
@@ -1275,66 +1991,6 @@ const PlugRule = () => {
             .finally(() => {
                 setDownloadingCSVData(false);
             });
-    };
-
-    const fetchLinkedSocketRules = async () => {
-        const sorting = sortByLinkedTab.method &&
-            sortByLinkedTab.name && {
-                order_by: sortByLinkedTab.name,
-                sort_by: sortByLinkedTab.method,
-            };
-        isLoadingLinkedRef.current = true;
-        bldgId &&
-            (await getUnlinkedSocketRules(
-                pageSizeLinked,
-                pageNoLinked,
-                bldgId,
-                equipmentTypeFilterStringLinked,
-                macTypeFilterStringLinked,
-                locationTypeFilterString,
-                sensorTypeFilterStringLinked,
-                floorTypeFilterStringLinked,
-                spaceTypeFilterStringLinked,
-                spaceTypeTypeFilterStringLinked,
-                assignedRuleFilterStringLinked,
-                tagsFilterStringLinked,
-                schedulerStatusStringLinked,
-                true,
-                {
-                    ...sorting,
-                },
-                true,
-                ruleId,
-                searchLinked
-            )
-                .then((res) => {
-                    isLoadingLinkedRef.current = false;
-                    let response = res.data;
-                    let linkedIds = [];
-
-                    if (res.success) {
-                        setTotalSocket(response.total_data);
-                    }
-
-                    response.data.forEach((record) => {
-                        linkedIds.push(record.id);
-                    });
-                    if (response.data.length > 0) {
-                        setCheckedToUnlinkAll(true);
-                    } else {
-                        setCheckedToUnlinkAll(false);
-                    }
-                    if (!_.isEqual(selectedInitialyIds, linkedIds)) {
-                        setSelectedInitialyIds(linkedIds || []);
-                    }
-                    setLinkedSocketsTabData(response.data);
-                    // if (!isSetInitiallySocketsCountLinked) {
-                    setCountLinkedSockets(response.total_data);
-                    setIsSetInitiallySocketsCountLinked(true);
-                    // }
-                    setTotalItemsLinked(response?.total_data);
-                })
-                .catch((error) => {}));
     };
 
     useEffect(() => {
@@ -1583,76 +2239,10 @@ const PlugRule = () => {
 
         return allSearchData.filter(({ id }) => !selectedInitialyIds.find((sensorId) => sensorId === id));
     };
-
-    const renderTagCell = (row) => {
-        return (row.tag || []).map((tag, key) => <Badge text={tag} key={key} className="ml-1" />);
-    };
-    const renderScheduleStatus = (row) => {
-        const time_format = is24Format ? `HH:mm:ss D MMM 'YY` : `hh:mm A D MMM 'YY`;
-        let icon = '';
-        if (row.scheduler_status == 'OK') {
-            icon = <CheckedSVG />;
-        } else if (row.scheduler_status == 'Partial') {
-            icon = <WarningSVG />;
-        } else if (row.scheduler_status == 'Failed') {
-            icon = <CircleXmarkSVG />;
-        }
-
-        return (
-            <div id={row.id}>
-                <UncontrolledTooltip placement="top" target={`tooltip-${row.id}`}>
-                    <div className="tooltip-for-sockets">
-                        {row.current_job_log.map((el) => {
-                            return (
-                                <div className="tooltip-for-sockets-item" id={el.kasa_socket_condition_id}>
-                                    <span className="flex" style={{ fontSize: '10px' }}>
-                                        Condition ID: {el.kasa_socket_condition_id}
-                                    </span>
-                                    <span style={{ fontSize: '10px' }}>Err Code: {el.response.err_code}</span>
-                                    <span style={{ fontSize: '10px' }}>
-                                        Time Stamp: {moment(el.response.time_stamp).format(time_format)}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </UncontrolledTooltip>
-
-                <Typography.Subheader size={Typography.Sizes.sm} className="justify-content-center ">
-                    <span className="cursor-pointer" id={`tooltip-${row.id}`}>
-                        {icon}
-                    </span>
-                </Typography.Subheader>
-            </div>
-        );
-    };
-    const renderTimeStamp = (row) => {
-        const sortedData = row.current_job_log.sort((x, y) => {
-            return new Date(x.response.time_stamp) < new Date(y.response.time_stamp) ? 1 : -1;
-        });
-        const res = sortedData[0]?.response
-            ? moment(sortedData[0].response?.time_stamp).format(prepareTimeAndDateFormat(dateFormat, timeFormat))
-            : '';
-        return res;
+    const handleCloseSocketsModal = () => {
+        setShowSocketsModal(false);
     };
 
-    const renderLastUsedCell = (row, childrenTemplate) => {
-        const { last_used_data } = row;
-
-        return childrenTemplate(last_used_data ? moment(last_used_data).fromNow() : '');
-    };
-    const validatePlugRuleForm = (data) => {
-        let valid = true;
-        if (!data.name.length) {
-            setNameError(true);
-            valid = false;
-        }
-        if (!data.building_id.length) {
-            setBuildingError({ text: 'please select building' });
-            valid = false;
-        }
-        return valid;
-    };
     const handleContinueAndSaveClick = async () => {
         Promise.allSettled([
             isChangedRuleDetails && updatePlugRuleData(),
@@ -1691,349 +2281,6 @@ const PlugRule = () => {
         } else {
             return { isAssignedToAnotherRule: false, dataToAssign: idSocketsToAssign };
         }
-    };
-    const handleSaveClicked = async () => {
-        const { isAssignedToAnotherRule } = handleCheckIfSocketAssignedToAnotherRule(rulesToLink);
-        if (isAssignedToAnotherRule) {
-            setShowSocketsModal(true);
-            return;
-        }
-        Promise.allSettled([
-            // isChangedSockets && updateSocketUnlink(),
-            isChangedSocketsUnlinked && reassignSensorsToRule(),
-            isChangedRuleDetails && updatePlugRuleData(),
-        ]).then((value) => {
-            setRulesToLink({ ruleId: '', sensor_id: [] });
-            setRulesToUnLink({ ruleId: '', sensor_id: [] });
-            setIsChangedRuleDetails(false);
-            setIsChangedSocketsUnlinked(false);
-            setIsChangedSocketsLinked(false);
-            fetchLinkedSocketIds();
-            fetchFiltersForSensorsUnlinked();
-            fetchFiltersForSensorsLinked();
-            fetchPlugRuleDetail();
-        });
-
-        setIsUnsavedChanges(false);
-    };
-
-    const renderAssignRule = useCallback(
-        (row, childrenTemplate) => childrenTemplate(row.assigned_rules?.length === 0 ? 'None' : row.assigned_rules),
-        []
-    );
-
-    const renderEquipType = useCallback((row) => {
-        return <Badge text={<span className="gray-950">{row.equipment_type_name}</span>} />;
-    }, []);
-
-    const renderLocation = useCallback((row, childrenTemplate) => {
-        const location = [row.installed_floor, row.installed_space];
-
-        return childrenTemplate(location.join(' - '));
-    }, []);
-
-    const [filterOptionsUnlinked, setFilterOptionsUnlinked] = useState([]);
-    const [filterOptionsLinked, setFilterOptionsLinked] = useState([]);
-    const [isFilterFetching, setFetchingFilters] = useState(false);
-
-    const fetchFiltersForSensorsUnlinked = async () => {
-        isLoadingUnlinkedRef.current = true;
-        setFetchingFilters(true);
-        await getFiltersForSensorsRequest({
-            activeBuildingId: bldgId,
-            macTypeFilterString: macTypeFilterStringUnlinked,
-            equipmentTypeFilterString: equipmentTypeFilterStringUnlinked,
-            sensorTypeFilterString: sensorTypeFilterStringUnlinked,
-            floorTypeFilterString: floorTypeFilterStringUnlinked,
-            spaceTypeFilterString: spaceTypeFilterStringUnlinked,
-            spaceTypeTypeFilterString: spaceTypeTypeFilterStringUnlinked,
-            schedulerStatusString: schedulerStatusStringUninked,
-            isGetOnlyLinked: false,
-            plugRuleId: ruleId,
-        }).then((filters) => {
-            const filterOptions = filters.data?.length ? filters.data[0] : filters.data;
-            const filterOptionsFetched = !_.isEmpty(filterOptions)
-                ? [
-                      {
-                          label: 'Equipment Type',
-                          value: 'equipmentType',
-                          placeholder: 'All Equipment Types',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.equipment_type.map((filterItem) => ({
-                              value: filterItem.equipment_type_id,
-                              label: filterItem.equipment_type_name,
-                          })),
-                          onClose: (options) => filterHandler(setEquipmentTypeFilterStringUnlinked, options),
-                          onDelete: () => {
-                              setEquipmentTypeFilterStringUnlinked('');
-                          },
-                      },
-                      {
-                          label: 'Floor',
-                          value: 'floor',
-                          placeholder: 'All Floors',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.installed_floor.map((filterItem) => ({
-                              value: filterItem.floor_id,
-                              label: filterItem.floor_name,
-                          })),
-                          onClose: (options) => filterHandler(setFloorTypeFilterStringUnlinked, options),
-                          onDelete: () => setFloorTypeFilterStringUnlinked(''),
-                      },
-                      {
-                          label: 'Space',
-                          value: 'space',
-                          placeholder: 'All Spaces',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.installed_space.map((filterItem) => ({
-                              value: filterItem.space_id,
-                              label: filterItem.space_name,
-                          })),
-                          onClose: (options) => filterHandler(setSpaceTypeFilterStringUnlinked, options),
-                          onDelete: () => setSpaceTypeFilterStringUnlinked(''),
-                      },
-                      {
-                          label: 'Space Type',
-                          value: 'spaceType',
-                          placeholder: 'All Space Types',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.installed_space_type.map((filterItem) => ({
-                              value: filterItem.space_type_id,
-                              label: filterItem.space_type_name,
-                          })),
-                          onClose: (options) => filterHandler(setSpaceTypeTypeFilterStringUnlinked, options),
-                          onDelete: () => setSpaceTypeTypeFilterStringUnlinked(''),
-                      },
-                      {
-                          label: 'MAC Address',
-                          value: 'macAddresses',
-                          placeholder: 'All Mac addresses',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.mac_address.map((filterItem) => ({
-                              value: filterItem,
-                              label: filterItem,
-                          })),
-                          onClose: (options) => filterHandler(setMacTypeFilterStringUnlinked, options),
-                          onDelete: () => {
-                              setMacTypeFilterStringUnlinked('');
-                          },
-                      },
-                      {
-                          label: 'Sensors',
-                          value: 'sensor_count',
-                          placeholder: 'All Sensors',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.sensor_count.map((filterItem) => ({
-                              value: filterItem,
-                              label: filterItem,
-                          })),
-                          onClose: (options) => filterHandler(setSensorTypeFilterStringUnlinked, options),
-                          onDelete: () => setSensorTypeFilterStringUnlinked(''),
-                      },
-                      {
-                          label: 'Assigned rule',
-                          value: 'assigned_rule',
-                          placeholder: 'All assigned rule',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.assigned_rule.map((filterItem) => ({
-                              value: filterItem.plug_rule_id,
-                              label: filterItem.plug_rule_name,
-                          })),
-                          onClose: (options) => filterHandler(setAssignedRuleFilterStringUnlinked, options),
-                          onDelete: () => setAssignedRuleFilterStringUnlinked(''),
-                      },
-                      {
-                          label: 'Tags',
-                          value: 'tags',
-                          placeholder: 'All tags',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.tags.map((filterItem) => ({
-                              value: filterItem,
-                              label: filterItem,
-                          })),
-                          onClose: (options) => filterHandler(setTagsFilterStringUnlinked, options),
-                          onDelete: () => setTagsFilterStringUnlinked(''),
-                      },
-                      {
-                          label: 'Schedule status',
-                          value: 'scheduler_status',
-                          placeholder: 'All statuses',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.scheduler_status.map((filterItem) => ({
-                              value: filterItem,
-                              label: filterItem,
-                          })),
-                          onClose: (options) => filterHandler(setSchedulerStatusStringUninked, options),
-                          onDelete: () => setSchedulerStatusStringUninked(''),
-                      },
-                      {
-                          label: 'Last used data',
-                          value: 'last_used_data',
-                          placeholder: 'All last used data',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.last_used_data.map((filterItem) => ({
-                              value: filterItem,
-                              label: filterItem,
-                          })),
-                          onClose: (options) => filterHandler(setLastUsedDataFilterStringUnlinked, options),
-                          onDelete: () => setLastUsedDataFilterStringUnlinked(''),
-                      },
-                  ]
-                : [];
-            setFilterOptionsUnlinked(filterOptionsFetched);
-        });
-        setFetchingFilters(false);
-        isLoadingUnlinkedRef.current = false;
-    };
-
-    const fetchFiltersForSensorsLinked = async () => {
-        isLoadingLinkedRef.current = true;
-        setFetchingFilters(true);
-        await getFiltersForSensorsRequest({
-            activeBuildingId: bldgId,
-            macTypeFilterString: macTypeFilterStringLinked,
-            equipmentTypeFilterString: equipmentTypeFilterStringLinked,
-            sensorTypeFilterString: sensorTypeFilterStringLinked,
-            floorTypeFilterString: floorTypeFilterStringLinked,
-            spaceTypeFilterString: spaceTypeFilterStringLinked,
-            schedulerStatusString: schedulerStatusStringLinked,
-            spaceTypeTypeFilterString: spaceTypeTypeFilterStringLinked,
-            isGetOnlyLinked: true,
-            plugRuleId: ruleId,
-        }).then((filters) => {
-            const filterOptions = filters.data?.length ? filters.data[0] : filters.data;
-            const filterOptionsFetched = !_.isEmpty(filterOptions)
-                ? [
-                      {
-                          label: 'Equipment Type',
-                          value: 'equipmentType',
-                          placeholder: 'All Equipment Types',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.equipment_type.map((filterItem) => ({
-                              value: filterItem.equipment_type_id,
-                              label: filterItem.equipment_type_name,
-                          })),
-                          onClose: (options) => filterHandler(setEquipmentTypeFilterStringLinked, options),
-                          onDelete: () => {
-                              setEquipmentTypeFilterStringLinked('');
-                          },
-                      },
-                      {
-                          label: 'Floor',
-                          value: 'floor',
-                          placeholder: 'All Floors',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.installed_floor.map((filterItem) => ({
-                              value: filterItem.floor_id,
-                              label: filterItem.floor_name,
-                          })),
-                          onClose: (options) => filterHandler(setFloorTypeFilterStringLinked, options),
-                          onDelete: () => setFloorTypeFilterStringLinked(''),
-                      },
-                      {
-                          label: 'Space',
-                          value: 'space',
-                          placeholder: 'All Spaces',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.installed_space.map((filterItem) => ({
-                              value: filterItem.space_id,
-                              label: filterItem.space_name,
-                          })),
-                          onClose: (options) => filterHandler(setSpaceTypeFilterStringLinked, options),
-                          onDelete: () => setSpaceTypeFilterStringLinked(''),
-                      },
-                      {
-                          label: 'Space Type',
-                          value: 'spaceType',
-                          placeholder: 'All Space Types',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.installed_space_type.map((filterItem) => ({
-                              value: filterItem.space_type_id,
-                              label: filterItem.space_type_name,
-                          })),
-                          onClose: (options) => filterHandler(setSpaceTypeTypeFilterStringLinked, options),
-                          onDelete: () => setSpaceTypeTypeFilterStringLinked(''),
-                      },
-                      {
-                          label: 'MAC Address',
-                          value: 'macAddresses',
-                          placeholder: 'All Mac addresses',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.mac_address.map((filterItem) => ({
-                              value: filterItem,
-                              label: filterItem,
-                          })),
-                          onClose: (options) => filterHandler(setMacTypeFilterStringLinked, options),
-                          onDelete: () => {
-                              setMacTypeFilterStringLinked('');
-                          },
-                      },
-                      {
-                          label: 'Sensors',
-                          value: 'sensor_count',
-                          placeholder: 'All Sensors',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.sensor_count.map((filterItem) => ({
-                              value: filterItem,
-                              label: filterItem,
-                          })),
-                          onClose: (options) => filterHandler(setSensorTypeFilterStringLinked, options),
-                          onDelete: () => setSensorTypeFilterStringLinked(''),
-                      },
-                      {
-                          label: 'Assigned rule',
-                          value: 'assigned_rule',
-                          placeholder: 'All assigned rule',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.assigned_rule.map((filterItem) => ({
-                              value: filterItem.plug_rule_id,
-                              label: filterItem.plug_rule_name,
-                          })),
-                          onClose: (options) => filterHandler(setAssignedRuleFilterStringLinked, options),
-                          onDelete: () => setAssignedRuleFilterStringLinked(''),
-                      },
-                      {
-                          label: 'Tags',
-                          value: 'tags',
-                          placeholder: 'All tags',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.tags.map((filterItem) => ({
-                              value: filterItem,
-                              label: filterItem,
-                          })),
-                          onClose: (options) => filterHandler(setTagsFilterStringLinked, options),
-                          onDelete: () => setTagsFilterStringLinked(''),
-                      },
-                      {
-                          label: 'Schedule status',
-                          value: 'scheduler_status',
-                          placeholder: 'All statuses',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.scheduler_status.map((filterItem) => ({
-                              value: filterItem,
-                              label: filterItem,
-                          })),
-                          onClose: (options) => filterHandler(setSchedulerStatusStringLinked, options),
-                          onDelete: () => setSchedulerStatusStringLinked(''),
-                      },
-                      {
-                          label: 'Last used data',
-                          value: 'last_used_data',
-                          placeholder: 'All last used data',
-                          filterType: FILTER_TYPES.MULTISELECT,
-                          filterOptions: filterOptions?.last_used_data.map((filterItem) => ({
-                              value: filterItem,
-                              label: filterItem,
-                          })),
-                          onClose: (options) => filterHandler(setLastUsedDataFilterStringLinked, options),
-                          onDelete: () => setLastUsedDataFilterStringLinked(''),
-                      },
-                  ]
-                : [];
-            setFilterOptionsLinked(filterOptionsFetched);
-        });
-        setFetchingFilters(false);
-        isLoadingLinkedRef.current = false;
     };
 
     const getAvailableActionType = (anotherSelectedValue) => {
@@ -2164,295 +2411,6 @@ const PlugRule = () => {
         );
     };
 
-    const getFirstLastOffPeriodDayAndTime = (week) => {
-        let firstOnDay,
-            firstOnTime,
-            isLastOffAction = false,
-            lastOffTime = '',
-            lastOffDay = null;
-        if (!_.isEmpty(week)) {
-            const copyWeekReverse = [...week];
-            copyWeekReverse.length = 7;
-            const reverseWeek = copyWeekReverse.reverse();
-            const copyWeek = [...week];
-            copyWeek.length = 7;
-            for (let i = 0; i < (reverseWeek || []).length; i++) {
-                const currentDay = reverseWeek[i];
-                if (currentDay?.turnOn && !isLastOffAction) {
-                    if (currentDay?.turnOn < currentDay?.turnOff) {
-                        isLastOffAction = true;
-                        lastOffDay = reverseWeek.length - i - 1;
-                        lastOffTime = currentDay.turnOff;
-                    }
-                    break;
-                }
-                if (currentDay?.turnOn && isLastOffAction) {
-                    if (currentDay?.turnOn < currentDay?.turnOff) {
-                        isLastOffAction = true;
-                        lastOffDay = reverseWeek.length - i - 1;
-                        lastOffTime = currentDay.turnOff;
-                    }
-                    break;
-                }
-                if (!currentDay || !currentDay?.turnOff) continue;
-                if (currentDay?.turnOff) {
-                    isLastOffAction = true;
-                    lastOffDay = reverseWeek.length - i - 1;
-                    lastOffTime = currentDay.turnOff;
-                    const arrayToSearch = reverseWeek.slice(i + 1);
-                    if (
-                        arrayToSearch.findIndex((nextDay) => nextDay?.turnOn) <
-                        arrayToSearch.findIndex((nextDay) => nextDay?.turnOff)
-                    ) {
-                        break;
-                    }
-                }
-            }
-
-            for (let i = 0; i < (copyWeek || []).length; i++) {
-                const currentDay = copyWeek[i];
-
-                if (!currentDay || !currentDay?.turnOn) continue;
-                if (currentDay?.turnOn && !firstOnDay) {
-                    firstOnDay = i;
-                    firstOnTime = currentDay.turnOn;
-                    break;
-                }
-            }
-
-            if (typeof firstOnDay !== 'number') {
-                firstOnDay = lastOffDay;
-                firstOnTime = lastOffTime;
-            }
-        }
-        return { isLastOffAction, lastOffDay, lastOffTime, firstOnDay, firstOnTime };
-    };
-    const getSoonestOnDateWithTime = (currentOff, week) => {
-        let onDay = 0;
-        let onTime = 0;
-        let isSearchedDay = false;
-        week.forEach((dayOfWeek, index) => {
-            if (currentOff < index && dayOfWeek.turnOn && !isSearchedDay) {
-                onDay = index;
-                onTime = dayOfWeek.turnOn;
-                isSearchedDay = true;
-            }
-        });
-        return { isSearchedDay, onDay, onTime };
-    };
-
-    const getOffPeriodsForOffTimeLater = (week) => {
-        const res = [];
-        week?.length &&
-            week.forEach((dayOfWeek, index) => {
-                if (dayOfWeek.turnOn < dayOfWeek.turnOff) {
-                    const { isSearchedDay, onDay, onTime } = getSoonestOnDateWithTime(index, week);
-                    if (isSearchedDay) {
-                        res.push({
-                            day: index,
-                            currentOffDay: index,
-                            nextOnDay: onDay,
-                            currentOffTime: dayOfWeek.turnOff,
-                            nextOnTime: onTime,
-                        });
-                    }
-                }
-            });
-        return res;
-    };
-    const getDateRange = (rawLineChartData) => {
-        if (!_.isEmpty(rawLineChartData)) {
-            const minDate = moment.utc(rawLineChartData[0].time_stamp).startOf('week');
-            const maxDate = moment.utc(rawLineChartData[rawLineChartData.length - 1].time_stamp).endOf('isoweek');
-            maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
-            setDateRangeAverageData({
-                minDate: minDate.unix() * 1000,
-                maxDate: maxDate.unix() * 1000,
-            });
-        } else {
-            const minDate = moment().utc().startOf('isoweek');
-            const maxDate = moment().utc().endOf('isoweek');
-            maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
-            minDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-            minDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-            setDateRangeAverageData({
-                minDate: minDate.unix() * 1000,
-                maxDate: maxDate.unix() * 1000,
-            });
-        }
-    };
-    const calculateOffHoursPlots = () => {
-        let weekWithSchedule = [];
-        const copyOfPreparedScheduleData = [...preparedScheduleData];
-        copyOfPreparedScheduleData
-            .filter(
-                (el) =>
-                    !el.data.find((groupId) => {
-                        return groupId.is_deleted;
-                    })
-            )
-            .map((groupId) => {
-                groupId.data.forEach((el) => {
-                    switch (el.action_type) {
-                        case 0:
-                            el.action_day.forEach((day) => {
-                                weekWithSchedule[indexOfDay[day]] = {
-                                    ...weekWithSchedule[indexOfDay[day]],
-                                    turnOff: el.action_time,
-                                };
-                            });
-
-                            break;
-                        case 1:
-                            el.action_day.forEach((day) => {
-                                weekWithSchedule[indexOfDay[day]] = {
-                                    ...weekWithSchedule[indexOfDay[day]],
-                                    turnOn: el.action_time,
-                                };
-                            });
-                            break;
-                    }
-                });
-            });
-
-        let result = [];
-        for (let i = 0; i < weekWithSchedule.length; i++) {
-            let currentOff = weekWithSchedule[i]?.turnOff;
-            let currentOffDay = i;
-            let nextOn;
-            let nextOnDay;
-            if (weekWithSchedule[i] !== undefined) {
-                if (i === weekWithSchedule.length - 1) {
-                    nextOn = weekWithSchedule[0]?.turnOn;
-                    nextOnDay = weekWithSchedule.length - 1;
-                } else {
-                    for (let j = i; j < weekWithSchedule.length; j++) {
-                        if (weekWithSchedule[j]?.turnOn) {
-                            if (weekWithSchedule[j]?.turnOn >= weekWithSchedule[j]?.turnOff) {
-                                nextOnDay = j;
-                                nextOn = weekWithSchedule[j]?.turnOn;
-                                break;
-                            } else {
-                                if (weekWithSchedule[j + 1]?.turnOn) {
-                                    nextOnDay = j + 1;
-                                    if (weekWithSchedule[j + 1]) {
-                                        nextOn = weekWithSchedule[j + 1]?.turnOn;
-                                    }
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            if (!currentOff) {
-                continue;
-            }
-            if (!nextOn) {
-                if (i === weekWithSchedule.length - 1) {
-                    nextOn = weekWithSchedule[0]?.turnOn;
-                    nextOnDay = i;
-                } else {
-                    nextOn = weekWithSchedule[i + 1]?.turnOn;
-                    nextOnDay = i + 1;
-                }
-            }
-            if (currentOff && nextOn) {
-                if (currentOffDay < nextOnDay) {
-                    result.push({
-                        day: i,
-                        currentOffDay,
-                        nextOnDay,
-                        currentOffTime: currentOff,
-                        nextOnTime: nextOn,
-                    });
-                } else if (currentOffDay === nextOnDay && nextOn > currentOff) {
-                    result.push({
-                        day: i,
-                        currentOffDay,
-                        nextOnDay,
-                        currentOffTime: currentOff,
-                        nextOnTime: nextOn,
-                    });
-                }
-            }
-        }
-        const { isLastOffAction, lastOffDay, lastOffTime, firstOnDay, firstOnTime } =
-            getFirstLastOffPeriodDayAndTime(weekWithSchedule);
-        if (isLastOffAction) {
-            result.push({
-                day: lastOffDay,
-                currentOffDay: lastOffDay,
-                nextOnDay: 6,
-                currentOffTime: lastOffTime,
-                nextOnTime: '23:59',
-            });
-            result.push({
-                day: 0,
-                currentOffDay: 0,
-                nextOnDay: firstOnDay,
-                currentOffTime: '00:00',
-                nextOnTime: firstOnTime,
-            });
-        }
-        const theSameDayOffLater = getOffPeriodsForOffTimeLater(weekWithSchedule);
-        result.push(...theSameDayOffLater);
-        getOffperiodsWithRealDate(result);
-    };
-
-    function getDatesInRange(startDate, stopDate) {
-        var dateArray = [];
-        var currentDate = moment(startDate);
-        var stopDate = moment(stopDate);
-        while (currentDate <= stopDate) {
-            dateArray.push(moment(currentDate).format('YYYY-MM-DD'));
-            currentDate = moment(currentDate).add(1, 'days');
-        }
-        return dateArray;
-    }
-
-    const checkIfDayInOffRange = (day, result) => {
-        let offDayArray = [];
-        result.forEach((el) => {
-            if (el.day == day) {
-                offDayArray.push(el);
-            }
-        });
-        return offDayArray;
-    };
-
-    const getOffperiodsWithRealDate = (result) => {
-        const dateRange = dateRangeAverageData;
-        const maxdateString = moment.utc(dateRange.maxDate);
-        const mindateString = moment.utc(dateRange.minDate);
-        const rangeDates = getDatesInRange(mindateString, maxdateString);
-        const offPeriods = [];
-        rangeDates.forEach((day) => {
-            const currentWeekDay = moment(day).weekday();
-            const weekDayOffScheduleArray = checkIfDayInOffRange(currentWeekDay, result);
-            weekDayOffScheduleArray.forEach((weekDayOffSchedule) => {
-                if (!_.isEmpty(weekDayOffSchedule)) {
-                    let timeDiff;
-
-                    if (weekDayOffSchedule?.nextOnDay >= weekDayOffSchedule?.currentOffDay) {
-                        timeDiff = weekDayOffSchedule?.nextOnDay - weekDayOffSchedule?.currentOffDay;
-                    } else if (weekDayOffSchedule?.nextOnDay < weekDayOffSchedule?.currentOffDay) {
-                        timeDiff = 6 - weekDayOffSchedule?.currentOffDay + weekDayOffSchedule?.nextOnDay + 1;
-                    }
-                    const nextTurnOnDay = moment.utc(day, 'YYYY-MM-DD').add(timeDiff, 'days').format('YYYY-MM-DD');
-                    const from = moment.utc(day + ' ' + weekDayOffSchedule?.currentOffTime).unix();
-                    const to = moment.utc(nextTurnOnDay + ' ' + weekDayOffSchedule?.nextOnTime).unix();
-                    offPeriods.push({
-                        type: LineChart.PLOT_BANDS_TYPE.off_hours,
-                        from: from * 1000,
-                        to: to * 1000,
-                    });
-                }
-            });
-        });
-        setOffHoursPlots(offPeriods);
-    };
-
     const handlerClick = useCallback((id) => {
         setSocketsTab(id);
     }, []);
@@ -2464,9 +2422,6 @@ const PlugRule = () => {
             handleCurrentDataChange('building_id', event.value);
         },
         options: buildingListData,
-    };
-    const handleCloseSocketsModal = () => {
-        setShowSocketsModal(false);
     };
 
     if (buildingError?.text?.length) {
@@ -2493,10 +2448,6 @@ const PlugRule = () => {
     useEffect(() => {
         confirmButtonDisabledState();
     }, [socketsTab, isChangedSocketsLinked, isChangedSocketsUnlinked]);
-
-    const currentJobLog = currentData?.current_job_log?.sort((x, y) => {
-        return new Date(x.response?.time_stamp) < new Date(y.response?.time_stamp) ? 1 : -1;
-    });
 
     return (
         <>
