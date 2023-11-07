@@ -5,14 +5,19 @@ import { Row, Col, CardBody, CardHeader } from 'reactstrap';
 import Brick from '../../../sharedComponents/brick';
 import Select from '../../../sharedComponents/form/select';
 import Typography from '../../../sharedComponents/typography';
+import Inputs from '../../../sharedComponents/form/input/Input';
 
 import { ReactComponent as BanSVG } from '../../../assets/icon/ban.svg';
+import { ReactComponent as MinutesSVG } from '../../../assets/icon/minutes.svg';
 import { ReactComponent as UserProfileSVG } from '../../../assets/icon/user-profile.svg';
 import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 import { fetchMemberUserList } from '../../settings/users/service';
+import Radio from '../../../sharedComponents/form/radio/Radio';
+import { Checkbox } from '../../../sharedComponents/form/checkbox';
+import { Button } from '../../../sharedComponents/button';
 
 const NotificationMethod = (props) => {
     const { alertObj = {}, handleNotificationChange } = props;
@@ -154,6 +159,76 @@ const NotificationMethod = (props) => {
                                     <Typography.Subheader size={Typography.Sizes.md}>
                                         {`Recurrence`}
                                     </Typography.Subheader>
+
+                                    <Brick sizeInRem={1} />
+
+                                    <div className="d-flex align-items-center" style={{ gap: '1.25rem' }}>
+                                        <Radio name="send-immediately" label="Send immediately" checked />
+                                        <Radio
+                                            name="send-with-conditions"
+                                            label="Send if conditions lasts at least"
+                                            checked
+                                        />
+                                        <div style={{ width: '40%' }}>
+                                            <Inputs
+                                                type="number"
+                                                className="w-25"
+                                                inputClassName="custom-input-field"
+                                                elementEnd={<MinutesSVG />}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <Brick sizeInRem={1} />
+
+                                    <div className="d-flex justify-content-between">
+                                        <div className="d-flex align-items-center w-100" style={{ gap: '1.25rem' }}>
+                                            <Checkbox
+                                                label="Resend alert after"
+                                                type="checkbox"
+                                                id="resend-alert"
+                                                name="resend-alert"
+                                                size="md"
+                                                // checked={alertObj?.condition?.threshold75}
+                                                // value={alertObj?.condition?.threshold75}
+                                                // onClick={(e) => {
+                                                //     handleConditionChange(
+                                                //         'threshold75',
+                                                //         e.target.value === 'false' ? true : false
+                                                //     );
+                                                // }}
+                                            />
+                                            <div style={{ width: '40%' }}>
+                                                <Inputs
+                                                    type="number"
+                                                    className="w-50"
+                                                    inputClassName="custom-input-field"
+                                                    elementEnd={<MinutesSVG />}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div
+                                            className="d-flex justify-content-end align-items-center w-100"
+                                            style={{
+                                                gap: '0.5rem',
+                                            }}>
+                                            <Button
+                                                label={'Cancel'}
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.secondaryGrey}
+                                                // onClick={() => {
+                                                //     history.push({ pathname: '/alerts/overall' });
+                                                // }}
+                                            />
+                                            <Button
+                                                label={'Add Notification'}
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.primary}
+                                                // onClick={() => setActiveTab(1)}
+                                                // disabled={!isAlertConfigured}
+                                            />
+                                        </div>
+                                    </div>
                                 </>
                             )}
                         </CardBody>
