@@ -66,6 +66,7 @@ export const defaultAlertObj = {
     },
     notification: {
         method: ['none'],
+        selectedUserId: '',
     },
 };
 

@@ -13,7 +13,7 @@ export function inviteMemberUsers(params, payload) {
     return axiosInstance.post(`${addMemberUser}${params}`, payload).then((res) => res);
 }
 
-export function fetchMemberUserList(params) {
+export function fetchMemberUserList(params = '') {
     return axiosInstance.get(`${getMemberUser}${params}`).then((res) => res);
 }
 
