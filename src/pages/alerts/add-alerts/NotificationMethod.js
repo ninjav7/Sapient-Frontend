@@ -129,36 +129,49 @@ const NotificationMethod = (props) => {
                                 </div>
                             </div>
 
-                            {!alertObj?.notification?.method.includes('none') && <hr className="mt-4 mb-3" />}
-
-                            {alertObj?.notification?.method.includes('user') && (
+                            {!alertObj?.notification?.method.includes('none') && (
                                 <>
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}>{`Choose User`}</Typography.Subheader>
+                                    <hr className="mt-4 mb-3" />
+
+                                    <Typography.Subheader size={Typography.Sizes.md}>
+                                        {alertObj?.notification?.method.includes('user') && `Choose User`}
+                                        {alertObj?.notification?.method.includes('email') && `Enter Email Address`}
+                                    </Typography.Subheader>
 
                                     <Brick sizeInRem={1.25} />
 
-                                    <div style={{ width: '30%' }}>
-                                        <Select
-                                            id="user_select"
-                                            name="select"
-                                            options={usersList}
-                                            placeholder="Choose User"
-                                            currentValue={usersList.filter(
-                                                (option) => option.value === alertObj?.notification?.selectedUserId
-                                            )}
-                                            onChange={(e) => {
-                                                handleNotificationChange('selectedUserId', e.value);
-                                            }}
-                                            menuPlacement="auto"
-                                        />
-                                    </div>
+                                    {alertObj?.notification?.method.includes('user') && (
+                                        <div style={{ width: '30%' }}>
+                                            <Select
+                                                id="user_select"
+                                                name="select"
+                                                options={usersList}
+                                                placeholder="Choose User"
+                                                currentValue={usersList.filter(
+                                                    (option) => option.value === alertObj?.notification?.selectedUserId
+                                                )}
+                                                onChange={(e) => {
+                                                    handleNotificationChange('selectedUserId', e.value);
+                                                }}
+                                                menuPlacement="auto"
+                                            />
+                                        </div>
+                                    )}
+
+                                    {alertObj?.notification?.method.includes('email') && (
+                                        <div style={{ width: '50%' }}>
+                                            <Inputs type="text" className="w-75" placeholder="Enter email address" />
+                                            <Brick sizeInRem={0.25} />
+                                            <Typography.Body size={Typography.Sizes.sm}>
+                                                {`Add one or more email addresses, separated by a comma.`}
+                                            </Typography.Body>
+                                        </div>
+                                    )}
 
                                     <Brick sizeInRem={1.5} />
 
-                                    <Typography.Subheader size={Typography.Sizes.md}>
-                                        {`Recurrence`}
-                                    </Typography.Subheader>
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
 
                                     <Brick sizeInRem={1} />
 
