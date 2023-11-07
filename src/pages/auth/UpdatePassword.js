@@ -189,10 +189,9 @@ const Confirm = (props) => {
                 });
         }
     };
-
     const handleAccept = () => {
-        setTermsRead(true);
-        setTermsAcceptance(true); // PLT-1703: Temperory disabled the functionality
+        setTermsRead(true); // PLT-1703: Temperory disabled the functionality
+        setTermsAcceptance(true);
         handleModalClose();
     };
 
