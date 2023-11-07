@@ -143,17 +143,15 @@ const NotificationMethod = (props) => {
 
                                     {alertObj?.notification?.method.includes('user') && (
                                         <div style={{ width: '30%' }}>
-                                            <Select
+                                            <Select.Multi
                                                 id="user_select"
                                                 name="select"
                                                 options={usersList}
                                                 placeholder="Choose User"
-                                                currentValue={usersList.filter(
-                                                    (option) => option.value === alertObj?.notification?.selectedUserId
-                                                )}
-                                                onChange={(e) => {
-                                                    handleNotificationChange('selectedUserId', e.value);
+                                                onChange={(selectedUsersList) => {
+                                                    handleNotificationChange('selectedUserId', selectedUsersList);
                                                 }}
+                                                value={alertObj?.notification?.selectedUserId ?? []}
                                                 menuPlacement="auto"
                                             />
                                         </div>
@@ -166,9 +164,9 @@ const NotificationMethod = (props) => {
                                                 className="w-75"
                                                 placeholder="Enter email address"
                                                 onChange={(e) => {
-                                                    handleNotificationChange('selectedUserId', e.target.value);
+                                                    handleNotificationChange('selectedUserEmailId', e.target.value);
                                                 }}
-                                                value={alertObj?.notification?.selectedUserId}
+                                                value={alertObj?.notification?.selectedUserEmailId}
                                             />
                                             <Brick sizeInRem={0.25} />
                                             <Typography.Body size={Typography.Sizes.sm}>
@@ -272,7 +270,7 @@ const NotificationMethod = (props) => {
                                                         !alertObj?.notification?.submitted
                                                     );
                                                 }}
-                                                disabled={alertObj?.notification?.selectedUserId === ''}
+                                                // disabled={alertObj?.notification?.selectedUserId === ''}
                                             />
                                         </div>
                                     </div>

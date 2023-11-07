@@ -58,7 +58,8 @@ export const defaultConditionObj = {
 
 export const defaultNotificationObj = {
     method: ['none'],
-    selectedUserId: '',
+    selectedUserId: [],
+    selectedUserEmailId: '',
     sendImmediate: true,
     sendAt: '',
     resendAlert: false,
