@@ -25,7 +25,7 @@ import { fetchBuildingsList } from '../../../services/buildings';
 import { getEquipTypeData } from '../../settings/equipment-type/services';
 import { getAllBuildingTypes } from '../../settings/general-settings/services';
 
-import { defaultAlertObj, defaultConditionObj } from '../constants';
+import { defaultAlertObj, defaultConditionObj, defaultNotificationObj } from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
@@ -362,12 +362,12 @@ const AddAlerts = () => {
     const handleConditionChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
 
-        // When condition Type change
+        // When Condition Type change
         if (key === 'type') {
             obj.condition = _.cloneDeep(defaultConditionObj);
         }
 
-        // When condition filter-type change
+        // When Condition filter-type change
         if (key === 'filterType') {
             obj.condition.threshold50 = false;
             obj.condition.threshold75 = false;
@@ -381,6 +381,11 @@ const AddAlerts = () => {
 
     const handleNotificationChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
+
+        // When Notification Method change
+        if (key === 'method') {
+            obj.notification = _.cloneDeep(defaultNotificationObj);
+        }
 
         obj.notification[key] = value;
         setAlertObj(obj);
