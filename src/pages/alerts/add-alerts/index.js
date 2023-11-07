@@ -153,9 +153,6 @@ const ConfigureAlerts = (props) => {
     const [equipmentsList, setEquipmentsList] = useState([]);
     const [equipmentTypeList, setEquipmentTypeList] = useState([]);
 
-    console.log('SSRai buildingsList => ', buildingsList);
-    console.log('SSRai equipmentTypeList => ', equipmentTypeList);
-
     const filteredBuildingsList = (newBldgTypeList = [], originalBldgList) => {
         let newBldgList = [];
         if (newBldgTypeList.length !== 0) {
