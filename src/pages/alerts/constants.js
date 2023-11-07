@@ -46,6 +46,25 @@ export const equipAlertConditions = [
     },
 ];
 
+export const defaultConditionObj = {
+    type: '',
+    level: 'above',
+    filterType: 'number',
+    thresholdValue: '',
+    threshold50: false,
+    threshold75: false,
+    threshold90: false,
+};
+
+export const defaultNotificationObj = {
+    method: ['none'],
+    selectedUserId: '',
+    sendImmediate: true,
+    sendAt: '',
+    resendAlert: false,
+    resentAt: '',
+};
+
 export const defaultAlertObj = {
     target: {
         type: '',
@@ -55,29 +74,10 @@ export const defaultAlertObj = {
         submitted: false,
     },
     condition: {
-        type: '',
-        level: 'above',
-        filterType: 'number',
-        thresholdValue: '',
-        threshold50: false,
-        threshold75: false,
-        threshold90: false,
+        ...defaultConditionObj,
         submitted: false,
     },
-    notification: {
-        method: ['none'],
-        selectedUserId: '',
-    },
-};
-
-export const defaultConditionObj = {
-    type: '',
-    level: 'above',
-    filterType: 'number',
-    thresholdValue: '',
-    threshold50: false,
-    threshold75: false,
-    threshold90: false,
+    notification: defaultNotificationObj,
 };
 
 export const conditionLevelsList = [
@@ -121,6 +121,7 @@ export const filtersForPeakDemand = [
     },
 ];
 
+// In Progress required for Tagrt Type change to alert user
 export const customComparator = (value1, value2, key) => {
     if (key === 'type' && key.startsWith('target.')) {
         return true; // Exclude comparison of obj.target.type
