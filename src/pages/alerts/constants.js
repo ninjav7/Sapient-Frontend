@@ -77,7 +77,10 @@ export const defaultAlertObj = {
         ...defaultConditionObj,
         submitted: false,
     },
-    notification: defaultNotificationObj,
+    notification: {
+        ...defaultNotificationObj,
+        submitted: false,
+    },
 };
 
 export const conditionLevelsList = [

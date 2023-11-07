@@ -260,16 +260,19 @@ const NotificationMethod = (props) => {
                                                 label={'Cancel'}
                                                 size={Button.Sizes.md}
                                                 type={Button.Type.secondaryGrey}
-                                                onClick={() =>
-                                                    handleNotificationChange('method', alertObj?.notification?.method)
-                                                }
+                                                onClick={() => handleNotificationChange('method', ['none'])}
                                             />
                                             <Button
                                                 label={'Add Notification'}
                                                 size={Button.Sizes.md}
                                                 type={Button.Type.primary}
-                                                // onClick={() => setActiveTab(1)}
-                                                // disabled={!isAlertConfigured}
+                                                onClick={() => {
+                                                    handleNotificationChange(
+                                                        'submitted',
+                                                        !alertObj?.notification?.submitted
+                                                    );
+                                                }}
+                                                disabled={alertObj?.notification?.selectedUserId === ''}
                                             />
                                         </div>
                                     </div>
