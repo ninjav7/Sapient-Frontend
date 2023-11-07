@@ -6,32 +6,29 @@ import { Row, Col, CardBody, CardHeader } from 'reactstrap';
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
 import Brick from '../../../sharedComponents/brick';
-import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
 import Target from './Target';
 import Condition from './Condition';
+import AlertPreview from './AlertPreview';
+import NotificationMethod from './NotificationMethod';
 
 import { UserStore } from '../../../store/UserStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 
-import { ReactComponent as BanSVG } from '../../../assets/icon/ban.svg';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as CheckMarkSVG } from '../../../assets/icon/check-mark.svg';
-import { ReactComponent as UserProfileSVG } from '../../../assets/icon/user-profile.svg';
-import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
 import { createAlertServiceAPI } from '../services';
+import { getEquipmentsList } from '../../settings/panels/services';
 import { fetchBuildingsList } from '../../../services/buildings';
+import { getEquipTypeData } from '../../settings/equipment-type/services';
 import { getAllBuildingTypes } from '../../settings/general-settings/services';
-import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
-import { bldgAlertConditions, defaultAlertObj, defaultConditionObj, filtersForEnergyConsumption } from '../constants';
+import { defaultAlertObj, defaultConditionObj } from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-import { getEquipTypeData } from '../../settings/equipment-type/services';
-import { getEquipmentsList } from '../../settings/panels/services';
 
 const CreateAlertHeader = (props) => {
     const { activeTab, setActiveTab, isAlertConfigured = false, onAlertCreate } = props;
@@ -338,203 +335,12 @@ const ConfigureAlerts = (props) => {
 };
 
 const NotificationSettings = (props) => {
-    const { alertObj = {}, typeSelectedLabel = '', handleConditionChange, handleNotificationChange } = props;
-
-    const targetType = alertObj?.target?.type === `building` ? `Building` : `Equipment`;
-
-    const renderAlertCondition = (alert_obj) => {
-        let text = '';
-
-        let alertType = bldgAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
-        if (alertType) text += alertType?.label;
-
-        if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
-
-        if (alertObj?.condition?.filterType === 'number' && alert_obj?.condition?.thresholdValue)
-            text += ` ${formatConsumptionValue(+alert_obj?.condition?.thresholdValue, 2)} kWh`;
-
-        if (alertObj?.condition?.filterType !== 'number') {
-            let alertFilter = filtersForEnergyConsumption.find((el) => el?.value === alertObj?.condition?.filterType);
-            if (alertFilter) text += ` ${alertFilter?.label}`;
-        }
-
-        return `${text}.`;
-    };
-
     return (
         <>
-            <Row>
-                <Col lg={9}>
-                    <div className="custom-card">
-                        <CardHeader>
-                            <Typography.Subheader
-                                size={Typography.Sizes.md}
-                                style={{ color: colorPalette.primaryGray550 }}>
-                                {`Alert Preview`}
-                            </Typography.Subheader>
-                        </CardHeader>
-                        <CardBody>
-                            <div>
-                                <Typography.Subheader size={Typography.Sizes.md}>{`Target Type`}</Typography.Subheader>
-                                <Brick sizeInRem={0.25} />
-                                <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                    {targetType}
-                                </Typography.Body>
-                            </div>
-
-                            <Brick sizeInRem={1} />
-
-                            <div>
-                                <Typography.Subheader size={Typography.Sizes.md}>{targetType}</Typography.Subheader>
-                                <Brick sizeInRem={0.25} />
-                                <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                    {typeSelectedLabel && typeSelectedLabel}
-                                </Typography.Body>
-                            </div>
-
-                            <Brick sizeInRem={0.5} />
-
-                            <div>
-                                <Typography.Subheader size={Typography.Sizes.md}>{`Condition`}</Typography.Subheader>
-                                <Brick sizeInRem={0.25} />
-                                <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                    {renderAlertCondition(alertObj)}
-                                </Typography.Body>
-                            </div>
-
-                            <Brick sizeInRem={1} />
-
-                            {alertObj?.condition?.type === 'energy_consumption' && (
-                                <div className="d-flex" style={{ gap: '1rem' }}>
-                                    <Checkbox
-                                        label="Alert at 50%"
-                                        type="checkbox"
-                                        id="50-percent-alert"
-                                        name="50-percent-alert"
-                                        size="md"
-                                        checked={alertObj?.condition?.threshold50}
-                                        value={alertObj?.condition?.threshold50}
-                                        onClick={(e) => {
-                                            handleConditionChange(
-                                                'threshold50',
-                                                e.target.value === 'false' ? true : false
-                                            );
-                                        }}
-                                    />
-                                    <Checkbox
-                                        label="Alert at 75%"
-                                        type="checkbox"
-                                        id="75-percent-alert"
-                                        name="75-percent-alert"
-                                        size="md"
-                                        checked={alertObj?.condition?.threshold75}
-                                        value={alertObj?.condition?.threshold75}
-                                        onClick={(e) => {
-                                            handleConditionChange(
-                                                'threshold75',
-                                                e.target.value === 'false' ? true : false
-                                            );
-                                        }}
-                                    />
-                                </div>
-                            )}
-
-                            {alertObj?.condition?.type === 'peak_demand' && (
-                                <Checkbox
-                                    label="Alert at 90%"
-                                    type="checkbox"
-                                    id="90-percent-alert"
-                                    name="90-percent-alert"
-                                    size="md"
-                                    checked={alertObj?.condition?.threshold90}
-                                    value={alertObj?.condition?.threshold90}
-                                    onClick={(e) => {
-                                        handleConditionChange('threshold90', e.target.value === 'false' ? true : false);
-                                    }}
-                                />
-                            )}
-                        </CardBody>
-                    </div>
-                </Col>
-            </Row>
-
+            <AlertPreview {...props} />
             <Brick sizeInRem={2} />
 
-            <Row>
-                <Col lg={9}>
-                    <Typography.Header
-                        size={Typography.Sizes.xs}>{`Add Notification Method (optional)`}</Typography.Header>
-                    <Brick sizeInRem={0.25} />
-                    <Typography.Body size={Typography.Sizes.md}>
-                        {`These are all notification methods available given your selected target and condition.`}
-                    </Typography.Body>
-                </Col>
-            </Row>
-
-            <Brick sizeInRem={2} />
-
-            <Row>
-                <Col lg={9}>
-                    <div className="custom-card">
-                        <CardHeader>
-                            <Typography.Subheader
-                                size={Typography.Sizes.md}
-                                style={{ color: colorPalette.primaryGray550 }}>
-                                {`Notification Method (optional)`}
-                            </Typography.Subheader>
-                        </CardHeader>
-                        <CardBody>
-                            <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                                <div
-                                    className={`d-flex align-items-center mouse-pointer ${
-                                        alertObj?.notification?.method === 'none'
-                                            ? `notify-container-active`
-                                            : `notify-container`
-                                    }`}
-                                    onClick={() => handleNotificationChange('method', 'none')}>
-                                    <BanSVG className="p-0 square" width={20} height={20} />
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        style={{ color: colorPalette.primaryGray700 }}>
-                                        {`None`}
-                                    </Typography.Subheader>
-                                </div>
-
-                                <div
-                                    className={`d-flex align-items-center mouse-pointer ${
-                                        alertObj?.notification?.method === 'user'
-                                            ? `notify-container-active`
-                                            : `notify-container`
-                                    }`}
-                                    onClick={() => handleNotificationChange('method', 'user')}>
-                                    <UserProfileSVG className="p-0 square" width={18} height={18} />
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        style={{ color: colorPalette.primaryGray700 }}>
-                                        {`User`}
-                                    </Typography.Subheader>
-                                </div>
-
-                                <div
-                                    className={`d-flex align-items-center mouse-pointer ${
-                                        alertObj?.notification?.method === 'email'
-                                            ? `notify-container-active`
-                                            : `notify-container`
-                                    }`}
-                                    onClick={() => handleNotificationChange('method', 'email')}>
-                                    <EmailAddressSVG className="p-0 square" width={20} height={20} />
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        style={{ color: colorPalette.primaryGray700 }}>
-                                        {`Email Address`}
-                                    </Typography.Subheader>
-                                </div>
-                            </div>
-                        </CardBody>
-                    </div>
-                </Col>
-            </Row>
-
+            <NotificationMethod {...props} />
             <Brick sizeInRem={2} />
         </>
     );

@@ -65,7 +65,7 @@ export const defaultAlertObj = {
         submitted: false,
     },
     notification: {
-        method: 'none',
+        method: ['none'],
     },
 };
 
