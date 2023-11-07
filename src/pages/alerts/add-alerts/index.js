@@ -490,6 +490,20 @@ const AddAlerts = () => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        const handleBeforeUnload = (event) => {
+            event.preventDefault();
+            event.returnValue = '';
+            alert('Are you sure you want to reload the page? Changes you have made wont be saved.');
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, []);
+
     return (
         <React.Fragment>
             <Row>
