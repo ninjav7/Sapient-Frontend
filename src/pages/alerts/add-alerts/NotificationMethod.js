@@ -23,11 +23,11 @@ import './styles.scss';
 const NotificationMethod = (props) => {
     const { alertObj = {}, handleNotificationChange } = props;
 
+    const [usersList, setUsersList] = useState([]);
+
     const notificationMethodTitle = alertObj?.notification?.method.includes('none')
         ? `Notification Method (optional)`
         : `User`;
-
-    const [usersList, setUsersList] = useState([]);
 
     const fetchUsersList = async () => {
         setUsersList([]);
@@ -51,10 +51,10 @@ const NotificationMethod = (props) => {
             .finally(() => {});
     };
 
+    const handleAddNotification = (alert_obj) => {};
+
     useEffect(() => {
-        if (alertObj?.notification?.method.includes('user')) {
-            fetchUsersList();
-        }
+        if (alertObj?.notification?.method.includes('user')) fetchUsersList();
     }, [alertObj?.notification?.method]);
 
     return (
@@ -265,12 +265,12 @@ const NotificationMethod = (props) => {
                                                 size={Button.Sizes.md}
                                                 type={Button.Type.primary}
                                                 onClick={() => {
-                                                    handleNotificationChange(
-                                                        'submitted',
-                                                        !alertObj?.notification?.submitted
-                                                    );
+                                                    handleAddNotification(alertObj);
+                                                    // handleNotificationChange(
+                                                    //     'submitted',
+                                                    //     !alertObj?.notification?.submitted
+                                                    // );
                                                 }}
-                                                // disabled={alertObj?.notification?.selectedUserId === ''}
                                             />
                                         </div>
                                     </div>
