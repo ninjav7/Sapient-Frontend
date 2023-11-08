@@ -83,197 +83,232 @@ const NotificationMethod = (props) => {
                             </Typography.Subheader>
                         </CardHeader>
                         <CardBody>
-                            <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                                <div
-                                    className={`d-flex align-items-center mouse-pointer ${
-                                        alertObj?.notification?.method.includes('none')
-                                            ? `notify-container-active`
-                                            : `notify-container`
-                                    }`}
-                                    onClick={() => handleNotificationChange('method', ['none'])}>
-                                    <BanSVG className="p-0 square" width={20} height={20} />
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        style={{ color: colorPalette.primaryGray700 }}>
-                                        {`None`}
-                                    </Typography.Subheader>
-                                </div>
-
-                                <div
-                                    className={`d-flex align-items-center mouse-pointer ${
-                                        alertObj?.notification?.method.includes('user')
-                                            ? `notify-container-active`
-                                            : `notify-container`
-                                    }`}
-                                    onClick={() => handleNotificationChange('method', ['user'])}>
-                                    <UserProfileSVG className="p-0 square" width={18} height={18} />
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        style={{ color: colorPalette.primaryGray700 }}>
-                                        {`User`}
-                                    </Typography.Subheader>
-                                </div>
-
-                                <div
-                                    className={`d-flex align-items-center mouse-pointer ${
-                                        alertObj?.notification?.method.includes('email')
-                                            ? `notify-container-active`
-                                            : `notify-container`
-                                    }`}
-                                    onClick={() => handleNotificationChange('method', ['email'])}>
-                                    <EmailAddressSVG className="p-0 square" width={20} height={20} />
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        style={{ color: colorPalette.primaryGray700 }}>
-                                        {`Email Address`}
-                                    </Typography.Subheader>
-                                </div>
-                            </div>
-
-                            {!alertObj?.notification?.method.includes('none') && (
+                            {alertObj?.target?.submitted ? (
+                                <></>
+                            ) : (
+                                // <div className="d-flex justify-content-between align-items-center">
+                                //     <div>
+                                //         <Typography.Subheader
+                                //             size={Typography.Sizes.md}>{`Building`}</Typography.Subheader>
+                                //         <Brick sizeInRem={0.25} />
+                                //         <Typography.Body size={Typography.Sizes.md} className="text-muted">
+                                //             {renderTargetedBuildingsList(alertObj, originalBuildingsList)}
+                                //         </Typography.Body>
+                                //     </div>
+                                //     <div>
+                                //         <PenSVG
+                                //             className="mouse-pointer"
+                                //             width={17}
+                                //             height={17}
+                                //             onClick={() => {
+                                //                 handleTargetChange('submitted', !alertObj?.target?.submitted);
+                                //             }}
+                                //         />
+                                //     </div>
+                                // </div>
                                 <>
-                                    <hr className="mt-4 mb-3" />
-
-                                    <Typography.Subheader size={Typography.Sizes.md}>
-                                        {alertObj?.notification?.method.includes('user') && `Choose User`}
-                                        {alertObj?.notification?.method.includes('email') && `Enter Email Address`}
-                                    </Typography.Subheader>
-
-                                    <Brick sizeInRem={1.25} />
-
-                                    {alertObj?.notification?.method.includes('user') && (
-                                        <div style={{ width: '30%' }}>
-                                            <Select.Multi
-                                                id="user_select"
-                                                name="select"
-                                                options={usersList}
-                                                placeholder="Choose User"
-                                                onChange={(selectedUsersList) => {
-                                                    handleNotificationChange('selectedUserId', selectedUsersList);
-                                                }}
-                                                value={alertObj?.notification?.selectedUserId ?? []}
-                                                menuPlacement="auto"
-                                            />
-                                        </div>
-                                    )}
-
-                                    {alertObj?.notification?.method.includes('email') && (
-                                        <div style={{ width: '50%' }}>
-                                            <Inputs
-                                                type="text"
-                                                className="w-75"
-                                                placeholder="Enter email address"
-                                                onChange={(e) => {
-                                                    handleNotificationChange('selectedUserEmailId', e.target.value);
-                                                }}
-                                                value={alertObj?.notification?.selectedUserEmailId}
-                                            />
-                                            <Brick sizeInRem={0.25} />
-                                            <Typography.Body size={Typography.Sizes.sm}>
-                                                {`Add one or more email addresses, separated by a comma.`}
-                                            </Typography.Body>
-                                        </div>
-                                    )}
-
-                                    <Brick sizeInRem={1.5} />
-
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
-
-                                    <Brick sizeInRem={1} />
-
-                                    <div className="d-flex align-items-center" style={{ gap: '1.25rem' }}>
-                                        <Radio
-                                            name="send-immediately"
-                                            label="Send immediately"
-                                            checked={alertObj?.notification?.sendImmediate}
-                                            onClick={() => {
-                                                handleNotificationChange('sendImmediate', true);
-                                            }}
-                                        />
-
-                                        <Radio
-                                            name="send-with-conditions"
-                                            label="Send if conditions lasts at least"
-                                            checked={!alertObj?.notification?.sendImmediate}
-                                            onClick={() => {
-                                                handleNotificationChange('sendImmediate', false);
-                                            }}
-                                        />
-
-                                        <div style={{ width: '40%' }}>
-                                            <Inputs
-                                                type="number"
-                                                className="w-25"
-                                                inputClassName="custom-input-field"
-                                                value={alertObj?.condition?.sendAt}
-                                                onChange={(e) => {
-                                                    handleNotificationChange('sendAt', e.target.value);
-                                                }}
-                                                elementEnd={<MinutesSVG />}
-                                                disabled={alertObj?.notification?.sendImmediate}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <Brick sizeInRem={1} />
-
-                                    <div className="d-flex justify-content-between align-items-center">
-                                        <div className="d-flex align-items-center w-100" style={{ gap: '1.25rem' }}>
-                                            <Checkbox
-                                                label="Resend alert after"
-                                                type="checkbox"
-                                                id="resend-alert"
-                                                name="resend-alert"
-                                                size="md"
-                                                checked={alertObj?.notification?.resendAlert}
-                                                value={alertObj?.notification?.resendAlert}
-                                                onClick={(e) => {
-                                                    handleNotificationChange(
-                                                        'resendAlert',
-                                                        e.target.value === 'false' ? true : false
-                                                    );
-                                                }}
-                                            />
-                                            <div style={{ width: '40%' }}>
-                                                <Inputs
-                                                    type="number"
-                                                    className="w-50"
-                                                    inputClassName="custom-input-field"
-                                                    value={alertObj?.notification?.resentAt}
-                                                    onChange={(e) => {
-                                                        handleNotificationChange('resentAt', e.target.value);
-                                                    }}
-                                                    elementEnd={<MinutesSVG />}
-                                                    disabled={!alertObj?.notification?.resendAlert}
-                                                />
-                                            </div>
-                                        </div>
+                                    <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
                                         <div
-                                            className="d-flex justify-content-end align-items-center w-100"
-                                            style={{
-                                                gap: '0.5rem',
-                                            }}>
-                                            <Button
-                                                label={'Cancel'}
-                                                size={Button.Sizes.md}
-                                                type={Button.Type.secondaryGrey}
-                                                onClick={() => handleNotificationChange('method', ['none'])}
-                                            />
-                                            <Button
-                                                label={'Add Notification'}
-                                                size={Button.Sizes.md}
-                                                type={Button.Type.primary}
-                                                onClick={() => {
-                                                    handleAddNotification(alertObj);
-                                                    // handleNotificationChange(
-                                                    //     'submitted',
-                                                    //     !alertObj?.notification?.submitted
-                                                    // );
-                                                }}
-                                            />
+                                            className={`d-flex align-items-center mouse-pointer ${
+                                                alertObj?.notification?.method.includes('none')
+                                                    ? `notify-container-active`
+                                                    : `notify-container`
+                                            }`}
+                                            onClick={() => handleNotificationChange('method', ['none'])}>
+                                            <BanSVG className="p-0 square" width={20} height={20} />
+                                            <Typography.Subheader
+                                                size={Typography.Sizes.md}
+                                                style={{ color: colorPalette.primaryGray700 }}>
+                                                {`None`}
+                                            </Typography.Subheader>
+                                        </div>
+
+                                        <div
+                                            className={`d-flex align-items-center mouse-pointer ${
+                                                alertObj?.notification?.method.includes('user')
+                                                    ? `notify-container-active`
+                                                    : `notify-container`
+                                            }`}
+                                            onClick={() => handleNotificationChange('method', ['user'])}>
+                                            <UserProfileSVG className="p-0 square" width={18} height={18} />
+                                            <Typography.Subheader
+                                                size={Typography.Sizes.md}
+                                                style={{ color: colorPalette.primaryGray700 }}>
+                                                {`User`}
+                                            </Typography.Subheader>
+                                        </div>
+
+                                        <div
+                                            className={`d-flex align-items-center mouse-pointer ${
+                                                alertObj?.notification?.method.includes('email')
+                                                    ? `notify-container-active`
+                                                    : `notify-container`
+                                            }`}
+                                            onClick={() => handleNotificationChange('method', ['email'])}>
+                                            <EmailAddressSVG className="p-0 square" width={20} height={20} />
+                                            <Typography.Subheader
+                                                size={Typography.Sizes.md}
+                                                style={{ color: colorPalette.primaryGray700 }}>
+                                                {`Email Address`}
+                                            </Typography.Subheader>
                                         </div>
                                     </div>
+
+                                    {!alertObj?.notification?.method.includes('none') && (
+                                        <>
+                                            <hr className="mt-4 mb-3" />
+
+                                            <Typography.Subheader size={Typography.Sizes.md}>
+                                                {alertObj?.notification?.method.includes('user') && `Choose User`}
+                                                {alertObj?.notification?.method.includes('email') &&
+                                                    `Enter Email Address`}
+                                            </Typography.Subheader>
+
+                                            <Brick sizeInRem={1.25} />
+
+                                            {alertObj?.notification?.method.includes('user') && (
+                                                <div style={{ width: '30%' }}>
+                                                    <Select.Multi
+                                                        id="user_select"
+                                                        name="select"
+                                                        options={usersList}
+                                                        placeholder="Choose User"
+                                                        onChange={(selectedUsersList) => {
+                                                            handleNotificationChange(
+                                                                'selectedUserId',
+                                                                selectedUsersList
+                                                            );
+                                                        }}
+                                                        value={alertObj?.notification?.selectedUserId ?? []}
+                                                        menuPlacement="auto"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {alertObj?.notification?.method.includes('email') && (
+                                                <div style={{ width: '50%' }}>
+                                                    <Inputs
+                                                        type="text"
+                                                        className="w-75"
+                                                        placeholder="Enter email address"
+                                                        onChange={(e) => {
+                                                            handleNotificationChange(
+                                                                'selectedUserEmailId',
+                                                                e.target.value
+                                                            );
+                                                        }}
+                                                        value={alertObj?.notification?.selectedUserEmailId}
+                                                    />
+                                                    <Brick sizeInRem={0.25} />
+                                                    <Typography.Body size={Typography.Sizes.sm}>
+                                                        {`Add one or more email addresses, separated by a comma.`}
+                                                    </Typography.Body>
+                                                </div>
+                                            )}
+
+                                            <Brick sizeInRem={1.5} />
+
+                                            <Typography.Subheader
+                                                size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
+
+                                            <Brick sizeInRem={1} />
+
+                                            <div className="d-flex align-items-center" style={{ gap: '1.25rem' }}>
+                                                <Radio
+                                                    name="send-immediately"
+                                                    label="Send immediately"
+                                                    checked={alertObj?.notification?.sendImmediate}
+                                                    onClick={() => {
+                                                        handleNotificationChange('sendImmediate', true);
+                                                    }}
+                                                />
+
+                                                <Radio
+                                                    name="send-with-conditions"
+                                                    label="Send if conditions lasts at least"
+                                                    checked={!alertObj?.notification?.sendImmediate}
+                                                    onClick={() => {
+                                                        handleNotificationChange('sendImmediate', false);
+                                                    }}
+                                                />
+
+                                                <div style={{ width: '40%' }}>
+                                                    <Inputs
+                                                        type="number"
+                                                        className="w-25"
+                                                        inputClassName="custom-input-field"
+                                                        value={alertObj?.condition?.sendAt}
+                                                        onChange={(e) => {
+                                                            handleNotificationChange('sendAt', e.target.value);
+                                                        }}
+                                                        elementEnd={<MinutesSVG />}
+                                                        disabled={alertObj?.notification?.sendImmediate}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <Brick sizeInRem={1} />
+
+                                            <div className="d-flex justify-content-between align-items-center">
+                                                <div
+                                                    className="d-flex align-items-center w-100"
+                                                    style={{ gap: '1.25rem' }}>
+                                                    <Checkbox
+                                                        label="Resend alert after"
+                                                        type="checkbox"
+                                                        id="resend-alert"
+                                                        name="resend-alert"
+                                                        size="md"
+                                                        checked={alertObj?.notification?.resendAlert}
+                                                        value={alertObj?.notification?.resendAlert}
+                                                        onClick={(e) => {
+                                                            handleNotificationChange(
+                                                                'resendAlert',
+                                                                e.target.value === 'false' ? true : false
+                                                            );
+                                                        }}
+                                                    />
+                                                    <div style={{ width: '40%' }}>
+                                                        <Inputs
+                                                            type="number"
+                                                            className="w-50"
+                                                            inputClassName="custom-input-field"
+                                                            value={alertObj?.notification?.resentAt}
+                                                            onChange={(e) => {
+                                                                handleNotificationChange('resentAt', e.target.value);
+                                                            }}
+                                                            elementEnd={<MinutesSVG />}
+                                                            disabled={!alertObj?.notification?.resendAlert}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    className="d-flex justify-content-end align-items-center w-100"
+                                                    style={{
+                                                        gap: '0.5rem',
+                                                    }}>
+                                                    <Button
+                                                        label={'Cancel'}
+                                                        size={Button.Sizes.md}
+                                                        type={Button.Type.secondaryGrey}
+                                                        onClick={() => handleNotificationChange('method', ['none'])}
+                                                    />
+                                                    <Button
+                                                        label={'Add Notification'}
+                                                        size={Button.Sizes.md}
+                                                        type={Button.Type.primary}
+                                                        onClick={() => {
+                                                            handleAddNotification(alertObj);
+                                                            // handleNotificationChange(
+                                                            //     'submitted',
+                                                            //     !alertObj?.notification?.submitted
+                                                            // );
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </>
                             )}
                         </CardBody>
