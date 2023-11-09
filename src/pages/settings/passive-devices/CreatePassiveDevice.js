@@ -201,6 +201,7 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
                             handleChange('space_id', e.value);
                         }}
                         isSearchable={true}
+                        menuPlacement="top"
                     />
                 </div>
 
