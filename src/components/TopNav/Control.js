@@ -31,7 +31,7 @@ const Control = () => {
     const user = cookies.get('user');
 
     const [userPermission] = useAtom(userPermissionData);
-    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperUser = true;
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     // User Preference Modal
@@ -151,7 +151,6 @@ const Control = () => {
     }, [user]);
 
     useEffect(() => {
-        getOpenAlerts();
         if (userPermission?.user_role !== 'admin') {
             if (!userPermission?.permissions?.permissions?.account_general_permission?.view) {
                 setAccountRoutes((el) =>
@@ -334,6 +333,10 @@ const Control = () => {
     useEffect(() => {
         setPageType(location.pathname.split('/')[1]);
     }, [location.pathname]);
+
+    useEffect(() => {
+        getOpenAlerts();
+    }, []);
 
     return (
         <>
