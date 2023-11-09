@@ -124,11 +124,3 @@ export const filtersForPeakDemand = [
         value: 'past_12_month',
     },
 ];
-
-// In Progress required for Tagrt Type change to alert user
-export const customComparator = (value1, value2, key) => {
-    if (key === 'type' && key.startsWith('target.')) {
-        return true; // Exclude comparison of obj.target.type
-    }
-    return undefined;
-};
