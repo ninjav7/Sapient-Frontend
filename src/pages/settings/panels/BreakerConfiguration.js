@@ -1528,6 +1528,7 @@ const BreakerConfiguration = ({
                                                                 className="basic-single"
                                                                 error={equipmentErrors?.equipment_type}
                                                                 isDisabled={firstBreakerObj?.type !== 'equipment'}
+                                                                menuPlacement="top"
                                                             />
                                                         </div>
 
@@ -1551,6 +1552,7 @@ const BreakerConfiguration = ({
                                                                 className="basic-single"
                                                                 error={equipmentErrors?.end_use}
                                                                 isDisabled={firstBreakerObj?.type !== 'equipment'}
+                                                                menuPlacement="top"
                                                             />
                                                         </div>
                                                     </div>
@@ -1574,6 +1576,7 @@ const BreakerConfiguration = ({
                                                             }}
                                                             className="basic-single"
                                                             isDisabled={firstBreakerObj?.type !== 'equipment'}
+                                                            menuPlacement="top"
                                                         />
                                                     </div>
                                                     <Brick sizeInRem={1.5} />

@@ -194,6 +194,7 @@ const AddEquipment = ({
                             handleChange('space_id', e.value);
                         }}
                         className="basic-single"
+                        menuPlacement="top"
                     />
                 </div>
 

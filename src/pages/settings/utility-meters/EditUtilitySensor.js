@@ -533,6 +533,7 @@ const ConfigureTab = (props) => {
                                             handleChange('service_location', e.value);
                                         }}
                                         isSearchable={true}
+                                        menuPlacement="top"
                                     />
                                     {sensorObj?.service_location ? (
                                         <>
@@ -630,6 +631,7 @@ const ConfigureTab = (props) => {
                                             handleChange('service_location', e.value);
                                         }}
                                         isSearchable={true}
+                                        menuPlacement="top"
                                     />
                                     {sensorObj?.service_location ? (
                                         <>

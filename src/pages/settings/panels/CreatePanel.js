@@ -314,6 +314,7 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
                             handleChange('space_id', e.value);
                         }}
                         isSearchable={true}
+                        menuPlacement="top"
                     />
                 </div>
 
@@ -331,6 +332,7 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
                         }}
                         isSearchable={true}
                         error={errorObj?.parent_panel}
+                        menuPlacement="top"
                     />
                 </div>
 

@@ -236,6 +236,7 @@ const SpaceLayout = (props) => {
                             onChange={(e) => {
                                 handleChange('type_id', e.value);
                             }}
+                            menuPlacement="top"
                         />
                     </div>
 
