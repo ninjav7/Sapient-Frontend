@@ -1,75 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
 import { useHistory } from 'react-router-dom';
-import Skeleton from 'react-loading-skeleton';
 import { Row, Col, CardBody, CardHeader } from 'reactstrap';
-import { UncontrolledTooltip } from 'reactstrap';
 
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
 import Brick from '../../../sharedComponents/brick';
-import Select from '../../../sharedComponents/form/select';
-import Inputs from '../../../sharedComponents/form/input/Input';
-import { Checkbox } from '../../../sharedComponents/form/checkbox';
+
+import Target from './Target';
+import Condition from './Condition';
+import AlertPreview from './AlertPreview';
+import NotificationMethod from './NotificationMethod';
 
 import { UserStore } from '../../../store/UserStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
-import { ReactComponent as KWH_SVG } from '../../../assets/icon/kwh.svg';
-import { ReactComponent as BanSVG } from '../../../assets/icon/ban.svg';
-import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
 import { ReactComponent as CheckMarkSVG } from '../../../assets/icon/check-mark.svg';
-import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
-import { ReactComponent as UserProfileSVG } from '../../../assets/icon/user-profile.svg';
-import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/assets/icons/building-type.svg';
-import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
-import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
 import { createAlertServiceAPI } from '../services';
+import { getEquipmentsList } from '../../settings/panels/services';
 import { fetchBuildingsList } from '../../../services/buildings';
+import { getEquipTypeData } from '../../settings/equipment-type/services';
 import { getAllBuildingTypes } from '../../settings/general-settings/services';
-import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
-import {
-    alertConditions,
-    conditionLevelsList,
-    defaultAlertObj,
-    defaultConditionObj,
-    filtersForEnergyConsumption,
-} from './constants';
+import { defaultAlertObj, defaultConditionObj, defaultNotificationObj } from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-
-const TargetToolTip = () => {
-    return (
-        <div>
-            <UncontrolledTooltip placement="bottom" target="tooltip-for-target">
-                {`Target Tooltip.`}
-            </UncontrolledTooltip>
-
-            <button type="button" className="tooltip-button" id="tooltip-for-target">
-                <TooltipIcon className="tooltip-icon" />
-            </button>
-        </div>
-    );
-};
-
-const ConditionToolTip = () => {
-    return (
-        <div>
-            <UncontrolledTooltip placement="bottom" target={'tooltip-for-condition'}>
-                {`Condition Tooltip.`}
-            </UncontrolledTooltip>
-
-            <button type="button" className="tooltip-button" id={'tooltip-for-condition'}>
-                <TooltipIcon className="tooltip-icon" />
-            </button>
-        </div>
-    );
-};
 
 const CreateAlertHeader = (props) => {
     const { activeTab, setActiveTab, isAlertConfigured = false, onAlertCreate } = props;
@@ -179,13 +138,7 @@ const RemoveAlert = () => {
 };
 
 const ConfigureAlerts = (props) => {
-    const {
-        alertObj = {},
-        handleTargetChange,
-        handleConditionChange,
-        updateAlertWithBuildingData,
-        setTypeSelectedLabel,
-    } = props;
+    const { alertObj = {}, updateAlertWithBuildingData, setTypeSelectedLabel } = props;
 
     const [isFetchingData, setFetching] = useState(false);
 
@@ -222,6 +175,39 @@ const ConfigureAlerts = (props) => {
     };
 
     useEffect(() => {
+        if (buildingsList.length !== 0 && alertObj?.target?.type === 'equipment') {
+            let promisesList = [];
+
+            buildingsList.forEach((el) => {
+                if (el?.value) promisesList.push(getEquipmentsList(`?building_id=${el?.value}`));
+            });
+
+            Promise.all(promisesList)
+                .then((res) => {
+                    const response = res;
+                    let newMappedEquipmentList = [];
+
+                    response.forEach((record, index) => {
+                        if (record?.status === 200) {
+                            const responseData = record?.data?.data;
+                            if (responseData) {
+                                const equipmentsList = responseData.map((el) => ({
+                                    label: `${el?.equipments_name} [${buildingsList[index]?.label}]`,
+                                    value: el?.equipments_id,
+                                    building_id: buildingsList[index]?.value,
+                                }));
+                                newMappedEquipmentList = [...newMappedEquipmentList, ...equipmentsList];
+                            }
+                        }
+                    });
+                    newMappedEquipmentList && setEquipmentsList(newMappedEquipmentList);
+                })
+                .catch(() => {})
+                .finally(() => {});
+        }
+    }, [buildingsList]);
+
+    useEffect(() => {
         const label = renderTargetedBuildingsList(alertObj, originalBuildingsList);
         setTypeSelectedLabel(label);
     }, [alertObj?.target?.lists, originalBuildingsList]);
@@ -229,6 +215,8 @@ const ConfigureAlerts = (props) => {
     useEffect(() => {
         if (alertObj?.target?.type === 'building') {
             setFetching(true);
+            setOriginalBuildingsList([]);
+            setBuildingsList([]);
 
             const promiseOne = getAllBuildingTypes();
             const promiseTwo = fetchBuildingsList(false);
@@ -273,271 +261,63 @@ const ConfigureAlerts = (props) => {
                     setFetching(false);
                 });
         }
+
+        if (alertObj?.target?.type === 'equipment') {
+            setFetching(true);
+            setOriginalBuildingsList([]);
+            setBuildingsList([]);
+
+            const promiseOne = fetchBuildingsList(false);
+            const promiseTwo = getEquipTypeData();
+
+            Promise.all([promiseOne, promiseTwo])
+                .then((res) => {
+                    const response = res;
+
+                    if (response && response[0]?.status === 200 && response[1]?.status === 200) {
+                        const buildingsListResponse = response[0]?.data ?? [];
+                        const equipTypesResponse = response[1]?.data?.data ?? [];
+
+                        if (buildingsListResponse && equipTypesResponse) {
+                            const newMappedBldgsData = buildingsListResponse.map((el) => ({
+                                label: el?.building_name,
+                                value: el?.building_id,
+                                building_type_id: el?.building_type_id,
+                            }));
+                            setOriginalBuildingsList(newMappedBldgsData);
+                            setBuildingsList(newMappedBldgsData);
+
+                            const newMappedEquipTypesData = equipTypesResponse.map((el) => ({
+                                label: el?.equipment_type,
+                                value: el?.equipment_id,
+                            }));
+                            setEquipmentTypeList(newMappedEquipTypesData);
+                        }
+                    }
+                })
+                .catch(() => {})
+                .finally(() => {
+                    setFetching(false);
+                });
+        }
     }, [alertObj?.target?.type]);
 
     return (
         <>
             <Row>
                 <Col lg={9}>
-                    <div className="custom-card">
-                        <CardHeader>
-                            <div className="d-flex align-items-baseline">
-                                <Typography.Subheader
-                                    size={Typography.Sizes.md}
-                                    style={{ color: colorPalette.primaryGray550 }}>
-                                    {`Target`}
-                                </Typography.Subheader>
-                                <TargetToolTip />
-                            </div>
-                        </CardHeader>
-                        <CardBody>
-                            {alertObj?.target?.submitted ? (
-                                <div className="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <Typography.Subheader
-                                            size={Typography.Sizes.md}>{`Building`}</Typography.Subheader>
-                                        <Brick sizeInRem={0.25} />
-                                        <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                            {renderTargetedBuildingsList(alertObj, originalBuildingsList)}
-                                        </Typography.Body>
-                                    </div>
-                                    <div>
-                                        <PenSVG
-                                            className="mouse-pointer"
-                                            width={17}
-                                            height={17}
-                                            onClick={() => {
-                                                handleTargetChange('submitted', !alertObj?.target?.submitted);
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                            ) : (
-                                <>
-                                    <div>
-                                        <Typography.Subheader size={Typography.Sizes.md}>
-                                            {`Select a Target Type`}
-                                        </Typography.Subheader>
-
-                                        <Brick sizeInRem={1.25} />
-
-                                        <div className="d-flex" style={{ gap: '0.75rem' }}>
-                                            <div
-                                                className={`d-flex align-items-center mouse-pointer ${
-                                                    alertObj?.target?.type === 'building'
-                                                        ? `target-type-container-active`
-                                                        : `target-type-container`
-                                                }`}
-                                                onClick={() => {
-                                                    handleTargetChange('type', 'building');
-                                                }}>
-                                                <BuildingTypeSVG className="p-0 square" width={20} height={20} />
-                                                <Typography.Subheader
-                                                    size={Typography.Sizes.md}
-                                                    style={{ color: colorPalette.primaryGray700 }}>
-                                                    {`Building`}
-                                                </Typography.Subheader>
-                                            </div>
-
-                                            <div
-                                                className={`d-flex align-items-center mouse-pointer ${
-                                                    alertObj?.target?.type === 'equipment'
-                                                        ? `target-type-container-active`
-                                                        : `target-type-container`
-                                                }`}
-                                                onClick={() => {
-                                                    handleTargetChange('type', 'equipment');
-                                                }}>
-                                                <EquipmentTypeSVG className="p-0 square" width={20} height={20} />
-                                                <Typography.Subheader
-                                                    size={Typography.Sizes.md}
-                                                    style={{ color: colorPalette.primaryGray700 }}>
-                                                    {`Equipment`}
-                                                </Typography.Subheader>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {alertObj?.target?.type && <hr />}
-
-                                    {alertObj?.target?.type && (
-                                        <>
-                                            <Typography.Subheader size={Typography.Sizes.md}>
-                                                {`Select a Target`}
-                                            </Typography.Subheader>
-
-                                            <Brick sizeInRem={1.25} />
-                                        </>
-                                    )}
-
-                                    {alertObj?.target?.type === 'building' && (
-                                        <div>
-                                            {isFetchingData ? (
-                                                <Skeleton count={2} width={1000} height={20} />
-                                            ) : (
-                                                <div className="d-flex w-100 justify-content-between">
-                                                    <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
-                                                        <div className="w-100">
-                                                            <Typography.Body size={Typography.Sizes.sm}>
-                                                                {`Building Type`}
-                                                            </Typography.Body>
-                                                            <Brick sizeInRem={0.25} />
-                                                            <Select.Multi
-                                                                id="endUseSelect"
-                                                                placeholder="Select Building Type"
-                                                                name="select"
-                                                                className="w-100"
-                                                                isSearchable={true}
-                                                                options={buildingTypeList}
-                                                                onChange={(newBldgTypeList) => {
-                                                                    handleTargetChange('lists', []);
-                                                                    setBuildingsList(
-                                                                        filteredBuildingsList(
-                                                                            newBldgTypeList,
-                                                                            originalBuildingsList
-                                                                        )
-                                                                    );
-                                                                    handleTargetChange('typesList', newBldgTypeList);
-                                                                }}
-                                                                value={alertObj?.target?.typesList ?? []}
-                                                                menuPlacement="auto"
-                                                            />
-                                                        </div>
-
-                                                        <div className="w-100">
-                                                            <Typography.Body size={Typography.Sizes.sm}>
-                                                                {`Building`}
-                                                            </Typography.Body>
-                                                            <Brick sizeInRem={0.25} />
-                                                            <Select.Multi
-                                                                id="endUseSelect"
-                                                                placeholder="Select Building"
-                                                                name="select"
-                                                                className="w-100"
-                                                                isSearchable={true}
-                                                                options={buildingsList}
-                                                                onChange={(selectedBldgTypeList) => {
-                                                                    handleTargetChange('lists', selectedBldgTypeList);
-                                                                }}
-                                                                value={alertObj?.target?.lists ?? []}
-                                                                menuPlacement="auto"
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    <div>
-                                                        <Brick sizeInRem={1.35} />
-                                                        <div
-                                                            className="d-flex"
-                                                            style={{
-                                                                gap: '0.5rem',
-                                                                maxHeight: '2.25rem',
-                                                            }}>
-                                                            <Button
-                                                                label={'Cancel'}
-                                                                size={Button.Sizes.md}
-                                                                type={Button.Type.secondaryGrey}
-                                                                className="w-100"
-                                                                onClick={() => {
-                                                                    handleTargetChange(
-                                                                        'submitted',
-                                                                        !alertObj?.target.submitted
-                                                                    );
-                                                                }}
-                                                                disabled={
-                                                                    alertObj?.target?.lists.length === 0 ||
-                                                                    alertObj?.target?.typesList.length === 0
-                                                                }
-                                                            />
-                                                            <Button
-                                                                label={'Add target'}
-                                                                size={Button.Sizes.md}
-                                                                type={Button.Type.primary}
-                                                                className="w-100"
-                                                                onClick={() => {
-                                                                    handleTargetChange(
-                                                                        'submitted',
-                                                                        !alertObj?.target.submitted
-                                                                    );
-                                                                }}
-                                                                disabled={
-                                                                    alertObj?.target?.lists &&
-                                                                    alertObj?.target?.lists.length === 0
-                                                                }
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {alertObj?.target?.type === 'equipment' && (
-                                        <div>
-                                            {isFetchingData ? (
-                                                <Skeleton count={2} width={1000} height={20} />
-                                            ) : (
-                                                <div>
-                                                    <Select
-                                                        id="endUseSelect"
-                                                        placeholder="Select Building"
-                                                        name="select"
-                                                        isSearchable={true}
-                                                        options={[]}
-                                                        className="w-25"
-                                                        menuPlacement="auto"
-                                                    />
-
-                                                    <Brick sizeInRem={1.25} />
-
-                                                    <div
-                                                        className="d-flex justify-content-between w-100"
-                                                        style={{ gap: '1.25rem' }}>
-                                                        <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
-                                                            <Select
-                                                                id="endUseSelect"
-                                                                placeholder="Select Equipment Type"
-                                                                name="select"
-                                                                isSearchable={true}
-                                                                options={[]}
-                                                                className="w-100"
-                                                                menuPlacement="auto"
-                                                            />
-
-                                                            <Select
-                                                                id="endUseSelect"
-                                                                placeholder="Select Equipment"
-                                                                name="select"
-                                                                isSearchable={true}
-                                                                options={[]}
-                                                                className="w-100"
-                                                                menuPlacement="auto"
-                                                            />
-                                                        </div>
-
-                                                        <div className="d-flex" style={{ gap: '0.75rem' }}>
-                                                            <Button
-                                                                label={'Cancel'}
-                                                                size={Button.Sizes.md}
-                                                                type={Button.Type.secondaryGrey}
-                                                                className="w-100"
-                                                            />
-                                                            <Button
-                                                                label={'Add target'}
-                                                                size={Button.Sizes.md}
-                                                                type={Button.Type.primary}
-                                                                className="w-100"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                        </CardBody>
-                    </div>
+                    <Target
+                        isFetchingData={isFetchingData}
+                        buildingsList={buildingsList}
+                        originalBuildingsList={originalBuildingsList}
+                        buildingTypeList={buildingTypeList}
+                        equipmentTypeList={equipmentTypeList}
+                        equipmentsList={equipmentsList}
+                        renderTargetedBuildingsList={renderTargetedBuildingsList}
+                        filteredBuildingsList={filteredBuildingsList}
+                        setBuildingsList={setBuildingsList}
+                        {...props}
+                    />
                 </Col>
             </Row>
 
@@ -545,147 +325,7 @@ const ConfigureAlerts = (props) => {
 
             <Row>
                 <Col lg={9}>
-                    <div className="custom-card">
-                        <CardHeader>
-                            <div className="d-flex align-items-baseline">
-                                <Typography.Subheader
-                                    size={Typography.Sizes.md}
-                                    style={{ color: colorPalette.primaryGray550 }}>
-                                    {`Condition`}
-                                </Typography.Subheader>
-                                <ConditionToolTip />
-                            </div>
-                        </CardHeader>
-                        <CardBody>
-                            <div>
-                                <Typography.Subheader size={Typography.Sizes.md}>
-                                    {`Select a Condition`}
-                                </Typography.Subheader>
-
-                                <Brick sizeInRem={1.25} />
-
-                                {/* <div className="d-flex w-100 align-items-center" style={{ gap: '0.75rem' }}> */}
-                                <div
-                                    className={`container-grid${
-                                        alertObj?.condition?.filterType === `number` ? `-with-value` : ``
-                                    }`}>
-                                    <Select
-                                        id="endUseSelect"
-                                        placeholder="Select a Condition"
-                                        name="select"
-                                        options={alertObj?.target?.type === '' ? [] : alertConditions}
-                                        className="w-100"
-                                        onChange={(e) => {
-                                            handleConditionChange('type', e.value);
-                                        }}
-                                        currentValue={alertConditions.filter(
-                                            (option) => option.value === alertObj?.condition?.type
-                                        )}
-                                        isDisabled={alertObj?.target?.type === ''}
-                                        menuPlacement="auto"
-                                    />
-
-                                    {alertObj?.condition?.type !== '' && (
-                                        <>
-                                            <Select
-                                                id="condition_lvl"
-                                                name="select"
-                                                options={conditionLevelsList}
-                                                className="w-100"
-                                                onChange={(e) => {
-                                                    handleConditionChange('level', e.value);
-                                                }}
-                                                currentValue={conditionLevelsList.filter(
-                                                    (option) => option.value === alertObj?.condition?.level
-                                                )}
-                                                menuPlacement="auto"
-                                            />
-                                            <Select
-                                                id="filter_type"
-                                                name="select"
-                                                options={filtersForEnergyConsumption}
-                                                className="w-100"
-                                                onChange={(e) => {
-                                                    handleConditionChange('filterType', e.value);
-                                                }}
-                                                currentValue={filtersForEnergyConsumption.filter(
-                                                    (option) => option.value === alertObj?.condition?.filterType
-                                                )}
-                                                menuPlacement="auto"
-                                            />
-                                            {alertObj?.condition?.filterType === 'number' && (
-                                                <Inputs
-                                                    type="number"
-                                                    placeholder="Enter value"
-                                                    className="custom-input-width w-100"
-                                                    inputClassName="custom-input-field"
-                                                    value={alertObj?.condition?.thresholdValue}
-                                                    onChange={(e) => {
-                                                        handleConditionChange('thresholdValue', e.target.value);
-                                                    }}
-                                                    elementEnd={<KWH_SVG />}
-                                                />
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-
-                                <Brick sizeInRem={1.25} />
-
-                                {alertObj?.condition?.type === 'energy_consumption' && (
-                                    <div className="d-flex" style={{ gap: '1rem' }}>
-                                        <Checkbox
-                                            label="Alert at 50%"
-                                            type="checkbox"
-                                            id="50-percent-alert"
-                                            name="50-percent-alert"
-                                            size="md"
-                                            checked={alertObj?.condition?.threshold50}
-                                            value={alertObj?.condition?.threshold50}
-                                            onClick={(e) => {
-                                                const value = e.target.value;
-                                                if (value === 'false') handleConditionChange('threshold50', true);
-
-                                                if (value === 'true') handleConditionChange('threshold50', false);
-                                            }}
-                                        />
-                                        <Checkbox
-                                            label="Alert at 75%"
-                                            type="checkbox"
-                                            id="75-percent-alert"
-                                            name="75-percent-alert"
-                                            size="md"
-                                            checked={alertObj?.condition?.threshold75}
-                                            value={alertObj?.condition?.threshold75}
-                                            onClick={(e) => {
-                                                const value = e.target.value;
-                                                if (value === 'false') handleConditionChange('threshold75', true);
-
-                                                if (value === 'true') handleConditionChange('threshold75', false);
-                                            }}
-                                        />
-                                    </div>
-                                )}
-
-                                {alertObj?.condition?.type === 'peak_demand' && (
-                                    <Checkbox
-                                        label="Alert at 90%"
-                                        type="checkbox"
-                                        id="90-percent-alert"
-                                        name="90-percent-alert"
-                                        size="md"
-                                        checked={alertObj?.condition?.threshold90}
-                                        value={alertObj?.condition?.threshold90}
-                                        onClick={(e) => {
-                                            const value = e.target.value;
-                                            if (value === 'false') handleConditionChange('threshold90', true);
-                                            if (value === 'true') handleConditionChange('threshold90', false);
-                                        }}
-                                    />
-                                )}
-                            </div>
-                        </CardBody>
-                    </div>
+                    <Condition {...props} />
                 </Col>
             </Row>
 
@@ -695,206 +335,12 @@ const ConfigureAlerts = (props) => {
 };
 
 const NotificationSettings = (props) => {
-    const { alertObj = {}, typeSelectedLabel = '', handleConditionChange, handleNotificationChange } = props;
-
-    const targetType = alertObj?.target?.type === `building` ? `Building` : `Equipment`;
-
-    const renderAlertCondition = (alert_obj) => {
-        let text = '';
-
-        let alertType = alertConditions.find((el) => el?.value === alert_obj?.condition?.type);
-        if (alertType) text += alertType?.label;
-
-        if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
-
-        if (alertObj?.condition?.filterType === 'number' && alert_obj?.condition?.thresholdValue)
-            text += ` ${formatConsumptionValue(+alert_obj?.condition?.thresholdValue, 2)} kWh`;
-
-        if (alertObj?.condition?.filterType !== 'number') {
-            let alertFilter = filtersForEnergyConsumption.find((el) => el?.value === alertObj?.condition?.filterType);
-            if (alertFilter) text += ` ${alertFilter?.label}`;
-        }
-
-        return `${text}.`;
-    };
-
     return (
         <>
-            <Row>
-                <Col lg={9}>
-                    <div className="custom-card">
-                        <CardHeader>
-                            <Typography.Subheader
-                                size={Typography.Sizes.md}
-                                style={{ color: colorPalette.primaryGray550 }}>
-                                {`Alert Preview`}
-                            </Typography.Subheader>
-                        </CardHeader>
-                        <CardBody>
-                            <div>
-                                <Typography.Subheader size={Typography.Sizes.md}>{`Target Type`}</Typography.Subheader>
-                                <Brick sizeInRem={0.25} />
-                                <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                    {targetType}
-                                </Typography.Body>
-                            </div>
-
-                            <Brick sizeInRem={1} />
-
-                            <div>
-                                <Typography.Subheader size={Typography.Sizes.md}>{targetType}</Typography.Subheader>
-                                <Brick sizeInRem={0.25} />
-                                <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                    {typeSelectedLabel && typeSelectedLabel}
-                                </Typography.Body>
-                            </div>
-
-                            <Brick sizeInRem={0.5} />
-
-                            <div>
-                                <Typography.Subheader size={Typography.Sizes.md}>{`Condition`}</Typography.Subheader>
-                                <Brick sizeInRem={0.25} />
-                                <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                    {renderAlertCondition(alertObj)}
-                                </Typography.Body>
-                            </div>
-
-                            <Brick sizeInRem={1} />
-
-                            {alertObj?.condition?.type === 'energy_consumption' && (
-                                <div className="d-flex" style={{ gap: '1rem' }}>
-                                    <Checkbox
-                                        label="Alert at 50%"
-                                        type="checkbox"
-                                        id="50-percent-alert"
-                                        name="50-percent-alert"
-                                        size="md"
-                                        checked={alertObj?.condition?.threshold50}
-                                        value={alertObj?.condition?.threshold50}
-                                        onClick={(e) => {
-                                            const value = e.target.value;
-                                            if (value === 'false') handleConditionChange('threshold50', true);
-
-                                            if (value === 'true') handleConditionChange('threshold50', false);
-                                        }}
-                                    />
-                                    <Checkbox
-                                        label="Alert at 75%"
-                                        type="checkbox"
-                                        id="75-percent-alert"
-                                        name="75-percent-alert"
-                                        size="md"
-                                        checked={alertObj?.condition?.threshold75}
-                                        value={alertObj?.condition?.threshold75}
-                                        onClick={(e) => {
-                                            const value = e.target.value;
-                                            if (value === 'false') handleConditionChange('threshold75', true);
-
-                                            if (value === 'true') handleConditionChange('threshold75', false);
-                                        }}
-                                    />
-                                </div>
-                            )}
-
-                            {alertObj?.condition?.type === 'peak_demand' && (
-                                <Checkbox
-                                    label="Alert at 90%"
-                                    type="checkbox"
-                                    id="90-percent-alert"
-                                    name="90-percent-alert"
-                                    size="md"
-                                    checked={alertObj?.condition?.threshold90}
-                                    value={alertObj?.condition?.threshold90}
-                                    onClick={(e) => {
-                                        const value = e.target.value;
-                                        if (value === 'false') handleConditionChange('threshold90', true);
-                                        if (value === 'true') handleConditionChange('threshold90', false);
-                                    }}
-                                />
-                            )}
-                        </CardBody>
-                    </div>
-                </Col>
-            </Row>
-
+            <AlertPreview {...props} />
             <Brick sizeInRem={2} />
 
-            <Row>
-                <Col lg={9}>
-                    <Typography.Header
-                        size={Typography.Sizes.xs}>{`Add Notification Method (optional)`}</Typography.Header>
-                    <Brick sizeInRem={0.25} />
-                    <Typography.Body
-                        size={
-                            Typography.Sizes.md
-                        }>{`These are all notification methods available given your selected target and condition.`}</Typography.Body>
-                </Col>
-            </Row>
-
-            <Brick sizeInRem={2} />
-
-            <Row>
-                <Col lg={9}>
-                    <div className="custom-card">
-                        <CardHeader>
-                            <Typography.Subheader
-                                size={Typography.Sizes.md}
-                                style={{ color: colorPalette.primaryGray550 }}>
-                                {`Notification Method (optional)`}
-                            </Typography.Subheader>
-                        </CardHeader>
-                        <CardBody>
-                            <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                                <div
-                                    className={`d-flex align-items-center mouse-pointer ${
-                                        alertObj?.notification?.method === 'none'
-                                            ? `notify-container-active`
-                                            : `notify-container`
-                                    }`}
-                                    onClick={() => handleNotificationChange('method', 'none')}>
-                                    <BanSVG className="p-0 square" width={20} height={20} />
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        style={{ color: colorPalette.primaryGray700 }}>
-                                        {`None`}
-                                    </Typography.Subheader>
-                                </div>
-
-                                <div
-                                    className={`d-flex align-items-center mouse-pointer ${
-                                        alertObj?.notification?.method === 'user'
-                                            ? `notify-container-active`
-                                            : `notify-container`
-                                    }`}
-                                    onClick={() => handleNotificationChange('method', 'user')}>
-                                    <UserProfileSVG className="p-0 square" width={18} height={18} />
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        style={{ color: colorPalette.primaryGray700 }}>
-                                        {`User`}
-                                    </Typography.Subheader>
-                                </div>
-
-                                <div
-                                    className={`d-flex align-items-center mouse-pointer ${
-                                        alertObj?.notification?.method === 'email'
-                                            ? `notify-container-active`
-                                            : `notify-container`
-                                    }`}
-                                    onClick={() => handleNotificationChange('method', 'email')}>
-                                    <EmailAddressSVG className="p-0 square" width={20} height={20} />
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        style={{ color: colorPalette.primaryGray700 }}>
-                                        {`Email Address`}
-                                    </Typography.Subheader>
-                                </div>
-                            </div>
-                        </CardBody>
-                    </div>
-                </Col>
-            </Row>
-
+            <NotificationMethod {...props} />
             <Brick sizeInRem={2} />
         </>
     );
@@ -907,6 +353,7 @@ const AddAlerts = () => {
 
     const handleTargetChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
+        if (key === 'type' && obj?.target?.type !== value) obj = _.cloneDeep(defaultAlertObj);
         obj.target[key] = value;
         setAlertObj(obj);
     };
@@ -914,12 +361,12 @@ const AddAlerts = () => {
     const handleConditionChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
 
-        // When condition Type change
+        // When Condition Type change
         if (key === 'type') {
             obj.condition = _.cloneDeep(defaultConditionObj);
         }
 
-        // When condition filter-type change
+        // When Condition filter-type change
         if (key === 'filterType') {
             obj.condition.threshold50 = false;
             obj.condition.threshold75 = false;
@@ -933,6 +380,11 @@ const AddAlerts = () => {
 
     const handleNotificationChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
+
+        // When Notification Method change
+        if (key === 'method') {
+            obj.notification = _.cloneDeep(defaultNotificationObj);
+        }
 
         obj.notification[key] = value;
         setAlertObj(obj);
@@ -1035,6 +487,20 @@ const AddAlerts = () => {
 
     useEffect(() => {
         updateBreadcrumbStore();
+    }, []);
+
+    useEffect(() => {
+        const handleBeforeUnload = (event) => {
+            event.preventDefault();
+            event.returnValue = '';
+            alert('Are you sure you want to reload the page? Changes you have made wont be saved.');
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
     }, []);
 
     return (
