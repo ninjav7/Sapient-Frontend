@@ -145,6 +145,11 @@ const notificationCreateData = {
 const notificationUpdatedData = {
     title: 'Rule has been updated',
 };
+
+const notificationConflictionActionTime = {
+    title: 'Cannot save a rule with conflicting actions. Please set a different Turn Off and Turn On time for each action.',
+};
+
 const notificationLinkedData = (count, name) => {
     return {
         title: `${count} ${count == 1 ? 'socket has' : 'sockets have'} been linked to ${name}`,
@@ -1626,9 +1631,25 @@ const PlugRule = () => {
         setFetchingFilters(false);
         isLoadingLinkedRef.current = false;
     };
+    const handleChangeIfConflictingSchedule = () => {
+        let isConflicting = false;
+        preparedScheduleData.forEach((currentCondition) => {
+            const firstConfition = currentCondition.data[0];
+            const secondConfition = currentCondition.data[1];
+            if (firstConfition.action_time == secondConfition.action_time) {
+                isConflicting = true;
+            }
+        });
+        return isConflicting;
+    };
 
     const handleSaveClicked = async () => {
         const { isAssignedToAnotherRule } = handleCheckIfSocketAssignedToAnotherRule(rulesToLink);
+        const isConflictingScheduleRule = handleChangeIfConflictingSchedule();
+        if (isConflictingScheduleRule) {
+            openSnackbar({ ...notificationConflictionActionTime, type: Notification.Types.error, duration: 5000 });
+            return;
+        }
         if (isAssignedToAnotherRule) {
             setShowSocketsModal(true);
             return;
