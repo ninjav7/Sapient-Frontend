@@ -349,7 +349,6 @@ const NotificationSettings = (props) => {
 const AddAlerts = () => {
     const [activeTab, setActiveTab] = useState(0);
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
-    console.log('SSR alertObj => ', alertObj);
     const [typeSelectedLabel, setTypeSelectedLabel] = useState(null);
 
     const handleTargetChange = (key, value) => {

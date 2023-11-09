@@ -57,7 +57,6 @@ const NotificationMethod = (props) => {
         if (alert_obj?.notification?.method.includes('email')) {
             value = alert_obj?.notification?.selectedUserEmailId !== '';
         }
-        console.log('SSR value => ', value);
         return value;
     };
 
