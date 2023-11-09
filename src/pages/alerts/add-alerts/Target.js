@@ -159,7 +159,7 @@ const Target = (props) => {
                                                     placeholder="Select Building Type"
                                                     name="select"
                                                     className="w-100"
-                                                    isSearchable={true}
+                                                    isSearchable={buildingTypeList && buildingTypeList.length > 5}
                                                     options={buildingTypeList}
                                                     onChange={(newBldgTypeList) => {
                                                         handleTargetChange('lists', []);

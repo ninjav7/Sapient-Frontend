@@ -11,10 +11,12 @@ import { Checkbox } from '../../../sharedComponents/form/checkbox';
 import { Button } from '../../../sharedComponents/button';
 
 import { ReactComponent as BanSVG } from '../../../assets/icon/ban.svg';
+import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
 import { ReactComponent as MinutesSVG } from '../../../assets/icon/minutes.svg';
 import { ReactComponent as UserProfileSVG } from '../../../assets/icon/user-profile.svg';
 import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
+import { fetchCommaSeperatedEmailAddresses, getCommaSeparatedObjectLabels } from '../helpers';
 import { fetchMemberUserList } from '../../settings/users/service';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
@@ -24,10 +26,6 @@ const NotificationMethod = (props) => {
     const { alertObj = {}, handleNotificationChange } = props;
 
     const [usersList, setUsersList] = useState([]);
-
-    const notificationMethodTitle = alertObj?.notification?.method.includes('none')
-        ? `Notification Method (optional)`
-        : `User`;
 
     const fetchUsersList = async () => {
         setUsersList([]);
@@ -51,7 +49,57 @@ const NotificationMethod = (props) => {
             .finally(() => {});
     };
 
-    const handleAddNotification = (alert_obj) => {};
+    const validateNotification = (alert_obj) => {
+        let value = false;
+        if (alert_obj?.notification?.method.includes('user')) {
+            value = alert_obj?.notification?.selectedUserId?.length !== 0;
+        }
+        if (alert_obj?.notification?.method.includes('email')) {
+            value = alert_obj?.notification?.selectedUserEmailId !== '';
+        }
+        console.log('SSR value => ', value);
+        return value;
+    };
+
+    const renderNotification = (alert_obj) => {
+        const notify = alert_obj?.notification;
+        let label = '';
+
+        if (notify?.sendImmediate) label = `Send immediately`;
+        if (!notify?.sendImmediate) {
+            label = `Send if conditions lasts at least ${notify?.sendAt === '' ? 0 : notify?.sendAt} min`;
+        }
+        if (notify?.resendAlert) {
+            label += `, resend alert after ${notify?.resentAt === '' ? 0 : notify?.resentAt} min`;
+        }
+
+        return label;
+    };
+
+    const renderUsers = (alert_obj) => {
+        const notify = alert_obj?.notification;
+
+        if (notify?.selectedUserId.length === 0) return `No user selected`;
+
+        if (notify?.selectedUserId.length > 3) {
+            return `${notify?.selectedUserId.length} users selected`;
+        } else {
+            return getCommaSeparatedObjectLabels(notify?.selectedUserId);
+        }
+    };
+
+    const renderEmailAddress = (alert_obj) => {
+        const notify = alert_obj?.notification;
+        const emailsList = fetchCommaSeperatedEmailAddresses(notify?.selectedUserEmailId);
+
+        if (emailsList.length === 0) return `No email address added`;
+
+        if (emailsList.length > 3) {
+            return `${emailsList.length} email address added`;
+        } else {
+            return emailsList.map((email_id) => email_id).join(', ');
+        }
+    };
 
     useEffect(() => {
         if (alertObj?.notification?.method.includes('user')) fetchUsersList();
@@ -79,33 +127,53 @@ const NotificationMethod = (props) => {
                             <Typography.Subheader
                                 size={Typography.Sizes.md}
                                 style={{ color: colorPalette.primaryGray550 }}>
-                                {notificationMethodTitle}
+                                {`Notification`}
                             </Typography.Subheader>
                         </CardHeader>
                         <CardBody>
-                            {alertObj?.target?.submitted ? (
-                                <></>
+                            {alertObj?.notification?.submitted ? (
+                                <>
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <Typography.Subheader size={Typography.Sizes.md}>
+                                                {alertObj?.notification?.method.includes('user') && `User`}
+                                                {alertObj?.notification?.method.includes('email') && `Email Address`}
+                                            </Typography.Subheader>
+                                            <Brick sizeInRem={0.25} />
+                                            <Typography.Body size={Typography.Sizes.md} className="text-muted">
+                                                {alertObj?.notification?.method.includes('user') &&
+                                                    renderUsers(alertObj)}
+                                                {alertObj?.notification?.method.includes('email') &&
+                                                    renderEmailAddress(alertObj)}
+                                            </Typography.Body>
+                                        </div>
+                                        <div>
+                                            <PenSVG
+                                                className="mouse-pointer"
+                                                width={17}
+                                                height={17}
+                                                onClick={() => {
+                                                    handleNotificationChange(
+                                                        'submitted',
+                                                        !alertObj?.notification?.submitted
+                                                    );
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <Brick sizeInRem={1} />
+
+                                    <div>
+                                        <Typography.Subheader
+                                            size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
+                                        <Brick sizeInRem={0.25} />
+                                        <Typography.Body size={Typography.Sizes.md} className="text-muted">
+                                            {renderNotification(alertObj)}
+                                        </Typography.Body>
+                                    </div>
+                                </>
                             ) : (
-                                // <div className="d-flex justify-content-between align-items-center">
-                                //     <div>
-                                //         <Typography.Subheader
-                                //             size={Typography.Sizes.md}>{`Building`}</Typography.Subheader>
-                                //         <Brick sizeInRem={0.25} />
-                                //         <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                //             {renderTargetedBuildingsList(alertObj, originalBuildingsList)}
-                                //         </Typography.Body>
-                                //     </div>
-                                //     <div>
-                                //         <PenSVG
-                                //             className="mouse-pointer"
-                                //             width={17}
-                                //             height={17}
-                                //             onClick={() => {
-                                //                 handleTargetChange('submitted', !alertObj?.target?.submitted);
-                                //             }}
-                                //         />
-                                //     </div>
-                                // </div>
                                 <>
                                     <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
                                         <div
@@ -173,6 +241,7 @@ const NotificationMethod = (props) => {
                                                         name="select"
                                                         options={usersList}
                                                         placeholder="Choose User"
+                                                        isSearchable={usersList && usersList.length > 5}
                                                         onChange={(selectedUsersList) => {
                                                             handleNotificationChange(
                                                                 'selectedUserId',
@@ -237,7 +306,7 @@ const NotificationMethod = (props) => {
                                                         type="number"
                                                         className="w-25"
                                                         inputClassName="custom-input-field"
-                                                        value={alertObj?.condition?.sendAt}
+                                                        value={alertObj?.notification?.sendAt}
                                                         onChange={(e) => {
                                                             handleNotificationChange('sendAt', e.target.value);
                                                         }}
@@ -298,12 +367,12 @@ const NotificationMethod = (props) => {
                                                         size={Button.Sizes.md}
                                                         type={Button.Type.primary}
                                                         onClick={() => {
-                                                            handleAddNotification(alertObj);
-                                                            // handleNotificationChange(
-                                                            //     'submitted',
-                                                            //     !alertObj?.notification?.submitted
-                                                            // );
+                                                            handleNotificationChange(
+                                                                'submitted',
+                                                                !alertObj?.notification?.submitted
+                                                            );
                                                         }}
+                                                        disabled={!validateNotification(alertObj)}
                                                     />
                                                 </div>
                                             </div>
