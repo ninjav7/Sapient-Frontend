@@ -255,9 +255,9 @@ const Target = (props) => {
                                                 options={buildingsList}
                                                 onChange={setSelectedBldgsForEquip}
                                                 onMenuClose={() => {
-                                                    handleTargetChange('buildingIDs', selectedBldgsForEquip);
+                                                    handleTargetChange('lists', selectedBldgsForEquip);
                                                 }}
-                                                value={alertObj?.target?.buildingIDs ?? []}
+                                                value={alertObj?.target?.lists ?? []}
                                                 menuPlacement="auto"
                                             />
                                         </div>
@@ -280,9 +280,9 @@ const Target = (props) => {
                                                         isSearchable={equipmentTypeList && equipmentTypeList.length > 5}
                                                         options={equipmentTypeList}
                                                         onChange={(selectedBldgTypeList) => {
-                                                            handleTargetChange('lists', selectedBldgTypeList);
+                                                            handleTargetChange('typesList', selectedBldgTypeList);
                                                         }}
-                                                        value={alertObj?.target?.lists ?? []}
+                                                        value={alertObj?.target?.typesList ?? []}
                                                         menuPlacement="auto"
                                                     />
                                                 </div>

@@ -138,7 +138,7 @@ const RemoveAlert = () => {
 };
 
 const ConfigureAlerts = (props) => {
-    const { alertObj = {}, updateAlertWithBuildingData, setTypeSelectedLabel } = props;
+    const { alertObj = {}, updateAlertWithTargetTypeData, setTypeSelectedLabel } = props;
 
     const [isFetchingData, setFetching] = useState(false);
 
@@ -245,7 +245,7 @@ const ConfigureAlerts = (props) => {
                             setBuildingsList(newMappedBldgsData);
 
                             if (alertObj?.target?.typesList.length === 0 && alertObj?.target?.lists.length === 0) {
-                                updateAlertWithBuildingData(newMappedBuildingTypesData, newMappedBldgsData);
+                                updateAlertWithTargetTypeData(newMappedBuildingTypesData, newMappedBldgsData);
                             } else {
                                 const newFilteredBldgsList = filteredBuildingsList(
                                     alertObj?.target?.typesList,
@@ -292,6 +292,8 @@ const ConfigureAlerts = (props) => {
                                 value: el?.equipment_id,
                             }));
                             setEquipmentTypeList(newMappedEquipTypesData);
+
+                            updateAlertWithTargetTypeData(newMappedEquipTypesData, newMappedBldgsData);
                         }
                     }
                 })
@@ -390,10 +392,10 @@ const AddAlerts = () => {
         setAlertObj(obj);
     };
 
-    const updateAlertWithBuildingData = (bldg_type_list, bldgs_list) => {
+    const updateAlertWithTargetTypeData = (types_list, list) => {
         let obj = Object.assign({}, alertObj);
-        obj.target.typesList = bldg_type_list ?? [];
-        obj.target.lists = bldgs_list ?? [];
+        obj.target.typesList = types_list ?? [];
+        obj.target.lists = list ?? [];
         setAlertObj(obj);
     };
 
@@ -524,7 +526,7 @@ const AddAlerts = () => {
                         alertObj={alertObj}
                         handleTargetChange={handleTargetChange}
                         handleConditionChange={handleConditionChange}
-                        updateAlertWithBuildingData={updateAlertWithBuildingData}
+                        updateAlertWithTargetTypeData={updateAlertWithTargetTypeData}
                         setTypeSelectedLabel={setTypeSelectedLabel}
                     />
                 )}

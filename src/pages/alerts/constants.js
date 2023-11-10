@@ -22,9 +22,9 @@ export const defaultNotificationObj = {
 export const defaultAlertObj = {
     target: {
         type: '',
-        typesList: [], // building_type, equip_type
-        lists: [], // buildings_list, equip_lists
-        buildindsList: [],
+        typesList: [], // building_type, equipment_type
+        lists: [], // buildings_list, equipments_list
+        buildingsList: [],
         buildingIDs: [],
         submitted: false,
     },
