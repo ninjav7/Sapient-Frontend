@@ -22,7 +22,7 @@ const EditSensorModal = (props) => {
 
     const handleChange = (key, value, sensorsList) => {
         let obj = Object.assign({}, ctSensorObj);
-        let errorObj = Object.assign({}, errorObj);
+        let newErrorObj = Object.assign({}, errorObj);
 
         if (key === '_id') {
             let newObj = sensorsList.find((el) => el?._id === value);
@@ -35,7 +35,7 @@ const EditSensorModal = (props) => {
 
         obj[key] = value;
         setCTSensorObj(obj);
-        setErrorObj(errorObj);
+        setErrorObj(newErrorObj);
     };
 
     const handleCustomValueChange = (ct_sensors) => {
