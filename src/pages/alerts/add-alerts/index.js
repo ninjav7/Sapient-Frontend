@@ -154,6 +154,8 @@ const ConfigureAlerts = (props) => {
     const [buildingTypeList, setBuildingTypeList] = useState([]);
 
     const [equipmentsList, setEquipmentsList] = useState([]);
+    const [originalEquipmentsList, setOriginalEquipmentsList] = useState([]);
+
     const [equipmentTypeList, setEquipmentTypeList] = useState([]);
 
     const filteredBuildingsList = (newBldgTypeList = [], originalBldgList) => {
@@ -180,39 +182,54 @@ const ConfigureAlerts = (props) => {
         return label;
     };
 
+    const fetchAllEquipmentsList = (bldgList = [], equipTypeList = []) => {
+        if (!bldgList || bldgList.length === 0) return;
+
+        // console.log('SSR equipTypeList => ', equipTypeList);
+
+        let promisesList = [];
+
+        bldgList.forEach((el) => {
+            if (el?.value) promisesList.push(getEquipmentsList(`?building_id=${el?.value}`));
+        });
+
+        Promise.all(promisesList)
+            .then((res) => {
+                const response = res;
+                let newMappedEquipmentList = [];
+
+                response.forEach((record, index) => {
+                    if (record?.status === 200) {
+                        const responseData = record?.data?.data;
+                        if (responseData) {
+                            const equipmentsList = responseData.map((el) => ({
+                                label: el?.equipments_name,
+                                value: el?.equipments_id,
+                                building_id: buildingsList[index]?.value,
+                                equipments_type_id: el?.equipments_type_id,
+                            }));
+                            newMappedEquipmentList = [...newMappedEquipmentList, ...equipmentsList];
+                        }
+                    }
+                });
+
+                // if(equipTypeList.length !== 0){
+
+                // }
+
+                if (newMappedEquipmentList) {
+                    setEquipmentsList(newMappedEquipmentList);
+                    setOriginalEquipmentsList(newMappedEquipmentList);
+                    handleTargetChange('lists', newMappedEquipmentList);
+                }
+            })
+            .catch(() => {})
+            .finally(() => {});
+    };
+
     useEffect(() => {
         if (buildingsList.length !== 0 && alertObj?.target?.type === 'equipment') {
-            let promisesList = [];
-
-            buildingsList.forEach((el) => {
-                if (el?.value) promisesList.push(getEquipmentsList(`?building_id=${el?.value}`));
-            });
-
-            Promise.all(promisesList)
-                .then((res) => {
-                    const response = res;
-                    let newMappedEquipmentList = [];
-
-                    response.forEach((record, index) => {
-                        if (record?.status === 200) {
-                            const responseData = record?.data?.data;
-                            if (responseData) {
-                                const equipmentsList = responseData.map((el) => ({
-                                    label: `${el?.equipments_name} [${buildingsList[index]?.label}]`,
-                                    value: el?.equipments_id,
-                                    building_id: buildingsList[index]?.value,
-                                }));
-                                newMappedEquipmentList = [...newMappedEquipmentList, ...equipmentsList];
-                            }
-                        }
-                    });
-                    if (newMappedEquipmentList) {
-                        setEquipmentsList(newMappedEquipmentList);
-                        handleTargetChange('lists', newMappedEquipmentList);
-                    }
-                })
-                .catch(() => {})
-                .finally(() => {});
+            fetchAllEquipmentsList(buildingsList);
         }
     }, [buildingsList]);
 
@@ -324,9 +341,13 @@ const ConfigureAlerts = (props) => {
                         buildingTypeList={buildingTypeList}
                         equipmentTypeList={equipmentTypeList}
                         equipmentsList={equipmentsList}
+                        setEquipmentsList={setEquipmentsList}
+                        setOriginalEquipmentsList={setOriginalEquipmentsList}
+                        originalEquipmentsList={originalEquipmentsList}
                         renderTargetedBuildingsList={renderTargetedBuildingsList}
                         filteredBuildingsList={filteredBuildingsList}
                         setBuildingsList={setBuildingsList}
+                        fetchAllEquipmentsList={fetchAllEquipmentsList}
                         {...props}
                     />
                 </Col>
