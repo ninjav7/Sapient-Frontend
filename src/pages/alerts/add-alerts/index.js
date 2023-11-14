@@ -390,6 +390,12 @@ const AddAlerts = () => {
         setAlertObj(obj);
     };
 
+    const handleRecurrenceChange = (key, value) => {
+        let obj = Object.assign({}, alertObj);
+        obj.recurrence[key] = value;
+        setAlertObj(obj);
+    };
+
     const handleConditionChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
 
@@ -562,6 +568,7 @@ const AddAlerts = () => {
                     <ConfigureAlerts
                         alertObj={alertObj}
                         handleTargetChange={handleTargetChange}
+                        handleRecurrenceChange={handleRecurrenceChange}
                         handleConditionChange={handleConditionChange}
                         updateAlertForBuildingTypeData={updateAlertForBuildingTypeData}
                         updateAlertForEquipmentTypeData={updateAlertForEquipmentTypeData}

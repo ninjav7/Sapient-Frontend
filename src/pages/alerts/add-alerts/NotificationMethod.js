@@ -274,106 +274,31 @@ const NotificationMethod = (props) => {
                                                 </div>
                                             )}
 
-                                            <Brick sizeInRem={1.5} />
+                                            <Brick sizeInRem={0.5} />
 
-                                            <Typography.Subheader
-                                                size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
-
-                                            <Brick sizeInRem={1} />
-
-                                            {/* <div className="d-flex align-items-center" style={{ gap: '1.25rem' }}>
-                                                <Radio
-                                                    name="send-immediately"
-                                                    label="Send immediately"
-                                                    checked={alertObj?.notification?.sendImmediate}
-                                                    onClick={() => {
-                                                        handleNotificationChange('sendImmediate', true);
-                                                    }}
+                                            <div
+                                                className="d-flex justify-content-end align-items-center w-100"
+                                                style={{
+                                                    gap: '0.5rem',
+                                                }}>
+                                                <Button
+                                                    label={'Cancel'}
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.secondaryGrey}
+                                                    onClick={() => handleNotificationChange('method', ['none'])}
                                                 />
-
-                                                <Radio
-                                                    name="send-with-conditions"
-                                                    label="Send if conditions lasts at least"
-                                                    checked={!alertObj?.notification?.sendImmediate}
+                                                <Button
+                                                    label={'Add Notification'}
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.primary}
                                                     onClick={() => {
-                                                        handleNotificationChange('sendImmediate', false);
+                                                        handleNotificationChange(
+                                                            'submitted',
+                                                            !alertObj?.notification?.submitted
+                                                        );
                                                     }}
+                                                    disabled={!validateNotification(alertObj)}
                                                 />
-
-                                                <div style={{ width: '40%' }}>
-                                                    <Inputs
-                                                        type="number"
-                                                        className="w-25"
-                                                        inputClassName="custom-input-field"
-                                                        value={alertObj?.notification?.sendAt}
-                                                        onChange={(e) => {
-                                                            handleNotificationChange('sendAt', e.target.value);
-                                                        }}
-                                                        elementEnd={<MinutesSVG />}
-                                                        disabled={alertObj?.notification?.sendImmediate}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <Brick sizeInRem={1} /> */}
-
-                                            <div className="d-flex justify-content-between align-items-center">
-                                                <div
-                                                    className="d-flex align-items-center w-100"
-                                                    style={{ gap: '1.25rem' }}>
-                                                    <Checkbox
-                                                        label="Resend alert after"
-                                                        type="checkbox"
-                                                        id="resend-alert"
-                                                        name="resend-alert"
-                                                        size="md"
-                                                        checked={alertObj?.notification?.resendAlert}
-                                                        value={alertObj?.notification?.resendAlert}
-                                                        onClick={(e) => {
-                                                            handleNotificationChange(
-                                                                'resendAlert',
-                                                                e.target.value === 'false' ? true : false
-                                                            );
-                                                        }}
-                                                    />
-                                                    <div style={{ width: '40%' }}>
-                                                        <Inputs
-                                                            type="number"
-                                                            className="w-50"
-                                                            inputClassName="custom-input-field"
-                                                            value={alertObj?.notification?.resentAt}
-                                                            onChange={(e) => {
-                                                                handleNotificationChange('resentAt', e.target.value);
-                                                            }}
-                                                            elementEnd={<MinutesSVG />}
-                                                            disabled={!alertObj?.notification?.resendAlert}
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div
-                                                    className="d-flex justify-content-end align-items-center w-100"
-                                                    style={{
-                                                        gap: '0.5rem',
-                                                    }}>
-                                                    <Button
-                                                        label={'Cancel'}
-                                                        size={Button.Sizes.md}
-                                                        type={Button.Type.secondaryGrey}
-                                                        onClick={() => handleNotificationChange('method', ['none'])}
-                                                    />
-                                                    <Button
-                                                        label={'Add Notification'}
-                                                        size={Button.Sizes.md}
-                                                        type={Button.Type.primary}
-                                                        onClick={() => {
-                                                            handleNotificationChange(
-                                                                'submitted',
-                                                                !alertObj?.notification?.submitted
-                                                            );
-                                                        }}
-                                                        disabled={!validateNotification(alertObj)}
-                                                    />
-                                                </div>
                                             </div>
                                         </>
                                     )}

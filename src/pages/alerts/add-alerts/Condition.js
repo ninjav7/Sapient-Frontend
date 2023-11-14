@@ -9,6 +9,7 @@ import Inputs from '../../../sharedComponents/form/input/Input';
 import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
 import { ReactComponent as KWH_SVG } from '../../../assets/icon/kwh.svg';
+import { ReactComponent as MinutesSVG } from '../../../assets/icon/minutes.svg';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 
 import {
@@ -20,6 +21,8 @@ import {
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
+import Radio from '../../../sharedComponents/form/radio/Radio';
+import { Button } from '../../../sharedComponents/button';
 
 const ConditionToolTip = () => {
     return (
@@ -36,7 +39,7 @@ const ConditionToolTip = () => {
 };
 
 const Condition = (props) => {
-    const { alertObj = {}, handleConditionChange } = props;
+    const { alertObj = {}, handleConditionChange, handleRecurrenceChange } = props;
 
     const targetType = alertObj?.target?.type;
     const conditionType = alertObj?.condition?.type;
@@ -196,7 +199,6 @@ const Condition = (props) => {
                                 onClick={(e) => {
                                     const value = e.target.value;
                                     if (value === 'false') handleConditionChange('threshold75', true);
-
                                     if (value === 'true') handleConditionChange('threshold75', false);
                                 }}
                             />
@@ -218,6 +220,90 @@ const Condition = (props) => {
                                 if (value === 'true') handleConditionChange('threshold90', false);
                             }}
                         />
+                    )}
+
+                    {alertObj?.target?.type && alertObj?.condition?.type && (
+                        <>
+                            <Brick sizeInRem={0.5} />
+                            <hr />
+                            <Brick sizeInRem={0.5} />
+                        </>
+                    )}
+
+                    {alertObj?.target?.type && alertObj?.condition?.type && (
+                        <>
+                            <Typography.Subheader size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
+
+                            <Brick sizeInRem={1.25} />
+
+                            <div className="d-flex justify-content-between align-items-center">
+                                <div className="d-flex align-items-center w-100" style={{ gap: '1rem' }}>
+                                    <Checkbox
+                                        label="Trigger if condition lasts at least"
+                                        type="checkbox"
+                                        id="trigger-alert"
+                                        name="trigger-alert"
+                                        size="md"
+                                        checked={alertObj?.recurrence?.triggerAlert}
+                                        value={alertObj?.recurrence?.triggerAlert}
+                                        onClick={(e) => {
+                                            handleRecurrenceChange(
+                                                'triggerAlert',
+                                                e.target.value === 'false' ? true : false
+                                            );
+                                        }}
+                                    />
+                                    <div style={{ width: '40%' }}>
+                                        <Inputs
+                                            type="number"
+                                            className="w-50"
+                                            inputClassName="custom-input-field"
+                                            value={alertObj?.recurrence?.triggerAt}
+                                            onChange={(e) => {
+                                                handleRecurrenceChange('triggerAt', e.target.value);
+                                            }}
+                                            elementEnd={<MinutesSVG />}
+                                            disabled={!alertObj?.recurrence?.triggerAlert}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <Brick sizeInRem={1} />
+
+                            <div className="d-flex justify-content-between align-items-center">
+                                <div className="d-flex align-items-center w-100" style={{ gap: '1rem' }}>
+                                    <Checkbox
+                                        label="Resend alert after"
+                                        type="checkbox"
+                                        id="resend-alert"
+                                        name="resend-alert"
+                                        size="md"
+                                        checked={alertObj?.recurrence?.resendAlert}
+                                        value={alertObj?.recurrence?.resendAlert}
+                                        onClick={(e) => {
+                                            handleRecurrenceChange(
+                                                'resendAlert',
+                                                e.target.value === 'false' ? true : false
+                                            );
+                                        }}
+                                    />
+                                    <div style={{ width: '40%' }}>
+                                        <Inputs
+                                            type="number"
+                                            className="w-50"
+                                            inputClassName="custom-input-field"
+                                            value={alertObj?.recurrence?.resendAt}
+                                            onChange={(e) => {
+                                                handleRecurrenceChange('resendAt', e.target.value);
+                                            }}
+                                            elementEnd={<MinutesSVG />}
+                                            disabled={!alertObj?.recurrence?.resendAlert}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </>
                     )}
                 </div>
             </CardBody>

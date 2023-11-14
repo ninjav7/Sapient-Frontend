@@ -8,6 +8,13 @@ export const defaultConditionObj = {
     threshold90: false,
 };
 
+export const defaultRecurrenceObj = {
+    triggerAlert: false,
+    triggerAt: '0',
+    resendAlert: false,
+    resendAt: '0',
+};
+
 export const defaultNotificationObj = {
     method: ['none'],
     selectedUserId: [],
@@ -22,11 +29,12 @@ export const defaultNotificationObj = {
 export const defaultAlertObj = {
     target: {
         type: '',
-        typesList: [], // building_type, equipment_type
-        lists: [], // buildings_list, equipments_list
+        typesList: [],
+        lists: [],
         buildingIDs: [],
         submitted: false,
     },
+    recurrence: defaultRecurrenceObj,
     condition: {
         ...defaultConditionObj,
         submitted: false,
