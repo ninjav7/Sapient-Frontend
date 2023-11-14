@@ -20,12 +20,12 @@ const EditSensorModal = (props) => {
     const [originalCTSensorObj, setOriginalCTSensorObj] = useState(null);
     const [ctSensorsList, setCTSensorsList] = useState([]);
 
-    const handleChange = (key, value) => {
+    const handleChange = (key, value, sensorsList) => {
         let obj = Object.assign({}, ctSensorObj);
-        let errorObj = Object.assign({}, errorObj);
+        let newErrorObj = Object.assign({}, errorObj);
 
         if (key === '_id') {
-            let newObj = ctSensorsList.find((el) => el?._id === value);
+            let newObj = sensorsList.find((el) => el?._id === value);
             obj = newObj;
             if (newObj?.model === 'Custom') {
                 obj.rated_amps = 0;
@@ -35,7 +35,7 @@ const EditSensorModal = (props) => {
 
         obj[key] = value;
         setCTSensorObj(obj);
-        setErrorObj(errorObj);
+        setErrorObj(newErrorObj);
     };
 
     const handleCustomValueChange = (ct_sensors) => {
@@ -161,8 +161,8 @@ const EditSensorModal = (props) => {
                         placeholder="Select Sensor Model"
                         options={ctSensorsList}
                         currentValue={ctSensorsList.find((option) => option?.value === ctSensorObj?._id)}
-                        onChange={(e) => handleChange('_id', e.value)}
-                        isSearchable={true}
+                        onChange={(e) => handleChange('_id', e.value, ctSensorsList)}
+                        isSearchable={false}
                     />
                 </div>
 
