@@ -255,9 +255,9 @@ const Target = (props) => {
                                                 options={buildingsList}
                                                 onChange={setSelectedBldgsForEquip}
                                                 onMenuClose={() => {
-                                                    handleTargetChange('lists', selectedBldgsForEquip);
+                                                    handleTargetChange('buildingIDs', selectedBldgsForEquip);
                                                 }}
-                                                value={alertObj?.target?.lists ?? []}
+                                                value={alertObj?.target?.buildingIDs ?? []}
                                                 menuPlacement="auto"
                                             />
                                         </div>
