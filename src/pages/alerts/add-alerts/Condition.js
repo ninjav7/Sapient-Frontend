@@ -138,7 +138,7 @@ const Condition = (props) => {
                                 <Select
                                     id="condition_lvl"
                                     name="select"
-                                    isSearchable={true}
+                                    isSearchable={false}
                                     options={conditionLevelsList}
                                     className="w-100"
                                     onChange={(e) => {
