@@ -281,7 +281,7 @@ const NotificationMethod = (props) => {
 
                                             <Brick sizeInRem={1} />
 
-                                            <div className="d-flex align-items-center" style={{ gap: '1.25rem' }}>
+                                            {/* <div className="d-flex align-items-center" style={{ gap: '1.25rem' }}>
                                                 <Radio
                                                     name="send-immediately"
                                                     label="Send immediately"
@@ -315,7 +315,7 @@ const NotificationMethod = (props) => {
                                                 </div>
                                             </div>
 
-                                            <Brick sizeInRem={1} />
+                                            <Brick sizeInRem={1} /> */}
 
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <div

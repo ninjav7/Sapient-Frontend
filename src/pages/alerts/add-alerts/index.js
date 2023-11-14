@@ -138,7 +138,13 @@ const RemoveAlert = () => {
 };
 
 const ConfigureAlerts = (props) => {
-    const { alertObj = {}, updateAlertWithBuildingData, setTypeSelectedLabel } = props;
+    const {
+        alertObj = {},
+        handleTargetChange,
+        updateAlertForBuildingTypeData,
+        updateAlertForEquipmentTypeData,
+        setTypeSelectedLabel,
+    } = props;
 
     const [isFetchingData, setFetching] = useState(false);
 
@@ -148,6 +154,8 @@ const ConfigureAlerts = (props) => {
     const [buildingTypeList, setBuildingTypeList] = useState([]);
 
     const [equipmentsList, setEquipmentsList] = useState([]);
+    const [originalEquipmentsList, setOriginalEquipmentsList] = useState([]);
+
     const [equipmentTypeList, setEquipmentTypeList] = useState([]);
 
     const filteredBuildingsList = (newBldgTypeList = [], originalBldgList) => {
@@ -174,36 +182,54 @@ const ConfigureAlerts = (props) => {
         return label;
     };
 
+    const fetchAllEquipmentsList = (bldgList = [], equipTypeList = []) => {
+        if (!bldgList || bldgList.length === 0) return;
+
+        // console.log('SSR equipTypeList => ', equipTypeList);
+
+        let promisesList = [];
+
+        bldgList.forEach((el) => {
+            if (el?.value) promisesList.push(getEquipmentsList(`?building_id=${el?.value}`));
+        });
+
+        Promise.all(promisesList)
+            .then((res) => {
+                const response = res;
+                let newMappedEquipmentList = [];
+
+                response.forEach((record, index) => {
+                    if (record?.status === 200) {
+                        const responseData = record?.data?.data;
+                        if (responseData) {
+                            const equipmentsList = responseData.map((el) => ({
+                                label: el?.equipments_name,
+                                value: el?.equipments_id,
+                                building_id: buildingsList[index]?.value,
+                                equipments_type_id: el?.equipments_type_id,
+                            }));
+                            newMappedEquipmentList = [...newMappedEquipmentList, ...equipmentsList];
+                        }
+                    }
+                });
+
+                // if(equipTypeList.length !== 0){
+
+                // }
+
+                if (newMappedEquipmentList) {
+                    setEquipmentsList(newMappedEquipmentList);
+                    setOriginalEquipmentsList(newMappedEquipmentList);
+                    handleTargetChange('lists', newMappedEquipmentList);
+                }
+            })
+            .catch(() => {})
+            .finally(() => {});
+    };
+
     useEffect(() => {
         if (buildingsList.length !== 0 && alertObj?.target?.type === 'equipment') {
-            let promisesList = [];
-
-            buildingsList.forEach((el) => {
-                if (el?.value) promisesList.push(getEquipmentsList(`?building_id=${el?.value}`));
-            });
-
-            Promise.all(promisesList)
-                .then((res) => {
-                    const response = res;
-                    let newMappedEquipmentList = [];
-
-                    response.forEach((record, index) => {
-                        if (record?.status === 200) {
-                            const responseData = record?.data?.data;
-                            if (responseData) {
-                                const equipmentsList = responseData.map((el) => ({
-                                    label: `${el?.equipments_name} [${buildingsList[index]?.label}]`,
-                                    value: el?.equipments_id,
-                                    building_id: buildingsList[index]?.value,
-                                }));
-                                newMappedEquipmentList = [...newMappedEquipmentList, ...equipmentsList];
-                            }
-                        }
-                    });
-                    newMappedEquipmentList && setEquipmentsList(newMappedEquipmentList);
-                })
-                .catch(() => {})
-                .finally(() => {});
+            fetchAllEquipmentsList(buildingsList);
         }
     }, [buildingsList]);
 
@@ -245,7 +271,7 @@ const ConfigureAlerts = (props) => {
                             setBuildingsList(newMappedBldgsData);
 
                             if (alertObj?.target?.typesList.length === 0 && alertObj?.target?.lists.length === 0) {
-                                updateAlertWithBuildingData(newMappedBuildingTypesData, newMappedBldgsData);
+                                updateAlertForBuildingTypeData(newMappedBuildingTypesData, newMappedBldgsData);
                             } else {
                                 const newFilteredBldgsList = filteredBuildingsList(
                                     alertObj?.target?.typesList,
@@ -292,6 +318,8 @@ const ConfigureAlerts = (props) => {
                                 value: el?.equipment_id,
                             }));
                             setEquipmentTypeList(newMappedEquipTypesData);
+
+                            updateAlertForEquipmentTypeData(newMappedEquipTypesData, newMappedBldgsData);
                         }
                     }
                 })
@@ -313,9 +341,13 @@ const ConfigureAlerts = (props) => {
                         buildingTypeList={buildingTypeList}
                         equipmentTypeList={equipmentTypeList}
                         equipmentsList={equipmentsList}
+                        setEquipmentsList={setEquipmentsList}
+                        setOriginalEquipmentsList={setOriginalEquipmentsList}
+                        originalEquipmentsList={originalEquipmentsList}
                         renderTargetedBuildingsList={renderTargetedBuildingsList}
                         filteredBuildingsList={filteredBuildingsList}
                         setBuildingsList={setBuildingsList}
+                        fetchAllEquipmentsList={fetchAllEquipmentsList}
                         {...props}
                     />
                 </Col>
@@ -390,10 +422,17 @@ const AddAlerts = () => {
         setAlertObj(obj);
     };
 
-    const updateAlertWithBuildingData = (bldg_type_list, bldgs_list) => {
+    const updateAlertForBuildingTypeData = (types_list, list) => {
         let obj = Object.assign({}, alertObj);
-        obj.target.typesList = bldg_type_list ?? [];
-        obj.target.lists = bldgs_list ?? [];
+        obj.target.typesList = types_list ?? [];
+        obj.target.lists = list ?? [];
+        setAlertObj(obj);
+    };
+
+    const updateAlertForEquipmentTypeData = (types_list, bldgs_list) => {
+        let obj = Object.assign({}, alertObj);
+        obj.target.typesList = types_list ?? [];
+        obj.target.buildingIDs = bldgs_list ?? [];
         setAlertObj(obj);
     };
 
@@ -524,7 +563,8 @@ const AddAlerts = () => {
                         alertObj={alertObj}
                         handleTargetChange={handleTargetChange}
                         handleConditionChange={handleConditionChange}
-                        updateAlertWithBuildingData={updateAlertWithBuildingData}
+                        updateAlertForBuildingTypeData={updateAlertForBuildingTypeData}
+                        updateAlertForEquipmentTypeData={updateAlertForEquipmentTypeData}
                         setTypeSelectedLabel={setTypeSelectedLabel}
                     />
                 )}

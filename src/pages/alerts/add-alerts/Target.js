@@ -39,13 +39,30 @@ const Target = (props) => {
         buildingsList = [],
         equipmentTypeList = [],
         equipmentsList = [],
-        originalBuildingsList,
+        setEquipmentsList,
+        setOriginalEquipmentsList,
+        originalBuildingsList = [],
+        originalEquipmentsList = [],
         buildingTypeList,
         filteredBuildingsList,
         setBuildingsList,
+        fetchAllEquipmentsList,
     } = props;
 
     const [selectedBldgsForEquip, setSelectedBldgsForEquip] = useState([]);
+
+    const handleEquipmentListChange = (originalEquipsList, equipTypeList, selectedBldgslist) => {
+        const newMappedEquipList = [];
+
+        originalEquipsList.forEach((el) => {
+            const bldgExist = selectedBldgslist.some((item) => item?.value === el?.building_id);
+            const equipTypeExist = equipTypeList.some((item) => item?.value === el?.equipments_type_id);
+            if (bldgExist && equipTypeExist) newMappedEquipList.push(el);
+        });
+
+        handleTargetChange('lists', newMappedEquipList);
+        setEquipmentsList(newMappedEquipList);
+    };
 
     useEffect(() => {
         if (alertObj?.target?.type !== 'equipment' && selectedBldgsForEquip.length !== 0) {
@@ -251,11 +268,21 @@ const Target = (props) => {
                                                 placeholder="Select Building"
                                                 name="select"
                                                 className="w-100"
-                                                isSearchable={buildingsList && buildingsList.length > 5}
-                                                options={buildingsList}
+                                                isSearchable={originalBuildingsList && originalBuildingsList.length > 5}
+                                                options={originalBuildingsList}
                                                 onChange={setSelectedBldgsForEquip}
                                                 onMenuClose={() => {
                                                     handleTargetChange('buildingIDs', selectedBldgsForEquip);
+                                                    if (selectedBldgsForEquip.length === 0) {
+                                                        setEquipmentsList([]);
+                                                        setOriginalEquipmentsList([]);
+                                                        handleTargetChange('lists', []);
+                                                    } else {
+                                                        fetchAllEquipmentsList(
+                                                            selectedBldgsForEquip,
+                                                            alertObj?.target?.typesList
+                                                        );
+                                                    }
                                                 }}
                                                 value={alertObj?.target?.buildingIDs ?? []}
                                                 menuPlacement="auto"
@@ -279,10 +306,15 @@ const Target = (props) => {
                                                         className="w-100"
                                                         isSearchable={equipmentTypeList && equipmentTypeList.length > 5}
                                                         options={equipmentTypeList}
-                                                        onChange={(selectedBldgTypeList) => {
-                                                            handleTargetChange('lists', selectedBldgTypeList);
+                                                        onChange={(value) => {
+                                                            handleTargetChange('typesList', value);
+                                                            handleEquipmentListChange(
+                                                                originalEquipmentsList,
+                                                                value,
+                                                                alertObj?.target?.buildingIDs
+                                                            );
                                                         }}
-                                                        value={alertObj?.target?.lists ?? []}
+                                                        value={alertObj?.target?.typesList ?? []}
                                                         menuPlacement="auto"
                                                     />
                                                 </div>
@@ -293,13 +325,13 @@ const Target = (props) => {
                                                     <Brick sizeInRem={0.25} />
                                                     <Select.Multi
                                                         id="equipTypeSelectList"
-                                                        placeholder="Select Equipment Type"
+                                                        placeholder="Select Equipment"
                                                         name="select"
                                                         className="w-100"
                                                         isSearchable={equipmentsList && equipmentsList.length > 5}
                                                         options={equipmentsList}
-                                                        onChange={(selectedBldgTypeList) => {
-                                                            handleTargetChange('lists', selectedBldgTypeList);
+                                                        onChange={(value) => {
+                                                            handleTargetChange('lists', value);
                                                         }}
                                                         value={alertObj?.target?.lists ?? []}
                                                         menuPlacement="auto"

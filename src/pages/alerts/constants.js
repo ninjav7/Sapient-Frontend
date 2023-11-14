@@ -1,3 +1,42 @@
+export const defaultConditionObj = {
+    type: '',
+    level: 'above',
+    filterType: 'number',
+    thresholdValue: '',
+    threshold50: false,
+    threshold75: false,
+    threshold90: false,
+};
+
+export const defaultNotificationObj = {
+    method: ['none'],
+    selectedUserId: [],
+    selectedUserEmailId: '',
+    sendImmediate: true,
+    sendAt: '',
+    resendAlert: false,
+    resentAt: '',
+};
+
+// Main Alert Obj
+export const defaultAlertObj = {
+    target: {
+        type: '',
+        typesList: [], // building_type, equipment_type
+        lists: [], // buildings_list, equipments_list
+        buildingIDs: [],
+        submitted: false,
+    },
+    condition: {
+        ...defaultConditionObj,
+        submitted: false,
+    },
+    notification: {
+        ...defaultNotificationObj,
+        submitted: false,
+    },
+};
+
 // Building Alert Conditions
 export const bldgAlertConditions = [
     {
@@ -45,44 +84,6 @@ export const equipAlertConditions = [
         value: 'shortcycling',
     },
 ];
-
-export const defaultConditionObj = {
-    type: '',
-    level: 'above',
-    filterType: 'number',
-    thresholdValue: '',
-    threshold50: false,
-    threshold75: false,
-    threshold90: false,
-};
-
-export const defaultNotificationObj = {
-    method: ['none'],
-    selectedUserId: [],
-    selectedUserEmailId: '',
-    sendImmediate: true,
-    sendAt: '',
-    resendAlert: false,
-    resentAt: '',
-};
-
-export const defaultAlertObj = {
-    target: {
-        type: '',
-        typesList: [],
-        lists: [],
-        buildingIDs: [],
-        submitted: false,
-    },
-    condition: {
-        ...defaultConditionObj,
-        submitted: false,
-    },
-    notification: {
-        ...defaultNotificationObj,
-        submitted: false,
-    },
-};
 
 export const conditionLevelsList = [
     {
