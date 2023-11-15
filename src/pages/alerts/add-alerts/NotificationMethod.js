@@ -60,21 +60,6 @@ const NotificationMethod = (props) => {
         return value;
     };
 
-    const renderNotification = (alert_obj) => {
-        const notify = alert_obj?.notification;
-        let label = '';
-
-        if (notify?.sendImmediate) label = `Send immediately`;
-        if (!notify?.sendImmediate) {
-            label = `Send if conditions lasts at least ${notify?.sendAt === '' ? 0 : notify?.sendAt} min`;
-        }
-        if (notify?.resendAlert) {
-            label += `, resend alert after ${notify?.resentAt === '' ? 0 : notify?.resentAt} min`;
-        }
-
-        return label;
-    };
-
     const renderUsers = (alert_obj) => {
         const notify = alert_obj?.notification;
 
@@ -159,17 +144,6 @@ const NotificationMethod = (props) => {
                                                 }}
                                             />
                                         </div>
-                                    </div>
-
-                                    <Brick sizeInRem={1} />
-
-                                    <div>
-                                        <Typography.Subheader
-                                            size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
-                                        <Brick sizeInRem={0.25} />
-                                        <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                            {renderNotification(alertObj)}
-                                        </Typography.Body>
                                     </div>
                                 </>
                             ) : (

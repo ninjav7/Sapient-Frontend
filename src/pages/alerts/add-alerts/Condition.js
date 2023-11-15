@@ -258,6 +258,7 @@ const Condition = (props) => {
                                             type="number"
                                             className="w-50"
                                             inputClassName="custom-input-field"
+                                            min={0}
                                             value={alertObj?.recurrence?.triggerAt}
                                             onChange={(e) => {
                                                 handleRecurrenceChange('triggerAt', e.target.value);
@@ -293,6 +294,7 @@ const Condition = (props) => {
                                             type="number"
                                             className="w-50"
                                             inputClassName="custom-input-field"
+                                            min={0}
                                             value={alertObj?.recurrence?.resendAt}
                                             onChange={(e) => {
                                                 handleRecurrenceChange('resendAt', e.target.value);

@@ -37,6 +37,17 @@ const AlertPreview = (props) => {
         return `${text}.`;
     };
 
+    const renderNotification = (alert_obj) => {
+        const obj = alert_obj?.recurrence;
+
+        let label = '';
+
+        if (obj?.triggerAlert) label = `Trigger if conditions lasts at least ${obj?.triggerAt} min`;
+        if (obj?.resendAlert) label += `, resend alert after ${obj?.resendAt} min`;
+
+        return label;
+    };
+
     return (
         <Row>
             <Col lg={9}>
@@ -75,7 +86,7 @@ const AlertPreview = (props) => {
                             </Typography.Body>
                         </div>
 
-                        <Brick sizeInRem={1} />
+                        <Brick sizeInRem={0.5} />
 
                         {alertObj?.condition?.type === 'energy_consumption' && (
                             <div className="d-flex" style={{ gap: '1rem' }}>
@@ -119,6 +130,20 @@ const AlertPreview = (props) => {
                                     handleConditionChange('threshold90', e.target.value === 'false' ? true : false);
                                 }}
                             />
+                        )}
+
+                        {(alertObj?.recurrence?.triggerAlert || alertObj?.recurrence?.resendAlert) && (
+                            <>
+                                <Brick sizeInRem={0.75} />
+                                <div>
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
+                                    <Brick sizeInRem={0.25} />
+                                    <Typography.Body size={Typography.Sizes.md} className="text-muted">
+                                        {renderNotification(alertObj)}
+                                    </Typography.Body>
+                                </div>
+                            </>
                         )}
                     </CardBody>
                 </div>
