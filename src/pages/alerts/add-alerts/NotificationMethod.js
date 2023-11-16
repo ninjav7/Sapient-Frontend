@@ -85,6 +85,11 @@ const NotificationMethod = (props) => {
         }
     };
 
+    const renderTriggerNotification = (alert_obj) => {
+        const obj = alert_obj?.recurrence;
+        return `Resend alert after ${obj?.resendAt} min`;
+    };
+
     useEffect(() => {
         if (alertObj?.notification?.method.includes('user')) fetchUsersList();
     }, [alertObj?.notification?.method]);
@@ -144,6 +149,17 @@ const NotificationMethod = (props) => {
                                                 }}
                                             />
                                         </div>
+                                    </div>
+
+                                    <Brick sizeInRem={1} />
+
+                                    <div>
+                                        <Typography.Subheader
+                                            size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
+                                        <Brick sizeInRem={0.25} />
+                                        <Typography.Body size={Typography.Sizes.md} className="text-muted">
+                                            {renderTriggerNotification(alertObj)}
+                                        </Typography.Body>
                                     </div>
                                 </>
                             ) : (
