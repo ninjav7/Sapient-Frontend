@@ -582,6 +582,7 @@ const AddAlerts = () => {
                         typeSelectedLabel={typeSelectedLabel}
                         handleConditionChange={handleConditionChange}
                         handleNotificationChange={handleNotificationChange}
+                        handleRecurrenceChange={handleRecurrenceChange}
                     />
                 )}
             </div>

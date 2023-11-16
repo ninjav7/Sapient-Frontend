@@ -23,7 +23,7 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const NotificationMethod = (props) => {
-    const { alertObj = {}, handleNotificationChange } = props;
+    const { alertObj = {}, handleNotificationChange, handleRecurrenceChange } = props;
 
     const [usersList, setUsersList] = useState([]);
 
@@ -254,7 +254,7 @@ const NotificationMethod = (props) => {
                                                 {`Recurrence`}
                                             </Typography.Subheader>
 
-                                            <Brick sizeInRem={1} />
+                                            <Brick sizeInRem={0.75} />
 
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <div
@@ -266,10 +266,10 @@ const NotificationMethod = (props) => {
                                                         id="resend-alert"
                                                         name="resend-alert"
                                                         size="md"
-                                                        checked={alertObj?.notification?.resendAlert}
-                                                        value={alertObj?.notification?.resendAlert}
+                                                        checked={alertObj?.recurrence?.resendAlert}
+                                                        value={alertObj?.recurrence?.resendAlert}
                                                         onClick={(e) => {
-                                                            handleNotificationChange(
+                                                            handleRecurrenceChange(
                                                                 'resendAlert',
                                                                 e.target.value === 'false' ? true : false
                                                             );
@@ -280,12 +280,12 @@ const NotificationMethod = (props) => {
                                                             type="number"
                                                             className="w-50"
                                                             inputClassName="custom-input-field"
-                                                            value={alertObj?.notification?.resentAt}
+                                                            value={alertObj?.recurrence?.resendAt}
                                                             onChange={(e) => {
-                                                                handleNotificationChange('resentAt', e.target.value);
+                                                                handleRecurrenceChange('resendAt', e.target.value);
                                                             }}
                                                             elementEnd={<MinutesSVG />}
-                                                            disabled={!alertObj?.notification?.resendAlert}
+                                                            disabled={!alertObj?.recurrence?.resendAlert}
                                                         />
                                                     </div>
                                                 </div>

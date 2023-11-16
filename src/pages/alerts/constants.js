@@ -19,10 +19,6 @@ export const defaultNotificationObj = {
     method: ['none'],
     selectedUserId: [],
     selectedUserEmailId: '',
-    sendImmediate: true,
-    sendAt: '',
-    resendAlert: false,
-    resentAt: '',
 };
 
 // Main Alert Obj
