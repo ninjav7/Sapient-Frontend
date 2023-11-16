@@ -37,15 +37,9 @@ const AlertPreview = (props) => {
         return `${text}.`;
     };
 
-    const renderNotification = (alert_obj) => {
+    const renderTriggerNotification = (alert_obj) => {
         const obj = alert_obj?.recurrence;
-
-        let label = '';
-
-        if (obj?.triggerAlert) label = `Trigger if conditions lasts at least ${obj?.triggerAt} min`;
-        if (obj?.resendAlert) label += `, resend alert after ${obj?.resendAt} min`;
-
-        return label;
+        return `Trigger if conditions lasts at least ${obj?.triggerAt} min`;
     };
 
     return (
@@ -76,7 +70,7 @@ const AlertPreview = (props) => {
                             </Typography.Body>
                         </div>
 
-                        <Brick sizeInRem={0.5} />
+                        <Brick sizeInRem={1} />
 
                         <div>
                             <Typography.Subheader size={Typography.Sizes.md}>{`Condition`}</Typography.Subheader>
@@ -132,15 +126,15 @@ const AlertPreview = (props) => {
                             />
                         )}
 
-                        {(alertObj?.recurrence?.triggerAlert || alertObj?.recurrence?.resendAlert) && (
+                        {alertObj?.recurrence?.triggerAlert && (
                             <>
-                                <Brick sizeInRem={0.75} />
+                                <Brick sizeInRem={1.25} />
                                 <div>
                                     <Typography.Subheader
                                         size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
                                     <Brick sizeInRem={0.25} />
                                     <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                        {renderNotification(alertObj)}
+                                        {renderTriggerNotification(alertObj)}
                                     </Typography.Body>
                                 </div>
                             </>

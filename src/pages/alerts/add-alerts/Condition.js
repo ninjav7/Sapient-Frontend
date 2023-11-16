@@ -169,7 +169,7 @@ const Condition = (props) => {
                         )}
                     </div>
 
-                    <Brick sizeInRem={1.25} />
+                    <Brick sizeInRem={1} />
 
                     {targetType === 'building' && conditionType === 'energy_consumption' && (
                         <div className="d-flex" style={{ gap: '1rem' }}>
@@ -234,7 +234,7 @@ const Condition = (props) => {
                         <>
                             <Typography.Subheader size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
 
-                            <Brick sizeInRem={1.25} />
+                            <Brick sizeInRem={0.5} />
 
                             <div className="d-flex justify-content-between align-items-center">
                                 <div className="d-flex align-items-center w-100" style={{ gap: '1rem' }}>
@@ -270,41 +270,7 @@ const Condition = (props) => {
                                 </div>
                             </div>
 
-                            <Brick sizeInRem={1} />
-
-                            <div className="d-flex justify-content-between align-items-center">
-                                <div className="d-flex align-items-center w-100" style={{ gap: '1rem' }}>
-                                    <Checkbox
-                                        label="Resend alert after"
-                                        type="checkbox"
-                                        id="resend-alert"
-                                        name="resend-alert"
-                                        size="md"
-                                        checked={alertObj?.recurrence?.resendAlert}
-                                        value={alertObj?.recurrence?.resendAlert}
-                                        onClick={(e) => {
-                                            handleRecurrenceChange(
-                                                'resendAlert',
-                                                e.target.value === 'false' ? true : false
-                                            );
-                                        }}
-                                    />
-                                    <div style={{ width: '40%' }}>
-                                        <Inputs
-                                            type="number"
-                                            className="w-50"
-                                            inputClassName="custom-input-field"
-                                            min={0}
-                                            value={alertObj?.recurrence?.resendAt}
-                                            onChange={(e) => {
-                                                handleRecurrenceChange('resendAt', e.target.value);
-                                            }}
-                                            elementEnd={<MinutesSVG />}
-                                            disabled={!alertObj?.recurrence?.resendAlert}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+                            <Brick sizeInRem={0.25} />
                         </>
                     )}
                 </div>
