@@ -194,8 +194,6 @@ const ConfigureAlerts = (props) => {
     const fetchAllEquipmentsList = (bldgList = [], equipTypeList = []) => {
         if (!bldgList || bldgList.length === 0) return;
 
-        // console.log('SSR equipTypeList => ', equipTypeList);
-
         let promisesList = [];
 
         bldgList.forEach((el) => {
