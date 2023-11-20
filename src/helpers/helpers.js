@@ -18,13 +18,13 @@ export const prepareTimeAndDateFormat = (dateFormat, timeFormat) => {
     if (dateFormat == 'DD-MM-YYYY') {
         if (timeFormat == '12h') {
             format = `DD/MM/YYYY hh:mm A `;
-        } else if(timeFormat == '24h') {
+        } else if (timeFormat == '24h') {
             format = `DD/MM/YYYY HH:mm:ss`;
         }
     } else if (dateFormat == 'MM-DD-YYYY') {
         if (timeFormat == '12h') {
             format = `MM/DD/YYYY hh:mm A `;
-        } else if(timeFormat == '24h') {
+        } else if (timeFormat == '24h') {
             format = `MM/DD/YYYY HH:mm:ss`;
         }
     }
@@ -407,4 +407,8 @@ export const xAxisLabelStepCount = (days_count, time_format) => {
     let value = 1;
     if (time_format === '12h' && days_count <= 7 && days_count > 1) value = 2;
     return value;
+};
+
+export const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
 };

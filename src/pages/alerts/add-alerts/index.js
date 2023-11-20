@@ -26,6 +26,7 @@ import { getEquipTypeData } from '../../settings/equipment-type/services';
 import { getAllBuildingTypes } from '../../settings/general-settings/services';
 
 import { defaultAlertObj, defaultConditionObj, defaultNotificationObj } from '../constants';
+import { capitalizeFirstLetter } from '../../../helpers/helpers';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
@@ -171,14 +172,22 @@ const ConfigureAlerts = (props) => {
 
     const renderTargetedBuildingsList = (alert_obj, buildingsList = []) => {
         const count = alert_obj?.target?.lists?.length ?? 0;
+        const targetType = alert_obj?.target?.type;
 
         let label = '';
 
-        if (count === 0) label = `No building selected.`;
-        else if (count === buildingsList.length) label = `All Buildings selected.`;
+        if (count === 0) label = `No ${targetType} selected.`;
+        else if (count === buildingsList.length) label = `All ${capitalizeFirstLetter(targetType)}s selected.`;
         else if (count === 1) label = alertObj.target.lists[0].label;
-        else if (count > 1) label = `${count} buildings selected.`;
+        else if (count > 1) label = `${count} ${targetType}s selected.`;
 
+        return label;
+    };
+
+    const renderTargetTypeHeader = (alert_obj) => {
+        let label = '';
+        if (alert_obj?.target?.type === 'building') label = 'Building';
+        if (alert_obj?.target?.type === 'equipment') label = 'Equipment';
         return label;
     };
 
@@ -345,6 +354,7 @@ const ConfigureAlerts = (props) => {
                         setOriginalEquipmentsList={setOriginalEquipmentsList}
                         originalEquipmentsList={originalEquipmentsList}
                         renderTargetedBuildingsList={renderTargetedBuildingsList}
+                        renderTargetTypeHeader={renderTargetTypeHeader}
                         filteredBuildingsList={filteredBuildingsList}
                         setBuildingsList={setBuildingsList}
                         fetchAllEquipmentsList={fetchAllEquipmentsList}
@@ -406,9 +416,9 @@ const AddAlerts = () => {
 
         // When Condition filter-type change
         if (key === 'filterType') {
-            obj.condition.threshold50 = false;
-            obj.condition.threshold75 = false;
-            obj.condition.threshold90 = false;
+            obj.condition.threshold50 = true;
+            obj.condition.threshold75 = true;
+            obj.condition.threshold90 = true;
             obj.condition.thresholdValue = '';
         }
 

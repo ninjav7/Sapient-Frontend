@@ -36,6 +36,7 @@ const Target = (props) => {
         isFetchingData,
         handleTargetChange,
         renderTargetedBuildingsList,
+        renderTargetTypeHeader,
         buildingsList = [],
         equipmentTypeList = [],
         equipmentsList = [],
@@ -84,7 +85,9 @@ const Target = (props) => {
                 {alertObj?.target?.submitted ? (
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <Typography.Subheader size={Typography.Sizes.md}>{`Building`}</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.md}>
+                                {renderTargetTypeHeader(alertObj)}
+                            </Typography.Subheader>
                             <Brick sizeInRem={0.25} />
                             <Typography.Body size={Typography.Sizes.md} className="text-muted">
                                 {renderTargetedBuildingsList(alertObj, originalBuildingsList)}
@@ -243,7 +246,7 @@ const Target = (props) => {
                                                     type={Button.Type.primary}
                                                     className="w-100"
                                                     onClick={() => {
-                                                        handleTargetChange('submitted', !alertObj?.target.submitted);
+                                                        handleTargetChange('submitted', !alertObj?.target?.submitted);
                                                     }}
                                                     disabled={
                                                         alertObj?.target?.lists && alertObj?.target?.lists.length === 0
