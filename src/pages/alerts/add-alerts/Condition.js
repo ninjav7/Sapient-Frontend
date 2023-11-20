@@ -169,7 +169,7 @@ const Condition = (props) => {
                         )}
                     </div>
 
-                    <Brick sizeInRem={1} />
+                    <Brick sizeInRem={targetType === 'building' ? 1 : 0.5} />
 
                     {targetType === 'building' && conditionType === 'energy_consumption' && (
                         <div className="d-flex" style={{ gap: '1rem' }}>
@@ -224,7 +224,6 @@ const Condition = (props) => {
 
                     {alertObj?.target?.type !== 'building' && alertObj?.condition?.type && (
                         <>
-                            <Brick sizeInRem={0.5} />
                             <hr />
                             <Brick sizeInRem={0.5} />
                         </>
