@@ -23,7 +23,7 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const NotificationMethod = (props) => {
-    const { alertObj = {}, handleNotificationChange } = props;
+    const { alertObj = {}, handleNotificationChange, handleRecurrenceChange } = props;
 
     const [usersList, setUsersList] = useState([]);
 
@@ -60,21 +60,6 @@ const NotificationMethod = (props) => {
         return value;
     };
 
-    const renderNotification = (alert_obj) => {
-        const notify = alert_obj?.notification;
-        let label = '';
-
-        if (notify?.sendImmediate) label = `Send immediately`;
-        if (!notify?.sendImmediate) {
-            label = `Send if conditions lasts at least ${notify?.sendAt === '' ? 0 : notify?.sendAt} min`;
-        }
-        if (notify?.resendAlert) {
-            label += `, resend alert after ${notify?.resentAt === '' ? 0 : notify?.resentAt} min`;
-        }
-
-        return label;
-    };
-
     const renderUsers = (alert_obj) => {
         const notify = alert_obj?.notification;
 
@@ -98,6 +83,11 @@ const NotificationMethod = (props) => {
         } else {
             return emailsList.map((email_id) => email_id).join(', ');
         }
+    };
+
+    const renderTriggerNotification = (alert_obj) => {
+        const obj = alert_obj?.recurrence;
+        return `Resend alert after ${obj?.resendAt} min`;
     };
 
     useEffect(() => {
@@ -168,7 +158,7 @@ const NotificationMethod = (props) => {
                                             size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
                                         <Brick sizeInRem={0.25} />
                                         <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                            {renderNotification(alertObj)}
+                                            {renderTriggerNotification(alertObj)}
                                         </Typography.Body>
                                     </div>
                                 </>
@@ -276,61 +266,26 @@ const NotificationMethod = (props) => {
 
                                             <Brick sizeInRem={1.5} />
 
-                                            <Typography.Subheader
-                                                size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
+                                            <Typography.Subheader size={Typography.Sizes.md}>
+                                                {`Recurrence`}
+                                            </Typography.Subheader>
 
-                                            <Brick sizeInRem={1} />
-
-                                            {/* <div className="d-flex align-items-center" style={{ gap: '1.25rem' }}>
-                                                <Radio
-                                                    name="send-immediately"
-                                                    label="Send immediately"
-                                                    checked={alertObj?.notification?.sendImmediate}
-                                                    onClick={() => {
-                                                        handleNotificationChange('sendImmediate', true);
-                                                    }}
-                                                />
-
-                                                <Radio
-                                                    name="send-with-conditions"
-                                                    label="Send if conditions lasts at least"
-                                                    checked={!alertObj?.notification?.sendImmediate}
-                                                    onClick={() => {
-                                                        handleNotificationChange('sendImmediate', false);
-                                                    }}
-                                                />
-
-                                                <div style={{ width: '40%' }}>
-                                                    <Inputs
-                                                        type="number"
-                                                        className="w-25"
-                                                        inputClassName="custom-input-field"
-                                                        value={alertObj?.notification?.sendAt}
-                                                        onChange={(e) => {
-                                                            handleNotificationChange('sendAt', e.target.value);
-                                                        }}
-                                                        elementEnd={<MinutesSVG />}
-                                                        disabled={alertObj?.notification?.sendImmediate}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <Brick sizeInRem={1} /> */}
+                                            <Brick sizeInRem={0.75} />
 
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <div
                                                     className="d-flex align-items-center w-100"
-                                                    style={{ gap: '1.25rem' }}>
+                                                    style={{ gap: '1rem' }}>
                                                     <Checkbox
                                                         label="Resend alert after"
                                                         type="checkbox"
                                                         id="resend-alert"
                                                         name="resend-alert"
                                                         size="md"
-                                                        checked={alertObj?.notification?.resendAlert}
-                                                        value={alertObj?.notification?.resendAlert}
+                                                        checked={alertObj?.recurrence?.resendAlert}
+                                                        value={alertObj?.recurrence?.resendAlert}
                                                         onClick={(e) => {
-                                                            handleNotificationChange(
+                                                            handleRecurrenceChange(
                                                                 'resendAlert',
                                                                 e.target.value === 'false' ? true : false
                                                             );
@@ -341,12 +296,12 @@ const NotificationMethod = (props) => {
                                                             type="number"
                                                             className="w-50"
                                                             inputClassName="custom-input-field"
-                                                            value={alertObj?.notification?.resentAt}
+                                                            value={alertObj?.recurrence?.resendAt}
                                                             onChange={(e) => {
-                                                                handleNotificationChange('resentAt', e.target.value);
+                                                                handleRecurrenceChange('resendAt', e.target.value);
                                                             }}
                                                             elementEnd={<MinutesSVG />}
-                                                            disabled={!alertObj?.notification?.resendAlert}
+                                                            disabled={!alertObj?.recurrence?.resendAlert}
                                                         />
                                                     </div>
                                                 </div>

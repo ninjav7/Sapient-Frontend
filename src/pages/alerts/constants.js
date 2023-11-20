@@ -3,30 +3,34 @@ export const defaultConditionObj = {
     level: 'above',
     filterType: 'number',
     thresholdValue: '',
-    threshold50: false,
-    threshold75: false,
-    threshold90: false,
+    threshold50: true,
+    threshold75: true,
+    threshold90: true,
+};
+
+export const defaultRecurrenceObj = {
+    triggerAlert: false,
+    triggerAt: '0',
+    resendAlert: false,
+    resendAt: '0',
 };
 
 export const defaultNotificationObj = {
     method: ['none'],
     selectedUserId: [],
     selectedUserEmailId: '',
-    sendImmediate: true,
-    sendAt: '',
-    resendAlert: false,
-    resentAt: '',
 };
 
 // Main Alert Obj
 export const defaultAlertObj = {
     target: {
         type: '',
-        typesList: [], // building_type, equipment_type
-        lists: [], // buildings_list, equipments_list
+        typesList: [],
+        lists: [],
         buildingIDs: [],
         submitted: false,
     },
+    recurrence: defaultRecurrenceObj,
     condition: {
         ...defaultConditionObj,
         submitted: false,

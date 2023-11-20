@@ -36,6 +36,7 @@ const Target = (props) => {
         isFetchingData,
         handleTargetChange,
         renderTargetedBuildingsList,
+        renderTargetTypeHeader,
         buildingsList = [],
         equipmentTypeList = [],
         equipmentsList = [],
@@ -84,7 +85,9 @@ const Target = (props) => {
                 {alertObj?.target?.submitted ? (
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <Typography.Subheader size={Typography.Sizes.md}>{`Building`}</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.md}>
+                                {renderTargetTypeHeader(alertObj)}
+                            </Typography.Subheader>
                             <Brick sizeInRem={0.25} />
                             <Typography.Body size={Typography.Sizes.md} className="text-muted">
                                 {renderTargetedBuildingsList(alertObj, originalBuildingsList)}
@@ -176,7 +179,8 @@ const Target = (props) => {
                                                     placeholder="Select Building Type"
                                                     name="select"
                                                     className="w-100"
-                                                    isSearchable={buildingTypeList && buildingTypeList.length > 5}
+                                                    isSearchable={true}
+                                                    // isSelectAll={buildingTypeList && buildingTypeList.length !== 0}
                                                     options={buildingTypeList}
                                                     onChange={(newBldgTypeList) => {
                                                         handleTargetChange('lists', []);
@@ -203,7 +207,8 @@ const Target = (props) => {
                                                     placeholder="Select Building"
                                                     name="select"
                                                     className="w-100"
-                                                    isSearchable={buildingsList && buildingsList.length > 5}
+                                                    isSearchable={true}
+                                                    // isSelectAll={buildingsList && buildingsList.length !== 0}
                                                     options={buildingsList}
                                                     onChange={(selectedBldgTypeList) => {
                                                         handleTargetChange('lists', selectedBldgTypeList);
@@ -241,7 +246,7 @@ const Target = (props) => {
                                                     type={Button.Type.primary}
                                                     className="w-100"
                                                     onClick={() => {
-                                                        handleTargetChange('submitted', !alertObj?.target.submitted);
+                                                        handleTargetChange('submitted', !alertObj?.target?.submitted);
                                                     }}
                                                     disabled={
                                                         alertObj?.target?.lists && alertObj?.target?.lists.length === 0
@@ -268,7 +273,10 @@ const Target = (props) => {
                                                 placeholder="Select Building"
                                                 name="select"
                                                 className="w-100"
-                                                isSearchable={originalBuildingsList && originalBuildingsList.length > 5}
+                                                isSearchable={true}
+                                                // isSelectAll={
+                                                //     originalBuildingsList && originalBuildingsList.length !== 0
+                                                // }
                                                 options={originalBuildingsList}
                                                 onChange={setSelectedBldgsForEquip}
                                                 onMenuClose={() => {
@@ -304,7 +312,10 @@ const Target = (props) => {
                                                         placeholder="Select Equipment Type"
                                                         name="select"
                                                         className="w-100"
-                                                        isSearchable={equipmentTypeList && equipmentTypeList.length > 5}
+                                                        isSearchable={true}
+                                                        // isSelectAll={
+                                                        //     equipmentTypeList && equipmentTypeList.length !== 0
+                                                        // }
                                                         options={equipmentTypeList}
                                                         onChange={(value) => {
                                                             handleTargetChange('typesList', value);
@@ -328,7 +339,8 @@ const Target = (props) => {
                                                         placeholder="Select Equipment"
                                                         name="select"
                                                         className="w-100"
-                                                        isSearchable={equipmentsList && equipmentsList.length > 5}
+                                                        isSearchable={true}
+                                                        // isSelectAll={equipmentsList && equipmentsList.length !== 0}
                                                         options={equipmentsList}
                                                         onChange={(value) => {
                                                             handleTargetChange('lists', value);

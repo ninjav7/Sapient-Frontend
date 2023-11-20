@@ -37,6 +37,11 @@ const AlertPreview = (props) => {
         return `${text}.`;
     };
 
+    const renderTriggerNotification = (alert_obj) => {
+        const obj = alert_obj?.recurrence;
+        return `Trigger if conditions lasts at least ${obj?.triggerAt} min`;
+    };
+
     return (
         <Row>
             <Col lg={9}>
@@ -65,7 +70,7 @@ const AlertPreview = (props) => {
                             </Typography.Body>
                         </div>
 
-                        <Brick sizeInRem={0.5} />
+                        <Brick sizeInRem={1} />
 
                         <div>
                             <Typography.Subheader size={Typography.Sizes.md}>{`Condition`}</Typography.Subheader>
@@ -75,7 +80,7 @@ const AlertPreview = (props) => {
                             </Typography.Body>
                         </div>
 
-                        <Brick sizeInRem={1} />
+                        <Brick sizeInRem={0.5} />
 
                         {alertObj?.condition?.type === 'energy_consumption' && (
                             <div className="d-flex" style={{ gap: '1rem' }}>
@@ -119,6 +124,20 @@ const AlertPreview = (props) => {
                                     handleConditionChange('threshold90', e.target.value === 'false' ? true : false);
                                 }}
                             />
+                        )}
+
+                        {alertObj?.recurrence?.triggerAlert && (
+                            <>
+                                <Brick sizeInRem={1.25} />
+                                <div>
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
+                                    <Brick sizeInRem={0.25} />
+                                    <Typography.Body size={Typography.Sizes.md} className="text-muted">
+                                        {renderTriggerNotification(alertObj)}
+                                    </Typography.Body>
+                                </div>
+                            </>
                         )}
                     </CardBody>
                 </div>

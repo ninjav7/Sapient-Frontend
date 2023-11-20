@@ -9,12 +9,21 @@ import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/ass
 
 import { alertSettingsMock } from './mock';
 
+import DeleteAlert from './DeleterAlert';
+
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const AlertSettings = () => {
     const [alertSettingsList, setAlertSettingsList] = useState(alertSettingsMock);
     const [alertSettingsCount, setAlertSettingsCount] = useState(0);
+
+    const [selectedAlertObj, setSelectedAlertObj] = useState({});
+
+    // Delete Device Modal states
+    const [isDeleteAlertModalOpen, setDeleteAlertModalStatus] = useState(false);
+    const closeDeleteAlertModal = () => setDeleteAlertModalStatus(false);
+    const openDeleteAlertModal = () => setDeleteAlertModalStatus(true);
 
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -66,6 +75,17 @@ const AlertSettings = () => {
         );
     };
 
+    const handleDeleteClick = (record) => {
+        setSelectedAlertObj(record);
+        openDeleteAlertModal();
+    };
+
+    const handleAlertDelete = (record) => {
+        const newFilteredList = alertSettingsList.filter((el) => el?.id !== record?.id);
+        setAlertSettingsList(newFilteredList);
+        closeDeleteAlertModal();
+    };
+
     const currentRow = () => {
         return alertSettingsList;
     };
@@ -112,15 +132,20 @@ const AlertSettings = () => {
                 onChangePage={setPageNo}
                 pageSize={pageSize}
                 onPageSize={setPageSize}
-                onDeleteRow={(row) => (row) => {
-                    return true;
-                }}
+                onDeleteRow={(record, id, row) => handleDeleteClick(row)}
                 isDeletable={(row) => {
                     return true;
                 }}
                 totalCount={(() => {
                     return alertSettingsCount;
                 })()}
+            />
+
+            <DeleteAlert
+                isModalOpen={isDeleteAlertModalOpen}
+                closeModal={closeDeleteAlertModal}
+                selectedAlertObj={selectedAlertObj}
+                handleAlertDelete={handleAlertDelete}
             />
         </div>
     );
