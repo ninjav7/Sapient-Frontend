@@ -222,7 +222,7 @@ const Condition = (props) => {
                         />
                     )}
 
-                    {alertObj?.target?.type && alertObj?.condition?.type && (
+                    {alertObj?.target?.type !== 'building' && alertObj?.condition?.type && (
                         <>
                             <Brick sizeInRem={0.5} />
                             <hr />
@@ -230,7 +230,7 @@ const Condition = (props) => {
                         </>
                     )}
 
-                    {alertObj?.target?.type && alertObj?.condition?.type && (
+                    {alertObj?.target?.type !== 'building' && alertObj?.condition?.type && (
                         <>
                             <Typography.Subheader size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
 

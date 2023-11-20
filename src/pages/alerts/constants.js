@@ -3,9 +3,9 @@ export const defaultConditionObj = {
     level: 'above',
     filterType: 'number',
     thresholdValue: '',
-    threshold50: false,
-    threshold75: false,
-    threshold90: false,
+    threshold50: true,
+    threshold75: true,
+    threshold90: true,
 };
 
 export const defaultRecurrenceObj = {
