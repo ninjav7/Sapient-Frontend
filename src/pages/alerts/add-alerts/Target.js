@@ -177,7 +177,7 @@ const Target = (props) => {
                                                     name="select"
                                                     className="w-100"
                                                     isSearchable={true}
-                                                    isSelectAll={buildingTypeList && buildingTypeList.length !== 0}
+                                                    // isSelectAll={buildingTypeList && buildingTypeList.length !== 0}
                                                     options={buildingTypeList}
                                                     onChange={(newBldgTypeList) => {
                                                         handleTargetChange('lists', []);
@@ -205,7 +205,7 @@ const Target = (props) => {
                                                     name="select"
                                                     className="w-100"
                                                     isSearchable={true}
-                                                    isSelectAll={buildingsList && buildingsList.length !== 0}
+                                                    // isSelectAll={buildingsList && buildingsList.length !== 0}
                                                     options={buildingsList}
                                                     onChange={(selectedBldgTypeList) => {
                                                         handleTargetChange('lists', selectedBldgTypeList);
@@ -271,9 +271,9 @@ const Target = (props) => {
                                                 name="select"
                                                 className="w-100"
                                                 isSearchable={true}
-                                                isSelectAll={
-                                                    originalBuildingsList && originalBuildingsList.length !== 0
-                                                }
+                                                // isSelectAll={
+                                                //     originalBuildingsList && originalBuildingsList.length !== 0
+                                                // }
                                                 options={originalBuildingsList}
                                                 onChange={setSelectedBldgsForEquip}
                                                 onMenuClose={() => {
@@ -310,9 +310,9 @@ const Target = (props) => {
                                                         name="select"
                                                         className="w-100"
                                                         isSearchable={true}
-                                                        isSelectAll={
-                                                            equipmentTypeList && equipmentTypeList.length !== 0
-                                                        }
+                                                        // isSelectAll={
+                                                        //     equipmentTypeList && equipmentTypeList.length !== 0
+                                                        // }
                                                         options={equipmentTypeList}
                                                         onChange={(value) => {
                                                             handleTargetChange('typesList', value);
@@ -337,7 +337,7 @@ const Target = (props) => {
                                                         name="select"
                                                         className="w-100"
                                                         isSearchable={true}
-                                                        isSelectAll={equipmentsList && equipmentsList.length !== 0}
+                                                        // isSelectAll={equipmentsList && equipmentsList.length !== 0}
                                                         options={equipmentsList}
                                                         onChange={(value) => {
                                                             handleTargetChange('lists', value);
