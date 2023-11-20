@@ -9,6 +9,7 @@ import Inputs from '../../../sharedComponents/form/input/Input';
 import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
 import { ReactComponent as KWH_SVG } from '../../../assets/icon/kwh.svg';
+import { ReactComponent as PERCENT_SVG } from '../../../assets/icon/percent.svg';
 import { ReactComponent as MinutesSVG } from '../../../assets/icon/minutes.svg';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 
@@ -153,7 +154,32 @@ const Condition = (props) => {
                                     menuPlacement="auto"
                                 />
 
-                                {conditionType !== 'rms_current' && (
+                                {conditionType === 'rms_current' && (
+                                    <Inputs
+                                        type="text"
+                                        placeholder="Enter Threshold"
+                                        className="custom-input-width w-100"
+                                        // inputClassName="custom-input-field"
+                                        // value={alertObj?.condition?.thresholdValue}
+                                        // onChange={(e) => {
+                                        //     handleConditionChange('thresholdValue', e.target.value);
+                                        // }}
+                                        // elementEnd={<KWH_SVG />}
+                                    />
+                                )}
+
+                                <Inputs
+                                    type="number"
+                                    className="custom-input-width w-100"
+                                    inputClassName="custom-input-field"
+                                    value={alertObj?.condition?.thresholdValue}
+                                    onChange={(e) => {
+                                        handleConditionChange('thresholdValue', e.target.value);
+                                    }}
+                                    elementEnd={<PERCENT_SVG />}
+                                />
+
+                                {conditionType === 'shortcycling' && (
                                     <Inputs
                                         type="number"
                                         className="custom-input-width w-100"
@@ -162,7 +188,7 @@ const Condition = (props) => {
                                         onChange={(e) => {
                                             handleConditionChange('thresholdValue', e.target.value);
                                         }}
-                                        elementEnd={<KWH_SVG />}
+                                        elementEnd={<MinutesSVG />}
                                     />
                                 )}
                             </>
