@@ -7,8 +7,8 @@ export const defaultConditionObj = {
     threshold75: true,
     threshold90: true,
     thresholdName: '',
-    shortcyclingMinutes: '',
-    thresholdPercentage: '',
+    shortcyclingMinutes: '0',
+    thresholdPercentage: '0',
 };
 
 export const defaultRecurrenceObj = {
