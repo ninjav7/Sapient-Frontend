@@ -936,7 +936,7 @@ const PlugRule = () => {
             });
         const res =
             sortedData && sortedData[0]?.response
-                ? moment(sortedData[0].response?.time_stamp).format(prepareTimeAndDateFormat(dateFormat, timeFormat))
+                ? moment.parseZone(sortedData[0].response?.time_stamp).format(prepareTimeAndDateFormat(dateFormat, timeFormat))
                 : '';
         return res;
     };
@@ -2543,7 +2543,7 @@ const PlugRule = () => {
                             {plugRuleStatus && plugRuleStatus.last_updated && (
                                 <Typography.Subheader size={Typography.Sizes.sm}>
                                     Last Update:{' '}
-                                    {moment(plugRuleStatus.last_updated).format(
+                                    {moment.parseZone(plugRuleStatus.last_updated).format(
                                         prepareTimeAndDateFormat(dateFormat, timeFormat)
                                     )}
                                 </Typography.Subheader>
