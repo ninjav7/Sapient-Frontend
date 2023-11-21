@@ -8,7 +8,7 @@ import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
-import { bldgAlertConditions, filtersForEnergyConsumption } from '../constants';
+import { bldgAlertConditions, equipAlertConditions, filtersForEnergyConsumption } from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
@@ -21,17 +21,34 @@ const AlertPreview = (props) => {
     const renderAlertCondition = (alert_obj) => {
         let text = '';
 
-        let alertType = bldgAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
-        if (alertType) text += alertType?.label;
+        if (alert_obj?.target?.type === 'building') {
+            let alertType = bldgAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
+            if (alertType) text += alertType?.label;
 
-        if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
+            if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
 
-        if (alertObj?.condition?.filterType === 'number' && alert_obj?.condition?.thresholdValue)
-            text += ` ${formatConsumptionValue(+alert_obj?.condition?.thresholdValue, 2)} kWh`;
+            if (alertObj?.condition?.filterType === 'number' && alert_obj?.condition?.thresholdValue)
+                text += ` ${formatConsumptionValue(+alert_obj?.condition?.thresholdValue, 2)} kWh`;
 
-        if (alertObj?.condition?.filterType !== 'number') {
-            let alertFilter = filtersForEnergyConsumption.find((el) => el?.value === alertObj?.condition?.filterType);
-            if (alertFilter) text += ` ${alertFilter?.label}`;
+            if (alertObj?.condition?.filterType !== 'number') {
+                let alertFilter = filtersForEnergyConsumption.find(
+                    (el) => el?.value === alertObj?.condition?.filterType
+                );
+                if (alertFilter) text += ` ${alertFilter?.label}`;
+            }
+        }
+
+        if (alert_obj?.target?.type === 'equipment') {
+            let alertType = equipAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
+            if (alertType) text += alertType?.label;
+
+            if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
+
+            if (alert_obj?.condition?.type === 'shortcycling') {
+                text += ` ${alert_obj?.condition?.shortcyclingMinutes} min`;
+            } else {
+                text += ` ${alert_obj?.condition?.thresholdPercentage}%`;
+            }
         }
 
         return `${text}.`;
@@ -80,7 +97,8 @@ const AlertPreview = (props) => {
                             </Typography.Body>
                         </div>
 
-                        <Brick sizeInRem={0.5} />
+                        {(alertObj?.condition?.type === 'energy_consumption' ||
+                            alertObj?.condition?.type === 'peak_demand') && <Brick sizeInRem={0.5} />}
 
                         {alertObj?.condition?.type === 'energy_consumption' && (
                             <div className="d-flex" style={{ gap: '1rem' }}>

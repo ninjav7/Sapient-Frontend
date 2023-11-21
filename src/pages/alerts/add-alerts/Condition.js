@@ -9,6 +9,7 @@ import Inputs from '../../../sharedComponents/form/input/Input';
 import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
 import { ReactComponent as KWH_SVG } from '../../../assets/icon/kwh.svg';
+import { ReactComponent as PERCENT_SVG } from '../../../assets/icon/percent.svg';
 import { ReactComponent as MinutesSVG } from '../../../assets/icon/minutes.svg';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 
@@ -21,8 +22,6 @@ import {
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-import Radio from '../../../sharedComponents/form/radio/Radio';
-import { Button } from '../../../sharedComponents/button';
 
 const ConditionToolTip = () => {
     return (
@@ -56,6 +55,26 @@ const Condition = (props) => {
             conditionsList = [];
     }
 
+    const fetchConditionStyle = (alert_obj) => {
+        let label = `condition-grid-default`;
+
+        if (alert_obj?.target?.type === 'building') {
+            label = `condition-grid-for-bldg`;
+            if (alert_obj?.condition?.filterType === `number`) label += `-with-value`;
+        }
+
+        if (alert_obj?.target?.type === 'equipment') {
+            label = `condition-grid-for-equip`;
+            if (alert_obj?.condition?.type === 'shortcycling') {
+                label += `-with-shortcycling`;
+            } else {
+                if (alert_obj?.condition?.type !== 'rms_current') label += `-without-threshold`;
+            }
+        }
+
+        return label;
+    };
+
     return (
         <div className="custom-card">
             <CardHeader>
@@ -72,10 +91,7 @@ const Condition = (props) => {
 
                     <Brick sizeInRem={1.25} />
 
-                    <div
-                        className={`container-grid${
-                            alertObj?.condition?.filterType === `number` ? `-with-value` : ``
-                        }`}>
+                    <div className={fetchConditionStyle(alertObj)}>
                         <Select
                             id="endUseSelect"
                             placeholder="Select a Condition"
@@ -138,31 +154,79 @@ const Condition = (props) => {
                         {/* Equipment conditions fields */}
                         {targetType === 'equipment' && conditionType !== '' && (
                             <>
-                                <Select
-                                    id="condition_lvl"
-                                    name="select"
-                                    isSearchable={false}
-                                    options={conditionLevelsList}
-                                    className="w-100"
-                                    onChange={(e) => {
-                                        handleConditionChange('level', e.value);
-                                    }}
-                                    currentValue={conditionLevelsList.filter(
-                                        (option) => option.value === alertObj?.condition?.level
-                                    )}
-                                    menuPlacement="auto"
-                                />
+                                {conditionType === 'rms_current' && (
+                                    <Select
+                                        id="condition_lvl"
+                                        name="select"
+                                        isSearchable={false}
+                                        options={conditionLevelsList}
+                                        className="w-100"
+                                        onChange={(e) => {
+                                            handleConditionChange('level', e.value);
+                                        }}
+                                        currentValue={conditionLevelsList.filter(
+                                            (option) => option.value === alertObj?.condition?.level
+                                        )}
+                                        menuPlacement="auto"
+                                    />
+                                )}
 
-                                {conditionType !== 'rms_current' && (
+                                {conditionType === 'shortcycling' && (
+                                    <div className="d-flex align-items-center">
+                                        <Typography.Subheader
+                                            size={Typography.Sizes.md}
+                                            style={{ color: colorPalette.primaryGray550 }}>
+                                            {`Turn On/Turn Off`}
+                                        </Typography.Subheader>
+                                    </div>
+                                )}
+
+                                {conditionType !== 'rms_current' && conditionType !== 'shortcycling' && (
+                                    <div className="d-flex align-items-center">
+                                        <Typography.Subheader
+                                            size={Typography.Sizes.md}
+                                            style={{ color: colorPalette.primaryGray550 }}>
+                                            {`Above`}
+                                        </Typography.Subheader>
+                                    </div>
+                                )}
+
+                                {conditionType === 'rms_current' && (
+                                    <Inputs
+                                        type="text"
+                                        placeholder="Enter Threshold"
+                                        className="custom-input-width w-100"
+                                        inputClassName="custom-input-field"
+                                        value={alertObj?.condition?.thresholdName}
+                                        onChange={(e) => {
+                                            handleConditionChange('thresholdName', e.target.value);
+                                        }}
+                                    />
+                                )}
+
+                                {conditionType !== 'shortcycling' && (
                                     <Inputs
                                         type="number"
                                         className="custom-input-width w-100"
                                         inputClassName="custom-input-field"
-                                        value={alertObj?.condition?.thresholdValue}
+                                        value={alertObj?.condition?.thresholdPercentage}
                                         onChange={(e) => {
-                                            handleConditionChange('thresholdValue', e.target.value);
+                                            handleConditionChange('thresholdPercentage', e.target.value);
                                         }}
-                                        elementEnd={<KWH_SVG />}
+                                        elementEnd={<PERCENT_SVG />}
+                                    />
+                                )}
+
+                                {conditionType === 'shortcycling' && (
+                                    <Inputs
+                                        type="number"
+                                        className="custom-input-width w-100"
+                                        inputClassName="custom-input-field"
+                                        value={alertObj?.condition?.shortcyclingMinutes}
+                                        onChange={(e) => {
+                                            handleConditionChange('shortcyclingMinutes', e.target.value);
+                                        }}
+                                        elementEnd={<MinutesSVG />}
                                     />
                                 )}
                             </>

@@ -34,6 +34,7 @@ const Target = (props) => {
     const {
         alertObj = {},
         isFetchingData,
+        isFetchingEquipments,
         handleTargetChange,
         renderTargetedBuildingsList,
         renderTargetTypeHeader,
@@ -334,20 +335,24 @@ const Target = (props) => {
                                                     <Typography.Body
                                                         size={Typography.Sizes.sm}>{`Equipment`}</Typography.Body>
                                                     <Brick sizeInRem={0.25} />
-                                                    <Select.Multi
-                                                        id="equipTypeSelectList"
-                                                        placeholder="Select Equipment"
-                                                        name="select"
-                                                        className="w-100"
-                                                        isSearchable={true}
-                                                        // isSelectAll={equipmentsList && equipmentsList.length !== 0}
-                                                        options={equipmentsList}
-                                                        onChange={(value) => {
-                                                            handleTargetChange('lists', value);
-                                                        }}
-                                                        value={alertObj?.target?.lists ?? []}
-                                                        menuPlacement="auto"
-                                                    />
+                                                    {isFetchingEquipments ? (
+                                                        <Skeleton count={1} height={33} width={350} />
+                                                    ) : (
+                                                        <Select.Multi
+                                                            id="equipTypeSelectList"
+                                                            placeholder="Select Equipment"
+                                                            name="select"
+                                                            className="w-100"
+                                                            isSearchable={true}
+                                                            // isSelectAll={equipmentsList && equipmentsList.length !== 0}
+                                                            options={equipmentsList}
+                                                            onChange={(value) => {
+                                                                handleTargetChange('lists', value);
+                                                            }}
+                                                            value={alertObj?.target?.lists ?? []}
+                                                            menuPlacement="auto"
+                                                        />
+                                                    )}
                                                 </div>
                                             </div>
 
