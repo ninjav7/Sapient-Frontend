@@ -22,8 +22,6 @@ import {
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-import Radio from '../../../sharedComponents/form/radio/Radio';
-import { Button } from '../../../sharedComponents/button';
 
 const ConditionToolTip = () => {
     return (
@@ -198,12 +196,11 @@ const Condition = (props) => {
                                         type="text"
                                         placeholder="Enter Threshold"
                                         className="custom-input-width w-100"
-                                        // inputClassName="custom-input-field"
-                                        // value={alertObj?.condition?.thresholdValue}
-                                        // onChange={(e) => {
-                                        //     handleConditionChange('thresholdValue', e.target.value);
-                                        // }}
-                                        // elementEnd={<KWH_SVG />}
+                                        inputClassName="custom-input-field"
+                                        value={alertObj?.condition?.thresholdName}
+                                        onChange={(e) => {
+                                            handleConditionChange('thresholdName', e.target.value);
+                                        }}
                                     />
                                 )}
 
@@ -212,9 +209,9 @@ const Condition = (props) => {
                                         type="number"
                                         className="custom-input-width w-100"
                                         inputClassName="custom-input-field"
-                                        value={alertObj?.condition?.thresholdValue}
+                                        value={alertObj?.condition?.thresholdPercentage}
                                         onChange={(e) => {
-                                            handleConditionChange('thresholdValue', e.target.value);
+                                            handleConditionChange('thresholdPercentage', e.target.value);
                                         }}
                                         elementEnd={<PERCENT_SVG />}
                                     />
@@ -225,9 +222,9 @@ const Condition = (props) => {
                                         type="number"
                                         className="custom-input-width w-100"
                                         inputClassName="custom-input-field"
-                                        value={alertObj?.condition?.thresholdValue}
+                                        value={alertObj?.condition?.shortcyclingMinutes}
                                         onChange={(e) => {
-                                            handleConditionChange('thresholdValue', e.target.value);
+                                            handleConditionChange('shortcyclingMinutes', e.target.value);
                                         }}
                                         elementEnd={<MinutesSVG />}
                                     />
