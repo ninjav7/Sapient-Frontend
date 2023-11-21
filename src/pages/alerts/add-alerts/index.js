@@ -541,7 +541,12 @@ const AddAlerts = () => {
         alertObj?.target?.submitted &&
         alertObj?.condition?.type !== '' &&
         ((alertObj?.condition?.filterType === 'number' && alertObj?.condition?.thresholdValue !== '') ||
-            alertObj?.condition?.filterType !== 'number');
+            alertObj?.condition?.filterType !== 'number' ||
+            (alertObj?.condition?.type === 'rms_current' && alertObj?.condition?.thresholdPercentage !== '') ||
+            (alertObj?.condition?.type === 'shortcycling' && alertObj?.condition?.shortcyclingMinutes !== '') ||
+            (alertObj?.condition?.type !== 'rms_current' &&
+                alertObj?.condition?.type !== 'shortcycling' &&
+                alertObj?.condition?.thresholdPercentage !== ''));
 
     useEffect(() => {
         updateBreadcrumbStore();
