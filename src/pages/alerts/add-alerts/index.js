@@ -148,6 +148,7 @@ const ConfigureAlerts = (props) => {
     } = props;
 
     const [isFetchingData, setFetching] = useState(false);
+    const [isFetchingEquipments, setFetchingEquipments] = useState(false);
 
     const [buildingsList, setBuildingsList] = useState([]);
     const [originalBuildingsList, setOriginalBuildingsList] = useState([]);
@@ -194,6 +195,7 @@ const ConfigureAlerts = (props) => {
     const fetchAllEquipmentsList = (bldgList = [], equipTypeList = []) => {
         if (!bldgList || bldgList.length === 0) return;
 
+        setFetchingEquipments(true);
         let promisesList = [];
 
         bldgList.forEach((el) => {
@@ -231,7 +233,9 @@ const ConfigureAlerts = (props) => {
                 }
             })
             .catch(() => {})
-            .finally(() => {});
+            .finally(() => {
+                setFetchingEquipments(false);
+            });
     };
 
     useEffect(() => {
@@ -343,6 +347,7 @@ const ConfigureAlerts = (props) => {
                 <Col lg={9}>
                     <Target
                         isFetchingData={isFetchingData}
+                        isFetchingEquipments={isFetchingEquipments}
                         buildingsList={buildingsList}
                         originalBuildingsList={originalBuildingsList}
                         buildingTypeList={buildingTypeList}
