@@ -58,7 +58,7 @@ const Condition = (props) => {
     }
 
     const fetchConditionStyle = (alert_obj) => {
-        let label = `container-grid`;
+        let label = `condition-grid-default`;
 
         if (alert_obj?.target?.type === 'building') {
             label = `condition-grid-for-bldg`;
