@@ -409,7 +409,7 @@ const PlugRules = () => {
     };
     const renderTimeStamp = (row) => {
         let dateInUtc = row.current_job_log
-            ? moment(row.current_job_log[row.current_job_log.length - 1]?.time_stamp).format(
+            ? moment.parseZone(row.current_job_log[row.current_job_log.length - 1]?.time_stamp).format(
                   prepareTimeAndDateFormat(dateFormat, timeFormat)
               )
             : '';
