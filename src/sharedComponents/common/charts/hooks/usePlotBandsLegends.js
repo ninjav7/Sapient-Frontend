@@ -11,7 +11,10 @@ const usePlotBandsLegends = ({ plotBandsProp, plotBandsLegends }) => {
         setPlotBands(plotBandsProp);
     }, [plotBandsProp]);
     const renderPlotBandsLegends = useCallback(
-        plotBandsLegends?.map((plotLegend) => {
+        _.uniqBy(
+            [...(plotBandsLegends || []), ...(plotBandsProp || []).filter((plot) => plot.type in PLOT_BANDS_TYPE)],
+            (obj) => obj.type
+        ).map((plotLegend) => {
             let styles;
 
             let label, color, onClick;
