@@ -195,6 +195,10 @@ const ConfigureAlerts = (props) => {
     const fetchAllEquipmentsList = (bldgList = [], equipTypeList = []) => {
         if (!bldgList || bldgList.length === 0) return;
 
+        const clonedObj = _.cloneDeep(alertObj);
+
+        console.log('SSRai alertObj => ', clonedObj);
+
         setFetchingEquipments(true);
         let promisesList = [];
 
@@ -210,26 +214,32 @@ const ConfigureAlerts = (props) => {
                 response.forEach((record, index) => {
                     if (record?.status === 200) {
                         const responseData = record?.data?.data;
+
                         if (responseData) {
-                            const equipmentsList = responseData.map((el) => ({
-                                label: el?.equipments_name,
-                                value: el?.equipments_id,
-                                building_id: buildingsList[index]?.value,
-                                equipments_type_id: el?.equipments_type_id,
-                            }));
-                            newMappedEquipmentList = [...newMappedEquipmentList, ...equipmentsList];
+                            let newFilteredEquipmentsList = [];
+
+                            responseData.forEach((el) => {
+                                const matchedType = equipTypeList.find(
+                                    (type) => type?.value === el?.equipments_type_id
+                                );
+                                if (matchedType?.value) {
+                                    newFilteredEquipmentsList.push({
+                                        label: el?.equipments_name,
+                                        value: el?.equipments_id,
+                                        building_id: buildingsList[index]?.value,
+                                        equipments_type_id: el?.equipments_type_id,
+                                    });
+                                }
+                            });
+                            newMappedEquipmentList = [...newMappedEquipmentList, ...newFilteredEquipmentsList];
                         }
                     }
                 });
 
-                // if(equipTypeList.length !== 0){
-
-                // }
-
                 if (newMappedEquipmentList) {
                     setEquipmentsList(newMappedEquipmentList);
                     setOriginalEquipmentsList(newMappedEquipmentList);
-                    handleTargetChange('lists', newMappedEquipmentList);
+                    if (alertObj?.target?.lists.length === 0) handleTargetChange('lists', newMappedEquipmentList);
                 }
             })
             .catch(() => {})
@@ -238,11 +248,24 @@ const ConfigureAlerts = (props) => {
             });
     };
 
+    const handleEquipmentListChange = (originalEquipsList, equipTypeList, selectedBldgslist) => {
+        const newMappedEquipList = [];
+
+        originalEquipsList.forEach((el) => {
+            const bldgExist = selectedBldgslist.some((item) => item?.value === el?.building_id);
+            const equipTypeExist = equipTypeList.some((item) => item?.value === el?.equipments_type_id);
+            if (bldgExist && equipTypeExist) newMappedEquipList.push(el);
+        });
+
+        handleTargetChange('lists', newMappedEquipList);
+        setEquipmentsList(newMappedEquipList);
+    };
+
     useEffect(() => {
-        if (buildingsList.length !== 0 && alertObj?.target?.type === 'equipment') {
-            fetchAllEquipmentsList(buildingsList);
+        if (alertObj?.target?.type === 'equipment' && buildingsList.length !== 0 && equipmentTypeList.length !== 0) {
+            fetchAllEquipmentsList(buildingsList, equipmentTypeList);
         }
-    }, [buildingsList]);
+    }, [buildingsList, equipmentTypeList]);
 
     useEffect(() => {
         const label = renderTargetedBuildingsList(alertObj, originalBuildingsList);
@@ -303,6 +326,7 @@ const ConfigureAlerts = (props) => {
             setFetching(true);
             setOriginalBuildingsList([]);
             setBuildingsList([]);
+            setEquipmentTypeList([]);
 
             const promiseOne = fetchBuildingsList(false);
             const promiseTwo = getEquipTypeData();
@@ -330,7 +354,13 @@ const ConfigureAlerts = (props) => {
                             }));
                             setEquipmentTypeList(newMappedEquipTypesData);
 
-                            updateAlertForEquipmentTypeData(newMappedEquipTypesData, newMappedBldgsData);
+                            if (
+                                alertObj?.target?.typesList.length === 0 &&
+                                alertObj?.target?.lists.length === 0 &&
+                                alertObj?.target?.buildingIDs.length === 0
+                            ) {
+                                updateAlertForEquipmentTypeData(newMappedEquipTypesData, newMappedBldgsData);
+                            }
                         }
                     }
                 })
@@ -361,6 +391,7 @@ const ConfigureAlerts = (props) => {
                         filteredBuildingsList={filteredBuildingsList}
                         setBuildingsList={setBuildingsList}
                         fetchAllEquipmentsList={fetchAllEquipmentsList}
+                        handleEquipmentListChange={handleEquipmentListChange}
                         {...props}
                     />
                 </Col>

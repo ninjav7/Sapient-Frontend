@@ -49,22 +49,10 @@ const Target = (props) => {
         filteredBuildingsList,
         setBuildingsList,
         fetchAllEquipmentsList,
+        handleEquipmentListChange,
     } = props;
 
     const [selectedBldgsForEquip, setSelectedBldgsForEquip] = useState([]);
-
-    const handleEquipmentListChange = (originalEquipsList, equipTypeList, selectedBldgslist) => {
-        const newMappedEquipList = [];
-
-        originalEquipsList.forEach((el) => {
-            const bldgExist = selectedBldgslist.some((item) => item?.value === el?.building_id);
-            const equipTypeExist = equipTypeList.some((item) => item?.value === el?.equipments_type_id);
-            if (bldgExist && equipTypeExist) newMappedEquipList.push(el);
-        });
-
-        handleTargetChange('lists', newMappedEquipList);
-        setEquipmentsList(newMappedEquipList);
-    };
 
     useEffect(() => {
         if (alertObj?.target?.type !== 'equipment' && selectedBldgsForEquip.length !== 0) {
