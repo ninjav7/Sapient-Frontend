@@ -271,16 +271,18 @@ const Target = (props) => {
                                                 options={originalBuildingsList}
                                                 onChange={setSelectedBldgsForEquip}
                                                 onMenuClose={() => {
-                                                    handleTargetChange('buildingIDs', selectedBldgsForEquip);
-                                                    if (selectedBldgsForEquip.length === 0) {
-                                                        setEquipmentsList([]);
-                                                        setOriginalEquipmentsList([]);
-                                                        handleTargetChange('lists', []);
-                                                    } else {
-                                                        fetchAllEquipmentsList(
-                                                            selectedBldgsForEquip,
-                                                            alertObj?.target?.typesList
-                                                        );
+                                                    if (selectedBldgsForEquip.length !== 0) {
+                                                        handleTargetChange('buildingIDs', selectedBldgsForEquip);
+                                                        if (selectedBldgsForEquip.length === 0) {
+                                                            setEquipmentsList([]);
+                                                            setOriginalEquipmentsList([]);
+                                                            handleTargetChange('lists', []);
+                                                        } else {
+                                                            fetchAllEquipmentsList(
+                                                                selectedBldgsForEquip,
+                                                                alertObj?.target?.typesList
+                                                            );
+                                                        }
                                                     }
                                                 }}
                                                 value={alertObj?.target?.buildingIDs ?? []}
