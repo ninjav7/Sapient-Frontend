@@ -192,12 +192,21 @@ const ConfigureAlerts = (props) => {
         return label;
     };
 
+    const handleEquipmentListChange = (originalEquipsList, equipTypeList, selectedBldgslist) => {
+        const newMappedEquipList = [];
+
+        originalEquipsList.forEach((el) => {
+            const bldgExist = selectedBldgslist.some((item) => item?.value === el?.building_id);
+            const equipTypeExist = equipTypeList.some((item) => item?.value === el?.equipments_type_id);
+            if (bldgExist && equipTypeExist) newMappedEquipList.push(el);
+        });
+
+        handleTargetChange('lists', newMappedEquipList);
+        setEquipmentsList(newMappedEquipList);
+    };
+
     const fetchAllEquipmentsList = (bldgList = [], equipTypeList = []) => {
         if (!bldgList || bldgList.length === 0) return;
-
-        const clonedObj = _.cloneDeep(alertObj);
-
-        console.log('SSRai alertObj => ', clonedObj);
 
         setFetchingEquipments(true);
         let promisesList = [];
@@ -210,6 +219,7 @@ const ConfigureAlerts = (props) => {
             .then((res) => {
                 const response = res;
                 let newMappedEquipmentList = [];
+                let newMappedOriginalEquipmentList = [];
 
                 response.forEach((record, index) => {
                     if (record?.status === 200) {
@@ -219,16 +229,20 @@ const ConfigureAlerts = (props) => {
                             let newFilteredEquipmentsList = [];
 
                             responseData.forEach((el) => {
+                                const mappedEquipObj = {
+                                    label: el?.equipments_name,
+                                    value: el?.equipments_id,
+                                    building_id: buildingsList[index]?.value,
+                                    equipments_type_id: el?.equipments_type_id,
+                                };
+
+                                newMappedOriginalEquipmentList.push(mappedEquipObj);
+
                                 const matchedType = equipTypeList.find(
                                     (type) => type?.value === el?.equipments_type_id
                                 );
                                 if (matchedType?.value) {
-                                    newFilteredEquipmentsList.push({
-                                        label: el?.equipments_name,
-                                        value: el?.equipments_id,
-                                        building_id: buildingsList[index]?.value,
-                                        equipments_type_id: el?.equipments_type_id,
-                                    });
+                                    newFilteredEquipmentsList.push(mappedEquipObj);
                                 }
                             });
                             newMappedEquipmentList = [...newMappedEquipmentList, ...newFilteredEquipmentsList];
@@ -236,29 +250,24 @@ const ConfigureAlerts = (props) => {
                     }
                 });
 
-                if (newMappedEquipmentList) {
-                    setEquipmentsList(newMappedEquipmentList);
-                    setOriginalEquipmentsList(newMappedEquipmentList);
-                    if (alertObj?.target?.lists.length === 0) handleTargetChange('lists', newMappedEquipmentList);
-                }
+                let newFilteredList = [];
+
+                newMappedOriginalEquipmentList.forEach((el) => {
+                    const bldgExist = alertObj?.target?.buildingIDs.some((item) => item?.value === el?.building_id);
+                    const equipTypeExist = alertObj?.target?.typesList.some(
+                        (item) => item?.value === el?.equipments_type_id
+                    );
+                    if (bldgExist && equipTypeExist) newFilteredList.push(el);
+                });
+
+                setOriginalEquipmentsList(newMappedOriginalEquipmentList);
+                if (alertObj?.target?.lists.length === 0) handleTargetChange('lists', newMappedEquipmentList);
+                setEquipmentsList(newFilteredList);
             })
             .catch(() => {})
             .finally(() => {
                 setFetchingEquipments(false);
             });
-    };
-
-    const handleEquipmentListChange = (originalEquipsList, equipTypeList, selectedBldgslist) => {
-        const newMappedEquipList = [];
-
-        originalEquipsList.forEach((el) => {
-            const bldgExist = selectedBldgslist.some((item) => item?.value === el?.building_id);
-            const equipTypeExist = equipTypeList.some((item) => item?.value === el?.equipments_type_id);
-            if (bldgExist && equipTypeExist) newMappedEquipList.push(el);
-        });
-
-        handleTargetChange('lists', newMappedEquipList);
-        setEquipmentsList(newMappedEquipList);
     };
 
     useEffect(() => {
