@@ -122,7 +122,8 @@ const Target = (props) => {
                                             : `target-type-container`
                                     }`}
                                     onClick={() => {
-                                        handleTargetChange('type', 'building');
+                                        !(isFetchingData || isFetchingEquipments) &&
+                                            handleTargetChange('type', 'building');
                                     }}>
                                     <BuildingTypeSVG className="p-0 square" width={20} height={20} />
                                     <Typography.Subheader
@@ -139,7 +140,8 @@ const Target = (props) => {
                                             : `target-type-container`
                                     }`}
                                     onClick={() => {
-                                        handleTargetChange('type', 'equipment');
+                                        !(isFetchingData || isFetchingEquipments) &&
+                                            handleTargetChange('type', 'equipment');
                                     }}>
                                     <EquipmentTypeSVG className="p-0 square" width={20} height={20} />
                                     <Typography.Subheader
