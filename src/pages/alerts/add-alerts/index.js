@@ -192,6 +192,19 @@ const ConfigureAlerts = (props) => {
         return label;
     };
 
+    const handleEquipmentListChange = (originalEquipsList, equipTypeList, selectedBldgslist) => {
+        const newMappedEquipList = [];
+
+        originalEquipsList.forEach((el) => {
+            const bldgExist = selectedBldgslist.some((item) => item?.value === el?.building_id);
+            const equipTypeExist = equipTypeList.some((item) => item?.value === el?.equipments_type_id);
+            if (bldgExist && equipTypeExist) newMappedEquipList.push(el);
+        });
+
+        handleTargetChange('lists', newMappedEquipList);
+        setEquipmentsList(newMappedEquipList);
+    };
+
     const fetchAllEquipmentsList = (bldgList = [], equipTypeList = []) => {
         if (!bldgList || bldgList.length === 0) return;
 
@@ -206,31 +219,50 @@ const ConfigureAlerts = (props) => {
             .then((res) => {
                 const response = res;
                 let newMappedEquipmentList = [];
+                let newMappedOriginalEquipmentList = [];
 
                 response.forEach((record, index) => {
                     if (record?.status === 200) {
                         const responseData = record?.data?.data;
+
                         if (responseData) {
-                            const equipmentsList = responseData.map((el) => ({
-                                label: el?.equipments_name,
-                                value: el?.equipments_id,
-                                building_id: buildingsList[index]?.value,
-                                equipments_type_id: el?.equipments_type_id,
-                            }));
-                            newMappedEquipmentList = [...newMappedEquipmentList, ...equipmentsList];
+                            let newFilteredEquipmentsList = [];
+
+                            responseData.forEach((el) => {
+                                const mappedEquipObj = {
+                                    label: el?.equipments_name,
+                                    value: el?.equipments_id,
+                                    building_id: buildingsList[index]?.value,
+                                    equipments_type_id: el?.equipments_type_id,
+                                };
+
+                                newMappedOriginalEquipmentList.push(mappedEquipObj);
+
+                                const matchedType = equipTypeList.find(
+                                    (type) => type?.value === el?.equipments_type_id
+                                );
+                                if (matchedType?.value) {
+                                    newFilteredEquipmentsList.push(mappedEquipObj);
+                                }
+                            });
+                            newMappedEquipmentList = [...newMappedEquipmentList, ...newFilteredEquipmentsList];
                         }
                     }
                 });
 
-                // if(equipTypeList.length !== 0){
+                let newFilteredList = [];
 
-                // }
+                newMappedOriginalEquipmentList.forEach((el) => {
+                    const bldgExist = alertObj?.target?.buildingIDs.some((item) => item?.value === el?.building_id);
+                    const equipTypeExist = alertObj?.target?.typesList.some(
+                        (item) => item?.value === el?.equipments_type_id
+                    );
+                    if (bldgExist && equipTypeExist) newFilteredList.push(el);
+                });
 
-                if (newMappedEquipmentList) {
-                    setEquipmentsList(newMappedEquipmentList);
-                    setOriginalEquipmentsList(newMappedEquipmentList);
-                    handleTargetChange('lists', newMappedEquipmentList);
-                }
+                setOriginalEquipmentsList(newMappedOriginalEquipmentList);
+                if (alertObj?.target?.lists.length === 0) handleTargetChange('lists', newMappedEquipmentList);
+                setEquipmentsList(newFilteredList);
             })
             .catch(() => {})
             .finally(() => {
@@ -239,10 +271,10 @@ const ConfigureAlerts = (props) => {
     };
 
     useEffect(() => {
-        if (buildingsList.length !== 0 && alertObj?.target?.type === 'equipment') {
-            fetchAllEquipmentsList(buildingsList);
+        if (alertObj?.target?.type === 'equipment' && buildingsList.length !== 0 && equipmentTypeList.length !== 0) {
+            fetchAllEquipmentsList(buildingsList, equipmentTypeList);
         }
-    }, [buildingsList]);
+    }, [buildingsList, equipmentTypeList]);
 
     useEffect(() => {
         const label = renderTargetedBuildingsList(alertObj, originalBuildingsList);
@@ -303,6 +335,7 @@ const ConfigureAlerts = (props) => {
             setFetching(true);
             setOriginalBuildingsList([]);
             setBuildingsList([]);
+            setEquipmentTypeList([]);
 
             const promiseOne = fetchBuildingsList(false);
             const promiseTwo = getEquipTypeData();
@@ -330,7 +363,13 @@ const ConfigureAlerts = (props) => {
                             }));
                             setEquipmentTypeList(newMappedEquipTypesData);
 
-                            updateAlertForEquipmentTypeData(newMappedEquipTypesData, newMappedBldgsData);
+                            if (
+                                alertObj?.target?.typesList.length === 0 &&
+                                alertObj?.target?.lists.length === 0 &&
+                                alertObj?.target?.buildingIDs.length === 0
+                            ) {
+                                updateAlertForEquipmentTypeData(newMappedEquipTypesData, newMappedBldgsData);
+                            }
                         }
                     }
                 })
@@ -361,6 +400,7 @@ const ConfigureAlerts = (props) => {
                         filteredBuildingsList={filteredBuildingsList}
                         setBuildingsList={setBuildingsList}
                         fetchAllEquipmentsList={fetchAllEquipmentsList}
+                        handleEquipmentListChange={handleEquipmentListChange}
                         {...props}
                     />
                 </Col>
