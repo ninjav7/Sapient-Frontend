@@ -421,7 +421,8 @@ const PlugRule = () => {
 
         if (!_.isEmpty(res) && bldgTimeZone) {
             await getEstimateSensorSavingsRequst(res, ids, ruleId, bldgTimeZone).then((res) => {
-                setEstimatedEnergySavings(res.data);
+                const dataRounded = Math.round(res.data);
+                setEstimatedEnergySavings(dataRounded);
             });
         }
     };
@@ -936,7 +937,9 @@ const PlugRule = () => {
             });
         const res =
             sortedData && sortedData[0]?.response
-                ? moment.parseZone(sortedData[0].response?.time_stamp).format(prepareTimeAndDateFormat(dateFormat, timeFormat))
+                ? moment
+                      .parseZone(sortedData[0].response?.time_stamp)
+                      .format(prepareTimeAndDateFormat(dateFormat, timeFormat))
                 : '';
         return res;
     };
@@ -2543,9 +2546,9 @@ const PlugRule = () => {
                             {plugRuleStatus && plugRuleStatus.last_updated && (
                                 <Typography.Subheader size={Typography.Sizes.sm}>
                                     Last Update:{' '}
-                                    {moment.parseZone(plugRuleStatus.last_updated).format(
-                                        prepareTimeAndDateFormat(dateFormat, timeFormat)
-                                    )}
+                                    {moment
+                                        .parseZone(plugRuleStatus.last_updated)
+                                        .format(prepareTimeAndDateFormat(dateFormat, timeFormat))}
                                 </Typography.Subheader>
                             )}
                         </div>
