@@ -149,11 +149,11 @@ export const GroupHeading = ({ children, ...props }) => {
 
 //Multi
 const BadgeSingleValue = ({ handleCloseBtn, ...props }) => (
-    <div className="multi-single-value" {...props}>
+    <div className="multi-select-value" {...props}>
         <Typography.Body size={Typography.Sizes.lg} className="d-flex align-items-center">
             {props.children}
         </Typography.Body>
-        <button onClick={handleCloseBtn} type="button" className="multi-single-value-close-btn">
+        <button onClick={handleCloseBtn} type="button" className="multi-select-close-btn">
             <CloseSVG />
         </button>
     </div>
