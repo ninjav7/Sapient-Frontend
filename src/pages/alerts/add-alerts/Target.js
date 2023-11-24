@@ -199,10 +199,13 @@ const Target = (props) => {
                                                     name="select"
                                                     className="w-100"
                                                     isSearchable={true}
-                                                    // isSelectAll={buildingsList && buildingsList.length !== 0}
+                                                    isSelectAll={true}
                                                     options={buildingsList}
                                                     onChange={(selectedBldgTypeList) => {
-                                                        handleTargetChange('lists', selectedBldgTypeList);
+                                                        const value = selectedBldgTypeList.filter(
+                                                            (el) => el?.value !== 'all'
+                                                        );
+                                                        handleTargetChange('lists', value);
                                                     }}
                                                     value={alertObj?.target?.lists ?? []}
                                                     menuPlacement="auto"

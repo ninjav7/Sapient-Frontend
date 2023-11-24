@@ -85,6 +85,10 @@ const MultiSelect = ({
         setValue(props.value);
     }, [props.value]);
 
+    useEffect(() => {
+        props.isSelectAll && setValue([selectAllOption, ...value]);
+    }, [props.isSelectAll]);
+
     return (
         <div
             className={cx(`react-select-wrapper`, className, { 'is-error': !!error })}
@@ -131,7 +135,7 @@ const MultiSelect = ({
                         setValue([]);
                         return;
                     }
-                    props.onChange && props.onChange(props.withSelectAllOption ? options : props.options);
+                    props.onChange && props.onChange(props.isSelectAll ? options : props.options);
                     setValue(options);
                 }}
                 isMulti={true}
