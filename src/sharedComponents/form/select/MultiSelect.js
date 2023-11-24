@@ -82,20 +82,6 @@ const MultiSelect = ({
         props.onMenuClose && props.onMenuClose(event, props);
     };
 
-    // useEffect(() => {
-    //     if (props.value && props.value.length === 0) {
-    //         setValue([]);
-    //         return;
-    //     }
-
-    //     if (props.isSelectAll) {
-    //         const filteredOptions = filterOutSelectAllOption(props.value);
-    //         setValue([selectAllOption, ...filteredOptions]);
-    //     } else {
-    //         setValue(props.value);
-    //     }
-    // }, [props.value, props.isSelectAll]);
-
     useEffect(() => {
         if (!props.value || props.value.length === 0) {
             setValue([]);
