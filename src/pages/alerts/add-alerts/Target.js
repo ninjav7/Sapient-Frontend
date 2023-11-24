@@ -204,10 +204,6 @@ const Target = (props) => {
                                                     isSelectAll={true}
                                                     options={buildingsList}
                                                     onChange={(selectedBldgTypeList) => {
-                                                        console.log(
-                                                            'SSR selectedBldgTypeList => ',
-                                                            selectedBldgTypeList
-                                                        );
                                                         handleTargetChange(
                                                             'lists',
                                                             filterOutSelectAllOption(selectedBldgTypeList)
