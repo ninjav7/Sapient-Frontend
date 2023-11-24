@@ -19,6 +19,7 @@ import useClickOutside from '../../hooks/useClickOutside';
 import { stringOrNumberPropTypes } from '../../helpers/helper';
 import { DROPDOWN_INPUT_TYPES } from './index';
 import { selectAllOption } from './constants';
+import { filterOutSelectAllOption } from './helpers';
 
 import { ReactComponent as ErrorSVG } from '../../assets/icons/errorInfo.svg';
 
@@ -82,8 +83,15 @@ const MultiSelect = ({
     };
 
     useEffect(() => {
-        setValue(props.value);
-    }, [props.value]);
+        if (!props.value || props.value.length === 0) {
+            setValue([]);
+        } else if (props.isSelectAll) {
+            const filteredOptions = filterOutSelectAllOption(props.value);
+            setValue([selectAllOption, ...filteredOptions]);
+        } else {
+            setValue(props.value);
+        }
+    }, [props.value, props.isSelectAll]);
 
     return (
         <div
@@ -131,7 +139,7 @@ const MultiSelect = ({
                         setValue([]);
                         return;
                     }
-                    props.onChange && props.onChange(props.withSelectAllOption ? options : props.options);
+                    props.onChange && props.onChange(props.isSelectAll ? options : props.options);
                     setValue(options);
                 }}
                 isMulti={true}
