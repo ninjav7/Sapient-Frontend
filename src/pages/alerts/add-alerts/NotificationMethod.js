@@ -16,6 +16,7 @@ import { ReactComponent as MinutesSVG } from '../../../assets/icon/minutes.svg';
 import { ReactComponent as UserProfileSVG } from '../../../assets/icon/user-profile.svg';
 import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
+import { filterOutSelectAllOption } from '../../../sharedComponents/form/select/helpers';
 import { fetchCommaSeperatedEmailAddresses, getCommaSeparatedObjectLabels } from '../helpers';
 import { fetchMemberUserList } from '../../settings/users/service';
 
@@ -231,11 +232,10 @@ const NotificationMethod = (props) => {
                                                         options={usersList}
                                                         placeholder="Choose User"
                                                         isSearchable={usersList && usersList.length > 5}
+                                                        isSelectAll={usersList && usersList.length !== 0}
                                                         onChange={(selectedUsersList) => {
-                                                            handleNotificationChange(
-                                                                'selectedUserId',
-                                                                selectedUsersList
-                                                            );
+                                                            const values = filterOutSelectAllOption(selectedUsersList);
+                                                            handleNotificationChange('selectedUserId', values);
                                                         }}
                                                         value={alertObj?.notification?.selectedUserId ?? []}
                                                         menuPlacement="auto"

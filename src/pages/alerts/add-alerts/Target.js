@@ -173,17 +173,15 @@ const Target = (props) => {
                                                     name="select"
                                                     className="w-100"
                                                     isSearchable={true}
-                                                    // isSelectAll={buildingTypeList && buildingTypeList.length !== 0}
+                                                    isSelectAll={buildingTypeList && buildingTypeList.length !== 0}
                                                     options={buildingTypeList}
                                                     onChange={(newBldgTypeList) => {
+                                                        const values = filterOutSelectAllOption(newBldgTypeList);
                                                         handleTargetChange('lists', []);
                                                         setBuildingsList(
-                                                            filteredBuildingsList(
-                                                                newBldgTypeList,
-                                                                originalBuildingsList
-                                                            )
+                                                            filteredBuildingsList(values, originalBuildingsList)
                                                         );
-                                                        handleTargetChange('typesList', newBldgTypeList);
+                                                        handleTargetChange('typesList', values);
                                                     }}
                                                     value={alertObj?.target?.typesList ?? []}
                                                     menuPlacement="auto"
@@ -201,7 +199,7 @@ const Target = (props) => {
                                                     name="select"
                                                     className="w-100"
                                                     isSearchable={true}
-                                                    isSelectAll={true}
+                                                    isSelectAll={buildingsList && buildingsList.length !== 0}
                                                     options={buildingsList}
                                                     onChange={(selectedBldgTypeList) => {
                                                         handleTargetChange(
@@ -270,21 +268,23 @@ const Target = (props) => {
                                                 name="select"
                                                 className="w-100"
                                                 isSearchable={true}
-                                                // isSelectAll={
-                                                //     originalBuildingsList && originalBuildingsList.length !== 0
-                                                // }
+                                                isSelectAll={
+                                                    originalBuildingsList && originalBuildingsList.length !== 0
+                                                }
                                                 options={originalBuildingsList}
                                                 onChange={setSelectedBldgsForEquip}
                                                 onMenuClose={() => {
                                                     if (selectedBldgsForEquip.length !== 0) {
-                                                        handleTargetChange('buildingIDs', selectedBldgsForEquip);
-                                                        if (selectedBldgsForEquip.length === 0) {
+                                                        const filteredBldgsList =
+                                                            filterOutSelectAllOption(selectedBldgsForEquip);
+                                                        handleTargetChange('buildingIDs', filteredBldgsList);
+                                                        if (filteredBldgsList.length === 0) {
                                                             setEquipmentsList([]);
                                                             setOriginalEquipmentsList([]);
                                                             handleTargetChange('lists', []);
                                                         } else {
                                                             fetchAllEquipmentsList(
-                                                                selectedBldgsForEquip,
+                                                                filteredBldgsList,
                                                                 alertObj?.target?.typesList
                                                             );
                                                         }
@@ -311,15 +311,16 @@ const Target = (props) => {
                                                         name="select"
                                                         className="w-100"
                                                         isSearchable={true}
-                                                        // isSelectAll={
-                                                        //     equipmentTypeList && equipmentTypeList.length !== 0
-                                                        // }
+                                                        isSelectAll={
+                                                            equipmentTypeList && equipmentTypeList.length !== 0
+                                                        }
                                                         options={equipmentTypeList}
                                                         onChange={(value) => {
-                                                            handleTargetChange('typesList', value);
+                                                            const filteredList = filterOutSelectAllOption(value);
+                                                            handleTargetChange('typesList', filteredList);
                                                             handleEquipmentListChange(
                                                                 originalEquipmentsList,
-                                                                value,
+                                                                filteredList,
                                                                 alertObj?.target?.buildingIDs
                                                             );
                                                         }}
@@ -341,10 +342,13 @@ const Target = (props) => {
                                                             name="select"
                                                             className="w-100"
                                                             isSearchable={true}
-                                                            // isSelectAll={equipmentsList && equipmentsList.length !== 0}
+                                                            isSelectAll={equipmentsList && equipmentsList.length !== 0}
                                                             options={equipmentsList}
                                                             onChange={(value) => {
-                                                                handleTargetChange('lists', value);
+                                                                handleTargetChange(
+                                                                    'lists',
+                                                                    filterOutSelectAllOption(value)
+                                                                );
                                                             }}
                                                             value={alertObj?.target?.lists ?? []}
                                                             menuPlacement="auto"
