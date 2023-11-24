@@ -14,6 +14,8 @@ import { DataTableWidgetContext } from '../DataTableWidget';
 import { StatusFilter } from './StatusFilter';
 
 import { FILTER_TYPES } from '../constants';
+import { filterOutSelectAllOption } from '../../form/select/helpers';
+
 import SearchSVG from '../../assets/icons/search.svg';
 import { ReactComponent as PlusSVG } from '../../assets/icons/plus.svg';
 
@@ -70,8 +72,9 @@ const mapFilters = {
         const [selectedOptions, setSelectedOptions] = useState([]);
 
         const handleChange = (options) => {
-            props.onChange && props.onChange(options);
-            setSelectedOptions(options);
+            const filteredList = filterOutSelectAllOption(options);
+            props.onChange && props.onChange(filteredList);
+            setSelectedOptions(filteredList);
         };
 
         return (
