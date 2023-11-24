@@ -10,6 +10,7 @@ const usePlotBandsLegends = ({ plotBandsProp, plotBandsLegends }) => {
     useEffect(() => {
         setPlotBands(plotBandsProp);
     }, [plotBandsProp]);
+
     const renderPlotBandsLegends = useCallback(
         _.uniqBy(
             [...(plotBandsLegends || []), ...(plotBandsProp || []).filter((plot) => plot.type in PLOT_BANDS_TYPE)],
@@ -81,7 +82,7 @@ const usePlotBandsLegends = ({ plotBandsProp, plotBandsLegends }) => {
 
             return { onClick, label, styles, type: plotLegend.type };
         }),
-        []
+        [plotBands]
     );
 
     return { plotBands, renderPlotBandsLegends };

@@ -43,6 +43,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import colorPalette from '../../assets/scss/_colors.scss';
 import './style.css';
+import LineChart from '../../sharedComponents/lineChart/LineChart';
 
 const BuildingOverview = () => {
     const { bldgId } = useParams();
@@ -121,12 +122,77 @@ const BuildingOverview = () => {
     const [totalBldgUsageBySpaceType, setTotalBldgUsageBySpaceType] = useState(0);
     const [totalBldgUsageByFloor, setTotalBldgUsageByFloor] = useState(0);
 
+    const [showAfterHours, setShowAfterHours] = useState(false);
+
     //EquipChartModel
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
     const [showEquipmentChart, setShowEquipmentChart] = useState(false);
     const handleChartOpen = () => setShowEquipmentChart(true);
     const handleChartClose = () => setShowEquipmentChart(false);
+
+    const checkWhetherShowAfterHours = () => (showAfterHours ? getPlotBands() : null);
+
+    const formatTime = (time) => {
+        const timeWDot = time.replace(':', '.');
+
+        if (timeWDot[0] === '0') {
+            return timeWDot.slice(1);
+        } else {
+            return timeWDot.slice(0);
+        }
+    };
+
+    const getPlotBands = () => {
+        const bldgIdObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+
+        if (!bldgIdObj) return;
+
+        const weekOperHours = bldgIdObj?.operating_hours;
+        const currDay = moment(startDate).format('ddd').toLowerCase();
+        const dayOperHours = weekOperHours[currDay];
+
+        if (!dayOperHours.stat) return null;
+
+        const {
+            time_range: { frm, to },
+        } = dayOperHours;
+
+        const formattedFrom = formatTime(frm);
+        const formattedTo = formatTime(to);
+
+        const subHours = ['15', '30', '45', '00'];
+
+        const subHoursFromSubHours = subHours.find(
+            (subHours) =>
+                subHours ===
+                formattedFrom
+                    .split('')
+                    .slice(formattedFrom.length - 2)
+                    .join('')
+        );
+
+        const subHoursToSubHours = subHours.find(
+            (subHours) =>
+                subHours ===
+                formattedTo
+                    .split('')
+                    .slice(formattedTo.length - 2)
+                    .join('')
+        );
+
+        if (!subHoursFromSubHours || !subHoursToSubHours) {
+            return null;
+        }
+
+        return [
+            {
+                type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                from: formattedFrom,
+                to: formattedTo,
+            },
+        ];
+    };
 
     const formatXaxis = ({ value }) => {
         return moment.utc(value).format(`${dateFormat}`);
@@ -523,6 +589,10 @@ const BuildingOverview = () => {
     };
 
     useEffect(() => {
+        setShowAfterHours(startDate === endDate);
+    }, [startDate, endDate]);
+
+    useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
             const xaxisObj = xaxisLabelsCount(days_count);
             if (xaxisObj) xaxisObj.legend = { enabled: false };
@@ -640,7 +710,7 @@ const BuildingOverview = () => {
                                 restChartProps={xAxisObj}
                                 tooltipCallBackValue={toolTipFormatter}
                                 temperatureSeries={weatherData}
-                                plotBands={null}
+                                plotBands={checkWhetherShowAfterHours()}
                                 withTemp={isWeatherChartVisible}
                                 isChartLoading={isEnergyChartLoading}
                             />
@@ -676,7 +746,6 @@ const BuildingOverview = () => {
                                 showRouteBtn={true}
                                 timeFormat={userPrefTimeFormat}
                             />
-
                             <div className="mt-4">
                                 <ColumnChart
                                     title="Total Energy Consumption"
@@ -692,7 +761,7 @@ const BuildingOverview = () => {
                                     restChartProps={xAxisObj}
                                     tooltipCallBackValue={toolTipFormatter}
                                     temperatureSeries={weatherData}
-                                    plotBands={null}
+                                    plotBands={checkWhetherShowAfterHours()}
                                     upperLegendsProps={{
                                         weather: {
                                             onClick: ({ withTemp }) => {
