@@ -25,7 +25,3 @@ export const customComparator = (value1, value2, key) => {
     }
     return undefined;
 };
-
-export const filterOutSelectAllOption = (options) => {
-    return options.filter((el) => el?.value !== selectAllOption?.value);
-};

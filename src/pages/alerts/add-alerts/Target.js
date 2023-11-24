@@ -13,9 +13,10 @@ import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/ass
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 
+import { filterOutSelectAllOption } from '../../../sharedComponents/form/select/helpers';
+
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-import { filterOutSelectAllOption } from '../helpers';
 
 const TargetToolTip = () => {
     return (
@@ -203,10 +204,13 @@ const Target = (props) => {
                                                     isSelectAll={true}
                                                     options={buildingsList}
                                                     onChange={(selectedBldgTypeList) => {
+                                                        console.log(
+                                                            'SSR selectedBldgTypeList => ',
+                                                            selectedBldgTypeList
+                                                        );
                                                         handleTargetChange(
                                                             'lists',
                                                             filterOutSelectAllOption(selectedBldgTypeList)
-                                                            // selectedBldgTypeList
                                                         );
                                                     }}
                                                     value={alertObj?.target?.lists ?? []}

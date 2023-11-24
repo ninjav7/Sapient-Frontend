@@ -1,4 +1,5 @@
 import cx from 'classnames';
+import { selectAllOption } from './constants';
 
 const conditionalClass = (props) => (props.selectProps.menuIsOpen ? 'is-open' : 'is-closed');
 
@@ -10,4 +11,8 @@ const optionClasses = ({ isDisabled, isFocused, isSelected, customOption }) =>
         customOption: !!customOption,
     });
 
-export { conditionalClass, optionClasses };
+const filterOutSelectAllOption = (options) => {
+    return options.filter((el) => el?.value !== selectAllOption?.value);
+};
+
+export { conditionalClass, optionClasses, filterOutSelectAllOption };
