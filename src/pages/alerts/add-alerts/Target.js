@@ -15,6 +15,7 @@ import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
+import { filterOutSelectAllOption } from '../helpers';
 
 const TargetToolTip = () => {
     return (
@@ -202,10 +203,11 @@ const Target = (props) => {
                                                     isSelectAll={true}
                                                     options={buildingsList}
                                                     onChange={(selectedBldgTypeList) => {
-                                                        const value = selectedBldgTypeList.filter(
-                                                            (el) => el?.value !== 'all'
+                                                        handleTargetChange(
+                                                            'lists',
+                                                            filterOutSelectAllOption(selectedBldgTypeList)
+                                                            // selectedBldgTypeList
                                                         );
-                                                        handleTargetChange('lists', value);
                                                     }}
                                                     value={alertObj?.target?.lists ?? []}
                                                     menuPlacement="auto"
