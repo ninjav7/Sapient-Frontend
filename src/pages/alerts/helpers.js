@@ -1,3 +1,5 @@
+import { selectAllOption } from '../../sharedComponents/form/select/constants';
+
 export function showCommaSeparatedEmails(array) {
     return array.join(', ');
 }
@@ -22,4 +24,8 @@ export const customComparator = (value1, value2, key) => {
         return true; // Exclude comparison of obj.target.type
     }
     return undefined;
+};
+
+export const filterOutSelectAllOption = (options) => {
+    return options.filter((el) => el?.value !== selectAllOption?.value);
 };
