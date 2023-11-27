@@ -25,7 +25,7 @@ import { fetchBuildingsList } from '../../../services/buildings';
 import { getEquipTypeData } from '../../settings/equipment-type/services';
 import { getAllBuildingTypes } from '../../settings/general-settings/services';
 
-import { defaultAlertObj, defaultConditionObj, defaultNotificationObj } from '../constants';
+import { TARGET_TYPES, defaultAlertObj, defaultConditionObj, defaultNotificationObj } from '../constants';
 import { capitalizeFirstLetter } from '../../../helpers/helpers';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
@@ -187,8 +187,8 @@ const ConfigureAlerts = (props) => {
 
     const renderTargetTypeHeader = (alert_obj) => {
         let label = '';
-        if (alert_obj?.target?.type === 'building') label = 'Building';
-        if (alert_obj?.target?.type === 'equipment') label = 'Equipment';
+        if (alert_obj?.target?.type === TARGET_TYPES.BUILDING) label = TARGET_TYPES.BUILDING;
+        if (alert_obj?.target?.type === TARGET_TYPES.EQUIPMENT) label = TARGET_TYPES.EQUIPMENT;
         return label;
     };
 
@@ -271,7 +271,11 @@ const ConfigureAlerts = (props) => {
     };
 
     useEffect(() => {
-        if (alertObj?.target?.type === 'equipment' && buildingsList.length !== 0 && equipmentTypeList.length !== 0) {
+        if (
+            alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
+            buildingsList.length !== 0 &&
+            equipmentTypeList.length !== 0
+        ) {
             fetchAllEquipmentsList(buildingsList, equipmentTypeList);
         }
     }, [buildingsList, equipmentTypeList]);
@@ -282,7 +286,7 @@ const ConfigureAlerts = (props) => {
     }, [alertObj?.target?.lists, originalBuildingsList]);
 
     useEffect(() => {
-        if (alertObj?.target?.type === 'building') {
+        if (alertObj?.target?.type === TARGET_TYPES.BUILDING) {
             setFetching(true);
             setOriginalBuildingsList([]);
             setBuildingsList([]);
@@ -331,7 +335,7 @@ const ConfigureAlerts = (props) => {
                 });
         }
 
-        if (alertObj?.target?.type === 'equipment') {
+        if (alertObj?.target?.type === TARGET_TYPES.EQUIPMENT) {
             setFetching(true);
             setOriginalBuildingsList([]);
             setBuildingsList([]);
@@ -578,12 +582,12 @@ const AddAlerts = () => {
     const isTargetSetAndSubmitted = alertObj?.target?.type !== '' && alertObj?.target?.submitted;
 
     const isBuildingConfigured =
-        alertObj?.target?.type === 'building' &&
+        alertObj?.target?.type === TARGET_TYPES.BUILDING &&
         alertObj?.target?.lists.length !== 0 &&
         alertObj?.target?.typesList.length !== 0;
 
     const isEquipmentConfigured =
-        alertObj?.target?.type === 'equipment' &&
+        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
         alertObj?.target?.lists.length !== 0 &&
         alertObj?.target?.typesList.length !== 0 &&
         alertObj?.target?.buildingIDs.length !== 0;
@@ -591,13 +595,13 @@ const AddAlerts = () => {
     const isConditionSet = alertObj?.condition?.type !== '';
 
     const isBuildingConditionsSet =
-        alertObj?.target?.type === 'building' &&
+        alertObj?.target?.type === TARGET_TYPES.BUILDING &&
         (alertObj?.condition?.filterType === 'previous_month' ||
             alertObj?.condition?.filterType === 'previous_year' ||
             (alertObj?.condition?.filterType === 'number' && alertObj?.condition?.thresholdValue !== ''));
 
     const isEquipmentConditionsSet =
-        alertObj?.target?.type === 'equipment' &&
+        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
         ((alertObj?.condition?.type === 'rms_current' && alertObj?.condition?.thresholdPercentage !== '') ||
             (alertObj?.condition?.type === 'shortcycling' && alertObj?.condition?.shortcyclingMinutes !== '') ||
             (alertObj?.condition?.type !== 'rms_current' &&

@@ -9,6 +9,7 @@ import SkeletonLoader from '../../../components/SkeletonLoader';
 import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/assets/icons/building-type.svg';
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 
+import { TARGET_TYPES } from '../constants';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
@@ -29,7 +30,7 @@ const OpenAlerts = (props) => {
     const renderAlertType = (row) => {
         return (
             <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                {row?.target_type === 'Building' ? (
+                {row?.target_type === TARGET_TYPES.BUILDING ? (
                     <BuildingTypeSVG className="p-0 square" />
                 ) : (
                     <EquipmentTypeSVG className="p-0 square" />

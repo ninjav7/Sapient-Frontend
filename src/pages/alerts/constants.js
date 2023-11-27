@@ -1,3 +1,8 @@
+export const TARGET_TYPES = Object.freeze({
+    BUILDING: 'building',
+    EQUIPMENT: 'equipment',
+});
+
 export const defaultConditionObj = {
     type: '',
     level: 'above',

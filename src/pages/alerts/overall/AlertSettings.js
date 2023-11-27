@@ -11,6 +11,7 @@ import { alertSettingsMock } from './mock';
 
 import DeleteAlert from './DeleterAlert';
 
+import { TARGET_TYPES } from '../constants';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
@@ -31,7 +32,7 @@ const AlertSettings = () => {
     const renderAlertType = (row) => {
         return (
             <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                {row?.target_type === 'Building' ? (
+                {row?.target_type === TARGET_TYPES.BUILDING ? (
                     <BuildingTypeSVG className="p-0 square" />
                 ) : (
                     <EquipmentTypeSVG className="p-0 square" />

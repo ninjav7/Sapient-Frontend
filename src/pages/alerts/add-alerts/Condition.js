@@ -14,6 +14,7 @@ import { ReactComponent as MinutesSVG } from '../../../assets/icon/minutes.svg';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 
 import {
+    TARGET_TYPES,
     bldgAlertConditions,
     conditionLevelsList,
     equipAlertConditions,
@@ -45,10 +46,10 @@ const Condition = (props) => {
 
     let conditionsList = [];
     switch (targetType) {
-        case 'building':
+        case TARGET_TYPES.BUILDING:
             conditionsList = bldgAlertConditions;
             break;
-        case 'equipment':
+        case TARGET_TYPES.EQUIPMENT:
             conditionsList = equipAlertConditions;
             break;
         default:
@@ -58,12 +59,12 @@ const Condition = (props) => {
     const fetchConditionStyle = (alert_obj) => {
         let label = `condition-grid-default`;
 
-        if (alert_obj?.target?.type === 'building') {
+        if (alert_obj?.target?.type === TARGET_TYPES.BUILDING) {
             label = `condition-grid-for-bldg`;
             if (alert_obj?.condition?.filterType === `number`) label += `-with-value`;
         }
 
-        if (alert_obj?.target?.type === 'equipment') {
+        if (alert_obj?.target?.type === TARGET_TYPES.EQUIPMENT) {
             label = `condition-grid-for-equip`;
             if (alert_obj?.condition?.type === 'shortcycling') {
                 label += `-with-shortcycling`;
@@ -107,7 +108,7 @@ const Condition = (props) => {
                         />
 
                         {/* Building conditions fields */}
-                        {targetType === 'building' && conditionType !== '' && (
+                        {targetType === TARGET_TYPES.BUILDING && conditionType !== '' && (
                             <>
                                 <Select
                                     id="condition_lvl"
@@ -152,7 +153,7 @@ const Condition = (props) => {
                         )}
 
                         {/* Equipment conditions fields */}
-                        {targetType === 'equipment' && conditionType !== '' && (
+                        {targetType === TARGET_TYPES.EQUIPMENT && conditionType !== '' && (
                             <>
                                 {conditionType === 'rms_current' && (
                                     <Select
@@ -233,9 +234,9 @@ const Condition = (props) => {
                         )}
                     </div>
 
-                    <Brick sizeInRem={targetType === 'building' ? 1 : 0.5} />
+                    <Brick sizeInRem={targetType === TARGET_TYPES.BUILDING ? 1 : 0.5} />
 
-                    {targetType === 'building' && conditionType === 'energy_consumption' && (
+                    {targetType === TARGET_TYPES.BUILDING && conditionType === 'energy_consumption' && (
                         <div className="d-flex" style={{ gap: '1rem' }}>
                             <Checkbox
                                 label="Alert at 50%"
@@ -269,7 +270,7 @@ const Condition = (props) => {
                         </div>
                     )}
 
-                    {targetType === 'building' && conditionType === 'peak_demand' && (
+                    {targetType === TARGET_TYPES.BUILDING && conditionType === 'peak_demand' && (
                         <Checkbox
                             label="Alert at 90%"
                             type="checkbox"
@@ -286,14 +287,14 @@ const Condition = (props) => {
                         />
                     )}
 
-                    {alertObj?.target?.type !== 'building' && alertObj?.condition?.type && (
+                    {alertObj?.target?.type !== TARGET_TYPES.BUILDING && alertObj?.condition?.type && (
                         <>
                             <hr />
                             <Brick sizeInRem={0.5} />
                         </>
                     )}
 
-                    {alertObj?.target?.type !== 'building' && alertObj?.condition?.type && (
+                    {alertObj?.target?.type !== TARGET_TYPES.BUILDING && alertObj?.condition?.type && (
                         <>
                             <Typography.Subheader size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
 
