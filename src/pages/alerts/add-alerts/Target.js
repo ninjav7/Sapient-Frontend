@@ -15,6 +15,7 @@ import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/
 
 import { filterOutSelectAllOption } from '../../../sharedComponents/form/select/helpers';
 
+import { TARGET_TYPES } from '../constants';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
@@ -57,7 +58,7 @@ const Target = (props) => {
     const [selectedBldgsForEquip, setSelectedBldgsForEquip] = useState([]);
 
     useEffect(() => {
-        if (alertObj?.target?.type !== 'equipment' && selectedBldgsForEquip.length !== 0) {
+        if (alertObj?.target?.type !== TARGET_TYPES.EQUIPMENT && selectedBldgsForEquip.length !== 0) {
             setSelectedBldgsForEquip([]);
         }
     }, [alertObj?.target?.type]);
@@ -107,13 +108,13 @@ const Target = (props) => {
                             <div className="d-flex" style={{ gap: '0.75rem' }}>
                                 <div
                                     className={`d-flex align-items-center mouse-pointer ${
-                                        alertObj?.target?.type === 'building'
+                                        alertObj?.target?.type === TARGET_TYPES.BUILDING
                                             ? `target-type-container-active`
                                             : `target-type-container`
                                     }`}
                                     onClick={() => {
                                         !(isFetchingData || isFetchingEquipments) &&
-                                            handleTargetChange('type', 'building');
+                                            handleTargetChange('type', TARGET_TYPES.BUILDING);
                                     }}>
                                     <BuildingTypeSVG className="p-0 square" width={20} height={20} />
                                     <Typography.Subheader
@@ -125,13 +126,13 @@ const Target = (props) => {
 
                                 <div
                                     className={`d-flex align-items-center mouse-pointer ${
-                                        alertObj?.target?.type === 'equipment'
+                                        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT
                                             ? `target-type-container-active`
                                             : `target-type-container`
                                     }`}
                                     onClick={() => {
                                         !(isFetchingData || isFetchingEquipments) &&
-                                            handleTargetChange('type', 'equipment');
+                                            handleTargetChange('type', TARGET_TYPES.EQUIPMENT);
                                     }}>
                                     <EquipmentTypeSVG className="p-0 square" width={20} height={20} />
                                     <Typography.Subheader
@@ -155,7 +156,7 @@ const Target = (props) => {
                             </>
                         )}
 
-                        {alertObj?.target?.type === 'building' && (
+                        {alertObj?.target?.type === TARGET_TYPES.BUILDING && (
                             <div>
                                 {isFetchingData ? (
                                     <Skeleton count={2} width={1000} height={20} />
@@ -253,7 +254,7 @@ const Target = (props) => {
                             </div>
                         )}
 
-                        {alertObj?.target?.type === 'equipment' && (
+                        {alertObj?.target?.type === TARGET_TYPES.EQUIPMENT && (
                             <div>
                                 {isFetchingData ? (
                                     <Skeleton count={2} width={1000} height={20} />

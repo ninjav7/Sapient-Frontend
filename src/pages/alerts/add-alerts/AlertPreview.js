@@ -8,7 +8,7 @@ import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
-import { bldgAlertConditions, equipAlertConditions, filtersForEnergyConsumption } from '../constants';
+import { TARGET_TYPES, bldgAlertConditions, equipAlertConditions, filtersForEnergyConsumption } from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
@@ -21,7 +21,7 @@ const AlertPreview = (props) => {
     const renderAlertCondition = (alert_obj) => {
         let text = '';
 
-        if (alert_obj?.target?.type === 'building') {
+        if (alert_obj?.target?.type === TARGET_TYPES.BUILDING) {
             let alertType = bldgAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
             if (alertType) text += alertType?.label;
 
@@ -38,7 +38,7 @@ const AlertPreview = (props) => {
             }
         }
 
-        if (alert_obj?.target?.type === 'equipment') {
+        if (alert_obj?.target?.type === TARGET_TYPES.EQUIPMENT) {
             let alertType = equipAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
             if (alertType) text += alertType?.label;
 
