@@ -575,18 +575,37 @@ const AddAlerts = () => {
         });
     };
 
-    const isAlertConfigured =
-        alertObj?.target?.type !== '' &&
+    const isTargetSetAndSubmitted = alertObj?.target?.type !== '' && alertObj?.target?.submitted;
+
+    const isBuildingConfigured =
+        alertObj?.target?.type === 'building' &&
         alertObj?.target?.lists.length !== 0 &&
-        alertObj?.target?.submitted &&
-        alertObj?.condition?.type !== '' &&
-        ((alertObj?.condition?.filterType === 'number' && alertObj?.condition?.thresholdValue !== '') ||
-            alertObj?.condition?.filterType !== 'number' ||
-            (alertObj?.condition?.type === 'rms_current' && alertObj?.condition?.thresholdPercentage !== '') ||
+        alertObj?.target?.typesList.length !== 0;
+
+    const isEquipmentConfigured =
+        alertObj?.target?.type === 'equipment' &&
+        alertObj?.target?.lists.length !== 0 &&
+        alertObj?.target?.typesList.length !== 0 &&
+        alertObj?.target?.buildingIDs.length !== 0;
+
+    const isConditionSet = alertObj?.condition?.type !== '';
+
+    const isBuildingConditionsSet =
+        alertObj?.target?.type === 'building' &&
+        (alertObj?.condition?.filterType === 'previous_month' ||
+            alertObj?.condition?.filterType === 'previous_year' ||
+            (alertObj?.condition?.filterType === 'number' && alertObj?.condition?.thresholdValue !== ''));
+
+    const isEquipmentConditionsSet =
+        alertObj?.target?.type === 'equipment' &&
+        ((alertObj?.condition?.type === 'rms_current' && alertObj?.condition?.thresholdPercentage !== '') ||
             (alertObj?.condition?.type === 'shortcycling' && alertObj?.condition?.shortcyclingMinutes !== '') ||
             (alertObj?.condition?.type !== 'rms_current' &&
                 alertObj?.condition?.type !== 'shortcycling' &&
                 alertObj?.condition?.thresholdPercentage !== ''));
+
+    const isTargetConfigured = isTargetSetAndSubmitted && (isBuildingConfigured || isEquipmentConfigured);
+    const isConditionConfigured = isConditionSet && (isBuildingConditionsSet || isEquipmentConditionsSet);
 
     useEffect(() => {
         updateBreadcrumbStore();
@@ -613,7 +632,7 @@ const AddAlerts = () => {
                     <CreateAlertHeader
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
-                        isAlertConfigured={isAlertConfigured}
+                        isAlertConfigured={isTargetConfigured && isConditionConfigured}
                         onAlertCreate={() => {
                             handleCreateAlert(alertObj);
                         }}
