@@ -22,7 +22,10 @@ import { Checkbox } from '../../sharedComponents/form/checkbox';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 import Typography from '../../sharedComponents/typography';
+
+import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
 import ExploreCompareChart from '../../sharedComponents/exploreCompareChart/ExploreCompareChart';
+
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 
 import {
@@ -1060,6 +1063,12 @@ const ExploreByEquipment = () => {
         }
     }, [checkedAll]);
 
+    useEffect(() => {
+        setSeriesData([]);
+        setPastSeriesData([]);
+        setSelectedEquipIds([]);
+    }, [isInComparisonMode]);
+
     const dataToRenderOnChart = validateSeriesDataForEquipments(selectedEquipIds, equipDataList, seriesData);
     const pastDataToRenderOnChart = validateSeriesDataForEquipments(selectedEquipIds, equipDataList, pastSeriesData);
 
@@ -1105,19 +1114,86 @@ const ExploreByEquipment = () => {
                             </div>
                         </div>
                     ) : (
-                        <ExploreCompareChart
-                            title={''}
-                            subTitle={''}
-                            data={dataToRenderOnChart}
-                            pastData={pastDataToRenderOnChart}
-                            tooltipUnit={selectedUnit}
-                            tooltipLabel={selectedConsumptionLabel}
-                            chartProps={{
-                                tooltip: {
-                                    xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
-                                },
-                            }}
-                        />
+                        <>
+                            {isInComparisonMode ? (
+                                <ExploreCompareChart
+                                    title={''}
+                                    subTitle={''}
+                                    data={dataToRenderOnChart}
+                                    pastData={pastDataToRenderOnChart}
+                                    tooltipUnit={selectedUnit}
+                                    tooltipLabel={selectedConsumptionLabel}
+                                    chartProps={{
+                                        tooltip: {
+                                            xDateFormat: dateTimeFormatForHighChart(
+                                                userPrefDateFormat,
+                                                userPrefTimeFormat
+                                            ),
+                                        },
+                                    }}
+                                />
+                            ) : (
+                                <ExploreChart
+                                    title={''}
+                                    subTitle={''}
+                                    isLoadingData={false}
+                                    disableDefaultPlotBands={true}
+                                    tooltipValuesKey={'{point.y:.1f}'}
+                                    tooltipUnit={selectedUnit}
+                                    tooltipLabel={selectedConsumptionLabel}
+                                    data={dataToRenderOnChart}
+                                    chartProps={{
+                                        navigator: {
+                                            outlineWidth: 0,
+                                            adaptToUpdatedData: false,
+                                            stickToMax: true,
+                                        },
+                                        plotOptions: {
+                                            series: {
+                                                states: {
+                                                    inactive: {
+                                                        opacity: 1,
+                                                    },
+                                                },
+                                            },
+                                        },
+                                        xAxis: {
+                                            gridLineWidth: 0,
+                                            type: 'datetime',
+                                            labels: {
+                                                format: formatXaxisForHighCharts(
+                                                    daysCount,
+                                                    userPrefDateFormat,
+                                                    userPrefTimeFormat,
+                                                    selectedConsumption
+                                                ),
+                                            },
+                                        },
+                                        yAxis: [
+                                            {
+                                                gridLineWidth: 1,
+                                                lineWidth: 1,
+                                                opposite: false,
+                                                lineColor: null,
+                                            },
+                                            {
+                                                opposite: true,
+                                                title: false,
+                                                max: 120,
+                                                postFix: '23',
+                                                gridLineWidth: 0,
+                                            },
+                                        ],
+                                        tooltip: {
+                                            xDateFormat: dateTimeFormatForHighChart(
+                                                userPrefDateFormat,
+                                                userPrefTimeFormat
+                                            ),
+                                        },
+                                    }}
+                                />
+                            )}
+                        </>
                     )}
                 </div>
             </Row>
