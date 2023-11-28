@@ -30,9 +30,9 @@ const ExploreCompareChart = (props) => {
     const {
         title,
         subTitle,
-        isLoadingData = false,
         data = [],
         pastData = [],
+        isLoadingData = false,
         tooltipUnit,
         tooltipLabel,
         chartProps = {},
@@ -93,16 +93,12 @@ const ExploreCompareChart = (props) => {
                     />
                 </div>
             </div>
-            {isLoadingData ? (
-                <EmptyExploreChart />
-            ) : (
-                <HighchartsReact
-                    highcharts={Highcharts}
-                    constructorType={'stockChart'}
-                    options={chartConfig}
-                    ref={chartComponentRef}
-                />
-            )}
+            <HighchartsReact
+                highcharts={Highcharts}
+                constructorType={'stockChart'}
+                options={chartConfig}
+                ref={chartComponentRef}
+            />
         </div>
     );
 };

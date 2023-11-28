@@ -1108,7 +1108,6 @@ const ExploreByEquipment = () => {
                         <ExploreCompareChart
                             title={''}
                             subTitle={''}
-                            isLoadingData={false}
                             data={dataToRenderOnChart}
                             pastData={pastDataToRenderOnChart}
                             tooltipUnit={selectedUnit}
