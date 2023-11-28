@@ -1,50 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import { Cookies } from 'react-cookie';
+
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+
+import AddCustomer from './addCustomer';
+import Brick from '../../../sharedComponents/brick';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
-import { useHistory } from 'react-router-dom';
-import colorPalette from '../../../assets/scss/_colors.scss';
+import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
+import SkeletonLoader from '../../../components/SkeletonLoader';
+import { TRENDS_BADGE_TYPES, TrendsBadge } from '../../../sharedComponents/trendsBadge';
+
 import { ReactComponent as MiniLogo } from '../../../assets/icon/miniLogo.svg';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import { ReactComponent as InactiveSVG } from '../../../assets/icon/ban.svg';
 import { ReactComponent as ActiveSVG } from '../../../assets/icon/circle-check.svg';
-import { TRENDS_BADGE_TYPES, TrendsBadge } from '../../../sharedComponents/trendsBadge';
-import { fetchCustomerList, fetchSelectedCustomer, fetchOfflineDevices } from './services';
-import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
+
 import { getCustomerListCSVExport } from '../../../utils/tablesExport';
-import 'moment-timezone';
 import { percentageHandler, timeZone } from '../../../utils/helper';
-import AddCustomer from './addCustomer';
-import Brick from '../../../sharedComponents/brick';
 import { formatConsumptionValue } from '../../../helpers/helpers';
+import { fetchCustomerList, fetchSelectedCustomer, fetchOfflineDevices } from './services';
+
+import colorPalette from '../../../assets/scss/_colors.scss';
 import './style.scss';
-import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const Accounts = () => {
-    // Modal states
-
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-    const history = useHistory();
-
-    const [isUserDataFetched, setIsUserDataFetched] = useState(false);
-    const [openCustomer, setOpenCustomer] = useState(false);
-
-    const closeAddCustomer = () => setOpenCustomer(false);
-    const [userData, setUserData] = useState([]);
-    const [offlineData, setOfflineData] = useState([]);
+    const { download } = useCSVDownload();
 
     const [totalItems, setTotalItems] = useState(0);
+    const [customersList, setCustomersList] = useState([]);
+    const [isFetchingCustomersList, setFetchingCustomersList] = useState(false);
+
+    const [isCustomerModalOpen, setCustomerModal] = useState(false);
+    const openCustomerModal = () => setCustomerModal(true);
+    const closeCustomerModal = () => setCustomerModal(false);
+
     const [selectedStatus, setSelectedStatus] = useState(0);
+
+    const [sortBy, setSortBy] = useState({});
     const [search, setSearch] = useState('');
-    const { download } = useCSVDownload();
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
-    const [sortBy, setSortBy] = useState({});
+
     const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
     const fetchTrendBadgeType = (now, old) => {
@@ -52,80 +52,81 @@ const Accounts = () => {
         if (now < old) return TRENDS_BADGE_TYPES.DOWNWARD_TREND;
     };
 
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Accounts',
-                        path: '/super-user/accounts',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'account';
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
-
-    const getCustomerList = async () => {
-        setIsUserDataFetched(true);
-        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'vendor_name' : sortBy.name;
-        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'ace' : sortBy.method;
-        let params = `?customer_search=${search}&timezone=${timeZone}&page_no=${pageNo}&page_size=${pageSize}&ordered_by=${ordered_by}&sort_by=${sort_by}`;
-        await fetchCustomerList(params)
-            .then(async (res) => {
-                let response = res.data;
-                let userDt = response?.data;
-
-                let allArr = [];
-                userDt.map((ele) => {
-                    let match = offlineData.filter((el) => el?.vendor_id === ele?.vendor_id);
-                    if (match.length > 0)
-                        allArr.push({
-                            active_devices: ele?.active_devices,
-                            passive_devices: ele?.passive_devices,
-                            status: ele?.status,
-                            total_usage: ele?.total_usage / 1000,
-                            old_usage: ele?.old_usage / 1000,
-                            vendor_id: ele?.vendor_id,
-                            vendor_name: ele?.vendor_name,
-                            offline_active_devices: match[0]?.offline_active_devices,
-                            offline_passive_devices: match[0]?.offline_passive_devices,
-                        });
-                });
-                setTotalItems(response?.total_data);
-                setUserData(allArr);
-                setIsUserDataFetched(false);
-            })
-            .catch((error) => {
-                setIsUserDataFetched(false);
-            });
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Accounts',
+                    path: '/super-user/accounts',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'account';
+        });
     };
-    const getOfflineDevices = async () => {
-        setIsUserDataFetched(true);
+
+    const getOfflineDevices = async (latestCustomersList) => {
         await fetchOfflineDevices()
             .then((res) => {
-                let response = res.data;
-                setOfflineData(response?.data);
-                setIsUserDataFetched(false);
+                const response = res?.data;
+                if (response?.success) {
+                    const devicesList = response?.data;
+
+                    if (latestCustomersList.length !== 0 && devicesList.length !== 0) {
+                        let newMappedCustomerList = latestCustomersList;
+
+                        newMappedCustomerList.forEach((customer) => {
+                            const deviceObj = devicesList.find((device) => device?.vendor_id === customer?.vendor_id);
+                            if (deviceObj?.vendor_id) {
+                                customer.offline_active_devices = deviceObj?.offline_active_devices;
+                                customer.offline_passive_devices = deviceObj?.offline_passive_devices;
+                            }
+                        });
+
+                        setCustomersList(newMappedCustomerList);
+                    }
+                }
             })
-            .catch((error) => {
-                setIsUserDataFetched(false);
-            });
+            .catch((error) => {})
+            .finally(() => {});
     };
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-        getOfflineDevices();
-    }, []);
+    const getCustomersList = async () => {
+        setFetchingCustomersList(true);
+        setCustomersList([]);
 
-    useEffect(() => {
-        if (offlineData.length !== 0) getCustomerList();
-    }, [search, offlineData, pageNo, pageSize, sortBy]);
+        const ordered_by = sortBy?.name === undefined || sortBy?.method === null ? 'vendor_name' : sortBy?.name;
+        const sort_by = sortBy?.method === undefined || sortBy?.method === null ? 'ace' : sortBy?.method;
+
+        const params = `?customer_search=${search}&timezone=${timeZone}&page_no=${pageNo}&page_size=${pageSize}&ordered_by=${ordered_by}&sort_by=${sort_by}`;
+
+        await fetchCustomerList(params)
+            .then(async (res) => {
+                const response = res?.data;
+
+                if (response?.success) {
+                    let responseData = response?.data;
+
+                    responseData.forEach((el) => {
+                        el.total_usage = el?.total_usage / 1000;
+                        el.old_usage = el?.old_usage / 1000;
+                    });
+
+                    if (responseData) {
+                        setCustomersList(responseData);
+                        getOfflineDevices(responseData);
+                    }
+                    if (response?.total_data) setTotalItems(response?.total_data);
+                }
+            })
+            .catch((error) => {})
+            .finally(() => {
+                setFetchingCustomersList(false);
+            });
+    };
 
     const handleDownloadCsv = async () => {
         setDownloadingCSVData(true);
@@ -162,134 +163,98 @@ const Accounts = () => {
                 localStorage.setItem('vendorName', response?.data.vendor_name);
                 window.open(`/energy/portfolio/overview`, '_blank');
             })
-            .catch((error) => {
-                setIsUserDataFetched(false);
-            });
+            .catch((error) => {});
     };
 
-    const currentRow = () => {
-        if (selectedStatus === 2) return userData;
-        else if (selectedStatus === 0) {
-            return userData.filter((ele) => ele?.status === true);
-        } else {
-            return userData.filter((ele) => ele?.status === false);
-        }
-    };
+    const renderActiveDevices = (row) => (
+        <>
+            <div style={{ display: 'flex', flexDirection: 'row' }}>
+                <Typography.Body size={Typography.Sizes.md} className="mt-1">
+                    {row?.active_devices}
+                </Typography.Body>
+                {row?.offline_active_devices > 0 ? (
+                    <Typography.Subheader
+                        size={Typography.Sizes.md}
+                        className="d-flex offline-container justify-content-center"
+                        style={{ color: colorPalette.error700 }}>
+                        {row?.offline_active_devices} offline
+                    </Typography.Subheader>
+                ) : null}
+            </div>
+        </>
+    );
 
-    const renderActiveDevices = (row) => {
-        return (
-            <>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <Typography.Body size={Typography.Sizes.sm} className="mt-1">
-                        {row?.active_devices}
+    const renderPassiveDevices = (row) => (
+        <>
+            <div style={{ display: 'flex', flexDirection: 'row' }}>
+                <Typography.Body size={Typography.Sizes.md} className="mt-1">
+                    {row?.passive_devices}
+                </Typography.Body>
+                {row?.offline_passive_devices > 0 ? (
+                    <Typography.Body
+                        size={Typography.Sizes.md}
+                        className="d-flex offline-container justify-content-center"
+                        style={{ color: colorPalette.error700 }}>
+                        {row?.offline_passive_devices} offline
                     </Typography.Body>
-                    {row?.offline_active_devices > 0 ? (
-                        <Typography.Subheader
-                            size={Typography.Sizes.sm}
-                            className="d-flex offline-container justify-content-center"
-                            style={{ color: colorPalette.error700 }}>
-                            {row?.offline_active_devices} offline
-                        </Typography.Subheader>
-                    ) : null}
-                </div>
-            </>
-        );
-    };
+                ) : null}
+            </div>
+        </>
+    );
 
-    const renderPassiveDevices = (row) => {
-        return (
-            <>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <Typography.Body size={Typography.Sizes.sm} className="mt-1">
-                        {row?.passive_devices}
-                    </Typography.Body>
-                    {row?.offline_passive_devices > 0 ? (
-                        <Typography.Subheader
-                            size={Typography.Sizes.sm}
-                            className="d-flex offline-container justify-content-center"
-                            style={{ color: colorPalette.error700 }}>
-                            {row?.offline_passive_devices} offline
-                        </Typography.Subheader>
-                    ) : null}
-                </div>
-            </>
-        );
-    };
+    const renderStatus = (row) => (
+        <Typography.Body
+            size={Typography.Sizes.md}
+            className={`d-flex justify-content-center align-items-center 
+                    ${row?.status ? `active-container` : `inactive-container`}`}
+            style={{
+                color: row?.status ? colorPalette.success700 : colorPalette.primaryGray800,
+                cursor: 'pointer',
+            }}>
+            {row?.status ? <ActiveSVG width={20} height={15} /> : <InactiveSVG width={20} height={15} />}
+            {row?.status ? `Active` : `Inactive`}
+        </Typography.Body>
+    );
 
-    const renderStatus = (row) => {
-        if (row?.status === false) {
-            return (
-                <Typography.Subheader
-                    size={Typography.Sizes.sm}
-                    className="d-flex inactive-container justify-content-center"
-                    style={{ color: colorPalette.primaryGray800 }}>
-                    <InactiveSVG style={{ marginTop: '0.125rem' }} />
-                    Inactive
-                </Typography.Subheader>
-            );
-        } else if (row?.status === true) {
-            return (
-                <Typography.Subheader
-                    size={Typography.Sizes.sm}
-                    className="d-flex active-container justify-content-center"
-                    style={{ color: colorPalette.success700 }}>
-                    <ActiveSVG style={{ marginTop: '0.125rem' }} />
-                    Active
-                </Typography.Subheader>
-            );
-        }
-    };
+    const renderAccountID = (row) => (
+        <Typography.Body size={Typography.Sizes.md}>{row?.vendor_id === '' ? '-' : row?.vendor_id}</Typography.Body>
+    );
 
-    const renderAccountID = (row) => {
-        return (
-            <Typography.Body size={Typography.Sizes.sm}>{row?.vendor_id === '' ? '-' : row?.vendor_id}</Typography.Body>
-        );
-    };
-    const renderAccountName = (row) => {
-        return (
-            <Typography.Link
-                size={Typography.Sizes.md}
-                className="mouse-pointer"
-                onClick={() => redirectToVendorPage(row?.vendor_id)}>
-                {row?.vendor_name === '' ? '-' : row?.vendor_name}
-            </Typography.Link>
-        );
-    };
+    const renderAccountName = (row) => (
+        <Typography.Link
+            size={Typography.Sizes.md}
+            className="mouse-pointer"
+            onClick={() => redirectToVendorPage(row?.vendor_id)}>
+            {row?.vendor_name === '' ? '-' : row?.vendor_name}
+        </Typography.Link>
+    );
 
-    const renderEnergy = (row) => {
-        return (
-            <>
-                <Row style={{ padding: '0.5rem 0.625rem' }}>
-                    <Typography.Body size={Typography.Sizes.sm} className="mr-2">
-                        {formatConsumptionValue(row.total_usage, 2)} kWh
-                    </Typography.Body>
-                    <TrendsBadge
-                        value={percentageHandler(row?.total_usage, row?.old_usage)}
-                        type={fetchTrendBadgeType(row?.total_usage, row?.old_usage)}
-                    />
-                </Row>
-            </>
-        );
-    };
+    const renderEnergy = (row) => (
+        <>
+            <Row style={{ padding: '0.5rem 0.625rem' }}>
+                <Typography.Body size={Typography.Sizes.md} className="mr-2">
+                    {formatConsumptionValue(row.total_usage, 2)} kWh
+                </Typography.Body>
+                <TrendsBadge
+                    value={percentageHandler(row?.total_usage, row?.old_usage)}
+                    type={fetchTrendBadgeType(row?.total_usage, row?.old_usage)}
+                />
+            </Row>
+        </>
+    );
 
-    const renderActions = (row) => {
-        return (
-            <>
-                <Row style={{ padding: '0.5rem 0.625rem' }}>
-                    <Button
-                        label="View"
-                        size={Button.Sizes.lg}
-                        className="sub-button"
-                        type={Button.Type.secondaryGrey}
-                        icon={<MiniLogo />}
-                        onClick={() => {
-                            redirectToVendorPage(row?.vendor_id);
-                        }}
-                    />
-                </Row>
-            </>
-        );
-    };
+    const renderActions = (row) => (
+        <Button
+            label="View"
+            size={Button.Sizes.lg}
+            className="sub-button w-75"
+            type={Button.Type.secondaryGrey}
+            icon={<MiniLogo width={20} height={20} />}
+            onClick={() => {
+                redirectToVendorPage(row?.vendor_id);
+            }}
+        />
+    );
 
     const headerProps = [
         {
@@ -349,6 +314,22 @@ const Accounts = () => {
             value: '100',
         },
     ];
+
+    const currentRow = () => {
+        if (selectedStatus === 0) return customersList.filter((el) => el?.status);
+        if (selectedStatus === 1) return customersList.filter((el) => !el?.status);
+        if (selectedStatus === 2) return customersList;
+    };
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        updateBreadcrumbStore();
+    }, []);
+
+    useEffect(() => {
+        getCustomersList();
+    }, [search, pageNo, pageSize, sortBy]);
+
     return (
         <React.Fragment>
             <Row>
@@ -362,9 +343,7 @@ const Accounts = () => {
                                 label={'Add Customer'}
                                 size={Button.Sizes.md}
                                 type={Button.Type.primary}
-                                onClick={() => {
-                                    setOpenCustomer(true);
-                                }}
+                                onClick={openCustomerModal}
                                 icon={<PlusSVG />}
                             />
                         </div>
@@ -377,16 +356,16 @@ const Accounts = () => {
             <Row>
                 <Col lg={12}>
                     <DataTableWidget
-                        isLoading={isUserDataFetched}
-                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length} noOfRows={15} />}
                         id="admin-accounts"
+                        isLoading={isFetchingCustomersList}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length} noOfRows={15} />}
                         onSearch={(query) => {
                             setPageNo(1);
                             setPageSize(20);
                             setSearch(query);
                         }}
-                        onDownload={() => handleDownloadCsv()}
                         isCSVDownloading={isCSVDownloading}
+                        onDownload={() => handleDownloadCsv()}
                         buttonGroupFilterOptions={[{ label: 'Active' }, { label: 'Inactive' }, { label: 'All' }]}
                         onStatus={setSelectedStatus}
                         onPageSize={(currentPageSize) => {
@@ -408,10 +387,9 @@ const Accounts = () => {
             </Row>
 
             <AddCustomer
-                isAddCustomerOpen={openCustomer}
-                closeAddCustomerModal={closeAddCustomer}
-                getCustomerList={getCustomerList}
-                getOfflineDevices={getOfflineDevices}
+                isAddCustomerOpen={isCustomerModalOpen}
+                closeAddCustomerModal={closeCustomerModal}
+                getCustomerList={getCustomersList}
                 pageSize={setPageSize}
                 pageNo={setPageNo}
             />
