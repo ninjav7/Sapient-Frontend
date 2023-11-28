@@ -1,24 +1,36 @@
 import React from 'react';
+import moment from 'moment';
 import { hexToRgb } from '../../utils/helper';
 import { DATAVIZ_COLORS } from '../../constants/colors';
 import { renderComponents } from '../columnChart/helper';
 import Typography from '../../sharedComponents/typography';
 import { formatConsumptionValue } from '../helpers/helper';
 import { sampleDataFour, sampleDataOne, sampleDataThree, sampleDataTwo } from './mock';
+import { getPastDateRange } from '../../helpers/helpers';
 
-export const customPreparedData = (data = [], pastData = []) => {
+export const customPreparedData = (data = [], pastData = [], timeIntervalObj) => {
+    const pastDateObj = getPastDateRange(timeIntervalObj?.startDate, timeIntervalObj?.daysCount);
+
+    const presentSelectionDateLabel = `${moment(timeIntervalObj?.startDate).format('MMM D')} - ${moment(
+        timeIntervalObj?.endDate
+    ).format('MMM D')}`;
+
+    const pastSelectionDateLabel = `${moment(pastDateObj?.startDate).format('MMM D')} - ${moment(
+        pastDateObj?.endDate
+    ).format('MMM D')}`;
+
     let comparedDataList = [];
 
     data.forEach((el, index) => {
         const presentDataObj = {
-            name: el?.name,
+            name: `${el?.name} (${presentSelectionDateLabel})`,
             data: el?.data,
             xAxis: 0,
             dashStyle: 'Solid',
             color: DATAVIZ_COLORS[`datavizMain${index + 1}`],
         };
         const pastDataObj = {
-            name: pastData[index]?.name,
+            name: `${pastData[index]?.name} (${pastSelectionDateLabel})`,
             data: pastData[index]?.data,
             xAxis: 1,
             dashStyle: 'Dash',
@@ -31,7 +43,7 @@ export const customPreparedData = (data = [], pastData = []) => {
     return comparedDataList;
 };
 
-export const multipleLineChartOptions = ({ data = [], pastData = [], tooltipUnit, tooltipLabel }) => {
+export const multipleLineChartOptions = ({ data = [], pastData = [], tooltipUnit, tooltipLabel, timeIntervalObj }) => {
     return {
         chart: {
             type: 'line',
@@ -162,7 +174,7 @@ export const multipleLineChartOptions = ({ data = [], pastData = [], tooltipUnit
         time: {
             useUTC: true,
         },
-        series: customPreparedData(data, pastData),
+        series: customPreparedData(data, pastData, timeIntervalObj),
     };
 };
 

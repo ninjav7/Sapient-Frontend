@@ -1123,6 +1123,11 @@ const ExploreByEquipment = () => {
                                     pastData={pastDataToRenderOnChart}
                                     tooltipUnit={selectedUnit}
                                     tooltipLabel={selectedConsumptionLabel}
+                                    timeIntervalObj={{
+                                        startDate,
+                                        endDate,
+                                        daysCount,
+                                    }}
                                     chartProps={{
                                         tooltip: {
                                             xDateFormat: dateTimeFormatForHighChart(

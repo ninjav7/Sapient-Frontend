@@ -36,6 +36,7 @@ const ExploreCompareChart = (props) => {
         tooltipUnit,
         tooltipLabel,
         chartProps = {},
+        timeIntervalObj = {},
     } = props;
 
     const handleDropDownOptionClicked = (name) => {
@@ -60,6 +61,7 @@ const ExploreCompareChart = (props) => {
             pastData,
             tooltipUnit,
             tooltipLabel,
+            timeIntervalObj,
         }),
         chartProps
     );
