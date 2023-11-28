@@ -76,17 +76,21 @@ const Accounts = () => {
                     const devicesList = response?.data;
 
                     if (latestCustomersList.length !== 0 && devicesList.length !== 0) {
-                        let newMappedCustomerList = latestCustomersList;
-
-                        newMappedCustomerList.forEach((customer) => {
+                        const updatedCustomersList = latestCustomersList.map((customer) => {
                             const deviceObj = devicesList.find((device) => device?.vendor_id === customer?.vendor_id);
+
                             if (deviceObj?.vendor_id) {
-                                customer.offline_active_devices = deviceObj?.offline_active_devices;
-                                customer.offline_passive_devices = deviceObj?.offline_passive_devices;
+                                return {
+                                    ...customer,
+                                    offline_active_devices: deviceObj?.offline_active_devices,
+                                    offline_passive_devices: deviceObj?.offline_passive_devices,
+                                };
                             }
+
+                            return customer;
                         });
 
-                        setCustomersList(newMappedCustomerList);
+                        setCustomersList(updatedCustomersList);
                     }
                 }
             })
@@ -322,13 +326,16 @@ const Accounts = () => {
     };
 
     useEffect(() => {
-        window.scrollTo(0, 0);
         updateBreadcrumbStore();
     }, []);
 
     useEffect(() => {
         getCustomersList();
     }, [search, pageNo, pageSize, sortBy]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pageNo, pageSize]);
 
     return (
         <React.Fragment>
