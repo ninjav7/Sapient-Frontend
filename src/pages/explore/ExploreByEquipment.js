@@ -13,6 +13,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 import Header from '../../components/Header';
+import SkeletonLoader from '../../components/SkeletonLoader';
 import EquipChartModal from '../chartModal/EquipChartModal';
 import Brick from '../../sharedComponents/brick';
 import Select from '../../sharedComponents/form/select';
@@ -21,7 +22,7 @@ import { Checkbox } from '../../sharedComponents/form/checkbox';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 import Typography from '../../sharedComponents/typography';
-import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
+import ExploreCompareChart from '../../sharedComponents/exploreCompareChart/ExploreCompareChart';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 
 import {
@@ -29,6 +30,7 @@ import {
     dateTimeFormatForHighChart,
     formatConsumptionValue,
     formatXaxisForHighCharts,
+    getPastDateRange,
     pageListSizes,
 } from '../../helpers/helpers';
 import { UNITS } from '../../constants/units';
@@ -39,7 +41,6 @@ import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilt
 
 import './style.css';
 import './styles.scss';
-import SkeletonLoader from '../../components/SkeletonLoader';
 
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
@@ -68,6 +69,7 @@ const ExploreByEquipment = () => {
     const [filterObj, setFilterObj] = useState({});
     const [filterOptions, setFilterOptions] = useState([]);
     const [seriesData, setSeriesData] = useState([]);
+    const [pastSeriesData, setPastSeriesData] = useState([]);
     const [equipDataList, setEquipDataList] = useState([]);
 
     const [isFiltersFetching, setFiltersFetching] = useState(false);
@@ -112,6 +114,8 @@ const ExploreByEquipment = () => {
 
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
+
+    const [isInComparisonMode, setComparisonMode] = useState(false);
 
     // Chart metric
     const metric = [
@@ -356,6 +360,7 @@ const ExploreByEquipment = () => {
                     if (data.length === 0) {
                         setSelectedEquipIds([]);
                         setSeriesData([]);
+                        setComparisonMode(false);
                     }
                     if (total_data) setTotalItems(total_data);
                 }
@@ -368,6 +373,12 @@ const ExploreByEquipment = () => {
 
     const fetchSingleEquipChartData = async (equipId, device_type) => {
         const payload = apiRequestBody(startDate, endDate, timeZone);
+        let previousDataPayload = {};
+
+        if (isInComparisonMode) {
+            const pastDateObj = getPastDateRange(startDate, daysCount);
+            previousDataPayload = apiRequestBody(pastDateObj?.startDate, pastDateObj?.endDate, timeZone);
+        }
 
         const params = `?building_id=${bldgId}&consumption=${
             selectedConsumption === 'rmsCurrentMilliAmps' && device_type === 'active' ? 'mAh' : selectedConsumption
@@ -375,69 +386,78 @@ const ExploreByEquipment = () => {
             selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
         }`;
 
-        await fetchExploreEquipmentChart(payload, params)
+        let promisesList = [];
+        promisesList.push(fetchExploreEquipmentChart(payload, params));
+        if (isInComparisonMode) promisesList.push(fetchExploreEquipmentChart(previousDataPayload, params));
+
+        Promise.all(promisesList)
             .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    const { data } = response;
+                const response = res;
 
-                    const equipObj = equipDataList.find((el) => el?.equipment_id === equipId);
-                    if (!equipObj?.equipment_id || data.length === 0) return;
+                response.forEach((record, index) => {
+                    if (record?.status === 200 && record?.data?.success) {
+                        const { data } = record?.data;
 
-                    if (selectedConsumption === 'rmsCurrentMilliAmps') {
-                        const chartData = [];
+                        const equipObj = equipDataList.find((el) => el?.equipment_id === equipId);
 
-                        let legendName = equipObj?.equipment_name;
-                        if (equipObj?.location.includes('>')) {
-                            legendName += ` - ${equipObj?.location.split('>')[1].trim()}`;
+                        if (!equipObj?.equipment_id || data.length === 0) return;
+
+                        if (selectedConsumption === 'rmsCurrentMilliAmps') {
+                            let chartData = [];
+
+                            let legendName = equipObj?.equipment_name;
+                            if (equipObj?.location.includes('>')) {
+                                legendName += ` - ${equipObj?.location.split('>')[1].trim()}`;
+                            }
+
+                            data.forEach((sensorObj) => {
+                                const newSensorMappedData = sensorObj?.data.map((el) => ({
+                                    x: new Date(el?.time_stamp).getTime(),
+                                    y: el?.consumption === '' ? null : el?.consumption,
+                                }));
+
+                                chartData.push({
+                                    id: equipObj?.equipment_id,
+                                    name: `${legendName} - Sensor ${sensorObj?.sensor_name}`,
+                                    data: newSensorMappedData,
+                                });
+                            });
+
+                            if (index === 0) setSeriesData([...seriesData, ...chartData]);
+                            if (index === 1) setPastSeriesData([...pastSeriesData, ...chartData]);
                         }
 
-                        data.forEach((sensorObj) => {
-                            const newSensorMappedData = sensorObj?.data.map((el) => ({
+                        if (selectedConsumption !== 'rmsCurrentMilliAmps') {
+                            let legendName = equipObj?.equipment_name;
+                            if (equipObj?.location.includes('>')) {
+                                legendName += ` - ${equipObj?.location.split('>')[1].trim()}`;
+                            }
+                            const newEquipMappedData = data.map((el) => ({
                                 x: new Date(el?.time_stamp).getTime(),
                                 y: el?.consumption === '' ? null : el?.consumption,
                             }));
 
-                            chartData.push({
+                            const recordToInsert = {
                                 id: equipObj?.equipment_id,
-                                name: `${legendName} - Sensor ${sensorObj?.sensor_name}`,
-                                data: newSensorMappedData,
-                            });
-                        });
+                                name: legendName,
+                                data: newEquipMappedData,
+                            };
 
-                        setSeriesData([...seriesData, ...chartData]);
-                    }
-
-                    if (selectedConsumption !== 'rmsCurrentMilliAmps') {
-                        let legendName = equipObj?.equipment_name;
-                        if (equipObj?.location.includes('>')) {
-                            legendName += ` - ${equipObj?.location.split('>')[1].trim()}`;
+                            if (index === 0) setSeriesData([...seriesData, recordToInsert]);
+                            if (index === 1) setPastSeriesData([...pastSeriesData, recordToInsert]);
                         }
-
-                        const newEquipMappedData = data.map((el) => ({
-                            x: new Date(el?.time_stamp).getTime(),
-                            y: el?.consumption === '' ? null : el?.consumption,
-                        }));
-
-                        const recordToInsert = {
-                            id: equipObj?.equipment_id,
-                            name: legendName,
-                            data: newEquipMappedData,
-                        };
-
-                        setSeriesData([...seriesData, recordToInsert]);
+                    } else {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message
+                                ? response?.message
+                                : res
+                                ? 'Unable to fetch data for selected Equipment.'
+                                : 'Unable to fetch data due to Internal Server Error!.';
+                            s.notificationType = 'error';
+                        });
                     }
-                } else {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = response?.message
-                            ? response?.message
-                            : res
-                            ? 'Unable to fetch data for selected Equipment.'
-                            : 'Unable to fetch data due to Internal Server Error!.';
-                        s.notificationType = 'error';
-                    });
-                }
+                });
             })
             .catch((err) => {
                 UserStore.update((s) => {
@@ -1035,27 +1055,45 @@ const ExploreByEquipment = () => {
         }
         if (!checkedAll) {
             setSeriesData([]);
+            setComparisonMode(false);
             setSelectedEquipIds([]);
         }
     }, [checkedAll]);
 
     const dataToRenderOnChart = validateSeriesDataForEquipments(selectedEquipIds, equipDataList, seriesData);
+    const pastDataToRenderOnChart = validateSeriesDataForEquipments(selectedEquipIds, equipDataList, pastSeriesData);
 
     return (
         <>
-            <Row className="explore-filters-style p-2">
-                <div className="mr-2">
-                    <Select
-                        defaultValue={selectedConsumption}
-                        options={metric}
-                        onChange={(e) => {
-                            setConsumption(e.value);
-                            handleUnitChange(e.value);
-                            handleConsumptionChange(e.value);
-                        }}
-                    />
+            <Row className="d-flex justify-content-end">
+                <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
+                    <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
+                        <div className="mr-1">
+                            <Checkbox
+                                label="Enable Compare"
+                                type="checkbox"
+                                id="compare-chart-data"
+                                name="compare-chart-data"
+                                size="md"
+                                checked={isInComparisonMode}
+                                value={isInComparisonMode}
+                                onClick={(e) => {
+                                    e.target.value === 'false' ? setComparisonMode(true) : setComparisonMode(false);
+                                }}
+                            />
+                        </div>
+                        <Select
+                            defaultValue={selectedConsumption}
+                            options={metric}
+                            onChange={(e) => {
+                                setConsumption(e.value);
+                                handleUnitChange(e.value);
+                                handleConsumptionChange(e.value);
+                            }}
+                        />
+                        <Header title="" type="page" />
+                    </div>
                 </div>
-                <Header title="" type="page" />
             </Row>
 
             <Row>
@@ -1067,57 +1105,15 @@ const ExploreByEquipment = () => {
                             </div>
                         </div>
                     ) : (
-                        <ExploreChart
+                        <ExploreCompareChart
                             title={''}
                             subTitle={''}
                             isLoadingData={false}
-                            disableDefaultPlotBands={true}
-                            tooltipValuesKey={'{point.y:.1f}'}
+                            data={dataToRenderOnChart}
+                            pastData={pastDataToRenderOnChart}
                             tooltipUnit={selectedUnit}
                             tooltipLabel={selectedConsumptionLabel}
-                            data={dataToRenderOnChart}
                             chartProps={{
-                                navigator: {
-                                    outlineWidth: 0,
-                                    adaptToUpdatedData: false,
-                                    stickToMax: true,
-                                },
-                                plotOptions: {
-                                    series: {
-                                        states: {
-                                            inactive: {
-                                                opacity: 1,
-                                            },
-                                        },
-                                    },
-                                },
-                                xAxis: {
-                                    gridLineWidth: 0,
-                                    type: 'datetime',
-                                    labels: {
-                                        format: formatXaxisForHighCharts(
-                                            daysCount,
-                                            userPrefDateFormat,
-                                            userPrefTimeFormat,
-                                            selectedConsumption
-                                        ),
-                                    },
-                                },
-                                yAxis: [
-                                    {
-                                        gridLineWidth: 1,
-                                        lineWidth: 1,
-                                        opposite: false,
-                                        lineColor: null,
-                                    },
-                                    {
-                                        opposite: true,
-                                        title: false,
-                                        max: 120,
-                                        postFix: '23',
-                                        gridLineWidth: 0,
-                                    },
-                                ],
                                 tooltip: {
                                     xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
                                 },

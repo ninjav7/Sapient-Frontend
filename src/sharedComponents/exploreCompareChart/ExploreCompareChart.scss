@@ -1,0 +1,68 @@
+@import '../assets/scss/stories.scss';
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.explore-compare-chart-wrapper {
+    border: 1px solid $primary-gray-200;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    .highcharts-navigator-xaxis {
+        display: none;
+    }
+
+    .chart-tooltip {
+        @extend .box-shadow-lg;
+        padding: 0.4375rem 0.8125rem;
+        background: $base-white;
+        position: relative;
+        z-index: 1;
+        border-radius: 0.25rem;
+        overflow: hidden;
+
+        border: 0.0625rem solid $primary-gray-450;
+
+        td + td {
+            padding-left: 1rem !important;
+        }
+    }
+
+    .chart-header {
+        padding-left: 0.625rem;
+        display: flex;
+        justify-content: space-between;
+        .button-wrapper button {
+            padding: 0.625rem 0.5625rem;
+            margin-right: 0.625rem;
+        }
+    }
+    .highcharts-axis-labels text {
+        color: $primary-gray-550 !important;
+        font-weight: 600;
+        font-size: 0.75rem !important;
+    }
+    .legend-text text tspan {
+        cursor: pointer;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        text-transform: capitalize;
+    }
+    .chart-legend-wrapper {
+        display: flex;
+        color: $primary-gray-550 !important;
+        fill: $primary-gray-550 !important;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        font-weight: 400;
+        .chart-legend-symbol {
+            width: 0.5rem;
+            height: 0.5rem;
+            display: flex;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+    }
+    .highcharts-legend g path {
+        display: none;
+    }
+}
