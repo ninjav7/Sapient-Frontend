@@ -122,8 +122,6 @@ const BuildingOverview = () => {
     const [totalBldgUsageBySpaceType, setTotalBldgUsageBySpaceType] = useState(0);
     const [totalBldgUsageByFloor, setTotalBldgUsageByFloor] = useState(0);
 
-    const [showAfterHours, setShowAfterHours] = useState(false);
-
     //EquipChartModel
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
@@ -131,7 +129,16 @@ const BuildingOverview = () => {
     const handleChartOpen = () => setShowEquipmentChart(true);
     const handleChartClose = () => setShowEquipmentChart(false);
 
-    const checkWhetherShowAfterHours = () => (showAfterHours ? getPlotBands() : null);
+    const checkWhetherShowAfterHours = () => {
+        const fDayHour = moment(energyConsumptionsCategories[0]);
+        const sDayHour = moment(energyConsumptionsCategories[1]);
+
+        if (sDayHour.diff(fDayHour, 'hours') <= 1) {
+            return getPlotBands();
+        } else {
+            return null;
+        }
+    };
 
     const formatTime = (time) => {
         const timeWDot = time.replace(':', '.');
@@ -149,49 +156,71 @@ const BuildingOverview = () => {
         if (!bldgIdObj) return;
 
         const weekOperHours = bldgIdObj?.operating_hours;
-        const currDay = moment(startDate).format('ddd').toLowerCase();
-        const dayOperHours = weekOperHours[currDay];
+        const numberOfSelectedDays = moment(endDate).diff(startDate, 'days');
+        const operHoursToShow = [];
 
-        if (!dayOperHours.stat) return null;
+        for (let numberOfDay = 0; numberOfDay <= numberOfSelectedDays; numberOfDay++) {
+            const day = moment(startDate).add(numberOfDay, 'days');
+            const dayInWeek = moment(day).format('ddd').toLowerCase();
 
-        const {
-            time_range: { frm, to },
-        } = dayOperHours;
+            const dayOperHours = weekOperHours[dayInWeek];
 
-        const formattedFrom = formatTime(frm);
-        const formattedTo = formatTime(to);
+            const dayPosition = numberOfDay * 24;
 
-        const subHours = ['15', '30', '45', '00'];
+            if (!dayOperHours.stat) {
+                operHoursToShow.push({
+                    type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                    from: 0 + dayPosition,
+                    to: 24 + dayPosition,
+                });
+                continue;
+            }
 
-        const subHoursFromSubHours = subHours.find(
-            (subHours) =>
-                subHours ===
-                formattedFrom
-                    .split('')
-                    .slice(formattedFrom.length - 2)
-                    .join('')
-        );
+            const {
+                time_range: { frm, to },
+            } = dayOperHours;
 
-        const subHoursToSubHours = subHours.find(
-            (subHours) =>
-                subHours ===
-                formattedTo
-                    .split('')
-                    .slice(formattedTo.length - 2)
-                    .join('')
-        );
+            const formattedToUnworked = formatTime(frm);
+            const formattedFromUnworked = formatTime(to);
 
-        if (!subHoursFromSubHours || !subHoursToSubHours) {
-            return null;
+            const subHours = ['15', '30', '45', '00'];
+
+            const subHoursFromSubHours = subHours.find(
+                (subHours) =>
+                    subHours ===
+                    formattedFromUnworked
+                        .split('')
+                        .slice(formattedFromUnworked.length - 2)
+                        .join('')
+            );
+
+            const subHoursToSubHours = subHours.find(
+                (subHours) =>
+                    subHours ===
+                    formattedToUnworked
+                        .split('')
+                        .slice(formattedToUnworked.length - 2)
+                        .join('')
+            );
+
+            if (!subHoursFromSubHours || !subHoursToSubHours) {
+                return null;
+            }
+
+            operHoursToShow.push({
+                type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                from: 0 + dayPosition,
+                to: Number(formattedToUnworked) + dayPosition,
+            });
+
+            operHoursToShow.push({
+                type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                from: Number(formattedFromUnworked) + dayPosition,
+                to: 24 + dayPosition,
+            });
         }
 
-        return [
-            {
-                type: LineChart.PLOT_BANDS_TYPE.after_hours,
-                from: formattedFrom,
-                to: formattedTo,
-            },
-        ];
+        return operHoursToShow;
     };
 
     const formatXaxis = ({ value }) => {
@@ -587,10 +616,6 @@ const BuildingOverview = () => {
             s.parent = 'buildings';
         });
     };
-
-    useEffect(() => {
-        setShowAfterHours(startDate === endDate);
-    }, [startDate, endDate]);
 
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
