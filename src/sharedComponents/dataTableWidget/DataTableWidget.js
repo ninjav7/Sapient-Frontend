@@ -214,7 +214,7 @@ const DataTableWidget = (props) => {
 
     const currentRows = searchMode ? searchedRows : rows;
 
-    const isActionsAvailable = props.onDeleteRow || props.onEditRow || props.onViewRow;
+    const isActionsAvailable = props.onViewRow || props.onEditRow || props.onDeleteRow;
 
     const HeadComponent = ({ onSort, name, accessor, ...props }) => {
         const [state, setState] = useState(0);

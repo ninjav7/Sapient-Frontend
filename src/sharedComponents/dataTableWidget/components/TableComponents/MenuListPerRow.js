@@ -8,7 +8,7 @@ import { ReactComponent as EyeSVG } from '../../../assets/icons/eye.svg';
 const MenuListPerRow = ({ onDeleteRow, onEditRow, onViewRow }) => (
     <>
         {onViewRow && (
-            <button className="reset-styles d-block w-100" onClick={onEditRow}>
+            <button className="reset-styles d-block w-100" onClick={onViewRow}>
                 <div className="dropdown-list-item d-flex align-items-center borders-bottom" style={{ gap: '0.55rem' }}>
                     <EyeSVG /> <Typography.Body size={Typography.Sizes.lg}>View</Typography.Body>
                 </div>
