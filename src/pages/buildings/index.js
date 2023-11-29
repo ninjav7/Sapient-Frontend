@@ -207,15 +207,40 @@ const BuildingOverview = () => {
                 return null;
             }
 
+            const formattedToUnworkedNumber = Number(formattedToUnworked);
+            const formattedFromUnworkedNumber = Number(formattedFromUnworked);
+
+            if (formattedToUnworkedNumber === 0 && formattedFromUnworkedNumber === 0) {
+                continue;
+            }
+
+            if (formattedToUnworkedNumber === 0) {
+                operHoursToShow.push({
+                    type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                    from: formattedFromUnworkedNumber + dayPosition,
+                    to: 24 + dayPosition,
+                });
+                continue;
+            }
+
+            if (formattedFromUnworkedNumber === 0) {
+                operHoursToShow.push({
+                    type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                    from: 0 + dayPosition,
+                    to: formattedToUnworkedNumber + dayPosition,
+                });
+                continue;
+            }
+
             operHoursToShow.push({
                 type: LineChart.PLOT_BANDS_TYPE.after_hours,
                 from: 0 + dayPosition,
-                to: Number(formattedToUnworked) + dayPosition,
+                to: formattedToUnworkedNumber + dayPosition,
             });
 
             operHoursToShow.push({
                 type: LineChart.PLOT_BANDS_TYPE.after_hours,
-                from: Number(formattedFromUnworked) + dayPosition,
+                from: formattedFromUnworkedNumber + dayPosition,
                 to: 24 + dayPosition,
             });
         }
