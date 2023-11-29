@@ -24,8 +24,8 @@ import EditPassiveDevice from './EditPassiveDevice';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getPassiveDeviceTableCSVExport } from '../../../utils/tablesExport';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
-import './style.css';
 import SkeletonLoader from '../../../components/SkeletonLoader';
+import './style.css';
 
 const PassiveDevices = () => {
     const history = useHistory();
@@ -33,6 +33,14 @@ const PassiveDevices = () => {
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const [buildingListData] = useAtom(buildingData);
     const [userPermission] = useAtom(userPermissionData);
+
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperAdmin = isUserAdmin || isSuperUser;
+    const canUserView = userPermission?.permissions?.permissions?.advanced_passive_device_permission?.view ?? false;
+    const canUserCreate = userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ?? false;
+    const canUserEdit = userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ?? false;
+    const canUserDelete = userPermission?.permissions?.permissions?.advanced_passive_device_permission?.delete ?? false;
 
     const { download } = useCSVDownload();
     const [search, setSearch] = useState('');
@@ -263,23 +271,15 @@ const PassiveDevices = () => {
         return passiveDeviceData;
     };
 
-    const handleClick = (el) => {
-        history.push({
-            pathname: `/settings/smart-meters/single/${bldgId}/${el.equipments_id}`,
-        });
-    };
-
     const handleDeviceEdit = (record) => {
-        handleClick(record);
+        history.push({
+            pathname: `/settings/smart-meters/single/${bldgId}/${record?.equipments_id}`,
+        });
     };
 
     const handleDeviceDelete = (record) => {
         setSelectedPassiveDevice(record);
         openDeleteDeviceModal();
-    };
-
-    const handleAbleToDeleteRow = (row) => {
-        return true;
     };
 
     const handleDownloadCsv = async () => {
@@ -443,8 +443,7 @@ const PassiveDevices = () => {
                         <div>
                             <Typography.Header size={Typography.Sizes.lg}>Smart Meters</Typography.Header>
                         </div>
-                        {userPermission?.user_role === 'admin' ||
-                        userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ? (
+                        {isSuperAdmin || canUserCreate ? (
                             <div className="d-flex">
                                 <Button
                                     label={'Add Smart Meter'}
@@ -488,19 +487,14 @@ const PassiveDevices = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
+                        onViewRow={isSuperAdmin || canUserView ? (record, id, row) => handleDeviceDelete(row) : null}
+                        onEditRow={isSuperAdmin || canUserEdit ? (record, id, row) => handleDeviceEdit(row) : null}
                         onDeleteRow={
-                            userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                ? (record, id, row) => handleDeviceDelete(row)
-                                : null
+                            isSuperAdmin || canUserDelete ? (record, id, row) => handleDeviceDelete(row) : null
                         }
-                        onEditRow={
-                            userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                ? (record, id, row) => handleDeviceEdit(row)
-                                : null
-                        }
-                        isDeletable={(row) => handleAbleToDeleteRow(row)}
+                        isViewable={() => isSuperAdmin || canUserView}
+                        isEditable={() => isSuperAdmin || canUserEdit}
+                        isDeletable={() => isSuperAdmin || canUserDelete}
                         totalCount={(() => {
                             return totalItems;
                         })()}
