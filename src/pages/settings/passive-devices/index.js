@@ -25,6 +25,7 @@ import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getPassiveDeviceTableCSVExport } from '../../../utils/tablesExport';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 import SkeletonLoader from '../../../components/SkeletonLoader';
+import ViewSmartMeterRawData from './ViewSmartMeterRawData';
 import './style.css';
 
 const PassiveDevices = () => {
@@ -60,6 +61,11 @@ const PassiveDevices = () => {
     const [isEditDeviceModalOpen, setEditDeviceDeviceModal] = useState(false);
     const closeEditDeviceModal = () => setEditDeviceDeviceModal(false);
     const openEditDeviceModal = () => setEditDeviceDeviceModal(true);
+
+    // View Device Modal states
+    const [isViewDeviceModalOpen, setViewDeviceDeviceModal] = useState(false);
+    const closeViewDeviceModal = () => setViewDeviceDeviceModal(false);
+    const openViewDeviceModal = () => setViewDeviceDeviceModal(true);
 
     // Delete Device Modal states
     const [isDeleteDeviceModalOpen, setDeleteDeviceDeviceModal] = useState(false);
@@ -271,6 +277,11 @@ const PassiveDevices = () => {
         return passiveDeviceData;
     };
 
+    const handleDeviceView = (record) => {
+        setSelectedPassiveDevice(record);
+        openViewDeviceModal();
+    };
+
     const handleDeviceEdit = (record) => {
         history.push({
             pathname: `/settings/smart-meters/single/${bldgId}/${record?.equipments_id}`,
@@ -428,6 +439,10 @@ const PassiveDevices = () => {
     ]);
 
     useEffect(() => {
+        if (!isDeleteDeviceModalOpen && !isViewDeviceModalOpen) setSelectedPassiveDevice({});
+    }, [isDeleteDeviceModalOpen, isViewDeviceModalOpen]);
+
+    useEffect(() => {
         window.scrollTo(0, 0);
     }, [pageNo, pageSize]);
 
@@ -463,10 +478,10 @@ const PassiveDevices = () => {
             <Row>
                 <Col lg={12}>
                     <DataTableWidget
+                        id="smart_meter_list"
                         isLoading={isDataFetching}
                         isFilterLoading={isFilterFetching}
                         isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={15} />}
-                        id="smart_meter_list"
                         onSearch={(query) => {
                             setPageNo(1);
                             setSearch(query);
@@ -487,14 +502,14 @@ const PassiveDevices = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
-                        onViewRow={isSuperAdmin || canUserView ? (record, id, row) => handleDeviceDelete(row) : null}
+                        isViewable={() => isSuperAdmin || canUserView}
+                        isEditable={() => isSuperAdmin || canUserEdit}
+                        isDeletable={() => isSuperAdmin || canUserDelete}
+                        onViewRow={isSuperAdmin || canUserView ? (record, id, row) => handleDeviceView(row) : null}
                         onEditRow={isSuperAdmin || canUserEdit ? (record, id, row) => handleDeviceEdit(row) : null}
                         onDeleteRow={
                             isSuperAdmin || canUserDelete ? (record, id, row) => handleDeviceDelete(row) : null
                         }
-                        isViewable={() => isSuperAdmin || canUserView}
-                        isEditable={() => isSuperAdmin || canUserEdit}
-                        isDeletable={() => isSuperAdmin || canUserDelete}
                         totalCount={(() => {
                             return totalItems;
                         })()}
@@ -513,6 +528,12 @@ const PassiveDevices = () => {
                 closeEditDeviceModal={closeEditDeviceModal}
                 selectedPassiveDevice={selectedPassiveDevice}
                 fetchPassiveDeviceData={fetchPassiveDeviceData}
+            />
+
+            <ViewSmartMeterRawData
+                isModalOpen={isViewDeviceModalOpen}
+                closeModal={closeViewDeviceModal}
+                selectedPassiveDevice={selectedPassiveDevice}
             />
 
             <DeletePassiveAlert
