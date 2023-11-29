@@ -32,6 +32,7 @@ const HorizontalLayout = (props) => {
 
     // Default 2rem padding not required for device configuration pages in energy app settings
     const isPaddingRequired = deviceConfigRoutes.some((route) => location.pathname.includes(route));
+    const isSuperUserPage = location.pathname.includes('/super-user/accounts');
 
     const updateNotification = () => {
         UserStore.update((s) => {
@@ -68,6 +69,7 @@ const HorizontalLayout = (props) => {
                         className={showSideNav ? 'energy-page-content' : 'energy-page-content-full-screen'}
                         style={{
                             padding: isPaddingRequired ? '0rem' : '2rem',
+                            paddingTop: isSuperUserPage ? '0rem' : isPaddingRequired ? '0rem' : '2rem',
                         }}>
                         <Suspense fallback={loading()}>
                             <Card className="energy-page-content-card shadow-none">{children}</Card>

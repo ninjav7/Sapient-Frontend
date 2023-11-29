@@ -10,14 +10,7 @@ import { UserStore } from '../../../store/UserStore';
 import { useNotification } from '../../../sharedComponents/notification/useNotification';
 import { Notification } from '../../../sharedComponents/notification/Notification';
 
-const CreateCustomer = ({
-    isAddCustomerOpen,
-    closeAddCustomerModal,
-    getCustomerList,
-    getOfflineDevices,
-    setPageSize,
-    setPageNo,
-}) => {
+const CreateCustomer = ({ isAddCustomerOpen, closeAddCustomerModal, getCustomerList, setPageSize, setPageNo }) => {
     const defaultCustomerObj = {
         name: '',
     };
@@ -54,7 +47,6 @@ const CreateCustomer = ({
                     openSnackbar({ ...mockData, type: Notification.Types.success });
                     closeAddCustomerModal();
                     getCustomerList();
-                    getOfflineDevices();
                     setPageNo(1);
                     setPageSize(20);
                 }
