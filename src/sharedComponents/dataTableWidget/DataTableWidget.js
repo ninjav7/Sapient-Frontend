@@ -448,8 +448,8 @@ DataTableWidget.propTypes = {
     isDeletable: PropTypes.func,
     onEditRow: PropTypes.func,
     isEditable: PropTypes.func,
-    isViewable: PropTypes.func,
     onViewRow: PropTypes.func,
+    isViewable: PropTypes.func,
     /**** The following 4 props are responsible for showing pagination ****/
     onChangePage: PropTypes.func,
     totalCount: PropTypes.number.isRequired,
