@@ -84,6 +84,11 @@ export const multipleLineChartOptions = ({ data = [], pastData = [], tooltipUnit
                 showInNavigator: true,
                 gapSize: 6,
                 turboThreshold: 0,
+                states: {
+                    inactive: {
+                        opacity: 1, // Change this to default opacity (usually 0.2 or unset)
+                    },
+                },
             },
         },
         tooltip: {
@@ -98,6 +103,7 @@ export const multipleLineChartOptions = ({ data = [], pastData = [], tooltipUnit
                 </>
             )} <table>`,
             pointFormatter: function () {
+                console.log('SSR this => ', this);
                 const formattedValue = formatConsumptionValue(this.y, 2);
 
                 return `<tr> <td style='color:${this.series.color};padding:0'>
@@ -114,6 +120,7 @@ export const multipleLineChartOptions = ({ data = [], pastData = [], tooltipUnit
                     </Typography.Subheader>
                 )}</td></tr>`;
             },
+            // pointFormat: '{series.name}: <b>{point.y}</b><br/>',
             footerFormat: '</table></div>',
             shared: true,
             split: false,
