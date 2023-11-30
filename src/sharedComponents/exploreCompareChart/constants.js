@@ -11,13 +11,13 @@ import { getPastDateRange } from '../../helpers/helpers';
 export const customPreparedData = (data = [], pastData = [], timeIntervalObj) => {
     const pastDateObj = getPastDateRange(timeIntervalObj?.startDate, timeIntervalObj?.daysCount);
 
-    const presentSelectionDateLabel = `${moment(timeIntervalObj?.startDate).format('MMM D')} - ${moment(
+    const presentSelectionDateLabel = `${moment(timeIntervalObj?.startDate).format(`MMM D 'YY`)} - ${moment(
         timeIntervalObj?.endDate
-    ).format('MMM D')}`;
+    ).format(`MMM D 'YY`)}`;
 
-    const pastSelectionDateLabel = `${moment(pastDateObj?.startDate).format('MMM D')} - ${moment(
+    const pastSelectionDateLabel = `${moment(pastDateObj?.startDate).format(`MMM D 'YY`)} - ${moment(
         pastDateObj?.endDate
-    ).format('MMM D')}`;
+    ).format(`MMM D 'YY`)}`;
 
     let comparedDataList = [];
 
@@ -154,6 +154,7 @@ export const multipleLineChartOptions = ({ data = [], pastData = [], tooltipUnit
                     format: '{value:%d/%m %I:%M %p}',
                     padding: 10,
                 },
+                visible: false, // Enable when timestamp need to be shown on top of the chart
             },
         ],
         yAxis: [
@@ -260,7 +261,6 @@ export const multipleChartMocks = {
             },
         },
     ],
-
     yAxis: [
         {
             gridLineWidth: 1,
