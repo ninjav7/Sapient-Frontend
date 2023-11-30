@@ -283,7 +283,6 @@ export const multipleChartMocks = {
         {
             data: sampleDataOne,
             xAxis: 0, // Assign series to the first x-axis
-
             name: 'RTU-3 (Sep 1 - Sep 2)',
             color: '#B863CF',
             dashStyle: 'Dash',
@@ -291,14 +290,12 @@ export const multipleChartMocks = {
         {
             data: sampleDataTwo,
             xAxis: 1, // Assign series to the second x-axis
-
             name: 'RTU-3 (Sep 3 - Sep 4)',
             color: '#B863CF',
         },
         {
             data: sampleDataThree,
             xAxis: 0, // Assign series to the first x-axis
-
             name: 'RTU-2 (Sep 1 - Sep 2)',
             color: '#5E94E4',
             dashStyle: 'Dash',
@@ -306,7 +303,6 @@ export const multipleChartMocks = {
         {
             data: sampleDataFour,
             xAxis: 1, // Assign series to the second x-axis
-
             name: 'RTU-2 (Sep 3 - Sep 4)',
             color: '#5E94E4',
         },
