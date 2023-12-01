@@ -214,7 +214,7 @@ const DataTableWidget = (props) => {
 
     const currentRows = searchMode ? searchedRows : rows;
 
-    const isActionsAvailable = props.onDeleteRow || props.onEditRow;
+    const isActionsAvailable = props.onViewRow || props.onEditRow || props.onDeleteRow;
 
     const HeadComponent = ({ onSort, name, accessor, ...props }) => {
         const [state, setState] = useState(0);
@@ -333,10 +333,17 @@ const DataTableWidget = (props) => {
                                     //@TODO Needs to be refactored
                                     let isEditable = props?.isEditable && props?.isEditable(row);
                                     let isDeletable = props?.isDeletable && props?.isDeletable(row);
+                                    let isViewable = props?.isViewable && props?.isViewable(row);
                                     const isActionButtonShown =
-                                        (props.onEditRow && isEditable) || (props.onDeleteRow && isDeletable);
+                                        (props.onEditRow && isEditable) ||
+                                        (props.onDeleteRow && isDeletable) ||
+                                        (props.onViewRow && isViewable);
 
                                     const menuListPerRowProps = {};
+                                    if (props.onViewRow && isViewable) {
+                                        menuListPerRowProps.onViewRow = (event) =>
+                                            props.onViewRow(event, row.id, row, props);
+                                    }
                                     if (props.onEditRow && isEditable) {
                                         menuListPerRowProps.onEditRow = (event) =>
                                             props.onEditRow(event, row.id, row, props);
@@ -441,6 +448,8 @@ DataTableWidget.propTypes = {
     isDeletable: PropTypes.func,
     onEditRow: PropTypes.func,
     isEditable: PropTypes.func,
+    onViewRow: PropTypes.func,
+    isViewable: PropTypes.func,
     /**** The following 4 props are responsible for showing pagination ****/
     onChangePage: PropTypes.func,
     totalCount: PropTypes.number.isRequired,

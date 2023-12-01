@@ -24,8 +24,9 @@ import EditPassiveDevice from './EditPassiveDevice';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getPassiveDeviceTableCSVExport } from '../../../utils/tablesExport';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
-import './style.css';
 import SkeletonLoader from '../../../components/SkeletonLoader';
+import ViewSmartMeterRawData from './ViewSmartMeterRawData';
+import './style.css';
 
 const PassiveDevices = () => {
     const history = useHistory();
@@ -33,6 +34,14 @@ const PassiveDevices = () => {
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const [buildingListData] = useAtom(buildingData);
     const [userPermission] = useAtom(userPermissionData);
+
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperAdmin = isUserAdmin || isSuperUser;
+    const canUserView = userPermission?.permissions?.permissions?.advanced_passive_device_permission?.view ?? false;
+    const canUserCreate = userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ?? false;
+    const canUserEdit = userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ?? false;
+    const canUserDelete = userPermission?.permissions?.permissions?.advanced_passive_device_permission?.delete ?? false;
 
     const { download } = useCSVDownload();
     const [search, setSearch] = useState('');
@@ -52,6 +61,11 @@ const PassiveDevices = () => {
     const [isEditDeviceModalOpen, setEditDeviceDeviceModal] = useState(false);
     const closeEditDeviceModal = () => setEditDeviceDeviceModal(false);
     const openEditDeviceModal = () => setEditDeviceDeviceModal(true);
+
+    // View Device Modal states
+    const [isViewDeviceModalOpen, setViewDeviceDeviceModal] = useState(false);
+    const closeViewDeviceModal = () => setViewDeviceDeviceModal(false);
+    const openViewDeviceModal = () => setViewDeviceDeviceModal(true);
 
     // Delete Device Modal states
     const [isDeleteDeviceModalOpen, setDeleteDeviceDeviceModal] = useState(false);
@@ -263,23 +277,20 @@ const PassiveDevices = () => {
         return passiveDeviceData;
     };
 
-    const handleClick = (el) => {
-        history.push({
-            pathname: `/settings/smart-meters/single/${bldgId}/${el.equipments_id}`,
-        });
+    const handleDeviceView = (record) => {
+        setSelectedPassiveDevice(record);
+        openViewDeviceModal();
     };
 
     const handleDeviceEdit = (record) => {
-        handleClick(record);
+        history.push({
+            pathname: `/settings/smart-meters/single/${bldgId}/${record?.equipments_id}`,
+        });
     };
 
     const handleDeviceDelete = (record) => {
         setSelectedPassiveDevice(record);
         openDeleteDeviceModal();
-    };
-
-    const handleAbleToDeleteRow = (row) => {
-        return true;
     };
 
     const handleDownloadCsv = async () => {
@@ -428,6 +439,10 @@ const PassiveDevices = () => {
     ]);
 
     useEffect(() => {
+        if (!isDeleteDeviceModalOpen && !isViewDeviceModalOpen) setSelectedPassiveDevice({});
+    }, [isDeleteDeviceModalOpen, isViewDeviceModalOpen]);
+
+    useEffect(() => {
         window.scrollTo(0, 0);
     }, [pageNo, pageSize]);
 
@@ -443,8 +458,7 @@ const PassiveDevices = () => {
                         <div>
                             <Typography.Header size={Typography.Sizes.lg}>Smart Meters</Typography.Header>
                         </div>
-                        {userPermission?.user_role === 'admin' ||
-                        userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ? (
+                        {isSuperAdmin || canUserCreate ? (
                             <div className="d-flex">
                                 <Button
                                     label={'Add Smart Meter'}
@@ -464,10 +478,10 @@ const PassiveDevices = () => {
             <Row>
                 <Col lg={12}>
                     <DataTableWidget
+                        id="smart_meter_list"
                         isLoading={isDataFetching}
                         isFilterLoading={isFilterFetching}
                         isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={15} />}
-                        id="smart_meter_list"
                         onSearch={(query) => {
                             setPageNo(1);
                             setSearch(query);
@@ -488,19 +502,14 @@ const PassiveDevices = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
+                        isViewable={() => isSuperAdmin || canUserView}
+                        isEditable={() => isSuperAdmin || canUserEdit}
+                        isDeletable={() => isSuperAdmin || canUserDelete}
+                        onViewRow={isSuperAdmin || canUserView ? (record, id, row) => handleDeviceView(row) : null}
+                        onEditRow={isSuperAdmin || canUserEdit ? (record, id, row) => handleDeviceEdit(row) : null}
                         onDeleteRow={
-                            userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                ? (record, id, row) => handleDeviceDelete(row)
-                                : null
+                            isSuperAdmin || canUserDelete ? (record, id, row) => handleDeviceDelete(row) : null
                         }
-                        onEditRow={
-                            userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                ? (record, id, row) => handleDeviceEdit(row)
-                                : null
-                        }
-                        isDeletable={(row) => handleAbleToDeleteRow(row)}
                         totalCount={(() => {
                             return totalItems;
                         })()}
@@ -519,6 +528,12 @@ const PassiveDevices = () => {
                 closeEditDeviceModal={closeEditDeviceModal}
                 selectedPassiveDevice={selectedPassiveDevice}
                 fetchPassiveDeviceData={fetchPassiveDeviceData}
+            />
+
+            <ViewSmartMeterRawData
+                isModalOpen={isViewDeviceModalOpen}
+                closeModal={closeViewDeviceModal}
+                selectedPassiveDevice={selectedPassiveDevice}
             />
 
             <DeletePassiveAlert
