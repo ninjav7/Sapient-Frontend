@@ -3,14 +3,14 @@ import Typography from '../../../typography';
 
 import { ReactComponent as EditSVG } from '../../../assets/icons/edit.svg';
 import { ReactComponent as DeleteSVG } from '../../../assets/icons/delete.svg';
-import { ReactComponent as EyeSVG } from '../../../assets/icons/eye.svg';
+import { ReactComponent as ChartSVG } from '../../../../assets/icon/chart.svg';
 
 const MenuListPerRow = ({ onDeleteRow, onEditRow, onViewRow }) => (
     <>
         {onViewRow && (
             <button className="reset-styles d-block w-100" onClick={onViewRow}>
-                <div className="dropdown-list-item d-flex align-items-center borders-bottom" style={{ gap: '0.55rem' }}>
-                    <EyeSVG /> <Typography.Body size={Typography.Sizes.lg}>View</Typography.Body>
+                <div className="dropdown-list-item d-flex align-items-center borders-bottom" style={{ gap: '0.6rem' }}>
+                    <ChartSVG /> <Typography.Body size={Typography.Sizes.lg}>View Data</Typography.Body>
                 </div>
             </button>
         )}
