@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-
 import { useAtom } from 'jotai';
 import { useParams } from 'react-router-dom';
 import { Row, Col, UncontrolledTooltip, Progress, Spinner } from 'reactstrap';
@@ -44,6 +43,10 @@ import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilt
 
 import './style.css';
 import './styles.scss';
+import colorPalette from '../../assets/scss/_colors.scss';
+import { Button } from '../../sharedComponents/button';
+import Toggles from '../../sharedComponents/toggles/Toggles';
+import { TimeFrameSelector } from '../../sharedComponents/timeFrameSelector';
 
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
@@ -1077,20 +1080,23 @@ const ExploreByEquipment = () => {
             <Row className="d-flex justify-content-end">
                 <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
                     <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                        <div className="mr-1">
-                            <Checkbox
-                                label="Enable Compare"
-                                type="checkbox"
-                                id="compare-chart-data"
-                                name="compare-chart-data"
-                                size="md"
-                                checked={isInComparisonMode}
-                                value={isInComparisonMode}
-                                onClick={(e) => {
-                                    e.target.value === 'false' ? setComparisonMode(true) : setComparisonMode(false);
-                                }}
-                            />
-                        </div>
+                        <TimeFrameSelector
+                        // onCustomDateChange={onCustomDateChange}
+                        // onDateFilterChange={onDateFilterChange}
+                        // rangeDate={rangeDate}
+                        // timeOptions={customOptions}
+                        // defaultValue={filterPeriod}
+                        />
+                        <Button
+                            label="Enable Compare"
+                            size={Button.Sizes.lg}
+                            type={isInComparisonMode ? Button.Type.secondary : Button.Type.secondaryGrey}
+                            onClick={(e) => {
+                                setComparisonMode(!isInComparisonMode);
+                            }}>
+                            <Toggles size={Toggles.Sizes.sm} isChecked={isInComparisonMode} />
+                            {'Compare'}
+                        </Button>
                         <Select
                             defaultValue={selectedConsumption}
                             options={metric}
