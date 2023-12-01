@@ -133,6 +133,10 @@ const ExploreByEquipment = () => {
     const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0]?.Consumption);
     const [selectedConsumption, setConsumption] = useState(metric[0]?.value);
 
+    const toggleComparision = () => {
+        setComparisonMode(!isInComparisonMode);
+    };
+
     const handleUnitChange = (value) => {
         const obj = metric.find((record) => record?.value === value);
         setSelectedUnit(obj?.unit);
@@ -1080,22 +1084,28 @@ const ExploreByEquipment = () => {
             <Row className="d-flex justify-content-end">
                 <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
                     <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                        <TimeFrameSelector
-                        // onCustomDateChange={onCustomDateChange}
-                        // onDateFilterChange={onDateFilterChange}
-                        // rangeDate={rangeDate}
-                        // timeOptions={customOptions}
-                        // defaultValue={filterPeriod}
-                        />
+                        {isInComparisonMode && (
+                            <TimeFrameSelector
+                            // onCustomDateChange={onCustomDateChange}
+                            // onDateFilterChange={onDateFilterChange}
+                            // rangeDate={rangeDate}
+                            // timeOptions={customOptions}
+                            // defaultValue={filterPeriod}
+                            />
+                        )}
+
                         <Button
                             label="Enable Compare"
                             size={Button.Sizes.lg}
-                            type={isInComparisonMode ? Button.Type.secondary : Button.Type.secondaryGrey}
-                            onClick={(e) => {
-                                setComparisonMode(!isInComparisonMode);
-                            }}>
-                            <Toggles size={Toggles.Sizes.sm} isChecked={isInComparisonMode} />
-                            {'Compare'}
+                            type={isInComparisonMode ? Button.Type.secondary : Button.Type.secondaryGrey}>
+                            <Toggles
+                                size={Toggles.Sizes.sm}
+                                isChecked={isInComparisonMode}
+                                onChange={toggleComparision}
+                            />
+                            <Typography.Subheader size={Typography.Sizes.lg} onClick={toggleComparision}>
+                                {'Compare Data'}
+                            </Typography.Subheader>
                         </Button>
                         <Select
                             defaultValue={selectedConsumption}
