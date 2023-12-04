@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { Spinner } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
 import { pageListSizes } from '../../../helpers/helpers';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import SkeletonLoader from '../../../components/SkeletonLoader';
+import { DownloadButton } from './../../../sharedComponents/dataTableWidget/components/DownloadButton';
+import { ReactComponent as RefreshSVG } from './../../../../src/assets/icon/refresh.svg';
 import './styles.scss';
 
 const ViewPassiveRawData = ({ isModalOpen, closeModal, selectedPassiveDevice }) => {
     const [isFetchingData, setDataFetching] = useState(false);
+    const [isProcessing, setProcessing] = useState(false);
+    const [isCSVDownloading, setCSVDownloading] = useState(false);
 
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -51,6 +56,29 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, selectedPassiveDevice }) 
             </div>
 
             <div className="default-padding">
+                <div className="d-flex justify-content-between">
+                    <div></div>
+                    <div className="d-flex" style={{ gap: '0.5rem' }}>
+                        <Button
+                            label={''}
+                            type={Button.Type.secondaryGrey}
+                            size={Button.Sizes.md}
+                            icon={!isProcessing ? <RefreshSVG /> : <Spinner size="sm" color="secondary" />}
+                            className="data-table-widget-action-button"
+                            onClick={() => {
+                                setProcessing(true);
+                            }}
+                        />
+
+                        <DownloadButton
+                            isCSVDownloading={isCSVDownloading}
+                            onClick={() => {
+                                setCSVDownloading(true);
+                            }}
+                        />
+                    </div>
+                </div>
+
                 <DataTableWidget
                     id="raw_data_list"
                     isLoading={isFetchingData}
