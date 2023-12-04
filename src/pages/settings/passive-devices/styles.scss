@@ -86,5 +86,11 @@
 }
 
 .default-padding {
-    padding: 2rem;
+    padding: 1rem 2rem 2rem 2rem;
+}
+
+.modal-dialog-custom {
+    max-width: none;
+    height: auto;
+    margin: 0;
 }
