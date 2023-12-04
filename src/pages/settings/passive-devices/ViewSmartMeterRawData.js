@@ -29,7 +29,8 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
     // Define a custom CSS class for the modal content
     const customModalStyle = {
         modalContent: {
-            minHeight: '90vh',
+            height: '90vh',
+            overflowY: 'auto', // Enable vertical scrolling when content exceeds the height
         },
     };
 
@@ -151,41 +152,43 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                         </div>
                     </div>
 
-                    <DataTableWidget
-                        id="raw_data_list"
-                        isLoading={isFetchingData}
-                        isLoadingComponent={<SkeletonLoader noOfColumns={5} noOfRows={10} />}
-                        buttonGroupFilterOptions={[]}
-                        rows={currentRow()}
-                        disableColumnDragging={true}
-                        searchResultRows={currentRow()}
-                        headers={[
-                            {
-                                name: 'Timestamp',
-                                accessor: 'time_stamp',
-                            },
-                            {
-                                name: 'Gateway / MAC',
-                                accessor: 'gateway_mac',
-                            },
-                            {
-                                name: 'Firmware',
-                                accessor: 'firmware',
-                            },
-                            {
-                                name: 'CT Firmware',
-                                accessor: 'ct_firmware',
-                            },
-                        ]}
-                        currentPage={pageNo}
-                        onChangePage={setPageNo}
-                        pageSize={pageSize}
-                        onPageSize={setPageSize}
-                        pageListSizes={pageListSizes}
-                        totalCount={(() => {
-                            return totalDataCount;
-                        })()}
-                    />
+                    <div className="raw-data-table-container">
+                        <DataTableWidget
+                            id="raw_data_list"
+                            isLoading={isFetchingData}
+                            isLoadingComponent={<SkeletonLoader noOfColumns={5} noOfRows={10} />}
+                            buttonGroupFilterOptions={[]}
+                            rows={currentRow()}
+                            disableColumnDragging={true}
+                            searchResultRows={currentRow()}
+                            headers={[
+                                {
+                                    name: 'Timestamp',
+                                    accessor: 'time_stamp',
+                                },
+                                {
+                                    name: 'Gateway / MAC',
+                                    accessor: 'gateway_mac',
+                                },
+                                {
+                                    name: 'Firmware',
+                                    accessor: 'firmware',
+                                },
+                                {
+                                    name: 'CT Firmware',
+                                    accessor: 'ct_firmware',
+                                },
+                            ]}
+                            currentPage={pageNo}
+                            onChangePage={setPageNo}
+                            pageSize={pageSize}
+                            onPageSize={setPageSize}
+                            pageListSizes={pageListSizes}
+                            totalCount={(() => {
+                                return totalDataCount;
+                            })()}
+                        />
+                    </div>
                 </div>
             </div>
         </Modal>
