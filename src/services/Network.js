@@ -229,6 +229,7 @@ export const sensorUsageData = '/api/v2/metrics/sensor';
 export const sensorUsageDataForUtilityMonitor = '/api/v2/metrics/ytd';
 export const getEnergyConsumptionV2 = '/api/v2/metrics/building';
 export const compareBuildingsV2 = '/api/v2/metrics/portfolio/compare-buildings';
+export const getRawDeviceData = '/api/v2/metrics/raw/devices';
 
 // Alerts API's
 export const listAlerts = '/api/v2/alerts';

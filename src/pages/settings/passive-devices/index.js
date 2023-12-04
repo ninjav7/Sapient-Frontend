@@ -32,6 +32,7 @@ const PassiveDevices = () => {
     const history = useHistory();
     const { bldgId } = useParams();
     const bldgName = BuildingStore.useState((s) => s.BldgName);
+    const bldgTimezone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [buildingListData] = useAtom(buildingData);
     const [userPermission] = useAtom(userPermissionData);
 
@@ -533,6 +534,7 @@ const PassiveDevices = () => {
             <ViewSmartMeterRawData
                 isModalOpen={isViewDeviceModalOpen}
                 closeModal={closeViewDeviceModal}
+                bldgTimezone={bldgTimezone}
                 selectedPassiveDevice={selectedPassiveDevice}
             />
 
