@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Spinner } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
+import moment from 'moment';
+import 'moment-timezone';
+
+import { UserStore } from '../../../store/UserStore.js';
 
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
@@ -25,6 +29,9 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
 
     const [rawDeviceData, setRawDeviceData] = useState([]);
     const [totalDataCount, setTotalDataCount] = useState(0);
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     // Define a custom CSS class for the modal content
     const customModalStyle = {
@@ -69,6 +76,41 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             .finally(() => {
                 setCSVDownloading(false);
             });
+    };
+
+    function isValidDate(d) {
+        return d instanceof Date && !isNaN(d);
+    }
+
+    const handleLastActiveDate = (last_login) => {
+        let dt = '';
+        if (isValidDate(new Date(last_login)) && last_login != null) {
+            const last_dt = new Date(last_login);
+            const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
+            const timeFormat = userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`;
+            dt = moment.utc(last_dt).format(`${dateFormat} 'YY @ ${timeFormat}`);
+        } else {
+            dt = 'Never';
+        }
+        return dt;
+    };
+
+    const renderRawDataTimestamp = (row) => {
+        const formattedTimestamp = handleLastActiveDate(row?.time_stamp);
+
+        return (
+            <Typography.Body size={Typography.Sizes.md} className="mouse-pointer">
+                {row?.time_stamp === '' ? '-' : formattedTimestamp}
+            </Typography.Body>
+        );
+    };
+
+    const renderGatewayMac = (row) => {
+        return (
+            <div size={Typography.Sizes.md} className="mouse-pointer">
+                {row?.gateway_mac === '' ? '-' : row?.gateway_mac}
+            </div>
+        );
     };
 
     useEffect(() => {
@@ -165,18 +207,28 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                                 {
                                     name: 'Timestamp',
                                     accessor: 'time_stamp',
+                                    callbackValue: renderRawDataTimestamp,
                                 },
                                 {
                                     name: 'Gateway / MAC',
                                     accessor: 'gateway_mac',
+                                    callbackValue: renderGatewayMac,
                                 },
                                 {
                                     name: 'Firmware',
                                     accessor: 'firmware',
                                 },
                                 {
-                                    name: 'CT Firmware',
-                                    accessor: 'ct_firmware',
+                                    name: 'Sensor Type',
+                                    accessor: 'sensor_type',
+                                },
+                                {
+                                    name: 'Counter',
+                                    accessor: 'counter',
+                                },
+                                {
+                                    name: 'RSSI',
+                                    accessor: 'rssi',
                                 },
                             ]}
                             currentPage={pageNo}
