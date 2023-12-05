@@ -10,6 +10,7 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 
 import Header from '../../components/Header';
 import SkeletonLoader from '../../components/SkeletonLoader';
@@ -21,11 +22,12 @@ import { Checkbox } from '../../sharedComponents/form/checkbox';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 import Typography from '../../sharedComponents/typography';
+import { Button } from '../../sharedComponents/button';
+import Toggles from '../../sharedComponents/toggles/Toggles';
+import { TimeFrameSelector } from '../../sharedComponents/timeFrameSelector';
 
 import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
 import ExploreCompareChart from '../../sharedComponents/exploreCompareChart/ExploreCompareChart';
-
-import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 
 import {
     apiRequestBody,
@@ -39,14 +41,11 @@ import { UNITS } from '../../constants/units';
 import { isEmptyObject, truncateString, validateSeriesDataForEquipments } from './utils';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
+
 import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../explore/services';
 
 import './style.css';
 import './styles.scss';
-import colorPalette from '../../assets/scss/_colors.scss';
-import { Button } from '../../sharedComponents/button';
-import Toggles from '../../sharedComponents/toggles/Toggles';
-import { TimeFrameSelector } from '../../sharedComponents/timeFrameSelector';
 
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
@@ -74,9 +73,13 @@ const ExploreByEquipment = () => {
     const [selectedEquipIds, setSelectedEquipIds] = useState([]);
     const [filterObj, setFilterObj] = useState({});
     const [filterOptions, setFilterOptions] = useState([]);
+    const [equipDataList, setEquipDataList] = useState([]);
+
     const [seriesData, setSeriesData] = useState([]);
     const [pastSeriesData, setPastSeriesData] = useState([]);
-    const [equipDataList, setEquipDataList] = useState([]);
+
+    console.log('SSR seriesData => ', seriesData);
+    console.log('SSR pastSeriesData => ', pastSeriesData);
 
     const [isFiltersFetching, setFiltersFetching] = useState(false);
     const [isFetchingChartData, setFetchingChartData] = useState(false);
@@ -381,11 +384,11 @@ const ExploreByEquipment = () => {
             });
     };
 
-    const fetchSingleEquipChartData = async (equipId, device_type) => {
+    const fetchSingleEquipChartData = async (equipId, device_type, isComparisionOn = false) => {
         const payload = apiRequestBody(startDate, endDate, timeZone);
         let previousDataPayload = {};
 
-        if (isInComparisonMode) {
+        if (isComparisionOn) {
             const pastDateObj = getPastDateRange(startDate, daysCount);
             previousDataPayload = apiRequestBody(pastDateObj?.startDate, pastDateObj?.endDate, timeZone);
         }
@@ -398,7 +401,7 @@ const ExploreByEquipment = () => {
 
         let promisesList = [];
         promisesList.push(fetchExploreEquipmentChart(payload, params));
-        if (isInComparisonMode) promisesList.push(fetchExploreEquipmentChart(previousDataPayload, params));
+        if (isComparisionOn) promisesList.push(fetchExploreEquipmentChart(previousDataPayload, params));
 
         Promise.all(promisesList)
             .then((res) => {
@@ -626,15 +629,21 @@ const ExploreByEquipment = () => {
             });
     };
 
-    const handleEquipStateChange = (value, equipObj) => {
+    const handleEquipStateChange = (value, equipObj, isComparisionOn = false) => {
         if (value === 'true') {
             const newDataList = seriesData.filter((item) => item?.id !== equipObj?.equipment_id);
             setSeriesData(newDataList);
+
+            if (isComparisionOn) {
+                const newPastDataList = pastSeriesData.filter((item) => item?.id !== equipObj?.equipment_id);
+                setPastSeriesData(newPastDataList);
+            }
         }
 
         if (value === 'false') {
             if (equipObj?.device_type) setDeviceType(equipObj?.device_type);
-            if (equipObj?.equipment_id) fetchSingleEquipChartData(equipObj?.equipment_id, equipObj?.device_type);
+            if (equipObj?.equipment_id)
+                fetchSingleEquipChartData(equipObj?.equipment_id, equipObj?.device_type, isComparisionOn);
         }
 
         const isAdding = value === 'false';
@@ -1084,7 +1093,8 @@ const ExploreByEquipment = () => {
             <Row className="d-flex justify-content-end">
                 <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
                     <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                        {isInComparisonMode && (
+                        {/* PLT-1785: Functionality to be enabled with Custom Period selector  */}
+                        {/* {isInComparisonMode && (
                             <TimeFrameSelector
                             // onCustomDateChange={onCustomDateChange}
                             // onDateFilterChange={onDateFilterChange}
@@ -1092,8 +1102,7 @@ const ExploreByEquipment = () => {
                             // timeOptions={customOptions}
                             // defaultValue={filterPeriod}
                             />
-                        )}
-
+                        )} */}
                         <Button
                             label="Enable Compare"
                             size={Button.Sizes.lg}
@@ -1263,7 +1272,7 @@ const ExploreByEquipment = () => {
                                     checked={selectedEquipIds.includes(record?.equipment_id)}
                                     value={selectedEquipIds.includes(record?.equipment_id)}
                                     onChange={(e) => {
-                                        handleEquipStateChange(e.target.value, record);
+                                        handleEquipStateChange(e.target.value, record, isInComparisonMode);
                                     }}
                                 />
                             )}
