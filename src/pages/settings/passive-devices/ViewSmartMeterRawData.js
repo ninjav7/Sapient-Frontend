@@ -5,6 +5,9 @@ import moment from 'moment';
 import 'moment-timezone';
 
 import { UserStore } from '../../../store/UserStore.js';
+import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload.js';
+import { BuildingStore } from '../../../store/BuildingStore.js';
+import { getRawDeviceDataTableCSVExport } from '../../../utils/tablesExport.js';
 
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
@@ -20,6 +23,9 @@ import { getDeviceRawData } from './services.js';
 import './styles.scss';
 
 const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPassiveDevice }) => {
+    const { download } = useCSVDownload();
+    const bldgName = BuildingStore.useState((s) => s.BldgName);
+
     const [isFetchingData, setDataFetching] = useState(false);
     const [isProcessing, setProcessing] = useState(false);
     const [isCSVDownloading, setCSVDownloading] = useState(false);
@@ -64,20 +70,6 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             });
     };
 
-    const downloadRawDataForCSVExport = async (bldg_id, device_id, bldg_tz) => {
-        setCSVDownloading(true);
-        const params = `?building_id=${bldg_id}&device_id=${device_id}&tz_info=${bldg_tz}`;
-
-        await getDeviceRawData(params)
-            .then((res) => {
-                const response = res?.data;
-            })
-            .catch(() => {})
-            .finally(() => {
-                setCSVDownloading(false);
-            });
-    };
-
     function isValidDate(d) {
         return d instanceof Date && !isNaN(d);
     }
@@ -111,6 +103,54 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                 {row?.gateway_mac === '' ? '-' : row?.gateway_mac}
             </div>
         );
+    };
+
+    const headerProps = [
+        {
+            name: 'Timestamp',
+            accessor: 'time_stamp',
+            callbackValue: renderRawDataTimestamp,
+        },
+        {
+            name: 'Gateway / MAC',
+            accessor: 'gateway_mac',
+            callbackValue: renderGatewayMac,
+        },
+        {
+            name: 'Firmware',
+            accessor: 'firmware',
+        },
+        {
+            name: 'Sensor Type',
+            accessor: 'sensor_type',
+        },
+        {
+            name: 'Counter',
+            accessor: 'counter',
+        },
+        {
+            name: 'RSSI',
+            accessor: 'rssi',
+        },
+    ];
+
+    const downloadRawDataForCSVExport = async (bldg_id, device_id, bldg_tz) => {
+        setCSVDownloading(true);
+        const params = `?building_id=${bldg_id}&device_id=${device_id}&tz_info=${bldg_tz}`;
+
+        await getDeviceRawData(params)
+            .then((res) => {
+                const responseData = res?.data;
+
+                if (responseData) {
+                    const csvData = getRawDeviceDataTableCSVExport(responseData, headerProps);
+                    download(`${bldgName}_Device_Raw_Data_${new Date().toISOString().split('T')[0]}`, csvData);
+                }
+            })
+            .catch(() => {})
+            .finally(() => {
+                setCSVDownloading(false);
+            });
     };
 
     useEffect(() => {
@@ -203,34 +243,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                             rows={currentRow()}
                             disableColumnDragging={true}
                             searchResultRows={currentRow()}
-                            headers={[
-                                {
-                                    name: 'Timestamp',
-                                    accessor: 'time_stamp',
-                                    callbackValue: renderRawDataTimestamp,
-                                },
-                                {
-                                    name: 'Gateway / MAC',
-                                    accessor: 'gateway_mac',
-                                    callbackValue: renderGatewayMac,
-                                },
-                                {
-                                    name: 'Firmware',
-                                    accessor: 'firmware',
-                                },
-                                {
-                                    name: 'Sensor Type',
-                                    accessor: 'sensor_type',
-                                },
-                                {
-                                    name: 'Counter',
-                                    accessor: 'counter',
-                                },
-                                {
-                                    name: 'RSSI',
-                                    accessor: 'rssi',
-                                },
-                            ]}
+                            headers={headerProps}
                             currentPage={pageNo}
                             onChangePage={setPageNo}
                             pageSize={pageSize}
