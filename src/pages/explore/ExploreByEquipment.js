@@ -136,6 +136,11 @@ const ExploreByEquipment = () => {
 
     const toggleComparision = () => {
         setComparisonMode(!isInComparisonMode);
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = isInComparisonMode ? 'Comparison Mode turned OFF' : 'Comparison Mode turned ON';
+            s.notificationType = 'success';
+        });
     };
 
     const handleUnitChange = (value) => {

@@ -103,7 +103,6 @@ export const multipleLineChartOptions = ({ data = [], pastData = [], tooltipUnit
                 </>
             )} <table>`,
             pointFormatter: function () {
-                console.log('SSR this => ', this);
                 const formattedValue = formatConsumptionValue(this.y, 2);
 
                 return `<tr> <td style='color:${this.series.color};padding:0'>
