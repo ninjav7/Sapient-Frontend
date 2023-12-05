@@ -1136,7 +1136,6 @@ const ExploreByEquipment = () => {
                             />
                         )} */}
                         <Button
-                            label="Enable Compare"
                             size={Button.Sizes.lg}
                             type={isInComparisonMode ? Button.Type.secondary : Button.Type.secondaryGrey}>
                             <Toggles
@@ -1145,7 +1144,7 @@ const ExploreByEquipment = () => {
                                 onChange={toggleComparision}
                             />
                             <Typography.Subheader size={Typography.Sizes.lg} onClick={toggleComparision}>
-                                {'Compare Data'}
+                                {isInComparisonMode ? 'Disable Compare' : 'Enable Compare'}
                             </Typography.Subheader>
                         </Button>
                         <Select
