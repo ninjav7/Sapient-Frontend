@@ -959,6 +959,10 @@ const PlugRule = () => {
         return <Badge text={<span className="gray-950">{row.equipment_type_name}</span>} />;
     }, []);
 
+    const renderEquipLink = useCallback((row) => {
+        return <Badge text={<span>{row.equipment_link}</span>} />;
+    }, []);
+
     const renderLocation = useCallback((row, childrenTemplate) => {
         const location = [row.installed_floor, row.installed_space];
 
@@ -1832,6 +1836,12 @@ const PlugRule = () => {
 
     const headerPropsLinkedTab = [
         {
+            name: 'Equipment Name                                            ',
+            accessor: 'equipment_link',
+            callbackValue: renderEquipLink,
+            onSort: (method, name) => setSortByLinkedTab({ method, name }),
+        },
+        {
             name: 'Equipment Type',
             accessor: 'equipment_type_name',
             callbackValue: renderEquipType,
@@ -1873,6 +1883,12 @@ const PlugRule = () => {
         },
     ];
     const headerPropsUnlinkedTab = [
+        {
+            name: 'Equipment Name                                            ',
+            accessor: 'equipment_link',
+            callbackValue: renderEquipLink,
+            onSort: (method, name) => setSortByUnlinkedTab({ method, name }),
+        },
         {
             name: 'Equipment Type',
             accessor: 'equipment_type_name',
@@ -2798,6 +2814,12 @@ const PlugRule = () => {
                                     searchResultRows={linkedSocketsTabData}
                                     headers={[
                                         {
+                                            name: 'Equipment Name                                            ',
+                                            accessor: 'equipment_link',
+                                            callbackValue: renderEquipLink,
+                                            onSort: (method, name) => setSortByLinkedTab({ method, name }),
+                                        },
+                                        {
                                             name: 'Equipment Type',
                                             accessor: 'equipment_type_name',
                                             callbackValue: renderEquipType,
@@ -2919,6 +2941,12 @@ const PlugRule = () => {
                                     rows={unlinkedSocketsTabData}
                                     searchResultRows={unlinkedSocketsTabData}
                                     headers={[
+                                        {
+                                            name: 'Equipment Name                                            ',
+                                            accessor: 'equipment_link',
+                                            callbackValue: renderEquipLink,
+                                            onSort: (method, name) => setSortByUnlinkedTab({ method, name }),
+                                        },
                                         {
                                             name: 'Equipment Type',
                                             accessor: 'equipment_type_name',
@@ -3118,6 +3146,11 @@ const PlugRule = () => {
                             rows={dataToUnassign}
                             buttonGroupFilterOptions={[]}
                             headers={[
+                                {
+                                    name: 'Equipment Name                                            ',
+                                    accessor: 'equipment_link',
+                                    callbackValue: renderEquipLink,
+                                },
                                 {
                                     name: 'Equipment Type',
                                     accessor: 'equipment_type_name',
