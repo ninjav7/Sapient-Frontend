@@ -98,6 +98,11 @@ const SecondaryTopNavBar = () => {
     const handleBuildingChange = (record, path) => {
         updateBuildingStore(record?.value, record?.label, record?.timezone, record?.plug_only);
 
+        if (path.includes('/energy/end-uses') && record?.plug_only) {
+            redirectToEndpoint(`/energy/building/overview/${record?.value}`);
+            return;
+        }
+
         if (path === '/explore-page/by-buildings') {
             redirectToEndpoint(`/explore-page/by-equipment/${record?.value}`);
             return;
