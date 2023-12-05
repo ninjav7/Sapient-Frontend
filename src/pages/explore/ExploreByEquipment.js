@@ -78,11 +78,9 @@ const ExploreByEquipment = () => {
     const [seriesData, setSeriesData] = useState([]);
     const [pastSeriesData, setPastSeriesData] = useState([]);
 
-    console.log('SSR seriesData => ', seriesData);
-    console.log('SSR pastSeriesData => ', pastSeriesData);
-
     const [isFiltersFetching, setFiltersFetching] = useState(false);
     const [isFetchingChartData, setFetchingChartData] = useState(false);
+    const [isFetchingPastChartData, setFetchingPastChartData] = useState(false);
     const [isEquipDataFetching, setEquipDataFetching] = useState(false);
 
     const [checkedAll, setCheckedAll] = useState(false);
@@ -481,10 +479,16 @@ const ExploreByEquipment = () => {
             });
     };
 
-    const fetchMultipleEquipChartData = async (start_date, end_date, data_type = 'energy', equipIDs = []) => {
+    const fetchMultipleEquipChartData = async (
+        start_date,
+        end_date,
+        data_type = 'energy',
+        equipIDs = [],
+        requestType = 'currentData'
+    ) => {
         if (start_date === null || end_date === null || !data_type || equipIDs.length === 0) return;
 
-        setFetchingChartData(true);
+        requestType === 'currentData' ? setFetchingChartData(true) : setFetchingPastChartData(true);
 
         const payload = apiRequestBody(start_date, end_date, timeZone);
 
@@ -499,7 +503,7 @@ const ExploreByEquipment = () => {
             promisesList.push(fetchExploreEquipmentChart(payload, params));
         });
 
-        setSeriesData([]);
+        requestType === 'currentData' ? setSeriesData([]) : setPastSeriesData([]);
 
         Promise.all(promisesList)
             .then((res) => {
@@ -554,12 +558,12 @@ const ExploreByEquipment = () => {
                         }
                     });
 
-                    setSeriesData(newResponse);
+                    requestType === 'currentData' ? setSeriesData(newResponse) : setPastSeriesData(newResponse);
                 }
             })
             .catch(() => {})
             .finally(() => {
-                setFetchingChartData(false);
+                requestType === 'currentData' ? setFetchingChartData(false) : setFetchingPastChartData(false);
             });
     };
 
@@ -1060,7 +1064,18 @@ const ExploreByEquipment = () => {
 
     useEffect(() => {
         if (selectedEquipIds.length !== 0) {
-            fetchMultipleEquipChartData(startDate, endDate, selectedConsumption, selectedEquipIds);
+            fetchMultipleEquipChartData(startDate, endDate, selectedConsumption, selectedEquipIds, 'currentData');
+
+            if (isInComparisonMode) {
+                const pastDateObj = getPastDateRange(startDate, daysCount);
+                fetchMultipleEquipChartData(
+                    pastDateObj?.startDate,
+                    pastDateObj?.endDate,
+                    selectedConsumption,
+                    selectedEquipIds,
+                    'pastData'
+                );
+            }
         }
     }, [startDate, endDate, selectedConsumption]);
 
@@ -1068,12 +1083,24 @@ const ExploreByEquipment = () => {
         if (checkedAll) {
             if (equipDataList.length !== 0 && equipDataList.length <= 20) {
                 const allEquipIds = equipDataList.map((el) => el?.equipment_id);
-                fetchMultipleEquipChartData(startDate, endDate, selectedConsumption, allEquipIds);
+                fetchMultipleEquipChartData(startDate, endDate, selectedConsumption, allEquipIds, 'currentData');
                 setSelectedEquipIds(allEquipIds);
+
+                if (isInComparisonMode) {
+                    const pastDateObj = getPastDateRange(startDate, daysCount);
+                    fetchMultipleEquipChartData(
+                        pastDateObj?.startDate,
+                        pastDateObj?.endDate,
+                        selectedConsumption,
+                        selectedEquipIds,
+                        'pastData'
+                    );
+                }
             }
         }
         if (!checkedAll) {
             setSeriesData([]);
+            setPastSeriesData([]);
             setComparisonMode(false);
             setSelectedEquipIds([]);
         }
@@ -1093,8 +1120,8 @@ const ExploreByEquipment = () => {
             <Row className="d-flex justify-content-end">
                 <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
                     <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                        {/* PLT-1785: Functionality to be enabled with Custom Period selector  */}
-                        {/* {isInComparisonMode && (
+                        {/* PLT-1785: Functionality to be enabled with Custom Period selector
+                        {isInComparisonMode && (
                             <TimeFrameSelector
                             // onCustomDateChange={onCustomDateChange}
                             // onDateFilterChange={onDateFilterChange}
@@ -1132,7 +1159,7 @@ const ExploreByEquipment = () => {
 
             <Row>
                 <div className="explore-data-table-style p-2">
-                    {isFetchingChartData ? (
+                    {isFetchingChartData || isFetchingPastChartData ? (
                         <div className="explore-chart-wrapper">
                             <div className="explore-chart-loader">
                                 <Spinner color="primary" />
@@ -1260,7 +1287,7 @@ const ExploreByEquipment = () => {
                                     onChange={() => {
                                         setCheckedAll(!checkedAll);
                                     }}
-                                    disabled={!equipDataList || equipDataList.length > 20}
+                                    disabled={!equipDataList || equipDataList.length > 20 || isInComparisonMode}
                                 />
                             )}
                             customCheckboxForCell={(record) => (
