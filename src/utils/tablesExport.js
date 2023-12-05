@@ -552,6 +552,31 @@ export const getPassiveDeviceTableCSVExport = (tableData, columns) => {
     return csv;
 };
 
+export const getRawDeviceDataTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+
+    tableData.forEach((tableRow) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
 export const getActiveDeviceTableCSVExport = (tableData, columns) => {
     let dataToExport = [];
 

@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Spinner } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
+import moment from 'moment';
+import 'moment-timezone';
+
+import { UserStore } from '../../../store/UserStore.js';
+import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload.js';
+import { BuildingStore } from '../../../store/BuildingStore.js';
+import { getRawDeviceDataTableCSVExport } from '../../../utils/tablesExport.js';
 
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
@@ -16,6 +23,9 @@ import { getDeviceRawData } from './services.js';
 import './styles.scss';
 
 const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPassiveDevice }) => {
+    const { download } = useCSVDownload();
+    const bldgName = BuildingStore.useState((s) => s.BldgName);
+
     const [isFetchingData, setDataFetching] = useState(false);
     const [isProcessing, setProcessing] = useState(false);
     const [isCSVDownloading, setCSVDownloading] = useState(false);
@@ -25,6 +35,9 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
 
     const [rawDeviceData, setRawDeviceData] = useState([]);
     const [totalDataCount, setTotalDataCount] = useState(0);
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     // Define a custom CSS class for the modal content
     const customModalStyle = {
@@ -57,13 +70,82 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             });
     };
 
+    function isValidDate(d) {
+        return d instanceof Date && !isNaN(d);
+    }
+
+    const handleLastActiveDate = (last_login) => {
+        let dt = '';
+        if (isValidDate(new Date(last_login)) && last_login != null) {
+            const last_dt = new Date(last_login);
+            const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
+            const timeFormat = userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`;
+            dt = moment.utc(last_dt).format(`${dateFormat} 'YY @ ${timeFormat}`);
+        } else {
+            dt = 'Never';
+        }
+        return dt;
+    };
+
+    const renderRawDataTimestamp = (row) => {
+        const formattedTimestamp = handleLastActiveDate(row?.time_stamp);
+
+        return (
+            <Typography.Body size={Typography.Sizes.md} className="mouse-pointer">
+                {row?.time_stamp === '' ? '-' : formattedTimestamp}
+            </Typography.Body>
+        );
+    };
+
+    const renderGatewayMac = (row) => {
+        return (
+            <div size={Typography.Sizes.md} className="mouse-pointer">
+                {row?.gateway_mac === '' ? '-' : row?.gateway_mac}
+            </div>
+        );
+    };
+
+    const headerProps = [
+        {
+            name: 'Timestamp',
+            accessor: 'time_stamp',
+            callbackValue: renderRawDataTimestamp,
+        },
+        {
+            name: 'Gateway / MAC',
+            accessor: 'gateway_mac',
+            callbackValue: renderGatewayMac,
+        },
+        {
+            name: 'Firmware',
+            accessor: 'firmware',
+        },
+        {
+            name: 'Sensor Type',
+            accessor: 'sensor_type',
+        },
+        {
+            name: 'Counter',
+            accessor: 'counter',
+        },
+        {
+            name: 'RSSI',
+            accessor: 'rssi',
+        },
+    ];
+
     const downloadRawDataForCSVExport = async (bldg_id, device_id, bldg_tz) => {
         setCSVDownloading(true);
         const params = `?building_id=${bldg_id}&device_id=${device_id}&tz_info=${bldg_tz}`;
 
         await getDeviceRawData(params)
             .then((res) => {
-                const response = res?.data;
+                const responseData = res?.data;
+
+                if (responseData) {
+                    const csvData = getRawDeviceDataTableCSVExport(responseData, headerProps);
+                    download(`${bldgName}_Device_Raw_Data_${new Date().toISOString().split('T')[0]}`, csvData);
+                }
             })
             .catch(() => {})
             .finally(() => {
@@ -156,29 +238,12 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                         <DataTableWidget
                             id="raw_data_list"
                             isLoading={isFetchingData}
-                            isLoadingComponent={<SkeletonLoader noOfColumns={5} noOfRows={10} />}
+                            isLoadingComponent={<SkeletonLoader noOfColumns={6} noOfRows={10} />}
                             buttonGroupFilterOptions={[]}
                             rows={currentRow()}
                             disableColumnDragging={true}
                             searchResultRows={currentRow()}
-                            headers={[
-                                {
-                                    name: 'Timestamp',
-                                    accessor: 'time_stamp',
-                                },
-                                {
-                                    name: 'Gateway / MAC',
-                                    accessor: 'gateway_mac',
-                                },
-                                {
-                                    name: 'Firmware',
-                                    accessor: 'firmware',
-                                },
-                                {
-                                    name: 'CT Firmware',
-                                    accessor: 'ct_firmware',
-                                },
-                            ]}
+                            headers={headerProps}
                             currentPage={pageNo}
                             onChangePage={setPageNo}
                             pageSize={pageSize}
