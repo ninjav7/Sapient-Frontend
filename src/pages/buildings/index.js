@@ -749,7 +749,6 @@ const BuildingOverview = () => {
                             <ColumnChart
                                 title="Total Energy Consumption"
                                 subTitle={`${consumptionType} Energy Consumption (kWh)`}
-                                onMoreDetail={() => handleRouteChange('/energy/end-uses/plug')}
                                 colors={[colors.datavizMain2]}
                                 categories={energyConsumptionsCategories}
                                 tooltipUnit={UNITS.KWH}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import _ from 'lodash';
 import Modal from 'react-bootstrap/Modal';
 import Brick from '../../../sharedComponents/brick';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
@@ -111,14 +112,16 @@ const EditSensorModal = (props) => {
                 const response = res?.data;
                 if (response?.success && response?.data.length !== 0) {
                     // const customObj = response?.data.find((el) => el?.model === 'Custom'); --- PLT-1562 Hide "Custom" CT functionality temperory
-                    const sortedList = response?.data
+                    const sortedList = _.chain(response?.data)
                         .filter((el) => el?.model !== 'Custom')
-                        .sort((a, b) => a?.rated_amps - b?.rated_amps);
-                    // sortedList.push(customObj); --- PLT-1562 Hide "Custom" CT functionality temperory
-                    sortedList.forEach((el) => {
-                        el.label = el?.model;
-                        el.value = el?._id;
-                    });
+                        .sortBy((el) => el?.model)
+                        .map((el) => ({
+                            ...el,
+                            label: el?.model,
+                            value: el?._id,
+                        }))
+                        .value();
+                    // sortedList.push(customObj); //  PLT-1562 Hide "Custom" CT functionality temperory
                     setCTSensorsList(sortedList);
                 }
             })
