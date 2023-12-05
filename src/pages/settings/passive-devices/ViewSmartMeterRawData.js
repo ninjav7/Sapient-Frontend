@@ -198,7 +198,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                         <DataTableWidget
                             id="raw_data_list"
                             isLoading={isFetchingData}
-                            isLoadingComponent={<SkeletonLoader noOfColumns={5} noOfRows={10} />}
+                            isLoadingComponent={<SkeletonLoader noOfColumns={6} noOfRows={10} />}
                             buttonGroupFilterOptions={[]}
                             rows={currentRow()}
                             disableColumnDragging={true}
