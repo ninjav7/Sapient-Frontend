@@ -412,3 +412,16 @@ export const xAxisLabelStepCount = (days_count, time_format) => {
 export const capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
 };
+
+export const getPastDateRange = (startDate, daysCount) => {
+    const inputDate = moment(startDate);
+
+    // Calculate the past date range using Moment.js while preserving timezone
+    const startDatePast = inputDate.clone().subtract(daysCount, 'days');
+    const endDatePast = inputDate.clone().subtract(1, 'days');
+
+    return {
+        startDate: startDatePast.toISOString(),
+        endDate: endDatePast.toISOString(),
+    };
+};
