@@ -15,6 +15,7 @@ const SideNav = () => {
     const parentRoute = ComponentStore.useState((s) => s.parent);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [buildingListData] = useAtom(buildingData);
+    const [isPlugEnabled, setPlugEnabled] = useState(false);
 
     const [userPermission] = useAtom(userPermissionData);
     const [userPermissionListBuildings, setUserPermissionListBuildings] = useState('');
@@ -50,6 +51,11 @@ const SideNav = () => {
             pathname: `${route.path}`,
         });
     };
+
+    useEffect(() => {
+        const bldgObj = buildingListData.find((record) => record?.building_id === bldgId);
+        setPlugEnabled(bldgObj?.plug_only ?? false);
+    }, [buildingListData, bldgId]);
 
     useEffect(() => {
         if (userPermission?.user_role !== 'admin') {
@@ -163,6 +169,7 @@ const SideNav = () => {
     return (
         <div className="side-nav">
             {activeRoute.map((item, index) => {
+                if (item.path.includes('/energy/end-uses') && isPlugEnabled) return;
                 if (item.path.includes(':bldgId')) {
                     item.path = item.path.split(':')[0].concat(bldgId);
                 }
