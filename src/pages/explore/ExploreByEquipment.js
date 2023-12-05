@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-
 import { useAtom } from 'jotai';
 import { useParams } from 'react-router-dom';
 import { Row, Col, UncontrolledTooltip, Progress, Spinner } from 'reactstrap';
@@ -11,8 +10,10 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 
 import Header from '../../components/Header';
+import SkeletonLoader from '../../components/SkeletonLoader';
 import EquipChartModal from '../chartModal/EquipChartModal';
 import Brick from '../../sharedComponents/brick';
 import Select from '../../sharedComponents/form/select';
@@ -21,25 +22,30 @@ import { Checkbox } from '../../sharedComponents/form/checkbox';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 import Typography from '../../sharedComponents/typography';
+import { Button } from '../../sharedComponents/button';
+import Toggles from '../../sharedComponents/toggles/Toggles';
+import { TimeFrameSelector } from '../../sharedComponents/timeFrameSelector';
+
 import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
-import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+import ExploreCompareChart from '../../sharedComponents/exploreCompareChart/ExploreCompareChart';
 
 import {
     apiRequestBody,
     dateTimeFormatForHighChart,
     formatConsumptionValue,
     formatXaxisForHighCharts,
+    getPastDateRange,
     pageListSizes,
 } from '../../helpers/helpers';
 import { UNITS } from '../../constants/units';
 import { isEmptyObject, truncateString, validateSeriesDataForEquipments } from './utils';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
+
 import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../explore/services';
 
 import './style.css';
 import './styles.scss';
-import SkeletonLoader from '../../components/SkeletonLoader';
 
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
@@ -67,11 +73,14 @@ const ExploreByEquipment = () => {
     const [selectedEquipIds, setSelectedEquipIds] = useState([]);
     const [filterObj, setFilterObj] = useState({});
     const [filterOptions, setFilterOptions] = useState([]);
-    const [seriesData, setSeriesData] = useState([]);
     const [equipDataList, setEquipDataList] = useState([]);
+
+    const [seriesData, setSeriesData] = useState([]);
+    const [pastSeriesData, setPastSeriesData] = useState([]);
 
     const [isFiltersFetching, setFiltersFetching] = useState(false);
     const [isFetchingChartData, setFetchingChartData] = useState(false);
+    const [isFetchingPastChartData, setFetchingPastChartData] = useState(false);
     const [isEquipDataFetching, setEquipDataFetching] = useState(false);
 
     const [checkedAll, setCheckedAll] = useState(false);
@@ -113,6 +122,8 @@ const ExploreByEquipment = () => {
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
 
+    const [isInComparisonMode, setComparisonMode] = useState(false);
+
     // Chart metric
     const metric = [
         { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy Consumption' },
@@ -122,6 +133,15 @@ const ExploreByEquipment = () => {
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0]?.Consumption);
     const [selectedConsumption, setConsumption] = useState(metric[0]?.value);
+
+    const toggleComparision = () => {
+        setComparisonMode(!isInComparisonMode);
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = isInComparisonMode ? 'Comparison Mode turned OFF' : 'Comparison Mode turned ON';
+            s.notificationType = 'success';
+        });
+    };
 
     const handleUnitChange = (value) => {
         const obj = metric.find((record) => record?.value === value);
@@ -356,6 +376,7 @@ const ExploreByEquipment = () => {
                     if (data.length === 0) {
                         setSelectedEquipIds([]);
                         setSeriesData([]);
+                        setComparisonMode(false);
                     }
                     if (total_data) setTotalItems(total_data);
                 }
@@ -366,8 +387,14 @@ const ExploreByEquipment = () => {
             });
     };
 
-    const fetchSingleEquipChartData = async (equipId, device_type) => {
+    const fetchSingleEquipChartData = async (equipId, device_type, isComparisionOn = false) => {
         const payload = apiRequestBody(startDate, endDate, timeZone);
+        let previousDataPayload = {};
+
+        if (isComparisionOn) {
+            const pastDateObj = getPastDateRange(startDate, daysCount);
+            previousDataPayload = apiRequestBody(pastDateObj?.startDate, pastDateObj?.endDate, timeZone);
+        }
 
         const params = `?building_id=${bldgId}&consumption=${
             selectedConsumption === 'rmsCurrentMilliAmps' && device_type === 'active' ? 'mAh' : selectedConsumption
@@ -375,69 +402,78 @@ const ExploreByEquipment = () => {
             selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
         }`;
 
-        await fetchExploreEquipmentChart(payload, params)
+        let promisesList = [];
+        promisesList.push(fetchExploreEquipmentChart(payload, params));
+        if (isComparisionOn) promisesList.push(fetchExploreEquipmentChart(previousDataPayload, params));
+
+        Promise.all(promisesList)
             .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    const { data } = response;
+                const response = res;
 
-                    const equipObj = equipDataList.find((el) => el?.equipment_id === equipId);
-                    if (!equipObj?.equipment_id || data.length === 0) return;
+                response.forEach((record, index) => {
+                    if (record?.status === 200 && record?.data?.success) {
+                        const { data } = record?.data;
 
-                    if (selectedConsumption === 'rmsCurrentMilliAmps') {
-                        const chartData = [];
+                        const equipObj = equipDataList.find((el) => el?.equipment_id === equipId);
 
-                        let legendName = equipObj?.equipment_name;
-                        if (equipObj?.location.includes('>')) {
-                            legendName += ` - ${equipObj?.location.split('>')[1].trim()}`;
+                        if (!equipObj?.equipment_id || data.length === 0) return;
+
+                        if (selectedConsumption === 'rmsCurrentMilliAmps') {
+                            let chartData = [];
+
+                            let legendName = equipObj?.equipment_name;
+                            if (equipObj?.location.includes('>')) {
+                                legendName += ` - ${equipObj?.location.split('>')[1].trim()}`;
+                            }
+
+                            data.forEach((sensorObj) => {
+                                const newSensorMappedData = sensorObj?.data.map((el) => ({
+                                    x: new Date(el?.time_stamp).getTime(),
+                                    y: el?.consumption === '' ? null : el?.consumption,
+                                }));
+
+                                chartData.push({
+                                    id: equipObj?.equipment_id,
+                                    name: `${legendName} - Sensor ${sensorObj?.sensor_name}`,
+                                    data: newSensorMappedData,
+                                });
+                            });
+
+                            if (index === 0) setSeriesData([...seriesData, ...chartData]);
+                            if (index === 1) setPastSeriesData([...pastSeriesData, ...chartData]);
                         }
 
-                        data.forEach((sensorObj) => {
-                            const newSensorMappedData = sensorObj?.data.map((el) => ({
+                        if (selectedConsumption !== 'rmsCurrentMilliAmps') {
+                            let legendName = equipObj?.equipment_name;
+                            if (equipObj?.location.includes('>')) {
+                                legendName += ` - ${equipObj?.location.split('>')[1].trim()}`;
+                            }
+                            const newEquipMappedData = data.map((el) => ({
                                 x: new Date(el?.time_stamp).getTime(),
                                 y: el?.consumption === '' ? null : el?.consumption,
                             }));
 
-                            chartData.push({
+                            const recordToInsert = {
                                 id: equipObj?.equipment_id,
-                                name: `${legendName} - Sensor ${sensorObj?.sensor_name}`,
-                                data: newSensorMappedData,
-                            });
-                        });
+                                name: legendName,
+                                data: newEquipMappedData,
+                            };
 
-                        setSeriesData([...seriesData, ...chartData]);
-                    }
-
-                    if (selectedConsumption !== 'rmsCurrentMilliAmps') {
-                        let legendName = equipObj?.equipment_name;
-                        if (equipObj?.location.includes('>')) {
-                            legendName += ` - ${equipObj?.location.split('>')[1].trim()}`;
+                            if (index === 0) setSeriesData([...seriesData, recordToInsert]);
+                            if (index === 1) setPastSeriesData([...pastSeriesData, recordToInsert]);
                         }
-
-                        const newEquipMappedData = data.map((el) => ({
-                            x: new Date(el?.time_stamp).getTime(),
-                            y: el?.consumption === '' ? null : el?.consumption,
-                        }));
-
-                        const recordToInsert = {
-                            id: equipObj?.equipment_id,
-                            name: legendName,
-                            data: newEquipMappedData,
-                        };
-
-                        setSeriesData([...seriesData, recordToInsert]);
+                    } else {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message
+                                ? response?.message
+                                : res
+                                ? 'Unable to fetch data for selected Equipment.'
+                                : 'Unable to fetch data due to Internal Server Error!.';
+                            s.notificationType = 'error';
+                        });
                     }
-                } else {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = response?.message
-                            ? response?.message
-                            : res
-                            ? 'Unable to fetch data for selected Equipment.'
-                            : 'Unable to fetch data due to Internal Server Error!.';
-                        s.notificationType = 'error';
-                    });
-                }
+                });
             })
             .catch((err) => {
                 UserStore.update((s) => {
@@ -448,10 +484,16 @@ const ExploreByEquipment = () => {
             });
     };
 
-    const fetchMultipleEquipChartData = async (start_date, end_date, data_type = 'energy', equipIDs = []) => {
+    const fetchMultipleEquipChartData = async (
+        start_date,
+        end_date,
+        data_type = 'energy',
+        equipIDs = [],
+        requestType = 'currentData'
+    ) => {
         if (start_date === null || end_date === null || !data_type || equipIDs.length === 0) return;
 
-        setFetchingChartData(true);
+        requestType === 'currentData' ? setFetchingChartData(true) : setFetchingPastChartData(true);
 
         const payload = apiRequestBody(start_date, end_date, timeZone);
 
@@ -466,7 +508,7 @@ const ExploreByEquipment = () => {
             promisesList.push(fetchExploreEquipmentChart(payload, params));
         });
 
-        setSeriesData([]);
+        requestType === 'currentData' ? setSeriesData([]) : setPastSeriesData([]);
 
         Promise.all(promisesList)
             .then((res) => {
@@ -521,12 +563,12 @@ const ExploreByEquipment = () => {
                         }
                     });
 
-                    setSeriesData(newResponse);
+                    requestType === 'currentData' ? setSeriesData(newResponse) : setPastSeriesData(newResponse);
                 }
             })
             .catch(() => {})
             .finally(() => {
-                setFetchingChartData(false);
+                requestType === 'currentData' ? setFetchingChartData(false) : setFetchingPastChartData(false);
             });
     };
 
@@ -596,15 +638,21 @@ const ExploreByEquipment = () => {
             });
     };
 
-    const handleEquipStateChange = (value, equipObj) => {
+    const handleEquipStateChange = (value, equipObj, isComparisionOn = false) => {
         if (value === 'true') {
             const newDataList = seriesData.filter((item) => item?.id !== equipObj?.equipment_id);
             setSeriesData(newDataList);
+
+            if (isComparisionOn) {
+                const newPastDataList = pastSeriesData.filter((item) => item?.id !== equipObj?.equipment_id);
+                setPastSeriesData(newPastDataList);
+            }
         }
 
         if (value === 'false') {
             if (equipObj?.device_type) setDeviceType(equipObj?.device_type);
-            if (equipObj?.equipment_id) fetchSingleEquipChartData(equipObj?.equipment_id, equipObj?.device_type);
+            if (equipObj?.equipment_id)
+                fetchSingleEquipChartData(equipObj?.equipment_id, equipObj?.device_type, isComparisionOn);
         }
 
         const isAdding = value === 'false';
@@ -1021,7 +1069,18 @@ const ExploreByEquipment = () => {
 
     useEffect(() => {
         if (selectedEquipIds.length !== 0) {
-            fetchMultipleEquipChartData(startDate, endDate, selectedConsumption, selectedEquipIds);
+            fetchMultipleEquipChartData(startDate, endDate, selectedConsumption, selectedEquipIds, 'currentData');
+
+            if (isInComparisonMode) {
+                const pastDateObj = getPastDateRange(startDate, daysCount);
+                fetchMultipleEquipChartData(
+                    pastDateObj?.startDate,
+                    pastDateObj?.endDate,
+                    selectedConsumption,
+                    selectedEquipIds,
+                    'pastData'
+                );
+            }
         }
     }, [startDate, endDate, selectedConsumption]);
 
@@ -1029,100 +1088,173 @@ const ExploreByEquipment = () => {
         if (checkedAll) {
             if (equipDataList.length !== 0 && equipDataList.length <= 20) {
                 const allEquipIds = equipDataList.map((el) => el?.equipment_id);
-                fetchMultipleEquipChartData(startDate, endDate, selectedConsumption, allEquipIds);
+                fetchMultipleEquipChartData(startDate, endDate, selectedConsumption, allEquipIds, 'currentData');
                 setSelectedEquipIds(allEquipIds);
+
+                if (isInComparisonMode) {
+                    const pastDateObj = getPastDateRange(startDate, daysCount);
+                    fetchMultipleEquipChartData(
+                        pastDateObj?.startDate,
+                        pastDateObj?.endDate,
+                        selectedConsumption,
+                        selectedEquipIds,
+                        'pastData'
+                    );
+                }
             }
         }
         if (!checkedAll) {
             setSeriesData([]);
+            setPastSeriesData([]);
+            setComparisonMode(false);
             setSelectedEquipIds([]);
         }
     }, [checkedAll]);
 
+    useEffect(() => {
+        setSeriesData([]);
+        setPastSeriesData([]);
+        setSelectedEquipIds([]);
+    }, [isInComparisonMode]);
+
     const dataToRenderOnChart = validateSeriesDataForEquipments(selectedEquipIds, equipDataList, seriesData);
+    const pastDataToRenderOnChart = validateSeriesDataForEquipments(selectedEquipIds, equipDataList, pastSeriesData);
 
     return (
         <>
-            <Row className="explore-filters-style p-2">
-                <div className="mr-2">
-                    <Select
-                        defaultValue={selectedConsumption}
-                        options={metric}
-                        onChange={(e) => {
-                            setConsumption(e.value);
-                            handleUnitChange(e.value);
-                            handleConsumptionChange(e.value);
-                        }}
-                    />
+            <Row className="d-flex justify-content-end">
+                <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
+                    <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
+                        {/* PLT-1785: Functionality to be enabled with Custom Period selector
+                        {isInComparisonMode && (
+                            <TimeFrameSelector
+                            // onCustomDateChange={onCustomDateChange}
+                            // onDateFilterChange={onDateFilterChange}
+                            // rangeDate={rangeDate}
+                            // timeOptions={customOptions}
+                            // defaultValue={filterPeriod}
+                            />
+                        )} */}
+                        <Button
+                            size={Button.Sizes.lg}
+                            type={isInComparisonMode ? Button.Type.secondary : Button.Type.secondaryGrey}>
+                            <Toggles
+                                size={Toggles.Sizes.sm}
+                                isChecked={isInComparisonMode}
+                                onChange={toggleComparision}
+                            />
+                            <Typography.Subheader size={Typography.Sizes.lg} onClick={toggleComparision}>
+                                {isInComparisonMode ? 'Disable Compare' : 'Enable Compare'}
+                            </Typography.Subheader>
+                        </Button>
+                        <Select
+                            defaultValue={selectedConsumption}
+                            options={metric}
+                            onChange={(e) => {
+                                setConsumption(e.value);
+                                handleUnitChange(e.value);
+                                handleConsumptionChange(e.value);
+                            }}
+                        />
+                        <Header title="" type="page" />
+                    </div>
                 </div>
-                <Header title="" type="page" />
             </Row>
 
             <Row>
                 <div className="explore-data-table-style p-2">
-                    {isFetchingChartData ? (
+                    {isFetchingChartData || isFetchingPastChartData ? (
                         <div className="explore-chart-wrapper">
                             <div className="explore-chart-loader">
                                 <Spinner color="primary" />
                             </div>
                         </div>
                     ) : (
-                        <ExploreChart
-                            title={''}
-                            subTitle={''}
-                            isLoadingData={false}
-                            disableDefaultPlotBands={true}
-                            tooltipValuesKey={'{point.y:.1f}'}
-                            tooltipUnit={selectedUnit}
-                            tooltipLabel={selectedConsumptionLabel}
-                            data={dataToRenderOnChart}
-                            chartProps={{
-                                navigator: {
-                                    outlineWidth: 0,
-                                    adaptToUpdatedData: false,
-                                    stickToMax: true,
-                                },
-                                plotOptions: {
-                                    series: {
-                                        states: {
-                                            inactive: {
-                                                opacity: 1,
+                        <>
+                            {isInComparisonMode ? (
+                                <ExploreCompareChart
+                                    title={''}
+                                    subTitle={''}
+                                    data={dataToRenderOnChart}
+                                    pastData={pastDataToRenderOnChart}
+                                    tooltipUnit={selectedUnit}
+                                    tooltipLabel={selectedConsumptionLabel}
+                                    timeIntervalObj={{
+                                        startDate,
+                                        endDate,
+                                        daysCount,
+                                    }}
+                                    chartProps={{
+                                        tooltip: {
+                                            xDateFormat: dateTimeFormatForHighChart(
+                                                userPrefDateFormat,
+                                                userPrefTimeFormat
+                                            ),
+                                        },
+                                    }}
+                                />
+                            ) : (
+                                <ExploreChart
+                                    title={''}
+                                    subTitle={''}
+                                    isLoadingData={false}
+                                    disableDefaultPlotBands={true}
+                                    tooltipValuesKey={'{point.y:.1f}'}
+                                    tooltipUnit={selectedUnit}
+                                    tooltipLabel={selectedConsumptionLabel}
+                                    data={dataToRenderOnChart}
+                                    chartProps={{
+                                        navigator: {
+                                            outlineWidth: 0,
+                                            adaptToUpdatedData: false,
+                                            stickToMax: true,
+                                        },
+                                        plotOptions: {
+                                            series: {
+                                                states: {
+                                                    inactive: {
+                                                        opacity: 1,
+                                                    },
+                                                },
                                             },
                                         },
-                                    },
-                                },
-                                xAxis: {
-                                    gridLineWidth: 0,
-                                    type: 'datetime',
-                                    labels: {
-                                        format: formatXaxisForHighCharts(
-                                            daysCount,
-                                            userPrefDateFormat,
-                                            userPrefTimeFormat,
-                                            selectedConsumption
-                                        ),
-                                    },
-                                },
-                                yAxis: [
-                                    {
-                                        gridLineWidth: 1,
-                                        lineWidth: 1,
-                                        opposite: false,
-                                        lineColor: null,
-                                    },
-                                    {
-                                        opposite: true,
-                                        title: false,
-                                        max: 120,
-                                        postFix: '23',
-                                        gridLineWidth: 0,
-                                    },
-                                ],
-                                tooltip: {
-                                    xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
-                                },
-                            }}
-                        />
+                                        xAxis: {
+                                            gridLineWidth: 0,
+                                            type: 'datetime',
+                                            labels: {
+                                                format: formatXaxisForHighCharts(
+                                                    daysCount,
+                                                    userPrefDateFormat,
+                                                    userPrefTimeFormat,
+                                                    selectedConsumption
+                                                ),
+                                            },
+                                        },
+                                        yAxis: [
+                                            {
+                                                gridLineWidth: 1,
+                                                lineWidth: 1,
+                                                opposite: false,
+                                                lineColor: null,
+                                            },
+                                            {
+                                                opposite: true,
+                                                title: false,
+                                                max: 120,
+                                                postFix: '23',
+                                                gridLineWidth: 0,
+                                            },
+                                        ],
+                                        tooltip: {
+                                            xDateFormat: dateTimeFormatForHighChart(
+                                                userPrefDateFormat,
+                                                userPrefTimeFormat
+                                            ),
+                                        },
+                                    }}
+                                />
+                            )}
+                        </>
                     )}
                 </div>
             </Row>
@@ -1159,7 +1291,7 @@ const ExploreByEquipment = () => {
                                     onChange={() => {
                                         setCheckedAll(!checkedAll);
                                     }}
-                                    disabled={!equipDataList || equipDataList.length > 20}
+                                    disabled={!equipDataList || equipDataList.length > 20 || isInComparisonMode}
                                 />
                             )}
                             customCheckboxForCell={(record) => (
@@ -1171,7 +1303,7 @@ const ExploreByEquipment = () => {
                                     checked={selectedEquipIds.includes(record?.equipment_id)}
                                     value={selectedEquipIds.includes(record?.equipment_id)}
                                     onChange={(e) => {
-                                        handleEquipStateChange(e.target.value, record);
+                                        handleEquipStateChange(e.target.value, record, isInComparisonMode);
                                     }}
                                 />
                             )}
