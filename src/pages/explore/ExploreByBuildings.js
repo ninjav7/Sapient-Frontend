@@ -979,7 +979,7 @@ const ExploreByBuildings = () => {
                                 onChange={toggleComparision}
                             />
                             <Typography.Subheader size={Typography.Sizes.lg} onClick={toggleComparision}>
-                                {isInComparisonMode ? 'Disable Compare' : 'Enable Compare'}
+                                Compare
                             </Typography.Subheader>
                         </Button>
                         <Select
