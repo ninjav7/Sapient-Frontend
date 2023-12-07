@@ -38,7 +38,6 @@ const ActiveDevices = () => {
     const canUserView = userPermission?.permissions?.permissions?.advanced_active_device_permission?.view ?? false;
     const canUserCreate = userPermission?.permissions?.permissions?.advanced_active_device_permission?.create ?? false;
     const canUserEdit = userPermission?.permissions?.permissions?.advanced_active_device_permission?.edit ?? false;
-    const canUserDelete = userPermission?.permissions?.permissions?.advanced_active_device_permission?.delete ?? false;
 
     const { download } = useCSVDownload();
     const [search, setSearch] = useState('');
