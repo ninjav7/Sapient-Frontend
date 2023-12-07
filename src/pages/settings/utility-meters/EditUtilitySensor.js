@@ -31,6 +31,7 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 import { formatSensorHeading } from './helper';
 import './styles.scss';
+import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
 const MetricsTab = (props) => {
     const { utilityMeterObj, sensorObj, bldgId } = props;
@@ -533,6 +534,9 @@ const ConfigureTab = (props) => {
                                             handleChange('service_location', e.value);
                                         }}
                                         isSearchable={true}
+                                        customSearchCallback={({ data, query }) =>
+                                            defaultDropdownSearch(data, query?.value)
+                                        }
                                         menuPlacement="top"
                                     />
                                     {sensorObj?.service_location ? (
@@ -631,6 +635,9 @@ const ConfigureTab = (props) => {
                                             handleChange('service_location', e.value);
                                         }}
                                         isSearchable={true}
+                                        customSearchCallback={({ data, query }) =>
+                                            defaultDropdownSearch(data, query?.value)
+                                        }
                                         menuPlacement="top"
                                     />
                                     {sensorObj?.service_location ? (

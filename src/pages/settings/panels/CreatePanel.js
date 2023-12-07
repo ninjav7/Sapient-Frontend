@@ -11,6 +11,7 @@ import { addNewPanel, getLocationData, getPanelsList } from './services';
 import { disconnectBreaker, panelType, voltsOption } from './utils';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { UserStore } from '../../../store/UserStore';
+import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
 const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
     const history = useHistory();
@@ -314,6 +315,7 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
                             handleChange('space_id', e.value);
                         }}
                         isSearchable={true}
+                        customSearchCallback={({ data, query }) => defaultDropdownSearch(data, query?.value)}
                         menuPlacement="top"
                     />
                 </div>
@@ -331,6 +333,7 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
                             handleChange('parent_panel', e.value);
                         }}
                         isSearchable={true}
+                        customSearchCallback={({ data, query }) => defaultDropdownSearch(data, query?.value)}
                         error={errorObj?.parent_panel}
                         menuPlacement="top"
                     />

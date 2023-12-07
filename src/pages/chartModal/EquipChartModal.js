@@ -43,6 +43,7 @@ import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/
 import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
 import '../settings/passive-devices/styles.scss';
 import './styles.scss';
+import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -726,6 +727,9 @@ const EquipChartModal = ({
                                                         handleDataChange('equipments_type_id', e.value);
                                                     }}
                                                     isSearchable={true}
+                                                    customSearchCallback={({ data, query }) =>
+                                                        defaultDropdownSearch(data, query?.value)
+                                                    }
                                                     disabled={
                                                         !(
                                                             userPermission?.user_role === 'admin' ||
@@ -781,6 +785,9 @@ const EquipChartModal = ({
                                                     handleDataChange('location_id', e.value);
                                                 }}
                                                 isSearchable={true}
+                                                customSearchCallback={({ data, query }) =>
+                                                    defaultDropdownSearch(data, query?.value)
+                                                }
                                                 disabled={
                                                     !(
                                                         userPermission?.user_role === 'admin' ||
@@ -812,6 +819,9 @@ const EquipChartModal = ({
                                                             (option) => option.value === 'desktop-pc'
                                                         )}
                                                         isSearchable={false}
+                                                        customSearchCallback={({ data, query }) =>
+                                                            defaultDropdownSearch(data, query?.value)
+                                                        }
                                                         disabled={
                                                             !(
                                                                 userPermission?.user_role === 'admin' ||

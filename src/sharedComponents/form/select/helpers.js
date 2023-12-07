@@ -15,4 +15,18 @@ const filterOutSelectAllOption = (options) => {
     return options.filter((el) => el?.value !== selectAllOption?.value);
 };
 
-export { conditionalClass, optionClasses, filterOutSelectAllOption };
+const defaultDropdownSearch = (data, value) => {
+    if (!value) {
+        return data;
+    }
+
+    const lowerCaseValue = value.toLowerCase();
+    const newFilteredList = data.filter((el) => {
+        const { props: { data: { label } = {} } = {} } = el;
+        return label && label.toLowerCase().includes(lowerCaseValue);
+    });
+
+    return newFilteredList;
+};
+
+export { conditionalClass, optionClasses, filterOutSelectAllOption, defaultDropdownSearch };

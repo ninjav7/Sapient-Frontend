@@ -32,6 +32,7 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import '../../../sharedComponents/form/select/style.scss';
 import '../style.css';
 import './styles.scss';
+import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
 const UserAlertPopup = (props) => {
     const { isModalOpen = false, onCancel } = props;
@@ -602,6 +603,9 @@ const GeneralBuildingSettings = () => {
                                                     };
                                                 });
                                             }}
+                                            customSearchCallback={({ data, query }) =>
+                                                defaultDropdownSearch(data, query?.value)
+                                            }
                                             className="w-100"
                                         />
                                     ) : (

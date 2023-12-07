@@ -52,6 +52,7 @@ import DeletePanel from './DeletePanel';
 import UngroupAlert from './UngroupAlert';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
+import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
 const EditPanel = () => {
     const history = useHistory();
@@ -1555,6 +1556,9 @@ const EditPanel = () => {
                                         handleChange('parent_id', e.value);
                                     }}
                                     isSearchable={true}
+                                    customSearchCallback={({ data, query }) =>
+                                        defaultDropdownSearch(data, query?.value)
+                                    }
                                     isDisabled={!(isSuperAdmin || canUserEdit)}
                                 />
                             )}
@@ -1582,6 +1586,9 @@ const EditPanel = () => {
                                         handleChange('location_id', e.value);
                                     }}
                                     isSearchable={true}
+                                    customSearchCallback={({ data, query }) =>
+                                        defaultDropdownSearch(data, query?.value)
+                                    }
                                     isDisabled={!(isSuperAdmin || canUserEdit)}
                                 />
                             )}

@@ -8,6 +8,7 @@ import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import Select from '../../../sharedComponents/form/select';
 import { addNewEquipment } from '../../../services/equipment';
 import { UserStore } from '../../../store/UserStore';
+import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
 const AddEquipment = ({
     isAddEquipModalOpen,
@@ -147,6 +148,7 @@ const AddEquipment = ({
                         onChange={(e) => {
                             handleChange('equipment_type', e.value);
                         }}
+                        customSearchCallback={({ data, query }) => defaultDropdownSearch(data, query?.value)}
                         error={equipmentErrors?.equipment_type}
                         className="basic-single"
                     />
@@ -193,6 +195,7 @@ const AddEquipment = ({
                         onChange={(e) => {
                             handleChange('space_id', e.value);
                         }}
+                        customSearchCallback={({ data, query }) => defaultDropdownSearch(data, query?.value)}
                         className="basic-single"
                         menuPlacement="top"
                     />
