@@ -20,6 +20,7 @@ import { ReactComponent as RefreshSVG } from './../../../../src/assets/icon/refr
 
 import { getDeviceRawData } from './services.js';
 
+import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPassiveDevice }) => {
@@ -53,17 +54,31 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
 
     const fetchRawDataForDevice = async (bldg_id, device_id, page_no = 1, page_size = 20, bldg_tz) => {
         setDataFetching(true);
+        setTotalDataCount(0);
         setRawDeviceData([]);
         const params = `?building_id=${bldg_id}&device_id=${device_id}&page_no=${page_no}&page_size=${page_size}&tz_info=${bldg_tz}`;
 
         await getDeviceRawData(params)
             .then((res) => {
                 const response = res?.data;
+                if (response?.total_count) setTotalDataCount(response?.total_count);
                 if (response) {
-                    if (response.length !== 0) setRawDeviceData(response);
+                    if (response?.data.length !== 0) setRawDeviceData(response?.data);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Unable to update Raw Data for due to Internal Server Error!.';
+                        s.notificationType = 'error';
+                    });
                 }
             })
-            .catch(() => {})
+            .catch(() => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to update Raw Data for due to Internal Server Error!.';
+                    s.notificationType = 'error';
+                });
+            })
             .finally(() => {
                 setDataFetching(false);
                 setProcessing(false);
@@ -105,6 +120,17 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
         );
     };
 
+    const renderSensorData = (row) => {
+        return (
+            <div
+                size={Typography.Sizes.md}
+                className="typography-wrapper mouse-pointer"
+                style={{ color: colorPalette?.datavizBlue500 }}>
+                View
+            </div>
+        );
+    };
+
     const headerProps = [
         {
             name: 'Timestamp',
@@ -132,6 +158,12 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             name: 'RSSI',
             accessor: 'rssi',
         },
+        // Planned to be disabled as part of Ticket: PLT-1203
+        // {
+        //     name: 'Sensor Data',
+        //     accessor: 'sensor_data',
+        //     callbackValue: renderSensorData,
+        // },
     ];
 
     const downloadRawDataForCSVExport = async (bldg_id, device_id, bldg_tz) => {
@@ -140,7 +172,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
 
         await getDeviceRawData(params)
             .then((res) => {
-                const responseData = res?.data;
+                const responseData = res?.data?.data;
 
                 if (responseData) {
                     const csvData = getRawDeviceDataTableCSVExport(responseData, headerProps);
@@ -238,7 +270,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                         <DataTableWidget
                             id="raw_data_list"
                             isLoading={isFetchingData}
-                            isLoadingComponent={<SkeletonLoader noOfColumns={6} noOfRows={10} />}
+                            isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length} noOfRows={10} />}
                             buttonGroupFilterOptions={[]}
                             rows={currentRow()}
                             disableColumnDragging={true}
