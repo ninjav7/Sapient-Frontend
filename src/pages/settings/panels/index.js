@@ -479,9 +479,10 @@ const Panels = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
+                        isEditable={() => isSuperAdmin || canUserEdit}
+                        isDeletable={() => isSuperAdmin || canUserDelete}
                         onEditRow={isSuperAdmin || canUserEdit ? (record, id, row) => handleClick(row) : null}
                         onDeleteRow={isSuperAdmin || canUserDelete ? (record, id, row) => handlePanelDelete(row) : null}
-                        isDeletable={(row) => handleAbleToDeleteRow()}
                         totalCount={(() => {
                             if (selectedFilter === 0) {
                                 return totalItems;

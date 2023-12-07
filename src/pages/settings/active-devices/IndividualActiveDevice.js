@@ -37,10 +37,16 @@ import { UserStore } from '../../../store/UserStore';
 import '../../../sharedComponents/breaker/Breaker.scss';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
 const IndividualActiveDevice = () => {
     const history = useHistory();
     const [userPermission] = useAtom(userPermissionData);
+
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperAdmin = isUserAdmin || isSuperUser;
+    const canUserEdit = userPermission?.permissions?.permissions?.advanced_active_device_permission?.edit ?? false;
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -402,8 +408,7 @@ const IndividualActiveDevice = () => {
                                 />
                             </div>
                             <div>
-                                {userPermission?.user_role === 'admin' ||
-                                userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ? (
+                                {isSuperAdmin || canUserEdit ? (
                                     <Button
                                         label={isProcessing ? 'Saving' : 'Save'}
                                         size={Button.Sizes.md}
@@ -445,13 +450,8 @@ const IndividualActiveDevice = () => {
                                     setLocationError(null);
                                 }}
                                 isSearchable={true}
-                                disabled={
-                                    !(
-                                        userPermission?.user_role === 'admin' ||
-                                        userPermission?.permissions?.permissions?.advanced_passive_device_permission
-                                            ?.edit
-                                    )
-                                }
+                                customSearchCallback={({ data, query }) => defaultDropdownSearch(data, query?.value)}
+                                disabled={!(isSuperAdmin || canUserEdit)}
                                 error={locationError}
                             />
                         )}
