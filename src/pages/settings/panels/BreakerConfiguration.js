@@ -48,6 +48,7 @@ import { getSensorGraphData } from '../passive-devices/services';
 import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../../helpers/helpers';
 import { Spinner } from 'reactstrap';
 import './breaker-config-styles.scss';
+import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
 const BreakerConfiguration = ({
     showBreakerConfigModal,
@@ -1362,6 +1363,9 @@ const BreakerConfiguration = ({
                                                                             handleChange('equipment_link', e.value);
                                                                             setSelectedEquipment(e.value);
                                                                         }}
+                                                                        customSearchCallback={({ data, query }) =>
+                                                                            defaultDropdownSearch(data, query?.value)
+                                                                        }
                                                                         className="basic-single"
                                                                         isDisabled={
                                                                             firstBreakerObj?.type !== 'equipment'
@@ -1525,6 +1529,9 @@ const BreakerConfiguration = ({
                                                                 onChange={(e) => {
                                                                     handleCreateEquipChange('equipment_type', e.value);
                                                                 }}
+                                                                customSearchCallback={({ data, query }) =>
+                                                                    defaultDropdownSearch(data, query?.value)
+                                                                }
                                                                 className="basic-single"
                                                                 error={equipmentErrors?.equipment_type}
                                                                 isDisabled={firstBreakerObj?.type !== 'equipment'}
@@ -1574,6 +1581,9 @@ const BreakerConfiguration = ({
                                                             onChange={(e) => {
                                                                 handleCreateEquipChange('space_id', e.value);
                                                             }}
+                                                            customSearchCallback={({ data, query }) =>
+                                                                defaultDropdownSearch(data, query?.value)
+                                                            }
                                                             className="basic-single"
                                                             isDisabled={firstBreakerObj?.type !== 'equipment'}
                                                             menuPlacement="top"

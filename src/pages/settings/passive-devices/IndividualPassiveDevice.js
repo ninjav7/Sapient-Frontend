@@ -35,9 +35,15 @@ import '../../../sharedComponents/breaker/Breaker.scss';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 import Sensors from './Sensors';
 import colorPalette from '../../../assets/scss/_colors.scss';
+import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
 const IndividualPassiveDevice = () => {
     const [userPermission] = useAtom(userPermissionData);
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperAdmin = isUserAdmin || isSuperUser;
+    const canUserEdit = userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ?? false;
+    const canUserDelete = userPermission?.permissions?.permissions?.advanced_passive_device_permission?.delete ?? false;
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -380,8 +386,7 @@ const IndividualPassiveDevice = () => {
                                 />
                             </div>
                             <div>
-                                {userPermission?.user_role === 'admin' ||
-                                userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ? (
+                                {isSuperAdmin || canUserEdit ? (
                                     <Button
                                         label={isProcessing ? 'Saving' : 'Save'}
                                         size={Button.Sizes.md}
@@ -423,13 +428,8 @@ const IndividualPassiveDevice = () => {
                                     setLocationError(null);
                                 }}
                                 isSearchable={true}
-                                disabled={
-                                    !(
-                                        userPermission?.user_role === 'admin' ||
-                                        userPermission?.permissions?.permissions?.advanced_passive_device_permission
-                                            ?.edit
-                                    )
-                                }
+                                customSearchCallback={({ data, query }) => defaultDropdownSearch(data, query?.value)}
+                                disabled={!(isSuperAdmin || canUserEdit)}
                                 error={locationError}
                             />
                         )}
@@ -477,8 +477,7 @@ const IndividualPassiveDevice = () => {
                             </div>
                         </div>
 
-                        {userPermission?.user_role === 'admin' ||
-                        userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ? (
+                        {isSuperAdmin || canUserEdit ? (
                             <div
                                 className="d-flex justify-content-between align-items-start mouse-pointer"
                                 onClick={openEditDeviceModal}>
@@ -529,8 +528,7 @@ const IndividualPassiveDevice = () => {
                 </Col>
             </Row>
 
-            {(userPermission?.user_role === 'admin' ||
-                userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit) && (
+            {(isSuperAdmin || canUserDelete) && (
                 <div className="passive-container">
                     <DeleteDevice
                         showDeleteModal={showDeleteModal}

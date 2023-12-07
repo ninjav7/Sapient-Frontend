@@ -13,7 +13,7 @@ import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/ass
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 
-import { filterOutSelectAllOption } from '../../../sharedComponents/form/select/helpers';
+import { defaultDropdownSearch, filterOutSelectAllOption } from '../../../sharedComponents/form/select/helpers';
 
 import { TARGET_TYPES } from '../constants';
 import colorPalette from '../../../assets/scss/_colors.scss';
@@ -325,6 +325,9 @@ const Target = (props) => {
                                                                 alertObj?.target?.buildingIDs
                                                             );
                                                         }}
+                                                        customSearchCallback={({ data, query }) =>
+                                                            defaultDropdownSearch(data, query?.value)
+                                                        }
                                                         value={alertObj?.target?.typesList ?? []}
                                                         menuPlacement="auto"
                                                     />
@@ -351,6 +354,9 @@ const Target = (props) => {
                                                                     filterOutSelectAllOption(value)
                                                                 );
                                                             }}
+                                                            customSearchCallback={({ data, query }) =>
+                                                                defaultDropdownSearch(data, query?.value)
+                                                            }
                                                             value={alertObj?.target?.lists ?? []}
                                                             menuPlacement="auto"
                                                         />

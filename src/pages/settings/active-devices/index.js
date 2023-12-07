@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useHistory } from 'react-router-dom';
 import { getActiveDeviceData, fetchActiveFilter, getSingleActiveDevice } from './services';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
@@ -27,9 +27,17 @@ import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const ActiveDevices = () => {
     const { bldgId } = useParams();
+    const history = useHistory();
     const [buildingListData] = useAtom(buildingData);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
+
     const [userPermission] = useAtom(userPermissionData);
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperAdmin = isUserAdmin || isSuperUser;
+    const canUserView = userPermission?.permissions?.permissions?.advanced_active_device_permission?.view ?? false;
+    const canUserCreate = userPermission?.permissions?.permissions?.advanced_active_device_permission?.create ?? false;
+    const canUserEdit = userPermission?.permissions?.permissions?.advanced_active_device_permission?.edit ?? false;
 
     const { download } = useCSVDownload();
     const [search, setSearch] = useState('');
@@ -326,6 +334,12 @@ const ActiveDevices = () => {
         });
     };
 
+    const handleDeviceEdit = (record) => {
+        history.push({
+            pathname: `/settings/smart-plugs/single/${bldgId}/${record?.equipments_id}`,
+        });
+    };
+
     useEffect(() => {
         fetchActiveDeviceData();
         getFilters();
@@ -507,8 +521,7 @@ const ActiveDevices = () => {
                         <div>
                             <Typography.Header size={Typography.Sizes.lg}>{`Smart Plugs`}</Typography.Header>
                         </div>
-                        {userPermission?.user_role === 'admin' ||
-                        userPermission?.permissions?.permissions?.advanced_active_device_permission?.create ? (
+                        {isSuperAdmin || canUserCreate ? (
                             <div className="d-flex">
                                 <Link
                                     to={{
@@ -556,6 +569,8 @@ const ActiveDevices = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
+                        isEditable={() => isSuperAdmin || canUserEdit}
+                        onEditRow={isSuperAdmin || canUserEdit ? (record, id, row) => handleDeviceEdit(row) : null}
                         totalCount={(() => {
                             return totalItems;
                         })()}

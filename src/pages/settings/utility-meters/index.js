@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { Row, Col } from 'reactstrap';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
 import Brick from '../../../sharedComponents/brick';
 import { UserStore } from '../../../store/UserStore';
 import { pageListSizes } from '../../../helpers/helpers';
@@ -20,8 +20,17 @@ import DeleteModal from './AlertModals';
 import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const UtilityMeters = () => {
-    const [userPermission] = useAtom(userPermissionData);
     const { bldgId } = useParams();
+    const history = useHistory();
+
+    const [userPermission] = useAtom(userPermissionData);
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperAdmin = isUserAdmin || isSuperUser;
+    const canUserCreate = userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ?? false;
+    const canUserEdit = userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ?? false;
+    const canUserDelete = userPermission?.permissions?.permissions?.advanced_passive_device_permission?.delete ?? false;
+
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [deviceStatus, setDeviceStatus] = useState(0);
@@ -181,8 +190,10 @@ const UtilityMeters = () => {
         showDeleteAlert();
     };
 
-    const handleAbleToDeleteRow = (row) => {
-        return true;
+    const handleDeviceEdit = (record) => {
+        history.push({
+            pathname: `/settings/utility-monitors/single/${bldgId}/${record?.id}`,
+        });
     };
 
     const updateBreadcrumbStore = () => {
@@ -217,10 +228,7 @@ const UtilityMeters = () => {
                         <div>
                             <Typography.Header size={Typography.Sizes.lg}>Utility Monitors</Typography.Header>
                         </div>
-                        {userPermission?.user_role === 'admin' ||
-                        userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ? (
-                            <CreateUtilityMeters bldgId={bldgId} />
-                        ) : null}
+                        {isSuperAdmin || canUserCreate ? <CreateUtilityMeters bldgId={bldgId} /> : null}
                     </div>
                 </Col>
             </Row>
@@ -250,13 +258,12 @@ const UtilityMeters = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
+                        isEditable={() => isSuperAdmin || canUserEdit}
+                        isDeletable={() => isSuperAdmin || canUserDelete}
+                        onEditRow={isSuperAdmin || canUserEdit ? (record, id, row) => handleDeviceEdit(row) : null}
                         onDeleteRow={
-                            userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                ? (record, id, row) => handleDeviceDelete(row)
-                                : null
+                            isSuperAdmin || canUserDelete ? (record, id, row) => handleDeviceDelete(row) : null
                         }
-                        isDeletable={(row) => handleAbleToDeleteRow(row)}
                         totalCount={(() => {
                             return totalItems;
                         })()}
