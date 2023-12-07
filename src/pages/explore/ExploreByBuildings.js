@@ -16,13 +16,16 @@ import { Checkbox } from '../../sharedComponents/form/checkbox';
 import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
 import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
+import Toggles from '../../sharedComponents/toggles/Toggles';
+import { Button } from '../../sharedComponents/button';
+import ExploreCompareChart from '../../sharedComponents/exploreCompareChart/ExploreCompareChart';
 
 import { timeZone } from '../../utils/helper';
 import { exploreBldgMetrics, calculateDataConvertion, validateSeriesDataForBuildings } from './utils';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-import { dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
+import { dateTimeFormatForHighChart, formatXaxisForHighCharts, getPastDateRange } from '../../helpers/helpers';
 import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../explore/services';
 import { handleUnitConverstion } from '../settings/general-settings/utils';
 import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
@@ -49,12 +52,15 @@ const ExploreByBuildings = () => {
     const [checkedAll, setCheckedAll] = useState(false);
 
     const [seriesData, setSeriesData] = useState([]);
+    const [pastSeriesData, setPastSeriesData] = useState([]);
+
     const [filterOptions, setFilterOptions] = useState([]);
     const [selectedBldgIds, setSelectedBldgIds] = useState([]);
     const [exploreBuildingsList, setExploreBuildingsList] = useState([]);
 
     const [isFilterFetching, setFetchingFilters] = useState(false);
     const [isFetchingChartData, setFetchingChartData] = useState(false);
+    const [isFetchingPastChartData, setFetchingPastChartData] = useState(false);
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
 
     const [isCSVDownloading, setDownloadingCSVData] = useState(false);
@@ -89,6 +95,17 @@ const ExploreByBuildings = () => {
     const [selectedUnit, setSelectedUnit] = useState(exploreBldgMetrics[0].unit);
     const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(exploreBldgMetrics[0]?.Consumption);
     const [selectedConsumption, setConsumption] = useState(exploreBldgMetrics[0]?.value);
+
+    const [isInComparisonMode, setComparisonMode] = useState(false);
+
+    const toggleComparision = () => {
+        setComparisonMode(!isInComparisonMode);
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = isInComparisonMode ? 'Comparison Mode turned OFF' : 'Comparison Mode turned ON';
+            s.notificationType = 'success';
+        });
+    };
 
     const handleUnitChange = (value) => {
         const obj = exploreBldgMetrics.find((record) => record?.value === value);
@@ -352,153 +369,172 @@ const ExploreByBuildings = () => {
             });
     };
 
-    const fetchSingleBldgChartData = async (bldg_id) => {
+    const fetchSingleBldgChartData = async (bldg_id, isComparisionOn = false) => {
         const start_date = encodeURIComponent(startDate);
         const end_date = encodeURIComponent(endDate);
         const time_zone = encodeURIComponent(timeZone);
-
         const params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${time_zone}&metric=${selectedConsumption}`;
 
-        await fetchExploreBuildingChart(params, bldg_id)
+        let paramsForPastData = `?tz_info=${time_zone}&metric=${selectedConsumption}`;
+        if (isComparisionOn) {
+            const pastDateObj = getPastDateRange(startDate, daysCount);
+            paramsForPastData += `&date_from=${encodeURIComponent(pastDateObj?.startDate)}&date_to=${encodeURIComponent(
+                pastDateObj?.endDate
+            )}`;
+        }
+
+        let promisesList = [];
+        promisesList.push(fetchExploreBuildingChart(params, bldg_id));
+        if (isComparisionOn) promisesList.push(fetchExploreBuildingChart(paramsForPastData, bldg_id));
+
+        Promise.all(promisesList)
             .then((res) => {
-                const response = res?.data;
-                const { metadata } = res?.data;
+                const response = res;
 
-                if (response?.success) {
-                    const { data } = response;
+                response.forEach((record, index) => {
+                    if (record?.status === 200 && record?.data?.success) {
+                        const { data, metadata } = record?.data;
 
-                    const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldg_id);
-                    if (!bldgObj?.building_id || data.length === 0) return;
+                        const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldg_id);
+                        if (!bldgObj?.building_id || data.length === 0) return;
 
-                    let recordToInsert = [];
+                        let recordToInsert = [];
 
-                    if (
-                        metadata?.device_types === 'shadow meter' &&
-                        (selectedConsumption === 'current' || selectedConsumption === 'voltage')
-                    ) {
-                        if (selectedConsumption === 'current') {
-                            const firstList = {
+                        if (
+                            metadata?.device_types === 'shadow meter' &&
+                            (selectedConsumption === 'current' || selectedConsumption === 'voltage')
+                        ) {
+                            if (selectedConsumption === 'current') {
+                                const firstList = {
+                                    id: bldgObj?.building_id,
+                                    name: `${bldgObj?.building_name} - Amps_A`,
+                                    data: [],
+                                };
+                                const secondList = {
+                                    id: bldgObj?.building_id,
+                                    name: `${bldgObj?.building_name} - Amps_B`,
+                                    data: [],
+                                };
+                                const thirdList = {
+                                    id: bldgObj?.building_id,
+                                    name: `${bldgObj?.building_name} - Amps_C`,
+                                    data: [],
+                                };
+
+                                data.map((el) => {
+                                    if (el?.data === '' && el?.data !== 0) {
+                                        firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                        secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                        thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                    } else {
+                                        firstList.data.push({
+                                            x: new Date(el?.time_stamp).getTime(),
+                                            y: calculateDataConvertion(el?.data?.Amps_A, selectedConsumption),
+                                        });
+                                        secondList.data.push({
+                                            x: new Date(el?.time_stamp).getTime(),
+                                            y: calculateDataConvertion(el?.data?.Amps_B, selectedConsumption),
+                                        });
+                                        thirdList.data.push({
+                                            x: new Date(el?.time_stamp).getTime(),
+                                            y: calculateDataConvertion(el?.data?.Amps_C, selectedConsumption),
+                                        });
+                                    }
+                                });
+
+                                recordToInsert.push(firstList);
+                                recordToInsert.push(secondList);
+                                recordToInsert.push(thirdList);
+                            }
+                            if (selectedConsumption === 'voltage') {
+                                const firstList = {
+                                    id: bldgObj?.building_id,
+                                    name: `${bldgObj?.building_name} - Volts_A_N`,
+                                    data: [],
+                                };
+                                const secondList = {
+                                    id: bldgObj?.building_id,
+                                    name: `${bldgObj?.building_name} - Volts_B_N`,
+                                    data: [],
+                                };
+                                const thirdList = {
+                                    id: bldgObj?.building_id,
+                                    name: `${bldgObj?.building_name} - Volts_C_N`,
+                                    data: [],
+                                };
+
+                                data.map((el) => {
+                                    if (el?.data === '' && el?.data !== 0) {
+                                        firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                        secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                        thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
+                                    } else {
+                                        firstList.data.push({
+                                            x: new Date(el?.time_stamp).getTime(),
+                                            y: calculateDataConvertion(el?.data?.Volts_A_N, selectedConsumption),
+                                        });
+                                        secondList.data.push({
+                                            x: new Date(el?.time_stamp).getTime(),
+                                            y: calculateDataConvertion(el?.data?.Volts_B_N, selectedConsumption),
+                                        });
+                                        thirdList.data.push({
+                                            x: new Date(el?.time_stamp).getTime(),
+                                            y: calculateDataConvertion(el?.data?.Volts_C_N, selectedConsumption),
+                                        });
+                                    }
+                                });
+
+                                recordToInsert.push(firstList);
+                                recordToInsert.push(secondList);
+                                recordToInsert.push(thirdList);
+                            }
+                        } else {
+                            const newBldgMappedData = data.map((el) => ({
+                                x: new Date(el?.time_stamp).getTime(),
+                                y: calculateDataConvertion(el?.data, selectedConsumption),
+                            }));
+
+                            recordToInsert.push({
                                 id: bldgObj?.building_id,
-                                name: `${bldgObj?.building_name} - Amps_A`,
-                                data: [],
-                            };
-                            const secondList = {
-                                id: bldgObj?.building_id,
-                                name: `${bldgObj?.building_name} - Amps_B`,
-                                data: [],
-                            };
-                            const thirdList = {
-                                id: bldgObj?.building_id,
-                                name: `${bldgObj?.building_name} - Amps_C`,
-                                data: [],
-                            };
-
-                            data.map((el) => {
-                                if (el?.data === '' && el?.data !== 0) {
-                                    firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                    secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                    thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                } else {
-                                    firstList.data.push({
-                                        x: new Date(el?.time_stamp).getTime(),
-                                        y: calculateDataConvertion(el?.data?.Amps_A, selectedConsumption),
-                                    });
-                                    secondList.data.push({
-                                        x: new Date(el?.time_stamp).getTime(),
-                                        y: calculateDataConvertion(el?.data?.Amps_B, selectedConsumption),
-                                    });
-                                    thirdList.data.push({
-                                        x: new Date(el?.time_stamp).getTime(),
-                                        y: calculateDataConvertion(el?.data?.Amps_C, selectedConsumption),
-                                    });
-                                }
+                                name: bldgObj?.building_name,
+                                data: newBldgMappedData,
                             });
-
-                            recordToInsert.push(firstList);
-                            recordToInsert.push(secondList);
-                            recordToInsert.push(thirdList);
                         }
-                        if (selectedConsumption === 'voltage') {
-                            const firstList = {
-                                id: bldgObj?.building_id,
-                                name: `${bldgObj?.building_name} - Volts_A_N`,
-                                data: [],
-                            };
-                            const secondList = {
-                                id: bldgObj?.building_id,
-                                name: `${bldgObj?.building_name} - Volts_B_N`,
-                                data: [],
-                            };
-                            const thirdList = {
-                                id: bldgObj?.building_id,
-                                name: `${bldgObj?.building_name} - Volts_C_N`,
-                                data: [],
-                            };
 
-                            data.map((el) => {
-                                if (el?.data === '' && el?.data !== 0) {
-                                    firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                    secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                    thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                } else {
-                                    firstList.data.push({
-                                        x: new Date(el?.time_stamp).getTime(),
-                                        y: calculateDataConvertion(el?.data?.Volts_A_N, selectedConsumption),
-                                    });
-                                    secondList.data.push({
-                                        x: new Date(el?.time_stamp).getTime(),
-                                        y: calculateDataConvertion(el?.data?.Volts_B_N, selectedConsumption),
-                                    });
-                                    thirdList.data.push({
-                                        x: new Date(el?.time_stamp).getTime(),
-                                        y: calculateDataConvertion(el?.data?.Volts_C_N, selectedConsumption),
-                                    });
-                                }
-                            });
-
-                            recordToInsert.push(firstList);
-                            recordToInsert.push(secondList);
-                            recordToInsert.push(thirdList);
-                        }
+                        if (index === 0) setSeriesData([...seriesData, ...recordToInsert]);
+                        if (index === 1) setPastSeriesData([...pastSeriesData, ...recordToInsert]);
                     } else {
-                        const newBldgMappedData = data.map((el) => ({
-                            x: new Date(el?.time_stamp).getTime(),
-                            y: calculateDataConvertion(el?.data, selectedConsumption),
-                        }));
-
-                        recordToInsert.push({
-                            id: bldgObj?.building_id,
-                            name: bldgObj?.building_name,
-                            data: newBldgMappedData,
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message
+                                ? response?.message
+                                : res
+                                ? 'Unable to fetch data for selected Building.'
+                                : 'Unable to fetch data due to Internal Server Error!';
+                            s.notificationType = 'error';
                         });
                     }
-
-                    setSeriesData([...seriesData, ...recordToInsert]);
-                } else {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = response?.message
-                            ? response?.message
-                            : res
-                            ? 'Unable to fetch data for selected Building.'
-                            : 'Unable to fetch data due to Internal Server Error!';
-                        s.notificationType = 'error';
-                    });
-                }
+                });
             })
             .catch((err) => {
                 UserStore.update((s) => {
                     s.showNotification = true;
-                    s.notificationMessage = 'Unable to selected Building!';
+                    s.notificationMessage = 'Unable to fetch data due to Internal Server Error!.';
                     s.notificationType = 'error';
                 });
             });
     };
 
-    const fetchMultipleBldgsChartData = async (start_date, end_date, data_type = 'energy', bldgIDs = []) => {
+    const fetchMultipleBldgsChartData = async (
+        start_date,
+        end_date,
+        data_type = 'energy',
+        bldgIDs = [],
+        requestType = 'currentData'
+    ) => {
         if (start_date === null || end_date === null || !data_type || bldgIDs.length === 0) return;
 
-        setFetchingChartData(true);
+        requestType === 'currentData' ? setFetchingChartData(true) : setFetchingPastChartData(true);
 
         const time_zone = encodeURIComponent(timeZone);
         const params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${time_zone}&metric=${data_type}`;
@@ -509,7 +545,7 @@ const ExploreByBuildings = () => {
             promisesList.push(fetchExploreBuildingChart(params, id));
         });
 
-        setSeriesData([]);
+        requestType === 'currentData' ? setSeriesData([]) : setPastSeriesData([]);
 
         Promise.all(promisesList)
             .then((res) => {
@@ -629,23 +665,28 @@ const ExploreByBuildings = () => {
                         }
                     });
 
-                    setSeriesData(newResponse);
+                    requestType === 'currentData' ? setSeriesData(newResponse) : setPastSeriesData(newResponse);
                 }
             })
             .catch(() => {})
             .finally(() => {
-                setFetchingChartData(false);
+                requestType === 'currentData' ? setFetchingChartData(false) : setFetchingPastChartData(false);
             });
     };
 
-    const handleBuildingStateChange = (value, selectedBldg) => {
+    const handleBuildingStateChange = (value, selectedBldg, isComparisionOn = false) => {
         if (value === 'true') {
             const newDataList = seriesData.filter((item) => item?.id !== selectedBldg?.building_id);
             setSeriesData(newDataList);
+
+            if (isComparisionOn) {
+                const newPastDataList = pastSeriesData.filter((item) => item?.id !== selectedBldg?.building_id);
+                setPastSeriesData(newPastDataList);
+            }
         }
 
         if (value === 'false') {
-            if (selectedBldg?.building_id) fetchSingleBldgChartData(selectedBldg?.building_id);
+            if (selectedBldg?.building_id) fetchSingleBldgChartData(selectedBldg?.building_id, isComparisionOn);
         }
 
         const isAdding = value === 'false';
@@ -869,7 +910,18 @@ const ExploreByBuildings = () => {
 
     useEffect(() => {
         if (selectedBldgIds.length !== 0) {
-            fetchMultipleBldgsChartData(startDate, endDate, selectedConsumption, selectedBldgIds);
+            fetchMultipleBldgsChartData(startDate, endDate, selectedConsumption, selectedBldgIds, 'currentData');
+
+            if (isInComparisonMode) {
+                const pastDateObj = getPastDateRange(startDate, daysCount);
+                fetchMultipleBldgsChartData(
+                    pastDateObj?.startDate,
+                    pastDateObj?.endDate,
+                    selectedConsumption,
+                    selectedBldgIds,
+                    'pastData'
+                );
+            }
         }
     }, [startDate, endDate, selectedConsumption, userPrefUnits]);
 
@@ -887,7 +939,18 @@ const ExploreByBuildings = () => {
         }
     }, [checkedAll]);
 
+    useEffect(() => {
+        setSeriesData([]);
+        setPastSeriesData([]);
+        setSelectedBldgIds([]);
+    }, [isInComparisonMode]);
+
     const dataToRenderOnChart = validateSeriesDataForBuildings(selectedBldgIds, exploreBuildingsList, seriesData);
+    const pastDataToRenderOnChart = validateSeriesDataForBuildings(
+        selectedBldgIds,
+        exploreBuildingsList,
+        pastSeriesData
+    );
 
     let tooltipUnitVal = selectedUnit;
 
@@ -904,84 +967,128 @@ const ExploreByBuildings = () => {
 
     return (
         <>
-            <Row className="explore-filters-style p-2">
-                <div className="mr-2">
-                    <Select
-                        defaultValue={selectedConsumption}
-                        options={exploreBldgMetrics}
-                        onChange={(e) => {
-                            setConsumption(e.value);
-                            handleUnitChange(e.value);
-                            handleConsumptionChange(e.value);
-                        }}
-                    />
+            <Row className="d-flex justify-content-end">
+                <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
+                    <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
+                        <Button
+                            size={Button.Sizes.lg}
+                            type={isInComparisonMode ? Button.Type.secondary : Button.Type.secondaryGrey}>
+                            <Toggles
+                                size={Toggles.Sizes.sm}
+                                isChecked={isInComparisonMode}
+                                onChange={toggleComparision}
+                            />
+                            <Typography.Subheader size={Typography.Sizes.lg} onClick={toggleComparision}>
+                                {isInComparisonMode ? 'Disable Compare' : 'Enable Compare'}
+                            </Typography.Subheader>
+                        </Button>
+                        <Select
+                            defaultValue={selectedConsumption}
+                            options={exploreBldgMetrics}
+                            onChange={(e) => {
+                                setConsumption(e.value);
+                                handleUnitChange(e.value);
+                                handleConsumptionChange(e.value);
+                            }}
+                        />
+                        <Header title="" type="page" />
+                    </div>
                 </div>
-                <Header title="" type="page" />
             </Row>
 
             <Row>
                 <div className="explore-data-table-style p-2">
-                    {isFetchingChartData ? (
+                    {isFetchingChartData || isFetchingPastChartData ? (
                         <div className="explore-chart-wrapper">
                             <div className="explore-chart-loader">
                                 <Spinner color="primary" />
                             </div>
                         </div>
                     ) : (
-                        <ExploreChart
-                            title={''}
-                            subTitle={''}
-                            tooltipUnit={tooltipUnitVal}
-                            tooltipLabel={selectedConsumptionLabel}
-                            disableDefaultPlotBands={true}
-                            data={dataToRenderOnChart}
-                            chartProps={{
-                                navigator: {
-                                    outlineWidth: 0,
-                                    adaptToUpdatedData: false,
-                                    stickToMax: true,
-                                },
-                                plotOptions: {
-                                    series: {
-                                        states: {
-                                            inactive: {
-                                                opacity: 1,
+                        <>
+                            {isInComparisonMode ? (
+                                <ExploreCompareChart
+                                    title={''}
+                                    subTitle={''}
+                                    data={dataToRenderOnChart}
+                                    pastData={pastDataToRenderOnChart}
+                                    tooltipUnit={selectedUnit}
+                                    tooltipLabel={selectedConsumptionLabel}
+                                    timeIntervalObj={{
+                                        startDate,
+                                        endDate,
+                                        daysCount,
+                                    }}
+                                    chartProps={{
+                                        tooltip: {
+                                            xDateFormat: dateTimeFormatForHighChart(
+                                                userPrefDateFormat,
+                                                userPrefTimeFormat
+                                            ),
+                                        },
+                                    }}
+                                />
+                            ) : (
+                                <ExploreChart
+                                    title={''}
+                                    subTitle={''}
+                                    tooltipUnit={tooltipUnitVal}
+                                    tooltipLabel={selectedConsumptionLabel}
+                                    disableDefaultPlotBands={true}
+                                    data={dataToRenderOnChart}
+                                    pastData={pastDataToRenderOnChart}
+                                    chartProps={{
+                                        navigator: {
+                                            outlineWidth: 0,
+                                            adaptToUpdatedData: false,
+                                            stickToMax: true,
+                                        },
+                                        plotOptions: {
+                                            series: {
+                                                states: {
+                                                    inactive: {
+                                                        opacity: 1,
+                                                    },
+                                                },
                                             },
                                         },
-                                    },
-                                },
-                                xAxis: {
-                                    gridLineWidth: 0,
-                                    type: 'datetime',
-                                    labels: {
-                                        format: formatXaxisForHighCharts(
-                                            daysCount,
-                                            userPrefDateFormat,
-                                            userPrefTimeFormat,
-                                            selectedConsumption
-                                        ),
-                                    },
-                                },
-                                yAxis: [
-                                    {
-                                        gridLineWidth: 1,
-                                        lineWidth: 1,
-                                        opposite: false,
-                                        lineColor: null,
-                                    },
-                                    {
-                                        opposite: true,
-                                        title: false,
-                                        max: 120,
-                                        postFix: '23',
-                                        gridLineWidth: 0,
-                                    },
-                                ],
-                                tooltip: {
-                                    xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
-                                },
-                            }}
-                        />
+                                        xAxis: {
+                                            gridLineWidth: 0,
+                                            type: 'datetime',
+                                            labels: {
+                                                format: formatXaxisForHighCharts(
+                                                    daysCount,
+                                                    userPrefDateFormat,
+                                                    userPrefTimeFormat,
+                                                    selectedConsumption
+                                                ),
+                                            },
+                                        },
+                                        yAxis: [
+                                            {
+                                                gridLineWidth: 1,
+                                                lineWidth: 1,
+                                                opposite: false,
+                                                lineColor: null,
+                                            },
+                                            {
+                                                opposite: true,
+                                                title: false,
+                                                max: 120,
+                                                postFix: '23',
+                                                gridLineWidth: 0,
+                                            },
+                                        ],
+                                        tooltip: {
+                                            xDateFormat: dateTimeFormatForHighChart(
+                                                userPrefDateFormat,
+                                                userPrefTimeFormat
+                                            ),
+                                        },
+                                    }}
+                                />
+                            )}
+                        </>
                     )}
                 </div>
             </Row>
@@ -1027,7 +1134,7 @@ const ExploreByBuildings = () => {
                                     checked={selectedBldgIds.includes(record?.building_id)}
                                     value={selectedBldgIds.includes(record?.building_id)}
                                     onChange={(e) => {
-                                        handleBuildingStateChange(e.target.value, record);
+                                        handleBuildingStateChange(e.target.value, record, isInComparisonMode);
                                     }}
                                 />
                             )}
