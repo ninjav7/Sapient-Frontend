@@ -11,6 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { isInputLetterOrNumber } from '../../../helpers/helpers';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { UserStore } from '../../../store/UserStore';
+import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
 const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchPassiveDeviceData }) => {
     const history = useHistory();
@@ -201,6 +202,7 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
                             handleChange('space_id', e.value);
                         }}
                         isSearchable={true}
+                        customSearchCallback={({ data, query }) => defaultDropdownSearch(data, query?.value)}
                         menuPlacement="top"
                     />
                 </div>

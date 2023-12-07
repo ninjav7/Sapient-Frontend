@@ -7,6 +7,7 @@ import Select from '../../../sharedComponents/form/select';
 import { getEquipmentTypes } from './services';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
 const UpdateSocket = ({
     showSocketModal,
@@ -77,6 +78,7 @@ const UpdateSocket = ({
                                 setEquipTypeError(null);
                             }}
                             isSearchable={true}
+                            customSearchCallback={({ data, query }) => defaultDropdownSearch(data, query?.value)}
                             error={equipTypeError}
                         />
                     )}

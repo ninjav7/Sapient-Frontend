@@ -35,6 +35,7 @@ import '../../../sharedComponents/breaker/Breaker.scss';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 import Sensors from './Sensors';
 import colorPalette from '../../../assets/scss/_colors.scss';
+import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
 const IndividualPassiveDevice = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -427,6 +428,7 @@ const IndividualPassiveDevice = () => {
                                     setLocationError(null);
                                 }}
                                 isSearchable={true}
+                                customSearchCallback={({ data, query }) => defaultDropdownSearch(data, query?.value)}
                                 disabled={!(isSuperAdmin || canUserEdit)}
                                 error={locationError}
                             />

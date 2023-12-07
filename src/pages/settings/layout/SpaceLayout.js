@@ -14,6 +14,7 @@ import { compareObjData } from '../../../helpers/helpers';
 import { addSpaceService, updateSpaceService, deleteSpaceService, getAllSpaceTypes } from './services';
 
 import DeleteLayout from './DeleteLayout';
+import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
 const SpaceLayout = (props) => {
     const {
@@ -236,6 +237,7 @@ const SpaceLayout = (props) => {
                             onChange={(e) => {
                                 handleChange('type_id', e.value);
                             }}
+                            customSearchCallback={({ data, query }) => defaultDropdownSearch(data, query?.value)}
                             menuPlacement="top"
                         />
                     </div>
