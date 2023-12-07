@@ -16,6 +16,8 @@ import SkeletonLoader from '../../../components/SkeletonLoader';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { DownloadButton } from './../../../sharedComponents/dataTableWidget/components/DownloadButton';
 
+import ViewSensorData from './ViewSensorData.js';
+
 import { ReactComponent as RefreshSVG } from './../../../../src/assets/icon/refresh.svg';
 
 import { getDeviceRawData } from './services.js';
@@ -124,7 +126,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
         return (
             <div
                 size={Typography.Sizes.md}
-                className="typography-wrapper mouse-pointer"
+                className="typography-wrapper link mouse-pointer"
                 style={{ color: colorPalette?.datavizBlue500 }}>
                 View
             </div>
@@ -158,12 +160,11 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             name: 'RSSI',
             accessor: 'rssi',
         },
-        // Planned to be disabled as part of Ticket: PLT-1203
-        // {
-        //     name: 'Sensor Data',
-        //     accessor: 'sensor_data',
-        //     callbackValue: renderSensorData,
-        // },
+        {
+            name: 'Sensor Data',
+            accessor: 'sensor_data',
+            callbackValue: renderSensorData,
+        },
     ];
 
     const downloadRawDataForCSVExport = async (bldg_id, device_id, bldg_tz) => {
@@ -202,93 +203,98 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
     }, [selectedPassiveDevice, pageNo, pageSize, bldgTimezone]);
 
     return (
-        <Modal show={isModalOpen} onHide={closeModal} backdrop="static" keyboard={false} size="xl" centered>
-            <div className="modal-dialog-custom" style={customModalStyle.modalContent}>
-                <div className="passive-header-wrapper d-flex justify-content-between" style={{ background: 'none' }}>
-                    <div className="d-flex flex-column justify-content-between">
-                        <Typography.Subheader size={Typography.Sizes.sm}>
-                            {selectedPassiveDevice?.location}
-                        </Typography.Subheader>
-                        <Typography.Header size={Typography.Sizes.md}>
-                            {selectedPassiveDevice?.identifier}
-                        </Typography.Header>
-                        <div className="d-flex justify-content-start mouse-pointer ">
-                            <Typography.Subheader
-                                size={Typography.Sizes.md}
-                                className="typography-wrapper active-tab-style">
-                                {`Raw Data`}
+        <>
+            <Modal show={isModalOpen} onHide={closeModal} backdrop="static" keyboard={false} size="xl" centered>
+                <div className="modal-dialog-custom" style={customModalStyle.modalContent}>
+                    <div
+                        className="passive-header-wrapper d-flex justify-content-between"
+                        style={{ background: 'none' }}>
+                        <div className="d-flex flex-column justify-content-between">
+                            <Typography.Subheader size={Typography.Sizes.sm}>
+                                {selectedPassiveDevice?.location}
                             </Typography.Subheader>
+                            <Typography.Header size={Typography.Sizes.md}>
+                                {selectedPassiveDevice?.identifier}
+                            </Typography.Header>
+                            <div className="d-flex justify-content-start mouse-pointer ">
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    className="typography-wrapper active-tab-style">
+                                    {`Raw Data`}
+                                </Typography.Subheader>
+                            </div>
+                        </div>
+                        <div className="d-flex">
+                            <div>
+                                <Button
+                                    label="Close"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryGrey}
+                                    onClick={closeModal}
+                                />
+                            </div>
                         </div>
                     </div>
-                    <div className="d-flex">
-                        <div>
-                            <Button
-                                label="Close"
-                                size={Button.Sizes.md}
-                                type={Button.Type.secondaryGrey}
-                                onClick={closeModal}
+
+                    <div className="default-padding">
+                        <div className="d-flex justify-content-between">
+                            <div></div>
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Button
+                                    label={''}
+                                    type={Button.Type.secondaryGrey}
+                                    size={Button.Sizes.md}
+                                    icon={!isProcessing ? <RefreshSVG /> : <Spinner size="sm" color="secondary" />}
+                                    className="data-table-widget-action-button"
+                                    onClick={() => {
+                                        setProcessing(true);
+                                        fetchRawDataForDevice(
+                                            selectedPassiveDevice?.bldg_id,
+                                            selectedPassiveDevice?.equipments_id,
+                                            pageNo,
+                                            pageSize,
+                                            bldgTimezone
+                                        );
+                                    }}
+                                />
+                                <DownloadButton
+                                    isCSVDownloading={isCSVDownloading}
+                                    onClick={() => {
+                                        downloadRawDataForCSVExport(
+                                            selectedPassiveDevice?.bldg_id,
+                                            selectedPassiveDevice?.equipments_id,
+                                            bldgTimezone
+                                        );
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="raw-data-table-container">
+                            <DataTableWidget
+                                id="raw_data_list"
+                                isLoading={isFetchingData}
+                                isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length} noOfRows={10} />}
+                                buttonGroupFilterOptions={[]}
+                                rows={currentRow()}
+                                disableColumnDragging={true}
+                                searchResultRows={currentRow()}
+                                headers={headerProps}
+                                currentPage={pageNo}
+                                onChangePage={setPageNo}
+                                pageSize={pageSize}
+                                onPageSize={setPageSize}
+                                pageListSizes={pageListSizes}
+                                totalCount={(() => {
+                                    return totalDataCount;
+                                })()}
                             />
                         </div>
                     </div>
                 </div>
-
-                <div className="default-padding">
-                    <div className="d-flex justify-content-between">
-                        <div></div>
-                        <div className="d-flex" style={{ gap: '0.5rem' }}>
-                            <Button
-                                label={''}
-                                type={Button.Type.secondaryGrey}
-                                size={Button.Sizes.md}
-                                icon={!isProcessing ? <RefreshSVG /> : <Spinner size="sm" color="secondary" />}
-                                className="data-table-widget-action-button"
-                                onClick={() => {
-                                    setProcessing(true);
-                                    fetchRawDataForDevice(
-                                        selectedPassiveDevice?.bldg_id,
-                                        selectedPassiveDevice?.equipments_id,
-                                        pageNo,
-                                        pageSize,
-                                        bldgTimezone
-                                    );
-                                }}
-                            />
-                            <DownloadButton
-                                isCSVDownloading={isCSVDownloading}
-                                onClick={() => {
-                                    downloadRawDataForCSVExport(
-                                        selectedPassiveDevice?.bldg_id,
-                                        selectedPassiveDevice?.equipments_id,
-                                        bldgTimezone
-                                    );
-                                }}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="raw-data-table-container">
-                        <DataTableWidget
-                            id="raw_data_list"
-                            isLoading={isFetchingData}
-                            isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length} noOfRows={10} />}
-                            buttonGroupFilterOptions={[]}
-                            rows={currentRow()}
-                            disableColumnDragging={true}
-                            searchResultRows={currentRow()}
-                            headers={headerProps}
-                            currentPage={pageNo}
-                            onChangePage={setPageNo}
-                            pageSize={pageSize}
-                            onPageSize={setPageSize}
-                            pageListSizes={pageListSizes}
-                            totalCount={(() => {
-                                return totalDataCount;
-                            })()}
-                        />
-                    </div>
-                </div>
-            </div>
-        </Modal>
+            </Modal>
+            <ViewSensorData />
+        </>
     );
 };
 
