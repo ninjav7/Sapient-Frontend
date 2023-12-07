@@ -1112,9 +1112,18 @@ const ExploreByEquipment = () => {
     }, [checkedAll]);
 
     useEffect(() => {
-        setSeriesData([]);
-        setPastSeriesData([]);
-        setSelectedEquipIds([]);
+        if (isInComparisonMode) {
+            const pastDateObj = getPastDateRange(startDate, daysCount);
+            fetchMultipleEquipChartData(
+                pastDateObj?.startDate,
+                pastDateObj?.endDate,
+                selectedConsumption,
+                selectedEquipIds,
+                'pastData'
+            );
+        } else {
+            setPastSeriesData([]);
+        }
     }, [isInComparisonMode]);
 
     const dataToRenderOnChart = validateSeriesDataForEquipments(selectedEquipIds, equipDataList, seriesData);

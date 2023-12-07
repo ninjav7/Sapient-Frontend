@@ -940,9 +940,18 @@ const ExploreByBuildings = () => {
     }, [checkedAll]);
 
     useEffect(() => {
-        setSeriesData([]);
-        setPastSeriesData([]);
-        setSelectedBldgIds([]);
+        if (isInComparisonMode) {
+            const pastDateObj = getPastDateRange(startDate, daysCount);
+            fetchMultipleBldgsChartData(
+                pastDateObj?.startDate,
+                pastDateObj?.endDate,
+                selectedConsumption,
+                selectedBldgIds,
+                'pastData'
+            );
+        } else {
+            setPastSeriesData([]);
+        }
     }, [isInComparisonMode]);
 
     const dataToRenderOnChart = validateSeriesDataForBuildings(selectedBldgIds, exploreBuildingsList, seriesData);
