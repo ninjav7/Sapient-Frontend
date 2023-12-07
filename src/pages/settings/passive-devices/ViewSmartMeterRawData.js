@@ -126,7 +126,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                 size={Typography.Sizes.md}
                 className="typography-wrapper mouse-pointer"
                 style={{ color: colorPalette?.datavizBlue500 }}>
-                {`View`}
+                View
             </div>
         );
     };
@@ -158,6 +158,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             name: 'RSSI',
             accessor: 'rssi',
         },
+        // Planned to be disabled as part of Ticket: PLT-1203
         // {
         //     name: 'Sensor Data',
         //     accessor: 'sensor_data',
