@@ -42,6 +42,10 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
+    const [isSensorModalOpen, setSensorModal] = useState(false);
+    const closeSensorModal = () => setSensorModal(false);
+    const openSensorModal = () => setSensorModal(true);
+
     // Define a custom CSS class for the modal content
     const customModalStyle = {
         modalContent: {
@@ -127,7 +131,8 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             <div
                 size={Typography.Sizes.md}
                 className="typography-wrapper link mouse-pointer"
-                style={{ color: colorPalette?.datavizBlue500 }}>
+                style={{ color: colorPalette?.datavizBlue500 }}
+                onClick={openSensorModal}>
                 View
             </div>
         );
@@ -293,7 +298,11 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                     </div>
                 </div>
             </Modal>
-            <ViewSensorData />
+            <ViewSensorData
+                isModalOpen={isSensorModalOpen}
+                closeModal={closeSensorModal}
+                selectedPassiveDevice={selectedPassiveDevice}
+            />
         </>
     );
 };
