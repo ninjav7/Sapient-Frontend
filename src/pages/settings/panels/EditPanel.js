@@ -1238,7 +1238,6 @@ const EditPanel = () => {
                         isDisabled: record?.breaker_id !== '',
                     }));
 
-                console.log('SSR equipArray => ', equipArray);
                 setEquipmentsList(equipArray);
                 BreakersStore.update((s) => {
                     s.equipmentData = equipArray;
