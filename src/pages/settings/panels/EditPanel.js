@@ -6,7 +6,7 @@ import { useAtom } from 'jotai';
 import {
     deleteCurrentPanel,
     getBreakersList,
-    getEquipmentsList,
+    getEquipmentsListV2,
     getLocationData,
     getPanelsList,
     getPassiveDeviceList,
@@ -399,7 +399,6 @@ const EditPanel = () => {
         await updateBreakersLink(params, payload)
             .then((res) => {
                 fetchBreakersData(panelId, bldgId, setIsLoading);
-                fetchEquipmentData(bldgId);
             })
             .catch(() => {
                 setIsLoading(false);
@@ -413,7 +412,6 @@ const EditPanel = () => {
         await updateBreakersLink(params, payload)
             .then((res) => {
                 fetchBreakersData(panelId, bldgId, setIsLoading);
-                fetchEquipmentData(bldgId);
             })
             .catch(() => {
                 setIsLoading(false);
@@ -1226,21 +1224,21 @@ const EditPanel = () => {
 
     const fetchEquipmentData = async (bldg_id) => {
         setEquipmentFetching(true);
-        const params = `?building_id=${bldg_id}&occupancy_filter=true`;
-        await getEquipmentsList(params)
+        const params = `?building_id=${bldg_id}`;
+        await getEquipmentsListV2(params)
             .then((res) => {
-                const responseData = res?.data?.data;
-                const equipArray = [];
-                responseData.forEach((record) => {
-                    if (record.equipments_name === '') return;
-                    const obj = {
+                const responseData = res?.data || [];
+
+                const equipArray = responseData
+                    .filter((record) => record.equipments_name !== '')
+                    .map((record) => ({
                         label: record?.equipments_name,
                         value: record?.equipments_id,
                         breakerId: record?.breaker_id,
                         isDisabled: record?.breaker_id !== '',
-                    };
-                    equipArray.push(obj);
-                });
+                    }));
+
+                console.log('SSR equipArray => ', equipArray);
                 setEquipmentsList(equipArray);
                 BreakersStore.update((s) => {
                     s.equipmentData = equipArray;

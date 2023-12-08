@@ -17,6 +17,7 @@ import {
     listSensor,
     updateBreakers,
     createEquipment,
+    generalEquipmentsV2,
 } from '../../../services/Network';
 
 export function getPanelsData(
@@ -75,6 +76,10 @@ export function getBreakersList(params) {
 
 export function getEquipmentsList(params = '', payload = {}) {
     return axiosInstance.post(`${generalEquipments}${params}`, payload).then((res) => res);
+}
+
+export function getEquipmentsListV2(params) {
+    return axiosInstance.get(`${generalEquipmentsV2}${params}`).then((res) => res);
 }
 
 export function getPassiveDeviceList(params) {
