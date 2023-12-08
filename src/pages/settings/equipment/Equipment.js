@@ -405,6 +405,28 @@ const Equipment = () => {
             </Typography.Link>
         );
     };
+    const renderPanel = (row) => {
+        return (
+            <Typography.Body size={Typography.Sizes.md}>{row.panel_name !== '' ? row.panel_name : '-'}</Typography.Body>
+        );
+    };
+
+    const renderCTAmp = (row) => {
+        return (
+            <Typography.Body size={Typography.Sizes.md}>
+                {row.ct_model_installed !== '' ? row.ct_model_installed : '-'}
+            </Typography.Body>
+        );
+    };
+
+    const renderRatedAmps = (row) => {
+        return <Typography.Body size={Typography.Sizes.md}>{row.breaker_rated_amps[0]}</Typography.Body>;
+    };
+
+    const renderBreaker = (row) => {
+        const res = row.breaker_number && row.breaker_number.length ? row.breaker_number.join(', ') : '';
+        return <Typography.Body size={Typography.Sizes.md}>{res !== '' ? res : '-'}</Typography.Body>;
+    };
 
     const getFilters = async () => {
         setFetchingFilters(true);
@@ -413,13 +435,12 @@ const Equipment = () => {
             deviceMacAddress,
             equipmentTypeFilterString,
             endUseFilterString,
-            floorTypeFilterString:floorString,
-            spaceTypeFilterString:spaceString,
+            floorTypeFilterString: floorString,
+            spaceTypeFilterString: spaceString,
             tagsFilterString,
         });
 
         filters.data.forEach((filterOptions) => {
-
             const sortedFloors = filterOptions?.installed_floor
                 .slice()
                 .sort((a, b) => a.floor_name.localeCompare(b.floor_name));
@@ -637,6 +658,30 @@ const Equipment = () => {
         {
             name: 'Device ID',
             accessor: 'device_mac',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Panel',
+            accessor: 'panel_name',
+            callbackValue: renderPanel,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: `Breaker #s`,
+            accessor: 'breaker_number',
+            callbackValue: renderBreaker,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Rated Amps',
+            accessor: 'breaker_rated_amps',
+            callbackValue: renderRatedAmps,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'CT Amp Rating',
+            accessor: 'end_use_name',
+            callbackValue: renderCTAmp,
             onSort: (method, name) => setSortBy({ method, name }),
         },
     ];

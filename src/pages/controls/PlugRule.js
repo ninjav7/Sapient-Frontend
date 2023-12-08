@@ -98,6 +98,22 @@ const SkeletonLoading = () => (
             <th>
                 <Skeleton count={5} />
             </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
             <th>
                 <Skeleton count={5} />
             </th>
