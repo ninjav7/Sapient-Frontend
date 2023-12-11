@@ -217,7 +217,7 @@ export const linkSocket = '/api/user_role/plug_rule/link_socket';
 export const getPlugRuleStatus = '/api/v2/control/plug_rule/status';
 
 // weather api
-export const getWeather = '/api/weather/';
+export const getWeather = '/api/v2/metrics/weather';
 
 // V2 API's
 export const listCts = '/api/v2/config/sensor/get-cts';
