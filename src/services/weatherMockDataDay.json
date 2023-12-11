@@ -1,0 +1,41 @@
+{
+    "success": true,
+    "data": [
+        {
+            "time_stamp": "2023-11-26T00:00:00",
+            "avgtemp_f": 41,
+            "mintemp_f": 31.5,
+            "maxtemp_f": 48.1,
+            "avghumidity": 68
+        },
+        {
+            "time_stamp": "2023-11-27T00:00:00",
+            "avgtemp_f": 45.6,
+            "mintemp_f": 35.8,
+            "maxtemp_f": 51.8,
+            "avghumidity": 75
+        },
+        {
+            "time_stamp": "2023-11-28T00:00:00",
+            "avgtemp_f": 33.7,
+            "mintemp_f": 27.1,
+            "maxtemp_f": 38.1,
+            "avghumidity": 53
+        },
+        {
+            "time_stamp": "2023-11-29T00:00:00",
+            "avgtemp_f": 32.2,
+            "mintemp_f": 23.5,
+            "maxtemp_f": 37.3,
+            "avghumidity": 51
+        },
+        {
+            "time_stamp": "2023-11-30T00:00:00",
+            "avgtemp_f": 38.7,
+            "mintemp_f": 28.2,
+            "maxtemp_f": 46.8,
+            "avghumidity": 55
+        }
+    ],
+    "message": ""
+}
