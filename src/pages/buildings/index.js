@@ -532,8 +532,11 @@ const BuildingOverview = () => {
             .then((res) => {
                 const response = res;
 
+                console.log('RESPONSE_1', response);
+
                 if (response?.success) {
                     const tempData = [];
+                    console.log('RESPONSE_2', response);
 
                     const highTemp = {
                         type: LOW_MED_HIGH_TYPES.HIGH,
@@ -567,12 +570,15 @@ const BuildingOverview = () => {
                     if (highTemp?.data.length !== 0) tempData.push(highTemp);
                     if (lowTemp?.data.length !== 0) tempData.push(lowTemp);
 
+                    console.log(tempData);
+
                     if (tempData.length !== 0) setWeatherData(tempData);
                 } else {
                     setWeatherData(null);
                 }
             })
             .catch((e) => {
+                console.log('ERROR', e);
                 setWeatherData(null);
             });
     };
