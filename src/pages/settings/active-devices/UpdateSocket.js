@@ -3,6 +3,8 @@ import Modal from 'react-bootstrap/Modal';
 import { TagsInput } from 'react-tag-input-component';
 import Skeleton from 'react-loading-skeleton';
 
+import { UserStore } from '../../../store/UserStore';
+
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
@@ -10,13 +12,12 @@ import Select from '../../../sharedComponents/form/select';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 
 import { getEquipmentTypes, getSensorEquipmentLinked } from './services';
+import { updateEquipmentDetails } from '../../chartModal/services';
 
 import { compareObjData } from '../../../helpers/helpers';
 import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
 import 'react-loading-skeleton/dist/skeleton.css';
-import { UserStore } from '../../../store/UserStore';
-import { updateEquipmentDetails } from '../../chartModal/services';
 
 const UpdateSocket = ({
     isSocketModalOpen,
