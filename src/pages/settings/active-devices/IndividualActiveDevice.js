@@ -22,13 +22,7 @@ import { ReactComponent as AttachedSVG } from '../../../assets/icon/active-devic
 import { ReactComponent as SocketSVG } from '../../../assets/icon/active-devices/socket.svg';
 import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
 import { Badge } from '../../../sharedComponents/badge';
-import {
-    getActiveDeviceSensors,
-    getSensorData,
-    getSensorEquipmentLinked,
-    getSingleActiveDevice,
-    updateActiveDeviceService,
-} from './services';
+import { getActiveDeviceSensors, getSensorData, getSingleActiveDevice, updateActiveDeviceService } from './services';
 import UpdateSocket from './UpdateSocket';
 import './style.css';
 import './styles.scss';
@@ -56,11 +50,6 @@ const IndividualActiveDevice = () => {
     const [showChart, setShowChart] = useState(false);
     const handleChartClose = () => setShowChart(false);
 
-    // Equipment states
-    const [showSocketModal, setSocketModalState] = useState(false);
-    const closeSocketModal = () => setSocketModalState(false);
-    const openSocketModal = () => setSocketModalState(true);
-
     const { deviceId } = useParams();
     const [sensorId, setSensorId] = useState('');
 
@@ -75,13 +64,16 @@ const IndividualActiveDevice = () => {
     const [sensors, setSensors] = useState([]);
     const [isFetchingSensorData, setIsFetchingSensorData] = useState(true);
     const [isSensorChartLoading, setIsSensorChartLoading] = useState(true);
-    const [isUpdating, setIsUpdating] = useState(false);
     const [sensorData, setSensorData] = useState({});
-    const [selectedSensor, setSelectedSensor] = useState('');
-    const [selectedEquipType, setSelectedEquipType] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [searchSocket, setSearchSocket] = useState('');
-    const [equipTypeError, setEquipTypeError] = useState(null);
+
+    // Equipment states
+    const [isSocketModalOpen, setSocketModalState] = useState(false);
+    const closeSocketModal = () => setSocketModalState(false);
+    const openSocketModal = () => setSocketModalState(true);
+
+    const [selectedSocketObj, setSelectedSocketObj] = useState({});
 
     const handleSocketChange = (e) => {
         setSearchSocket(e.target.value);
@@ -249,42 +241,6 @@ const IndividualActiveDevice = () => {
             });
     };
 
-    const linkSensorToEquipment = async (sensorId, currEquipId, newEquipID) => {
-        if (currEquipId === newEquipID) {
-            setEquipTypeError({
-                text: 'Please update Equipment Type.',
-            });
-            return;
-        }
-        setIsUpdating(true);
-        const params = `?sensor_id=${sensorId}&equipment_type_id=${newEquipID}`;
-
-        await getSensorEquipmentLinked(params)
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = response?.message;
-                        s.notificationType = 'success';
-                    });
-                } else {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = response?.message ? response?.message : 'Unable to Save.';
-                        s.notificationType = 'error';
-                    });
-                }
-                setIsUpdating(false);
-                closeSocketModal();
-                setEquipTypeError(null);
-                fetchActiveSensorsList();
-            })
-            .catch(() => {
-                setIsUpdating(false);
-            });
-    };
-
     const redirectToActivePage = () => {
         history.push({ pathname: `/settings/smart-plugs/${bldgId}` });
     };
@@ -330,6 +286,10 @@ const IndividualActiveDevice = () => {
                 setLocationError(null);
             });
     };
+
+    useEffect(() => {
+        if (!isSocketModalOpen) setSelectedSocketObj({});
+    }, [isSocketModalOpen]);
 
     useEffect(() => {
         fetchActiveDevice();
@@ -598,8 +558,7 @@ const IndividualActiveDevice = () => {
                                                 <Button
                                                     className="breaker-action-btn ml-2"
                                                     onClick={() => {
-                                                        setSelectedEquipType(record?.equipment_type_id);
-                                                        setSelectedSensor(record?.id);
+                                                        setSelectedSocketObj(record);
                                                         openSocketModal();
                                                     }}
                                                     type={Button.Type.secondaryGrey}
@@ -643,16 +602,11 @@ const IndividualActiveDevice = () => {
             />
 
             <UpdateSocket
-                bldgId={bldgId}
-                showSocketModal={showSocketModal}
+                isSocketModalOpen={isSocketModalOpen}
                 closeSocketModal={closeSocketModal}
-                selectedEquipType={selectedEquipType}
-                selectedSensor={selectedSensor}
-                setSelectedSensor={setSelectedSensor}
-                linkSensorToEquipment={linkSensorToEquipment}
-                isUpdating={isUpdating}
-                equipTypeError={equipTypeError}
-                setEquipTypeError={setEquipTypeError}
+                bldgId={bldgId}
+                selectedSocketObj={selectedSocketObj}
+                fetchActiveSensorsList={fetchActiveSensorsList}
             />
         </React.Fragment>
     );

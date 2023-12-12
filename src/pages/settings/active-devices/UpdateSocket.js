@@ -1,63 +1,127 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
+import { TagsInput } from 'react-tag-input-component';
+import Skeleton from 'react-loading-skeleton';
+
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import Select from '../../../sharedComponents/form/select';
-import { getEquipmentTypes } from './services';
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
+import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
+
+import { getEquipmentTypes, getSensorEquipmentLinked } from './services';
+
+import { compareObjData } from '../../../helpers/helpers';
 import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
+import 'react-loading-skeleton/dist/skeleton.css';
+import { UserStore } from '../../../store/UserStore';
+import { updateEquipmentDetails } from '../../chartModal/services';
+
 const UpdateSocket = ({
-    showSocketModal,
+    isSocketModalOpen,
     closeSocketModal,
     bldgId,
-    selectedEquipType,
-    selectedSensor,
-    setSelectedSensor,
-    linkSensorToEquipment,
-    isUpdating,
-    equipTypeError,
-    setEquipTypeError,
+    selectedSocketObj = {},
+    fetchActiveSensorsList,
 }) => {
-    const [equipTypeId, setEquipTypeId] = useState('');
-    const [equipTypeData, setEquipTypeData] = useState([]);
+    const [socketObj, setSocketObj] = useState({});
+    const [isProcessing, setProcessing] = useState(false);
+
+    const [equipTypesList, setEquipTypesList] = useState([]);
     const [isFetechingData, setFetechingData] = useState(false);
 
     const fetchEquipmentTypeData = async () => {
         setFetechingData(true);
         const params = `?end_use=Plug&building_id=${bldgId}`;
+
         await getEquipmentTypes(params)
             .then((res) => {
                 const response = res?.data?.data;
                 const dataList = [];
-                response.forEach((record) => {
-                    let obj = {
-                        label: record?.equipment_type,
-                        value: record?.equipment_id,
-                    };
-                    dataList.push(obj);
-                });
-                setEquipTypeData(dataList);
-                setFetechingData(false);
+                response &&
+                    response.length !== 0 &&
+                    response.forEach((record) => {
+                        dataList.push({
+                            label: record?.equipment_type,
+                            value: record?.equipment_id,
+                        });
+                    });
+                setEquipTypesList(dataList);
             })
-            .catch(() => {
-                setEquipTypeData([]);
+            .catch(() => {})
+            .finally(() => {
                 setFetechingData(false);
             });
     };
 
-    useEffect(() => {
-        if (showSocketModal) fetchEquipmentTypeData();
-    }, [showSocketModal]);
+    const updateNotification = (message, type) => {
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = message;
+            s.notificationType = type;
+        });
+    };
+
+    const onConfigurationSave = async (socket_obj, selected_socket_obj) => {
+        setProcessing(true);
+
+        let promisesList = [];
+
+        if (socket_obj?.equipment_type_id !== selected_socket_obj?.equipment_type_id) {
+            const params = `?sensor_id=${socket_obj?.id}&equipment_type_id=${socket_obj?.equipment_type_id}`;
+            promisesList.push(getSensorEquipmentLinked(params));
+        }
+
+        if (
+            socket_obj?.equipment !== selected_socket_obj?.equipment ||
+            socket_obj?.tags !== selected_socket_obj?.tags
+        ) {
+            const params = `?equipment_id=${socket_obj?.equipment_id}`;
+            promisesList.push(
+                updateEquipmentDetails(params, {
+                    name: socket_obj?.equipment,
+                    tag: socket_obj?.tags ?? [],
+                })
+            );
+        }
+
+        Promise.all(promisesList)
+            .then((res) => {
+                const responses = res;
+                const updateSuccess = responses.every((record) => record?.status === 200 && record?.data?.success);
+                if (updateSuccess) {
+                    updateNotification('Smart Plug socket updated successfully!', 'success');
+                } else {
+                    updateNotification('Failed to update socket configuration.', 'error');
+                }
+            })
+            .catch((err) => {
+                updateNotification('Unable to update socket configuration due to Internal Server Error.', 'error');
+            })
+            .finally(() => {
+                setProcessing(false);
+                closeSocketModal();
+                fetchActiveSensorsList();
+            });
+    };
+
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, socketObj);
+        obj[key] = value;
+        setSocketObj(obj);
+    };
 
     useEffect(() => {
-        setEquipTypeId(selectedEquipType);
-    }, [showSocketModal]);
+        if (selectedSocketObj?.id) setSocketObj(selectedSocketObj);
+    }, [selectedSocketObj]);
+
+    useEffect(() => {
+        isSocketModalOpen ? fetchEquipmentTypeData() : setSocketObj({});
+    }, [isSocketModalOpen]);
 
     return (
-        <Modal show={showSocketModal} onHide={closeSocketModal} backdrop="static" keyboard={false} centered>
+        <Modal show={isSocketModalOpen} onHide={closeSocketModal} backdrop="static" keyboard={false} centered>
             <div className="p-4">
                 <Typography.Header size={Typography.Sizes.lg}>Edit Socket</Typography.Header>
 
@@ -71,17 +135,46 @@ const UpdateSocket = ({
                     ) : (
                         <Select
                             placeholder="Select Equipment Type"
-                            options={equipTypeData}
-                            currentValue={equipTypeData.filter((option) => option.value === equipTypeId)}
+                            options={equipTypesList}
+                            currentValue={equipTypesList.filter(
+                                (option) => option.value === socketObj?.equipment_type_id
+                            )}
                             onChange={(e) => {
-                                setEquipTypeId(e.value);
-                                setEquipTypeError(null);
+                                handleChange('equipment_type_id', e.value);
                             }}
                             isSearchable={true}
                             customSearchCallback={({ data, query }) => defaultDropdownSearch(data, query?.value)}
-                            error={equipTypeError}
                         />
                     )}
+                </div>
+
+                <Brick sizeInRem={1.5} />
+
+                <div>
+                    <Typography.Body size={Typography.Sizes.md}>Equipment Name</Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                    <InputTooltip
+                        placeholder="Enter Equipment Name"
+                        labelSize={Typography.Sizes.md}
+                        value={socketObj?.equipment}
+                        onChange={(e) => {
+                            handleChange('equipment', e.target.value);
+                        }}
+                    />
+                </div>
+
+                <Brick sizeInRem={1.5} />
+
+                <div>
+                    <Typography.Body size={Typography.Sizes.md}>Tags</Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                    <TagsInput
+                        placeHolder={socketObj?.tags && socketObj?.tags.length !== 0 ? '' : 'Enter Tags'}
+                        value={socketObj?.tags ? socketObj?.tags : []}
+                        onChange={(value) => {
+                            handleChange('tags', value);
+                        }}
+                    />
                 </div>
 
                 <Brick sizeInRem={2.5} />
@@ -92,22 +185,18 @@ const UpdateSocket = ({
                         size={Button.Sizes.lg}
                         type={Button.Type.secondaryGrey}
                         className="w-100"
-                        onClick={() => {
-                            closeSocketModal();
-                            setEquipTypeId('');
-                            setSelectedSensor('');
-                        }}
+                        onClick={closeSocketModal}
                     />
 
                     <Button
-                        label={isUpdating ? 'Updating...' : 'Update Equipment Type'}
+                        label={isProcessing ? 'Updating...' : 'Update'}
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         className="w-100"
-                        disabled={isUpdating}
                         onClick={() => {
-                            linkSensorToEquipment(selectedSensor, selectedEquipType, equipTypeId);
+                            onConfigurationSave(socketObj, selectedSocketObj);
                         }}
+                        disabled={isProcessing || compareObjData(socketObj, selectedSocketObj)}
                     />
                 </div>
 
