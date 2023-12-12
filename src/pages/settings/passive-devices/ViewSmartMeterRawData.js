@@ -19,8 +19,8 @@ import { DownloadButton } from './../../../sharedComponents/dataTableWidget/comp
 import { ReactComponent as RefreshSVG } from './../../../../src/assets/icon/refresh.svg';
 
 import { getDeviceRawData } from './services.js';
+import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper.js';
 
-import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPassiveDevice }) => {
@@ -56,7 +56,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
         return d instanceof Date && !isNaN(d);
     }
 
-    const handleLastActiveDate = (last_login) => {
+    const handleDateFormat = (last_login) => {
         let dt = '';
         if (isValidDate(new Date(last_login)) && last_login != null) {
             const last_dt = new Date(last_login);
@@ -70,10 +70,10 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
     };
 
     const renderRawDataTimestamp = (row) => {
-        const formattedTimestamp = handleLastActiveDate(row?.time_stamp);
+        const formattedTimestamp = handleDateFormat(row?.time_stamp);
 
         return (
-            <Typography.Body size={Typography.Sizes.md} className="mouse-pointer">
+            <Typography.Body size={Typography.Sizes.md} className="mouse-pointer" style={{ width: 'max-content' }}>
                 {row?.time_stamp === '' ? '-' : formattedTimestamp}
             </Typography.Body>
         );
@@ -81,7 +81,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
 
     const renderGatewayMac = (row) => {
         return (
-            <div size={Typography.Sizes.md} className="mouse-pointer">
+            <div size={Typography.Sizes.md} className="mouse-pointer" style={{ width: 'max-content' }}>
                 {row?.gateway_mac === '' ? '-' : row?.gateway_mac}
             </div>
         );
@@ -118,12 +118,11 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
 
     const [headerProps, setHeaderProps] = useState(defaultHeaderProps);
 
-    console.log('SSR headerProps => ', headerProps);
-
     const fetchRawDataForDevice = async (bldg_id, device_id, page_no = 1, page_size = 20, bldg_tz) => {
         setDataFetching(true);
         setTotalDataCount(0);
         setRawDeviceData([]);
+
         const params = `?building_id=${bldg_id}&device_id=${device_id}&page_no=${page_no}&page_size=${page_size}&tz_info=${bldg_tz}`;
 
         await getDeviceRawData(params)
@@ -134,37 +133,39 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                     if (response?.data.length !== 0) {
                         const responseData = response?.data;
 
-                        responseData.forEach((record, index) => {
-                            if (index === 0 && record?.sensor_data) {
-                                const headersListToMerge = Object.keys(record?.sensor_data).flatMap((key) =>
-                                    Object.keys(record?.sensor_data[key]).map((subKey) => ({
-                                        name: `${key} ${subKey}`,
-                                        accessor: `${key}_${subKey}`,
-                                    }))
-                                );
+                        const firstRecord = responseData[0];
+                        if (firstRecord?.sensor_data) {
+                            const headersListToMerge = Object.keys(firstRecord?.sensor_data).flatMap((key) =>
+                                Object.keys(firstRecord?.sensor_data[key]).map((subKey) => ({
+                                    name: `${key}_${subKey}`,
+                                    accessor: `${key}_${subKey}`,
+                                }))
+                            );
 
-                                const mergedHeaderProps = [...headerProps, ...headersListToMerge];
-                                setHeaderProps(mergedHeaderProps);
+                            const mergedHeaderProps = [...headerProps, ...headersListToMerge];
+                            setHeaderProps(mergedHeaderProps);
+                        }
 
-                                // Transforming responseData to newResponseData format
-                                const newResponseData = responseData.map((data) => {
-                                    const { sensor_data, ...rest } = data; // Extract sensor_data and other properties
-                                    const newData = {};
+                        // Transforming responseData to newResponseData format
+                        const newResponseData = responseData.map((data) => {
+                            const { sensor_data, ...rest } = data; // Extract sensor_data and other properties
+                            const newData = {};
 
-                                    // Dynamically iterate through sensor_data keys and create new properties
-                                    Object.keys(sensor_data).forEach((key) => {
-                                        const sensorKeys = Object.keys(sensor_data[key]);
-                                        sensorKeys.forEach((sensorKey) => {
-                                            newData[`${key}_${sensorKey}`] = sensor_data[key][sensorKey];
-                                        });
-                                    });
-
-                                    return { ...rest, ...newData }; // Combining other properties with newly generated properties
+                            // Dynamically iterate through sensor_data keys and create new properties
+                            Object.keys(sensor_data).forEach((key) => {
+                                const sensorKeys = Object.keys(sensor_data[key]);
+                                sensorKeys.forEach((sensorKey) => {
+                                    newData[`${key}_${sensorKey}`] = formatConsumptionValue(
+                                        sensor_data[key][sensorKey],
+                                        2
+                                    );
                                 });
+                            });
 
-                                setRawDeviceData(newResponseData);
-                            }
+                            return { ...rest, ...newData }; // Combining other properties with newly generated properties
                         });
+
+                        setRawDeviceData(newResponseData);
                     }
                 } else {
                     UserStore.update((s) => {
