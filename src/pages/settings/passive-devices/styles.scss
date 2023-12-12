@@ -93,11 +93,14 @@
     max-width: none;
     height: auto;
     margin: 0;
+    overflow-x: auto; /* Enable horizontal scrolling */
+    max-width: 100%; /* Adjust as needed based on your layout */
 }
 
 /* Customize the scrollbar track */
 .modal-dialog-custom::-webkit-scrollbar {
     width: 0.525rem;
+    height: 0.725rem; /* For horizontal scrollbar */
 }
 
 .modal-dialog-custom::-webkit-scrollbar-track {
