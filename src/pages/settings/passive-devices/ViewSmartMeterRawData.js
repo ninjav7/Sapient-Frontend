@@ -52,39 +52,6 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
         return rawDeviceData;
     };
 
-    const fetchRawDataForDevice = async (bldg_id, device_id, page_no = 1, page_size = 20, bldg_tz) => {
-        setDataFetching(true);
-        setTotalDataCount(0);
-        setRawDeviceData([]);
-        const params = `?building_id=${bldg_id}&device_id=${device_id}&page_no=${page_no}&page_size=${page_size}&tz_info=${bldg_tz}`;
-
-        await getDeviceRawData(params)
-            .then((res) => {
-                const response = res?.data;
-                if (response?.total_count) setTotalDataCount(response?.total_count);
-                if (response) {
-                    if (response?.data.length !== 0) setRawDeviceData(response?.data);
-                } else {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = 'Unable to update Raw Data for due to Internal Server Error!.';
-                        s.notificationType = 'error';
-                    });
-                }
-            })
-            .catch(() => {
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Unable to update Raw Data for due to Internal Server Error!.';
-                    s.notificationType = 'error';
-                });
-            })
-            .finally(() => {
-                setDataFetching(false);
-                setProcessing(false);
-            });
-    };
-
     function isValidDate(d) {
         return d instanceof Date && !isNaN(d);
     }
@@ -120,33 +87,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
         );
     };
 
-    const sensorDataHeaderProps = [
-        {
-            name: 'Timestamp',
-            accessor: 'time_stamp',
-        },
-        {
-            name: 'Gateway / MAC',
-            accessor: 'gateway_mac',
-        },
-        {
-            name: 'Firmware',
-            accessor: 'firmware',
-        },
-    ];
-
-    const renderSensorData = (row) => {
-        return (
-            <div
-                size={Typography.Sizes.md}
-                className="typography-wrapper link mouse-pointer"
-                style={{ color: colorPalette?.datavizBlue500 }}>
-                View
-            </div>
-        );
-    };
-
-    const headerProps = [
+    const defaultHeaderProps = [
         {
             name: 'Timestamp',
             accessor: 'time_stamp',
@@ -173,12 +114,78 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             name: 'RSSI',
             accessor: 'rssi',
         },
-        {
-            name: 'Sensor Data',
-            accessor: 'sensor_data',
-            callbackValue: renderSensorData,
-        },
     ];
+
+    const [headerProps, setHeaderProps] = useState(defaultHeaderProps);
+
+    console.log('SSR headerProps => ', headerProps);
+
+    const fetchRawDataForDevice = async (bldg_id, device_id, page_no = 1, page_size = 20, bldg_tz) => {
+        setDataFetching(true);
+        setTotalDataCount(0);
+        setRawDeviceData([]);
+        const params = `?building_id=${bldg_id}&device_id=${device_id}&page_no=${page_no}&page_size=${page_size}&tz_info=${bldg_tz}`;
+
+        await getDeviceRawData(params)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.total_count) setTotalDataCount(response?.total_count);
+                if (response) {
+                    if (response?.data.length !== 0) {
+                        const responseData = response?.data;
+
+                        responseData.forEach((record, index) => {
+                            if (index === 0 && record?.sensor_data) {
+                                const headersListToMerge = Object.keys(record?.sensor_data).flatMap((key) =>
+                                    Object.keys(record?.sensor_data[key]).map((subKey) => ({
+                                        name: `${key} ${subKey}`,
+                                        accessor: `${key}_${subKey}`,
+                                    }))
+                                );
+
+                                const mergedHeaderProps = [...headerProps, ...headersListToMerge];
+                                setHeaderProps(mergedHeaderProps);
+
+                                // Transforming responseData to newResponseData format
+                                const newResponseData = responseData.map((data) => {
+                                    const { sensor_data, ...rest } = data; // Extract sensor_data and other properties
+                                    const newData = {};
+
+                                    // Dynamically iterate through sensor_data keys and create new properties
+                                    Object.keys(sensor_data).forEach((key) => {
+                                        const sensorKeys = Object.keys(sensor_data[key]);
+                                        sensorKeys.forEach((sensorKey) => {
+                                            newData[`${key}_${sensorKey}`] = sensor_data[key][sensorKey];
+                                        });
+                                    });
+
+                                    return { ...rest, ...newData }; // Combining other properties with newly generated properties
+                                });
+
+                                setRawDeviceData(newResponseData);
+                            }
+                        });
+                    }
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Unable to update Raw Data for due to Internal Server Error!.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch(() => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to update Raw Data for due to Internal Server Error!.';
+                    s.notificationType = 'error';
+                });
+            })
+            .finally(() => {
+                setDataFetching(false);
+                setProcessing(false);
+            });
+    };
 
     const downloadRawDataForCSVExport = async (bldg_id, device_id, bldg_tz) => {
         setCSVDownloading(true);
