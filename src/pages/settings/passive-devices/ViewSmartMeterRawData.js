@@ -188,8 +188,9 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             });
     };
 
-    const downloadRawDataForCSVExport = async (bldg_id, device_id, bldg_tz) => {
+    const downloadRawDataForCSVExport = async (bldg_id, device_id, bldg_tz, header_props) => {
         setCSVDownloading(true);
+
         const params = `?building_id=${bldg_id}&device_id=${device_id}&tz_info=${bldg_tz}`;
 
         await getDeviceRawData(params)
@@ -197,7 +198,21 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                 const responseData = res?.data?.data;
 
                 if (responseData) {
-                    const csvData = getRawDeviceDataTableCSVExport(responseData, headerProps);
+                    const newResponseData = responseData.map((data) => {
+                        const { sensor_data, ...rest } = data;
+                        const newData = {};
+
+                        Object.keys(sensor_data).forEach((key) => {
+                            const sensorKeys = Object.keys(sensor_data[key]);
+                            sensorKeys.forEach((sensorKey) => {
+                                newData[`${key}_${sensorKey}`] = sensor_data[key][sensorKey];
+                            });
+                        });
+
+                        return { ...rest, ...newData };
+                    });
+
+                    const csvData = getRawDeviceDataTableCSVExport(newResponseData, header_props);
                     download(`${bldgName}_Device_Raw_Data_${new Date().toISOString().split('T')[0]}`, csvData);
                 }
             })
@@ -281,7 +296,8 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                                     downloadRawDataForCSVExport(
                                         selectedPassiveDevice?.bldg_id,
                                         selectedPassiveDevice?.equipments_id,
-                                        bldgTimezone
+                                        bldgTimezone,
+                                        headerProps
                                     );
                                 }}
                             />
