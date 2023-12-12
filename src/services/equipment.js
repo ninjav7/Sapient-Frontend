@@ -28,24 +28,30 @@ export function getEqupmentDataRequest(
 ) {
     const searchData = encodeURIComponent(search);
     let params = `?building_id=${bldgId}&equipment_search=${searchData}`;
+
     if (withPagination) {
         params += `&page_size=${pageSize}&page_no=${pageNo}`;
     }
+
     if (getParams.order_by && getParams.sort_by) {
         params += `&ordered_by=${getParams.order_by}&sort_by=${getParams.sort_by}`;
     }
 
+    if (tagsFilterString.order_by && tagsFilterString.sort_by) {
+        params += `&ordered_by=${tagsFilterString.order_by}&sort_by=${tagsFilterString.sort_by}`;
+    }
+
     const filteredData = _.pickBy(
         {
-            floor_id: floorTypeFilterString,
+            floor_id: _.isEmpty(floorTypeFilterString) ? null : floorTypeFilterString,
             space_id: spaceTypeFilterString,
-            tags: tagsFilterString,
             equipment_types: equipmentTypeFilterString,
             device_id: macAddressFilterString,
             ...getParams,
         },
         _.identity
     );
+
     if (endUseFilterString.length) {
         filteredData['end_uses'] = endUseFilterString;
     }
@@ -142,7 +148,9 @@ export function getFiltersForEquipmentRequest(args) {
                     query_collection: 'equipment',
                     building_id: args.bldgId,
                     mac_address: macAddressQuery,
-                    equipment_types:args.equipmentTypeFilterString? encodeURI(args.equipmentTypeFilterString?.join('+')):null,
+                    equipment_types: args.equipmentTypeFilterString
+                        ? encodeURI(args.equipmentTypeFilterString?.join('+'))
+                        : null,
                     end_use: args.endUseFilterString,
                     floor_id: encodeURI(args.floorTypeFilterString?.join('+')),
                     space_id: encodeURI(args.spaceTypeFilterString?.join('+')),
