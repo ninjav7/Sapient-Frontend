@@ -172,47 +172,73 @@ const EndUseType = () => {
             });
     };
 
+    const checkWhetherHourly = () => {
+        const fDayHour = moment(energyConsumptionsCategories[0]);
+        const sDayHour = moment(energyConsumptionsCategories[1]);
+
+        if (sDayHour.diff(fDayHour, 'hours') <= 1) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
     const fetchWeatherData = async (time_zone) => {
+        const range = checkWhetherHourly() ? 'hour' : 'day';
+
         const payload = {
             date_from: encodeURIComponent(startDate),
             date_to: encodeURIComponent(endDate),
             tz_info: time_zone,
             bldg_id: bldgId,
+            range,
         };
+
         await getWeatherData(payload)
             .then((res) => {
-                const response = res?.data;
+                const response = res;
+
                 if (response?.success) {
                     const tempData = [];
+
                     const highTemp = {
                         type: LOW_MED_HIGH_TYPES.HIGH,
                         data: [],
                         color: colorPalette.datavizRed500,
                     };
+
                     const avgTemp = {
                         type: LOW_MED_HIGH_TYPES.MED,
                         data: [],
                         color: colorPalette.primaryGray450,
                     };
+
                     const lowTemp = {
                         type: LOW_MED_HIGH_TYPES.LOW,
                         data: [],
                         color: colorPalette.datavizBlue400,
                     };
+
                     response.data.forEach((record) => {
-                        if (record.hasOwnProperty('temp')) avgTemp.data.push(record?.temp);
-                        if (record.hasOwnProperty('max_temp')) highTemp.data.push(record?.max_temp);
-                        if (record.hasOwnProperty('min_temp')) lowTemp.data.push(record?.min_temp);
+                        if (range === 'day') {
+                            if (record.hasOwnProperty('avgtemp_f')) avgTemp.data.push(record?.avgtemp_f);
+                            if (record.hasOwnProperty('mintemp_f')) highTemp.data.push(record?.mintemp_f);
+                            if (record.hasOwnProperty('maxtemp_f')) lowTemp.data.push(record?.maxtemp_f);
+                        } else {
+                            if (record.hasOwnProperty('temp_f')) avgTemp.data.push(record?.temp_f);
+                        }
                     });
+
                     if (avgTemp?.data.length !== 0) tempData.push(avgTemp);
                     if (highTemp?.data.length !== 0) tempData.push(highTemp);
                     if (lowTemp?.data.length !== 0) tempData.push(lowTemp);
+
                     if (tempData.length !== 0) setWeatherData(tempData);
                 } else {
                     setWeatherData(null);
                 }
             })
-            .catch(() => {
+            .catch((e) => {
                 setWeatherData(null);
             });
     };
@@ -338,7 +364,7 @@ const EndUseType = () => {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             fetchWeatherData(bldgObj?.timezone);
         }
-    }, [isWeatherChartVisible, startDate, endDate]);
+    }, [isWeatherChartVisible, energyConsumptionsCategories]);
 
     const fetchEnduseTitle = (type) => {
         return type === 'hvac'
