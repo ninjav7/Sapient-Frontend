@@ -142,7 +142,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                                 }))
                             );
 
-                            const mergedHeaderProps = [...headerProps, ...headersListToMerge];
+                            const mergedHeaderProps = [...defaultHeaderProps, ...headersListToMerge];
                             setHeaderProps(mergedHeaderProps);
                         }
 
@@ -188,7 +188,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             });
     };
 
-    const downloadRawDataForCSVExport = async (bldg_id, device_id, bldg_tz, header_props) => {
+    const downloadRawDataForCSVExport = async (bldg_id, device_id, bldg_tz, latestHeaderProps) => {
         setCSVDownloading(true);
 
         const params = `?building_id=${bldg_id}&device_id=${device_id}&tz_info=${bldg_tz}`;
@@ -212,7 +212,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                         return { ...rest, ...newData };
                     });
 
-                    const csvData = getRawDeviceDataTableCSVExport(newResponseData, header_props);
+                    const csvData = getRawDeviceDataTableCSVExport(newResponseData, latestHeaderProps);
                     download(`${bldgName}_Device_Raw_Data_${new Date().toISOString().split('T')[0]}`, csvData);
                 }
             })
