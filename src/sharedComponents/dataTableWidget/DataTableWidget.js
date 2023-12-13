@@ -53,7 +53,12 @@ export const initialFilterState = {
 };
 
 const DataTableWidget = (props) => {
-    const { customExcludedHeaders = [], showExternalButton = false, externalButtonObj = {} } = props;
+    const {
+        customExcludedHeaders = [],
+        shouldSortHeader = true,
+        showExternalButton = false,
+        externalButtonObj = {},
+    } = props;
 
     const [excludedHeaderLocalStorage, setExcludedHeadersLocalStorage] = useLocalStorage(
         `${LOCAL_STORAGE.EXCLUDED_HEADERS}${props.id && '-' + props.id}`,
@@ -83,8 +88,8 @@ const DataTableWidget = (props) => {
                 orderHeaders.findIndex(({ name }) => name === b.name)
             );
         });
-        setHeaders(preparedOrderHeaders);
-    }, [JSON.stringify(orderedHeaders)]);
+        setHeaders(shouldSortHeader ? preparedOrderHeaders : props.headers);
+    }, [JSON.stringify(orderedHeaders), shouldSortHeader]);
 
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [selectedFiltersValues, setSelectedFiltersValues] = useState(_.cloneDeep(initialFilterState));
