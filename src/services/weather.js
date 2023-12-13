@@ -1,9 +1,11 @@
 import axiosInstance from './axiosInstance';
 import { getWeather } from './Network';
+// Should be enabled only in localhost
 // import dataWeatherHourMock from './dataWeatherHourMock.json';
 // import dataWeatherDayMock from './dataWeatherDayMock.json';
 
 export function getWeatherData(obj) {
+    // Should be enabled only in localhost
     // return new Promise((res) => {
     //     if (obj.range === 'hour') {
     //         res(dataWeatherHourMock.data);
