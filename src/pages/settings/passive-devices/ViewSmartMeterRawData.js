@@ -243,7 +243,10 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
     };
 
     useEffect(() => {
-        if (!isModalOpen) setRawDeviceData([]);
+        if (!isModalOpen) {
+            setRawDeviceData([]);
+            setHeaderProps(defaultHeaderProps);
+        }
     }, [isModalOpen]);
 
     useEffect(() => {
