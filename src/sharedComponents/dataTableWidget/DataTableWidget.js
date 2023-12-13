@@ -244,7 +244,7 @@ const DataTableWidget = (props) => {
 
         return (
             <Table.Cell {...cellProps}>
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-flex justify-content-between align-items-center" style={{ width: 'max-content' }}>
                     <Typography.Subheader size={Typography.Sizes.sm}>{name}</Typography.Subheader>
                     {onSort && SORT_TYPES[state] && <ArrowSortSVG className={state === 1 && 'rotate-180'} />}
                 </div>
