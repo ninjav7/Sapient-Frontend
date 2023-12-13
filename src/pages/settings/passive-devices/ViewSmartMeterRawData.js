@@ -239,7 +239,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
     }, [selectedPassiveDevice, pageNo, pageSize, bldgTimezone]);
 
     return (
-        <Modal show={isModalOpen} onHide={closeModal} backdrop="static" keyboard={false} size="xl" centered>
+        <Modal show={isModalOpen} onHide={closeModal} size="xl" centered>
             <div className="modal-dialog-custom" style={customModalStyle.modalContent}>
                 <div className="passive-header-wrapper d-flex justify-content-between" style={{ background: 'none' }}>
                     <div className="d-flex flex-column justify-content-between">
