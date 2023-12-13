@@ -280,22 +280,8 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                             </Typography.Subheader>
                         </div>
                     </div>
-                    <div className="d-flex">
-                        <div>
-                            <Button
-                                label="Close"
-                                size={Button.Sizes.md}
-                                type={Button.Type.secondaryGrey}
-                                onClick={closeModal}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="default-padding">
-                    <div className="d-flex justify-content-between">
-                        <div></div>
-                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                    <div className="d-flex" style={{ gap: '1.25rem' }}>
+                        <div className="d-flex" style={{ gap: '0.25rem' }}>
                             <Button
                                 label={''}
                                 type={Button.Type.secondaryGrey}
@@ -325,8 +311,18 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                                 }}
                             />
                         </div>
+                        <div>
+                            <Button
+                                label="Close"
+                                size={Button.Sizes.md}
+                                type={Button.Type.secondaryGrey}
+                                onClick={closeModal}
+                            />
+                        </div>
                     </div>
+                </div>
 
+                <div className="default-padding">
                     <div className="raw-data-table-container">
                         <DataTableWidget
                             id="raw_data_list"
