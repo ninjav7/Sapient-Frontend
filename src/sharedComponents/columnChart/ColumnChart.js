@@ -8,6 +8,7 @@ import Highcharts from 'highcharts';
 import _ from 'lodash';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 
 import Typography from '../typography';
 import Button from '../button/Button';
@@ -46,12 +47,18 @@ const ColumnChart = (props) => {
         style,
         isChartLoading = false,
         exportingTitle = '',
+        cbCustomCSV,
     } = props;
 
     const chartComponentRef = useRef(null);
     const [withTemp, setWithTemp] = useState(withTempProp);
+    const [plotBandsShown, setPlotBandsShown] = useState(true);
 
-    const { plotBands, renderPlotBandsLegends } = usePlotBandsLegends({ plotBandsProp, plotBandsLegends });
+    const { plotBands, renderPlotBandsLegends } = usePlotBandsLegends({
+        plotBandsProp,
+        plotBandsLegends,
+        setStateDisabledAfterHours: setPlotBandsShown,
+    });
     const { renderWeatherLegends } = useWeatherLegends();
 
     const filterWeather = useCallback(() => {
@@ -62,6 +69,22 @@ const ColumnChart = (props) => {
         setWithTemp(withTempProp);
     }, [withTempProp]);
 
+    const downloadCSV = (CSVContent) => {
+        const blob = new Blob([CSVContent], { type: 'text/csv' });
+
+        const link = document.createElement('a');
+
+        link.href = window.URL.createObjectURL(blob);
+
+        link.download = exportingTitle ? exportingTitle : 'chart';
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        link.remove();
+    };
+
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
             case DOWNLOAD_TYPES.downloadSVG:
@@ -71,7 +94,15 @@ const ColumnChart = (props) => {
                 chartComponentRef.current.chart.exportChart({ type: 'image/png' });
                 break;
             case DOWNLOAD_TYPES.downloadCSV:
-                chartComponentRef.current.chart.downloadCSV();
+                if (plotBandsShown && cbCustomCSV && typeof cbCustomCSV === 'function') {
+                    const originalCSV = chartComponentRef.current.chart.getCSV();
+
+                    const modifiedCSV = cbCustomCSV(originalCSV);
+
+                    downloadCSV(modifiedCSV);
+                } else {
+                    chartComponentRef.current.chart.downloadCSV();
+                }
         }
     };
 
@@ -217,6 +248,7 @@ ColumnChart.propTypes = {
     onMoreDetail: PropTypes.func,
     chartHeight: PropTypes.number,
     tooltipUnit: PropTypes.string,
+    categoryName: PropTypes.string,
     categories: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
     tooltipCallBackValue: PropTypes.func,
     restChartProps: PropTypes.object,

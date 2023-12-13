@@ -11,6 +11,7 @@ const chartsBaseConfig = ({
     colors,
     series,
     categories,
+    categoryName,
     tooltipUnit,
     yAxisWithAssignMeasure = true,
     isLegendsEnabled = true,
@@ -83,6 +84,10 @@ const chartsBaseConfig = ({
     },
 
     xAxis: {
+        title: {
+            text: categoryName ? categoryName : 'Category',
+            enabled: false,
+        },
         categories: categories,
         crosshair: true,
         labels: {
