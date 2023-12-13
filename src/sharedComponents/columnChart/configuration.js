@@ -114,6 +114,7 @@ export const options = (props) => {
         chartHeight: props.chartHeight || 341,
         colors: props.colors,
         series: [...props?.series, ...tempSeries(props?.temperatureSeries || [])],
+        categoryName: props.categoryName,
         categories: props.categories,
         onMoreDetail: props.onMoreDetail,
         tooltipUnit: props.tooltipUnit,
