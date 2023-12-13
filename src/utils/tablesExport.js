@@ -552,7 +552,7 @@ export const getPassiveDeviceTableCSVExport = (tableData, columns) => {
     return csv;
 };
 
-export const getRawDeviceDataTableCSVExport = (tableData, columns) => {
+export const getRawDeviceDataTableCSVExport = (tableData, columns, handleDateFormat) => {
     let dataToExport = [];
 
     tableData.forEach((tableRow) => {
@@ -560,6 +560,12 @@ export const getRawDeviceDataTableCSVExport = (tableData, columns) => {
 
         for (let i = 0; i <= columns.length - 1; i++) {
             switch (columns[i].accessor) {
+                case 'time_stamp':
+                    const timestamp = tableRow['time_stamp'];
+                    const formattedTimestamp = handleDateFormat(timestamp);
+                    arr.push(formattedTimestamp);
+                    break;
+
                 default:
                     arr.push(tableRow[columns[i].accessor]);
                     break;

@@ -212,7 +212,11 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                         return { ...rest, ...newData };
                     });
 
-                    const csvData = getRawDeviceDataTableCSVExport(newResponseData, latestHeaderProps);
+                    const csvData = getRawDeviceDataTableCSVExport(
+                        newResponseData,
+                        latestHeaderProps,
+                        handleDateFormat
+                    );
                     download(`${bldgName}_Device_Raw_Data_${new Date().toISOString().split('T')[0]}`, csvData);
                 }
             })
