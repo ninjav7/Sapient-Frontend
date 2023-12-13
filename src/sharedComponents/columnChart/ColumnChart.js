@@ -45,6 +45,7 @@ const ColumnChart = (props) => {
         onMoreDetail,
         style,
         isChartLoading = false,
+        exportingTitle = '',
     } = props;
 
     const chartComponentRef = useRef(null);
@@ -74,7 +75,19 @@ const ColumnChart = (props) => {
         }
     };
 
-    const chartConfig = options({ ...props, temperatureSeries: withTemp ? temperatureSeries : [], plotBands });
+    const chartConfig = options({
+        ...props,
+        temperatureSeries: withTemp ? temperatureSeries : [],
+        plotBands,
+
+        ...(exportingTitle !== '' && {
+            restChartProps: {
+                exporting: {
+                    filename: exportingTitle,
+                },
+            },
+        }),
+    });
 
     const { weather } = upperLegendsProps;
     const weatherIsAlwaysShown = weather?.isAlwaysShown;
