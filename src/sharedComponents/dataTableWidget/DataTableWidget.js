@@ -299,7 +299,7 @@ const DataTableWidget = (props) => {
                 <Brick sizeInRem={1.5} />
 
                 {!!filteredHeaders.length ? (
-                    <Table>
+                    <Table customStyle={props.customStyle}>
                         <Table.THead>
                             {/*//@ It is probably need to improve custom checkbox to make it generic*/}
                             {props.onCheckAll &&

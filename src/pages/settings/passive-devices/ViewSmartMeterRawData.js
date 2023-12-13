@@ -322,6 +322,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                             totalCount={(() => {
                                 return totalDataCount;
                             })()}
+                            customStyle={{ width: headerProps.length > 10 ? 'fit-content' : null }}
                         />
                     </div>
                 </div>
