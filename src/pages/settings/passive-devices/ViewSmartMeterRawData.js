@@ -137,7 +137,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                         if (firstRecord?.sensor_data) {
                             const headersListToMerge = Object.keys(firstRecord?.sensor_data).flatMap((key) =>
                                 Object.keys(firstRecord?.sensor_data[key]).map((subKey) => ({
-                                    name: `${key}_${subKey}`,
+                                    name: `${key} ${subKey}`,
                                     accessor: `${key}_${subKey}`,
                                 }))
                             );
