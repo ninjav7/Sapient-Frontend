@@ -135,15 +135,25 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
 
                         const firstRecord = responseData[0];
                         if (firstRecord?.sensor_data) {
-                            const headersListToMerge = Object.keys(firstRecord?.sensor_data).flatMap((key) =>
-                                Object.keys(firstRecord?.sensor_data[key]).map((subKey) => ({
-                                    name: `${key} ${subKey}`,
-                                    accessor: `${key}_${subKey}`,
-                                }))
-                            );
+                            let headersListToMerge = [];
 
-                            const mergedHeaderProps = [...defaultHeaderProps, ...headersListToMerge];
-                            setHeaderProps(mergedHeaderProps);
+                            Object.keys(firstRecord?.sensor_data).forEach((key) => {
+                                if (typeof firstRecord.sensor_data[key] === 'object') {
+                                    headersListToMerge.push(
+                                        ...Object.keys(firstRecord.sensor_data[key]).map((subKey) => ({
+                                            name: `${key} ${subKey}`,
+                                            accessor: `${key}_${subKey}`,
+                                        }))
+                                    );
+                                } else {
+                                    headersListToMerge.push({
+                                        name: `${key}`,
+                                        accessor: `${key}`,
+                                    });
+                                }
+                            });
+
+                            setHeaderProps([...defaultHeaderProps, ...headersListToMerge]);
                         }
 
                         // Transforming responseData to newResponseData format
@@ -154,12 +164,14 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                             // Dynamically iterate through sensor_data keys and create new properties
                             Object.keys(sensor_data).forEach((key) => {
                                 const sensorKeys = Object.keys(sensor_data[key]);
-                                sensorKeys.forEach((sensorKey) => {
-                                    newData[`${key}_${sensorKey}`] = formatConsumptionValue(
-                                        sensor_data[key][sensorKey],
-                                        2
-                                    );
-                                });
+
+                                sensorKeys.length !== 0 &&
+                                    sensorKeys.forEach((sensorKey) => {
+                                        newData[`${key}_${sensorKey}`] = formatConsumptionValue(
+                                            sensor_data[key][sensorKey],
+                                            2
+                                        );
+                                    });
                             });
 
                             return { ...rest, ...newData }; // Combining other properties with newly generated properties
@@ -198,18 +210,22 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                 const responseData = res?.data?.data;
 
                 if (responseData) {
+                    // Transforming responseData to newResponseData format
                     const newResponseData = responseData.map((data) => {
-                        const { sensor_data, ...rest } = data;
+                        const { sensor_data, ...rest } = data; // Extract sensor_data and other properties
                         const newData = {};
 
+                        // Dynamically iterate through sensor_data keys and create new properties
                         Object.keys(sensor_data).forEach((key) => {
                             const sensorKeys = Object.keys(sensor_data[key]);
-                            sensorKeys.forEach((sensorKey) => {
-                                newData[`${key}_${sensorKey}`] = sensor_data[key][sensorKey];
-                            });
+
+                            sensorKeys.length !== 0 &&
+                                sensorKeys.forEach((sensorKey) => {
+                                    newData[`${key}_${sensorKey}`] = sensor_data[key][sensorKey];
+                                });
                         });
 
-                        return { ...rest, ...newData };
+                        return { ...rest, ...newData }; // Combining other properties with newly generated properties
                     });
 
                     const csvData = getRawDeviceDataTableCSVExport(
