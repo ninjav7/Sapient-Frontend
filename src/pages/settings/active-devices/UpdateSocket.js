@@ -170,10 +170,12 @@ const UpdateSocket = ({
                     <Typography.Body size={Typography.Sizes.md}>Tags</Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <TagsInput
-                        placeHolder={socketObj?.tags && socketObj?.tags.length !== 0 ? '' : 'Enter Tags'}
-                        value={socketObj?.tags ? socketObj?.tags : []}
+                        placeHolder={
+                            socketObj?.equipment_tags && socketObj?.equipment_tags.length !== 0 ? '' : 'Enter Tags'
+                        }
+                        value={socketObj?.equipment_tags ? socketObj?.equipment_tags : []}
                         onChange={(value) => {
-                            handleChange('tags', value);
+                            handleChange('equipment_tags', value);
                         }}
                     />
                 </div>
