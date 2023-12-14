@@ -30,9 +30,9 @@ const THead = ({ children, ...props }) => (
 );
 const TBody = ({ children, ...props }) => <Body {...props}>{children}</Body>;
 
-const Table = ({ children, ...props }) => {
+const Table = ({ children, customStyle = {}, ...props }) => {
     return (
-        <div className="table-wrapper" {...props}>
+        <div className="table-wrapper" {...props} style={customStyle}>
             <table className="table-component">{children}</table>
         </div>
     );

@@ -19,8 +19,8 @@ import { DownloadButton } from './../../../sharedComponents/dataTableWidget/comp
 import { ReactComponent as RefreshSVG } from './../../../../src/assets/icon/refresh.svg';
 
 import { getDeviceRawData } from './services.js';
+import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper.js';
 
-import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPassiveDevice }) => {
@@ -52,44 +52,11 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
         return rawDeviceData;
     };
 
-    const fetchRawDataForDevice = async (bldg_id, device_id, page_no = 1, page_size = 20, bldg_tz) => {
-        setDataFetching(true);
-        setTotalDataCount(0);
-        setRawDeviceData([]);
-        const params = `?building_id=${bldg_id}&device_id=${device_id}&page_no=${page_no}&page_size=${page_size}&tz_info=${bldg_tz}`;
-
-        await getDeviceRawData(params)
-            .then((res) => {
-                const response = res?.data;
-                if (response?.total_count) setTotalDataCount(response?.total_count);
-                if (response) {
-                    if (response?.data.length !== 0) setRawDeviceData(response?.data);
-                } else {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = 'Unable to update Raw Data for due to Internal Server Error!.';
-                        s.notificationType = 'error';
-                    });
-                }
-            })
-            .catch(() => {
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Unable to update Raw Data for due to Internal Server Error!.';
-                    s.notificationType = 'error';
-                });
-            })
-            .finally(() => {
-                setDataFetching(false);
-                setProcessing(false);
-            });
-    };
-
     function isValidDate(d) {
         return d instanceof Date && !isNaN(d);
     }
 
-    const handleLastActiveDate = (last_login) => {
+    const handleDateFormat = (last_login) => {
         let dt = '';
         if (isValidDate(new Date(last_login)) && last_login != null) {
             const last_dt = new Date(last_login);
@@ -103,10 +70,10 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
     };
 
     const renderRawDataTimestamp = (row) => {
-        const formattedTimestamp = handleLastActiveDate(row?.time_stamp);
+        const formattedTimestamp = handleDateFormat(row?.time_stamp);
 
         return (
-            <Typography.Body size={Typography.Sizes.md} className="mouse-pointer">
+            <Typography.Body size={Typography.Sizes.md} className="mouse-pointer" style={{ width: 'max-content' }}>
                 {row?.time_stamp === '' ? '-' : formattedTimestamp}
             </Typography.Body>
         );
@@ -114,24 +81,13 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
 
     const renderGatewayMac = (row) => {
         return (
-            <div size={Typography.Sizes.md} className="mouse-pointer">
+            <div size={Typography.Sizes.md} className="mouse-pointer" style={{ width: 'max-content' }}>
                 {row?.gateway_mac === '' ? '-' : row?.gateway_mac}
             </div>
         );
     };
 
-    const renderSensorData = (row) => {
-        return (
-            <div
-                size={Typography.Sizes.md}
-                className="typography-wrapper mouse-pointer"
-                style={{ color: colorPalette?.datavizBlue500 }}>
-                View
-            </div>
-        );
-    };
-
-    const headerProps = [
+    const defaultHeaderProps = [
         {
             name: 'Timestamp',
             accessor: 'time_stamp',
@@ -158,16 +114,95 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             name: 'RSSI',
             accessor: 'rssi',
         },
-        // Planned to be disabled as part of Ticket: PLT-1203
-        // {
-        //     name: 'Sensor Data',
-        //     accessor: 'sensor_data',
-        //     callbackValue: renderSensorData,
-        // },
     ];
 
-    const downloadRawDataForCSVExport = async (bldg_id, device_id, bldg_tz) => {
+    const [headerProps, setHeaderProps] = useState(defaultHeaderProps);
+
+    const fetchRawDataForDevice = async (bldg_id, device_id, page_no = 1, page_size = 20, bldg_tz) => {
+        setDataFetching(true);
+        setTotalDataCount(0);
+        setRawDeviceData([]);
+
+        const params = `?building_id=${bldg_id}&device_id=${device_id}&page_no=${page_no}&page_size=${page_size}&tz_info=${bldg_tz}`;
+
+        await getDeviceRawData(params)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.total_count) setTotalDataCount(response?.total_count);
+                if (response) {
+                    if (response?.data.length !== 0) {
+                        const responseData = response?.data;
+
+                        const firstRecord = responseData[0];
+                        if (firstRecord?.sensor_data) {
+                            let headersListToMerge = [];
+
+                            Object.keys(firstRecord?.sensor_data).forEach((key) => {
+                                if (typeof firstRecord.sensor_data[key] === 'object') {
+                                    headersListToMerge.push(
+                                        ...Object.keys(firstRecord.sensor_data[key]).map((subKey) => ({
+                                            name: `${key} ${subKey}`,
+                                            accessor: `${key}_${subKey}`,
+                                        }))
+                                    );
+                                } else {
+                                    headersListToMerge.push({
+                                        name: `${key}`,
+                                        accessor: `${key}`,
+                                    });
+                                }
+                            });
+
+                            setHeaderProps([...defaultHeaderProps, ...headersListToMerge]);
+                        }
+
+                        // Transforming responseData to newResponseData format
+                        const newResponseData = responseData.map((data) => {
+                            const { sensor_data, ...rest } = data; // Extract sensor_data and other properties
+                            const newData = {};
+
+                            // Dynamically iterate through sensor_data keys and create new properties
+                            Object.keys(sensor_data).forEach((key) => {
+                                const sensorKeys = Object.keys(sensor_data[key]);
+
+                                sensorKeys.length !== 0 &&
+                                    sensorKeys.forEach((sensorKey) => {
+                                        newData[`${key}_${sensorKey}`] = formatConsumptionValue(
+                                            sensor_data[key][sensorKey],
+                                            2
+                                        );
+                                    });
+                            });
+
+                            return { ...rest, ...newData }; // Combining other properties with newly generated properties
+                        });
+
+                        setRawDeviceData(newResponseData);
+                    }
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Unable to update Raw Data for due to Internal Server Error!.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch(() => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to update Raw Data for due to Internal Server Error!.';
+                    s.notificationType = 'error';
+                });
+            })
+            .finally(() => {
+                setDataFetching(false);
+                setProcessing(false);
+            });
+    };
+
+    const downloadRawDataForCSVExport = async (bldg_id, device_id, bldg_tz, latestHeaderProps) => {
         setCSVDownloading(true);
+
         const params = `?building_id=${bldg_id}&device_id=${device_id}&tz_info=${bldg_tz}`;
 
         await getDeviceRawData(params)
@@ -175,7 +210,29 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                 const responseData = res?.data?.data;
 
                 if (responseData) {
-                    const csvData = getRawDeviceDataTableCSVExport(responseData, headerProps);
+                    // Transforming responseData to newResponseData format
+                    const newResponseData = responseData.map((data) => {
+                        const { sensor_data, ...rest } = data; // Extract sensor_data and other properties
+                        const newData = {};
+
+                        // Dynamically iterate through sensor_data keys and create new properties
+                        Object.keys(sensor_data).forEach((key) => {
+                            const sensorKeys = Object.keys(sensor_data[key]);
+
+                            sensorKeys.length !== 0 &&
+                                sensorKeys.forEach((sensorKey) => {
+                                    newData[`${key}_${sensorKey}`] = sensor_data[key][sensorKey];
+                                });
+                        });
+
+                        return { ...rest, ...newData }; // Combining other properties with newly generated properties
+                    });
+
+                    const csvData = getRawDeviceDataTableCSVExport(
+                        newResponseData,
+                        latestHeaderProps,
+                        handleDateFormat
+                    );
                     download(`${bldgName}_Device_Raw_Data_${new Date().toISOString().split('T')[0]}`, csvData);
                 }
             })
@@ -186,7 +243,10 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
     };
 
     useEffect(() => {
-        if (!isModalOpen) setRawDeviceData([]);
+        if (!isModalOpen) {
+            setRawDeviceData([]);
+            setHeaderProps(defaultHeaderProps);
+        }
     }, [isModalOpen]);
 
     useEffect(() => {
@@ -202,7 +262,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
     }, [selectedPassiveDevice, pageNo, pageSize, bldgTimezone]);
 
     return (
-        <Modal show={isModalOpen} onHide={closeModal} backdrop="static" keyboard={false} size="xl" centered>
+        <Modal show={isModalOpen} onHide={closeModal} size="xl" centered>
             <div className="modal-dialog-custom" style={customModalStyle.modalContent}>
                 <div className="passive-header-wrapper d-flex justify-content-between" style={{ background: 'none' }}>
                     <div className="d-flex flex-column justify-content-between">
@@ -220,22 +280,8 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                             </Typography.Subheader>
                         </div>
                     </div>
-                    <div className="d-flex">
-                        <div>
-                            <Button
-                                label="Close"
-                                size={Button.Sizes.md}
-                                type={Button.Type.secondaryGrey}
-                                onClick={closeModal}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="default-padding">
-                    <div className="d-flex justify-content-between">
-                        <div></div>
-                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                    <div className="d-flex" style={{ gap: '1.25rem' }}>
+                        <div className="d-flex" style={{ gap: '0.25rem' }}>
                             <Button
                                 label={''}
                                 type={Button.Type.secondaryGrey}
@@ -259,13 +305,24 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                                     downloadRawDataForCSVExport(
                                         selectedPassiveDevice?.bldg_id,
                                         selectedPassiveDevice?.equipments_id,
-                                        bldgTimezone
+                                        bldgTimezone,
+                                        headerProps
                                     );
                                 }}
                             />
                         </div>
+                        <div>
+                            <Button
+                                label="Close"
+                                size={Button.Sizes.md}
+                                type={Button.Type.secondaryGrey}
+                                onClick={closeModal}
+                            />
+                        </div>
                     </div>
+                </div>
 
+                <div className="default-padding">
                     <div className="raw-data-table-container">
                         <DataTableWidget
                             id="raw_data_list"
@@ -284,6 +341,8 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                             totalCount={(() => {
                                 return totalDataCount;
                             })()}
+                            shouldSortHeader={false}
+                            customStyle={{ width: headerProps.length > 10 ? 'fit-content' : null }}
                         />
                     </div>
                 </div>

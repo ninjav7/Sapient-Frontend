@@ -53,7 +53,12 @@ export const initialFilterState = {
 };
 
 const DataTableWidget = (props) => {
-    const { customExcludedHeaders = [], showExternalButton = false, externalButtonObj = {} } = props;
+    const {
+        customExcludedHeaders = [],
+        shouldSortHeader = true,
+        showExternalButton = false,
+        externalButtonObj = {},
+    } = props;
 
     const [excludedHeaderLocalStorage, setExcludedHeadersLocalStorage] = useLocalStorage(
         `${LOCAL_STORAGE.EXCLUDED_HEADERS}${props.id && '-' + props.id}`,
@@ -83,8 +88,8 @@ const DataTableWidget = (props) => {
                 orderHeaders.findIndex(({ name }) => name === b.name)
             );
         });
-        setHeaders(preparedOrderHeaders);
-    }, [JSON.stringify(orderedHeaders)]);
+        setHeaders(shouldSortHeader ? preparedOrderHeaders : props.headers);
+    }, [JSON.stringify(orderedHeaders), shouldSortHeader]);
 
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [selectedFiltersValues, setSelectedFiltersValues] = useState(_.cloneDeep(initialFilterState));
@@ -239,7 +244,7 @@ const DataTableWidget = (props) => {
 
         return (
             <Table.Cell {...cellProps}>
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-flex justify-content-between align-items-center" style={{ width: 'max-content' }}>
                     <Typography.Subheader size={Typography.Sizes.sm}>{name}</Typography.Subheader>
                     {onSort && SORT_TYPES[state] && <ArrowSortSVG className={state === 1 && 'rotate-180'} />}
                 </div>
@@ -299,7 +304,7 @@ const DataTableWidget = (props) => {
                 <Brick sizeInRem={1.5} />
 
                 {!!filteredHeaders.length ? (
-                    <Table>
+                    <Table customStyle={props.customStyle}>
                         <Table.THead>
                             {/*//@ It is probably need to improve custom checkbox to make it generic*/}
                             {props.onCheckAll &&
