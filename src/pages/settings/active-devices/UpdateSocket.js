@@ -64,34 +64,20 @@ const UpdateSocket = ({
         });
     };
 
-    const onConfigurationSave = async (socket_obj, selected_socket_obj) => {
+    const handleEquipmentUpdate = async (socket_obj, equip_id) => {
+        if (!equip_id) return;
+
         setProcessing(true);
+        const newParams = `?equipment_id=${equip_id}`;
+        const payload = {
+            name: socket_obj?.equipment,
+            tag: socket_obj?.equipment_tags ?? [],
+        };
 
-        let promisesList = [];
-
-        if (socket_obj?.equipment_type_id !== selected_socket_obj?.equipment_type_id) {
-            const params = `?sensor_id=${socket_obj?.id}&equipment_type_id=${socket_obj?.equipment_type_id}`;
-            promisesList.push(getSensorEquipmentLinked(params));
-        }
-
-        if (
-            socket_obj?.equipment !== selected_socket_obj?.equipment ||
-            socket_obj?.tags !== selected_socket_obj?.tags
-        ) {
-            const params = `?equipment_id=${socket_obj?.equipment_id}`;
-            promisesList.push(
-                updateEquipmentDetails(params, {
-                    name: socket_obj?.equipment,
-                    tag: socket_obj?.tags ?? [],
-                })
-            );
-        }
-
-        Promise.all(promisesList)
+        await updateEquipmentDetails(newParams, payload)
             .then((res) => {
-                const responses = res;
-                const updateSuccess = responses.every((record) => record?.status === 200 && record?.data?.success);
-                if (updateSuccess) {
+                const response = res?.data;
+                if (response?.success) {
                     updateNotification('Smart Plug socket updated successfully!', 'success');
                 } else {
                     updateNotification('Failed to update socket configuration.', 'error');
@@ -105,6 +91,47 @@ const UpdateSocket = ({
                 closeSocketModal();
                 fetchActiveSensorsList();
             });
+    };
+
+    const handleSensorEquipmentLinking = async (socket_obj) => {
+        if (!socket_obj?.id) return;
+
+        setProcessing(true);
+        const params = `?sensor_id=${socket_obj?.id}&equipment_type_id=${socket_obj?.equipment_type_id}`;
+
+        await getSensorEquipmentLinked(params)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    response?.id && handleEquipmentUpdate(socket_obj, response?.id);
+                } else {
+                    setProcessing(false);
+                    closeSocketModal();
+                    updateNotification('Failed to update socket configuration.', 'error');
+                    fetchActiveSensorsList();
+                }
+            })
+            .catch((err) => {
+                setProcessing(false);
+                closeSocketModal();
+                updateNotification('Unable to update socket configuration due to Internal Server Error.', 'error');
+                fetchActiveSensorsList();
+            });
+    };
+
+    const handleOnSocketUpdate = (newSocketObj, oldSocketObj) => {
+        const { equipment_id, equipment, equipment_type_id, equipment_tags: tags } = newSocketObj;
+        const {
+            equipment: oldEquipment,
+            equipment_tags: oldTags,
+            equipment_type_id: oldEquipmentTypeId,
+        } = oldSocketObj;
+
+        if (equipment_type_id !== oldEquipmentTypeId) {
+            handleSensorEquipmentLinking(newSocketObj);
+        } else if (equipment !== oldEquipment || JSON.stringify(tags) !== JSON.stringify(oldTags)) {
+            handleEquipmentUpdate(newSocketObj, equipment_id);
+        }
     };
 
     const handleChange = (key, value) => {
@@ -170,10 +197,12 @@ const UpdateSocket = ({
                     <Typography.Body size={Typography.Sizes.md}>Tags</Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <TagsInput
-                        placeHolder={socketObj?.tags && socketObj?.tags.length !== 0 ? '' : 'Enter Tags'}
-                        value={socketObj?.tags ? socketObj?.tags : []}
+                        placeHolder={
+                            socketObj?.equipment_tags && socketObj?.equipment_tags.length !== 0 ? '' : 'Enter Tags'
+                        }
+                        value={socketObj?.equipment_tags ? socketObj?.equipment_tags : []}
                         onChange={(value) => {
-                            handleChange('tags', value);
+                            handleChange('equipment_tags', value);
                         }}
                     />
                 </div>
@@ -195,7 +224,7 @@ const UpdateSocket = ({
                         type={Button.Type.primary}
                         className="w-100"
                         onClick={() => {
-                            onConfigurationSave(socketObj, selectedSocketObj);
+                            handleOnSocketUpdate(socketObj, selectedSocketObj);
                         }}
                         disabled={isProcessing || compareObjData(socketObj, selectedSocketObj)}
                     />

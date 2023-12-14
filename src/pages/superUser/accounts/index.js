@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
-import { Cookies } from 'react-cookie';
 
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
@@ -33,6 +32,7 @@ const Accounts = () => {
     const [totalItems, setTotalItems] = useState(0);
     const [customersList, setCustomersList] = useState([]);
     const [isFetchingCustomersList, setFetchingCustomersList] = useState(false);
+    const [isFetchingOfflineDevices, setFetchingOfflineDevices] = useState(false);
 
     const [isCustomerModalOpen, setCustomerModal] = useState(false);
     const openCustomerModal = () => setCustomerModal(true);
@@ -69,6 +69,8 @@ const Accounts = () => {
     };
 
     const getOfflineDevices = async (latestCustomersList) => {
+        setFetchingOfflineDevices(true);
+
         await fetchOfflineDevices()
             .then((res) => {
                 const response = res?.data;
@@ -95,7 +97,9 @@ const Accounts = () => {
                 }
             })
             .catch((error) => {})
-            .finally(() => {});
+            .finally(() => {
+                setFetchingOfflineDevices(false);
+            });
     };
 
     const getCustomersList = async () => {
