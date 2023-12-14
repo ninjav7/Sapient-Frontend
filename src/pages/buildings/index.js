@@ -671,6 +671,35 @@ const BuildingOverview = () => {
         });
     };
 
+    const cbCustomCSV = (originalCSV) => {
+        const operatingHours = buildingListData.find((bldg) => bldg.building_id === bldgId)?.operating_hours;
+
+        const csvRows = originalCSV.split('\n').map((row) => row.split(','));
+
+        csvRows[0].push('"On Hours"');
+        csvRows[0].push('"Open Day"');
+
+        for (let i = 1; i < csvRows.length; i++) {
+            const timestamp = moment(csvRows[i][0].replace(/"/g, ''));
+
+            const day = timestamp.format('ddd').toLowerCase();
+
+            const operateHoursDay = operatingHours[day];
+
+            const fromTime = moment(`${timestamp.format('YYYY-MM-DD')}T${operateHoursDay.time_range.frm}`);
+            const toTime = moment(`${timestamp.format('YYYY-MM-DD')}T${operateHoursDay.time_range.to}`);
+
+            const onHours = timestamp.isSameOrAfter(fromTime) && timestamp.isSameOrBefore(toTime);
+
+            csvRows[i].push(onHours ? 'TRUE' : 'FALSE');
+            csvRows[i].push(operateHoursDay.stat ? 'TRUE' : 'FALSE');
+        }
+
+        const modifiedCSV = csvRows.map((row) => row.join(',')).join('\n');
+
+        return modifiedCSV;
+    };
+
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
             const xaxisObj = xaxisLabelsCount(days_count);
@@ -779,6 +808,7 @@ const BuildingOverview = () => {
                                 title="Total Energy Consumption"
                                 subTitle={`${consumptionType} Energy Consumption (kWh)`}
                                 colors={[colors.datavizMain2]}
+                                categoryName="Timestamp"
                                 categories={energyConsumptionsCategories}
                                 tooltipUnit={UNITS.KWH}
                                 series={energyConsumptionsData}
@@ -792,6 +822,7 @@ const BuildingOverview = () => {
                                 withTemp={isWeatherChartVisible}
                                 isChartLoading={isEnergyChartLoading}
                                 exportingTitle={`Total_Energy_Consumption_Building_${moment().format('YYYY-MM-DD')}`}
+                                cbCustomCSV={cbCustomCSV}
                             />
 
                             <HourlyAvgConsumption
@@ -831,6 +862,7 @@ const BuildingOverview = () => {
                                     subTitle={`${consumptionType} Energy Consumption (kWh)`}
                                     onMoreDetail={() => handleRouteChange('/energy/end-uses')}
                                     colors={[colors.datavizMain2]}
+                                    categoryName="Timestamp"
                                     categories={energyConsumptionsCategories}
                                     tooltipUnit={UNITS.KWH}
                                     series={energyConsumptionsData}
@@ -854,6 +886,7 @@ const BuildingOverview = () => {
                                     exportingTitle={`Total_Energy_Consumption_Building_${moment().format(
                                         'YYYY-MM-DD'
                                     )}`}
+                                    cbCustomCSV={cbCustomCSV}
                                 />
                             </div>
                         </>

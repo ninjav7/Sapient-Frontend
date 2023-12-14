@@ -205,25 +205,28 @@ const EndUseType = () => {
                         type: LOW_MED_HIGH_TYPES.HIGH,
                         data: [],
                         color: colorPalette.datavizRed500,
+                        name: 'max temperature',
                     };
 
                     const avgTemp = {
                         type: LOW_MED_HIGH_TYPES.MED,
                         data: [],
                         color: colorPalette.primaryGray450,
+                        name: 'avg temperature',
                     };
 
                     const lowTemp = {
                         type: LOW_MED_HIGH_TYPES.LOW,
                         data: [],
                         color: colorPalette.datavizBlue400,
+                        name: 'min temperature',
                     };
 
                     response.data.forEach((record) => {
                         if (range === 'day') {
                             if (record.hasOwnProperty('avgtemp_f')) avgTemp.data.push(record?.avgtemp_f);
-                            if (record.hasOwnProperty('mintemp_f')) highTemp.data.push(record?.mintemp_f);
-                            if (record.hasOwnProperty('maxtemp_f')) lowTemp.data.push(record?.maxtemp_f);
+                            if (record.hasOwnProperty('mintemp_f')) lowTemp.data.push(record?.mintemp_f);
+                            if (record.hasOwnProperty('maxtemp_f')) highTemp.data.push(record?.maxtemp_f);
                         } else {
                             if (record.hasOwnProperty('temp_f')) avgTemp.data.push(record?.temp_f);
                         }
@@ -420,6 +423,7 @@ const EndUseType = () => {
                     }}
                     withTemp={isWeatherChartVisible}
                     isChartLoading={isEnergyChartLoading}
+                    exportingTitle={`Total_Energy_Consumption_Building_${moment().format('YYYY-MM-DD')}`}
                 />
             </div>
 

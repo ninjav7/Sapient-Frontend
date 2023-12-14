@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { PLOT_BANDS_TYPE } from '../modules/contants';
 import colors from '../../../../assets/scss/_colors.scss';
 
-const usePlotBandsLegends = ({ plotBandsProp, plotBandsLegends }) => {
+const usePlotBandsLegends = ({ plotBandsProp, plotBandsLegends, setStateDisabledAfterHours }) => {
     const [plotBands, setPlotBands] = useState(plotBandsProp);
 
     useEffect(() => {
@@ -56,6 +56,9 @@ const usePlotBandsLegends = ({ plotBandsProp, plotBandsLegends }) => {
                                           ...plotBandsProp.filter((data) => data.type === PLOT_BANDS_TYPE.after_hours),
                                       ]
                             );
+
+                            if (setStateDisabledAfterHours && typeof setStateDisabledAfterHours === 'function')
+                                setStateDisabledAfterHours(!disabled);
                         };
                         styles = {
                             background: color.background,
