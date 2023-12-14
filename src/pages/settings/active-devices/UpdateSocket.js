@@ -134,8 +134,11 @@ const UpdateSocket = ({
         }
     };
 
-    const handleChange = (key, value) => {
+    const handleChange = (key, value, label) => {
         let obj = Object.assign({}, socketObj);
+        if (key === 'equipment_type_id' && (!obj?.equipment || obj?.equipment === '')) {
+            obj['equipment'] = label;
+        }
         obj[key] = value;
         setSocketObj(obj);
     };
@@ -168,7 +171,7 @@ const UpdateSocket = ({
                                 (option) => option.value === socketObj?.equipment_type_id
                             )}
                             onChange={(e) => {
-                                handleChange('equipment_type_id', e.value);
+                                handleChange('equipment_type_id', e.value, e.label);
                             }}
                             isSearchable={true}
                             customSearchCallback={({ data, query }) => defaultDropdownSearch(data, query?.value)}
