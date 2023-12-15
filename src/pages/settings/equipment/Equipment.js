@@ -757,7 +757,7 @@ const Equipment = () => {
         },
         {
             name: 'CT Amp Rating',
-            accessor: 'end_use_name',
+            accessor: 'ct_model_installed',
             callbackValue: renderCTAmp,
             onSort: (method, name) => setSortBy({ method, name }),
         },
