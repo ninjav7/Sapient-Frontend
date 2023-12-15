@@ -12,6 +12,10 @@ import {
 } from './Network';
 
 export function getEqupmentDataRequest(
+    panelNameFilterString,
+    cdModelInstalledNameString,
+    breakerNumberString,
+    breakerRatedAmpsString,
     pageSize,
     pageNo,
     bldgId,
@@ -47,6 +51,10 @@ export function getEqupmentDataRequest(
             space_id: spaceTypeFilterString,
             equipment_types: equipmentTypeFilterString,
             device_id: macAddressFilterString,
+            panel_id: panelNameFilterString,
+            ct_model_installed_id: cdModelInstalledNameString,
+            breaker_number: breakerNumberString,
+            breaker_rated_amps: breakerRatedAmpsString,
             ...getParams,
         },
         _.identity
@@ -141,6 +149,7 @@ export function addNewEquipment(bldgId, createEqipmentData) {
 export function getFiltersForEquipmentRequest(args) {
     const macAddressArr = args?.deviceMacAddress;
     const macAddressQuery = macAddressArr ? macAddressArr.join('+') : null;
+
     return axiosInstance
         .get(`${getFiltersForEquipment}`, {
             params: _.pickBy(
@@ -150,6 +159,14 @@ export function getFiltersForEquipmentRequest(args) {
                     mac_address: macAddressQuery,
                     equipment_types: args.equipmentTypeFilterString
                         ? encodeURI(args.equipmentTypeFilterString?.join('+'))
+                        : null,
+                    panel_id: args.panelNameFilterString ? encodeURI(args.panelNameFilterString?.join('+')) : null,
+                    ct_model_installed_id: args.cdModelInstalledNameString
+                        ? encodeURI(args.cdModelInstalledNameString?.join('+'))
+                        : null,
+                    breaker_number: args.breakerNumberString ? encodeURI(args.breakerNumberString?.join('+')) : null,
+                    breaker_rated_amps: args.breakerRatedAmpsString
+                        ? encodeURI(args.breakerRatedAmpsString?.join('+'))
                         : null,
                     end_use: args.endUseFilterString,
                     floor_id: encodeURI(args.floorTypeFilterString?.join('+')),

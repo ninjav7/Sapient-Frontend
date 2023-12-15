@@ -155,6 +155,10 @@ const Equipment = () => {
     const { download } = useCSVDownload();
 
     const [equipmentTypeFilterString, setEquipmentTypeFilterString] = useState('');
+    const [panelNameFilterString, setPanelNameFilterString] = useState('');
+    const [cdModelInstalledNameString, setCdModelInstalledNameString] = useState('');
+    const [breakerNumberString, setBreakerNumberString] = useState('');
+    const [breakerRatedAmpsString, setBreakerRatedAmpsString] = useState('');
     const [endUseFilterString, setEndUseFilterString] = useState('');
 
     const [deviceIdFilterString, setDeviceIdFilterString] = useState('');
@@ -241,7 +245,12 @@ const Equipment = () => {
                 order_by: sortBy.name,
                 sort_by: sortBy.method,
             };
+
         await getEqupmentDataRequest(
+            panelNameFilterString,
+            cdModelInstalledNameString,
+            breakerNumberString,
+            breakerRatedAmpsString,
             pageSize,
             pageNo,
             bldgId,
@@ -438,6 +447,10 @@ const Equipment = () => {
             floorTypeFilterString: floorString,
             spaceTypeFilterString: spaceString,
             tagsFilterString,
+            panelNameFilterString,
+            cdModelInstalledNameString,
+            breakerNumberString,
+            breakerRatedAmpsString,
         });
 
         filters.data.forEach((filterOptions) => {
@@ -556,6 +569,66 @@ const Equipment = () => {
                         setSpaceString([]);
                     },
                 },
+                {
+                    label: 'Panel',
+                    value: 'panel_name',
+                    placeholder: 'All Panels',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.panel_name.map((panel) => ({
+                        value: panel.panel_id,
+                        label: panel.panel_name,
+                    })),
+                    onClose: (options) => filterHandler(setPanelNameFilterString, options),
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setPanelNameFilterString('');
+                    },
+                },
+                {
+                    label: 'CT Amp Rating',
+                    value: 'ct_model_installed_name',
+                    placeholder: 'All CT Amp Ratings',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.ct_model_installed_name.map((ct_model_installed_name) => ({
+                        value: ct_model_installed_name.ct_model_installed_id,
+                        label: ct_model_installed_name.ct_model_installed_name,
+                    })),
+                    onClose: (options) => filterHandler(setCdModelInstalledNameString, options),
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setCdModelInstalledNameString('');
+                    },
+                },
+                {
+                    label: 'Breaker #s',
+                    value: 'breaker_number',
+                    placeholder: 'All Breaker #s',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.breaker_number.map((breaker_number) => ({
+                        value: breaker_number,
+                        label: breaker_number,
+                    })),
+                    onClose: (options) => filterHandler(setBreakerNumberString, options),
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setBreakerNumberString('');
+                    },
+                },
+                {
+                    label: 'Rated Amps',
+                    value: 'breaker_rated_amps',
+                    placeholder: 'All Rated Amps',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.breaker_rated_amps.map((breaker_rated_amps) => ({
+                        value: breaker_rated_amps,
+                        label: breaker_rated_amps,
+                    })),
+                    onClose: (options) => filterHandler(setBreakerRatedAmpsString, options),
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setBreakerRatedAmpsString('');
+                    },
+                },
             ];
 
             setFilterOptions(filterOptionsFetched);
@@ -580,6 +653,10 @@ const Equipment = () => {
         floorString,
         spaceString,
         tagsFilterString,
+        panelNameFilterString,
+        cdModelInstalledNameString,
+        breakerNumberString,
+        breakerRatedAmpsString,
     ]);
 
     const renderLastUsedCell = (row, childrenTemplate) => {
@@ -693,7 +770,12 @@ const Equipment = () => {
                 order_by: sortBy.name,
                 sort_by: sortBy.method,
             };
+
         await getEqupmentDataRequest(
+            panelNameFilterString,
+            cdModelInstalledNameString,
+            breakerNumberString,
+            breakerRatedAmpsString,
             pageSize,
             pageNo,
             bldgId,
