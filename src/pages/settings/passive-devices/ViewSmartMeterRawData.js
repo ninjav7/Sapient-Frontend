@@ -103,12 +103,20 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             accessor: 'firmware',
         },
         {
-            name: 'Sensor Type',
-            accessor: 'sensor_type',
+            name: 'CT Firmware',
+            accessor: 'ct_firmware',
         },
         {
             name: 'Counter',
             accessor: 'counter',
+        },
+        {
+            name: 'Sensor Type',
+            accessor: 'sensor_type',
+        },
+        {
+            name: 'OTF_515',
+            accessor: 'otf_515',
         },
         {
             name: 'RSSI',
