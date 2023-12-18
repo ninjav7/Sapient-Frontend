@@ -25,7 +25,6 @@ import './styles.scss';
 
 const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPassiveDevice }) => {
     const { download } = useCSVDownload();
-    const bldgName = BuildingStore.useState((s) => s.BldgName);
 
     const [isFetchingData, setDataFetching] = useState(false);
     const [isProcessing, setProcessing] = useState(false);
@@ -103,12 +102,20 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             accessor: 'firmware',
         },
         {
-            name: 'Sensor Type',
-            accessor: 'sensor_type',
+            name: 'CT Firmware',
+            accessor: 'ct_firmware',
         },
         {
             name: 'Counter',
             accessor: 'counter',
+        },
+        {
+            name: 'Sensor Type',
+            accessor: 'sensor_type',
+        },
+        {
+            name: 'OTF_515',
+            accessor: 'otf_515',
         },
         {
             name: 'RSSI',
@@ -163,15 +170,19 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
 
                             // Dynamically iterate through sensor_data keys and create new properties
                             Object.keys(sensor_data).forEach((key) => {
-                                const sensorKeys = Object.keys(sensor_data[key]);
+                                if (typeof firstRecord.sensor_data[key] === 'object') {
+                                    const sensorKeys = Object.keys(sensor_data[key]);
 
-                                sensorKeys.length !== 0 &&
-                                    sensorKeys.forEach((sensorKey) => {
-                                        newData[`${key}_${sensorKey}`] = formatConsumptionValue(
-                                            sensor_data[key][sensorKey],
-                                            2
-                                        );
-                                    });
+                                    sensorKeys.length !== 0 &&
+                                        sensorKeys.forEach((sensorKey) => {
+                                            newData[`${key}_${sensorKey}`] = formatConsumptionValue(
+                                                sensor_data[key][sensorKey],
+                                                2
+                                            );
+                                        });
+                                } else {
+                                    newData[`${key}`] = formatConsumptionValue(sensor_data[key], 2);
+                                }
                             });
 
                             return { ...rest, ...newData }; // Combining other properties with newly generated properties
@@ -200,7 +211,13 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             });
     };
 
-    const downloadRawDataForCSVExport = async (bldg_id, device_id, bldg_tz, latestHeaderProps) => {
+    const downloadRawDataForCSVExport = async (
+        bldg_id,
+        device_id,
+        device_identifier = '',
+        bldg_tz,
+        latestHeaderProps
+    ) => {
         setCSVDownloading(true);
 
         const params = `?building_id=${bldg_id}&device_id=${device_id}&tz_info=${bldg_tz}`;
@@ -208,6 +225,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
         await getDeviceRawData(params)
             .then((res) => {
                 const responseData = res?.data?.data;
+                const firstRecord = responseData[0];
 
                 if (responseData) {
                     // Transforming responseData to newResponseData format
@@ -217,12 +235,16 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
 
                         // Dynamically iterate through sensor_data keys and create new properties
                         Object.keys(sensor_data).forEach((key) => {
-                            const sensorKeys = Object.keys(sensor_data[key]);
+                            if (typeof firstRecord.sensor_data[key] === 'object') {
+                                const sensorKeys = Object.keys(sensor_data[key]);
 
-                            sensorKeys.length !== 0 &&
-                                sensorKeys.forEach((sensorKey) => {
-                                    newData[`${key}_${sensorKey}`] = sensor_data[key][sensorKey];
-                                });
+                                sensorKeys.length !== 0 &&
+                                    sensorKeys.forEach((sensorKey) => {
+                                        newData[`${key}_${sensorKey}`] = sensor_data[key][sensorKey];
+                                    });
+                            } else {
+                                newData[`${key}`] = sensor_data[key];
+                            }
                         });
 
                         return { ...rest, ...newData }; // Combining other properties with newly generated properties
@@ -233,7 +255,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                         latestHeaderProps,
                         handleDateFormat
                     );
-                    download(`${bldgName}_Device_Raw_Data_${new Date().toISOString().split('T')[0]}`, csvData);
+                    download(`${device_identifier}_${new Date().toISOString().split('T')[0]}`, csvData);
                 }
             })
             .catch(() => {})
@@ -246,6 +268,8 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
         if (!isModalOpen) {
             setRawDeviceData([]);
             setHeaderProps(defaultHeaderProps);
+            setPageNo(1);
+            setPageSize(20);
         }
     }, [isModalOpen]);
 
@@ -305,6 +329,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                                     downloadRawDataForCSVExport(
                                         selectedPassiveDevice?.bldg_id,
                                         selectedPassiveDevice?.equipments_id,
+                                        selectedPassiveDevice?.identifier,
                                         bldgTimezone,
                                         headerProps
                                     );
