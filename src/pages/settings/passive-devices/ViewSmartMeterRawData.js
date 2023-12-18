@@ -254,6 +254,8 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
         if (!isModalOpen) {
             setRawDeviceData([]);
             setHeaderProps(defaultHeaderProps);
+            setPageNo(1);
+            setPageSize(20);
         }
     }, [isModalOpen]);
 
