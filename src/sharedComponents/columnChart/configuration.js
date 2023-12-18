@@ -6,7 +6,6 @@ import Typography from '../typography';
 
 import { chartsBaseConfig } from '../configs/chartsBaseConfig';
 import { renderComponents } from './helper';
-import { UNITS } from '../../constants/units';
 import { LOW_MED_HIGH, PLOT_BANDS_TYPE } from '../common/charts/modules/contants';
 
 import colors from '../../assets/scss/_colors.scss';
@@ -185,7 +184,7 @@ export const options = (props) => {
                                         size={Typography.Sizes.sm}
                                         className="gray-550"
                                         style={{ fill: colors.primaryGray550 }}>
-                                        {formattedValue} {UNITS.F}
+                                        {formattedValue} {props.tempUnit}
                                     </Typography.Subheader>
                                 );
                             },

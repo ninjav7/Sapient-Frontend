@@ -94,6 +94,7 @@ const BuildingOverview = () => {
         },
     });
 
+    const [bldgName, setBldgName] = useState('');
     const [isPlugOnly, setIsPlugOnly] = useState(false);
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
     const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
@@ -701,6 +702,12 @@ const BuildingOverview = () => {
     };
 
     useEffect(() => {
+        const currBldg = buildingListData?.find(({ building_id }) => building_id === bldgId);
+
+        if (currBldg) setBldgName(currBldg.building_name);
+    }, [bldgId, buildingListData]);
+
+    useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
             const xaxisObj = xaxisLabelsCount(days_count);
             if (xaxisObj) xaxisObj.legend = { enabled: false };
@@ -821,8 +828,9 @@ const BuildingOverview = () => {
                                 plotBands={checkWhetherShowAfterHours()}
                                 withTemp={isWeatherChartVisible}
                                 isChartLoading={isEnergyChartLoading}
-                                exportingTitle={`Total_Energy_Consumption_Building_${moment().format('YYYY-MM-DD')}`}
+                                exportingTitle={`Total Energy Consumption_${bldgName}_${moment().format('YYYY-MM-DD')}`}
                                 cbCustomCSV={cbCustomCSV}
+                                tempUnit={userPrefUnits === 'si' ? UNITS.C : UNITS.F}
                             />
 
                             <HourlyAvgConsumption
@@ -883,10 +891,11 @@ const BuildingOverview = () => {
                                     }}
                                     withTemp={isWeatherChartVisible}
                                     isChartLoading={isEnergyChartLoading}
-                                    exportingTitle={`Total_Energy_Consumption_Building_${moment().format(
+                                    exportingTitle={`Total Energy Consumption_${bldgName}_${moment().format(
                                         'YYYY-MM-DD'
                                     )}`}
                                     cbCustomCSV={cbCustomCSV}
+                                    tempUnit={userPrefUnits === 'si' ? UNITS.C : UNITS.F}
                                 />
                             </div>
                         </>

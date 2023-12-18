@@ -25,6 +25,7 @@ import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
 import { DOWNLOAD_TYPES } from '../constants';
 import { LOW_MED_HIGH_TYPES, PLOT_BANDS_TYPE } from '../common/charts/modules/contants';
+import { UNITS } from '../../constants/units';
 
 import colorPalette from '../../assets/scss/_colors.scss';
 import './ColumnChart.scss';
@@ -48,6 +49,7 @@ const ColumnChart = (props) => {
         isChartLoading = false,
         exportingTitle = '',
         cbCustomCSV,
+        tempUnit = UNITS.F,
     } = props;
 
     const chartComponentRef = useRef(null);
@@ -110,6 +112,7 @@ const ColumnChart = (props) => {
         ...props,
         temperatureSeries: withTemp ? temperatureSeries : [],
         plotBands,
+        tempUnit,
 
         ...(exportingTitle !== '' && {
             restChartProps: {
@@ -248,6 +251,7 @@ ColumnChart.propTypes = {
     onMoreDetail: PropTypes.func,
     chartHeight: PropTypes.number,
     tooltipUnit: PropTypes.string,
+    tempUnit: PropTypes.string,
     categoryName: PropTypes.string,
     categories: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
     tooltipCallBackValue: PropTypes.func,
