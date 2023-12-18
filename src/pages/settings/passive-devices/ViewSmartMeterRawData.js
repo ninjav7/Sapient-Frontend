@@ -25,7 +25,6 @@ import './styles.scss';
 
 const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPassiveDevice }) => {
     const { download } = useCSVDownload();
-    const bldgName = BuildingStore.useState((s) => s.BldgName);
 
     const [isFetchingData, setDataFetching] = useState(false);
     const [isProcessing, setProcessing] = useState(false);
@@ -212,7 +211,13 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
             });
     };
 
-    const downloadRawDataForCSVExport = async (bldg_id, device_id, bldg_tz, latestHeaderProps) => {
+    const downloadRawDataForCSVExport = async (
+        bldg_id,
+        device_id,
+        device_identifier = '',
+        bldg_tz,
+        latestHeaderProps
+    ) => {
         setCSVDownloading(true);
 
         const params = `?building_id=${bldg_id}&device_id=${device_id}&tz_info=${bldg_tz}`;
@@ -250,7 +255,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                         latestHeaderProps,
                         handleDateFormat
                     );
-                    download(`${bldgName}_Device_Raw_Data_${new Date().toISOString().split('T')[0]}`, csvData);
+                    download(`${device_identifier}_${new Date().toISOString().split('T')[0]}`, csvData);
                 }
             })
             .catch(() => {})
@@ -324,6 +329,7 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
                                     downloadRawDataForCSVExport(
                                         selectedPassiveDevice?.bldg_id,
                                         selectedPassiveDevice?.equipments_id,
+                                        selectedPassiveDevice?.identifier,
                                         bldgTimezone,
                                         headerProps
                                     );
