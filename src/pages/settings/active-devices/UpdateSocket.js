@@ -208,6 +208,10 @@ const UpdateSocket = ({
                             handleChange('equipment_tags', value);
                         }}
                     />
+                    <Brick sizeInRem={0.25} />
+                    <Typography.Body size={Typography.Sizes.sm}>
+                        Note: Press the Enter key to insert each tag.
+                    </Typography.Body>
                 </div>
 
                 <Brick sizeInRem={2.5} />
