@@ -34,16 +34,17 @@ import {
 } from '../../helpers/helpers';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
-import { fetchDateRange } from '../../helpers/formattedChartData';
 import Typography from '../../sharedComponents/typography';
 import Brick from '../../sharedComponents/brick';
 import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/attached.svg';
 import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
+import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
+import { renderEquipChartMetrics } from './helper';
+
 import '../settings/passive-devices/styles.scss';
 import './styles.scss';
-import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -69,20 +70,18 @@ const EquipChartModal = ({
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
+    const [equipData, setEquipData] = useState({});
+    const [originalEquipData, setOriginalEquipData] = useState({});
 
-    const metric = [
-        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
-        { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
-        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
-    ];
+    const metric = renderEquipChartMetrics(originalEquipData);
 
     const rulesAlert = [
         { value: 'desktop-pc', label: 'Desktop PC' },
         { value: 'refigerator', label: 'Refigerator' },
     ];
 
-    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
-    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
+    const [selectedUnit, setSelectedUnit] = useState(metric[0]?.unit);
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0]?.Consumption);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
@@ -92,9 +91,7 @@ const EquipChartModal = ({
     const [sensors, setSensors] = useState([]);
     const [isModified, setModification] = useState(false);
     const [isProcessing, setProcessing] = useState(false);
-    const [selectedConsumption, setConsumption] = useState(metric[0].value);
-    const [equipData, setEquipData] = useState({});
-    const [originalEquipData, setOriginalEquipData] = useState({});
+    const [selectedConsumption, setConsumption] = useState(metric[0]?.value);
     const [equipBreakerLink, setEquipBreakerLink] = useState([]);
     const [closeFlag, setCloseFlag] = useState(false);
 
