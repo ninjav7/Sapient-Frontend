@@ -6,7 +6,6 @@ import 'moment-timezone';
 
 import { UserStore } from '../../../store/UserStore.js';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload.js';
-import { BuildingStore } from '../../../store/BuildingStore.js';
 import { getRawDeviceDataTableCSVExport } from '../../../utils/tablesExport.js';
 
 import Typography from '../../../sharedComponents/typography';
@@ -26,6 +25,9 @@ import './styles.scss';
 const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPassiveDevice }) => {
     const { download } = useCSVDownload();
 
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+
     const [isFetchingData, setDataFetching] = useState(false);
     const [isProcessing, setProcessing] = useState(false);
     const [isCSVDownloading, setCSVDownloading] = useState(false);
@@ -35,9 +37,6 @@ const ViewPassiveRawData = ({ isModalOpen, closeModal, bldgTimezone, selectedPas
 
     const [rawDeviceData, setRawDeviceData] = useState([]);
     const [totalDataCount, setTotalDataCount] = useState(0);
-
-    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
-    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     // Define a custom CSS class for the modal content
     const customModalStyle = {
