@@ -1,29 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
+import { useAtom } from 'jotai';
 import { useParams, Link, useHistory } from 'react-router-dom';
-import { getActiveDeviceData, fetchActiveFilter, getSingleActiveDevice } from './services';
+
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
-import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import { ComponentStore } from '../../../store/ComponentStore';
-import { useAtom } from 'jotai';
 import { buildingData, userPermissionData } from '../../../store/globalState';
+
 import Brick from '../../../sharedComponents/brick';
 import Typography from '../../../sharedComponents/typography';
-import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
-import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
-import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
-import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
+
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
-import { ReactComponent as WifiSlashSVG } from '../../../sharedComponents/assets/icons/wifislash.svg';
-import { ReactComponent as WifiSVG } from '../../../sharedComponents/assets/icons/wifi.svg';
 import { Button } from '../../../sharedComponents/button';
 import { Badge } from '../../../sharedComponents/badge';
+
+import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
+import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
+import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
+
+import SkeletonLoader from '../../../components/SkeletonLoader';
+
+import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
+import { ReactComponent as WifiSVG } from '../../../sharedComponents/assets/icons/wifi.svg';
+import { ReactComponent as WifiSlashSVG } from '../../../sharedComponents/assets/icons/wifislash.svg';
+
 import { pageListSizes } from '../../../helpers/helpers';
 import { getActiveDeviceTableCSVExport } from '../../../utils/tablesExport';
+
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+
+import { getActiveDeviceData, fetchActiveFilter, getSingleActiveDevice } from './services';
+import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import './style.css';
-import SkeletonLoader from '../../../components/SkeletonLoader';
 
 const ActiveDevices = () => {
     const { bldgId } = useParams();
