@@ -210,7 +210,7 @@ const UpdateSocket = ({
                     />
                     <Brick sizeInRem={0.25} />
                     <Typography.Body size={Typography.Sizes.sm}>
-                        Hint: Press the Enter key to insert each tag.
+                        Note: Press the Enter key to insert each tag.
                     </Typography.Body>
                 </div>
 
