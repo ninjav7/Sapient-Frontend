@@ -1,31 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
+import { useAtom } from 'jotai';
+import { useHistory, Link, useParams } from 'react-router-dom';
+
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
-import { useAtom } from 'jotai';
-import { useHistory, Link, useParams } from 'react-router-dom';
-import { buildingData, userPermissionData } from '../../../store/globalState';
-import Typography from '../../../sharedComponents/typography';
-import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+
 import { Button } from '../../../sharedComponents/button';
 import Brick from '../../../sharedComponents/brick';
-import CreatePassiveDevice from './CreatePassiveDevice';
-import { pageListSizes } from '../../../helpers/helpers';
+import Typography from '../../../sharedComponents/typography';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
-import { ReactComponent as WifiSlashSVG } from '../../../sharedComponents/assets/icons/wifislash.svg';
-import { ReactComponent as WifiSVG } from '../../../sharedComponents/assets/icons/wifi.svg';
+import { pageListSizes } from '../../../helpers/helpers';
 import { Badge } from '../../../sharedComponents/badge';
-import { getPassiveDeviceData, fetchPassiveFilter, getSinglePassiveDevice } from './services';
+
 import DeletePassiveAlert from './DeletePassiveAlert';
 import EditPassiveDevice from './EditPassiveDevice';
-import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
-import { getPassiveDeviceTableCSVExport } from '../../../utils/tablesExport';
-import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+import CreatePassiveDevice from './CreatePassiveDevice';
 import SkeletonLoader from '../../../components/SkeletonLoader';
 import ViewSmartMeterRawData from './ViewSmartMeterRawData';
+import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
+
+import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
+import { ReactComponent as WifiSlashSVG } from '../../../sharedComponents/assets/icons/wifislash.svg';
+import { ReactComponent as WifiSVG } from '../../../sharedComponents/assets/icons/wifi.svg';
+
+import { buildingData, userPermissionData } from '../../../store/globalState';
+
+import { getPassiveDeviceTableCSVExport } from '../../../utils/tablesExport';
+import { getPassiveDeviceData, fetchPassiveFilter, getSinglePassiveDevice } from './services';
+
 import './style.css';
 
 const PassiveDevices = () => {
