@@ -461,6 +461,22 @@ const Equipment = () => {
                 .slice()
                 .sort((a, b) => a.space_name.localeCompare(b.space_name));
 
+            if (filterOptions?.breaker_number.length > 1) filterOptions.breaker_number.sort((a, b) => a - b);
+            if (filterOptions?.breaker_rated_amps.length > 1) filterOptions.breaker_rated_amps.sort((a, b) => a - b);
+            if (filterOptions?.tags.length > 1) filterOptions.tags.sort((a, b) => b.localeCompare(a));
+            if (filterOptions?.ct_model_installed_name.length > 1)
+                filterOptions.ct_model_installed_name.sort((a, b) =>
+                    a.ct_model_installed_name.localeCompare(b.ct_model_installed_name)
+                );
+            if (filterOptions?.panel_name.length > 1)
+                filterOptions.panel_name.sort((a, b) => a.panel_name.localeCompare(b.panel_name));
+            if (filterOptions?.mac_address.length > 1)
+                filterOptions.mac_address.sort((a, b) => a.device_mac_address.localeCompare(b.device_mac_address));
+            if (filterOptions?.end_use.length > 1)
+                filterOptions.end_use.sort((a, b) => a.end_use_name.localeCompare(b.end_use_name));
+            if (filterOptions?.equipment_type.length > 1)
+                filterOptions.equipment_type.sort((a, b) => a.equipment_type_name.localeCompare(b.equipment_type_name));
+
             const filterOptionsFetched = [
                 {
                     label: 'Equipment Type',
