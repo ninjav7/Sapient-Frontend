@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense } from 'react';
+import { useAtom } from 'jotai';
 import { useLocation } from 'react-router-dom';
 import { Card } from 'reactstrap';
 import { connect } from 'react-redux';
@@ -8,10 +9,15 @@ import TopNav from '../components/TopNav/TopNav';
 import SideNav from '../components/SideNav/SideNav';
 
 import { UserStore } from '../store/UserStore';
+import { userPermissionData } from '../store/globalState';
 import SecondaryTopNavBar from '../components/SecondaryTopNavBar';
 import { Notification } from '../sharedComponents/notification/Notification';
+
+import ChatBotModal from '../components/Chatbot';
+
 import { deviceConfigRoutes, secondaryNavBarNotRequiredRoutes, sideNavNotBarRequiredRoutes } from './utils';
 
+import { ReactComponent as MessageSVG } from '../assets/icon/message.svg';
 import '../components/style.css';
 import './styles.scss';
 
@@ -24,6 +30,14 @@ const HorizontalLayout = (props) => {
     const [showSideNav, setShowSideNav] = useState(true);
     const [showTopNav, setShowTopNav] = useState(true);
     const [showSecondaryNav, setShowSecondaryNav] = useState(true);
+
+    const [userPermission, setUserPermission] = useAtom(userPermissionData);
+    const isSuperUser = userPermission?.is_superuser ?? false;
+
+    // Chatbot Modal
+    const [isModalOpen, setModalStatus] = useState(false);
+    const handleModalOpen = () => setModalStatus(true);
+    const handleModalClose = () => setModalStatus(false);
 
     const componentType = UserStore.useState((s) => s.componentType);
     const notificationType = UserStore.useState((s) => s.notificationType);
@@ -95,7 +109,15 @@ const HorizontalLayout = (props) => {
                             />
                         </div>
                     ) : null}
+
+                    {!isSuperUser && (
+                        <div className="message-icon-alignment mouse-pointer" onClick={handleModalOpen}>
+                            <MessageSVG width={35} height={40} />
+                        </div>
+                    )}
                 </div>
+
+                <ChatBotModal isModalOpen={isModalOpen} closeModal={handleModalClose} />
             </div>
         </React.Fragment>
     );
