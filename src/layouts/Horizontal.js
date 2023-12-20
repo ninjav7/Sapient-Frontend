@@ -31,7 +31,7 @@ const HorizontalLayout = (props) => {
     const [showTopNav, setShowTopNav] = useState(true);
     const [showSecondaryNav, setShowSecondaryNav] = useState(true);
 
-    const [userPermission, setUserPermission] = useAtom(userPermissionData);
+    const userPermission = useAtom(userPermissionData);
     const isSuperUser = userPermission?.is_superuser ?? false;
 
     // Chatbot Modal
@@ -110,10 +110,13 @@ const HorizontalLayout = (props) => {
                         </div>
                     ) : null}
 
-                    {!isSuperUser && (
-                        <div className="message-icon-alignment mouse-pointer" onClick={handleModalOpen}>
-                            <MessageSVG width={35} height={40} />
-                        </div>
+                    {isSuperUser && (
+                        <MessageSVG
+                            width={35}
+                            height={40}
+                            className="message-icon-alignment mouse-pointer"
+                            onClick={handleModalOpen}
+                        />
                     )}
                 </div>
 
