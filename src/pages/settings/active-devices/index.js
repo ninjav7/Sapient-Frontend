@@ -109,6 +109,11 @@ const ActiveDevices = () => {
                 .slice()
                 .sort((a, b) => a.space_name.localeCompare(b.space_name));
 
+            if ((floorString?.length === 0 && spaceString?.length === 0) || floorString?.includes('none'))
+                sortedFloors.unshift({ floor_id: 'none', floor_name: 'None' });
+            if ((floorString?.length === 0 && spaceString?.length === 0) || spaceString?.includes('none'))
+                sortedSpaces.unshift({ space_id: 'none', space_name: 'None' });
+
             const filterOptionsFetched = [
                 {
                     label: 'Identifier',
