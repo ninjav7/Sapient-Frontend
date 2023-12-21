@@ -9,11 +9,22 @@ import { UNITS } from '../../constants/units';
 import '../portfolio/PortfolioKPIs.scss';
 
 const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
+    const formatOverallData = (originNumber) => {
+        if (originNumber) {
+            return originNumber.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            });
+        }
+
+        return '';
+    };
+
     return (
         <div className={`portfolioKPIs-wrapper`}>
             <KPILabeled
                 title="Total Carbon Emissions"
-                value={overalldata.total.now.toFixed(2)}
+                value={formatOverallData(overalldata.total.now)}
                 badgePrecentage={percentageHandler(overalldata?.total?.now, overalldata?.total?.old)}
                 unit={userPrefUnits === 'si' ? UNITS.kg : KPI_UNITS.lbs}
                 tooltipText={
@@ -32,7 +43,7 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
                 title={`Average Emissions ${
                     userPrefUnits === 'si' ? `${UNITS.kg}/${UNITS.SQ_M}` : `${UNITS.ibs}/${UNITS.SQ_FT}`
                 }`}
-                value={overalldata?.average?.now.toFixed(2)}
+                value={formatOverallData(overalldata?.average?.now)}
                 badgePrecentage={percentageHandler(overalldata?.average?.now, overalldata?.average?.old)}
                 unit={`${userPrefUnits === 'si' ? `${UNITS.kg}/${UNITS.SQ_M}` : `${UNITS.ibs}/${UNITS.SQ_FT}`}`}
                 tooltipText={
@@ -55,7 +66,7 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
                 title={`Current Carbon Intensity ${
                     userPrefUnits === 'si' ? `${UNITS.kg}` : `${UNITS.ibs}`
                 } / ${`${UNITS.mwh}`}`}
-                value={overalldata?.current_carbon_intensity?.now.toFixed(2)}
+                value={formatOverallData(overalldata?.current_carbon_intensity?.now)}
                 badgePrecentage={percentageHandler(
                     overalldata?.current_carbon_intensity?.now,
                     overalldata?.current_carbon_intensity?.old
@@ -73,7 +84,7 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
                 title={`eGrid Emissions Factor ${
                     userPrefUnits === 'si' ? `${UNITS.kg}` : `${UNITS.ibs}`
                 } / ${`${UNITS.mwh}`}`}
-                value={overalldata?.egrid_emission_factor && (overalldata?.egrid_emission_factor).toFixed(2)}
+                value={overalldata?.egrid_emission_factor && formatOverallData(overalldata?.egrid_emission_factor)}
                 unit={`${userPrefUnits === 'si' ? `${UNITS.kg}` : `${UNITS.ibs}`} / ${`${UNITS.mwh}`}`}
                 tooltipText={`The annual average emissions factor for this building's postal code using eGRID2021 standards.`}
                 tooltipId="egrid-emission-factor"
@@ -82,7 +93,7 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
                 title={`Average Carbon Intensity ${
                     userPrefUnits === 'si' ? `${UNITS.kg}` : `${UNITS.ibs}`
                 } / ${`${UNITS.mwh}`}`}
-                value={overalldata?.average_carbon_intensity.now.toFixed(2)}
+                value={formatOverallData(overalldata?.average_carbon_intensity.now)}
                 badgePrecentage={percentageHandler(
                     overalldata?.average_carbon_intensity?.now,
                     overalldata?.average_carbon_intensity?.old
@@ -100,7 +111,7 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0, userPrefUnits }) => {
             />
             <KPILabeled
                 title={`Difference in Emissions Reporting Factor`}
-                value={(overalldata?.egrid_emission_factor - overalldata.average_carbon_intensity.now).toFixed(2)}
+                value={formatOverallData(overalldata?.egrid_emission_factor - overalldata.average_carbon_intensity.now)}
                 badgePrecentage={percentageHandler(
                     overalldata.average_carbon_intensity.now,
                     overalldata?.egrid_emission_factor
