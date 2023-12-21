@@ -271,5 +271,8 @@ export const separateAndCalculateEnergyData = (array) => {
         consumption: calculateTotalEnergy(afterHoursEnergyConsumptionArray),
     };
 
+    onHoursObj.consumption.now = onHoursObj.consumption.now - afterHoursObj.consumption.now;
+    onHoursObj.consumption.old = onHoursObj.consumption.old - afterHoursObj.consumption.old;
+
     return [onHoursObj, afterHoursObj];
 };

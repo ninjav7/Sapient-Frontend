@@ -95,33 +95,37 @@ const TimeOfDay = () => {
             }
         }
 
-        const endUsesByOfHour = async (is_plug_only) => {
+        const endUsesByOfHour = async (is_plug_only = 'false') => {
             setEnergyConsumption([]);
             setEnergyDataFetching(true);
 
-            const params = `?building_id=${bldgId}${is_plug_only || is_plug_only === 'true' ? '' : `&off_hours=true`}`;
+            const params = `?building_id=${bldgId}${is_plug_only === 'true' ? '' : `&off_hours=true`}`;
             const payload = apiRequestBody(startDate, endDate, time_zone);
+
             await fetchBuildingAfterHours(params, payload)
                 .then((res) => {
-                    if (res?.data.success) {
-                        const response = res?.data?.data;
-                        if (is_plug_only || is_plug_only === 'true') {
-                            if (response.length !== 0) {
-                                const overAllConsumptionData = separateAndCalculateEnergyData(response);
-                                setEnergyConsumption(overAllConsumptionData);
-                            }
+                    const response = res?.data;
+
+                    if (response?.success) {
+                        const { data } = response;
+
+                        if (!data || data.length === 0) {
+                            return;
+                        }
+
+                        if (is_plug_only === 'true') {
+                            const overAllConsumptionData = separateAndCalculateEnergyData(data);
+                            setEnergyConsumption(overAllConsumptionData);
                         } else {
-                            if (response.length !== 0) {
-                                response.forEach((el) => {
-                                    el.after_hours_energy_consumption.now = Math.round(
-                                        el?.after_hours_energy_consumption?.now / 1000
-                                    );
-                                    el.after_hours_energy_consumption.old = Math.round(
-                                        el?.after_hours_energy_consumption?.old / 1000
-                                    );
-                                });
-                            }
-                            setEnergyConsumption(response);
+                            data.forEach((el) => {
+                                el.after_hours_energy_consumption.now = Math.round(
+                                    el?.after_hours_energy_consumption?.now / 1000
+                                );
+                                el.after_hours_energy_consumption.old = Math.round(
+                                    el?.after_hours_energy_consumption?.old / 1000
+                                );
+                            });
+                            setEnergyConsumption(data);
                         }
                     }
                 })
@@ -728,7 +732,6 @@ const TimeOfDay = () => {
                     setAvgConsumptionDataLoading(false);
                 });
         };
-
         endUsesByOfHour(isPlugOnly);
         dailyUsageByHour();
         averageUsageByHourFetch();
@@ -744,7 +747,7 @@ const TimeOfDay = () => {
                 <EndUseTotals
                     energyConsumption={energyConsumption}
                     className={'h-100'}
-                    isPlugOnly={isPlugOnly || isPlugOnly === 'true' ? true : false}
+                    isPlugOnly={isPlugOnly === 'true' ? true : false}
                     isChartLoading={isEnergyDataFetching}
                 />
 
