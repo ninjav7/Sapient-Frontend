@@ -30,8 +30,11 @@ export function getEqupmentDataRequest(
     getParams,
     withPagination
 ) {
-    const searchData = encodeURIComponent(search);
-    let params = `?building_id=${bldgId}&equipment_search=${searchData}`;
+    let params = `?building_id=${bldgId}`;
+
+    if (search) {
+        params += `&equipment_search=${encodeURIComponent(search)}`;
+    }
 
     if (withPagination) {
         params += `&page_size=${pageSize}&page_no=${pageNo}`;
@@ -48,7 +51,7 @@ export function getEqupmentDataRequest(
     const filteredData = _.pickBy(
         {
             floor_id: _.isEmpty(floorTypeFilterString) ? null : floorTypeFilterString,
-            space_id: spaceTypeFilterString,
+            space_id: _.isEmpty(spaceTypeFilterString) ? null : spaceTypeFilterString,
             equipment_types: equipmentTypeFilterString,
             device_id: macAddressFilterString,
             panel_id: panelNameFilterString,
