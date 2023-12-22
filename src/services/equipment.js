@@ -58,6 +58,7 @@ export function getEqupmentDataRequest(
             ct_model_installed_id: cdModelInstalledNameString,
             breaker_number: breakerNumberString,
             breaker_rated_amps: breakerRatedAmpsString,
+            tags: tagsFilterString,
             ...getParams,
         },
         _.identity
@@ -174,7 +175,7 @@ export function getFiltersForEquipmentRequest(args) {
                     end_use: args.endUseFilterString,
                     floor_id: encodeURI(args.floorTypeFilterString?.join('+')),
                     space_id: encodeURI(args.spaceTypeFilterString?.join('+')),
-                    tags: args.tagsFilterString,
+                    tags: args.tagsFilterString ? encodeURI(args.tagsFilterString?.join('+')) : null,
                 },
                 _.identity
             ),
