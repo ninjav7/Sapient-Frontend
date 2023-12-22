@@ -477,6 +477,20 @@ const Equipment = () => {
             if (filterOptions?.equipment_type.length > 1)
                 filterOptions.equipment_type.sort((a, b) => a.equipment_type_name.localeCompare(b.equipment_type_name));
 
+            if (tagsFilterString?.length === 0 || tagsFilterString?.includes('none'))
+                filterOptions.tags.unshift('none');
+            if (deviceIdFilterString?.length === 0 || deviceIdFilterString?.includes('none'))
+                filterOptions.mac_address.unshift({ device_id: 'none', device_mac_address: 'none' });
+            if (panelNameFilterString?.length === 0 || panelNameFilterString?.includes('none'))
+                filterOptions.panel_name.unshift({ panel_id: 'none', panel_name: 'none' });
+            if (breakerNumberString?.length === 0 || breakerNumberString?.includes('none'))
+                filterOptions.breaker_number.unshift('none');
+
+            if ((floorString?.length === 0 && spaceString?.length === 0) || floorString?.includes('none'))
+                sortedFloors.unshift({ floor_id: 'none', floor_name: 'none' });
+            if ((floorString?.length === 0 && spaceString?.length === 0) || spaceString?.includes('none'))
+                sortedSpaces.unshift({ space_id: 'none', space_name: 'none' });
+
             const filterOptionsFetched = [
                 {
                     label: 'Equipment Type',
