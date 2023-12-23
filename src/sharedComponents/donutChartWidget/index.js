@@ -65,6 +65,8 @@ const DonutChartWidget = ({
     subtitle,
     pageType,
     isChartLoading = false,
+    convertData = false,
+    computedTotal = 0,
     ...props
 }) => {
     const chartComponentRef = useRef(null);
@@ -84,7 +86,7 @@ const DonutChartWidget = ({
     const colors = items.map(({ color }) => color);
     const series = items.map(({ value }) => Math.round(value));
 
-    const totalValue = series.reduce((acc, item) => acc + item, 0);
+    const totalValue = convertData ? computedTotal : series.reduce((acc, item) => acc + item, 0);
 
     useEffect(() => {
         renderCenteredItemContent(totalValue, items[0]?.unit);

@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { HOURS_TYPE } from './constants';
 
 export const heatMapOptions = {
     chart: {
@@ -262,12 +263,12 @@ export const separateAndCalculateEnergyData = (array) => {
     });
 
     const onHoursObj = {
-        name: 'Occupied Hours',
+        name: HOURS_TYPE.OCCUPIED_HOURS,
         consumption: calculateTotalEnergy(energyConsumptionArray),
     };
 
     const afterHoursObj = {
-        name: 'Off Hours',
+        name: HOURS_TYPE.OFF_HOURS,
         consumption: calculateTotalEnergy(afterHoursEnergyConsumptionArray),
     };
 
