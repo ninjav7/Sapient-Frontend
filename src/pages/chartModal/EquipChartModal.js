@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, FormGroup, Spinner } from 'reactstrap';
-import Modal from 'react-bootstrap/Modal';
+import { Row, Col, FormGroup, Spinner, Modal } from 'reactstrap';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
 import { fetchExploreEquipmentChart } from '../explore/services';
@@ -408,13 +407,7 @@ const EquipChartModal = ({
 
     return (
         <div>
-            <Modal
-                show={showEquipmentChart}
-                onHide={handleChartClose}
-                size="xl"
-                centered
-                backdrop="static"
-                keyboard={false}>
+            <Modal isOpen={showEquipmentChart} className="modal-fullscreen">
                 <div>
                     <Row>
                         <Col lg={12}>
@@ -447,7 +440,7 @@ const EquipChartModal = ({
                                         </Typography.Subheader>
                                     </div>
                                 </div>
-                                <div className="d-flex">
+                                <div className="d-flex align-items-center">
                                     {/* Commented below code as part of Ticket PLT-1373: Hide "Turn Off" button on equipment modal */}
                                     {/* {equipData?.device_type === 'active' && (
                                         <div>
@@ -462,7 +455,7 @@ const EquipChartModal = ({
 
                                     <div>
                                         <Button
-                                            label="Cancel"
+                                            label={selectedTab === 1 ? 'Cancel' : 'Close'}
                                             size={Button.Sizes.md}
                                             type={Button.Type.secondaryGrey}
                                             onClick={handleCloseWithoutSave}
@@ -494,10 +487,10 @@ const EquipChartModal = ({
                         </Col>
                     </Row>
 
-                    <div className="p-4 pt=0">
+                    <div style={{ padding: '2rem' }}>
                         {selectedTab === 0 && (
                             <Row>
-                                <Col xl={4}>
+                                <Col xl={3}>
                                     <div className="ytd-container">
                                         <div>
                                             <div className="ytd-heading">
@@ -510,8 +503,8 @@ const EquipChartModal = ({
                                             {isYtdDataFetching ? (
                                                 <Skeleton count={1} />
                                             ) : (
-                                                <div className="ytd-flex">
-                                                    <span className="mr-1 ytd-value">
+                                                <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
+                                                    <span className="ytd-value">
                                                         {ytdData?.ytd?.ytd
                                                             ? formatConsumptionValue(ytdData?.ytd?.ytd / 1000, 0)
                                                             : 0}
@@ -531,8 +524,8 @@ const EquipChartModal = ({
                                             {isYtdDataFetching ? (
                                                 <Skeleton count={1} />
                                             ) : (
-                                                <div className="ytd-flex">
-                                                    <span className="mr-1 ytd-value">
+                                                <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
+                                                    <span className="ytd-value">
                                                         {ytdData?.ytd_peak?.power
                                                             ? formatConsumptionValue(
                                                                   ytdData?.ytd_peak?.power / 1000000,
@@ -568,7 +561,7 @@ const EquipChartModal = ({
                                     </div>
                                 </Col>
 
-                                <Col xl={8}>
+                                <Col xl={9}>
                                     <div className="equip-model">
                                         <div className="pt-3">
                                             <Typography.Subheader
@@ -603,13 +596,18 @@ const EquipChartModal = ({
                                                         style={{ fontWeight: 'normal', textDecoration: 'underline' }}>
                                                         {equipData?.device_mac}
                                                         &nbsp;
-                                                        <ArrowUpRightFromSquare style={{ color: 'base-black' }} />
+                                                        <ArrowUpRightFromSquare
+                                                            style={{ color: 'base-black' }}
+                                                            width={20}
+                                                            height={20}
+                                                            className="mb-1"
+                                                        />
                                                     </span>
                                                 </Link>
                                             </Typography.Subheader>
                                         </div>
                                         <div className="d-flex">
-                                            <div className="mr-2">
+                                            <div className="mr-2 mw-100">
                                                 <Select
                                                     defaultValue={selectedConsumption}
                                                     options={metric}
