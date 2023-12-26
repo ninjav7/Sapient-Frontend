@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, FormGroup, Spinner } from 'reactstrap';
-import Modal from 'react-bootstrap/Modal';
+import { Row, Col, FormGroup, Spinner, Modal } from 'reactstrap';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
 import { fetchExploreEquipmentChart } from '../explore/services';
@@ -34,16 +33,17 @@ import {
 } from '../../helpers/helpers';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
-import { fetchDateRange } from '../../helpers/formattedChartData';
 import Typography from '../../sharedComponents/typography';
 import Brick from '../../sharedComponents/brick';
 import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/attached.svg';
 import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
+import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
+import { renderEquipChartMetrics } from './helper';
+
 import '../settings/passive-devices/styles.scss';
 import './styles.scss';
-import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -69,20 +69,18 @@ const EquipChartModal = ({
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
+    const [equipData, setEquipData] = useState({});
+    const [originalEquipData, setOriginalEquipData] = useState({});
 
-    const metric = [
-        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
-        { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
-        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
-    ];
+    const metric = renderEquipChartMetrics(originalEquipData);
 
     const rulesAlert = [
         { value: 'desktop-pc', label: 'Desktop PC' },
         { value: 'refigerator', label: 'Refigerator' },
     ];
 
-    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
-    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
+    const [selectedUnit, setSelectedUnit] = useState(metric[0]?.unit);
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0]?.Consumption);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
@@ -92,9 +90,7 @@ const EquipChartModal = ({
     const [sensors, setSensors] = useState([]);
     const [isModified, setModification] = useState(false);
     const [isProcessing, setProcessing] = useState(false);
-    const [selectedConsumption, setConsumption] = useState(metric[0].value);
-    const [equipData, setEquipData] = useState({});
-    const [originalEquipData, setOriginalEquipData] = useState({});
+    const [selectedConsumption, setConsumption] = useState(metric[0]?.value);
     const [equipBreakerLink, setEquipBreakerLink] = useState([]);
     const [closeFlag, setCloseFlag] = useState(false);
 
@@ -411,13 +407,7 @@ const EquipChartModal = ({
 
     return (
         <div>
-            <Modal
-                show={showEquipmentChart}
-                onHide={handleChartClose}
-                size="xl"
-                centered
-                backdrop="static"
-                keyboard={false}>
+            <Modal isOpen={showEquipmentChart} className="modal-fullscreen">
                 <div>
                     <Row>
                         <Col lg={12}>
@@ -450,7 +440,7 @@ const EquipChartModal = ({
                                         </Typography.Subheader>
                                     </div>
                                 </div>
-                                <div className="d-flex">
+                                <div className="d-flex align-items-center">
                                     {/* Commented below code as part of Ticket PLT-1373: Hide "Turn Off" button on equipment modal */}
                                     {/* {equipData?.device_type === 'active' && (
                                         <div>
@@ -465,7 +455,7 @@ const EquipChartModal = ({
 
                                     <div>
                                         <Button
-                                            label="Cancel"
+                                            label={selectedTab === 1 ? 'Cancel' : 'Close'}
                                             size={Button.Sizes.md}
                                             type={Button.Type.secondaryGrey}
                                             onClick={handleCloseWithoutSave}
@@ -497,10 +487,10 @@ const EquipChartModal = ({
                         </Col>
                     </Row>
 
-                    <div className="p-4 pt=0">
+                    <div style={{ padding: '2rem' }}>
                         {selectedTab === 0 && (
                             <Row>
-                                <Col xl={4}>
+                                <Col xl={3}>
                                     <div className="ytd-container">
                                         <div>
                                             <div className="ytd-heading">
@@ -513,8 +503,8 @@ const EquipChartModal = ({
                                             {isYtdDataFetching ? (
                                                 <Skeleton count={1} />
                                             ) : (
-                                                <div className="ytd-flex">
-                                                    <span className="mr-1 ytd-value">
+                                                <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
+                                                    <span className="ytd-value">
                                                         {ytdData?.ytd?.ytd
                                                             ? formatConsumptionValue(ytdData?.ytd?.ytd / 1000, 0)
                                                             : 0}
@@ -534,8 +524,8 @@ const EquipChartModal = ({
                                             {isYtdDataFetching ? (
                                                 <Skeleton count={1} />
                                             ) : (
-                                                <div className="ytd-flex">
-                                                    <span className="mr-1 ytd-value">
+                                                <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
+                                                    <span className="ytd-value">
                                                         {ytdData?.ytd_peak?.power
                                                             ? formatConsumptionValue(
                                                                   ytdData?.ytd_peak?.power / 1000000,
@@ -571,7 +561,7 @@ const EquipChartModal = ({
                                     </div>
                                 </Col>
 
-                                <Col xl={8}>
+                                <Col xl={9}>
                                     <div className="equip-model">
                                         <div className="pt-3">
                                             <Typography.Subheader
@@ -606,13 +596,18 @@ const EquipChartModal = ({
                                                         style={{ fontWeight: 'normal', textDecoration: 'underline' }}>
                                                         {equipData?.device_mac}
                                                         &nbsp;
-                                                        <ArrowUpRightFromSquare style={{ color: 'base-black' }} />
+                                                        <ArrowUpRightFromSquare
+                                                            style={{ color: 'base-black' }}
+                                                            width={20}
+                                                            height={20}
+                                                            className="mb-1"
+                                                        />
                                                     </span>
                                                 </Link>
                                             </Typography.Subheader>
                                         </div>
                                         <div className="d-flex">
-                                            <div className="mr-2">
+                                            <div className="mr-2 mw-100">
                                                 <Select
                                                     defaultValue={selectedConsumption}
                                                     options={metric}
