@@ -30,8 +30,11 @@ export function getEqupmentDataRequest(
     getParams,
     withPagination
 ) {
-    const searchData = encodeURIComponent(search);
-    let params = `?building_id=${bldgId}&equipment_search=${searchData}`;
+    let params = `?building_id=${bldgId}`;
+
+    if (search) {
+        params += `&equipment_search=${encodeURIComponent(search)}`;
+    }
 
     if (withPagination) {
         params += `&page_size=${pageSize}&page_no=${pageNo}`;
@@ -48,13 +51,14 @@ export function getEqupmentDataRequest(
     const filteredData = _.pickBy(
         {
             floor_id: _.isEmpty(floorTypeFilterString) ? null : floorTypeFilterString,
-            space_id: spaceTypeFilterString,
+            space_id: _.isEmpty(spaceTypeFilterString) ? null : spaceTypeFilterString,
             equipment_types: equipmentTypeFilterString,
             device_id: macAddressFilterString,
             panel_id: panelNameFilterString,
             ct_model_installed_id: cdModelInstalledNameString,
             breaker_number: breakerNumberString,
             breaker_rated_amps: breakerRatedAmpsString,
+            tags: tagsFilterString,
             ...getParams,
         },
         _.identity
@@ -171,7 +175,7 @@ export function getFiltersForEquipmentRequest(args) {
                     end_use: args.endUseFilterString,
                     floor_id: encodeURI(args.floorTypeFilterString?.join('+')),
                     space_id: encodeURI(args.spaceTypeFilterString?.join('+')),
-                    tags: args.tagsFilterString,
+                    tags: args.tagsFilterString ? encodeURI(args.tagsFilterString?.join('+')) : null,
                 },
                 _.identity
             ),

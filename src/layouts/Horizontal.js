@@ -17,7 +17,7 @@ import ChatBotModal from '../components/Chatbot';
 
 import { deviceConfigRoutes, secondaryNavBarNotRequiredRoutes, sideNavNotBarRequiredRoutes } from './utils';
 
-import { ReactComponent as MessageSVG } from '../assets/icon/message.svg';
+import { ReactComponent as ChatBotSVG } from '../assets/icon/chatbot-icon.svg';
 import '../components/style.css';
 import './styles.scss';
 
@@ -111,9 +111,9 @@ const HorizontalLayout = (props) => {
                     ) : null}
 
                     {isSuperUser && (
-                        <MessageSVG
-                            width={35}
-                            height={40}
+                        <ChatBotSVG
+                            width={50}
+                            height={50}
                             className="message-icon-alignment mouse-pointer"
                             onClick={handleModalOpen}
                         />

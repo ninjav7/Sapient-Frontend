@@ -5,24 +5,39 @@ import { COLOR_SCHEME_BY_DEVICE } from '../../constants/colors';
 import { UNITS } from '../../constants/units';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import colorPalette from '../../assets/scss/_colors.scss';
+import { HOURS_TYPE } from './constants';
 
 const EndUseTotals = (props) => {
     const { energyConsumption, className = '', isPlugOnly } = props;
     let donutChartData = [];
+    let computedTotal = 0;
+    let afterHourVal = 0;
 
     if (isPlugOnly) {
+        const totalConsumptionKWh = energyConsumption.reduce((acc, item) => acc + (item?.consumption?.now || 0), 0);
+        computedTotal = Math.round(totalConsumptionKWh / 1000);
+
         donutChartData = energyConsumption.map((record) => {
-            const label = record?.name;
-            const value = Math.round(record?.consumption?.now / 1000);
-            const trendValue = percentageHandler(record?.consumption?.now, record?.consumption?.old);
+            const { name, consumption } = record || {};
+
+            const label = name;
+            const value = Math.round(consumption?.now / 1000);
+
+            if (name === HOURS_TYPE.OFF_HOURS) afterHourVal = value;
+
+            const trendValue = percentageHandler(consumption?.now, consumption?.old);
             const color =
-                record?.name === 'Occupied Hours' ? colorPalette.sapientSpecificHvac : colorPalette.datavizRed300;
+                name === HOURS_TYPE.OCCUPIED_HOURS ? colorPalette.sapientSpecificHvac : colorPalette.datavizRed300;
             const trendType =
-                record?.consumption?.now <= record?.consumption?.old
+                consumption?.now <= consumption?.old
                     ? TRENDS_BADGE_TYPES.DOWNWARD_TREND
                     : TRENDS_BADGE_TYPES.UPWARD_TREND;
 
             return { unit: UNITS.KWH, color, label, value, trendValue, trendType };
+        });
+
+        donutChartData.forEach((el) => {
+            if (el?.label === HOURS_TYPE.OCCUPIED_HOURS) el.value = computedTotal - afterHourVal;
         });
     } else {
         donutChartData = energyConsumption.map(({ device: label, after_hours_energy_consumption }) => {
@@ -51,6 +66,8 @@ const EndUseTotals = (props) => {
                 type={DONUT_CHART_TYPES.VERTICAL}
                 className={className}
                 onMoreDetail={null}
+                convertData={isPlugOnly}
+                computedTotal={computedTotal}
                 {...props}
             />
         </div>
