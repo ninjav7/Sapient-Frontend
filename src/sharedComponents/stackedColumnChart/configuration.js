@@ -1,8 +1,85 @@
 import moment from 'moment';
 import _ from 'lodash';
 import { chartsBaseConfig } from '../configs/chartsBaseConfig';
+import { PLOT_BANDS_TYPE } from '../common/charts/modules/contants';
+
+import colors from '../../assets/scss/_colors.scss';
 
 const options = (props) => {
+    const { plotBands } = props;
+    const plotBandsData = plotBands
+        ?.map(({ background, from, to, borderBottomColor, type }) => {
+            switch (type) {
+                case PLOT_BANDS_TYPE.off_hours: {
+                    return {
+                        from,
+                        to,
+                        color: 'rgb(16 24 40 / 25%)',
+                    };
+                }
+                case PLOT_BANDS_TYPE.after_hours: {
+                    return [
+                        {
+                            from,
+                            to,
+                            color: {
+                                linearGradient: { x1: 1, y1: 1, x2: 1, y2: 0 },
+                                stops: [
+                                    [0, 'rgba(240, 68, 56, 0.4)'],
+                                    [0.07, 'rgba(240, 68, 56, 0.08)'],
+                                    [1, 'rgba(240, 68, 56, 0.08)'],
+                                ],
+                            },
+                        },
+                        {
+                            from,
+                            to,
+                            color: {
+                                linearGradient: { x1: 1, y1: 1, x2: 1, y2: 0 },
+                                stops: [
+                                    [0, colors.error700],
+                                    [0.007, 'rgba(0, 0, 0, 0)'],
+                                ],
+                            },
+                        },
+                    ];
+                }
+            }
+
+            if (Array.isArray(background)) {
+                return [
+                    {
+                        from,
+                        to,
+                        color: {
+                            linearGradient: { x1: 1, y1: 1, x2: 1, y2: 0 },
+                            stops: background,
+                        },
+                    },
+                    {
+                        from,
+                        to,
+                        color: {
+                            linearGradient: { x1: 1, y1: 1, x2: 1, y2: 0 },
+                            stops: [
+                                [0, borderBottomColor],
+                                [0.007, 'rgba(0, 0, 0, 0)'],
+                            ],
+                        },
+                    },
+                ];
+            }
+
+            if (typeof background === 'string') {
+                return {
+                    from,
+                    to,
+                    color: background,
+                };
+            }
+        })
+        .flat();
+
     const baseConfig = chartsBaseConfig({
         columnType: 'column',
         chartHeight: props.chartHeight || 341,
@@ -64,6 +141,7 @@ const options = (props) => {
                         return this.axis.defaultLabelFormatter.call(value ? { ...this, value } : this);
                     },
                 },
+                plotBands: plotBandsData,
             },
         },
         props.restChartProps
