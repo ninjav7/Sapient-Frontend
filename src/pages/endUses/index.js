@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
+import moment from 'moment';
+import 'moment-timezone';
 import Header from '../../components/Header';
 import { fetchEndUsesChart, fetchEndUses } from '../endUses/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -20,6 +22,7 @@ import { COLOR_SCHEME_BY_DEVICE } from '../../constants/colors';
 import Brick from '../../sharedComponents/brick';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { buildingData } from '../../store/globalState';
+import LineChart from '../../sharedComponents/lineChart/LineChart';
 import './style.css';
 
 const EndUsesPage = () => {
@@ -63,6 +66,154 @@ const EndUsesPage = () => {
             },
         },
     });
+
+    const cbCustomCSV = (originalCSV) => {
+        const operatingHours = buildingListData.find((bldg) => bldg.building_id === bldgId)?.operating_hours;
+
+        const csvRows = originalCSV.split('\n').map((row) => row.split(','));
+
+        csvRows[0].push('"On Hours"');
+        csvRows[0].push('"Open Day"');
+
+        for (let i = 1; i < csvRows.length; i++) {
+            const timestamp = moment(csvRows[i][0].replace(/"/g, ''));
+
+            const day = timestamp.format('ddd').toLowerCase();
+
+            const operateHoursDay = operatingHours[day];
+
+            const fromTime = moment(`${timestamp.format('YYYY-MM-DD')}T${operateHoursDay.time_range.frm}`);
+            const toTime = moment(`${timestamp.format('YYYY-MM-DD')}T${operateHoursDay.time_range.to}`);
+
+            const onHours = timestamp.isSameOrAfter(fromTime) && timestamp.isSameOrBefore(toTime);
+
+            csvRows[i].push(onHours ? 'TRUE' : 'FALSE');
+            csvRows[i].push(operateHoursDay.stat ? 'TRUE' : 'FALSE');
+        }
+
+        const modifiedCSV = csvRows.map((row) => row.join(',')).join('\n');
+
+        return modifiedCSV;
+    };
+
+    const checkWhetherShowAfterHours = () => {
+        const fDayHour = moment(stackedColumnChartCategories[0]);
+        const sDayHour = moment(stackedColumnChartCategories[1]);
+
+        if (sDayHour.diff(fDayHour, 'hours') <= 1) {
+            return getPlotBands();
+        } else {
+            return null;
+        }
+    };
+
+    const formatTime = (time) => {
+        const timeWDot = time.replace(':', '.');
+
+        if (timeWDot[0] === '0') {
+            return timeWDot.slice(1);
+        } else {
+            return timeWDot.slice(0);
+        }
+    };
+
+    const getPlotBands = () => {
+        const bldgIdObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+
+        if (!bldgIdObj) return;
+
+        const weekOperHours = bldgIdObj?.operating_hours;
+        const numberOfSelectedDays = moment(endDate).diff(startDate, 'days');
+        const operHoursToShow = [];
+
+        for (let numberOfDay = 0; numberOfDay <= numberOfSelectedDays; numberOfDay++) {
+            const day = moment(startDate).add(numberOfDay, 'days');
+            const dayInWeek = moment(day).format('ddd').toLowerCase();
+
+            const dayOperHours = weekOperHours[dayInWeek];
+
+            const dayPosition = numberOfDay * 24;
+
+            if (!dayOperHours.stat) {
+                operHoursToShow.push({
+                    type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                    from: 0 + dayPosition,
+                    to: 24 + dayPosition,
+                });
+                continue;
+            }
+
+            const {
+                time_range: { frm, to },
+            } = dayOperHours;
+
+            const formattedToUnworked = formatTime(frm);
+            const formattedFromUnworked = formatTime(to);
+
+            const subHours = ['15', '30', '45', '00'];
+
+            const subHoursFromSubHours = subHours.find(
+                (subHours) =>
+                    subHours ===
+                    formattedFromUnworked
+                        .split('')
+                        .slice(formattedFromUnworked.length - 2)
+                        .join('')
+            );
+
+            const subHoursToSubHours = subHours.find(
+                (subHours) =>
+                    subHours ===
+                    formattedToUnworked
+                        .split('')
+                        .slice(formattedToUnworked.length - 2)
+                        .join('')
+            );
+
+            if (!subHoursFromSubHours || !subHoursToSubHours) {
+                return null;
+            }
+
+            const formattedToUnworkedNumber = Number(formattedToUnworked);
+            const formattedFromUnworkedNumber = Number(formattedFromUnworked);
+
+            if (formattedToUnworkedNumber === 0 && formattedFromUnworkedNumber === 0) {
+                continue;
+            }
+
+            if (formattedToUnworkedNumber === 0) {
+                operHoursToShow.push({
+                    type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                    from: formattedFromUnworkedNumber + dayPosition,
+                    to: 24 + dayPosition,
+                });
+                continue;
+            }
+
+            if (formattedFromUnworkedNumber === 0) {
+                operHoursToShow.push({
+                    type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                    from: 0 + dayPosition,
+                    to: formattedToUnworkedNumber + dayPosition,
+                });
+                continue;
+            }
+
+            operHoursToShow.push({
+                type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                from: 0 + dayPosition,
+                to: formattedToUnworkedNumber + dayPosition,
+            });
+
+            operHoursToShow.push({
+                type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                from: formattedFromUnworkedNumber + dayPosition,
+                to: 24 + dayPosition,
+            });
+        }
+
+        return operHoursToShow;
+    };
 
     const redirectToEndUse = (endUseType) => {
         let endUse = endUseType.toLowerCase();
@@ -266,6 +417,8 @@ const EndUsesPage = () => {
                 daysCount={daysCount}
                 isChartLoading={isChartLoading}
                 isFetchingEndUseData={isFetchingEndUseData}
+                plotBands={checkWhetherShowAfterHours()}
+                cbCustomCSV={cbCustomCSV}
             />
 
             <Brick sizeInRem={1.5} />

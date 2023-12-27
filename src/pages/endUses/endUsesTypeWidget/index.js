@@ -40,6 +40,10 @@ const EndUsesTypeWidget = (props) => {
         dateFormat,
         daysCount,
         isFetchingEndUseData = false,
+        plotBands: plotBandsProp,
+        upperLegendsProps = {},
+        cbCustomCSV,
+        exportingTitle = '',
     } = props;
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
@@ -89,6 +93,10 @@ const EndUsesTypeWidget = (props) => {
                         xAxisCallBackValue={formatXaxis}
                         restChartProps={xAxisObj}
                         tooltipCallBackValue={toolTipFormatter}
+                        plotBandsProp={plotBandsProp}
+                        upperLegendsProps={upperLegendsProps}
+                        cbCustomCSV={cbCustomCSV}
+                        exportingTitle={exportingTitle}
                         {...props}
                     />
                 </div>
