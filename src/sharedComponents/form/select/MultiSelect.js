@@ -118,6 +118,7 @@ const MultiSelect = ({
                 type={type}
                 options={options}
                 value={value}
+                styles={{ menu: (base) => ({ ...base, zIndex: 2 }) }}
                 components={{
                     ...Object.assign(
                         {
