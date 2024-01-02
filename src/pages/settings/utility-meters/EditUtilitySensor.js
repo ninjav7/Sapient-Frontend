@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col } from 'reactstrap';
-import Modal from 'react-bootstrap/Modal';
+import { Row, Col, Modal } from 'reactstrap';
 import moment from 'moment';
 import { useAtom } from 'jotai';
 import { Spinner, UncontrolledTooltip } from 'reactstrap';
@@ -230,7 +229,7 @@ const MetricsTab = (props) => {
     return (
         <React.Fragment>
             <Row>
-                <Col lg={4}>
+                <Col lg={3}>
                     <div className="device-detail-container d-flex justify-content-between">
                         <div className="w-50">
                             <Typography.Subheader className="gray-550" size={Typography.Sizes.md}>
@@ -285,7 +284,7 @@ const MetricsTab = (props) => {
                     <DeviceDetails utilityMeterObj={utilityMeterObj} />
                 </Col>
 
-                <Col lg={8}>
+                <Col lg={9}>
                     <div>
                         <div className="model-sensor-filters-v2 mb-3" style={{ padding: '0rem' }}>
                             <div className="d-flex">
@@ -765,7 +764,7 @@ const EditUtilitySensor = (props) => {
 
     return (
         <React.Fragment>
-            <Modal show={showModal} onHide={closeModal} size="xl" centered backdrop="static" keyboard={false}>
+            <Modal isOpen={showModal} className="utility-sensor-modal-fullscreen">
                 <div>
                     <div
                         className="passive-header-wrapper d-flex justify-content-between"

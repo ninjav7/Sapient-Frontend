@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Spinner } from 'reactstrap';
-import Modal from 'react-bootstrap/Modal';
+import { Spinner, Modal } from 'reactstrap';
 import 'moment-timezone';
 import { BaseUrl, sensorGraphData } from '../../services/Network';
 import axios from 'axios';
@@ -17,6 +16,7 @@ import { Button } from '../../sharedComponents/button';
 import { UserStore } from '../../store/UserStore';
 import '../../pages/portfolio/style.scss';
 import './style.css';
+import './styles.scss';
 
 const DeviceChartModel = ({
     showChart,
@@ -160,7 +160,7 @@ const DeviceChartModel = ({
     }, [startDate, endDate, selectedConsumption]);
 
     return (
-        <Modal show={showChart} size="xl" centered backdrop="static" keyboard={false}>
+        <Modal isOpen={showChart} className="modal-fullscreen">
             <div className="chart-model-header">
                 <div>
                     <Typography.Subheader
@@ -179,7 +179,7 @@ const DeviceChartModel = ({
 
                 <div>
                     <Button
-                        label="Cancel"
+                        label="Close"
                         size={Button.Sizes.md}
                         type={Button.Type.secondaryGrey}
                         onClick={() => {
