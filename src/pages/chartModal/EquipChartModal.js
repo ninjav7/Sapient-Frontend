@@ -765,6 +765,72 @@ const EquipChartModal = ({
 
                                         <Brick sizeInRem={1} />
 
+                                        <div className="d-flex justify-content-between">
+                                            <div className="w-100">
+                                                <Typography.Body size={Typography.Sizes.md}>
+                                                    Manufacturer
+                                                </Typography.Body>
+                                                <Brick sizeInRem={0.25} />
+                                                <InputTooltip
+                                                    placeholder="Enter Manufacturer Name"
+                                                    labelSize={Typography.Sizes.md}
+                                                    value={equipData?.equipments_name}
+                                                    onChange={(e) => {
+                                                        handleDataChange('equipments_name', e.target.value);
+                                                    }}
+                                                    disabled={
+                                                        !(
+                                                            userPermission?.user_role === 'admin' ||
+                                                            userPermission?.permissions?.permissions
+                                                                ?.account_buildings_permission?.edit
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+
+                                            <div className="w-100 ml-2">
+                                                <Typography.Body size={Typography.Sizes.md}>Model</Typography.Body>
+                                                <Brick sizeInRem={0.25} />
+                                                <InputTooltip
+                                                    placeholder="Enter Model Name"
+                                                    labelSize={Typography.Sizes.md}
+                                                    value={equipData?.equipments_name}
+                                                    onChange={(e) => {
+                                                        handleDataChange('equipments_name', e.target.value);
+                                                    }}
+                                                    disabled={
+                                                        !(
+                                                            userPermission?.user_role === 'admin' ||
+                                                            userPermission?.permissions?.permissions
+                                                                ?.account_buildings_permission?.edit
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+
+                                            <div className="w-100 ml-2">
+                                                <Typography.Body size={Typography.Sizes.md}>Serial</Typography.Body>
+                                                <Brick sizeInRem={0.25} />
+                                                <InputTooltip
+                                                    placeholder="Enter Serial Number"
+                                                    labelSize={Typography.Sizes.md}
+                                                    value={equipData?.equipments_name}
+                                                    onChange={(e) => {
+                                                        handleDataChange('equipments_name', e.target.value);
+                                                    }}
+                                                    disabled={
+                                                        !(
+                                                            userPermission?.user_role === 'admin' ||
+                                                            userPermission?.permissions?.permissions
+                                                                ?.account_buildings_permission?.edit
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <Brick sizeInRem={1} />
+
                                         <div>
                                             <Typography.Body size={Typography.Sizes.md}>
                                                 Equipment Location
