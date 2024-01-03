@@ -118,10 +118,9 @@ const EquipChartModal = ({
         let obj = {};
 
         if (originalEquipData?.equipments_name !== equipData?.equipments_name) obj.name = equipData?.equipments_name;
-        if (originalEquipData?.manufacturer_name !== equipData?.manufacturer_name)
-            obj.manufacturer_name = equipData?.manufacturer_name;
-        if (originalEquipData?.model_name !== equipData?.model_name) obj.model_name = equipData?.model_name;
-        if (originalEquipData?.serial_number !== equipData?.serial_number) obj.serial_number = equipData?.serial_number;
+        if (originalEquipData?.manufacturer !== equipData?.manufacturer) obj.manufacturer = equipData?.manufacturer;
+        if (originalEquipData?.model !== equipData?.model) obj.model = equipData?.model;
+        if (originalEquipData?.serial !== equipData?.serial) obj.serial = equipData?.serial;
 
         if (originalEquipData?.location_id !== equipData?.location_id) obj.space_id = equipData?.location_id;
 
@@ -756,9 +755,9 @@ const EquipChartModal = ({
                                                 <InputTooltip
                                                     placeholder="Enter Manufacturer Name"
                                                     labelSize={Typography.Sizes.md}
-                                                    value={equipData?.manufacturer_name}
+                                                    value={equipData?.manufacturer}
                                                     onChange={(e) => {
-                                                        handleDataChange('manufacturer_name', e.target.value);
+                                                        handleDataChange('manufacturer', e.target.value);
                                                     }}
                                                     disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
@@ -770,9 +769,9 @@ const EquipChartModal = ({
                                                 <InputTooltip
                                                     placeholder="Enter Model Name"
                                                     labelSize={Typography.Sizes.md}
-                                                    value={equipData?.model_name}
+                                                    value={equipData?.model}
                                                     onChange={(e) => {
-                                                        handleDataChange('model_name', e.target.value);
+                                                        handleDataChange('model', e.target.value);
                                                     }}
                                                     disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
@@ -784,9 +783,9 @@ const EquipChartModal = ({
                                                 <InputTooltip
                                                     placeholder="Enter Serial Number"
                                                     labelSize={Typography.Sizes.md}
-                                                    value={equipData?.serial_number}
+                                                    value={equipData?.serial}
                                                     onChange={(e) => {
-                                                        handleDataChange('serial_number', e.target.value);
+                                                        handleDataChange('serial', e.target.value);
                                                     }}
                                                     disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
