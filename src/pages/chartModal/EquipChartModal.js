@@ -55,6 +55,10 @@ const EquipChartModal = ({
     activePage,
 }) => {
     const [userPermission] = useAtom(userPermissionData);
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperAdmin = isUserAdmin || isSuperUser;
+    const canUserEdit = userPermission?.permissions?.permissions?.building_equipment_permission?.edit ?? false;
 
     const history = useHistory();
 
@@ -114,6 +118,9 @@ const EquipChartModal = ({
         let obj = {};
 
         if (originalEquipData?.equipments_name !== equipData?.equipments_name) obj.name = equipData?.equipments_name;
+        if (originalEquipData?.manufacturer !== equipData?.manufacturer) obj.manufacturer = equipData?.manufacturer;
+        if (originalEquipData?.model !== equipData?.model) obj.model = equipData?.model;
+        if (originalEquipData?.serial !== equipData?.serial) obj.serial = equipData?.serial;
 
         if (originalEquipData?.location_id !== equipData?.location_id) obj.space_id = equipData?.location_id;
 
@@ -469,15 +476,7 @@ const EquipChartModal = ({
                                                 size={Button.Sizes.md}
                                                 type={Button.Type.primary}
                                                 onClick={handleEquipmentUpdate}
-                                                disabled={
-                                                    isModified ||
-                                                    isProcessing ||
-                                                    !(
-                                                        userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit
-                                                    )
-                                                }
+                                                disabled={isModified || isProcessing || !(isSuperAdmin || canUserEdit)}
                                                 className="ml-2"
                                             />
                                         </div>
@@ -674,7 +673,7 @@ const EquipChartModal = ({
                                     Equipment Details
                                 </Typography.Header>
 
-                                <Brick sizeInRem={1} />
+                                <Brick sizeInRem={1.25} />
 
                                 <Row>
                                     <Col xl={8}>
@@ -691,13 +690,7 @@ const EquipChartModal = ({
                                                     onChange={(e) => {
                                                         handleDataChange('equipments_name', e.target.value);
                                                     }}
-                                                    disabled={
-                                                        !(
-                                                            userPermission?.user_role === 'admin' ||
-                                                            userPermission?.permissions?.permissions
-                                                                ?.account_buildings_permission?.edit
-                                                        )
-                                                    }
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
                                             </div>
 
@@ -725,13 +718,7 @@ const EquipChartModal = ({
                                                     customSearchCallback={({ data, query }) =>
                                                         defaultDropdownSearch(data, query?.value)
                                                     }
-                                                    disabled={
-                                                        !(
-                                                            userPermission?.user_role === 'admin' ||
-                                                            userPermission?.permissions?.permissions
-                                                                ?.account_buildings_permission?.edit
-                                                        )
-                                                    }
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
                                             </div>
 
@@ -751,19 +738,61 @@ const EquipChartModal = ({
                                                             handleDataChange('end_use_id', e.value);
                                                         }}
                                                         isSearchable={true}
-                                                        disabled={
-                                                            !(
-                                                                userPermission?.user_role === 'admin' ||
-                                                                userPermission?.permissions?.permissions
-                                                                    ?.account_buildings_permission?.edit
-                                                            )
-                                                        }
+                                                        disabled={!(isSuperAdmin || canUserEdit)}
                                                     />
                                                 </div>
                                             )}
                                         </div>
 
-                                        <Brick sizeInRem={1} />
+                                        <Brick sizeInRem={1.25} />
+
+                                        <div className="d-flex justify-content-between">
+                                            <div className="w-100">
+                                                <Typography.Body size={Typography.Sizes.md}>
+                                                    Manufacturer
+                                                </Typography.Body>
+                                                <Brick sizeInRem={0.25} />
+                                                <InputTooltip
+                                                    placeholder="Enter Manufacturer Name"
+                                                    labelSize={Typography.Sizes.md}
+                                                    value={equipData?.manufacturer}
+                                                    onChange={(e) => {
+                                                        handleDataChange('manufacturer', e.target.value);
+                                                    }}
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
+                                                />
+                                            </div>
+
+                                            <div className="w-100 ml-2">
+                                                <Typography.Body size={Typography.Sizes.md}>Model</Typography.Body>
+                                                <Brick sizeInRem={0.25} />
+                                                <InputTooltip
+                                                    placeholder="Enter Model Name"
+                                                    labelSize={Typography.Sizes.md}
+                                                    value={equipData?.model}
+                                                    onChange={(e) => {
+                                                        handleDataChange('model', e.target.value);
+                                                    }}
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
+                                                />
+                                            </div>
+
+                                            <div className="w-100 ml-2">
+                                                <Typography.Body size={Typography.Sizes.md}>Serial</Typography.Body>
+                                                <Brick sizeInRem={0.25} />
+                                                <InputTooltip
+                                                    placeholder="Enter Serial Number"
+                                                    labelSize={Typography.Sizes.md}
+                                                    value={equipData?.serial}
+                                                    onChange={(e) => {
+                                                        handleDataChange('serial', e.target.value);
+                                                    }}
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <Brick sizeInRem={1.25} />
 
                                         <div>
                                             <Typography.Body size={Typography.Sizes.md}>
@@ -783,13 +812,7 @@ const EquipChartModal = ({
                                                 customSearchCallback={({ data, query }) =>
                                                     defaultDropdownSearch(data, query?.value)
                                                 }
-                                                disabled={
-                                                    !(
-                                                        userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit
-                                                    )
-                                                }
+                                                disabled={!(isSuperAdmin || canUserEdit)}
                                             />
 
                                             <Brick sizeInRem={0.25} />
@@ -798,7 +821,7 @@ const EquipChartModal = ({
                                             </Typography.Body>
                                         </div>
 
-                                        <Brick sizeInRem={1} />
+                                        <Brick sizeInRem={1.25} />
 
                                         {equipData?.deviceType === 'active' && (
                                             <>
@@ -817,13 +840,7 @@ const EquipChartModal = ({
                                                         customSearchCallback={({ data, query }) =>
                                                             defaultDropdownSearch(data, query?.value)
                                                         }
-                                                        disabled={
-                                                            !(
-                                                                userPermission?.user_role === 'admin' ||
-                                                                userPermission?.permissions?.permissions
-                                                                    ?.account_buildings_permission?.edit
-                                                            )
-                                                        }
+                                                        disabled={!(isSuperAdmin || canUserEdit)}
                                                     />
 
                                                     <Brick sizeInRem={0.25} />
@@ -831,7 +848,7 @@ const EquipChartModal = ({
                                                         The rule applied to this equipment to control when it is on.
                                                     </Typography.Body>
                                                 </div>
-                                                <Brick sizeInRem={1} />
+                                                <Brick sizeInRem={1.25} />
                                             </>
                                         )}
 
@@ -845,17 +862,11 @@ const EquipChartModal = ({
                                                 }}
                                                 name="tag"
                                                 placeHolder="+ Add Tag"
-                                                disabled={
-                                                    !(
-                                                        userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit
-                                                    )
-                                                }
+                                                disabled={!(isSuperAdmin || canUserEdit)}
                                             />
                                         </div>
 
-                                        <Brick sizeInRem={1} />
+                                        <Brick sizeInRem={1.25} />
 
                                         <div className="w-100">
                                             <Typography.Body size={Typography.Sizes.md}>Notes</Typography.Body>
@@ -869,13 +880,7 @@ const EquipChartModal = ({
                                                     handleDataChange('note', e.target.value);
                                                 }}
                                                 inputClassName="pt-2"
-                                                disabled={
-                                                    !(
-                                                        userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit
-                                                    )
-                                                }
+                                                disabled={!(isSuperAdmin || canUserEdit)}
                                             />
                                         </div>
                                     </Col>
