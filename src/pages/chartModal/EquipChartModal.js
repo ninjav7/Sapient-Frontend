@@ -55,6 +55,10 @@ const EquipChartModal = ({
     activePage,
 }) => {
     const [userPermission] = useAtom(userPermissionData);
+    const isUserAdmin = userPermission?.is_admin ?? false;
+    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperAdmin = isUserAdmin || isSuperUser;
+    const canUserEdit = userPermission?.permissions?.permissions?.building_equipment_permission?.edit ?? false;
 
     const history = useHistory();
 
@@ -469,15 +473,7 @@ const EquipChartModal = ({
                                                 size={Button.Sizes.md}
                                                 type={Button.Type.primary}
                                                 onClick={handleEquipmentUpdate}
-                                                disabled={
-                                                    isModified ||
-                                                    isProcessing ||
-                                                    !(
-                                                        userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit
-                                                    )
-                                                }
+                                                disabled={isModified || isProcessing || !(isSuperAdmin || canUserEdit)}
                                                 className="ml-2"
                                             />
                                         </div>
@@ -691,13 +687,7 @@ const EquipChartModal = ({
                                                     onChange={(e) => {
                                                         handleDataChange('equipments_name', e.target.value);
                                                     }}
-                                                    disabled={
-                                                        !(
-                                                            userPermission?.user_role === 'admin' ||
-                                                            userPermission?.permissions?.permissions
-                                                                ?.account_buildings_permission?.edit
-                                                        )
-                                                    }
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
                                             </div>
 
@@ -725,13 +715,7 @@ const EquipChartModal = ({
                                                     customSearchCallback={({ data, query }) =>
                                                         defaultDropdownSearch(data, query?.value)
                                                     }
-                                                    disabled={
-                                                        !(
-                                                            userPermission?.user_role === 'admin' ||
-                                                            userPermission?.permissions?.permissions
-                                                                ?.account_buildings_permission?.edit
-                                                        )
-                                                    }
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
                                             </div>
 
@@ -751,13 +735,7 @@ const EquipChartModal = ({
                                                             handleDataChange('end_use_id', e.value);
                                                         }}
                                                         isSearchable={true}
-                                                        disabled={
-                                                            !(
-                                                                userPermission?.user_role === 'admin' ||
-                                                                userPermission?.permissions?.permissions
-                                                                    ?.account_buildings_permission?.edit
-                                                            )
-                                                        }
+                                                        disabled={!(isSuperAdmin || canUserEdit)}
                                                     />
                                                 </div>
                                             )}
@@ -778,13 +756,7 @@ const EquipChartModal = ({
                                                     onChange={(e) => {
                                                         handleDataChange('equipments_name', e.target.value);
                                                     }}
-                                                    disabled={
-                                                        !(
-                                                            userPermission?.user_role === 'admin' ||
-                                                            userPermission?.permissions?.permissions
-                                                                ?.account_buildings_permission?.edit
-                                                        )
-                                                    }
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
                                             </div>
 
@@ -798,13 +770,7 @@ const EquipChartModal = ({
                                                     onChange={(e) => {
                                                         handleDataChange('equipments_name', e.target.value);
                                                     }}
-                                                    disabled={
-                                                        !(
-                                                            userPermission?.user_role === 'admin' ||
-                                                            userPermission?.permissions?.permissions
-                                                                ?.account_buildings_permission?.edit
-                                                        )
-                                                    }
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
                                             </div>
 
@@ -818,13 +784,7 @@ const EquipChartModal = ({
                                                     onChange={(e) => {
                                                         handleDataChange('equipments_name', e.target.value);
                                                     }}
-                                                    disabled={
-                                                        !(
-                                                            userPermission?.user_role === 'admin' ||
-                                                            userPermission?.permissions?.permissions
-                                                                ?.account_buildings_permission?.edit
-                                                        )
-                                                    }
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
                                             </div>
                                         </div>
@@ -849,13 +809,7 @@ const EquipChartModal = ({
                                                 customSearchCallback={({ data, query }) =>
                                                     defaultDropdownSearch(data, query?.value)
                                                 }
-                                                disabled={
-                                                    !(
-                                                        userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit
-                                                    )
-                                                }
+                                                disabled={!(isSuperAdmin || canUserEdit)}
                                             />
 
                                             <Brick sizeInRem={0.25} />
@@ -883,13 +837,7 @@ const EquipChartModal = ({
                                                         customSearchCallback={({ data, query }) =>
                                                             defaultDropdownSearch(data, query?.value)
                                                         }
-                                                        disabled={
-                                                            !(
-                                                                userPermission?.user_role === 'admin' ||
-                                                                userPermission?.permissions?.permissions
-                                                                    ?.account_buildings_permission?.edit
-                                                            )
-                                                        }
+                                                        disabled={!(isSuperAdmin || canUserEdit)}
                                                     />
 
                                                     <Brick sizeInRem={0.25} />
@@ -911,13 +859,7 @@ const EquipChartModal = ({
                                                 }}
                                                 name="tag"
                                                 placeHolder="+ Add Tag"
-                                                disabled={
-                                                    !(
-                                                        userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit
-                                                    )
-                                                }
+                                                disabled={!(isSuperAdmin || canUserEdit)}
                                             />
                                         </div>
 
@@ -935,13 +877,7 @@ const EquipChartModal = ({
                                                     handleDataChange('note', e.target.value);
                                                 }}
                                                 inputClassName="pt-2"
-                                                disabled={
-                                                    !(
-                                                        userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit
-                                                    )
-                                                }
+                                                disabled={!(isSuperAdmin || canUserEdit)}
                                             />
                                         </div>
                                     </Col>
