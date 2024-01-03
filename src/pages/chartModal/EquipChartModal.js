@@ -118,6 +118,10 @@ const EquipChartModal = ({
         let obj = {};
 
         if (originalEquipData?.equipments_name !== equipData?.equipments_name) obj.name = equipData?.equipments_name;
+        if (originalEquipData?.manufacturer_name !== equipData?.manufacturer_name)
+            obj.manufacturer_name = equipData?.manufacturer_name;
+        if (originalEquipData?.model_name !== equipData?.model_name) obj.model_name = equipData?.model_name;
+        if (originalEquipData?.serial_number !== equipData?.serial_number) obj.serial_number = equipData?.serial_number;
 
         if (originalEquipData?.location_id !== equipData?.location_id) obj.space_id = equipData?.location_id;
 
@@ -670,7 +674,7 @@ const EquipChartModal = ({
                                     Equipment Details
                                 </Typography.Header>
 
-                                <Brick sizeInRem={1} />
+                                <Brick sizeInRem={1.25} />
 
                                 <Row>
                                     <Col xl={8}>
@@ -741,7 +745,7 @@ const EquipChartModal = ({
                                             )}
                                         </div>
 
-                                        <Brick sizeInRem={1} />
+                                        <Brick sizeInRem={1.25} />
 
                                         <div className="d-flex justify-content-between">
                                             <div className="w-100">
@@ -752,9 +756,9 @@ const EquipChartModal = ({
                                                 <InputTooltip
                                                     placeholder="Enter Manufacturer Name"
                                                     labelSize={Typography.Sizes.md}
-                                                    value={equipData?.equipments_name}
+                                                    value={equipData?.manufacturer_name}
                                                     onChange={(e) => {
-                                                        handleDataChange('equipments_name', e.target.value);
+                                                        handleDataChange('manufacturer_name', e.target.value);
                                                     }}
                                                     disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
@@ -766,9 +770,9 @@ const EquipChartModal = ({
                                                 <InputTooltip
                                                     placeholder="Enter Model Name"
                                                     labelSize={Typography.Sizes.md}
-                                                    value={equipData?.equipments_name}
+                                                    value={equipData?.model_name}
                                                     onChange={(e) => {
-                                                        handleDataChange('equipments_name', e.target.value);
+                                                        handleDataChange('model_name', e.target.value);
                                                     }}
                                                     disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
@@ -780,16 +784,16 @@ const EquipChartModal = ({
                                                 <InputTooltip
                                                     placeholder="Enter Serial Number"
                                                     labelSize={Typography.Sizes.md}
-                                                    value={equipData?.equipments_name}
+                                                    value={equipData?.serial_number}
                                                     onChange={(e) => {
-                                                        handleDataChange('equipments_name', e.target.value);
+                                                        handleDataChange('serial_number', e.target.value);
                                                     }}
                                                     disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
                                             </div>
                                         </div>
 
-                                        <Brick sizeInRem={1} />
+                                        <Brick sizeInRem={1.25} />
 
                                         <div>
                                             <Typography.Body size={Typography.Sizes.md}>
@@ -818,7 +822,7 @@ const EquipChartModal = ({
                                             </Typography.Body>
                                         </div>
 
-                                        <Brick sizeInRem={1} />
+                                        <Brick sizeInRem={1.25} />
 
                                         {equipData?.deviceType === 'active' && (
                                             <>
@@ -845,7 +849,7 @@ const EquipChartModal = ({
                                                         The rule applied to this equipment to control when it is on.
                                                     </Typography.Body>
                                                 </div>
-                                                <Brick sizeInRem={1} />
+                                                <Brick sizeInRem={1.25} />
                                             </>
                                         )}
 
@@ -863,7 +867,7 @@ const EquipChartModal = ({
                                             />
                                         </div>
 
-                                        <Brick sizeInRem={1} />
+                                        <Brick sizeInRem={1.25} />
 
                                         <div className="w-100">
                                             <Typography.Body size={Typography.Sizes.md}>Notes</Typography.Body>
