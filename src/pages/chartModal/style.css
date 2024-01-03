@@ -319,17 +319,6 @@
     color: blue;
 }
 
-.chart-model-header {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: stretch;
-    align-content: stretch;
-    padding: 25px;
-    height: fit-content;
-}
-
 .chart-model-subheader {
     display: flex;
     flex-direction: row;
@@ -624,7 +613,7 @@
         inset 4px 4px 7px rgba(0, 0, 0, 0.4), inset 6px 10px 10px rgba(0, 0, 0, 0.25);
     border-radius: 5px;
     margin-left: 1.5rem;
-    top: 1.2rem;
+    top: 1.3rem;
 }
 
 .breaker-voltage-style {
