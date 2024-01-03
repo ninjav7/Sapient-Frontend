@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Modal from 'react-bootstrap/Modal';
 import { BreakersStore } from '../../../store/BreakersStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import Brick from '../../../sharedComponents/brick';
@@ -46,7 +45,7 @@ import { fetchDateRange } from '../../../helpers/formattedChartData';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import { getSensorGraphData } from '../passive-devices/services';
 import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../../helpers/helpers';
-import { Spinner } from 'reactstrap';
+import { Spinner, Modal } from 'reactstrap';
 import './breaker-config-styles.scss';
 import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 
@@ -1176,14 +1175,7 @@ const BreakerConfiguration = ({
 
     return (
         <React.Fragment>
-            <Modal
-                show={showBreakerConfigModal}
-                onHide={closeModalWithoutSave}
-                size="xl"
-                centered
-                backdrop="static"
-                keyboard={false}
-                dialogClassName={showUnlabeledAlert || showReassignAlert ? 'child-modal-style' : ''}>
+            <Modal isOpen={showBreakerConfigModal} className="breaker-modal-fullscreen">
                 <div>
                     <div
                         className="passive-header-wrapper d-flex justify-content-between"

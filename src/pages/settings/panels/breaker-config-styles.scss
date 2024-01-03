@@ -64,3 +64,19 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
 }
+
+.breaker-modal-fullscreen {
+    width: 92vw !important;
+    height: 92vh !important;
+    max-width: none !important;
+}
+
+.breaker-modal-fullscreen .modal-dialog {
+    margin: 0 !important;
+    max-width: none !important;
+}
+
+.breaker-modal-fullscreen .modal-content {
+    height: 100% !important;
+    border-radius: 0 !important;
+}

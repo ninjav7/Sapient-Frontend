@@ -57,3 +57,19 @@
         }
     }
 }
+
+.utility-sensor-modal-fullscreen {
+    width: 92vw !important;
+    height: 92vh !important;
+    max-width: none !important;
+}
+
+.utility-sensor-modal-fullscreen .modal-dialog {
+    margin: 0 !important;
+    max-width: none !important;
+}
+
+.utility-sensor-modal-fullscreen .modal-content {
+    height: 100% !important;
+    border-radius: 0 !important;
+}

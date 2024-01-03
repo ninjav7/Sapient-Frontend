@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Spinner } from 'reactstrap';
-import Modal from 'react-bootstrap/Modal';
+import { Spinner, Modal } from 'reactstrap';
 import 'moment-timezone';
 import { BaseUrl, sensorGraphData } from '../../services/Network';
 import axios from 'axios';
@@ -15,8 +14,10 @@ import { fetchDateRange } from '../../helpers/formattedChartData';
 import Typography from '../../sharedComponents/typography';
 import { Button } from '../../sharedComponents/button';
 import { UserStore } from '../../store/UserStore';
+import Brick from '../../sharedComponents/brick';
 import '../../pages/portfolio/style.scss';
 import './style.css';
+import './styles.scss';
 
 const DeviceChartModel = ({
     showChart,
@@ -160,8 +161,8 @@ const DeviceChartModel = ({
     }, [startDate, endDate, selectedConsumption]);
 
     return (
-        <Modal show={showChart} size="xl" centered backdrop="static" keyboard={false}>
-            <div className="chart-model-header">
+        <Modal isOpen={showChart} className="modal-fullscreen">
+            <div className="chart-model-header d-flex justify-content-between">
                 <div>
                     <Typography.Subheader
                         size={Typography.Sizes.sm}
@@ -179,7 +180,7 @@ const DeviceChartModel = ({
 
                 <div>
                     <Button
-                        label="Cancel"
+                        label="Close"
                         size={Button.Sizes.md}
                         type={Button.Type.secondaryGrey}
                         onClick={() => {
@@ -190,37 +191,35 @@ const DeviceChartModel = ({
                 </div>
             </div>
 
-            <div className="model-sensor-filters-v2">
-                <div className="d-flex">
-                    <div className="mr-2">
-                        <Select
-                            defaultValue={selectedConsumption}
-                            options={metric}
-                            onChange={(e) => {
-                                if (e.value === 'passive-power') {
-                                    return;
-                                }
-                                setConsumption(e.value);
-                                handleUnitChange(e.value);
-                            }}
-                        />
-                    </div>
-                </div>
+            <Brick sizeInRem={2} />
 
+            <div className="d-flex flex-row-reverse" style={{ paddingRight: '2rem', gap: '0.5rem' }}>
                 <div
                     className="btn-group custom-button-group header-widget-styling"
                     role="group"
                     aria-label="Basic example">
                     <Header type="modal" />
                 </div>
+
+                <Select
+                    defaultValue={selectedConsumption}
+                    options={metric}
+                    onChange={(e) => {
+                        if (e.value === 'passive-power') {
+                            return;
+                        }
+                        setConsumption(e.value);
+                        handleUnitChange(e.value);
+                    }}
+                />
             </div>
 
-            {isSensorChartLoading ? (
-                <div className="loader-center-style">
-                    <Spinner className="m-2" color={'primary'} />
-                </div>
-            ) : (
-                <div className="p-4">
+            <div style={{ padding: '1rem 2rem 2rem 2rem' }}>
+                {isSensorChartLoading ? (
+                    <div className="loader-center-style">
+                        <Spinner color="primary" />
+                    </div>
+                ) : (
                     <LineChart
                         title={''}
                         subTitle={''}
@@ -245,8 +244,8 @@ const DeviceChartModel = ({
                             },
                         }}
                     />
-                </div>
-            )}
+                )}
+            </div>
         </Modal>
     );
 };
