@@ -229,7 +229,7 @@ export const OptionMulti = (props) => {
 
 // eslint-disable-next-line no-unused-vars
 export const ValueContainerMulti = ({ children, ...props }) => {
-    const { label, value } = props.selectProps;
+    const { label, value, selectType } = props.selectProps;
 
     const selectedItems = Array.isArray(value) ? value.filter((option) => option.value !== selectAllOption.value) : [];
     const isTitleShow = selectedItems.length > 1;
@@ -251,10 +251,19 @@ export const ValueContainerMulti = ({ children, ...props }) => {
                     </Typography.Body>
                 )}
                 {selectedItems.length === 1 && (
-                    <BadgeSingleValue handleCloseBtn={handleCloseBtn}>
-                        <OptionIcon type={props.selectProps.type} icon={props.selectProps.icon} />
-                        {selectedItems[0].label} {selectedItems[0].supportText}
-                    </BadgeSingleValue>
+                    <>
+                        {selectType ? (
+                            <>
+                                <OptionIcon type={props.selectProps.type} icon={props.selectProps.icon} />
+                                {selectedItems[0].label} {selectedItems[0].supportText}
+                            </>
+                        ) : (
+                            <BadgeSingleValue handleCloseBtn={handleCloseBtn}>
+                                <OptionIcon type={props.selectProps.type} icon={props.selectProps.icon} />
+                                {selectedItems[0].label} {selectedItems[0].supportText}
+                            </BadgeSingleValue>
+                        )}
+                    </>
                 )}
             </components.Placeholder>
             {/*{React.Children.map(children, child => (child && child.type !== Placeholder ? child : null))}*/}
