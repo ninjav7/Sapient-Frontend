@@ -83,6 +83,12 @@ const MultiSelect = ({
     };
 
     useEffect(() => {
+        // Added Select type condition for Multi-select used in Explore Building & Equipment page
+        if (props?.selectType) {
+            setValue(props.value);
+            return;
+        }
+
         if (!props.value || props.value.length === 0) {
             setValue([]);
         } else if (props.isSelectAll) {
