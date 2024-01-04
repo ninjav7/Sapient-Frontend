@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import moment from 'moment';
 import _ from 'lodash';
+import moment from 'moment';
 import { Row, Col, Spinner } from 'reactstrap';
 import { Link } from 'react-router-dom';
 
@@ -8,28 +8,32 @@ import { UserStore } from '../../store/UserStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 import Header from '../../components/Header';
 import Brick from '../../sharedComponents/brick';
+import { Button } from '../../sharedComponents/button';
+import SkeletonLoader from '../../components/SkeletonLoader';
 import Select from '../../sharedComponents/form/select';
 import Typography from '../../sharedComponents/typography';
+import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
+import { TrendsBadge } from '../../sharedComponents/trendsBadge';
+import Toggles from '../../sharedComponents/toggles/Toggles';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 import SynchronizedCharts from '../../sharedComponents/synchronizedCharts';
-import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
-import { TrendsBadge } from '../../sharedComponents/trendsBadge';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 
 import { timeZone } from '../../utils/helper';
-import { exploreBldgMetrics, calculateDataConvertion, validateSeriesDataForBuildings } from './utils';
 import { getAverageValue } from '../../helpers/AveragePercent';
-import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
-import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { formatXaxisForHighCharts } from '../../helpers/helpers';
-import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../explore/services';
+
 import { handleUnitConverstion } from '../settings/general-settings/utils';
-import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
-import SkeletonLoader from '../../components/SkeletonLoader';
+import { exploreBldgMetrics, calculateDataConvertion, validateSeriesDataForBuildings } from './utils';
+
+import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
+import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../explore/services';
 
 import './style.css';
 import './styles.scss';
@@ -92,6 +96,8 @@ const ExploreByBuildings = () => {
     const [selectedMetrics, setSelectedMetrics] = useState([defaultMetric]);
     const [metrics, setMetrics] = useState([defaultMetric]);
 
+    const [isInComparisonMode, setComparisonMode] = useState(false);
+
     const [synchronizedChartData, setSynchronizedChartData] = useState({
         xData: [],
         datasets: [],
@@ -103,6 +109,15 @@ const ExploreByBuildings = () => {
 
     const handleMenuClose = () => setMetrics(selectedMetrics);
     const handleMetricsChange = (selectedOptions) => setSelectedMetrics(selectedOptions);
+
+    const toggleComparision = () => {
+        setComparisonMode(!isInComparisonMode);
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = isInComparisonMode ? 'Comparison Mode turned OFF' : 'Comparison Mode turned ON';
+            s.notificationType = 'success';
+        });
+    };
 
     const renderBuildingName = (row) => {
         return (
@@ -811,18 +826,32 @@ const ExploreByBuildings = () => {
 
     return (
         <>
-            <Row className="explore-filters-style p-2">
-                <div className="mr-2">
-                    <Select.Multi
-                        defaultValue={selectedMetrics}
-                        options={exploreBldgMetrics}
-                        onChange={handleMetricsChange}
-                        onMenuClose={handleMenuClose}
-                        placeholder={`Select Metrics ...`}
-                        selectType={`explore`}
-                    />
+            <Row className="d-flex justify-content-end">
+                <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
+                    <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
+                        <Button
+                            size={Button.Sizes.lg}
+                            type={isInComparisonMode ? Button.Type.secondary : Button.Type.secondaryGrey}>
+                            <Toggles
+                                size={Toggles.Sizes.sm}
+                                isChecked={isInComparisonMode}
+                                onChange={toggleComparision}
+                            />
+                            <Typography.Subheader size={Typography.Sizes.lg} onClick={toggleComparision}>
+                                Compare
+                            </Typography.Subheader>
+                        </Button>
+                        <Select.Multi
+                            defaultValue={selectedMetrics}
+                            options={exploreBldgMetrics}
+                            onChange={handleMetricsChange}
+                            onMenuClose={handleMenuClose}
+                            placeholder={`Select Metrics ...`}
+                            selectType={`explore`}
+                        />
+                        <Header title="" type="page" />
+                    </div>
                 </div>
-                <Header title="" type="page" />
             </Row>
 
             <Row>
