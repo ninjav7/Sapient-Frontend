@@ -78,7 +78,7 @@ export const equipmentDetails = '/api/config/equipments_details/by_id';
 
 // equipments
 export const generalEquipments = '/api/config/equipments_details/';
-export const generalEquipmentsV2 = '/api/v2/config/equipment/device';
+export const generalEquipmentsV2 = '/api/v2/config/equipment/list';
 export const getFiltersForEquipment = '/api/config/configuration-filter';
 export const equipmentType = '/api/config/get_equipment_type';
 export const addEquipmentType = '/api/config/create_equipment_type';
