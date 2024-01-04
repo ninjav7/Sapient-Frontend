@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import moment from 'moment';
+import _ from 'lodash';
 import { Row, Col, Spinner } from 'reactstrap';
 import { Link } from 'react-router-dom';
 
@@ -13,19 +15,16 @@ import Select from '../../sharedComponents/form/select';
 import Typography from '../../sharedComponents/typography';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
-import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
+import SynchronizedCharts from '../../sharedComponents/synchronizedCharts';
 import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
-import Toggles from '../../sharedComponents/toggles/Toggles';
-import { Button } from '../../sharedComponents/button';
-import ExploreCompareChart from '../../sharedComponents/exploreCompareChart/ExploreCompareChart';
 
 import { timeZone } from '../../utils/helper';
 import { exploreBldgMetrics, calculateDataConvertion, validateSeriesDataForBuildings } from './utils';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-import { dateTimeFormatForHighChart, formatXaxisForHighCharts, getPastDateRange } from '../../helpers/helpers';
+import { formatXaxisForHighCharts } from '../../helpers/helpers';
 import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../explore/services';
 import { handleUnitConverstion } from '../settings/general-settings/utils';
 import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
@@ -52,25 +51,18 @@ const ExploreByBuildings = () => {
     const [checkedAll, setCheckedAll] = useState(false);
 
     const [seriesData, setSeriesData] = useState([]);
-    const [pastSeriesData, setPastSeriesData] = useState([]);
-
     const [filterOptions, setFilterOptions] = useState([]);
     const [selectedBldgIds, setSelectedBldgIds] = useState([]);
     const [exploreBuildingsList, setExploreBuildingsList] = useState([]);
 
     const [isFilterFetching, setFetchingFilters] = useState(false);
     const [isFetchingChartData, setFetchingChartData] = useState(false);
-    const [isFetchingPastChartData, setFetchingPastChartData] = useState(false);
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
 
     const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
     let top = '';
     let bottom = '';
-
-    const defaultMetric = exploreBldgMetrics[0];
-    const [selectedMetrics, setSelectedMetrics] = useState([defaultMetric]);
-    const [metrics, setMetrics] = useState([defaultMetric]);
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(0);
     const [bottomEnergyConsumption, setBottomEnergyConsumption] = useState(0);
@@ -96,37 +88,21 @@ const ExploreByBuildings = () => {
     const [bottomVal, setBottomVal] = useState(0);
     const [shouldRender, setShouldRender] = useState(true);
 
-    const [selectedUnit, setSelectedUnit] = useState(exploreBldgMetrics[0].unit);
-    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(exploreBldgMetrics[0]?.Consumption);
-    const [selectedConsumption, setConsumption] = useState(exploreBldgMetrics[0]?.value);
+    const defaultMetric = exploreBldgMetrics[0];
+    const [selectedMetrics, setSelectedMetrics] = useState([defaultMetric]);
+    const [metrics, setMetrics] = useState([defaultMetric]);
 
-    const [isInComparisonMode, setComparisonMode] = useState(false);
-
-    const toggleComparision = () => {
-        setComparisonMode(!isInComparisonMode);
-        UserStore.update((s) => {
-            s.showNotification = true;
-            s.notificationMessage = isInComparisonMode ? 'Comparison Mode turned OFF' : 'Comparison Mode turned ON';
-            s.notificationType = 'success';
-        });
-    };
-
-    const handleMenuClose = () => setMetrics(selectedMetrics);
-    const handleMetricsChange = (selectedOptions) => setSelectedMetrics(selectedOptions);
-
-    const handleUnitChange = (value) => {
-        const obj = exploreBldgMetrics.find((record) => record?.value === value);
-        setSelectedUnit(obj?.unit);
-    };
-
-    const handleConsumptionChange = (value) => {
-        const obj = exploreBldgMetrics.find((record) => record?.value === value);
-        setSelectedConsumptionLabel(obj?.Consumption);
-    };
+    const [synchronizedChartData, setSynchronizedChartData] = useState({
+        xData: [],
+        datasets: [],
+    });
 
     const currentRow = () => {
         return exploreBuildingsList;
     };
+
+    const handleMenuClose = () => setMetrics(selectedMetrics);
+    const handleMetricsChange = (selectedOptions) => setSelectedMetrics(selectedOptions);
 
     const renderBuildingName = (row) => {
         return (
@@ -376,324 +352,207 @@ const ExploreByBuildings = () => {
             });
     };
 
-    const fetchSingleBldgChartData = async (bldg_id, isComparisionOn = false) => {
+    const fetchSingleBldgChartData = async (bldg_id) => {
+        if (metrics.length === 0) return;
+
         const start_date = encodeURIComponent(startDate);
         const end_date = encodeURIComponent(endDate);
         const time_zone = encodeURIComponent(timeZone);
-        const params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${time_zone}&metric=${selectedConsumption}`;
 
-        let paramsForPastData = `?tz_info=${time_zone}&metric=${selectedConsumption}`;
-        if (isComparisionOn) {
-            const pastDateObj = getPastDateRange(startDate, daysCount);
-            paramsForPastData += `&date_from=${encodeURIComponent(pastDateObj?.startDate)}&date_to=${encodeURIComponent(
-                pastDateObj?.endDate
-            )}`;
-        }
+        const promisesList = [];
 
-        let promisesList = [];
-        promisesList.push(fetchExploreBuildingChart(params, bldg_id));
-        if (isComparisionOn) promisesList.push(fetchExploreBuildingChart(paramsForPastData, bldg_id));
+        metrics.forEach((metric) => {
+            let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${time_zone}&metric=${metric?.value}`;
+            if (
+                metric.value !== 'energy' ||
+                metric.value !== 'carbon_emissions' ||
+                metric.value !== 'generated_carbon_rate'
+            ) {
+                params += `&aggregate=hour`;
+            }
+            promisesList.push(fetchExploreBuildingChart(params, bldg_id));
+        });
 
         Promise.all(promisesList)
             .then((res) => {
-                const response = res;
+                const promiseResponse = res;
+                const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldg_id);
 
-                response.forEach((record, index) => {
-                    if (record?.status === 200 && record?.data?.success) {
-                        const { data, metadata } = record?.data;
+                // Made copy of synced chart obj
+                const previousSyncChartObj = _.cloneDeep(synchronizedChartData);
 
-                        const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldg_id);
-                        if (!bldgObj?.building_id || data.length === 0) return;
+                if (promiseResponse && promiseResponse.length !== 0) {
+                    promiseResponse.forEach((res, index) => {
+                        const response = res?.data;
 
-                        let recordToInsert = [];
+                        let metricObj = {
+                            name: metrics[index].label,
+                            data: [],
+                            unit: metrics[index].unit,
+                            metric: metrics[index].label,
+                        };
 
-                        if (
-                            metadata?.device_types === 'shadow meter' &&
-                            (selectedConsumption === 'current' || selectedConsumption === 'voltage')
-                        ) {
-                            if (selectedConsumption === 'current') {
-                                const firstList = {
-                                    id: bldgObj?.building_id,
-                                    name: `${bldgObj?.building_name} - Amps_A`,
-                                    data: [],
-                                };
-                                const secondList = {
-                                    id: bldgObj?.building_id,
-                                    name: `${bldgObj?.building_name} - Amps_B`,
-                                    data: [],
-                                };
-                                const thirdList = {
-                                    id: bldgObj?.building_id,
-                                    name: `${bldgObj?.building_name} - Amps_C`,
-                                    data: [],
-                                };
+                        if (response?.success) {
+                            const { data } = response;
+                            let timestamps = [];
 
-                                data.map((el) => {
-                                    if (el?.data === '' && el?.data !== 0) {
-                                        firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                        secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                        thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                    } else {
-                                        firstList.data.push({
-                                            x: new Date(el?.time_stamp).getTime(),
-                                            y: calculateDataConvertion(el?.data?.Amps_A, selectedConsumption),
-                                        });
-                                        secondList.data.push({
-                                            x: new Date(el?.time_stamp).getTime(),
-                                            y: calculateDataConvertion(el?.data?.Amps_B, selectedConsumption),
-                                        });
-                                        thirdList.data.push({
-                                            x: new Date(el?.time_stamp).getTime(),
-                                            y: calculateDataConvertion(el?.data?.Amps_C, selectedConsumption),
-                                        });
-                                    }
-                                });
+                            const metricBldgDataObj = {
+                                name: `${bldgObj?.building_name} - ${metrics[index].label}`,
+                                data: [],
+                            };
 
-                                recordToInsert.push(firstList);
-                                recordToInsert.push(secondList);
-                                recordToInsert.push(thirdList);
-                            }
-                            if (selectedConsumption === 'voltage') {
-                                const firstList = {
-                                    id: bldgObj?.building_id,
-                                    name: `${bldgObj?.building_name} - Volts_A_N`,
-                                    data: [],
-                                };
-                                const secondList = {
-                                    id: bldgObj?.building_id,
-                                    name: `${bldgObj?.building_name} - Volts_B_N`,
-                                    data: [],
-                                };
-                                const thirdList = {
-                                    id: bldgObj?.building_id,
-                                    name: `${bldgObj?.building_name} - Volts_C_N`,
-                                    data: [],
-                                };
+                            data.forEach((el) => {
+                                if (index === 0 && synchronizedChartData?.xData.length === 0) {
+                                    const time_format = userPrefTimeFormat === `24h` ? `HH:mm` : `hh:mm A`;
+                                    const date_format = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM 'YY` : `MMM D 'YY`;
 
-                                data.map((el) => {
-                                    if (el?.data === '' && el?.data !== 0) {
-                                        firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                        secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                        thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                    } else {
-                                        firstList.data.push({
-                                            x: new Date(el?.time_stamp).getTime(),
-                                            y: calculateDataConvertion(el?.data?.Volts_A_N, selectedConsumption),
-                                        });
-                                        secondList.data.push({
-                                            x: new Date(el?.time_stamp).getTime(),
-                                            y: calculateDataConvertion(el?.data?.Volts_B_N, selectedConsumption),
-                                        });
-                                        thirdList.data.push({
-                                            x: new Date(el?.time_stamp).getTime(),
-                                            y: calculateDataConvertion(el?.data?.Volts_C_N, selectedConsumption),
-                                        });
-                                    }
-                                });
+                                    timestamps.push(
+                                        moment.utc(el?.time_stamp).format(`${date_format} @ ${time_format}`)
+                                    );
+                                }
 
-                                recordToInsert.push(firstList);
-                                recordToInsert.push(secondList);
-                                recordToInsert.push(thirdList);
-                            }
-                        } else {
-                            const newBldgMappedData = data.map((el) => ({
-                                x: new Date(el?.time_stamp).getTime(),
-                                y: calculateDataConvertion(el?.data, selectedConsumption),
-                            }));
-
-                            recordToInsert.push({
-                                id: bldgObj?.building_id,
-                                name: bldgObj?.building_name,
-                                data: newBldgMappedData,
+                                metricBldgDataObj.data.push(calculateDataConvertion(el?.data, metrics[index]?.value));
                             });
+
+                            if (index === 0 && synchronizedChartData?.xData.length === 0) {
+                                previousSyncChartObj.xData = [...timestamps];
+                            }
+
+                            metricObj.data.push(metricBldgDataObj);
                         }
 
-                        if (index === 0) setSeriesData([...seriesData, ...recordToInsert]);
-                        if (index === 1) setPastSeriesData([...pastSeriesData, ...recordToInsert]);
-                    } else {
-                        UserStore.update((s) => {
-                            s.showNotification = true;
-                            s.notificationMessage = response?.message
-                                ? response?.message
-                                : res
-                                ? 'Unable to fetch data for selected Building.'
-                                : 'Unable to fetch data due to Internal Server Error!';
-                            s.notificationType = 'error';
-                        });
-                    }
-                });
+                        if (synchronizedChartData?.datasets.length === 0) {
+                            previousSyncChartObj.datasets.push(metricObj);
+                        } else {
+                            previousSyncChartObj.datasets.forEach((el) => {
+                                if (el?.name === metricObj?.metric) {
+                                    el.data.push({
+                                        name: metricObj?.data[0].name,
+                                        data: metricObj?.data[0].data,
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+                setSynchronizedChartData(previousSyncChartObj);
             })
             .catch((err) => {
                 UserStore.update((s) => {
                     s.showNotification = true;
-                    s.notificationMessage = 'Unable to fetch data due to Internal Server Error!.';
+                    s.notificationMessage = 'Unable to selected Building!';
                     s.notificationType = 'error';
                 });
             });
     };
 
-    const fetchMultipleBldgsChartData = async (
-        start_date,
-        end_date,
-        data_type = 'energy',
-        bldgIDs = [],
-        requestType = 'currentData'
-    ) => {
-        if (start_date === null || end_date === null || !data_type || bldgIDs.length === 0) return;
+    const fetchMultipleBldgsChartData = async (start_date, end_date, selected_metrics = [], bldgIDs = []) => {
+        if (start_date === null || end_date === null || selected_metrics.length === 0 || bldgIDs.length === 0) return;
 
-        requestType === 'currentData' ? setFetchingChartData(true) : setFetchingPastChartData(true);
+        setFetchingChartData(true);
+
+        setSynchronizedChartData({});
+
+        let promisesList = [];
+        let newMetricsMappedData = [];
 
         const time_zone = encodeURIComponent(timeZone);
-        const params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${time_zone}&metric=${data_type}`;
 
-        const promisesList = [];
+        selected_metrics.forEach((metric) => {
+            const params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${time_zone}&metric=${metric?.value}`;
 
-        bldgIDs.forEach((id) => {
-            promisesList.push(fetchExploreBuildingChart(params, id));
+            let newMetricObj = {
+                name: metric?.label,
+                data: [],
+                unit: metric?.unit,
+                metric: metric?.label,
+                value: metric?.value,
+            };
+
+            bldgIDs.forEach((bldg_id) => {
+                const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldg_id);
+                newMetricObj.data.push({
+                    name: `${bldgObj?.building_name} - ${metric?.label}`,
+                    data: [],
+                });
+
+                promisesList.push(fetchExploreBuildingChart(params, bldg_id));
+            });
+
+            newMetricsMappedData.push(newMetricObj);
         });
-
-        requestType === 'currentData' ? setSeriesData([]) : setPastSeriesData([]);
 
         Promise.all(promisesList)
             .then((res) => {
                 const promiseResponse = res;
 
-                if (promiseResponse?.length !== 0) {
-                    const newResponse = [];
+                let newSyncChartObj = {
+                    xData: [],
+                    datasets: [],
+                };
 
-                    promiseResponse.forEach((record, index) => {
-                        const response = record?.data;
-                        const { metadata } = record?.data;
-                        if (response?.success && response?.data.length !== 0) {
-                            const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldgIDs[index]);
-                            if (!bldgObj?.building_id) return;
+                if (promiseResponse && promiseResponse.length !== 0) {
+                    let dataList = [];
 
-                            if (
-                                metadata?.device_types === 'shadow meter' &&
-                                (selectedConsumption === 'current' || selectedConsumption === 'voltage')
-                            ) {
-                                if (selectedConsumption === 'current') {
-                                    const firstList = {
-                                        id: bldgObj?.building_id,
-                                        name: `${bldgObj?.building_name} - Amps_A`,
-                                        data: [],
-                                    };
-                                    const secondList = {
-                                        id: bldgObj?.building_id,
-                                        name: `${bldgObj?.building_name} - Amps_B`,
-                                        data: [],
-                                    };
-                                    const thirdList = {
-                                        id: bldgObj?.building_id,
-                                        name: `${bldgObj?.building_name} - Amps_C`,
-                                        data: [],
-                                    };
+                    promiseResponse.forEach((response, response_index) => {
+                        if (response?.status === 200 && response?.data?.success) {
+                            const { data } = response?.data;
+                            console.log('Sudhanshu data => ', data);
+                            console.log('Sudhanshu response_index => ', response_index);
 
-                                    response.data.map((el) => {
-                                        if (el?.data === '' && el?.data !== 0) {
-                                            firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                            secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                            thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                        } else {
-                                            firstList.data.push({
-                                                x: new Date(el?.time_stamp).getTime(),
-                                                y: calculateDataConvertion(el?.data?.Amps_A, selectedConsumption),
-                                            });
-                                            secondList.data.push({
-                                                x: new Date(el?.time_stamp).getTime(),
-                                                y: calculateDataConvertion(el?.data?.Amps_B, selectedConsumption),
-                                            });
-                                            thirdList.data.push({
-                                                x: new Date(el?.time_stamp).getTime(),
-                                                y: calculateDataConvertion(el?.data?.Amps_C, selectedConsumption),
-                                            });
-                                        }
-                                    });
+                            let newFormattedData = [];
 
-                                    newResponse.push(firstList);
-                                    newResponse.push(secondList);
-                                    newResponse.push(thirdList);
+                            data.forEach((el) => {
+                                if (response_index === 0) {
+                                    const time_format = userPrefTimeFormat === `24h` ? `HH:mm` : `hh:mm A`;
+                                    const date_format = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM 'YY` : `MMM D 'YY`;
+
+                                    newSyncChartObj.xData.push(
+                                        moment.utc(el?.time_stamp).format(`${date_format} @ ${time_format}`)
+                                    );
                                 }
 
-                                if (selectedConsumption === 'voltage') {
-                                    const firstList = {
-                                        id: bldgObj?.building_id,
-                                        name: `${bldgObj?.building_name} - Volts_A_N`,
-                                        data: [],
-                                    };
-                                    const secondList = {
-                                        id: bldgObj?.building_id,
-                                        name: `${bldgObj?.building_name} - Volts_B_N`,
-                                        data: [],
-                                    };
-                                    const thirdList = {
-                                        id: bldgObj?.building_id,
-                                        name: `${bldgObj?.building_name} - Volts_C_N`,
-                                        data: [],
-                                    };
+                                newFormattedData.push(
+                                    calculateDataConvertion(el?.data, metrics[response_index]?.value)
+                                );
+                            });
 
-                                    response.data.map((el) => {
-                                        if (el?.data === '' && el?.data !== 0) {
-                                            firstList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                            secondList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                            thirdList.data.push({ x: new Date(el?.time_stamp).getTime(), y: null });
-                                        } else {
-                                            firstList.data.push({
-                                                x: new Date(el?.time_stamp).getTime(),
-                                                y: calculateDataConvertion(el?.data?.Volts_A_N, selectedConsumption),
-                                            });
-                                            secondList.data.push({
-                                                x: new Date(el?.time_stamp).getTime(),
-                                                y: calculateDataConvertion(el?.data?.Volts_B_N, selectedConsumption),
-                                            });
-                                            thirdList.data.push({
-                                                x: new Date(el?.time_stamp).getTime(),
-                                                y: calculateDataConvertion(el?.data?.Volts_C_N, selectedConsumption),
-                                            });
-                                        }
-                                    });
-
-                                    newResponse.push(firstList);
-                                    newResponse.push(secondList);
-                                    newResponse.push(thirdList);
-                                }
-                            } else {
-                                const newBldgsMappedData = response?.data.map((el) => ({
-                                    x: new Date(el?.time_stamp).getTime(),
-                                    y: calculateDataConvertion(el?.data, data_type),
-                                }));
-
-                                newResponse.push({
-                                    id: bldgObj?.building_id,
-                                    name: bldgObj?.building_name,
-                                    data: newBldgsMappedData,
-                                });
-                            }
+                            dataList.push(newFormattedData);
                         }
                     });
 
-                    requestType === 'currentData' ? setSeriesData(newResponse) : setPastSeriesData(newResponse);
+                    let resultArray = [];
+                    const chunkSize = bldgIDs.length;
+
+                    for (let i = 0; i < dataList.length; i += chunkSize) {
+                        const chunk = dataList.slice(i, i + chunkSize);
+                        resultArray.push(chunk);
+                    }
+
+                    newMetricsMappedData.forEach((metric_obj, metric_index) => {
+                        metric_obj.data.forEach((building_obj, building_index) => {
+                            building_obj.data = resultArray[metric_index][building_index];
+                        });
+                    });
+
+                    newSyncChartObj.datasets = newMetricsMappedData;
+                    setSynchronizedChartData(newSyncChartObj);
                 }
             })
             .catch(() => {})
             .finally(() => {
-                requestType === 'currentData' ? setFetchingChartData(false) : setFetchingPastChartData(false);
+                setFetchingChartData(false);
             });
     };
 
-    const handleBuildingStateChange = (value, selectedBldg, isComparisionOn = false) => {
+    const handleBuildingStateChange = (value, selectedBldg) => {
         if (value === 'true') {
             const newDataList = seriesData.filter((item) => item?.id !== selectedBldg?.building_id);
             setSeriesData(newDataList);
-
-            if (isComparisionOn) {
-                const newPastDataList = pastSeriesData.filter((item) => item?.id !== selectedBldg?.building_id);
-                setPastSeriesData(newPastDataList);
-            }
         }
 
         if (value === 'false') {
-            if (selectedBldg?.building_id) fetchSingleBldgChartData(selectedBldg?.building_id, isComparisionOn);
+            if (selectedBldg?.building_id) fetchSingleBldgChartData(selectedBldg?.building_id);
         }
 
         const isAdding = value === 'false';
@@ -916,27 +775,16 @@ const ExploreByBuildings = () => {
     }, [minConValue, maxConValue, minPerValue, maxPerValue, minSqftValue, maxSqftValue, perAPIFlag, userPrefUnits]);
 
     useEffect(() => {
-        if (selectedBldgIds.length !== 0) {
-            fetchMultipleBldgsChartData(startDate, endDate, selectedConsumption, selectedBldgIds, 'currentData');
-
-            if (isInComparisonMode) {
-                const pastDateObj = getPastDateRange(startDate, daysCount);
-                fetchMultipleBldgsChartData(
-                    pastDateObj?.startDate,
-                    pastDateObj?.endDate,
-                    selectedConsumption,
-                    selectedBldgIds,
-                    'pastData'
-                );
-            }
+        if (selectedBldgIds.length !== 0 && metrics.length !== 0) {
+            fetchMultipleBldgsChartData(startDate, endDate, metrics, selectedBldgIds);
         }
-    }, [startDate, endDate, selectedConsumption, userPrefUnits]);
+    }, [startDate, endDate, metrics, userPrefUnits]);
 
     useEffect(() => {
         if (checkedAll) {
             if (exploreBuildingsList.length !== 0 && exploreBuildingsList.length <= 20) {
                 const allBldgsIds = exploreBuildingsList.map((el) => el?.building_id);
-                fetchMultipleBldgsChartData(startDate, endDate, selectedConsumption, allBldgsIds);
+                fetchMultipleBldgsChartData(startDate, endDate, metrics[0]?.value, allBldgsIds);
                 setSelectedBldgIds(allBldgsIds);
             }
         }
@@ -946,164 +794,55 @@ const ExploreByBuildings = () => {
         }
     }, [checkedAll]);
 
-    useEffect(() => {
-        if (isInComparisonMode) {
-            const pastDateObj = getPastDateRange(startDate, daysCount);
-            fetchMultipleBldgsChartData(
-                pastDateObj?.startDate,
-                pastDateObj?.endDate,
-                selectedConsumption,
-                selectedBldgIds,
-                'pastData'
-            );
-        } else {
-            setPastSeriesData([]);
-        }
-    }, [isInComparisonMode]);
-
     const dataToRenderOnChart = validateSeriesDataForBuildings(selectedBldgIds, exploreBuildingsList, seriesData);
-    const pastDataToRenderOnChart = validateSeriesDataForBuildings(
-        selectedBldgIds,
-        exploreBuildingsList,
-        pastSeriesData
-    );
 
-    let tooltipUnitVal = selectedUnit;
+    let tooltipUnitVal = metrics[0]?.unit;
 
-    if (selectedConsumption.includes('carbon')) {
+    if (metrics[0]?.value.includes('carbon')) {
         tooltipUnitVal =
             userPrefUnits === 'si'
-                ? selectedConsumption === 'carbon_emissions'
+                ? metrics[0]?.value === 'carbon_emissions'
                     ? 'kg'
                     : 'kg/MWh'
-                : selectedConsumption === 'carbon_emissions'
+                : metrics[0]?.value === 'carbon_emissions'
                 ? 'lbs'
                 : 'lbs/MWh';
     }
 
     return (
         <>
-            <Row className="d-flex justify-content-end">
-                <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
-                    <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                        <Button
-                            size={Button.Sizes.lg}
-                            type={isInComparisonMode ? Button.Type.secondary : Button.Type.secondaryGrey}>
-                            <Toggles
-                                size={Toggles.Sizes.sm}
-                                isChecked={isInComparisonMode}
-                                onChange={toggleComparision}
-                            />
-                            <Typography.Subheader size={Typography.Sizes.lg} onClick={toggleComparision}>
-                                Compare
-                            </Typography.Subheader>
-                        </Button>
-                        <Select.Multi
-                            defaultValue={selectedMetrics}
-                            options={exploreBldgMetrics}
-                            onChange={handleMetricsChange}
-                            onMenuClose={handleMenuClose}
-                            placeholder={`Select Metrics ...`}
-                            selectType={`explore`}
-                        />
-                        <Header title="" type="page" />
-                    </div>
+            <Row className="explore-filters-style p-2">
+                <div className="mr-2">
+                    <Select.Multi
+                        defaultValue={selectedMetrics}
+                        options={exploreBldgMetrics}
+                        onChange={handleMetricsChange}
+                        onMenuClose={handleMenuClose}
+                        placeholder={`Select Metrics ...`}
+                        selectType={`explore`}
+                    />
                 </div>
+                <Header title="" type="page" />
             </Row>
 
             <Row>
                 <div className="explore-data-table-style p-2">
-                    {isFetchingChartData || isFetchingPastChartData ? (
+                    {isFetchingChartData ? (
                         <div className="explore-chart-wrapper">
                             <div className="explore-chart-loader">
                                 <Spinner color="primary" />
                             </div>
                         </div>
                     ) : (
-                        <>
-                            {isInComparisonMode ? (
-                                <ExploreCompareChart
-                                    title={''}
-                                    subTitle={''}
-                                    data={dataToRenderOnChart}
-                                    pastData={pastDataToRenderOnChart}
-                                    tooltipUnit={selectedUnit}
-                                    tooltipLabel={selectedConsumptionLabel}
-                                    timeIntervalObj={{
-                                        startDate,
-                                        endDate,
-                                        daysCount,
-                                    }}
-                                    chartProps={{
-                                        tooltip: {
-                                            xDateFormat: dateTimeFormatForHighChart(
-                                                userPrefDateFormat,
-                                                userPrefTimeFormat
-                                            ),
-                                        },
-                                    }}
-                                />
-                            ) : (
-                                <ExploreChart
-                                    title={''}
-                                    subTitle={''}
-                                    tooltipUnit={tooltipUnitVal}
-                                    tooltipLabel={selectedConsumptionLabel}
-                                    disableDefaultPlotBands={true}
-                                    data={dataToRenderOnChart}
-                                    pastData={pastDataToRenderOnChart}
-                                    chartProps={{
-                                        navigator: {
-                                            outlineWidth: 0,
-                                            adaptToUpdatedData: false,
-                                            stickToMax: true,
-                                        },
-                                        plotOptions: {
-                                            series: {
-                                                states: {
-                                                    inactive: {
-                                                        opacity: 1,
-                                                    },
-                                                },
-                                            },
-                                        },
-                                        xAxis: {
-                                            gridLineWidth: 0,
-                                            type: 'datetime',
-                                            labels: {
-                                                format: formatXaxisForHighCharts(
-                                                    daysCount,
-                                                    userPrefDateFormat,
-                                                    userPrefTimeFormat,
-                                                    selectedConsumption
-                                                ),
-                                            },
-                                        },
-                                        yAxis: [
-                                            {
-                                                gridLineWidth: 1,
-                                                lineWidth: 1,
-                                                opposite: false,
-                                                lineColor: null,
-                                            },
-                                            {
-                                                opposite: true,
-                                                title: false,
-                                                max: 120,
-                                                postFix: '23',
-                                                gridLineWidth: 0,
-                                            },
-                                        ],
-                                        tooltip: {
-                                            xDateFormat: dateTimeFormatForHighChart(
-                                                userPrefDateFormat,
-                                                userPrefTimeFormat
-                                            ),
-                                        },
-                                    }}
-                                />
+                        <SynchronizedCharts
+                            syncChartData={synchronizedChartData}
+                            xAxisLabels={formatXaxisForHighCharts(
+                                daysCount,
+                                userPrefDateFormat,
+                                userPrefTimeFormat,
+                                'energy'
                             )}
-                        </>
+                        />
                     )}
                 </div>
             </Row>
@@ -1149,7 +888,7 @@ const ExploreByBuildings = () => {
                                     checked={selectedBldgIds.includes(record?.building_id)}
                                     value={selectedBldgIds.includes(record?.building_id)}
                                     onChange={(e) => {
-                                        handleBuildingStateChange(e.target.value, record, isInComparisonMode);
+                                        handleBuildingStateChange(e.target.value, record);
                                     }}
                                 />
                             )}
