@@ -68,6 +68,10 @@ const ExploreByBuildings = () => {
     let top = '';
     let bottom = '';
 
+    const defaultMetric = exploreBldgMetrics[0];
+    const [selectedMetrics, setSelectedMetrics] = useState([defaultMetric]);
+    const [metrics, setMetrics] = useState([defaultMetric]);
+
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(0);
     const [bottomEnergyConsumption, setBottomEnergyConsumption] = useState(0);
     const [topPerChange, setTopPerChange] = useState(0);
@@ -106,6 +110,9 @@ const ExploreByBuildings = () => {
             s.notificationType = 'success';
         });
     };
+
+    const handleMenuClose = () => setMetrics(selectedMetrics);
+    const handleMetricsChange = (selectedOptions) => setSelectedMetrics(selectedOptions);
 
     const handleUnitChange = (value) => {
         const obj = exploreBldgMetrics.find((record) => record?.value === value);
@@ -991,14 +998,13 @@ const ExploreByBuildings = () => {
                                 Compare
                             </Typography.Subheader>
                         </Button>
-                        <Select
-                            defaultValue={selectedConsumption}
+                        <Select.Multi
+                            defaultValue={selectedMetrics}
                             options={exploreBldgMetrics}
-                            onChange={(e) => {
-                                setConsumption(e.value);
-                                handleUnitChange(e.value);
-                                handleConsumptionChange(e.value);
-                            }}
+                            onChange={handleMetricsChange}
+                            onMenuClose={handleMenuClose}
+                            placeholder={`Select Metrics ...`}
+                            selectType={`explore`}
                         />
                         <Header title="" type="page" />
                     </div>
