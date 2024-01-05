@@ -6,7 +6,7 @@ import { renderComponents } from '../columnChart/helper';
 import Typography from '../../sharedComponents/typography';
 import { formatConsumptionValue } from '../helpers/helper';
 import { sampleDataFour, sampleDataOne, sampleDataThree, sampleDataTwo } from './mock';
-import { getPastDateRange } from '../../helpers/helpers';
+import { formatXaxisForHighCharts, getPastDateRange } from '../../helpers/helpers';
 
 export const customPreparedData = (data = [], pastData = [], timeIntervalObj) => {
     const pastDateObj = getPastDateRange(timeIntervalObj?.startDate, timeIntervalObj?.daysCount);
@@ -43,7 +43,16 @@ export const customPreparedData = (data = [], pastData = [], timeIntervalObj) =>
     return comparedDataList;
 };
 
-export const multipleLineChartOptions = ({ data = [], pastData = [], tooltipUnit, tooltipLabel, timeIntervalObj }) => {
+export const multipleLineChartOptions = ({
+    data = [],
+    pastData = [],
+    tooltipUnit,
+    tooltipLabel,
+    timeIntervalObj,
+    chartType,
+    userPrefDateFormat,
+    userPrefTimeFormat,
+}) => {
     return {
         chart: {
             type: 'line',
@@ -145,7 +154,12 @@ export const multipleLineChartOptions = ({ data = [], pastData = [], tooltipUnit
                 alternateGridColor: false,
                 type: 'datetime',
                 labels: {
-                    format: '{value:%d/%m %I:%M %p}',
+                    format: formatXaxisForHighCharts(
+                        timeIntervalObj?.daysCount,
+                        userPrefDateFormat,
+                        userPrefTimeFormat,
+                        chartType
+                    ),
                     padding: 10,
                 },
             },
@@ -157,7 +171,12 @@ export const multipleLineChartOptions = ({ data = [], pastData = [], tooltipUnit
                 type: 'datetime',
                 opposite: true,
                 labels: {
-                    format: '{value:%d/%m %I:%M %p}',
+                    format: formatXaxisForHighCharts(
+                        timeIntervalObj?.daysCount,
+                        userPrefDateFormat,
+                        userPrefTimeFormat,
+                        chartType
+                    ),
                     padding: 10,
                 },
                 visible: false, // Enable when timestamp need to be shown on top of the chart
