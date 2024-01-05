@@ -1201,6 +1201,7 @@ const ExploreByEquipment = () => {
                                             ),
                                         },
                                     }}
+                                    chartType={selectedConsumption}
                                 />
                             ) : (
                                 <ExploreChart

@@ -11,10 +11,11 @@ import HighchartsExporting from 'highcharts/modules/exporting';
 import Typography from '../typography';
 import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
 import { HighchartsLowMedHigh } from '../common/charts/modules/lowmedhigh';
-import EmptyExploreChart from '../exploreChart/components/emptyExploreChart/EmptyExploreChart';
+
+import { UserStore } from '../../store/UserStore';
 
 import { DOWNLOAD_TYPES } from '../constants';
-import { multipleChartMocks, multipleLineChartOptions } from './constants';
+import { multipleLineChartOptions } from './constants';
 
 import { ReactComponent as BurgerSVG } from '../../assets/icon/burger.svg';
 
@@ -37,7 +38,11 @@ const ExploreCompareChart = (props) => {
         tooltipLabel,
         chartProps = {},
         timeIntervalObj = {},
+        chartType = 'energy',
     } = props;
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
@@ -62,6 +67,9 @@ const ExploreCompareChart = (props) => {
             tooltipUnit,
             tooltipLabel,
             timeIntervalObj,
+            chartType,
+            userPrefDateFormat,
+            userPrefTimeFormat,
         }),
         chartProps
     );
