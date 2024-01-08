@@ -26,7 +26,7 @@ import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 
 import { timeZone } from '../../utils/helper';
 import { getAverageValue } from '../../helpers/AveragePercent';
-import { formatXaxisForHighCharts } from '../../helpers/helpers';
+import { formatXaxisForHighCharts, getPastDateRange } from '../../helpers/helpers';
 
 import { handleUnitConverstion } from '../settings/general-settings/utils';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
@@ -103,14 +103,13 @@ const ExploreByBuildings = () => {
         datasets: [],
     });
 
-    console.log('SSR synchronizedChartData => ', synchronizedChartData);
-
     const [pastSynchronizedChartData, setPastSynchronizedChartData] = useState({
         xData: [],
         datasets: [],
     });
 
     console.log('SSR synchronizedChartData => ', synchronizedChartData);
+    console.log('SSR pastSynchronizedChartData => ', pastSynchronizedChartData);
 
     const currentRow = () => {
         return exploreBuildingsList;
@@ -376,12 +375,13 @@ const ExploreByBuildings = () => {
             });
     };
 
-    const fetchSingleBldgChartData = async (bldg_id) => {
+    const fetchSingleBldgChartData = async (startDate, endDate, bldg_id, dataType) => {
         if (metrics.length === 0) return;
 
         const start_date = encodeURIComponent(startDate);
         const end_date = encodeURIComponent(endDate);
         const time_zone = encodeURIComponent(timeZone);
+        const currentChartData = dataType === 'currentData' ? synchronizedChartData : pastSynchronizedChartData;
 
         const promisesList = [];
 
@@ -403,7 +403,7 @@ const ExploreByBuildings = () => {
                 const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldg_id);
 
                 // Made copy of synced chart obj
-                const previousSyncChartObj = _.cloneDeep(synchronizedChartData);
+                const previousSyncChartObj = _.cloneDeep(currentChartData);
 
                 if (promiseResponse && promiseResponse.length !== 0) {
                     promiseResponse.forEach((res, index) => {
@@ -426,7 +426,7 @@ const ExploreByBuildings = () => {
                             };
 
                             data.forEach((el) => {
-                                if (index === 0 && synchronizedChartData?.xData.length === 0) {
+                                if (index === 0 && currentChartData?.xData.length === 0) {
                                     const time_format = userPrefTimeFormat === `24h` ? `HH:mm` : `hh:mm A`;
                                     const date_format = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM 'YY` : `MMM D 'YY`;
 
@@ -438,14 +438,14 @@ const ExploreByBuildings = () => {
                                 metricBldgDataObj.data.push(calculateDataConvertion(el?.data, metrics[index]?.value));
                             });
 
-                            if (index === 0 && synchronizedChartData?.xData.length === 0) {
+                            if (index === 0 && currentChartData?.xData.length === 0) {
                                 previousSyncChartObj.xData = [...timestamps];
                             }
 
                             metricObj.data.push(metricBldgDataObj);
                         }
 
-                        if (synchronizedChartData?.datasets.length === 0) {
+                        if (currentChartData?.datasets.length === 0) {
                             previousSyncChartObj.datasets.push(metricObj);
                         } else {
                             previousSyncChartObj.datasets.forEach((el) => {
@@ -459,7 +459,9 @@ const ExploreByBuildings = () => {
                         }
                     });
                 }
-                setSynchronizedChartData(previousSyncChartObj);
+
+                if (dataType === 'currentData') setSynchronizedChartData(previousSyncChartObj);
+                if (dataType === 'pastData') setPastSynchronizedChartData(previousSyncChartObj);
             })
             .catch((err) => {
                 UserStore.update((s) => {
@@ -521,8 +523,6 @@ const ExploreByBuildings = () => {
                     promiseResponse.forEach((response, response_index) => {
                         if (response?.status === 200 && response?.data?.success) {
                             const { data } = response?.data;
-                            console.log('Sudhanshu data => ', data);
-                            console.log('Sudhanshu response_index => ', response_index);
 
                             let newFormattedData = [];
 
@@ -569,14 +569,26 @@ const ExploreByBuildings = () => {
             });
     };
 
-    const handleBuildingStateChange = (value, selectedBldg) => {
+    const handleBuildingStateChange = (value, selectedBldg, isComparisionOn = false) => {
         if (value === 'true') {
             const newDataList = seriesData.filter((item) => item?.id !== selectedBldg?.building_id);
             setSeriesData(newDataList);
         }
 
         if (value === 'false') {
-            if (selectedBldg?.building_id) fetchSingleBldgChartData(selectedBldg?.building_id);
+            if (selectedBldg?.building_id) {
+                fetchSingleBldgChartData(startDate, endDate, selectedBldg?.building_id, 'currentData');
+
+                if (isComparisionOn) {
+                    const pastDateObj = getPastDateRange(startDate, daysCount);
+                    fetchSingleBldgChartData(
+                        pastDateObj?.startDate,
+                        pastDateObj?.endDate,
+                        selectedBldg?.building_id,
+                        'pastData'
+                    );
+                }
+            }
         }
 
         const isAdding = value === 'false';
@@ -926,7 +938,7 @@ const ExploreByBuildings = () => {
                                     checked={selectedBldgIds.includes(record?.building_id)}
                                     value={selectedBldgIds.includes(record?.building_id)}
                                     onChange={(e) => {
-                                        handleBuildingStateChange(e.target.value, record);
+                                        handleBuildingStateChange(e.target.value, record, isInComparisonMode);
                                     }}
                                 />
                             )}
