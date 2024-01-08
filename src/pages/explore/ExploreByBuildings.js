@@ -60,7 +60,10 @@ const ExploreByBuildings = () => {
     const [exploreBuildingsList, setExploreBuildingsList] = useState([]);
 
     const [isFilterFetching, setFetchingFilters] = useState(false);
+
     const [isFetchingChartData, setFetchingChartData] = useState(false);
+    const [isFetchingPastChartData, setFetchingPastChartData] = useState(false);
+
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
 
     const [isCSVDownloading, setDownloadingCSVData] = useState(false);
@@ -375,13 +378,13 @@ const ExploreByBuildings = () => {
             });
     };
 
-    const fetchSingleBldgChartData = async (startDate, endDate, bldg_id, dataType) => {
+    const fetchSingleBldgChartData = async (startDate, endDate, bldg_id, requestType = 'currentData') => {
         if (metrics.length === 0) return;
 
         const start_date = encodeURIComponent(startDate);
         const end_date = encodeURIComponent(endDate);
         const time_zone = encodeURIComponent(timeZone);
-        const currentChartData = dataType === 'currentData' ? synchronizedChartData : pastSynchronizedChartData;
+        const currentChartData = requestType === 'currentData' ? synchronizedChartData : pastSynchronizedChartData;
 
         const promisesList = [];
 
@@ -460,8 +463,8 @@ const ExploreByBuildings = () => {
                     });
                 }
 
-                if (dataType === 'currentData') setSynchronizedChartData(previousSyncChartObj);
-                if (dataType === 'pastData') setPastSynchronizedChartData(previousSyncChartObj);
+                if (requestType === 'currentData') setSynchronizedChartData(previousSyncChartObj);
+                if (requestType === 'pastData') setPastSynchronizedChartData(previousSyncChartObj);
             })
             .catch((err) => {
                 UserStore.update((s) => {
@@ -472,12 +475,19 @@ const ExploreByBuildings = () => {
             });
     };
 
-    const fetchMultipleBldgsChartData = async (start_date, end_date, selected_metrics = [], bldgIDs = []) => {
+    const fetchMultipleBldgsChartData = async (
+        start_date,
+        end_date,
+        selected_metrics = [],
+        bldgIDs = [],
+        requestType = 'currentData'
+    ) => {
         if (start_date === null || end_date === null || selected_metrics.length === 0 || bldgIDs.length === 0) return;
 
-        setFetchingChartData(true);
+        requestType === 'currentData' ? setFetchingChartData(true) : setFetchingPastChartData(true);
 
         setSynchronizedChartData({});
+        setPastSynchronizedChartData({});
 
         let promisesList = [];
         let newMetricsMappedData = [];
@@ -560,12 +570,14 @@ const ExploreByBuildings = () => {
                     });
 
                     newSyncChartObj.datasets = newMetricsMappedData;
-                    setSynchronizedChartData(newSyncChartObj);
+
+                    if (requestType === 'currentData') setSynchronizedChartData(newSyncChartObj);
+                    if (requestType === 'pastData') setPastSynchronizedChartData(newSyncChartObj);
                 }
             })
             .catch(() => {})
             .finally(() => {
-                setFetchingChartData(false);
+                requestType === 'currentData' ? setFetchingChartData(false) : setFetchingPastChartData(false);
             });
     };
 
@@ -812,7 +824,18 @@ const ExploreByBuildings = () => {
 
     useEffect(() => {
         if (selectedBldgIds.length !== 0 && metrics.length !== 0) {
-            fetchMultipleBldgsChartData(startDate, endDate, metrics, selectedBldgIds);
+            fetchMultipleBldgsChartData(startDate, endDate, metrics, selectedBldgIds, 'currentData');
+
+            if (isInComparisonMode) {
+                const pastDateObj = getPastDateRange(startDate, daysCount);
+                fetchMultipleBldgsChartData(
+                    pastDateObj?.startDate,
+                    pastDateObj?.endDate,
+                    metrics,
+                    selectedBldgIds,
+                    'pastData'
+                );
+            }
         }
     }, [startDate, endDate, metrics, userPrefUnits]);
 
@@ -877,7 +900,7 @@ const ExploreByBuildings = () => {
 
             <Row>
                 <div className="explore-data-table-style p-2">
-                    {isFetchingChartData ? (
+                    {isFetchingChartData || isFetchingPastChartData ? (
                         <div className="explore-chart-wrapper">
                             <div className="explore-chart-loader">
                                 <Spinner color="primary" />
