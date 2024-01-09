@@ -132,7 +132,7 @@ const ExploreByBuildingsV2 = () => {
         return (
             <div style={{ fontSize: 0 }}>
                 <Link
-                    to={`/explore-page/by-equipment/${row?.building_id}`}
+                    to={`/v2/explore-page/by-equipment/${row?.building_id}`}
                     className="typography-wrapper link mouse-pointer"
                     onClick={() => {
                         updateBuildingStore(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);

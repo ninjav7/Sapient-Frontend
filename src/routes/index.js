@@ -431,12 +431,12 @@ const exploreRoutes = {
 
 // Explore Routes
 const exploreRoutesV2 = {
-    path: '/explore-page/v2/by-buildings',
+    path: '/v2/explore-page/v2/by-buildings',
     name: 'Explore',
     visibility: true,
     children: [
         {
-            path: '/explore-page/v2/by-buildings',
+            path: '/v2/explore-page/by-buildings',
             name: 'Explore by Building',
             component: ExploreByBuildingsV2,
             route: PrivateRoute,
@@ -444,7 +444,7 @@ const exploreRoutesV2 = {
             visibility: false,
         },
         {
-            path: '/explore-page/v2/by-equipment/:bldgId',
+            path: '/v2/explore-page/by-equipment/:bldgId',
             name: 'Explore by Equipment',
             component: ExploreByEquipmentV2,
             route: PrivateRoute,
@@ -620,7 +620,6 @@ const authProtectedRoutes = [
     alertsRoutes,
     carbonRoutes,
     controlRoutes,
-    exploreRoutesV2,
     exploreRoutes,
     adminRoutes,
 ];
