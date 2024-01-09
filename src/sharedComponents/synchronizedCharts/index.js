@@ -13,7 +13,7 @@ import { formatConsumptionValue } from '../helpers/helper';
 import './styles.scss';
 
 const SynchronizedCharts = (props) => {
-    const { syncChartData = {}, xAxisLabels } = props;
+    const { currentChartData = {}, pastChartData = {}, isComparisionOn = false, xAxisLabels } = props;
 
     const [chartData, setChartData] = useState(null);
     const [hoveredIndexId, setHoveredIndexId] = useState(null);
@@ -60,7 +60,7 @@ const SynchronizedCharts = (props) => {
             this.series.chart.xAxis[0].drawCrosshair(event, this); // Show the crosshair
         };
 
-        const newChartData = _.cloneDeep(syncChartData);
+        const newChartData = _.cloneDeep(currentChartData);
 
         if (newChartData?.datasets && newChartData?.datasets.length !== 0) {
             newChartData.datasets.forEach((el) => {
@@ -83,7 +83,7 @@ const SynchronizedCharts = (props) => {
             Highcharts.Pointer.prototype.reset = oldReset;
             Highcharts.Point.prototype.highlight = oldHighlight;
         };
-    }, [syncChartData]);
+    }, [currentChartData]);
 
     if (!chartData) return null;
 
@@ -108,9 +108,19 @@ const SynchronizedCharts = (props) => {
                                         crosshair
                                         id={`sync-chart-${index}`}
                                         type={'datetime'}
-                                        labels={{ format: xAxisLabels }}
                                         gridLineWidth={0}
+                                        labels={{ format: xAxisLabels }}
                                     />
+
+                                    {/* <XAxis
+                                        crosshair
+                                        id={`opposite-sync-chart-${index}`}
+                                        type={'datetime'}
+                                        gridLineWidth={0}
+                                        labels={{ format: xAxisLabels }}
+                                        opposite
+                                        visible={false}
+                                    /> */}
 
                                     <YAxis>
                                         {dataset?.data.map((line, lineIndex) => (
@@ -185,7 +195,9 @@ const SynchronizedCharts = (props) => {
 };
 
 SynchronizedCharts.propTypes = {
-    syncChartData: PropTypes.object,
+    currentChartData: PropTypes.object,
+    pastChartData: PropTypes.object,
+    isComparisionOn: PropTypes.bool,
     xAxisLabels: PropTypes.any,
 };
 
