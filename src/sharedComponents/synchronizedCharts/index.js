@@ -60,30 +60,48 @@ const SynchronizedCharts = (props) => {
             this.series.chart.xAxis[0].drawCrosshair(event, this); // Show the crosshair
         };
 
-        const newChartData = _.cloneDeep(currentChartData);
+        const newCurrentData = _.cloneDeep(currentChartData);
 
-        if (newChartData?.datasets && newChartData?.datasets.length !== 0) {
-            newChartData.datasets.forEach((el) => {
+        if (newCurrentData?.datasets && newCurrentData?.datasets.length !== 0) {
+            newCurrentData.datasets.forEach((el, index) => {
                 const { unit } = el;
+
+                let newFormattedDataSets = [];
 
                 if (el?.data && el?.data.length !== 0) {
                     el.data.forEach((record, dataIndex) => {
                         const color = getColorBasedOnIndex(dataIndex);
-                        record.chart_color = color;
-                        record.chart_units = unit;
+
+                        newFormattedDataSets.push({
+                            ...record,
+                            chart_color: color,
+                            chart_units: unit,
+                            dash_style: 'Solid',
+                        });
+
+                        if (isComparisionOn && pastChartData.datasets[index]?.data[dataIndex]) {
+                            newFormattedDataSets.push({
+                                ...pastChartData.datasets[index].data[dataIndex],
+                                chart_color: color,
+                                chart_units: unit,
+                                dash_style: 'Dash',
+                            });
+                        }
                     });
                 }
+
+                el.data = newFormattedDataSets;
             });
         }
 
-        setChartData(newChartData);
+        setChartData(newCurrentData);
 
         // Cleanup: Restore the cached defaults
         return () => {
             Highcharts.Pointer.prototype.reset = oldReset;
             Highcharts.Point.prototype.highlight = oldHighlight;
         };
-    }, [currentChartData]);
+    }, [currentChartData, pastChartData, isComparisionOn]);
 
     if (!chartData) return null;
 
@@ -130,6 +148,7 @@ const SynchronizedCharts = (props) => {
                                                 data={line?.data}
                                                 color={line?.chart_color}
                                                 type="line"
+                                                dashStyle={line?.dash_style}
                                                 tooltip={{ valueSuffix: ` ${dataset?.unit}` }}
                                             />
                                         ))}
