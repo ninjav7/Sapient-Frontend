@@ -50,20 +50,11 @@ const SynchronizedCharts = (props) => {
         });
     };
 
-    useEffect(() => {
-        // Override the Highcharts prototypes here, so they only apply to this component
-        Highcharts.Pointer.prototype.reset = () => {};
+    const updateChartData = (currentChartData, pastChartData, isComparisionOn) => {
+        const updatedData = _.cloneDeep(currentChartData);
 
-        Highcharts.Point.prototype.highlight = function (event) {
-            this.onMouseOver(); // Show the hover marker
-            // this.series.chart.tooltip.refresh(this); // Show the tooltip
-            this.series.chart.xAxis[0].drawCrosshair(event, this); // Show the crosshair
-        };
-
-        const newCurrentData = _.cloneDeep(currentChartData);
-
-        if (newCurrentData?.datasets && newCurrentData?.datasets.length !== 0) {
-            newCurrentData.datasets.forEach((el, index) => {
+        if (updatedData?.datasets && updatedData?.datasets.length !== 0) {
+            updatedData.datasets.forEach((el, index) => {
                 const { unit } = el;
 
                 let newFormattedDataSets = [];
@@ -94,7 +85,21 @@ const SynchronizedCharts = (props) => {
             });
         }
 
-        setChartData(newCurrentData);
+        return updatedData;
+    };
+
+    useEffect(() => {
+        // Override the Highcharts prototypes here, so they only apply to this component
+        Highcharts.Pointer.prototype.reset = () => {};
+
+        Highcharts.Point.prototype.highlight = function (event) {
+            this.onMouseOver(); // Show the hover marker
+            // this.series.chart.tooltip.refresh(this); // Show the tooltip
+            this.series.chart.xAxis[0].drawCrosshair(event, this); // Show the crosshair
+        };
+
+        const updatedChartData = updateChartData(currentChartData, pastChartData, isComparisionOn);
+        setChartData(updatedChartData);
 
         // Cleanup: Restore the cached defaults
         return () => {
