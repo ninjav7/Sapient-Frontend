@@ -37,6 +37,7 @@ import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../expl
 
 import './style.css';
 import './styles.scss';
+import { getWeatherData } from '../../services/weather';
 
 const ExploreByBuildings = () => {
     const { download } = useCSVDownload();
@@ -387,14 +388,22 @@ const ExploreByBuildings = () => {
 
         metrics.forEach((metric) => {
             let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${time_zone}&metric=${metric?.value}`;
-            if (
-                metric.value !== 'energy' ||
-                metric.value !== 'carbon_emissions' ||
-                metric.value !== 'generated_carbon_rate'
-            ) {
-                params += `&aggregate=hour`;
+
+            if (metric?.value === 'weather') {
+                promisesList.push(
+                    getWeatherData({
+                        date_from: start_date,
+                        date_to: end_date,
+                        tz_info: time_zone,
+                        bldg_id,
+                        range: 'hour',
+                    })
+                );
+            } else {
+                const isMetricValid = ['energy', 'carbon_emissions', 'generated_carbon_rate'].includes(metric?.value);
+                if (!isMetricValid) params += `&aggregate=hour`;
+                promisesList.push(fetchExploreBuildingChart(params, bldg_id));
             }
-            promisesList.push(fetchExploreBuildingChart(params, bldg_id));
         });
 
         Promise.all(promisesList)
@@ -407,8 +416,6 @@ const ExploreByBuildings = () => {
 
                 if (promiseResponse && promiseResponse.length !== 0) {
                     promiseResponse.forEach((res, index) => {
-                        const response = res?.data;
-
                         let metricObj = {
                             name: metrics[index].label,
                             data: [],
@@ -416,33 +423,74 @@ const ExploreByBuildings = () => {
                             metric: metrics[index].label,
                         };
 
-                        if (response?.success) {
-                            const { data } = response;
-                            let timestamps = [];
+                        if (metrics[index].value === 'weather') {
+                            const response = res;
+                            if (response?.success) {
+                                const { data } = response;
 
-                            const metricBldgDataObj = {
-                                name: `${bldgObj?.building_name} - ${metrics[index].label}`,
-                                data: [],
-                            };
+                                let timestamps = [];
 
-                            data.forEach((el) => {
-                                if (index === 0 && currentChartData?.xData.length === 0) {
-                                    const time_format = userPrefTimeFormat === `24h` ? `HH:mm` : `hh:mm A`;
-                                    const date_format = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM 'YY` : `MMM D 'YY`;
+                                const metricBldgDataObj = {
+                                    name: `${bldgObj?.building_name} - ${metrics[index].label}`,
+                                    data: [],
+                                };
 
-                                    timestamps.push(
-                                        moment.utc(el?.time_stamp).format(`${date_format} @ ${time_format}`)
+                                data.forEach((el) => {
+                                    if (index === 0 && currentChartData?.xData.length === 0) {
+                                        const time_format = userPrefTimeFormat === `24h` ? `HH:mm` : `hh:mm A`;
+                                        const date_format =
+                                            userPrefDateFormat === `DD-MM-YYYY` ? `D MMM 'YY` : `MMM D 'YY`;
+
+                                        timestamps.push(
+                                            moment.utc(el?.time_stamp).format(`${date_format} @ ${time_format}`)
+                                        );
+                                    }
+
+                                    metricBldgDataObj.data.push(
+                                        calculateDataConvertion(el?.temp_f, metrics[index]?.value)
                                     );
+                                });
+
+                                if (index === 0 && currentChartData?.xData.length === 0) {
+                                    previousSyncChartObj.xData = [...timestamps];
                                 }
 
-                                metricBldgDataObj.data.push(calculateDataConvertion(el?.data, metrics[index]?.value));
-                            });
-
-                            if (index === 0 && currentChartData?.xData.length === 0) {
-                                previousSyncChartObj.xData = [...timestamps];
+                                metricObj.data.push(metricBldgDataObj);
                             }
+                        } else {
+                            const response = res?.data;
+                            if (response?.success) {
+                                const { data } = response;
 
-                            metricObj.data.push(metricBldgDataObj);
+                                let timestamps = [];
+
+                                const metricBldgDataObj = {
+                                    name: `${bldgObj?.building_name} - ${metrics[index].label}`,
+                                    data: [],
+                                };
+
+                                data.forEach((el) => {
+                                    if (index === 0 && currentChartData?.xData.length === 0) {
+                                        const time_format = userPrefTimeFormat === `24h` ? `HH:mm` : `hh:mm A`;
+                                        const date_format =
+                                            userPrefDateFormat === `DD-MM-YYYY` ? `D MMM 'YY` : `MMM D 'YY`;
+
+                                        timestamps.push(
+                                            moment.utc(el?.time_stamp).format(`${date_format} @ ${time_format}`)
+                                        );
+                                    }
+
+                                    metricBldgDataObj.data.push(
+                                        calculateDataConvertion(el?.data, metrics[index]?.value)
+                                    );
+                                });
+
+                                if (index === 0 && currentChartData?.xData.length === 0) {
+                                    previousSyncChartObj.xData = [...timestamps];
+                                }
+
+                                metricObj.data.push(metricBldgDataObj);
+                            }
                         }
 
                         if (currentChartData?.datasets.length === 0) {
