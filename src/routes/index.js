@@ -61,9 +61,13 @@ const EditAlert = React.lazy(() => import('../pages/alerts/edit-alerts'));
 const PlugRule = React.lazy(() => import('../pages/controls/PlugRule'));
 const PlugRules = React.lazy(() => import('../pages/controls/PlugRules'));
 
-// Explore Components
+// Explore Module V!
 const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
 const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
+
+// Explore Module V2
+const ExploreByEquipmentV2 = React.lazy(() => import('../pages/v2/explore/ExploreByEquipmentV2'));
+const ExploreByBuildingsV2 = React.lazy(() => import('../pages/v2/explore/ExploreByBuildingsV2'));
 
 // Super-user Components
 const Accounts = React.lazy(() => import('../pages/superUser/accounts'));
@@ -425,6 +429,33 @@ const exploreRoutes = {
     roles: ['Admin'],
 };
 
+// Explore Routes
+const exploreRoutesV2 = {
+    path: '/explore-page/v2/by-buildings',
+    name: 'Explore',
+    visibility: true,
+    children: [
+        {
+            path: '/explore-page/v2/by-buildings',
+            name: 'Explore by Building',
+            component: ExploreByBuildingsV2,
+            route: PrivateRoute,
+            parent: 'explore',
+            visibility: false,
+        },
+        {
+            path: '/explore-page/v2/by-equipment/:bldgId',
+            name: 'Explore by Equipment',
+            component: ExploreByEquipmentV2,
+            route: PrivateRoute,
+            parent: 'explore',
+            visibility: false,
+        },
+    ],
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+};
+
 // Control Routes
 const controlRoutes = {
     path: '/control/plug-rules',
@@ -577,6 +608,7 @@ const allRoutes = [
     alertsRoutes,
     controlRoutes,
     carbonRoutes,
+    exploreRoutesV2,
     exploreRoutes,
     adminRoutes,
     authRoutes,
@@ -588,6 +620,7 @@ const authProtectedRoutes = [
     alertsRoutes,
     carbonRoutes,
     controlRoutes,
+    exploreRoutesV2,
     exploreRoutes,
     adminRoutes,
 ];

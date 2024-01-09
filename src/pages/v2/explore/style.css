@@ -1,0 +1,38 @@
+.tooltipclass {
+    height: 0.9375rem;
+    width: 0.9375rem;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.explore-data-table-style {
+    background: #ffffff;
+    box-sizing: border-box;
+    padding: 0rem;
+    width: 100%;
+}
+
+.explore-filters-style {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+    align-content: flex-end;
+}
+
+.page-title {
+    padding: 0rem;
+}
+
+.breakers-row-content {
+    display: flex;
+    column-gap: 0.25rem;
+    justify-content: flex-start;
+}
+
+.tag-row-content {
+    display: flex;
+    column-gap: 0.25rem;
+    justify-content: flex-start;
+}
