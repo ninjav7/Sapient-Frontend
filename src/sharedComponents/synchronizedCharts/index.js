@@ -42,8 +42,8 @@ const SynchronizedCharts = (props) => {
         e.persist();
         Highcharts.charts.forEach((chart) => {
             if (!chart) return;
-            event = chart.pointer.normalize(e); // Find coordinates within the chart
-            point = chart.series[0].searchPoint(event, true); // Get the hovered point
+            event = chart?.pointer?.normalize(e); // Find coordinates within the chart
+            point = chart?.series[0]?.searchPoint(event, true); // Get the hovered point
             if (point) {
                 point.highlight(e);
             }
@@ -116,6 +116,7 @@ const SynchronizedCharts = (props) => {
                 chartData.datasets.map((dataset, index) => {
                     return (
                         <div
+                            key={index}
                             onMouseOver={() => {
                                 setHoveredIndexId(index);
                             }}
