@@ -908,7 +908,9 @@ const ExploreByBuildings = () => {
                         </div>
                     ) : (
                         <SynchronizedCharts
-                            syncChartData={synchronizedChartData}
+                            currentChartData={synchronizedChartData}
+                            pastChartData={pastSynchronizedChartData}
+                            isComparisionOn={isInComparisonMode}
                             xAxisLabels={formatXaxisForHighCharts(
                                 daysCount,
                                 userPrefDateFormat,
