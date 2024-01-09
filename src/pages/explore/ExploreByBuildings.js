@@ -111,9 +111,6 @@ const ExploreByBuildings = () => {
         datasets: [],
     });
 
-    console.log('SSR synchronizedChartData => ', synchronizedChartData);
-    console.log('SSR pastSynchronizedChartData => ', pastSynchronizedChartData);
-
     const currentRow = () => {
         return exploreBuildingsList;
     };
