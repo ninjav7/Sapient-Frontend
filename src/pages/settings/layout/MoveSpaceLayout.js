@@ -7,6 +7,7 @@ import Select from '../../../sharedComponents/form/select';
 import Typography from '../../../sharedComponents/typography';
 import { Notification } from '../../../sharedComponents/notification';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
+import LayoutElements from '../../../sharedComponents/layoutElements/LayoutElements';
 
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 
@@ -14,13 +15,14 @@ import { compareObjData } from '../../../helpers/helpers';
 import { addSpaceService, updateSpaceService, deleteSpaceService, getAllSpaceTypes } from './services';
 
 import DeleteLayout from './DeleteLayout';
+import MoveLayout from './MoveLayout';
 import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 import ChangeLayout from './ChangeLayout';
 
-const SpaceLayout = (props) => {
+const MoveSpaceLayout = (props) => {
     const {
         isModalOpen = false,
-        openModal,
+        openParentModal,
         closeModal,
         operationType,
         bldgId,
@@ -34,27 +36,52 @@ const SpaceLayout = (props) => {
         canUserDelete = false,
         floorsList,
         spacesList,
-        handleOpenEdit,
+        currentSpace,
         oldStack,
         newStack,
-        confirmedMove,
+        setNewStack,
+        confirmMove,
     } = props;
+
+    const [rootObj, setRootObj] = useState({
+        type: 'root',
+        bldg_id: bldgId,
+    });
 
     const defaultErrorObj = {
         name: null,
         type_id: null,
     };
 
+    const [shouldMove, setShouldMove] = useState(false);
+    const [isFetchingFloor, setFetchingFloor] = useState(false);
+    const [isFetchingSpace, setFetchingSpace] = useState(false);
+    const [newParent, setNewParent] = useState({});
+    const allowMove = () => setShouldMove(true);
+    const disableMove = () => setShouldMove(false);
+
     const [errorObj, setErrorObj] = useState(defaultErrorObj);
 
     const [spaceTypes, setSpaceTypes] = useState([]);
     const [isProcessing, setProcessing] = useState(false);
-    const [currentSpaceToChange, setCurrentSpaceToChange] = useState({});
+    const [showMoveSpace, setShowMoveSpace] = useState(false);
 
-    // Delete Space
-    const [showDeleteSpace, setShowDeleteSpace] = useState(false);
-    const closeDeleteSpacePopup = () => setShowDeleteSpace(false);
-    const openDeleteSpacePopup = () => setShowDeleteSpace(true);
+    const closeMoveSpacePopup = () => {
+        setShowMoveSpace(false);
+        setNewStack(null);
+    };
+
+    const openMoveSpacePopup = (newStack) => {
+        newStack && setNewStack(newStack);
+        setShowMoveSpace(true);
+    };
+
+    const confirmMoveSpacePopup = async () => {
+        confirmMove();
+        setShowMoveSpace(false);
+        closeModal();
+        openParentModal();
+    };
 
     // Change Parents of Space
     const [showChangeParents, setShowChangeParents] = useState(false);
@@ -96,6 +123,13 @@ const SpaceLayout = (props) => {
                     setSpaceObj({});
                     window.scroll(0, 0);
                 });
+        }
+    };
+    const onClickForAllItems = async ({ nativeHandler, data }) => {
+        console.log(1);
+        nativeHandler();
+        if (data?.parent_building && data?.floor_id) {
+            fetchAllSpaceData(data?.floor_id, data?.parent_building);
         }
     };
 
@@ -183,35 +217,6 @@ const SpaceLayout = (props) => {
         }
     };
 
-    const handleDeleteSpace = async () => {
-        if (!spaceObj?._id) return;
-
-        setProcessing(true);
-        const params = `?space_id=${spaceObj?._id}`;
-
-        await deleteSpaceService(params)
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    notifyUser(Notification.Types.success, `Space deleted successfully.`);
-                    fetchAllFloorData(bldgId);
-                    fetchAllSpaceData(spaceObj?.parents, bldgId);
-                } else {
-                    notifyUser(Notification.Types.error, response?.message);
-                }
-            })
-            .catch((err) => {
-                notifyUser(Notification.Types.error, `Failed to delete Space.`);
-            })
-            .finally(() => {
-                setProcessing(false);
-                closeModal();
-                closeDeleteSpacePopup();
-                setSpaceObj({});
-                window.scroll(0, 0);
-            });
-    };
-
     const fetchSpaceTypes = async () => {
         const params = `?ordered_by=name&sort_by=ace`;
 
@@ -234,7 +239,6 @@ const SpaceLayout = (props) => {
     };
 
     const floorsTypes = floorsList.map((el) => ({ label: el?.name, value: el?.floor_id }));
-    const spacesTypes = spacesList.map((el) => ({ label: el?.name, value: el?._id }));
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, spaceObj);
@@ -243,14 +247,14 @@ const SpaceLayout = (props) => {
         setSpaceObj(obj);
     };
 
-    const handleDeleteModalClose = () => {
-        closeDeleteSpacePopup();
-        openModal();
+    const handleMoveModalClose = () => {
+        closeMoveSpacePopup();
+        openParentModal();
     };
 
     const handleChangeModalClose = () => {
         closeChangeSpacePopup();
-        openModal();
+        openParentModal();
     };
 
     const handleChangeModalSave = () => fetchEditSpace(false);
@@ -260,95 +264,54 @@ const SpaceLayout = (props) => {
         if (!isModalOpen) setErrorObj(defaultErrorObj);
     }, [isModalOpen]);
 
-    const currentParent = floorsTypes.filter(
-        (option) => option.value === (spaceObj?.new_parents ? spaceObj?.new_parents : spaceObj?.parents)
-    );
+    const ableToBeMoved = (space) => {
+        if (spaceObj?._id === space?._id) return false;
 
-    const getCurrentParent = (stack) => {
-        for (let spaceNumber in stack) {
-            if (!stack[`${parseInt(spaceNumber + 1)}`]) {
-                console.log(stack[spaceNumber]);
-                return stack[spaceNumber].currentItem.name;
-            }
+        if (spaceObj?.parent_space) {
+            if (spaceObj?.parent_space === space?._id) return false;
+        } else {
+            if ((spaceObj?.new_parents ? spaceObj?.new_parents : spaceObj?.parents) === space?.floor_id) return false;
         }
+
+        return true;
     };
 
-    const currentFirstParent = confirmedMove ? getCurrentParent(newStack) : getCurrentParent(oldStack);
+    const onMoveClick = (stack) => {
+        console.log(stack);
+
+        openMoveSpacePopup(stack);
+    };
 
     return (
         <>
-            <Modal show={isModalOpen} backdrop="static" keyboard={false} size="md" centered>
+            <Modal show={isModalOpen} backdrop="static" keyboard={false} size="lg" centered>
                 <div className="p-4">
-                    <Typography.Header size={Typography.Sizes.lg}>
-                        {operationType === `ADD` ? `Add Space` : `Edit Space`}
-                    </Typography.Header>
+                    <Typography.Header size={Typography.Sizes.lg}>Move Space Layout</Typography.Header>
+                    <Typography.Body size={Typography.Sizes.md}>Current Space:{currentSpace.name}</Typography.Body>
+
                     <Brick sizeInRem={2} />
-                    <div>
-                        <Typography.Body size={Typography.Sizes.md}>{`Name`}</Typography.Body>
-                        <Brick sizeInRem={0.25} />
-                        <InputTooltip
-                            placeholder="Enter Name"
-                            labelSize={Typography.Sizes.md}
-                            value={spaceObj?.name}
-                            error={errorObj?.name}
-                            onChange={(e) => {
-                                handleChange('name', e.target.value);
-                            }}
-                        />
-                    </div>
-                    <Brick sizeInRem={1.25} />
-                    <div>
-                        <Typography.Body size={Typography.Sizes.md}>{`Type`}</Typography.Body>
-                        <Brick sizeInRem={0.25} />
-                        <Select
-                            name="select"
-                            placeholder="Select Type"
-                            options={spaceTypes}
-                            currentValue={spaceTypes.filter((option) => option.value === spaceObj?.type_id)}
-                            isSearchable={true}
-                            error={errorObj?.type_id}
-                            onChange={(e) => {
-                                handleChange('type_id', e.value);
-                            }}
-                            customSearchCallback={({ data, query }) => defaultDropdownSearch(data, query?.value)}
-                            menuPlacement="top"
-                        />
-                    </div>
-                    <Brick sizeInRem={1.25} />
-                    {operationType === 'EDIT' && (
-                        <>
-                            <Typography.Body size={Typography.Sizes.md}>{`Parent`}</Typography.Body>
-                            <Brick sizeInRem={0.25} />
-                            <Typography.Body size={Typography.Sizes.md} class="flex justify-between	">
-                                {currentFirstParent}
-                                <button
-                                    label="Edit Parent"
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.primary}
-                                    onClick={() => {
-                                        handleOpenEdit(spaceObj);
-                                    }}>
-                                    Change Parent
-                                </button>
-                            </Typography.Body>
-                        </>
-                    )}
-                    {operationType === 'EDIT' && (canUserDelete || isSuperAdmin) && (
-                        <>
-                            <Brick sizeInRem={1.25} />
-                            <Button
-                                label="Delete Space"
-                                size={Button.Sizes.md}
-                                type={Button.Type.secondaryDistructive}
-                                icon={<DeleteSVG />}
-                                onClick={() => {
-                                    closeModal();
-                                    openDeleteSpacePopup();
-                                }}
-                            />
-                        </>
-                    )}
+
+                    <LayoutElements
+                        spaces={spacesList}
+                        floors={floorsList}
+                        buildingData={rootObj}
+                        isLoadingLastColumn={isFetchingFloor || isFetchingSpace}
+                        onClickEachChild={[onClickForAllItems]}
+                        onColumnAdd={null}
+                        onColumnNameEdit={null}
+                        onItemEdit={null}
+                        isMoveSpace={true}
+                        initialStackThree={oldStack}
+                        confirmMove={true}
+                        ableToBeMoved={ableToBeMoved}
+                        onMoveClick={onMoveClick}
+                        shouldMove={shouldMove}
+                        allowMove={allowMove}
+                        disableMove={disableMove}
+                    />
+
                     <Brick sizeInRem={canUserDelete || isSuperAdmin ? 1.5 : 2} />
+
                     <div className="d-flex justify-content-between w-100">
                         <Button
                             label={`Cancel`}
@@ -361,43 +324,20 @@ const SpaceLayout = (props) => {
                                 setErrorObj(defaultErrorObj);
                             }}
                         />
-                        {operationType === 'ADD' ? (
-                            <Button
-                                label={isProcessing ? `Saving...` : `Save`}
-                                size={Button.Sizes.lg}
-                                type={Button.Type.primary}
-                                className="w-100"
-                                onClick={() => {
-                                    handleCreateSpace(spaceObj, bldgId);
-                                }}
-                                disabled={isProcessing}
-                            />
-                        ) : (
-                            <Button
-                                label={isProcessing ? `Updating...` : `Update`}
-                                size={Button.Sizes.lg}
-                                type={Button.Type.primary}
-                                className="w-100"
-                                onClick={() => {
-                                    handleEditSpace();
-                                }}
-                                disabled={isProcessing || compareObjData(defaultObjVal, spaceObj)}
-                            />
-                        )}
                     </div>
                     <Brick sizeInRem={0.25} />
                 </div>
             </Modal>
 
-            <DeleteLayout
-                isModalOpen={showDeleteSpace}
-                onCancel={handleDeleteModalClose}
-                onSave={handleDeleteSpace}
-                deleteType="SPACE"
-                isDeleting={isProcessing}
+            <MoveLayout
+                isModalOpen={showMoveSpace}
+                onCancel={closeMoveSpacePopup}
+                onSave={confirmMoveSpacePopup}
+                newStack={newStack}
+                oldStack={oldStack}
             />
         </>
     );
 };
 
-export default SpaceLayout;
+export default MoveSpaceLayout;

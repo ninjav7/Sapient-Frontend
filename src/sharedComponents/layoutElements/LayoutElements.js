@@ -40,6 +40,8 @@ const renderStackColumns = (
     //For preventing render next column if it was detected without children
     let rendering = true;
 
+    // console.log(state.stack);
+
     return Object.entries(state.stack).map(
         ([key, { component, callbackState, currentItem }], currentIndex, stackEntries) => {
             //preventing render if column without children has been detected
@@ -99,7 +101,20 @@ const renderStackColumns = (
 
 const LayoutElements = (props) => {
     const { state, dispatch } = useStateManager(props);
-    const { onClickEachChild, onClickForAllItems, buildingData, className, style } = props;
+
+    const {
+        onClickEachChild,
+        onClickForAllItems,
+        buildingData,
+        className,
+        style,
+        confirmMove,
+        onMoveClick,
+        ableToBeMoved,
+        shouldMove,
+        allowMove,
+        disableMove,
+    } = props;
 
     const childrenClickHandler = (title, key, callbackState, currentItem, restrictedActions, selectedItem) => {
         dispatch({
@@ -109,10 +124,15 @@ const LayoutElements = (props) => {
                     <LayoutLevelColumn
                         {...restrictedActions}
                         title={title}
+                        confirmMove={confirmMove}
+                        ableToBeMoved={ableToBeMoved}
+                        onMoveClick={onMoveClick}
+                        shouldMove={shouldMove}
+                        allowMove={allowMove}
+                        disableMove={disableMove}
                         childrenCallBackValue={(props) => ({ level: String(props.type_name), ...props })}
                         onChildrenClick={(space, restrictedActions) => {
                             const currentKey = key + 1;
-
                             // Preserve current's id and number of column
                             stackMap.current[currentKey] = space[ACCESSORS.SPACE_ID];
                             countOfStack.current = currentKey;
@@ -167,6 +187,9 @@ const LayoutElements = (props) => {
                         accessorArgsOnChildrenClick={[ACCESSORS.FLOOR_ID, ACCESSORS.NAME]}
                         childrenCallBackValue={(props) => ({ level: 'Floor', ...props })}
                         state={state}
+                        confirmMove={confirmMove}
+                        ableToBeMoved={ableToBeMoved}
+                        onMoveClick={onMoveClick}
                         onChildrenClick={(floor) => {
                             // Preserve current's id and number of column
                             countOfStack.current = 1;
