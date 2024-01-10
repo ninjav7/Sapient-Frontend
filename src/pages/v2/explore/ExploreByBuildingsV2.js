@@ -416,6 +416,8 @@ const ExploreByBuildingsV2 = () => {
 
                 if (promiseResponse && promiseResponse.length !== 0) {
                     promiseResponse.forEach((res, index) => {
+                        const response = res?.data;
+
                         let metricObj = {
                             name: metrics[index].label,
                             data: [],
@@ -423,74 +425,39 @@ const ExploreByBuildingsV2 = () => {
                             metric: metrics[index].label,
                         };
 
-                        if (metrics[index].value === 'weather') {
-                            const response = res;
-                            if (response?.success) {
-                                const { data } = response;
+                        if (response?.success) {
+                            const { data } = response;
 
-                                let timestamps = [];
+                            let timestamps = [];
 
-                                const metricBldgDataObj = {
-                                    name: `${bldgObj?.building_name} - ${metrics[index].label}`,
-                                    data: [],
-                                };
+                            const metricBldgDataObj = {
+                                name: `${bldgObj?.building_name} - ${metrics[index].label}`,
+                                data: [],
+                            };
 
-                                data.forEach((el) => {
-                                    if (index === 0 && currentChartData?.xData.length === 0) {
-                                        const time_format = userPrefTimeFormat === `24h` ? `HH:mm` : `hh:mm A`;
-                                        const date_format =
-                                            userPrefDateFormat === `DD-MM-YYYY` ? `D MMM 'YY` : `MMM D 'YY`;
-
-                                        timestamps.push(
-                                            moment.utc(el?.time_stamp).format(`${date_format} @ ${time_format}`)
-                                        );
-                                    }
-
-                                    metricBldgDataObj.data.push(
-                                        calculateDataConvertion(el?.temp_f, metrics[index]?.value)
-                                    );
-                                });
-
+                            data.forEach((el) => {
                                 if (index === 0 && currentChartData?.xData.length === 0) {
-                                    previousSyncChartObj.xData = [...timestamps];
+                                    const time_format = userPrefTimeFormat === `24h` ? `HH:mm` : `hh:mm A`;
+                                    const date_format = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM 'YY` : `MMM D 'YY`;
+
+                                    timestamps.push(
+                                        moment.utc(el?.time_stamp).format(`${date_format} @ ${time_format}`)
+                                    );
                                 }
 
-                                metricObj.data.push(metricBldgDataObj);
+                                metricBldgDataObj.data.push(
+                                    calculateDataConvertion(
+                                        metrics[index]?.value === 'weather' ? el?.temp_f : el?.data,
+                                        metrics[index]?.value
+                                    )
+                                );
+                            });
+
+                            if (index === 0 && currentChartData?.xData.length === 0) {
+                                previousSyncChartObj.xData = [...timestamps];
                             }
-                        } else {
-                            const response = res?.data;
-                            if (response?.success) {
-                                const { data } = response;
 
-                                let timestamps = [];
-
-                                const metricBldgDataObj = {
-                                    name: `${bldgObj?.building_name} - ${metrics[index].label}`,
-                                    data: [],
-                                };
-
-                                data.forEach((el) => {
-                                    if (index === 0 && currentChartData?.xData.length === 0) {
-                                        const time_format = userPrefTimeFormat === `24h` ? `HH:mm` : `hh:mm A`;
-                                        const date_format =
-                                            userPrefDateFormat === `DD-MM-YYYY` ? `D MMM 'YY` : `MMM D 'YY`;
-
-                                        timestamps.push(
-                                            moment.utc(el?.time_stamp).format(`${date_format} @ ${time_format}`)
-                                        );
-                                    }
-
-                                    metricBldgDataObj.data.push(
-                                        calculateDataConvertion(el?.data, metrics[index]?.value)
-                                    );
-                                });
-
-                                if (index === 0 && currentChartData?.xData.length === 0) {
-                                    previousSyncChartObj.xData = [...timestamps];
-                                }
-
-                                metricObj.data.push(metricBldgDataObj);
-                            }
+                            metricObj.data.push(metricBldgDataObj);
                         }
 
                         if (currentChartData?.datasets.length === 0) {
