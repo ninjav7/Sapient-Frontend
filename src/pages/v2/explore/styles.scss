@@ -1,0 +1,22 @@
+@import '../../../assets/scss/colors';
+
+.custom-on-hour {
+    background-color: $sapient-specific-hvac;
+}
+
+.custom-off-hour {
+    background-color: $dataviz-red-300;
+}
+
+.custom-progress-bar {
+    height: 0.8rem;
+    border-radius: 0.2rem;
+    background-color: $dataviz-background-2;
+}
+
+.explore-chart-loader {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

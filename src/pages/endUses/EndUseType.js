@@ -196,7 +196,7 @@ const EndUseType = () => {
 
         await getWeatherData(payload)
             .then((res) => {
-                const response = res;
+                const response = res?.data;
 
                 if (response?.success) {
                     const tempData = [];

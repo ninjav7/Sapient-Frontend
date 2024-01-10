@@ -1,0 +1,18 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.chart-tooltip {
+    @extend .box-shadow-lg;
+    padding: 0.4375rem 0.8125rem;
+    background: $base-white;
+    position: relative;
+    z-index: 1;
+    border-radius: 0.25rem;
+    overflow: hidden;
+
+    border: 0.0625rem solid $primary-gray-450;
+
+    td + td {
+        padding-left: 1rem !important;
+    }
+}
