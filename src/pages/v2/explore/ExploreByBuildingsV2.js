@@ -520,9 +520,8 @@ const ExploreByBuildingsV2 = () => {
         setPastSynchronizedChartData({});
 
         let promisesList = [];
-        let newMetricsMappedData = [];
-
-        let listToTrackAPIRequest = [];
+        let formattedMetrics = [];
+        let apiRequestListToTrack = [];
 
         const time_zone = encodeURIComponent(timeZone);
 
@@ -540,7 +539,7 @@ const ExploreByBuildingsV2 = () => {
             bldgIDs.forEach((bldg_id) => {
                 const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldg_id);
 
-                listToTrackAPIRequest.push({
+                apiRequestListToTrack.push({
                     bldgId: bldg_id,
                     metricsType: metric?.value,
                 });
@@ -566,7 +565,7 @@ const ExploreByBuildingsV2 = () => {
                 }
             });
 
-            newMetricsMappedData.push(newMetricObj);
+            formattedMetrics.push(newMetricObj);
         });
 
         Promise.all(promisesList)
@@ -599,10 +598,10 @@ const ExploreByBuildingsV2 = () => {
 
                                 newFormattedData.push(
                                     calculateDataConvertion(
-                                        listToTrackAPIRequest[response_index]?.metricsType === 'weather'
+                                        apiRequestListToTrack[response_index]?.metricsType === 'weather'
                                             ? el?.temp_f
                                             : el?.data,
-                                        listToTrackAPIRequest[response_index]?.metricsType
+                                        apiRequestListToTrack[response_index]?.metricsType
                                     )
                                 );
                             });
@@ -619,13 +618,13 @@ const ExploreByBuildingsV2 = () => {
                         resultArray.push(chunk);
                     }
 
-                    newMetricsMappedData.forEach((metric_obj, metric_index) => {
+                    formattedMetrics.forEach((metric_obj, metric_index) => {
                         metric_obj.data.forEach((building_obj, building_index) => {
                             building_obj.data = resultArray[metric_index][building_index];
                         });
                     });
 
-                    newSyncChartObj.datasets = newMetricsMappedData;
+                    newSyncChartObj.datasets = formattedMetrics;
 
                     if (requestType === 'currentData') setSynchronizedChartData(newSyncChartObj);
                     if (requestType === 'pastData') setPastSynchronizedChartData(newSyncChartObj);
