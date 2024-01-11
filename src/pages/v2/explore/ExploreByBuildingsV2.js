@@ -120,10 +120,19 @@ const ExploreByBuildingsV2 = () => {
             const newDataSets = synchronizedChartData.datasets.filter((data) =>
                 selectedMetrics.some((metric) => metric?.label === data?.name)
             );
+            const newPastDataSets = pastSynchronizedChartData.datasets.filter((data) =>
+                selectedMetrics.some((metric) => metric?.label === data?.name)
+            );
             if (newDataSets) {
                 setSynchronizedChartData((prevChartData) => ({
                     ...prevChartData,
                     datasets: newDataSets,
+                }));
+            }
+            if (newPastDataSets) {
+                setPastSynchronizedChartData((prevChartData) => ({
+                    ...prevChartData,
+                    datasets: newPastDataSets,
                 }));
             }
         }
