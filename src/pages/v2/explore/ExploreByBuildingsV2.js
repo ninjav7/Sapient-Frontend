@@ -522,6 +522,8 @@ const ExploreByBuildingsV2 = () => {
         let promisesList = [];
         let newMetricsMappedData = [];
 
+        let listToTrackAPIRequest = [];
+
         const time_zone = encodeURIComponent(timeZone);
 
         selected_metrics.forEach((metric) => {
@@ -537,13 +539,31 @@ const ExploreByBuildingsV2 = () => {
 
             bldgIDs.forEach((bldg_id) => {
                 const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldg_id);
+
+                listToTrackAPIRequest.push({
+                    bldgId: bldg_id,
+                    metricsType: metric?.value,
+                });
+
                 newMetricObj.data.push({
                     id: bldg_id,
                     name: `${bldgObj?.building_name} - ${metric?.label}`,
                     data: [],
                 });
 
-                promisesList.push(fetchExploreBuildingChart(params, bldg_id));
+                if (metric?.value === 'weather') {
+                    promisesList.push(
+                        getWeatherData({
+                            date_from: start_date,
+                            date_to: end_date,
+                            tz_info: time_zone,
+                            bldg_id,
+                            range: 'hour',
+                        })
+                    );
+                } else {
+                    promisesList.push(fetchExploreBuildingChart(params, bldg_id));
+                }
             });
 
             newMetricsMappedData.push(newMetricObj);
@@ -578,7 +598,12 @@ const ExploreByBuildingsV2 = () => {
                                 }
 
                                 newFormattedData.push(
-                                    calculateDataConvertion(el?.data, metrics[response_index]?.value)
+                                    calculateDataConvertion(
+                                        listToTrackAPIRequest[response_index]?.metricsType === 'weather'
+                                            ? el?.temp_f
+                                            : el?.data,
+                                        listToTrackAPIRequest[response_index]?.metricsType
+                                    )
                                 );
                             });
 
@@ -884,7 +909,7 @@ const ExploreByBuildingsV2 = () => {
                 );
             }
         }
-    }, [startDate, endDate, metrics, userPrefUnits]);
+    }, [startDate, endDate, metrics, userPrefUnits, isInComparisonMode]);
 
     useEffect(() => {
         if (checkedAll) {
