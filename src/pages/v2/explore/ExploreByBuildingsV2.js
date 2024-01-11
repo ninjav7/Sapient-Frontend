@@ -116,7 +116,23 @@ const ExploreByBuildingsV2 = () => {
         return exploreBuildingsList;
     };
 
-    const handleMenuClose = () => setMetrics(selectedMetrics);
+    const handleMenuClose = () => {
+        // When Unselecting Metrics
+        if (selectedMetrics.length < metrics.length) {
+            const newDataSets = synchronizedChartData.datasets.filter((data) =>
+                selectedMetrics.some((metric) => metric?.label === data?.name)
+            );
+            if (newDataSets) {
+                setSynchronizedChartData((prevChartData) => ({
+                    ...prevChartData,
+                    datasets: newDataSets,
+                }));
+            }
+        }
+
+        setMetrics(selectedMetrics);
+    };
+
     const handleMetricsChange = (selectedOptions) => setSelectedMetrics(selectedOptions);
 
     const toggleComparision = () => {
@@ -431,6 +447,7 @@ const ExploreByBuildingsV2 = () => {
                             let timestamps = [];
 
                             const metricBldgDataObj = {
+                                id: bldg_id,
                                 name: `${bldgObj?.building_name} - ${metrics[index].label}`,
                                 data: [],
                             };
@@ -466,6 +483,7 @@ const ExploreByBuildingsV2 = () => {
                             previousSyncChartObj.datasets.forEach((el) => {
                                 if (el?.name === metricObj?.metric) {
                                     el.data.push({
+                                        id: bldg_id,
                                         name: metricObj?.data[0].name,
                                         data: metricObj?.data[0].data,
                                     });
@@ -520,6 +538,7 @@ const ExploreByBuildingsV2 = () => {
             bldgIDs.forEach((bldg_id) => {
                 const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldg_id);
                 newMetricObj.data.push({
+                    id: bldg_id,
                     name: `${bldgObj?.building_name} - ${metric?.label}`,
                     data: [],
                 });
@@ -593,10 +612,26 @@ const ExploreByBuildingsV2 = () => {
             });
     };
 
+    const filterUnselectedData = (currentChartData, bldg_id) => {
+        const chartData = _.cloneDeep(currentChartData);
+
+        if (chartData.datasets) {
+            chartData.datasets.forEach((record) => {
+                const { data } = record;
+
+                if (data) {
+                    record.data = data.filter((el) => el.id !== bldg_id);
+                }
+            });
+        }
+
+        return chartData;
+    };
+
     const handleBuildingStateChange = (value, selectedBldg, isComparisionOn = false) => {
         if (value === 'true') {
-            const newDataList = seriesData.filter((item) => item?.id !== selectedBldg?.building_id);
-            setSeriesData(newDataList);
+            const newDataSet = filterUnselectedData(synchronizedChartData, selectedBldg?.building_id);
+            if (newDataSet) setSynchronizedChartData(newDataSet);
         }
 
         if (value === 'false') {
@@ -963,7 +998,8 @@ const ExploreByBuildingsV2 = () => {
                                     onChange={() => {
                                         setCheckedAll(!checkedAll);
                                     }}
-                                    disabled={!exploreBuildingsList || exploreBuildingsList.length > 20}
+                                    // disabled={!exploreBuildingsList || exploreBuildingsList.length > 20}
+                                    disabled={true}
                                 />
                             )}
                             customCheckboxForCell={(record) => (
