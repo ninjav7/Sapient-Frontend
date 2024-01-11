@@ -72,6 +72,11 @@ const ExploreByBuildingsV2 = () => {
     let top = '';
     let bottom = '';
 
+    const defaultExploreChartObj = {
+        xData: [],
+        datasets: [],
+    };
+
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(0);
     const [bottomEnergyConsumption, setBottomEnergyConsumption] = useState(0);
     const [topPerChange, setTopPerChange] = useState(0);
@@ -102,15 +107,8 @@ const ExploreByBuildingsV2 = () => {
 
     const [isInComparisonMode, setComparisonMode] = useState(false);
 
-    const [synchronizedChartData, setSynchronizedChartData] = useState({
-        xData: [],
-        datasets: [],
-    });
-
-    const [pastSynchronizedChartData, setPastSynchronizedChartData] = useState({
-        xData: [],
-        datasets: [],
-    });
+    const [synchronizedChartData, setSynchronizedChartData] = useState(defaultExploreChartObj);
+    const [pastSynchronizedChartData, setPastSynchronizedChartData] = useState(defaultExploreChartObj);
 
     const currentRow = () => {
         return exploreBuildingsList;
@@ -516,8 +514,8 @@ const ExploreByBuildingsV2 = () => {
 
         requestType === 'currentData' ? setFetchingChartData(true) : setFetchingPastChartData(true);
 
-        setSynchronizedChartData({});
-        setPastSynchronizedChartData({});
+        setSynchronizedChartData(defaultExploreChartObj);
+        setPastSynchronizedChartData(defaultExploreChartObj);
 
         let promisesList = [];
         let formattedMetrics = [];
@@ -655,7 +653,10 @@ const ExploreByBuildingsV2 = () => {
     const handleBuildingStateChange = (value, selectedBldg, isComparisionOn = false) => {
         if (value === 'true') {
             const newDataSet = filterUnselectedData(synchronizedChartData, selectedBldg?.building_id);
+            const newPastDataSet = filterUnselectedData(pastSynchronizedChartData, selectedBldg?.building_id);
+
             if (newDataSet) setSynchronizedChartData(newDataSet);
+            if (newPastDataSet) setPastSynchronizedChartData(newPastDataSet);
         }
 
         if (value === 'false') {
