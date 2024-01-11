@@ -24,6 +24,8 @@ import { Checkbox } from '../../../sharedComponents/form/checkbox';
 import SynchronizedCharts from '../../../sharedComponents/synchronizedCharts';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 
+import ExploreAlert from './ExploreAlert';
+
 import { timeZone } from '../../../utils/helper';
 import { getAverageValue } from '../../../helpers/AveragePercent';
 import { formatXaxisForHighCharts, getPastDateRange } from '../../../helpers/helpers';
@@ -68,6 +70,10 @@ const ExploreByBuildingsV2 = () => {
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
 
     const [isCSVDownloading, setDownloadingCSVData] = useState(false);
+
+    const [showAlert, setModalAlert] = useState(false);
+    const handleModalClose = () => setModalAlert(false);
+    const handleModalOpen = () => setModalAlert(true);
 
     let top = '';
     let bottom = '';
@@ -659,7 +665,12 @@ const ExploreByBuildingsV2 = () => {
         return chartData;
     };
 
-    const handleBuildingStateChange = (value, selectedBldg, isComparisionOn = false) => {
+    const handleBuildingStateChange = (value, selectedBldg, isComparisionOn = false, selected_metrics = []) => {
+        if (selected_metrics.length === 0) {
+            handleModalOpen();
+            return;
+        }
+
         if (value === 'true') {
             const newDataSet = filterUnselectedData(synchronizedChartData, selectedBldg?.building_id);
             const newPastDataSet = filterUnselectedData(pastSynchronizedChartData, selectedBldg?.building_id);
@@ -669,7 +680,7 @@ const ExploreByBuildingsV2 = () => {
         }
 
         if (value === 'false') {
-            if (selectedBldg?.building_id) {
+            if (selectedBldg?.building_id && selected_metrics.length !== 0) {
                 fetchSingleBldgChartData(startDate, endDate, selectedBldg?.building_id, 'currentData');
 
                 if (isComparisionOn) {
@@ -1002,7 +1013,9 @@ const ExploreByBuildingsV2 = () => {
                     )}
                 </div>
             </Row>
+
             <Brick sizeInRem={0.75} />
+
             <Row>
                 <div className="explore-data-table-style">
                     <Col lg={12}>
@@ -1045,7 +1058,12 @@ const ExploreByBuildingsV2 = () => {
                                     checked={selectedBldgIds.includes(record?.building_id)}
                                     value={selectedBldgIds.includes(record?.building_id)}
                                     onChange={(e) => {
-                                        handleBuildingStateChange(e.target.value, record, isInComparisonMode);
+                                        handleBuildingStateChange(
+                                            e.target.value,
+                                            record,
+                                            isInComparisonMode,
+                                            selectedMetrics
+                                        );
                                     }}
                                 />
                             )}
@@ -1056,6 +1074,13 @@ const ExploreByBuildingsV2 = () => {
                     </Col>
                 </div>
             </Row>
+
+            <ExploreAlert
+                isModalOpen={showAlert}
+                onCancel={handleModalClose}
+                title={`Metric Selection Required`}
+                message={`Kindly choose the Metric type to access data for the Building.`}
+            />
         </>
     );
 };
