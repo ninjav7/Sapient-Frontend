@@ -24,6 +24,8 @@ import { Checkbox } from '../../../sharedComponents/form/checkbox';
 import SynchronizedCharts from '../../../sharedComponents/synchronizedCharts';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 
+import ExploreAlert from './ExploreAlert';
+
 import { timeZone } from '../../../utils/helper';
 import { getAverageValue } from '../../../helpers/AveragePercent';
 import { formatXaxisForHighCharts, getPastDateRange } from '../../../helpers/helpers';
@@ -69,8 +71,17 @@ const ExploreByBuildingsV2 = () => {
 
     const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
+    const [showAlert, setModalAlert] = useState(false);
+    const handleModalClose = () => setModalAlert(false);
+    const handleModalOpen = () => setModalAlert(true);
+
     let top = '';
     let bottom = '';
+
+    const defaultExploreChartObj = {
+        xData: [],
+        datasets: [],
+    };
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(0);
     const [bottomEnergyConsumption, setBottomEnergyConsumption] = useState(0);
@@ -102,21 +113,39 @@ const ExploreByBuildingsV2 = () => {
 
     const [isInComparisonMode, setComparisonMode] = useState(false);
 
-    const [synchronizedChartData, setSynchronizedChartData] = useState({
-        xData: [],
-        datasets: [],
-    });
-
-    const [pastSynchronizedChartData, setPastSynchronizedChartData] = useState({
-        xData: [],
-        datasets: [],
-    });
+    const [synchronizedChartData, setSynchronizedChartData] = useState(defaultExploreChartObj);
+    const [pastSynchronizedChartData, setPastSynchronizedChartData] = useState(defaultExploreChartObj);
 
     const currentRow = () => {
         return exploreBuildingsList;
     };
 
-    const handleMenuClose = () => setMetrics(selectedMetrics);
+    const handleMenuClose = () => {
+        // When Unselecting Metrics
+        if (selectedMetrics.length < metrics.length) {
+            const newDataSets = synchronizedChartData.datasets.filter((data) =>
+                selectedMetrics.some((metric) => metric?.label === data?.name)
+            );
+            const newPastDataSets = pastSynchronizedChartData.datasets.filter((data) =>
+                selectedMetrics.some((metric) => metric?.label === data?.name)
+            );
+            if (newDataSets) {
+                setSynchronizedChartData((prevChartData) => ({
+                    ...prevChartData,
+                    datasets: newDataSets,
+                }));
+            }
+            if (newPastDataSets) {
+                setPastSynchronizedChartData((prevChartData) => ({
+                    ...prevChartData,
+                    datasets: newPastDataSets,
+                }));
+            }
+        }
+
+        setMetrics(selectedMetrics);
+    };
+
     const handleMetricsChange = (selectedOptions) => setSelectedMetrics(selectedOptions);
 
     const toggleComparision = () => {
@@ -431,6 +460,7 @@ const ExploreByBuildingsV2 = () => {
                             let timestamps = [];
 
                             const metricBldgDataObj = {
+                                id: bldg_id,
                                 name: `${bldgObj?.building_name} - ${metrics[index].label}`,
                                 data: [],
                             };
@@ -466,6 +496,7 @@ const ExploreByBuildingsV2 = () => {
                             previousSyncChartObj.datasets.forEach((el) => {
                                 if (el?.name === metricObj?.metric) {
                                     el.data.push({
+                                        id: bldg_id,
                                         name: metricObj?.data[0].name,
                                         data: metricObj?.data[0].data,
                                     });
@@ -498,11 +529,12 @@ const ExploreByBuildingsV2 = () => {
 
         requestType === 'currentData' ? setFetchingChartData(true) : setFetchingPastChartData(true);
 
-        setSynchronizedChartData({});
-        setPastSynchronizedChartData({});
+        setSynchronizedChartData(defaultExploreChartObj);
+        setPastSynchronizedChartData(defaultExploreChartObj);
 
         let promisesList = [];
-        let newMetricsMappedData = [];
+        let formattedMetrics = [];
+        let apiRequestListToTrack = [];
 
         const time_zone = encodeURIComponent(timeZone);
 
@@ -519,15 +551,34 @@ const ExploreByBuildingsV2 = () => {
 
             bldgIDs.forEach((bldg_id) => {
                 const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldg_id);
+
+                apiRequestListToTrack.push({
+                    bldgId: bldg_id,
+                    metricsType: metric?.value,
+                });
+
                 newMetricObj.data.push({
+                    id: bldg_id,
                     name: `${bldgObj?.building_name} - ${metric?.label}`,
                     data: [],
                 });
 
-                promisesList.push(fetchExploreBuildingChart(params, bldg_id));
+                if (metric?.value === 'weather') {
+                    promisesList.push(
+                        getWeatherData({
+                            date_from: start_date,
+                            date_to: end_date,
+                            tz_info: time_zone,
+                            bldg_id,
+                            range: 'hour',
+                        })
+                    );
+                } else {
+                    promisesList.push(fetchExploreBuildingChart(params, bldg_id));
+                }
             });
 
-            newMetricsMappedData.push(newMetricObj);
+            formattedMetrics.push(newMetricObj);
         });
 
         Promise.all(promisesList)
@@ -559,7 +610,12 @@ const ExploreByBuildingsV2 = () => {
                                 }
 
                                 newFormattedData.push(
-                                    calculateDataConvertion(el?.data, metrics[response_index]?.value)
+                                    calculateDataConvertion(
+                                        apiRequestListToTrack[response_index]?.metricsType === 'weather'
+                                            ? el?.temp_f
+                                            : el?.data,
+                                        apiRequestListToTrack[response_index]?.metricsType
+                                    )
                                 );
                             });
 
@@ -575,13 +631,13 @@ const ExploreByBuildingsV2 = () => {
                         resultArray.push(chunk);
                     }
 
-                    newMetricsMappedData.forEach((metric_obj, metric_index) => {
+                    formattedMetrics.forEach((metric_obj, metric_index) => {
                         metric_obj.data.forEach((building_obj, building_index) => {
                             building_obj.data = resultArray[metric_index][building_index];
                         });
                     });
 
-                    newSyncChartObj.datasets = newMetricsMappedData;
+                    newSyncChartObj.datasets = formattedMetrics;
 
                     if (requestType === 'currentData') setSynchronizedChartData(newSyncChartObj);
                     if (requestType === 'pastData') setPastSynchronizedChartData(newSyncChartObj);
@@ -593,14 +649,38 @@ const ExploreByBuildingsV2 = () => {
             });
     };
 
-    const handleBuildingStateChange = (value, selectedBldg, isComparisionOn = false) => {
+    const filterUnselectedData = (currentChartData, bldg_id) => {
+        const chartData = _.cloneDeep(currentChartData);
+
+        if (chartData.datasets) {
+            chartData.datasets.forEach((record) => {
+                const { data } = record;
+
+                if (data) {
+                    record.data = data.filter((el) => el.id !== bldg_id);
+                }
+            });
+        }
+
+        return chartData;
+    };
+
+    const handleBuildingStateChange = (value, selectedBldg, isComparisionOn = false, selected_metrics = []) => {
+        if (selected_metrics.length === 0) {
+            handleModalOpen();
+            return;
+        }
+
         if (value === 'true') {
-            const newDataList = seriesData.filter((item) => item?.id !== selectedBldg?.building_id);
-            setSeriesData(newDataList);
+            const newDataSet = filterUnselectedData(synchronizedChartData, selectedBldg?.building_id);
+            const newPastDataSet = filterUnselectedData(pastSynchronizedChartData, selectedBldg?.building_id);
+
+            if (newDataSet) setSynchronizedChartData(newDataSet);
+            if (newPastDataSet) setPastSynchronizedChartData(newPastDataSet);
         }
 
         if (value === 'false') {
-            if (selectedBldg?.building_id) {
+            if (selectedBldg?.building_id && selected_metrics.length !== 0) {
                 fetchSingleBldgChartData(startDate, endDate, selectedBldg?.building_id, 'currentData');
 
                 if (isComparisionOn) {
@@ -849,7 +929,7 @@ const ExploreByBuildingsV2 = () => {
                 );
             }
         }
-    }, [startDate, endDate, metrics, userPrefUnits]);
+    }, [startDate, endDate, metrics, userPrefUnits, isInComparisonMode]);
 
     useEffect(() => {
         if (checkedAll) {
@@ -933,7 +1013,9 @@ const ExploreByBuildingsV2 = () => {
                     )}
                 </div>
             </Row>
+
             <Brick sizeInRem={0.75} />
+
             <Row>
                 <div className="explore-data-table-style">
                     <Col lg={12}>
@@ -963,7 +1045,8 @@ const ExploreByBuildingsV2 = () => {
                                     onChange={() => {
                                         setCheckedAll(!checkedAll);
                                     }}
-                                    disabled={!exploreBuildingsList || exploreBuildingsList.length > 20}
+                                    // disabled={!exploreBuildingsList || exploreBuildingsList.length > 20}
+                                    disabled={true}
                                 />
                             )}
                             customCheckboxForCell={(record) => (
@@ -975,7 +1058,12 @@ const ExploreByBuildingsV2 = () => {
                                     checked={selectedBldgIds.includes(record?.building_id)}
                                     value={selectedBldgIds.includes(record?.building_id)}
                                     onChange={(e) => {
-                                        handleBuildingStateChange(e.target.value, record, isInComparisonMode);
+                                        handleBuildingStateChange(
+                                            e.target.value,
+                                            record,
+                                            isInComparisonMode,
+                                            selectedMetrics
+                                        );
                                     }}
                                 />
                             )}
@@ -986,6 +1074,13 @@ const ExploreByBuildingsV2 = () => {
                     </Col>
                 </div>
             </Row>
+
+            <ExploreAlert
+                isModalOpen={showAlert}
+                onCancel={handleModalClose}
+                title={`Metric Selection Required`}
+                message={`Kindly choose the Metric type to access data for the Building.`}
+            />
         </>
     );
 };
