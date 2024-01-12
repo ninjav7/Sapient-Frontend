@@ -952,7 +952,7 @@ const ExploreByBuildingsV2 = () => {
                 );
             }
         }
-    }, [startDate, endDate, metrics, userPrefUnits, isInComparisonMode]);
+    }, [startDate, endDate, metrics, userPrefDateFormat, userPrefTimeFormat, userPrefUnits, isInComparisonMode]);
 
     useEffect(() => {
         if (checkedAll) {
