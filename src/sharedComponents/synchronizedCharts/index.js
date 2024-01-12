@@ -174,7 +174,9 @@ const SynchronizedCharts = (props) => {
 
                                                 let tooltipContent = `<div class='chart-tooltip'>
                                                 ${renderComponents(
-                                                    <Typography.Subheader size={Typography.Sizes.md} className="mt-2">
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        className="gray-550 mt-2">
                                                         {`Consumption Data:`}
                                                     </Typography.Subheader>
                                                 )}
