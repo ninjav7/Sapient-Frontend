@@ -201,26 +201,28 @@ const SynchronizedCharts = (props) => {
                                                        `;
                                                 });
 
-                                                tooltipContent += `${renderComponents(
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.sm}
-                                                        className="gray-550 mt-4">
-                                                        {pastDataTimestamp}
-                                                    </Typography.Subheader>
-                                                )} <table>`;
+                                                isComparisionOn &&
+                                                    (tooltipContent += `${renderComponents(
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.sm}
+                                                            className="gray-550 mt-4">
+                                                            {pastDataTimestamp}
+                                                        </Typography.Subheader>
+                                                    )} <table>`);
 
                                                 // Iterate through each point in the tooltip
-                                                newMappedPastDataSets.forEach((el) => {
-                                                    const value = el?.data[indexPos]
-                                                        ? formatConsumptionValue(el?.data[indexPos], 2)
-                                                        : 0;
+                                                isComparisionOn &&
+                                                    newMappedPastDataSets.forEach((el) => {
+                                                        const value = el?.data[indexPos]
+                                                            ? formatConsumptionValue(el?.data[indexPos], 2)
+                                                            : 0;
 
-                                                    tooltipContent += `
+                                                        tooltipContent += `
                                                        <div class="mt-1 mb-1" style="color: ${el?.chart_color};">
                                                            <span>${el?.name}:</span> ${value} ${el?.chart_unit}
                                                        </div>                                                      
                                                       `;
-                                                });
+                                                    });
 
                                                 // Footer content
                                                 tooltipContent += `<span class='mb-2' />`;
