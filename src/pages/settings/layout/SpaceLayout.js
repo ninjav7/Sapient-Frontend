@@ -314,11 +314,10 @@ const SpaceLayout = (props) => {
                             <Typography.Body size={Typography.Sizes.md}>{`Parent`}</Typography.Body>
                             <Brick sizeInRem={0.25} />
                             <div className="d-flex w-100">
-                                <Select
-                                    name="select"
-                                    currentValue={[{ label: currentParent, id: currentParent }]}
-                                    menuPlacement="top"
-                                    isDisabled={true}
+                                <InputTooltip
+                                    labelSize={Typography.Sizes.md}
+                                    value={currentParent}
+                                    disabled={true}
                                     className="w-100"
                                 />
                                 <Button
