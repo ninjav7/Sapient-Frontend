@@ -54,9 +54,6 @@ const LayoutLevelColumn = (props) => {
         confirmMove,
         onMoveClick,
         ableToBeMoved,
-        shouldMove,
-        allowMove,
-        disableMove,
     } = props;
     const [selectedItem, setSelectedItem] = useState(selectedItemProp);
 
@@ -69,13 +66,6 @@ const LayoutLevelColumn = (props) => {
             selectedItem && setSelectedItem(null);
         };
     }, [title]);
-
-    useEffect(() => {
-        if (shouldMove) {
-            onMoveClick(state.stack);
-            disableMove();
-        }
-    }, [shouldMove]);
 
     const renderChildren = () => {
         if (isLoading) {
@@ -102,26 +92,25 @@ const LayoutLevelColumn = (props) => {
                         return ableToBeMoved(childProps) ? confirmMove : null;
                 };
 
-                const onMoveClickHandle = () => {
-                    if (shouldDispalyMove()) {
-                        allowMove();
-                    }
+                const onMoveClickHandler = () => {
+                    onMoveClick(childProps, state.stack);
                 };
 
+                let isShouldDisplayMove = shouldDispalyMove();
                 return (
                     <LayoutLocationSelectionMenuList
                         title={name}
                         key={generateID()}
                         level={level}
                         isActive={isActive}
-                        confirmMove={shouldDispalyMove()}
+                        confirmMove={isShouldDisplayMove}
                         notEditable={onColumnEditIncludeChildren}
                         onEdit={
                             !onColumnEditIncludeChildren && isEditable && onItemEdit
                                 ? (event) => onItemEdit({ event, name, ...props, stackThree: state.stack })
                                 : null
                         }
-                        onMoveClick={onMoveClickHandle}
+                        onMoveClick={onMoveClickHandler}
                         isArrowShown={hasChildren || childProps.hasChildren}
                         onClick={(event) => {
                             setSelectedItem(id);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import _ from 'lodash';
 import { useAtom } from 'jotai';
 import { useParams } from 'react-router-dom';
@@ -22,7 +22,6 @@ const LayoutPage = () => {
     const { bldgId } = useParams();
     const [buildingListData] = useAtom(buildingData);
     const [userPermission] = useAtom(userPermissionData);
-    const [selectedSpaceName, setSelectedSpaceName] = useState('');
     const isUserAdmin = userPermission?.is_admin ?? false;
     const isSuperUser = userPermission?.is_superuser ?? false;
     const isSuperAdmin = isUserAdmin || isSuperUser;
@@ -34,6 +33,7 @@ const LayoutPage = () => {
         type: 'root',
         bldg_id: bldgId,
     });
+
     const [floorsList, setFloorsList] = useState([]);
     const [isFetchingFloor, setFetchingFloor] = useState(false);
 
@@ -51,7 +51,6 @@ const LayoutPage = () => {
     const [showEditFloor, setShowEditFloor] = useState(false);
     const closeEditFloorPopup = () => setShowEditFloor(false);
     const openEditFloorPopup = () => setShowEditFloor(true);
-    const [currentSpaceToChange, setCurrentSpaceToChange] = useState({});
 
     // Add Space
     const [showAddSpace, setShowAddSpace] = useState(false);
@@ -61,20 +60,17 @@ const LayoutPage = () => {
     // Edit Space
     const [showEditSpace, setShowEditSpace] = useState(false);
     const [showMoveSpace, setShowMoveSpace] = useState(false);
-    const [confirmedMove, setConfirmedMove] = useState(false);
     const closeEditSpacePopup = () => setShowEditSpace(false);
     const closeMoveSpacePopup = () => setShowMoveSpace(false);
-    const unconfirmMove = () => setConfirmedMove(false);
     const openEditSpacePopup = () => setShowEditSpace(true);
     const openMoveSpacePopup = () => setShowMoveSpace(true);
-    const confirmMove = () => setConfirmedMove(true);
     const [selectedFloorObj, setSelectedFloorObj] = useState({});
-    const [idOfNewParent, setIdOfNewParent] = useState();
     const [oldStack, setOldStack] = useState({});
     const [newStack, setNewStack] = useState({});
-
     const [selectedSpaceObj, setSelectedSpaceObj] = useState({});
+    const [selectedSpaceObjParent, setSelectedSpaceObjParent] = useState({});
     const [defaultObjVal, setDefaultObjVal] = useState({});
+    const allParentSpaces = useRef([]);
 
     const notifyUser = (notifyType, notifyMessage) => {
         UserStore.update((s) => {
@@ -167,6 +163,30 @@ const LayoutPage = () => {
         ComponentStore.update((s) => {
             s.parent = 'building-settings';
         });
+    };
+
+    const createNewOldStack = (spaces, floors, currSpace) => {
+        const newStack = [];
+
+        const stackToSelectedSpaceObj = (currSpace) => {
+            newStack.push(currSpace);
+
+            if (currSpace?.parent_space) {
+                const nextParentSpace = spaces.find((space) => space?._id === currSpace?.parent_space);
+                stackToSelectedSpaceObj(nextParentSpace);
+            } else if (currSpace?.parents) {
+                const nextParentSpace = floors.find((floor) => floor?.floor_id === currSpace?.parents);
+                stackToSelectedSpaceObj(nextParentSpace);
+            }
+
+            return;
+        };
+
+        if (spaces && Object.values(spaces).length > 0 && currSpace) {
+            stackToSelectedSpaceObj(currSpace);
+            newStack.reverse();
+            setOldStack(newStack);
+        }
     };
 
     useEffect(() => {
@@ -265,7 +285,6 @@ const LayoutPage = () => {
                 onItemEdit={
                     isSuperAdmin || canUserEdit
                         ? (args) => {
-                              setOldStack(args.stackThree);
                               // When Edit Icon clicked from Floor item list
                               if (args?.floor_id && args?.floor_id !== '' && args?.parent_building) {
                                   setSelectedFloorObj({
@@ -283,6 +302,7 @@ const LayoutPage = () => {
                                       parents: args?.parents,
                                       parent_space: args?.parent_space,
                                   };
+                                  createNewOldStack(spacesList, floorsList, selectedObj);
                                   setSelectedSpaceObj(selectedObj);
                                   setDefaultObjVal(selectedObj);
                                   openEditSpacePopup();
@@ -336,10 +356,6 @@ const LayoutPage = () => {
                 setSpaceObj={setSelectedSpaceObj}
                 floorsList={floorsList}
                 spacesList={spacesList}
-                handleOpenEdit={(currentSpace) => {
-                    setCurrentSpaceToChange(currentSpace);
-                    openEditSpacePopup();
-                }}
             />
 
             {/* Edit Space */}
@@ -359,38 +375,31 @@ const LayoutPage = () => {
                 canUserDelete={canUserDelete}
                 floorsList={floorsList}
                 spacesList={spacesList}
-                handleOpenEdit={(currentSpace) => {
-                    setCurrentSpaceToChange(currentSpace);
-                    openMoveSpacePopup();
-                }}
-                oldStack={oldStack}
-                newStack={newStack}
-                confirmedMove={confirmedMove}
+                selectedFloorId={selectedFloorId}
+                spaceObjParent={selectedSpaceObjParent}
+                setSpaceObjParent={setSelectedSpaceObjParent}
+                setNewStack={setNewStack}
+                allParentSpaces={allParentSpaces}
+                openMoveSpacePopup={openMoveSpacePopup}
             />
 
             <MoveSpaceLayout
+                allParentSpaces={allParentSpaces}
+                sortedLayoutData={sortedLayoutData}
+                openEditSpacePopup={openEditSpacePopup}
                 isModalOpen={showMoveSpace}
-                openParentModal={openEditSpacePopup}
                 closeModal={closeMoveSpacePopup}
-                operationType="EDIT"
+                openModal={openMoveSpacePopup}
                 bldgId={bldgId}
-                parentId={idOfNewParent}
-                spaceName={selectedSpaceName}
-                fetchAllFloorData={fetchAllFloorData}
-                fetchAllSpaceData={fetchAllSpaceData}
                 notifyUser={notifyUser}
                 spaceObj={selectedSpaceObj}
                 setSpaceObj={setSelectedSpaceObj}
-                defaultObjVal={defaultObjVal}
-                isSuperAdmin={isSuperAdmin}
-                canUserDelete={canUserDelete}
                 floorsList={floorsList}
-                spacesList={spacesList}
                 oldStack={oldStack}
-                currentSpace={currentSpaceToChange}
                 newStack={newStack}
                 setNewStack={setNewStack}
-                confirmMove={confirmMove}
+                spaceObjParent={selectedSpaceObjParent}
+                setSpaceObjParent={setSelectedSpaceObjParent}
             />
         </React.Fragment>
     );

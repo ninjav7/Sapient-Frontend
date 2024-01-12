@@ -111,9 +111,6 @@ const LayoutElements = (props) => {
         confirmMove,
         onMoveClick,
         ableToBeMoved,
-        shouldMove,
-        allowMove,
-        disableMove,
     } = props;
 
     const childrenClickHandler = (title, key, callbackState, currentItem, restrictedActions, selectedItem) => {
@@ -127,9 +124,6 @@ const LayoutElements = (props) => {
                         confirmMove={confirmMove}
                         ableToBeMoved={ableToBeMoved}
                         onMoveClick={onMoveClick}
-                        shouldMove={shouldMove}
-                        allowMove={allowMove}
-                        disableMove={disableMove}
                         childrenCallBackValue={(props) => ({ level: String(props.type_name), ...props })}
                         onChildrenClick={(space, restrictedActions) => {
                             const currentKey = key + 1;
