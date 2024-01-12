@@ -66,7 +66,7 @@ const SynchronizedCharts = (props) => {
                         newFormattedDataSets.push({
                             ...record,
                             chart_color: color,
-                            chart_units: unit,
+                            chart_unit: unit,
                             dash_style: 'Solid',
                         });
 
@@ -74,7 +74,7 @@ const SynchronizedCharts = (props) => {
                             newFormattedDataSets.push({
                                 ...pastChartData.datasets[index].data[dataIndex],
                                 chart_color: color,
-                                chart_units: unit,
+                                chart_unit: unit,
                                 dash_style: 'Dash',
                             });
                         }
@@ -127,7 +127,6 @@ const SynchronizedCharts = (props) => {
                                     <Title align="left" margin={25} x={0} style={{ fontSize: '1rem' }}>
                                         {dataset?.name}
                                     </Title>
-
                                     <XAxis
                                         crosshair
                                         id={`sync-chart-${index}`}
@@ -135,17 +134,6 @@ const SynchronizedCharts = (props) => {
                                         gridLineWidth={0}
                                         labels={{ format: xAxisLabels }}
                                     />
-
-                                    {/* <XAxis
-                                        crosshair
-                                        id={`opposite-sync-chart-${index}`}
-                                        type={'datetime'}
-                                        gridLineWidth={0}
-                                        labels={{ format: xAxisLabels }}
-                                        opposite
-                                        visible={false}
-                                    /> */}
-
                                     <YAxis>
                                         {dataset?.data.map((line, lineIndex) => (
                                             <Series
@@ -159,7 +147,6 @@ const SynchronizedCharts = (props) => {
                                             />
                                         ))}
                                     </YAxis>
-
                                     {hoveredIndexId === index && (
                                         <Tooltip
                                             shared={true}
@@ -174,17 +161,23 @@ const SynchronizedCharts = (props) => {
                                             formatter={function () {
                                                 const points = this.points; // The `this` object refers to the tooltip context
                                                 const indexPos = points[0]?.x; // Fetch index position
-                                                const timestamp = chartData?.xData[indexPos]; // Fetch timestamp
-                                                const dataSets = chartData?.datasets; // All Metrics & Buildings dataset
+
+                                                const timestamp = currentChartData?.xData[indexPos]; // Fetch timestamp
+                                                const pastDataTimestamp = pastChartData?.xData[indexPos]; // Fetch timestamp
+
+                                                const dataSets = currentChartData?.datasets; // All Metrics & Buildings dataset
+                                                const pastDataSets = pastChartData?.datasets; // All Metrics & Buildings dataset
 
                                                 const newMappedDataSets = dataSets?.flatMap((el) => el?.data) || []; // Fetched into single array
+                                                const newMappedPastDataSets =
+                                                    pastDataSets?.flatMap((el) => el?.data) || []; // Fetched into single array
 
                                                 let tooltipContent = `<div class='chart-tooltip'>
-                                                <div class="gray-550 fs-1">Consumption Data:</div>
+                                                <h5 class="gray-550 mb-1">Consumption Data:</h5>
                                                  ${renderComponents(
                                                      <Typography.Subheader
                                                          size={Typography.Sizes.sm}
-                                                         className="gray-550">
+                                                         className="gray-550 mt-3">
                                                          {timestamp}
                                                      </Typography.Subheader>
                                                  )} <table>`;
@@ -197,13 +190,34 @@ const SynchronizedCharts = (props) => {
 
                                                     tooltipContent += `
                                                         <div class="mt-1 mb-1" style="color: ${el?.chart_color};">
-                                                            <span>${el?.name}:</span> ${value} ${el?.chart_units}
+                                                            <span>${el?.name}:</span> ${value} ${el?.chart_unit}
                                                         </div>                                                      
                                                        `;
                                                 });
 
+                                                tooltipContent += `${renderComponents(
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.sm}
+                                                        className="gray-550 mt-4">
+                                                        {pastDataTimestamp}
+                                                    </Typography.Subheader>
+                                                )} <table>`;
+
+                                                // Iterate through each point in the tooltip
+                                                newMappedPastDataSets.forEach((el, newDataSetIndex) => {
+                                                    const value = el?.data[indexPos]
+                                                        ? formatConsumptionValue(el?.data[indexPos], 2)
+                                                        : 0;
+
+                                                    tooltipContent += `
+                                                       <div class="mt-1 mb-1" style="color: ${el?.chart_color};">
+                                                           <span>${el?.name}:</span> ${value} ${el?.chart_unit}
+                                                       </div>                                                      
+                                                      `;
+                                                });
+
                                                 // Footer content
-                                                tooltipContent += '</div>';
+                                                tooltipContent += `<span class='mb-2' />`;
 
                                                 return tooltipContent;
                                             }}

@@ -33,6 +33,7 @@ import { formatXaxisForHighCharts, getPastDateRange } from '../../../helpers/hel
 import { handleUnitConverstion } from '../../settings/general-settings/utils';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { exploreBldgMetrics, calculateDataConvertion, validateSeriesDataForBuildings } from './utils';
+import { getColorBasedOnIndex } from '../../../sharedComponents/synchronizedCharts/utils';
 
 import { getWeatherData } from '../../../services/weather';
 import { getExploreByBuildingTableCSVExport } from '../../../utils/tablesExport';
@@ -405,17 +406,24 @@ const ExploreByBuildingsV2 = () => {
             });
     };
 
-    const fetchSingleBldgChartData = async (startDate, endDate, bldg_id, requestType = 'currentData') => {
+    const fetchSingleBldgChartData = async (
+        startDate,
+        endDate,
+        bldg_id,
+        requestType = 'currentData',
+        selected_metrics = []
+    ) => {
         if (metrics.length === 0) return;
 
         const start_date = encodeURIComponent(startDate);
         const end_date = encodeURIComponent(endDate);
         const time_zone = encodeURIComponent(timeZone);
         const currentChartData = requestType === 'currentData' ? synchronizedChartData : pastSynchronizedChartData;
+        const selectedRecordCount = currentChartData?.datasets[0]?.data.length ?? 0;
 
         const promisesList = [];
 
-        metrics.forEach((metric) => {
+        selected_metrics.forEach((metric) => {
             let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${time_zone}&metric=${metric?.value}`;
 
             if (metric?.value === 'weather') {
@@ -448,10 +456,10 @@ const ExploreByBuildingsV2 = () => {
                         const response = res?.data;
 
                         let metricObj = {
-                            name: metrics[index].label,
+                            name: selected_metrics[index].label,
                             data: [],
-                            unit: metrics[index].unit,
-                            metric: metrics[index].label,
+                            unit: selected_metrics[index].unit,
+                            metric: selected_metrics[index].label,
                         };
 
                         if (response?.success) {
@@ -461,7 +469,9 @@ const ExploreByBuildingsV2 = () => {
 
                             const metricBldgDataObj = {
                                 id: bldg_id,
-                                name: `${bldgObj?.building_name} - ${metrics[index].label}`,
+                                name: `${bldgObj?.building_name} - ${selected_metrics[index].label}`,
+                                chart_unit: selected_metrics[index].unit,
+                                chart_color: getColorBasedOnIndex(selectedRecordCount),
                                 data: [],
                             };
 
@@ -477,8 +487,8 @@ const ExploreByBuildingsV2 = () => {
 
                                 metricBldgDataObj.data.push(
                                     calculateDataConvertion(
-                                        metrics[index]?.value === 'weather' ? el?.temp_f : el?.data,
-                                        metrics[index]?.value
+                                        selected_metrics[index]?.value === 'weather' ? el?.temp_f : el?.data,
+                                        selected_metrics[index]?.value
                                     )
                                 );
                             });
@@ -498,6 +508,8 @@ const ExploreByBuildingsV2 = () => {
                                     el.data.push({
                                         id: bldg_id,
                                         name: metricObj?.data[0].name,
+                                        chart_unit: metricObj?.unit,
+                                        chart_color: getColorBasedOnIndex(selectedRecordCount),
                                         data: metricObj?.data[0].data,
                                     });
                                 }
@@ -549,7 +561,7 @@ const ExploreByBuildingsV2 = () => {
                 value: metric?.value,
             };
 
-            bldgIDs.forEach((bldg_id) => {
+            bldgIDs.forEach((bldg_id, index) => {
                 const bldgObj = exploreBuildingsList.find((el) => el?.building_id === bldg_id);
 
                 apiRequestListToTrack.push({
@@ -560,6 +572,8 @@ const ExploreByBuildingsV2 = () => {
                 newMetricObj.data.push({
                     id: bldg_id,
                     name: `${bldgObj?.building_name} - ${metric?.label}`,
+                    chart_unit: metric?.unit,
+                    chart_color: getColorBasedOnIndex(index),
                     data: [],
                 });
 
@@ -681,7 +695,13 @@ const ExploreByBuildingsV2 = () => {
 
         if (value === 'false') {
             if (selectedBldg?.building_id && selected_metrics.length !== 0) {
-                fetchSingleBldgChartData(startDate, endDate, selectedBldg?.building_id, 'currentData');
+                fetchSingleBldgChartData(
+                    startDate,
+                    endDate,
+                    selectedBldg?.building_id,
+                    'currentData',
+                    selected_metrics
+                );
 
                 if (isComparisionOn) {
                     const pastDateObj = getPastDateRange(startDate, daysCount);
@@ -689,7 +709,8 @@ const ExploreByBuildingsV2 = () => {
                         pastDateObj?.startDate,
                         pastDateObj?.endDate,
                         selectedBldg?.building_id,
-                        'pastData'
+                        'pastData',
+                        selected_metrics
                     );
                 }
             }
@@ -935,7 +956,7 @@ const ExploreByBuildingsV2 = () => {
         if (checkedAll) {
             if (exploreBuildingsList.length !== 0 && exploreBuildingsList.length <= 20) {
                 const allBldgsIds = exploreBuildingsList.map((el) => el?.building_id);
-                fetchMultipleBldgsChartData(startDate, endDate, metrics[0]?.value, allBldgsIds);
+                fetchMultipleBldgsChartData(startDate, endDate, metrics, allBldgsIds);
                 setSelectedBldgIds(allBldgsIds);
             }
         }
