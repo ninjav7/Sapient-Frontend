@@ -162,7 +162,7 @@ const SpaceLayout = (props) => {
 
         setErrorObj(alertObj);
 
-        fetchEditSpace();
+        if (!alertObj.name && !alertObj.type) fetchEditSpace();
     };
 
     const handleDeleteSpace = async () => {

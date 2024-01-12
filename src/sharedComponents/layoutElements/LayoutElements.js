@@ -40,8 +40,6 @@ const renderStackColumns = (
     //For preventing render next column if it was detected without children
     let rendering = true;
 
-    // console.log(state.stack);
-
     return Object.entries(state.stack).map(
         ([key, { component, callbackState, currentItem }], currentIndex, stackEntries) => {
             //preventing render if column without children has been detected
