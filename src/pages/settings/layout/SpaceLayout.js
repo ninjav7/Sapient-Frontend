@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
 
 import Brick from '../../../sharedComponents/brick';
@@ -28,6 +28,9 @@ const SpaceLayout = (props) => {
         notifyUser,
         spaceObj = {},
         setSpaceObj,
+        defaultObjVal = {},
+        isSuperAdmin = false,
+        canUserDelete = false,
         floorsList,
         spacesList,
         openMoveSpacePopup,
@@ -36,9 +39,6 @@ const SpaceLayout = (props) => {
         setNewStack,
         setSpaceObjParent,
         allParentSpaces,
-        canUserDelete,
-        isSuperAdmin,
-        defaultObjVal,
     } = props;
 
     const defaultErrorObj = {
@@ -144,7 +144,7 @@ const SpaceLayout = (props) => {
             });
     };
 
-    const handleEditSpace = async () => {
+    const handleEditSpace = () => {
         if (!bldgId || !spaceObj?._id) return;
 
         let alertObj = Object.assign({}, errorObj);
@@ -154,39 +154,7 @@ const SpaceLayout = (props) => {
 
         setErrorObj(alertObj);
 
-        if (!alertObj.name && !alertObj.type) {
-            setProcessing(true);
-
-            const params = `?space_id=${spaceObj?._id}`;
-            const payload = {
-                building_id: bldgId,
-                name: spaceObj?.name,
-                type_id: spaceObj?.type_id,
-                parents: spaceObj?.parents,
-                parent_space: spaceObj?.parent_space,
-            };
-
-            await updateSpaceService(params, payload)
-                .then((res) => {
-                    const response = res?.data;
-                    if (response?.success) {
-                        notifyUser(Notification.Types.success, `Space updated successfully.`);
-                        fetchAllFloorData(bldgId);
-                        fetchAllSpaceData(spaceObj?.parentsDefault, bldgId);
-                    } else {
-                        notifyUser(Notification.Types.error, response?.message);
-                    }
-                })
-                .catch((err) => {
-                    notifyUser(Notification.Types.error, `Failed to update Space.`);
-                })
-                .finally(() => {
-                    setProcessing(false);
-                    closeModal();
-                    setSpaceObj({});
-                    window.scroll(0, 0);
-                });
-        }
+        fetchEditSpace();
     };
 
     const handleDeleteSpace = async () => {
@@ -239,14 +207,9 @@ const SpaceLayout = (props) => {
             .catch(() => {});
     };
 
-    const floorsTypes = floorsList.map((el) => ({ label: el?.name, value: el?.floor_id }));
-
     const handleChange = (key, value) => {
         let obj = Object.assign({}, spaceObj);
         setErrorObj({ ...errorObj, [key]: null });
-        if (key === 'parents') {
-            obj['parentsDefault'] = obj['parents'];
-        }
         obj[key] = value;
         setSpaceObj(obj);
     };
@@ -329,7 +292,6 @@ const SpaceLayout = (props) => {
                         />
                     </div>
                     <Brick sizeInRem={1.25} />
-
                     {operationType === 'EDIT' && (
                         <>
                             <Typography.Body size={Typography.Sizes.md}>{`Parent`}</Typography.Body>
