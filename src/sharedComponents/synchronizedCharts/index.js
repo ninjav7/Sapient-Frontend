@@ -157,7 +157,7 @@ const SynchronizedCharts = (props) => {
                                             padding={0}
                                             borderWidth={0}
                                             shadow={0}
-                                            zIndex={9999}
+                                            outside={true}
                                             formatter={function () {
                                                 const points = this.points; // The `this` object refers to the tooltip context
                                                 const indexPos = points[0]?.x; // Fetch index position
@@ -173,11 +173,15 @@ const SynchronizedCharts = (props) => {
                                                     pastDataSets?.flatMap((el) => el?.data) || []; // Fetched into single array
 
                                                 let tooltipContent = `<div class='chart-tooltip'>
-                                                <h5 class="gray-550 mb-1">Consumption Data:</h5>
+                                                ${renderComponents(
+                                                    <Typography.Subheader size={Typography.Sizes.md} className="mt-2">
+                                                        {`Consumption Data:`}
+                                                    </Typography.Subheader>
+                                                )}
                                                  ${renderComponents(
                                                      <Typography.Subheader
                                                          size={Typography.Sizes.sm}
-                                                         className="gray-550 mt-3">
+                                                         className="gray-550 mt-2">
                                                          {timestamp}
                                                      </Typography.Subheader>
                                                  )} <table>`;
