@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, FormGroup, Spinner, Modal } from 'reactstrap';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
-import { fetchExploreEquipmentChart } from '../explore/services';
+import { fetchEquipmentChartDataV2, fetchExploreEquipmentChart } from '../explore/services';
 import {
     updateListSensor,
     updateEquipmentDetails,
@@ -40,7 +40,7 @@ import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/attached.svg';
 import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
 import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
-import { renderEquipChartMetrics } from './helper';
+import { handleDataConversion, renderEquipChartMetrics } from './helper';
 
 import '../settings/passive-devices/styles.scss';
 import './styles.scss';
@@ -212,6 +212,7 @@ const EquipChartModal = ({
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
                 const response = res?.data;
+                return;
 
                 if (response?.success) {
                     const { data } = response;
@@ -249,6 +250,51 @@ const EquipChartModal = ({
 
                         setDeviceData([recordToInsert]);
                     }
+                }
+            })
+            .catch((error) => {})
+            .finally(() => {
+                setIsEquipDataFetched(false);
+            });
+    };
+
+    const fetchEquipmentChartV2 = async (equipId, equiName) => {
+        if (!equipId || !bldgId || !startDate || !endDate || !selectedConsumption) {
+            return;
+        }
+
+        const payload = {
+            date_from: encodeURIComponent(startDate),
+            date_to: encodeURIComponent(endDate),
+            tz_info: encodeURIComponent(timeZone),
+        };
+
+        const params = `/${equipId}?building_id=${bldgId}&metric=${selectedConsumption}&date_from=${payload?.date_from}&date_to=${payload?.date_to}&tz_info=${payload?.tz_info}`;
+
+        setIsEquipDataFetched(true);
+
+        await fetchEquipmentChartDataV2(params)
+            .then((res) => {
+                const response = res?.data;
+
+                if (response?.success) {
+                    const { data } = response;
+
+                    if (!data || data.length === 0) {
+                        return;
+                    }
+
+                    const newEquipMappedData = data.map((el) => ({
+                        x: new Date(el?.time_stamp).getTime(),
+                        y: handleDataConversion(el?.consumption, selectedConsumption),
+                    }));
+
+                    const recordToInsert = {
+                        name: equiName,
+                        data: newEquipMappedData,
+                    };
+
+                    setDeviceData([recordToInsert]);
                 }
             })
             .catch((error) => {})
@@ -353,6 +399,7 @@ const EquipChartModal = ({
                 .finally(() => {});
         };
 
+        fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
         fetchEquipmentChart(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
         fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
@@ -401,6 +448,7 @@ const EquipChartModal = ({
             return;
         }
         if (closeFlag !== true) {
+            fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
             fetchEquipmentChart(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
             fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         } else {

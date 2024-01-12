@@ -16,7 +16,7 @@ export const metricForActiveDevice = [
 export const metricForPassiveWithOneBreaker = [
     { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
     { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
-    { value: 'current', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
+    { value: 'avg_current', label: 'Average Current (A)', unit: 'A', Consumption: 'Current' },
     { value: 'sensor_rms_current', label: 'Sensor RMS Current (A)', unit: 'A', Consumption: 'Sensor RMS Current' },
     { value: 'sensor_max_current', label: 'Sensor Max Current (A)', unit: 'A', Consumption: 'Sensor Max Current' },
     { value: 'sensor_min_current', label: 'Sensor Min Current (A)', unit: 'A', Consumption: 'Sensor Min Current' },
