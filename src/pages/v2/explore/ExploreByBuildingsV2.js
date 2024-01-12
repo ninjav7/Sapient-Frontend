@@ -669,15 +669,24 @@ const ExploreByBuildingsV2 = () => {
         if (chartData.datasets) {
             chartData.datasets.forEach((record) => {
                 const { data } = record;
-
                 if (data) {
                     record.data = data.filter((el) => el.id !== bldg_id);
+                }
+            });
+            chartData.datasets.forEach((record) => {
+                const { data } = record;
+                if (data) {
+                    data.forEach((el, index) => {
+                        el.chart_color = getColorBasedOnIndex(index);
+                    });
                 }
             });
         }
 
         return chartData;
     };
+
+    const updateChartColors = (chartData) => {};
 
     const handleBuildingStateChange = (value, selectedBldg, isComparisionOn = false, selected_metrics = []) => {
         if (selected_metrics.length === 0) {
