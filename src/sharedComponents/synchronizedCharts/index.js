@@ -183,7 +183,7 @@ const SynchronizedCharts = (props) => {
                                                  )} <table>`;
 
                                                 // Iterate through each point in the tooltip
-                                                newMappedDataSets.forEach((el, newDataSetIndex) => {
+                                                newMappedDataSets.forEach((el) => {
                                                     const value = el?.data[indexPos]
                                                         ? formatConsumptionValue(el?.data[indexPos], 2)
                                                         : 0;
@@ -204,7 +204,7 @@ const SynchronizedCharts = (props) => {
                                                 )} <table>`;
 
                                                 // Iterate through each point in the tooltip
-                                                newMappedPastDataSets.forEach((el, newDataSetIndex) => {
+                                                newMappedPastDataSets.forEach((el) => {
                                                     const value = el?.data[indexPos]
                                                         ? formatConsumptionValue(el?.data[indexPos], 2)
                                                         : 0;
