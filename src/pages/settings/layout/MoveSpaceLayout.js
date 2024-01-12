@@ -181,8 +181,8 @@ const MoveSpaceLayout = (props) => {
             return false;
         }
 
-        // if it is parent_floor of current element
-        if (space?.floor_id === spaceObj?.parents) {
+        // if it is parent_floor of current element if this current element is
+        if (space?.floor_id === spaceObj?.parents && spaceObj?.parent_space === null) {
             return false;
         }
 

@@ -356,6 +356,9 @@ const LayoutPage = () => {
                 setSpaceObj={setSelectedSpaceObj}
                 floorsList={floorsList}
                 spacesList={spacesList}
+                setSpaceObjParent={setSelectedSpaceObjParent}
+                setNewStack={setNewStack}
+                allParentSpaces={allParentSpaces}
             />
 
             {/* Edit Space */}

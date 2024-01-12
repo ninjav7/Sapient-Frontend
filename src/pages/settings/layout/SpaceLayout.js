@@ -90,6 +90,15 @@ const SpaceLayout = (props) => {
                     setProcessing(false);
                     closeModal();
                     setSpaceObj({});
+                    setNewStack({});
+                    setSpaceObjParent({});
+                    setSpaceObj((spaceObj) => {
+                        const newSpaceObj = { ...spaceObj };
+                        delete newSpaceObj.new_parents;
+                        delete newSpaceObj.new_parent_space;
+                        return newSpaceObj;
+                    });
+                    allParentSpaces.current = [];
                     window.scroll(0, 0);
                 });
         }
@@ -139,7 +148,6 @@ const SpaceLayout = (props) => {
                     return newSpaceObj;
                 });
                 allParentSpaces.current = [];
-
                 window.scroll(0, 0);
             });
     };
@@ -182,6 +190,15 @@ const SpaceLayout = (props) => {
                 closeModal();
                 closeDeleteSpacePopup();
                 setSpaceObj({});
+                setNewStack({});
+                setSpaceObjParent({});
+                setSpaceObj((spaceObj) => {
+                    const newSpaceObj = { ...spaceObj };
+                    delete newSpaceObj.new_parents;
+                    delete newSpaceObj.new_parent_space;
+                    return newSpaceObj;
+                });
+                allParentSpaces.current = [];
                 window.scroll(0, 0);
             });
     };
@@ -343,6 +360,15 @@ const SpaceLayout = (props) => {
                             onClick={() => {
                                 closeModal();
                                 setSpaceObj({});
+                                setNewStack({});
+                                setSpaceObjParent({});
+                                setSpaceObj((spaceObj) => {
+                                    const newSpaceObj = { ...spaceObj };
+                                    delete newSpaceObj.new_parents;
+                                    delete newSpaceObj.new_parent_space;
+                                    return newSpaceObj;
+                                });
+                                allParentSpaces.current = [];
                                 setErrorObj(defaultErrorObj);
                             }}
                         />
