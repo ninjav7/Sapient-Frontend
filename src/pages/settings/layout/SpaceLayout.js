@@ -31,6 +31,14 @@ const SpaceLayout = (props) => {
         defaultObjVal = {},
         isSuperAdmin = false,
         canUserDelete = false,
+        floorsList,
+        spacesList,
+        openMoveSpacePopup,
+        selectedFloorId,
+        spaceObjParent,
+        setNewStack,
+        setSpaceObjParent,
+        allParentSpaces,
     } = props;
 
     const defaultErrorObj = {
@@ -42,6 +50,7 @@ const SpaceLayout = (props) => {
 
     const [spaceTypes, setSpaceTypes] = useState([]);
     const [isProcessing, setProcessing] = useState(false);
+    const [currentParent, setCurrentParent] = useState('');
 
     // Delete Space
     const [showDeleteSpace, setShowDeleteSpace] = useState(false);
@@ -81,54 +90,79 @@ const SpaceLayout = (props) => {
                     setProcessing(false);
                     closeModal();
                     setSpaceObj({});
+                    setNewStack({});
+                    setSpaceObjParent({});
+                    setSpaceObj((spaceObj) => {
+                        const newSpaceObj = { ...spaceObj };
+                        delete newSpaceObj.new_parents;
+                        delete newSpaceObj.new_parent_space;
+                        return newSpaceObj;
+                    });
+                    allParentSpaces.current = [];
                     window.scroll(0, 0);
                 });
         }
     };
 
-    const handleEditSpace = async (space_obj, bldg_id) => {
-        if (!bldg_id || !spaceObj?._id) return;
+    const fetchEditSpace = async () => {
+        setProcessing(true);
+
+        const params = `?space_id=${spaceObj?._id}`;
+
+        const payload = {
+            building_id: bldgId,
+            name: spaceObj?.name,
+            type_id: spaceObj?.type_id,
+            parents: spaceObj?.new_parents ? spaceObj?.new_parents : spaceObj?.parents,
+            parent_space:
+                spaceObj?.new_parent_space || spaceObj?.new_parent_space === null
+                    ? spaceObj?.new_parent_space
+                    : spaceObj?.parent_space,
+        };
+
+        updateSpaceService(params, payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    notifyUser(Notification.Types.success, `Space updated successfully.`);
+                    fetchAllFloorData(bldgId);
+                    // here
+                    fetchAllSpaceData(selectedFloorId, bldgId);
+                } else {
+                    notifyUser(Notification.Types.error, response?.message);
+                }
+            })
+            .catch((err) => {
+                notifyUser(Notification.Types.error, `Failed to update Space.`);
+            })
+            .finally(() => {
+                setProcessing(false);
+                closeModal();
+                setSpaceObj({});
+                setNewStack({});
+                setSpaceObjParent({});
+                setSpaceObj((spaceObj) => {
+                    const newSpaceObj = { ...spaceObj };
+                    delete newSpaceObj.new_parents;
+                    delete newSpaceObj.new_parent_space;
+                    return newSpaceObj;
+                });
+                allParentSpaces.current = [];
+                window.scroll(0, 0);
+            });
+    };
+
+    const handleEditSpace = () => {
+        if (!bldgId || !spaceObj?._id) return;
 
         let alertObj = Object.assign({}, errorObj);
 
-        if (!space_obj?.name || space_obj?.name === '') alertObj.name = `Please enter Space name. It cannot be empty.`;
-        if (!space_obj?.type_id || space_obj?.type_id === '') alertObj.type_id = { text: `Please select Type.` };
+        if (!spaceObj?.name || spaceObj?.name === '') alertObj.name = `Please enter Space name. It cannot be empty.`;
+        if (!spaceObj?.type_id || spaceObj?.type_id === '') alertObj.type_id = { text: `Please select Type.` };
 
         setErrorObj(alertObj);
 
-        if (!alertObj.name && !alertObj.type) {
-            setProcessing(true);
-
-            const params = `?space_id=${space_obj?._id}`;
-            const payload = {
-                building_id: bldg_id,
-                name: space_obj?.name,
-                type_id: space_obj?.type_id,
-                parents: space_obj?.parents,
-                parent_space: space_obj?.parent_space,
-            };
-
-            await updateSpaceService(params, payload)
-                .then((res) => {
-                    const response = res?.data;
-                    if (response?.success) {
-                        notifyUser(Notification.Types.success, `Space updated successfully.`);
-                        fetchAllFloorData(bldg_id);
-                        fetchAllSpaceData(space_obj?.parents, bldg_id);
-                    } else {
-                        notifyUser(Notification.Types.error, response?.message);
-                    }
-                })
-                .catch((err) => {
-                    notifyUser(Notification.Types.error, `Failed to update Space.`);
-                })
-                .finally(() => {
-                    setProcessing(false);
-                    closeModal();
-                    setSpaceObj({});
-                    window.scroll(0, 0);
-                });
-        }
+        if (!alertObj.name && !alertObj.type) fetchEditSpace();
     };
 
     const handleDeleteSpace = async () => {
@@ -156,6 +190,15 @@ const SpaceLayout = (props) => {
                 closeModal();
                 closeDeleteSpacePopup();
                 setSpaceObj({});
+                setNewStack({});
+                setSpaceObjParent({});
+                setSpaceObj((spaceObj) => {
+                    const newSpaceObj = { ...spaceObj };
+                    delete newSpaceObj.new_parents;
+                    delete newSpaceObj.new_parent_space;
+                    return newSpaceObj;
+                });
+                allParentSpaces.current = [];
                 window.scroll(0, 0);
             });
     };
@@ -193,6 +236,34 @@ const SpaceLayout = (props) => {
         openModal();
     };
 
+    const getCurrentParent = () => {
+        if (spaceObjParent?._id) {
+            setCurrentParent(spaceObjParent?.name);
+            return;
+        }
+
+        if (spaceObjParent?.floor_id) {
+            setCurrentParent(spaceObjParent?.name);
+            return;
+        }
+
+        if (spaceObj?.parent_space) {
+            const parent = spacesList.find((space) => space._id === spaceObj.parent_space);
+            setCurrentParent(parent?.name);
+            return;
+        } else if (spaceObj?.parents) {
+            const parent = floorsList.find((space) => space.floor_id === spaceObj.parents);
+            setCurrentParent(parent?.name);
+            return;
+        }
+
+        setCurrentParent('');
+    };
+
+    useEffect(() => {
+        getCurrentParent();
+    }, [spaceObjParent, spaceObj, spacesList, floorsList]);
+
     useEffect(() => {
         if (isModalOpen) fetchSpaceTypes();
         if (!isModalOpen) setErrorObj(defaultErrorObj);
@@ -205,9 +276,7 @@ const SpaceLayout = (props) => {
                     <Typography.Header size={Typography.Sizes.lg}>
                         {operationType === `ADD` ? `Add Space` : `Edit Space`}
                     </Typography.Header>
-
                     <Brick sizeInRem={2} />
-
                     <div>
                         <Typography.Body size={Typography.Sizes.md}>{`Name`}</Typography.Body>
                         <Brick sizeInRem={0.25} />
@@ -221,9 +290,7 @@ const SpaceLayout = (props) => {
                             }}
                         />
                     </div>
-
                     <Brick sizeInRem={1.25} />
-
                     <div>
                         <Typography.Body size={Typography.Sizes.md}>{`Type`}</Typography.Body>
                         <Brick sizeInRem={0.25} />
@@ -241,7 +308,32 @@ const SpaceLayout = (props) => {
                             menuPlacement="top"
                         />
                     </div>
-
+                    <Brick sizeInRem={1.25} />
+                    {operationType === 'EDIT' && (
+                        <>
+                            <Typography.Body size={Typography.Sizes.md}>{`Parent`}</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            <div className="d-flex w-100">
+                                <InputTooltip
+                                    labelSize={Typography.Sizes.md}
+                                    value={currentParent}
+                                    disabled={true}
+                                    className="w-100"
+                                />
+                                <Button
+                                    label={'Move'}
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.primary}
+                                    onClick={() => {
+                                        closeModal();
+                                        openMoveSpacePopup();
+                                    }}
+                                    className="ml-2"
+                                />
+                            </div>
+                            <Brick sizeInRem={0.25} />
+                        </>
+                    )}
                     {operationType === 'EDIT' && (canUserDelete || isSuperAdmin) && (
                         <>
                             <Brick sizeInRem={1.25} />
@@ -257,9 +349,7 @@ const SpaceLayout = (props) => {
                             />
                         </>
                     )}
-
                     <Brick sizeInRem={canUserDelete || isSuperAdmin ? 1.5 : 2} />
-
                     <div className="d-flex justify-content-between w-100">
                         <Button
                             label={`Cancel`}
@@ -269,6 +359,15 @@ const SpaceLayout = (props) => {
                             onClick={() => {
                                 closeModal();
                                 setSpaceObj({});
+                                setNewStack({});
+                                setSpaceObjParent({});
+                                setSpaceObj((spaceObj) => {
+                                    const newSpaceObj = { ...spaceObj };
+                                    delete newSpaceObj.new_parents;
+                                    delete newSpaceObj.new_parent_space;
+                                    return newSpaceObj;
+                                });
+                                allParentSpaces.current = [];
                                 setErrorObj(defaultErrorObj);
                             }}
                         />
@@ -290,7 +389,7 @@ const SpaceLayout = (props) => {
                                 type={Button.Type.primary}
                                 className="w-100"
                                 onClick={() => {
-                                    handleEditSpace(spaceObj, bldgId);
+                                    handleEditSpace();
                                 }}
                                 disabled={isProcessing || compareObjData(defaultObjVal, spaceObj)}
                             />

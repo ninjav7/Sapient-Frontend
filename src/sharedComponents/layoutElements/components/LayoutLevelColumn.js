@@ -51,6 +51,9 @@ const LayoutLevelColumn = (props) => {
         isLoading,
         actionsMap,
         selectedItem: selectedItemProp,
+        confirmMove,
+        onMoveClick,
+        ableToBeMoved,
     } = props;
     const [selectedItem, setSelectedItem] = useState(selectedItemProp);
 
@@ -80,21 +83,34 @@ const LayoutLevelColumn = (props) => {
                 const hasChildren =
                     state[ACCESSORS.SPACES] &&
                     state[ACCESSORS.SPACES].some((space) => space[ACCESSORS.PARENT_SPACE] === id);
+
                 const isActive = selectedItem === id;
                 const { isEditable } = getActionRestrictions(actionsMap[id]);
 
+                const shouldDispalyMove = () => {
+                    if (ableToBeMoved && typeof ableToBeMoved === 'function')
+                        return ableToBeMoved(childProps) ? confirmMove : null;
+                };
+
+                const onMoveClickHandler = () => {
+                    onMoveClick(childProps, state.stack);
+                };
+
+                let isShouldDisplayMove = shouldDispalyMove();
                 return (
                     <LayoutLocationSelectionMenuList
                         title={name}
                         key={generateID()}
                         level={level}
                         isActive={isActive}
+                        confirmMove={isShouldDisplayMove}
                         notEditable={onColumnEditIncludeChildren}
                         onEdit={
                             !onColumnEditIncludeChildren && isEditable && onItemEdit
-                                ? (event) => onItemEdit({ event, name, ...props })
+                                ? (event) => onItemEdit({ event, name, ...props, stackThree: state.stack })
                                 : null
                         }
+                        onMoveClick={onMoveClickHandler}
                         isArrowShown={hasChildren || childProps.hasChildren}
                         onClick={(event) => {
                             setSelectedItem(id);
