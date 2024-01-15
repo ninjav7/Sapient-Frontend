@@ -14,11 +14,9 @@ import SecondaryTopNavBar from '../components/SecondaryTopNavBar';
 import { Notification } from '../sharedComponents/notification/Notification';
 
 import ChatBox from '../components/ChatBox';
-import ChatBotModal from '../components/Chatbot';
 
 import { deviceConfigRoutes, secondaryNavBarNotRequiredRoutes, sideNavNotBarRequiredRoutes } from './utils';
 
-import { ReactComponent as ChatBotSVG } from '../assets/icon/chatbot-icon.svg';
 import '../components/style.css';
 import './styles.scss';
 
@@ -35,12 +33,8 @@ const HorizontalLayout = (props) => {
     const userPermission = useAtom(userPermissionData);
     const isSuperUser = userPermission?.is_superuser ?? false;
 
-    // Chatbot Modal
-    const [isModalOpen, setModalStatus] = useState(false);
-    const handleModalOpen = () => setModalStatus(true);
-    const handleModalClose = () => setModalStatus(false);
     const [chatHistory, setChatHistory] = useState({
-        history: []
+        history: [],
     });
 
     const componentType = UserStore.useState((s) => s.componentType);
@@ -114,18 +108,8 @@ const HorizontalLayout = (props) => {
                         </div>
                     ) : null}
 
-                    {isSuperUser && (
-                        // <ChatBotSVG
-                        //     width={50}
-                        //     height={50}
-                        //     className="message-icon-alignment mouse-pointer"
-                        //     onClick={handleModalOpen}
-                        // />
-                        <ChatBox chatHistory={setChatHistory} toggle={setModalStatus}></ChatBox>
-                    )}
+                    {isSuperUser && <ChatBox chatHistory={setChatHistory} toggle={setModalStatus}></ChatBox>}
                 </div>
-
-                {/* <ChatBotModal isModalOpen={isModalOpen} closeModal={handleModalClose} /> */}
             </div>
         </React.Fragment>
     );
