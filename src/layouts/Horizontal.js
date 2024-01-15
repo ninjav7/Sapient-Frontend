@@ -13,6 +13,7 @@ import { userPermissionData } from '../store/globalState';
 import SecondaryTopNavBar from '../components/SecondaryTopNavBar';
 import { Notification } from '../sharedComponents/notification/Notification';
 
+import ChatBox from '../components/ChatBox';
 import ChatBotModal from '../components/Chatbot';
 
 import { deviceConfigRoutes, secondaryNavBarNotRequiredRoutes, sideNavNotBarRequiredRoutes } from './utils';
@@ -38,6 +39,9 @@ const HorizontalLayout = (props) => {
     const [isModalOpen, setModalStatus] = useState(false);
     const handleModalOpen = () => setModalStatus(true);
     const handleModalClose = () => setModalStatus(false);
+    const [chatHistory, setChatHistory] = useState({
+        history: []
+    });
 
     const componentType = UserStore.useState((s) => s.componentType);
     const notificationType = UserStore.useState((s) => s.notificationType);
@@ -111,16 +115,17 @@ const HorizontalLayout = (props) => {
                     ) : null}
 
                     {isSuperUser && (
-                        <ChatBotSVG
-                            width={50}
-                            height={50}
-                            className="message-icon-alignment mouse-pointer"
-                            onClick={handleModalOpen}
-                        />
+                        // <ChatBotSVG
+                        //     width={50}
+                        //     height={50}
+                        //     className="message-icon-alignment mouse-pointer"
+                        //     onClick={handleModalOpen}
+                        // />
+                        <ChatBox chatHistory={setChatHistory} toggle={setModalStatus}></ChatBox>
                     )}
                 </div>
 
-                <ChatBotModal isModalOpen={isModalOpen} closeModal={handleModalClose} />
+                {/* <ChatBotModal isModalOpen={isModalOpen} closeModal={handleModalClose} /> */}
             </div>
         </React.Fragment>
     );
