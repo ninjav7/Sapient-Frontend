@@ -30,7 +30,7 @@ const HorizontalLayout = (props) => {
     const [showTopNav, setShowTopNav] = useState(true);
     const [showSecondaryNav, setShowSecondaryNav] = useState(true);
 
-    const userPermission = useAtom(userPermissionData);
+    const [userPermission] = useAtom(userPermissionData);
     const isSuperUser = userPermission?.is_superuser ?? false;
 
     const [chatHistory, setChatHistory] = useState({
