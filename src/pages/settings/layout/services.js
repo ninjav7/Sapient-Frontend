@@ -8,7 +8,7 @@ import {
     getSpaces,
     getSpaceTypes,
     updateFloor,
-    updateSpace,
+    updateSpaceV2,
 } from '../../../services/Network';
 
 export function getAllFloorsList(params) {
@@ -40,7 +40,7 @@ export function addSpaceService(params, payload) {
 }
 
 export function updateSpaceService(params, payload) {
-    return axiosInstance.patch(`${updateSpace}${params}`, payload).then((res) => res);
+    return axiosInstance.patch(`${updateSpaceV2}${params}`, payload).then((res) => res);
 }
 
 export function deleteSpaceService(params) {

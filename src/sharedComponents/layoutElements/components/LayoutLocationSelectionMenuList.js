@@ -7,9 +7,10 @@ import { Badge } from '../../badge';
 
 import { ReactComponent as PenSVG } from '../../assets/icons/pen.svg';
 import { ReactComponent as ArrowRightSVG } from '../../assets/icons/arrow-right.svg';
+import { Button } from '../../button';
 
 const LayoutLocationSelectionMenuList = (props) => {
-    const { title, onEdit, onClick, isActive, notEditable, level, isArrowShown } = props;
+    const { title, onEdit, onClick, isActive, notEditable, level, isArrowShown, confirmMove, onMoveClick } = props;
 
     const onEditHandlerMemoized = useCallback((event) => {
         event.stopPropagation();
@@ -41,6 +42,7 @@ const LayoutLocationSelectionMenuList = (props) => {
                         <PenSVG />
                     </button>
                 )}
+                {confirmMove && <Button onClick={onMoveClick}>Move</Button>}
                 <Badge text={level} />
                 <div className="layout-location-selection-menu-list-click">
                     {onClick && isArrowShown && (
