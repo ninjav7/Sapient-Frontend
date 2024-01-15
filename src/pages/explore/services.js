@@ -3,6 +3,7 @@ import _ from 'lodash';
 import {
     getExploreEquipmentList,
     getExploreEquipmentChart,
+    getEquipmentChartV2,
     getExploreFilter,
     getWeather,
     compareBuildingsV2,
@@ -87,6 +88,10 @@ export function fetchExploreEquipmentChart(payload, params) {
     return axiosInstance.post(`${getExploreEquipmentChart}${params}`, payload).then((res) => {
         return res;
     });
+}
+
+export function fetchEquipmentChartDataV2(params) {
+    return axiosInstance.get(`${getEquipmentChartV2}${params}`).then((res) => res);
 }
 
 export function fetchExploreFilter(

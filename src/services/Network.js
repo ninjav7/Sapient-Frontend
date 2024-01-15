@@ -181,6 +181,7 @@ export const getExploreBuildingList = '/api/explorer/building_list';
 export const getExploreBuildingChart = '/api/explorer/building_chart';
 export const getExploreEquipmentList = '/api/explorer/equipment_list';
 export const getExploreEquipmentChart = '/api/explorer/equipment_chart';
+export const getEquipmentChartV2 = '/api/v2/metrics/equipment';
 export const getExploreByEquipment = '/api/explorer/chart/by_equipment';
 export const getExploreEquipmentYTDUsage = '/api/explorer/equipment_ytd_usage';
 export const getExploreFilter = '/api/explorer/filter_by_daterange';

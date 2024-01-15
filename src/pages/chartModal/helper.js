@@ -22,3 +22,21 @@ export const renderEquipChartMetrics = (equipObj) => {
 
     return defaultMetrics;
 };
+
+export const handleDataConversion = (value, metricType = 'energy') => {
+    if (value === '') {
+        return null;
+    }
+
+    const unitWithNoConversionReq = ['runtime', 'starts'];
+    const unitToDivideBy100 = ['max_phase_imbalance_percent', 'min_phase_imbalance_percent'];
+
+    switch (metricType) {
+        case metricType in unitWithNoConversionReq:
+            return value;
+        case metricType in unitToDivideBy100:
+            return value / 100;
+        default:
+            return value / 1000;
+    }
+};
