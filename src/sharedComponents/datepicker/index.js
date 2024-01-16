@@ -170,22 +170,12 @@ const Datepicker = ({
                             }`}>
                             {withTimeSelect && (
                                 <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                    <Button
-                                        size={Button.Sizes.md}
-                                        type={Button.Type.secondaryGrey}
-                                        label="Cancel"
-                                        onClick={handleCancelClick}
-                                    />
-                                    <Button
-                                        size={Button.Sizes.md}
-                                        type={Button.Type.primary}
-                                        label="Apply"
-                                        onClick={(event) => {
-                                            applyDate(event);
-                                            setFocusedInput(null);
-                                            handleClose();
-                                        }}
-                                    />
+                                    <div className="timepicker">
+                                        <input type="time" id="appt" name="appt" value={'12:00'} />
+                                    </div>
+                                    <div className="timepicker">
+                                        <input type="time" id="appt" name="appt" value={'23:00'} />
+                                    </div>
                                 </div>
                             )}
                             <div className="d-flex" style={{ gap: '0.5rem' }}>
@@ -273,6 +263,7 @@ Datepicker.propTypes = {
     onChange: PropTypes.func,
     isSingleDay: PropTypes.bool,
     withApplyButton: PropTypes.bool,
+    withTimeSelect: PropTypes.bool,
     onCancel: PropTypes.func,
     onApply: PropTypes.func,
     onCustomDateChange: PropTypes.func,
