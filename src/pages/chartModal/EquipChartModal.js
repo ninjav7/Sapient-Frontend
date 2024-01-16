@@ -31,6 +31,7 @@ import {
     dateTimeFormatForHighChart,
     formatXaxisForHighCharts,
 } from '../../helpers/helpers';
+import { metricsWithMultipleSensors } from './constants';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import Typography from '../../sharedComponents/typography';
@@ -212,7 +213,6 @@ const EquipChartModal = ({
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
                 const response = res?.data;
-                return;
 
                 if (response?.success) {
                     const { data } = response;
@@ -263,6 +263,8 @@ const EquipChartModal = ({
             return;
         }
 
+        setIsEquipDataFetched(true);
+
         const payload = {
             date_from: encodeURIComponent(startDate),
             date_to: encodeURIComponent(endDate),
@@ -270,8 +272,6 @@ const EquipChartModal = ({
         };
 
         const params = `/${equipId}?building_id=${bldgId}&metric=${selectedConsumption}&date_from=${payload?.date_from}&date_to=${payload?.date_to}&tz_info=${payload?.tz_info}`;
-
-        setIsEquipDataFetched(true);
 
         await fetchEquipmentChartDataV2(params)
             .then((res) => {
@@ -284,17 +284,37 @@ const EquipChartModal = ({
                         return;
                     }
 
-                    const newEquipMappedData = data.map((el) => ({
-                        x: new Date(el?.time_stamp).getTime(),
-                        y: handleDataConversion(el?.consumption, selectedConsumption),
-                    }));
+                    const isMultipleSensorData = metricsWithMultipleSensors.includes(selectedConsumption);
 
-                    const recordToInsert = {
-                        name: equiName,
-                        data: newEquipMappedData,
-                    };
+                    if (isMultipleSensorData) {
+                        const aggregatedSensorData = [];
 
-                    setDeviceData([recordToInsert]);
+                        data.forEach((sensorObj) => {
+                            const mappedSensorData = sensorObj?.data.map((el) => ({
+                                x: new Date(el?.time_stamp).getTime(),
+                                y: handleDataConversion(el?.consumption, selectedConsumption),
+                            }));
+
+                            aggregatedSensorData.push({
+                                name: `Sensor ${sensorObj?.index_alias}`,
+                                data: mappedSensorData,
+                            });
+                        });
+
+                        setDeviceData(aggregatedSensorData);
+                    } else {
+                        const mappedEquipmentData = data.map((el) => ({
+                            x: new Date(el?.time_stamp).getTime(),
+                            y: handleDataConversion(el?.consumption, selectedConsumption),
+                        }));
+
+                        const equipmentRecord = {
+                            name: equiName,
+                            data: mappedEquipmentData,
+                        };
+
+                        setDeviceData([equipmentRecord]);
+                    }
                 }
             })
             .catch((error) => {})
@@ -400,7 +420,6 @@ const EquipChartModal = ({
         };
 
         fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
-        fetchEquipmentChart(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
         fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
         fetchMetadata();
@@ -449,7 +468,6 @@ const EquipChartModal = ({
         }
         if (closeFlag !== true) {
             fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
-            fetchEquipmentChart(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
             fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         } else {
             setCloseFlag(false);
