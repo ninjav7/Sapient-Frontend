@@ -264,6 +264,7 @@ const EquipChartModal = ({
         }
 
         setIsEquipDataFetched(true);
+        setDeviceData([]);
 
         const payload = {
             date_from: encodeURIComponent(startDate),
