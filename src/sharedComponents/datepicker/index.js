@@ -26,6 +26,7 @@ const Datepicker = ({
     datepickerClassName = '',
     iconBtnClassName = '',
     withApplyButton = true,
+    withTimeSelect = true,
     isClosed = true,
     ...props
 }) => {
@@ -163,23 +164,48 @@ const Datepicker = ({
                 {...props}
                 renderCalendarInfo={() =>
                     withApplyButton && (
-                        <div className="datepicker-calendar-bottom d-flex justify-content-end">
-                            <Button
-                                size={Button.Sizes.md}
-                                type={Button.Type.secondaryGrey}
-                                label="Cancel"
-                                onClick={handleCancelClick}
-                            />
-                            <Button
-                                size={Button.Sizes.md}
-                                type={Button.Type.primary}
-                                label="Apply"
-                                onClick={(event) => {
-                                    applyDate(event);
-                                    setFocusedInput(null);
-                                    handleClose();
-                                }}
-                            />
+                        <div
+                            className={`datepicker-calendar-bottom d-flex justify-content-${
+                                withTimeSelect ? `between` : `end`
+                            }`}>
+                            {withTimeSelect && (
+                                <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                    <Button
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.secondaryGrey}
+                                        label="Cancel"
+                                        onClick={handleCancelClick}
+                                    />
+                                    <Button
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.primary}
+                                        label="Apply"
+                                        onClick={(event) => {
+                                            applyDate(event);
+                                            setFocusedInput(null);
+                                            handleClose();
+                                        }}
+                                    />
+                                </div>
+                            )}
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Button
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryGrey}
+                                    label="Cancel"
+                                    onClick={handleCancelClick}
+                                />
+                                <Button
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.primary}
+                                    label="Apply"
+                                    onClick={(event) => {
+                                        applyDate(event);
+                                        setFocusedInput(null);
+                                        handleClose();
+                                    }}
+                                />
+                            </div>
                         </div>
                     )
                 }
