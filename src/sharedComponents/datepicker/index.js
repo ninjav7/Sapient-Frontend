@@ -13,6 +13,7 @@ import { ReactComponent as ArrowSVG } from '../../assets/icon/arrow.svg';
 import 'react-dates/initialize';
 import 'react-dates/lib/css/_datepicker.css';
 import './Datepicker.scss';
+import { Checkbox } from '../form/checkbox';
 
 moment.updateLocale('en', {
     week: {
@@ -169,28 +170,41 @@ const Datepicker = ({
                                 withTimeSelect ? `between` : `end`
                             }`}>
                             {withTimeSelect && (
-                                <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                    <div>
-                                        <Typography.Body
-                                            size={Typography.Sizes.sm}
-                                            className="gray-550 font-weight-medium">
-                                            {`Start Time`}
-                                        </Typography.Body>
-                                        <div className="timepicker">
-                                            <input type="time" id="appt" name="appt" value={'12:00'} step="60" />
+                                <div className="d-flex flex-column" style={{ gap: '0.25rem' }}>
+                                    <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                        <div>
+                                            <Typography.Body
+                                                size={Typography.Sizes.sm}
+                                                className="gray-550 font-weight-medium">
+                                                {`Start Time`}
+                                            </Typography.Body>
+                                            <div className="timepicker">
+                                                <input type="time" id="appt" name="appt" value={'12:00'} step="60" />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <Typography.Body
+                                                size={Typography.Sizes.sm}
+                                                className="gray-550 font-weight-medium">
+                                                {`End Time`}
+                                            </Typography.Body>
+
+                                            <div className="timepicker">
+                                                <input type="time" id="appt" name="appt" value={'23:00'} />
+                                            </div>
                                         </div>
                                     </div>
-
                                     <div>
-                                        <Typography.Body
-                                            size={Typography.Sizes.sm}
-                                            className="gray-550 font-weight-medium">
-                                            {`End Time`}
-                                        </Typography.Body>
-
-                                        <div className="timepicker">
-                                            <input type="time" id="appt" name="appt" value={'23:00'} />
-                                        </div>
+                                        <label for="item2" style={{ color: 'black' }}>
+                                            <input
+                                                type="checkbox"
+                                                name="item1"
+                                                label="Enable Time select "
+                                                checked={true}
+                                            />
+                                            Enable time select
+                                        </label>
                                     </div>
                                 </div>
                             )}

@@ -65,19 +65,22 @@ const Checkbox = ({
                     type="checkbox"
                     value={value}
                 />
-                {label && <label className="m-0 w-100 cursor-pointer" htmlFor={id}>
-                    <Typography.Body size={labelSize} {...props.typographyProps}>{label}</Typography.Body>
-                    {description && type !== CHECKBOX_TYPES.dropDownCheckbox && (
-                        <Typography.Body
-                            className="checkbox-description"
-                            size={descriptionSize}
-                            fontWeight={Typography.Types.Light}
-                            {...props.typographyProps}    
-                        >
-                            {description}
+                {label && (
+                    <label className="m-0 w-100 cursor-pointer" htmlFor={id}>
+                        <Typography.Body size={labelSize} {...props.typographyProps}>
+                            {label}
                         </Typography.Body>
-                    )}
-                </label>}
+                        {description && type !== CHECKBOX_TYPES.dropDownCheckbox && (
+                            <Typography.Body
+                                className="checkbox-description"
+                                size={descriptionSize}
+                                fontWeight={Typography.Types.Light}
+                                {...props.typographyProps}>
+                                {description}
+                            </Typography.Body>
+                        )}
+                    </label>
+                )}
             </div>
         </div>
     );
