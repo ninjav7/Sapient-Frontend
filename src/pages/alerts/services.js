@@ -1,8 +1,8 @@
 import axiosInstance from '../../services/axiosInstance';
 import { listAlerts, alertAcknowledgement, createAlert } from '../../services/Network';
 
-export function fetchAlertsList(alertType = 'open') {
-    return axiosInstance.get(`${listAlerts}/${alertType}/list`).then((res) => res);
+export function fetchAlertsList(alertType = 'unacknowledged') {
+    return axiosInstance.get(`${listAlerts}?action=${alertType}`).then((res) => res);
 }
 
 export function updateAlertAcknowledgement(params, payload) {

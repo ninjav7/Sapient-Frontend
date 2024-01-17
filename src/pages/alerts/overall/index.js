@@ -48,14 +48,19 @@ const Alerts = () => {
         await fetchAlertsList(alertType)
             .then((res) => {
                 const response = res?.data;
-                if (response && response.length !== 0) {
-                    if (alertType === 'open') {
-                        setOpenAlertsList(response);
+                const { success: isSuccessful, data } = res?.data;
+                if (isSuccessful && data) {
+                    AlertsStore.update((s) => {
+                        s.alertCount = data.length;
+                    });
+
+                    if (alertType === 'unacknowledged') {
+                        setOpenAlertsList(data);
                         AlertsStore.update((s) => {
                             s.alertCount = response.length;
                         });
                     }
-                    if (alertType === 'close') setClosedAlertsList(response);
+                    if (alertType === 'acknowledged') setClosedAlertsList(data);
                 }
             })
             .catch(() => {})
@@ -78,8 +83,8 @@ const Alerts = () => {
                         s.notificationMessage = `${response?.message} successfully.`;
                         s.notificationType = 'success';
                     });
-                    if (actionType === 'acknowledged') getAllAlerts('open');
-                    if (actionType === 'unacknowledged') getAllAlerts('close');
+                    if (actionType === 'acknowledged') getAllAlerts('unacknowledged');
+                    if (actionType === 'unacknowledged') getAllAlerts('acknowledged');
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -103,8 +108,8 @@ const Alerts = () => {
     }, []);
 
     useEffect(() => {
-        if (activeTab === 0) getAllAlerts('open');
-        if (activeTab === 1) getAllAlerts('close');
+        if (activeTab === 0) getAllAlerts('unacknowledged');
+        if (activeTab === 1) getAllAlerts('acknowledged');
     }, [activeTab]);
 
     return (
