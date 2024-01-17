@@ -165,20 +165,36 @@ const Datepicker = ({
                 renderCalendarInfo={() =>
                     withApplyButton && (
                         <div
-                            className={`datepicker-calendar-bottom d-flex justify-content-${
+                            className={`datepicker-calendar-bottom d-flex align-items-center justify-content-${
                                 withTimeSelect ? `between` : `end`
                             }`}>
                             {withTimeSelect && (
                                 <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                    <div className="timepicker">
-                                        <input type="time" id="appt" name="appt" value={'12:00'} />
+                                    <div>
+                                        <Typography.Body
+                                            size={Typography.Sizes.sm}
+                                            className="gray-550 font-weight-medium">
+                                            {`Start Time`}
+                                        </Typography.Body>
+                                        <div className="timepicker">
+                                            <input type="time" id="appt" name="appt" value={'12:00'} step="60" />
+                                        </div>
                                     </div>
-                                    <div className="timepicker">
-                                        <input type="time" id="appt" name="appt" value={'23:00'} />
+
+                                    <div>
+                                        <Typography.Body
+                                            size={Typography.Sizes.sm}
+                                            className="gray-550 font-weight-medium">
+                                            {`End Time`}
+                                        </Typography.Body>
+
+                                        <div className="timepicker">
+                                            <input type="time" id="appt" name="appt" value={'23:00'} />
+                                        </div>
                                     </div>
                                 </div>
                             )}
-                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                            <div className="d-flex" style={{ gap: '0.5rem', height: 'fit-content' }}>
                                 <Button
                                     size={Button.Sizes.md}
                                     type={Button.Type.secondaryGrey}
