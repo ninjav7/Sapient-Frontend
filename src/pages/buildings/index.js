@@ -534,7 +534,9 @@ const BuildingOverview = () => {
 
         await getWeatherData(payload)
             .then((res) => {
+                console.log(res);
                 if (res?.success) {
+                    console.log(1);
                     const tempData = [];
 
                     const highTemp = {
@@ -559,6 +561,7 @@ const BuildingOverview = () => {
                     };
 
                     res.data.forEach((record) => {
+                        console.log(record);
                         if (range === 'day') {
                             if (record.hasOwnProperty('avgtemp_f')) {
                                 avgTemp.data.push(record?.avgtemp_f);
@@ -588,6 +591,7 @@ const BuildingOverview = () => {
                     if (highTemp?.data.length !== 0) tempData.push(highTemp);
                     if (lowTemp?.data.length !== 0) tempData.push(lowTemp);
 
+                    console.log(tempData);
                     if (tempData.length !== 0) setWeatherData(tempData);
                 } else {
                     setWeatherData(null);
