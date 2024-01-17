@@ -7,14 +7,16 @@ import { getWeather } from './Network';
 export function getWeatherData(obj) {
     // Should be enabled only in localhost
     // return new Promise((res) => {
-    //     if (obj.range === 'hour') {
-    //         res(dataWeatherHourMock.data);
-    //     } else {
-    //         res(dataWeatherDayMock.data);
-    //     }
+    //     setTimeout(() => {
+    //         if (obj.range === 'hour') {
+    //             res(dataWeatherHourMock);
+    //         } else {
+    //             res(dataWeatherDayMock);
+    //         }
+    //     }, 0);
     // });
 
-    const params = `?building_id=${obj?.bldg_id}&date_from=${obj?.date_from}&date_to=${obj?.date_to}&tz_info=${obj?.tz_info}&aggregate=${obj?.range}`;
+    const params = `?building_id=${obj?.bldg_id}&date_from=${obj?.date_from}&date_to=${obj?.date_to}&tz_info=${obj?.tz_info}`;
 
     return axiosInstance.get(`${getWeather}${params}`).then((res) => res);
 }
