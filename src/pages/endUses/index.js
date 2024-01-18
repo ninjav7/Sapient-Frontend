@@ -24,8 +24,12 @@ import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/help
 import { buildingData } from '../../store/globalState';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import './style.css';
+import { getEnergyConsumptionCSVExport } from '../../utils/tablesExport';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 
 const EndUsesPage = () => {
+    const { download } = useCSVDownload();
+
     const history = useHistory();
 
     const { bldgId } = useParams();
@@ -44,6 +48,7 @@ const EndUsesPage = () => {
     const [isFetchingData, setFetchingData] = useState(false);
     const [isFetchingEndUseData, setFetchingEndUseData] = useState(false);
 
+    const [bldgName, setBldgName] = useState('');
     const [endUseCategories, setEndUseCategories] = useState([]);
     const [stackedColumnChartCategories, setStackedColumnChartCategories] = useState([]);
     const [stackedColumnChartData, setStackedColumnChartData] = useState([]);
@@ -70,30 +75,9 @@ const EndUsesPage = () => {
     const cbCustomCSV = (originalCSV) => {
         const operatingHours = buildingListData.find((bldg) => bldg.building_id === bldgId)?.operating_hours;
 
-        const csvRows = originalCSV.split('\n').map((row) => row.split(','));
+        const csvToExport = getEnergyConsumptionCSVExport(originalCSV, operatingHours);
 
-        csvRows[0].push('"On Hours"');
-        csvRows[0].push('"Open Day"');
-
-        for (let i = 1; i < csvRows.length; i++) {
-            const timestamp = moment(csvRows[i][0].replace(/"/g, ''));
-
-            const day = timestamp.format('ddd').toLowerCase();
-
-            const operateHoursDay = operatingHours[day];
-
-            const fromTime = moment(`${timestamp.format('YYYY-MM-DD')}T${operateHoursDay.time_range.frm}`);
-            const toTime = moment(`${timestamp.format('YYYY-MM-DD')}T${operateHoursDay.time_range.to}`);
-
-            const onHours = timestamp.isSameOrAfter(fromTime) && timestamp.isSameOrBefore(toTime);
-
-            csvRows[i].push(onHours ? 'TRUE' : 'FALSE');
-            csvRows[i].push(operateHoursDay.stat ? 'TRUE' : 'FALSE');
-        }
-
-        const modifiedCSV = csvRows.map((row) => row.join(',')).join('\n');
-
-        return modifiedCSV;
+        download(`End Uses_${bldgName}_${moment().format('YYYY-MM-DD')}.csv`, csvToExport);
     };
 
     const checkWhetherShowAfterHours = () => {
@@ -355,6 +339,12 @@ const EndUsesPage = () => {
             s.parent = 'buildings';
         });
     };
+
+    useEffect(() => {
+        const currBldg = buildingListData?.find(({ building_id }) => building_id === bldgId);
+
+        if (currBldg) setBldgName(currBldg.building_name);
+    }, [bldgId, buildingListData]);
 
     useEffect(() => {
         if (startDate === null || endDate === null) return;

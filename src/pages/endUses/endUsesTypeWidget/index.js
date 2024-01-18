@@ -43,7 +43,6 @@ const EndUsesTypeWidget = (props) => {
         plotBands: plotBandsProp,
         upperLegendsProps = {},
         cbCustomCSV,
-        exportingTitle = '',
     } = props;
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
@@ -96,7 +95,6 @@ const EndUsesTypeWidget = (props) => {
                         plotBandsProp={plotBandsProp}
                         upperLegendsProps={upperLegendsProps}
                         cbCustomCSV={cbCustomCSV}
-                        exportingTitle={exportingTitle}
                         {...props}
                     />
                 </div>
