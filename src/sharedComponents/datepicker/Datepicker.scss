@@ -12,15 +12,6 @@
     padding-right: 0.75rem;
     border: 0.0625rem solid $primary-gray-450;
     border-radius: 0.375rem;
-    input {
-        font-weight: 500;
-        padding: 0.375rem 0.75rem 0.375rem 0.625rem;
-        border: 0;
-        background: none;
-        max-width: 11rem;
-        text-overflow: ellipsis;
-        overflow: hidden;
-    }
 
     .datepicker-icon-btn {
         background: none;
@@ -359,4 +350,14 @@
     border: 0.5px solid grey; /* Border color */
     border-radius: 8px; /* Optional: Add rounded corners */
     padding: 0rem !important;
+}
+
+.time-input-select {
+    font-weight: 500;
+    padding: 0.375rem 0.75rem 0.375rem 0.625rem;
+    border: 0;
+    background: none;
+    max-width: 11rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }

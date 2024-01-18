@@ -36,6 +36,10 @@ const Datepicker = ({
     const [focusedInput, setFocusedInput] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
 
+    const [startTime, setStartTime] = useState('12:00');
+    const [endTime, setEndTime] = useState('23:00');
+    const [isTimeSelectionEnabled, setTimeSelectionEnabled] = useState(false);
+
     const refApi = useRef(null);
 
     const onDateChangeSingle = (startDate) => {
@@ -170,42 +174,59 @@ const Datepicker = ({
                                 withTimeSelect ? `between` : `end`
                             }`}>
                             {withTimeSelect && (
-                                <div className="d-flex flex-column" style={{ gap: '0.25rem' }}>
+                                <div className="d-flex flex-column" style={{ gap: '0.5rem' }}>
                                     <div className="d-flex" style={{ gap: '0.5rem' }}>
                                         <div>
-                                            <Typography.Body
-                                                size={Typography.Sizes.sm}
-                                                className="gray-550 font-weight-medium">
+                                            <Typography.Body size={Typography.Sizes.sm} className="gray-550">
                                                 {`Start Time`}
                                             </Typography.Body>
                                             <div className="timepicker">
-                                                <input type="time" id="appt" name="appt" value={'12:00'} step="60" />
+                                                <input
+                                                    className="time-input-select"
+                                                    type="time"
+                                                    name="appt"
+                                                    value={startTime}
+                                                    step="60"
+                                                    onChange={(e) => {
+                                                        setStartTime(e.target.value);
+                                                    }}
+                                                    disabled={!isTimeSelectionEnabled}
+                                                />
                                             </div>
                                         </div>
 
                                         <div>
-                                            <Typography.Body
-                                                size={Typography.Sizes.sm}
-                                                className="gray-550 font-weight-medium">
+                                            <Typography.Body size={Typography.Sizes.sm} className="gray-550">
                                                 {`End Time`}
                                             </Typography.Body>
 
                                             <div className="timepicker">
-                                                <input type="time" id="appt" name="appt" value={'23:00'} />
+                                                <input
+                                                    id="appt"
+                                                    name="appt"
+                                                    type="time"
+                                                    className="time-input-select"
+                                                    value={endTime}
+                                                    onChange={(e) => {
+                                                        setEndTime(e.target.value);
+                                                    }}
+                                                    disabled={!isTimeSelectionEnabled}
+                                                />
                                             </div>
                                         </div>
                                     </div>
-                                    <div>
-                                        <label for="item2" style={{ color: 'black' }}>
-                                            <input
-                                                type="checkbox"
-                                                name="item1"
-                                                label="Enable Time select "
-                                                checked={true}
-                                            />
-                                            Enable time select
-                                        </label>
-                                    </div>
+                                    <Checkbox
+                                        label="Enable Time Selection"
+                                        type="checkbox"
+                                        id="select-time"
+                                        name="select-time"
+                                        size="sm"
+                                        checked={isTimeSelectionEnabled}
+                                        value={isTimeSelectionEnabled}
+                                        onClick={(e) => {
+                                            setTimeSelectionEnabled(e.target.value === 'false' ? true : false);
+                                        }}
+                                    />
                                 </div>
                             )}
                             <div className="d-flex" style={{ gap: '0.5rem', height: 'fit-content' }}>
