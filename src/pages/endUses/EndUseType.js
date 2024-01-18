@@ -50,6 +50,7 @@ const EndUseType = () => {
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
     const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
     const [isEnergyChartLoading, setEnergyChartLoading] = useState([]);
+    const [isWeatherLoading, setIsWeatherLoading] = useState(false);
     const [xAxisObj, setXAxisObj] = useState({
         xAxis: {
             tickPositioner: function () {
@@ -184,6 +185,8 @@ const EndUseType = () => {
     };
 
     const fetchWeatherData = async (time_zone) => {
+        setIsWeatherLoading(true);
+
         const range = checkWhetherHourly() ? 'hour' : 'day';
 
         const payload = {
@@ -196,9 +199,7 @@ const EndUseType = () => {
 
         await getWeatherData(payload)
             .then((res) => {
-                const response = res?.data;
-
-                if (response?.success) {
+                if (res?.success) {
                     const tempData = [];
 
                     const highTemp = {
@@ -222,13 +223,29 @@ const EndUseType = () => {
                         name: 'min temperature',
                     };
 
-                    response.data.forEach((record) => {
+                    res.data.forEach((record) => {
                         if (range === 'day') {
-                            if (record.hasOwnProperty('avgtemp_f')) avgTemp.data.push(record?.avgtemp_f);
-                            if (record.hasOwnProperty('mintemp_f')) lowTemp.data.push(record?.mintemp_f);
-                            if (record.hasOwnProperty('maxtemp_f')) highTemp.data.push(record?.maxtemp_f);
+                            if (record.hasOwnProperty('avgtemp_f')) {
+                                avgTemp.data.push(record?.avgtemp_f);
+                            } else {
+                                avgTemp.data.push(record?.avgtemp_c);
+                            }
+                            if (record.hasOwnProperty('mintemp_f')) {
+                                lowTemp.data.push(record?.mintemp_f);
+                            } else {
+                                lowTemp.data.push(record?.mintemp_c);
+                            }
+                            if (record.hasOwnProperty('maxtemp_f')) {
+                                highTemp.data.push(record?.maxtemp_f);
+                            } else {
+                                highTemp.data.push(record?.maxtemp_c);
+                            }
                         } else {
-                            if (record.hasOwnProperty('temp_f')) avgTemp.data.push(record?.temp_f);
+                            if (record.hasOwnProperty('temp_f')) {
+                                avgTemp.data.push(record?.temp_f);
+                            } else {
+                                avgTemp.data.push(record?.temp_c);
+                            }
                         }
                     });
 
@@ -243,6 +260,9 @@ const EndUseType = () => {
             })
             .catch((e) => {
                 setWeatherData(null);
+            })
+            .finally(() => {
+                setIsWeatherLoading(false);
             });
     };
 
@@ -422,7 +442,7 @@ const EndUseType = () => {
                         },
                     }}
                     withTemp={isWeatherChartVisible}
-                    isChartLoading={isEnergyChartLoading}
+                    isChartLoading={isEnergyChartLoading || isWeatherLoading}
                     exportingTitle={`Total_Energy_Consumption_Building_${moment().format('YYYY-MM-DD')}`}
                 />
             </div>

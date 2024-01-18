@@ -1,43 +1,90 @@
 {
-    "data": {
-        "success": true,
-        "data": [
-            {
-                "time_stamp": "2023-11-26T00:00:00",
-                "avgtemp_f": 41,
-                "mintemp_f": 31.5,
-                "maxtemp_f": 48.1,
-                "avghumidity": 68
-            },
-            {
-                "time_stamp": "2023-11-27T00:00:00",
-                "avgtemp_f": 45.6,
-                "mintemp_f": 35.8,
-                "maxtemp_f": 51.8,
-                "avghumidity": 75
-            },
-            {
-                "time_stamp": "2023-11-28T00:00:00",
-                "avgtemp_f": 33.7,
-                "mintemp_f": 27.1,
-                "maxtemp_f": 38.1,
-                "avghumidity": 53
-            },
-            {
-                "time_stamp": "2023-11-29T00:00:00",
-                "avgtemp_f": 32.2,
-                "mintemp_f": 23.5,
-                "maxtemp_f": 37.3,
-                "avghumidity": 51
-            },
-            {
-                "time_stamp": "2023-11-30T00:00:00",
-                "avgtemp_f": 38.7,
-                "mintemp_f": 28.2,
-                "maxtemp_f": 46.8,
-                "avghumidity": 55
-            }
-        ],
-        "message": ""
-    }
+    "success": true,
+    "message": "",
+    "data": [
+        {
+            "time_stamp": "2023-02-01T00:00:00+00:00",
+            "avgtemp_c": 6.7,
+            "mintemp_c": 2.7,
+            "maxtemp_c": 11.1,
+            "avghumidity": 57.3
+        },
+        {
+            "time_stamp": "2023-03-01T00:00:00+00:00",
+            "avgtemp_c": 8.1,
+            "mintemp_c": 2.8,
+            "maxtemp_c": 14.3,
+            "avghumidity": 65.6
+        },
+        {
+            "time_stamp": "2023-04-01T00:00:00+00:00",
+            "avgtemp_c": 15.1,
+            "mintemp_c": 9.7,
+            "maxtemp_c": 21.2,
+            "avghumidity": 59.8
+        },
+        {
+            "time_stamp": "2023-05-01T00:00:00+00:00",
+            "avgtemp_c": 16.8,
+            "mintemp_c": 11.2,
+            "maxtemp_c": 22.6,
+            "avghumidity": 67.7
+        },
+        {
+            "time_stamp": "2023-06-01T00:00:00+00:00",
+            "avgtemp_c": 21.6,
+            "mintemp_c": 15.8,
+            "maxtemp_c": 27.7,
+            "avghumidity": 61.6
+        },
+        {
+            "time_stamp": "2023-07-01T00:00:00+00:00",
+            "avgtemp_c": 27.2,
+            "mintemp_c": 21.8,
+            "maxtemp_c": 33.5,
+            "avghumidity": 71.1
+        },
+        {
+            "time_stamp": "2023-08-01T00:00:00+00:00",
+            "avgtemp_c": 25.6,
+            "mintemp_c": 20.7,
+            "maxtemp_c": 31.6,
+            "avghumidity": 65.5
+        },
+        {
+            "time_stamp": "2023-09-01T00:00:00+00:00",
+            "avgtemp_c": 21.4,
+            "mintemp_c": 16.9,
+            "maxtemp_c": 26.9,
+            "avghumidity": 67.8
+        },
+        {
+            "time_stamp": "2023-10-01T00:00:00+00:00",
+            "avgtemp_c": 16.4,
+            "mintemp_c": 11.8,
+            "maxtemp_c": 22.3,
+            "avghumidity": 67.1
+        },
+        {
+            "time_stamp": "2023-11-01T00:00:00+00:00",
+            "avgtemp_c": 8.5,
+            "mintemp_c": 3.6,
+            "maxtemp_c": 13.5,
+            "avghumidity": 58.7
+        },
+        {
+            "time_stamp": "2023-12-01T00:00:00+00:00",
+            "avgtemp_c": "",
+            "mintemp_c": "",
+            "maxtemp_c": "",
+            "avghumidity": ""
+        },
+        {
+            "time_stamp": "2024-01-01T00:00:00+00:00",
+            "avgtemp_c": "",
+            "mintemp_c": "",
+            "maxtemp_c": "",
+            "avghumidity": ""
+        }
+    ]
 }
