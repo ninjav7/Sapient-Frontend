@@ -1157,6 +1157,7 @@ const PlugRule = () => {
                 isLoadingUnlinkedRef.current = false;
 
                 let response = res.data;
+                console.log(response?.data);
                 setAllSensors(response?.data);
 
                 setUnlinkedSocketRuleSuccess(res.status);
@@ -1368,6 +1369,8 @@ const PlugRule = () => {
             spaceTypeFilterString: spaceTypeFilterStringUnlinked,
             spaceTypeTypeFilterString: spaceTypeTypeFilterStringUnlinked,
             schedulerStatusString: schedulerStatusStringUninked,
+            assignedRuleString: assignedRuleFilterStringUnlinked,
+            tagsFilterString: tagsFilterStringUnlinked,
             isGetOnlyLinked: false,
             plugRuleId: ruleId,
         }).then((filters) => {
@@ -1517,6 +1520,8 @@ const PlugRule = () => {
             spaceTypeFilterString: spaceTypeFilterStringLinked,
             schedulerStatusString: schedulerStatusStringLinked,
             spaceTypeTypeFilterString: spaceTypeTypeFilterStringLinked,
+            assignedRuleString: assignedRuleFilterStringLinked,
+            tagsFilterString: tagsFilterStringLinked,
             isGetOnlyLinked: true,
             plugRuleId: ruleId,
         }).then((filters) => {

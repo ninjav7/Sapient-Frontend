@@ -122,9 +122,9 @@ export function getFiltersForSensorsRequest(args) {
                     sensor_number: args.sensorTypeFilterString
                         ? encodeURI(args.sensorTypeFilterString?.join('+'))
                         : args.sensorTypeFilterString,
-                    floor_id: args.sensorTypeFilterString
-                        ? encodeURI(args.sensorTypeFilterString?.join('+'))
-                        : args.sensorTypeFilterString,
+                    floor_id: args.floorTypeFilterString
+                        ? encodeURI(args.floorTypeFilterString?.join('+'))
+                        : args.floorTypeFilterString,
                     space_id: args.spaceTypeFilterString
                         ? encodeURI(args.spaceTypeFilterString?.join('+'))
                         : args.spaceTypeFilterString,
@@ -134,7 +134,13 @@ export function getFiltersForSensorsRequest(args) {
                     space_type_id: args.spaceTypeTypeFilterString
                         ? encodeURI(args.spaceTypeTypeFilterString?.join('+'))
                         : args.spaceTypeTypeFilterString,
-                    assigned_rule: args?.isGetOnlyLinked ? args?.plugRuleId : 'other',
+                    tags: args.tagsFilterString ? encodeURI(args.tagsFilterString?.join('+')) : args.tagsFilterString,
+                    assigned_rule: args?.isGetOnlyLinked
+                        ? args?.plugRuleId
+                        : args.assignedRuleString
+                        ? encodeURI(args.assignedRuleString?.join('+'))
+                        : args.assignedRuleString,
+                    // assigned_rule: args?.isGetOnlyLinked ? args?.plugRuleId : 'other',
                     plug_rule_id: !args?.isGetOnlyLinked ? args?.plugRuleId : null,
                 },
                 _.identity
