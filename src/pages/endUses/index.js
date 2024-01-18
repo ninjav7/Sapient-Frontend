@@ -77,7 +77,7 @@ const EndUsesPage = () => {
 
         const csvToExport = getEnergyConsumptionCSVExport(originalCSV, operatingHours);
 
-        download(`End Uses_${bldgName}_${moment().format('YYYY-MM-DD')}`, csvToExport);
+        download(`End Uses_${bldgName}_${moment().format('YYYY-MM-DD')}.csv`, csvToExport);
     };
 
     const checkWhetherShowAfterHours = () => {

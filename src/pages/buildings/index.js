@@ -701,7 +701,7 @@ const BuildingOverview = () => {
 
         const csvToExport = getEnergyConsumptionCSVExport(originalCSV, operatingHours);
 
-        download(`Total Energy Consumption_${bldgName}_${moment().format('YYYY-MM-DD')}`, csvToExport);
+        download(`Total Energy Consumption_${bldgName}_${moment().format('YYYY-MM-DD')}.csv`, csvToExport);
     };
 
     useEffect(() => {
