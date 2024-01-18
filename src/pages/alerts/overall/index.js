@@ -11,7 +11,7 @@ import ClosedAlerts from './ClosedAlerts';
 import AlertSettings from './AlertSettings';
 import AlertPageHeader from './AlertPageHeader';
 
-import { fetchAlertsList, updateAlertAcknowledgement } from '../services';
+import { fetchAlertsList, fetchAllConfiguredAlerts, updateAlertAcknowledgement } from '../services';
 
 import './styles.scss';
 
@@ -21,6 +21,7 @@ const Alerts = () => {
 
     const [openAlertsList, setOpenAlertsList] = useState([]);
     const [closedAlertsList, setClosedAlertsList] = useState([]);
+    const [configuredAlertsList, setConfiguredAlertsList] = useState([]);
 
     const handleTabSwitch = (event) => {
         setActiveTab(+event.target.id);
@@ -48,19 +49,34 @@ const Alerts = () => {
         await fetchAlertsList(alertType)
             .then((res) => {
                 const response = res?.data;
-                const { success: isSuccessful, data } = res?.data;
+                const { success: isSuccessful, data } = response;
                 if (isSuccessful && data) {
-                    AlertsStore.update((s) => {
-                        s.alertCount = data.length;
-                    });
-
                     if (alertType === 'unacknowledged') {
                         setOpenAlertsList(data);
                         AlertsStore.update((s) => {
-                            s.alertCount = response.length;
+                            s.alertCount = data.length;
                         });
                     }
-                    if (alertType === 'acknowledged') setClosedAlertsList(data);
+                    if (alertType === 'acknowledged') {
+                        setClosedAlertsList(data);
+                    }
+                }
+            })
+            .catch(() => {})
+            .finally(() => {
+                setFetchingData(false);
+            });
+    };
+
+    const getAllConfiguredAlerts = async () => {
+        setFetchingData(true);
+
+        await fetchAllConfiguredAlerts()
+            .then((res) => {
+                const response = res?.data;
+                const { success: isSuccessful, data } = response;
+                if (isSuccessful && data) {
+                    setConfiguredAlertsList(data);
                 }
             })
             .catch(() => {})
@@ -110,6 +126,7 @@ const Alerts = () => {
     useEffect(() => {
         if (activeTab === 0) getAllAlerts('unacknowledged');
         if (activeTab === 1) getAllAlerts('acknowledged');
+        if (activeTab === 2) getAllConfiguredAlerts();
     }, [activeTab]);
 
     return (
@@ -136,7 +153,7 @@ const Alerts = () => {
                             handleAlertAcknowledgement={handleAlertAcknowledgement}
                         />
                     )}
-                    {activeTab === 2 && <AlertSettings />}
+                    {activeTab === 2 && <AlertSettings getAllConfiguredAlerts={getAllConfiguredAlerts} />}
                 </Col>
             </Row>
         </React.Fragment>

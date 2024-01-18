@@ -3,28 +3,37 @@ import React, { useState } from 'react';
 import Typography from '../../../sharedComponents/typography';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 
+import { UserStore } from '../../../store/UserStore';
+
 import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/assets/icons/building-type.svg';
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
 import { alertSettingsMock } from './mock';
-
-import DeleteAlert from './DeleterAlert';
-
 import { TARGET_TYPES } from '../constants';
+import { deleteConfiguredAlert } from '../services';
+
+import DeleteAlert from './DeleteAlert';
+
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
-const AlertSettings = () => {
+const AlertSettings = (props) => {
+    const { getAllConfiguredAlerts } = props;
+
     const [alertSettingsList, setAlertSettingsList] = useState(alertSettingsMock);
     const [alertSettingsCount, setAlertSettingsCount] = useState(0);
 
     const [selectedAlertObj, setSelectedAlertObj] = useState({});
 
+    console.log('SSR selectedAlertObj => ', selectedAlertObj);
+
     // Delete Device Modal states
     const [isDeleteAlertModalOpen, setDeleteAlertModalStatus] = useState(false);
     const closeDeleteAlertModal = () => setDeleteAlertModalStatus(false);
     const openDeleteAlertModal = () => setDeleteAlertModalStatus(true);
+
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -81,14 +90,45 @@ const AlertSettings = () => {
         openDeleteAlertModal();
     };
 
-    const handleAlertDelete = (record) => {
-        const newFilteredList = alertSettingsList.filter((el) => el?.id !== record?.id);
-        setAlertSettingsList(newFilteredList);
-        closeDeleteAlertModal();
-    };
-
     const currentRow = () => {
         return alertSettingsList;
+    };
+
+    const handleAlertDeletion = async (alert_id) => {
+        if (!alert_id) return;
+
+        setIsDeleting(true);
+        const params = `?alert_id=${alert_id}`;
+
+        await deleteConfiguredAlert(params)
+            .then((res) => {
+                const response = res?.data;
+
+                if (response?.success) {
+                    getAllConfiguredAlerts();
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Alert deleted successfully.';
+                        s.notificationType = 'success';
+                    });
+                    window.scrollTo(0, 0);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to delete Alert.'
+                            : 'Unable to delete Alert due to Internal Server Error.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch(() => {})
+            .finally(() => {
+                setIsDeleting(false);
+                closeDeleteAlertModal();
+            });
     };
 
     return (
@@ -146,7 +186,8 @@ const AlertSettings = () => {
                 isModalOpen={isDeleteAlertModalOpen}
                 closeModal={closeDeleteAlertModal}
                 selectedAlertObj={selectedAlertObj}
-                handleAlertDelete={handleAlertDelete}
+                handleAlertDeletion={handleAlertDeletion}
+                isDeleting={isDeleting}
             />
         </div>
     );

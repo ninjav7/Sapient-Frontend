@@ -238,3 +238,5 @@ export const updateSpaceV2 = '/api/v2/layout/update-space';
 export const listAlerts = '/api/v2/alerts/{alerts_type}';
 export const alertAcknowledgement = '/api/v2/alerts/mark-acknowledgement';
 export const createAlert = '/api/v2/alerts/create-alert';
+export const getConfiguredAlerts = '/api/v2/alerts/configs';
+export const deleteAlert = '/api/v2/alerts/config';

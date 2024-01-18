@@ -5,8 +5,8 @@ import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 
-const DeleteAlert = ({ isModalOpen, closeModal, selectedAlertObj, handleAlertDelete }) => {
-    const [isProcessing, setIsProcessing] = useState(false);
+const DeleteAlert = (props) => {
+    const { isModalOpen, closeModal, selectedAlertObj, handleAlertDeletion, isDeleting = false } = props;
 
     return (
         <Modal show={isModalOpen} onHide={closeModal} centered backdrop="static" keyboard={false}>
@@ -20,12 +20,12 @@ const DeleteAlert = ({ isModalOpen, closeModal, selectedAlertObj, handleAlertDel
             <Modal.Footer className="pb-4 pr-4">
                 <Button label="Cancel" size={Button.Sizes.lg} type={Button.Type.secondaryGrey} onClick={closeModal} />
                 <Button
-                    label={isProcessing ? 'Deleting' : 'Delete'}
+                    label={isDeleting ? 'Deleting' : 'Delete'}
                     size={Button.Sizes.lg}
                     type={Button.Type.primaryDistructive}
-                    disabled={isProcessing}
+                    disabled={isDeleting}
                     onClick={() => {
-                        handleAlertDelete(selectedAlertObj);
+                        handleAlertDeletion(selectedAlertObj?.id);
                     }}
                 />
             </Modal.Footer>
