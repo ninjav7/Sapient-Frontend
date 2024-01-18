@@ -35,6 +35,7 @@ import colors from '../../assets/scss/_colors.scss';
 import { validateIntervals } from '../../sharedComponents/helpers/helper';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
 import { getWeatherData } from '../../services/weather';
 import Brick from '../../sharedComponents/brick';
@@ -44,8 +45,11 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import colorPalette from '../../assets/scss/_colors.scss';
 import './style.css';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
+import { getEnergyConsumptionCSVExport } from '../../utils/tablesExport';
 
 const BuildingOverview = () => {
+    const { download } = useCSVDownload();
+
     const { bldgId } = useParams();
     const [buildingListData] = useAtom(buildingData);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
@@ -695,30 +699,9 @@ const BuildingOverview = () => {
     const cbCustomCSV = (originalCSV) => {
         const operatingHours = buildingListData.find((bldg) => bldg.building_id === bldgId)?.operating_hours;
 
-        const csvRows = originalCSV.split('\n').map((row) => row.split(','));
+        const csvToExport = getEnergyConsumptionCSVExport(originalCSV, operatingHours);
 
-        csvRows[0].push('"On Hours"');
-        csvRows[0].push('"Open Day"');
-
-        for (let i = 1; i < csvRows.length; i++) {
-            const timestamp = moment(csvRows[i][0].replace(/"/g, ''));
-
-            const day = timestamp.format('ddd').toLowerCase();
-
-            const operateHoursDay = operatingHours[day];
-
-            const fromTime = moment(`${timestamp.format('YYYY-MM-DD')}T${operateHoursDay.time_range.frm}`);
-            const toTime = moment(`${timestamp.format('YYYY-MM-DD')}T${operateHoursDay.time_range.to}`);
-
-            const onHours = timestamp.isSameOrAfter(fromTime) && timestamp.isSameOrBefore(toTime);
-
-            csvRows[i].push(onHours ? 'TRUE' : 'FALSE');
-            csvRows[i].push(operateHoursDay.stat ? 'TRUE' : 'FALSE');
-        }
-
-        const modifiedCSV = csvRows.map((row) => row.join(',')).join('\n');
-
-        return modifiedCSV;
+        download(`Total Energy Consumption_${bldgName}_${moment().format('YYYY-MM-DD')}`, csvToExport);
     };
 
     useEffect(() => {
@@ -848,7 +831,6 @@ const BuildingOverview = () => {
                                 plotBands={checkWhetherShowAfterHours()}
                                 withTemp={isWeatherChartVisible}
                                 isChartLoading={isEnergyChartLoading || isWeatherLoading}
-                                exportingTitle={`Total Energy Consumption_${bldgName}_${moment().format('YYYY-MM-DD')}`}
                                 cbCustomCSV={cbCustomCSV}
                                 tempUnit={userPrefUnits === 'si' ? UNITS.C : UNITS.F}
                             />
@@ -911,9 +893,6 @@ const BuildingOverview = () => {
                                     }}
                                     withTemp={isWeatherChartVisible}
                                     isChartLoading={isEnergyChartLoading || isWeatherLoading}
-                                    exportingTitle={`Total Energy Consumption_${bldgName}_${moment().format(
-                                        'YYYY-MM-DD'
-                                    )}`}
                                     cbCustomCSV={cbCustomCSV}
                                     tempUnit={userPrefUnits === 'si' ? UNITS.C : UNITS.F}
                                 />

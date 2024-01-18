@@ -47,7 +47,6 @@ const ColumnChart = (props) => {
         onMoreDetail,
         style,
         isChartLoading = false,
-        exportingTitle = '',
         cbCustomCSV,
         tempUnit = UNITS.F,
     } = props;
@@ -71,22 +70,6 @@ const ColumnChart = (props) => {
         setWithTemp(withTempProp);
     }, [withTempProp]);
 
-    const downloadCSV = (CSVContent) => {
-        const blob = new Blob([CSVContent], { type: 'text/csv' });
-
-        const link = document.createElement('a');
-
-        link.href = window.URL.createObjectURL(blob);
-
-        link.download = exportingTitle ? exportingTitle : 'chart';
-
-        document.body.appendChild(link);
-
-        link.click();
-
-        link.remove();
-    };
-
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
             case DOWNLOAD_TYPES.downloadSVG:
@@ -99,9 +82,7 @@ const ColumnChart = (props) => {
                 if (plotBandsShown && cbCustomCSV && typeof cbCustomCSV === 'function') {
                     const originalCSV = chartComponentRef.current.chart.getCSV();
 
-                    const modifiedCSV = cbCustomCSV(originalCSV);
-
-                    downloadCSV(modifiedCSV);
+                    cbCustomCSV(originalCSV);
                 } else {
                     chartComponentRef.current.chart.downloadCSV();
                 }
@@ -113,14 +94,6 @@ const ColumnChart = (props) => {
         temperatureSeries: withTemp ? temperatureSeries : [],
         plotBands,
         tempUnit,
-
-        ...(exportingTitle !== '' && {
-            restChartProps: {
-                exporting: {
-                    filename: exportingTitle,
-                },
-            },
-        }),
     });
 
     const { weather } = upperLegendsProps;
