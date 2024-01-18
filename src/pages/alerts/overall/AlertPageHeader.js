@@ -40,7 +40,7 @@ const AlertPageHeader = (props) => {
                     className={`mouse-pointer mr-4 ${activeTab === 0 ? `active-tab` : ``}`}
                     style={{ color: colorPalette.primaryGray500 }}
                     onClick={handleTabSwitch}>
-                    {`Open Alerts`}
+                    Open Alerts
                 </Typography.Header>
                 <Typography.Header
                     id="1"
@@ -48,7 +48,7 @@ const AlertPageHeader = (props) => {
                     className={`mouse-pointer mr-4 ${activeTab === 1 ? `active-tab` : ``}`}
                     style={{ color: colorPalette.primaryGray500 }}
                     onClick={handleTabSwitch}>
-                    {`Closed Alerts`}
+                    Closed Alerts
                 </Typography.Header>
                 <Typography.Header
                     id="2"

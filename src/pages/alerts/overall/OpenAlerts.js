@@ -36,14 +36,24 @@ const OpenAlerts = (props) => {
                     <EquipmentTypeSVG className="p-0 square" />
                 )}
                 <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
-                    {`${row?.target}`}
+                    {`${row?.target_description}`}
                 </Typography.Body>
             </div>
         );
     };
 
+    const renderTargetType = (row) => {
+        const formattedText = `${row?.target_type?.charAt(0).toUpperCase()}${row?.target_type?.slice(1)}`;
+
+        return (
+            <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
+                {formattedText ? formattedText : '-'}
+            </Typography.Body>
+        );
+    };
+
     const renderAlertTimestamp = (row) => {
-        const data = moment(row?.timestamps).fromNow();
+        const data = moment(row?.created_at).fromNow();
         return <Typography.Body size={Typography.Sizes.lg}>{data}</Typography.Body>;
     };
 
@@ -87,10 +97,11 @@ const OpenAlerts = (props) => {
                     {
                         name: 'Target Type',
                         accessor: 'target_type',
+                        callbackValue: renderTargetType,
                     },
                     {
                         name: 'Condition',
-                        accessor: 'condition',
+                        accessor: 'alert_condition_description',
                     },
                     {
                         name: 'Timestamps',
