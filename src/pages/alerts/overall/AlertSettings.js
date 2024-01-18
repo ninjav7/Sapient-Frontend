@@ -26,8 +26,6 @@ const AlertSettings = (props) => {
 
     const [selectedAlertObj, setSelectedAlertObj] = useState({});
 
-    console.log('SSR selectedAlertObj => ', selectedAlertObj);
-
     // Delete Device Modal states
     const [isDeleteAlertModalOpen, setDeleteAlertModalStatus] = useState(false);
     const closeDeleteAlertModal = () => setDeleteAlertModalStatus(false);
