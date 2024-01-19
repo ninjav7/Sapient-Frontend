@@ -563,7 +563,7 @@ const AddAlerts = () => {
             let newList = [
                 {
                     label: 'Alerts',
-                    path: '/alerts/overview',
+                    path: '/alerts/overview/open-alerts',
                     active: false,
                 },
                 {

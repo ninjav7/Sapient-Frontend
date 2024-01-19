@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
+import { useHistory, useParams } from 'react-router-dom';
 
 import { UserStore } from '../../../store/UserStore';
 import { AlertsStore } from '../../../store/AlertStore';
@@ -16,15 +17,17 @@ import { fetchAlertsList, fetchAllConfiguredAlerts, updateAlertAcknowledgement }
 import './styles.scss';
 
 const Alerts = () => {
-    const [activeTab, setActiveTab] = useState(0);
+    const { alertType } = useParams();
+    const history = useHistory();
+
     const [isFetchingData, setFetchingData] = useState(false);
 
     const [openAlertsList, setOpenAlertsList] = useState([]);
     const [closedAlertsList, setClosedAlertsList] = useState([]);
     const [configuredAlertsList, setConfiguredAlertsList] = useState([]);
 
-    const handleTabSwitch = (event) => {
-        setActiveTab(+event.target.id);
+    const handleTabSwitch = (e) => {
+        history.push({ pathname: `/alerts/overview/${e.target.id}` });
     };
 
     const updateBreadcrumbStore = () => {
@@ -32,7 +35,7 @@ const Alerts = () => {
             let newList = [
                 {
                     label: 'Alerts',
-                    path: '/alerts/overview',
+                    path: '/alerts/overview/open-alerts',
                     active: true,
                 },
             ];
@@ -124,36 +127,38 @@ const Alerts = () => {
     }, []);
 
     useEffect(() => {
-        if (activeTab === 0) getAllAlerts('unacknowledged');
-        if (activeTab === 1) getAllAlerts('acknowledged');
-        if (activeTab === 2) getAllConfiguredAlerts();
-    }, [activeTab]);
+        if (alertType === 'open-alerts') getAllAlerts('unacknowledged');
+        if (alertType === 'closed-alerts') getAllAlerts('acknowledged');
+        if (alertType === 'alert-settings') getAllConfiguredAlerts();
+    }, [alertType]);
 
     return (
         <React.Fragment>
             <Row>
                 <Col lg={12}>
-                    <AlertPageHeader activeTab={activeTab} handleTabSwitch={handleTabSwitch} />
+                    <AlertPageHeader alertType={alertType} handleTabSwitch={handleTabSwitch} />
                 </Col>
             </Row>
 
             <Row>
                 <Col lg={12}>
-                    {activeTab === 0 && (
+                    {alertType === 'open-alerts' && (
                         <OpenAlerts
                             alertsList={openAlertsList}
                             isProcessing={isFetchingData}
                             handleAlertAcknowledgement={handleAlertAcknowledgement}
                         />
                     )}
-                    {activeTab === 1 && (
+                    {alertType === 'closed-alerts' && (
                         <ClosedAlerts
                             alertsList={closedAlertsList}
                             isProcessing={isFetchingData}
                             handleAlertAcknowledgement={handleAlertAcknowledgement}
                         />
                     )}
-                    {activeTab === 2 && <AlertSettings getAllConfiguredAlerts={getAllConfiguredAlerts} />}
+                    {alertType === 'alert-settings' && (
+                        <AlertSettings getAllConfiguredAlerts={getAllConfiguredAlerts} />
+                    )}
                 </Col>
             </Row>
         </React.Fragment>

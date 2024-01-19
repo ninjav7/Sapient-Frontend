@@ -47,6 +47,14 @@ const SideNav = () => {
             return;
         }
 
+        if (route.parent === 'alerts') {
+            const pathName = route.path.substr(0, route.path.lastIndexOf('/'));
+            history.push({
+                pathname: `${pathName}/open-alerts`,
+            });
+            return;
+        }
+
         history.push({
             pathname: `${route.path}`,
         });

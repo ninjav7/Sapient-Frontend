@@ -219,7 +219,7 @@ const alertsRoutes = {
             parent: 'alerts',
         },
         {
-            path: '/alerts/overview',
+            path: '/alerts/overview/:alertType',
             name: 'Alerts',
             component: Alerts,
             route: PrivateRoute,
