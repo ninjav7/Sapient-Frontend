@@ -209,7 +209,7 @@ const MoveSpaceLayout = (props) => {
             <Modal show={isModalOpen} backdrop="static" keyboard={false} size="lg" centered>
                 <div className="p-4">
                     <Typography.Header size={Typography.Sizes.lg} style={{ marginBottom: '8px' }}>
-                        Move Space {spaceObj?.name}
+                        Move Space: {spaceObj?.name}
                     </Typography.Header>
                     <Typography.Body size={Typography.Sizes.md} style={{ fontWeight: 500 }}>
                         Current Location: {formattedOldValue}
