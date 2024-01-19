@@ -2,6 +2,7 @@ import { percentageHandler } from '../utils/helper';
 import { getBuildingName } from '../helpers/helpers';
 import { handleUnitConverstion } from '../pages/settings/general-settings/utils';
 import { UNITS } from '../constants/units';
+import moment from 'moment';
 
 export const getTableHeadersList = (record) => {
     let arr = [];
@@ -769,4 +770,42 @@ export const getCustomerListCSVExport = (tableData, columns) => {
         csv += '\n';
     });
     return csv;
+};
+
+export const getEnergyConsumptionCSVExport = (originalCSV, operatingHours) => {
+    const csvRows = originalCSV.split('\n').map((row) => row.split(','));
+
+    csvRows[0].push('"On Hours"');
+    csvRows[0].push('"Open Day"');
+
+    for (let i = 1; i < csvRows.length; i++) {
+        const timestamp = moment.tz(csvRows[i][0].replace(/"/g, ''), 'UTC');
+
+        const day = timestamp.format('ddd').toLowerCase();
+
+        const operateHoursDay = operatingHours[day];
+        const isWorkingThisDay = operateHoursDay.stat;
+
+        let operHoursFromTimeFormatted = operateHoursDay.time_range.frm;
+
+        let operHoursToTimeFormatted = operateHoursDay.time_range.to;
+
+        if (isWorkingThisDay && operHoursToTimeFormatted === '00:00') operHoursToTimeFormatted = '24:00';
+
+        const fromTime = moment.tz(`${timestamp.format('YYYY-MM-DD')}T${operHoursFromTimeFormatted}:00+00:00`, 'UTC');
+
+        const toTime = moment.tz(`${timestamp.format('YYYY-MM-DD')}T${operHoursToTimeFormatted}:00+00:00`, 'UTC');
+
+        const isTimestampAfterFromTime = timestamp.isSameOrAfter(fromTime);
+        const isTimestampBeforeToTime = timestamp.isSameOrBefore(toTime);
+
+        const onHours = isWorkingThisDay && isTimestampAfterFromTime && isTimestampBeforeToTime;
+
+        csvRows[i].push(onHours ? 'TRUE' : 'FALSE');
+        csvRows[i].push(isWorkingThisDay ? 'TRUE' : 'FALSE');
+    }
+
+    const modifiedCSV = csvRows.map((row) => row.join(',')).join('\n');
+
+    return modifiedCSV;
 };
