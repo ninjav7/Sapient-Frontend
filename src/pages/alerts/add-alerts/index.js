@@ -50,7 +50,7 @@ const CreateAlertHeader = (props) => {
                             size={Button.Sizes.md}
                             type={Button.Type.secondaryGrey}
                             onClick={() => {
-                                history.push({ pathname: '/alerts/overall' });
+                                history.push({ pathname: '/alerts/overview' });
                             }}
                         />
                     ) : (
@@ -563,12 +563,12 @@ const AddAlerts = () => {
             let newList = [
                 {
                     label: 'Alerts',
-                    path: '/alerts/overall',
+                    path: '/alerts/overview',
                     active: false,
                 },
                 {
                     label: 'Create Alert',
-                    path: '/alerts/overall/add-alert',
+                    path: '/alerts/overview/add-alert',
                     active: true,
                 },
             ];

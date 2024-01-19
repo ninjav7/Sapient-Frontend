@@ -32,7 +32,7 @@ const Alerts = () => {
             let newList = [
                 {
                     label: 'Alerts',
-                    path: '/alerts/overall',
+                    path: '/alerts/overview',
                     active: true,
                 },
             ];

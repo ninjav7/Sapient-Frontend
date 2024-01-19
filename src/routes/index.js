@@ -197,13 +197,13 @@ const carbonRoutes = {
 
 // Alerts Routes
 const alertsRoutes = {
-    path: '/alerts/overall',
+    path: '/alerts/overview',
     name: 'Alerts',
     component: Alerts,
     visibility: false,
     children: [
         {
-            path: '/alerts/overall/add-alert',
+            path: '/alerts/overview/add-alert',
             name: 'Add Alert',
             component: AddAlert,
             route: PrivateRoute,
@@ -211,7 +211,7 @@ const alertsRoutes = {
             parent: 'alerts',
         },
         {
-            path: '/alerts/overall/edit-alert',
+            path: '/alerts/overview/edit-alert',
             name: 'Edit Alert',
             component: EditAlert,
             route: PrivateRoute,
@@ -219,7 +219,7 @@ const alertsRoutes = {
             parent: 'alerts',
         },
         {
-            path: '/alerts/overall',
+            path: '/alerts/overview',
             name: 'Alerts',
             component: Alerts,
             route: PrivateRoute,
