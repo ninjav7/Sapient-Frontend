@@ -157,7 +157,10 @@ const Alerts = () => {
                         />
                     )}
                     {alertType === 'alert-settings' && (
-                        <AlertSettings getAllConfiguredAlerts={getAllConfiguredAlerts} />
+                        <AlertSettings
+                            getAllConfiguredAlerts={getAllConfiguredAlerts}
+                            configuredAlertsList={configuredAlertsList}
+                        />
                     )}
                 </Col>
             </Row>

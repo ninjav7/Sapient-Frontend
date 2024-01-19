@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 
 import Typography from '../../../sharedComponents/typography';
@@ -20,7 +21,7 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const AlertSettings = (props) => {
-    const { getAllConfiguredAlerts } = props;
+    const { getAllConfiguredAlerts, configuredAlertsList = [] } = props;
 
     const history = useHistory();
 
@@ -48,12 +49,22 @@ const AlertSettings = (props) => {
                     <EquipmentTypeSVG className="p-0 square" />
                 )}
                 <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
-                    {`${row?.target}`}
+                    {`${row?.target_type === TARGET_TYPES.BUILDING ? 'Building' : 'Equipment'} of any type`}
                 </Typography.Body>
             </div>
         );
     };
 
+    const renderTargetType = (row) => {
+        const { target_type = 'building' } = row;
+        const formattedText = `${target_type?.charAt(0).toUpperCase()}${target_type?.slice(1)}`;
+
+        return (
+            <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
+                {formattedText ? formattedText : '-'}
+            </Typography.Body>
+        );
+    };
     const renderSentAddress = (row) => {
         return (
             <div>
@@ -76,11 +87,16 @@ const AlertSettings = (props) => {
         );
     };
 
+    const renderAlertTimestamp = (row) => {
+        const data = moment(row?.created_at).fromNow();
+        return <Typography.Body size={Typography.Sizes.lg}>{data}</Typography.Body>;
+    };
+
     const renderConditions = (row) => {
         return (
             <div style={{ maxWidth: '15vw' }}>
                 <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray500 }}>
-                    {`${row?.condition}`}
+                    {row?.alert_condition_description ? row?.alert_condition_description : '-'}
                 </Typography.Body>
             </div>
         );
@@ -97,6 +113,7 @@ const AlertSettings = (props) => {
 
     const currentRow = () => {
         return alertSettingsList;
+        // return configuredAlertsList;
     };
 
     const handleAlertDeletion = async (alert_id) => {
@@ -151,12 +168,13 @@ const AlertSettings = (props) => {
                 headers={[
                     {
                         name: 'Target',
-                        accessor: 'target',
+                        accessor: 'target_type',
                         callbackValue: renderAlertType,
                     },
                     {
                         name: 'Target Type',
                         accessor: 'target_type',
+                        callbackValue: renderTargetType,
                     },
                     {
                         name: 'Condition',
@@ -171,6 +189,7 @@ const AlertSettings = (props) => {
                     {
                         name: 'Created',
                         accessor: 'created_at',
+                        callbackValue: renderAlertTimestamp,
                     },
                 ]}
                 filterOptions={[]}
