@@ -437,7 +437,7 @@ const NotificationSettings = (props) => {
     );
 };
 
-const AddAlerts = () => {
+const AlertConfig = () => {
     const { reqType, alertId } = useParams();
 
     const [activeTab, setActiveTab] = useState(0);
@@ -677,4 +677,4 @@ const AddAlerts = () => {
     );
 };
 
-export default AddAlerts;
+export default AlertConfig;
