@@ -139,8 +139,7 @@ export function getFiltersForSensorsRequest(args) {
                         ? args?.plugRuleId
                         : args.assignedRuleString
                         ? encodeURI(args.assignedRuleString?.join('+'))
-                        : args.assignedRuleString,
-                    // assigned_rule: args?.isGetOnlyLinked ? args?.plugRuleId : 'other',
+                        : 'other',
                     plug_rule_id: !args?.isGetOnlyLinked ? args?.plugRuleId : null,
                 },
                 _.identity

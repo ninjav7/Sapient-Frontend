@@ -1157,7 +1157,6 @@ const PlugRule = () => {
                 isLoadingUnlinkedRef.current = false;
 
                 let response = res.data;
-                console.log(response?.data);
                 setAllSensors(response?.data);
 
                 setUnlinkedSocketRuleSuccess(res.status);
