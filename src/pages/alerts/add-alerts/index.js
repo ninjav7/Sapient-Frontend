@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { Row, Col, CardBody, CardHeader } from 'reactstrap';
 
 import Typography from '../../../sharedComponents/typography';
@@ -50,7 +50,7 @@ const CreateAlertHeader = (props) => {
                             size={Button.Sizes.md}
                             type={Button.Type.secondaryGrey}
                             onClick={() => {
-                                history.push({ pathname: '/alerts/overview' });
+                                history.push({ pathname: '/alerts/overview/open-alerts' });
                             }}
                         />
                     ) : (
@@ -436,6 +436,8 @@ const NotificationSettings = (props) => {
 };
 
 const AddAlerts = () => {
+    const { reqType, alertId } = useParams();
+
     const [activeTab, setActiveTab] = useState(0);
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
     const [typeSelectedLabel, setTypeSelectedLabel] = useState(null);
@@ -568,7 +570,7 @@ const AddAlerts = () => {
                 },
                 {
                     label: 'Create Alert',
-                    path: '/alerts/overview/add-alert',
+                    path: '/alerts/overview/alert/create',
                     active: true,
                 },
             ];
@@ -613,6 +615,7 @@ const AddAlerts = () => {
 
     useEffect(() => {
         updateBreadcrumbStore();
+        window.scrollTo(0, 0);
     }, []);
 
     useEffect(() => {

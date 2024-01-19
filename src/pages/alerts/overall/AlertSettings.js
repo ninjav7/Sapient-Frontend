@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import Typography from '../../../sharedComponents/typography';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
@@ -20,6 +21,8 @@ import './styles.scss';
 
 const AlertSettings = (props) => {
     const { getAllConfiguredAlerts } = props;
+
+    const history = useHistory();
 
     const [alertSettingsList, setAlertSettingsList] = useState(alertSettingsMock);
     const [alertSettingsCount, setAlertSettingsCount] = useState(0);
@@ -81,6 +84,10 @@ const AlertSettings = (props) => {
                 </Typography.Body>
             </div>
         );
+    };
+
+    const handleEditClick = (record) => {
+        record?.id && history.push({ pathname: `/alerts/overview/alert/edit/${record?.id}` });
     };
 
     const handleDeleteClick = (record) => {
@@ -171,6 +178,10 @@ const AlertSettings = (props) => {
                 onChangePage={setPageNo}
                 pageSize={pageSize}
                 onPageSize={setPageSize}
+                onEditRow={(record, id, row) => handleEditClick(row)}
+                isEditable={(row) => {
+                    return true;
+                }}
                 onDeleteRow={(record, id, row) => handleDeleteClick(row)}
                 isDeletable={(row) => {
                     return true;
