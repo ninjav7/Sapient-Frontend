@@ -32,7 +32,7 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const CreateAlertHeader = (props) => {
-    const { activeTab, setActiveTab, isAlertConfigured = false, onAlertCreate } = props;
+    const { activeTab, setActiveTab, isAlertConfigured = false, onAlertCreate, reqType } = props;
 
     const history = useHistory();
 
@@ -42,7 +42,9 @@ const CreateAlertHeader = (props) => {
                 <Typography.Header
                     size={Typography.Sizes.lg}
                     style={{ color: colorPalette.primaryGray700 }}
-                    className="font-weight-bold">{`Create New Alert`}</Typography.Header>
+                    className="font-weight-bold">
+                    {`${reqType === 'create' ? `Create New` : `Edit`} Alert`}
+                </Typography.Header>
                 <div className="d-flex" style={{ gap: '0.75rem' }}>
                     {activeTab === 0 ? (
                         <Button
@@ -569,7 +571,7 @@ const AddAlerts = () => {
                     active: false,
                 },
                 {
-                    label: 'Create Alert',
+                    label: `${reqType === 'create' ? `Create` : `Edit`} Alert`,
                     path: '/alerts/overview/alert/create',
                     active: true,
                 },
@@ -643,6 +645,7 @@ const AddAlerts = () => {
                         onAlertCreate={() => {
                             handleCreateAlert(alertObj);
                         }}
+                        reqType={reqType}
                     />
                 </Col>
             </Row>
