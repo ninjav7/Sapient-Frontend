@@ -203,7 +203,7 @@ const alertsRoutes = {
     children: [
         {
             path: '/alerts/overview/alert/:reqType/:alertId?',
-            name: 'Add/Edit Alert',
+            name: 'Alert Configuration',
             component: AlertConfig,
             route: PrivateRoute,
             visibility: false,
