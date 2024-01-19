@@ -11,7 +11,7 @@ import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/ass
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
-import { alertSettingsMock } from './mock';
+import { separateEmails } from '../helpers';
 import { TARGET_TYPES } from '../constants';
 import { deleteConfiguredAlert } from '../services';
 
@@ -25,17 +25,13 @@ const AlertSettings = (props) => {
 
     const history = useHistory();
 
-    const [alertSettingsList, setAlertSettingsList] = useState(alertSettingsMock);
-    const [alertSettingsCount, setAlertSettingsCount] = useState(0);
-
+    const [isDeleting, setIsDeleting] = useState(false);
     const [selectedAlertObj, setSelectedAlertObj] = useState({});
 
     // Delete Device Modal states
     const [isDeleteAlertModalOpen, setDeleteAlertModalStatus] = useState(false);
     const closeDeleteAlertModal = () => setDeleteAlertModalStatus(false);
     const openDeleteAlertModal = () => setDeleteAlertModalStatus(true);
-
-    const [isDeleting, setIsDeleting] = useState(false);
 
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -66,6 +62,12 @@ const AlertSettings = (props) => {
         );
     };
     const renderSentAddress = (row) => {
+        const emailIds = separateEmails(row?.alert_emails);
+        let renderText = '';
+        if (emailIds.length === 0) renderText = `No Email Adress configured`;
+        if (emailIds.length === 1) renderText = emailIds[0];
+        if (emailIds.length > 1) renderText = `Email Addresses configured: ${emailIds.length}`;
+
         return (
             <div>
                 <div className="d-flex align-items-center" style={{ gap: '0.50rem' }}>
@@ -78,11 +80,14 @@ const AlertSettings = (props) => {
                 </div>
 
                 <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray500 }}>
-                    {`${row?.sent_to}`}
+                    {renderText}
                 </Typography.Body>
-                <Typography.Body size={Typography.Sizes.sm} style={{ color: colorPalette.primaryGray400 }}>
-                    {`Send if condition lasts 0 min, resend every 60 mins`}
-                </Typography.Body>
+                {row?.alert_reccurence && (
+                    <Typography.Body size={Typography.Sizes.sm} style={{ color: colorPalette.primaryGray400 }}>
+                        {/* {`Send if condition lasts 0 min, resend every 60 mins`} */}
+                        {`Resend every after ${row?.alert_reccurence_minutes} mins`}
+                    </Typography.Body>
+                )}
             </div>
         );
     };
@@ -112,8 +117,7 @@ const AlertSettings = (props) => {
     };
 
     const currentRow = () => {
-        return alertSettingsList;
-        // return configuredAlertsList;
+        return configuredAlertsList;
     };
 
     const handleAlertDeletion = async (alert_id) => {
@@ -206,7 +210,7 @@ const AlertSettings = (props) => {
                     return true;
                 }}
                 totalCount={(() => {
-                    return alertSettingsCount;
+                    return configuredAlertsList.length;
                 })()}
             />
 
