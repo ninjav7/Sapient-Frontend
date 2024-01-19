@@ -53,11 +53,11 @@ export const defaultAlertObj = {
 export const bldgAlertConditions = [
     {
         label: 'Energy consumption for the month is',
-        value: 'energy_consumption',
+        value: 'energy_consumption_month',
     },
     {
         label: 'Peak demand for the month is',
-        value: 'peak_demand',
+        value: 'peak_demand_month',
     },
 ];
 
@@ -134,6 +134,6 @@ export const filtersForPeakDemand = [
     },
     {
         label: 'Past 12 month',
-        value: 'past_12_month',
+        value: 'previous_year',
     },
 ];
