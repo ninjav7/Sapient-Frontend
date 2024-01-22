@@ -1,4 +1,6 @@
 export const BaseUrl = 'https://sapient-dev-service.stacksapien.com';
+// export const BaseUrl = 'http://localhost:8000';
+
 export const SingularityBaseUrl = 'https://api.singularity.energy/v2/';
 // Auth
 export const signin = '/api/user_role/user/signin';
@@ -235,7 +237,7 @@ export const getRawDeviceData = '/api/v2/metrics/raw/devices';
 export const updateSpaceV2 = '/api/v2/layout/update-space';
 
 // Alerts API's
-export const listAlerts = '/api/v2/alerts/{alerts_type}/list';
+export const listAlerts = '/api/v2/alerts/list';
 export const alertAcknowledgement = '/api/v2/alerts/mark-acknowledgement';
 export const getConfiguredAlerts = '/api/v2/alerts/configs/list';
 export const getConfiguredAlertsById = '/api/v2/alerts/configs';
