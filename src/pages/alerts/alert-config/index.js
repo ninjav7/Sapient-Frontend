@@ -197,8 +197,8 @@ const ConfigureAlerts = (props) => {
 
     const renderTargetTypeHeader = (alert_obj) => {
         let label = '';
-        if (alert_obj?.target?.type === TARGET_TYPES.BUILDING) label = TARGET_TYPES.BUILDING;
-        if (alert_obj?.target?.type === TARGET_TYPES.EQUIPMENT) label = TARGET_TYPES.EQUIPMENT;
+        if (alert_obj?.target?.type === TARGET_TYPES.BUILDING) label = 'Building';
+        if (alert_obj?.target?.type === TARGET_TYPES.EQUIPMENT) label = 'Equipment';
         return label;
     };
 
