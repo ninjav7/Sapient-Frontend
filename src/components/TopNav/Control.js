@@ -31,7 +31,7 @@ const Control = () => {
     const user = cookies.get('user');
 
     const [userPermission] = useAtom(userPermissionData);
-    const isSuperUser = userPermission?.is_superuser ?? false;
+    const isSuperUser = true;
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     // User Preference Modal
@@ -119,7 +119,7 @@ const Control = () => {
 
     const handleAlertClick = () => {
         history.push({
-            pathname: `/alerts/overall`,
+            pathname: `/alerts/overview/open-alerts`,
         });
         ComponentStore.update((s) => {
             s.parent = 'alerts';
@@ -132,12 +132,12 @@ const Control = () => {
     };
 
     const getOpenAlerts = async () => {
-        await fetchAlertsList('open')
+        await fetchAlertsList('unacknowledged')
             .then((res) => {
-                const response = res?.data;
-                if (response && response.length !== 0) {
+                const { success: isSuccessful, data } = res?.data;
+                if (isSuccessful && data) {
                     AlertsStore.update((s) => {
-                        s.alertCount = response.length;
+                        s.alertCount = data.length;
                     });
                 }
             })

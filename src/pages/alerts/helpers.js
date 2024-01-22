@@ -25,3 +25,10 @@ export const customComparator = (value1, value2, key) => {
     }
     return undefined;
 };
+
+export const separateEmails = (inputString = '') => {
+    if (inputString.trim() === '') return [];
+
+    const emailArray = inputString.split(',').map((email) => email.trim());
+    return emailArray;
+};
