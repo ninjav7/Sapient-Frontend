@@ -34,7 +34,7 @@ const AlertSettings = (props) => {
     const openDeleteAlertModal = () => setDeleteAlertModalStatus(true);
 
     const [pageNo, setPageNo] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(20);
 
     const renderAlertType = (row) => {
         return (
