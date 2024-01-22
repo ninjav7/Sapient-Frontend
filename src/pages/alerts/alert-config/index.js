@@ -614,7 +614,6 @@ const AlertConfig = () => {
         await createAlertServiceAPI(payload)
             .then((res) => {
                 const response = res?.data;
-                console.log('SSR response => ', response);
                 if (response?.success) {
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -654,7 +653,7 @@ const AlertConfig = () => {
                 const response = res?.data;
                 const { success: isSuccessful, data } = response;
                 if (isSuccessful && data) {
-                    console.log('SSR data => ', data);
+                    // To set response as alertObj;
                 }
             })
             .catch(() => {})
