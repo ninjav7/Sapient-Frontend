@@ -34,29 +34,13 @@ const StackedColumnChart = (props) => {
     const chartComponentRef = useRef(null);
     const [plotBandsShown, setPlotBandsShown] = useState(true);
 
-    const { plotBandsProp, plotBandsLegends, upperLegendsProps, cbCustomCSV, exportingTitle } = props;
+    const { plotBandsProp, plotBandsLegends, upperLegendsProps, cbCustomCSV } = props;
 
     const { plotBands, renderPlotBandsLegends } = usePlotBandsLegends({
         plotBandsProp,
         plotBandsLegends,
         setStateDisabledAfterHours: setPlotBandsShown,
     });
-
-    const downloadCSV = (CSVContent) => {
-        const blob = new Blob([CSVContent], { type: 'text/csv' });
-
-        const link = document.createElement('a');
-
-        link.href = window.URL.createObjectURL(blob);
-
-        link.download = exportingTitle ? exportingTitle : 'chart';
-
-        document.body.appendChild(link);
-
-        link.click();
-
-        link.remove();
-    };
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
@@ -70,9 +54,7 @@ const StackedColumnChart = (props) => {
                 if (plotBandsShown && cbCustomCSV && typeof cbCustomCSV === 'function') {
                     const originalCSV = chartComponentRef.current.chart.getCSV();
 
-                    const modifiedCSV = cbCustomCSV(originalCSV);
-
-                    downloadCSV(modifiedCSV);
+                    cbCustomCSV(originalCSV);
                 } else {
                     chartComponentRef.current.chart.downloadCSV();
                 }

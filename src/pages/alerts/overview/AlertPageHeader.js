@@ -11,7 +11,7 @@ import './styles.scss';
 
 const AlertPageHeader = (props) => {
     const history = useHistory();
-    const { activeTab = false, handleTabSwitch } = props;
+    const { alertType = 'open-alerts', handleTabSwitch } = props;
 
     return (
         <div className="alerts-header-wrapper d-flex flex-column justify-content-between">
@@ -27,7 +27,7 @@ const AlertPageHeader = (props) => {
                         type={Button.Type.primary}
                         icon={<PlusSVG />}
                         onClick={() => {
-                            history.push({ pathname: '/alerts/overall/add-alert' });
+                            history.push({ pathname: '/alerts/overview/alert/create' });
                         }}
                     />
                 </div>
@@ -35,25 +35,25 @@ const AlertPageHeader = (props) => {
 
             <div className="d-flex">
                 <Typography.Header
-                    id="0"
+                    id="open-alerts"
                     size={Typography.Sizes.xs}
-                    className={`mouse-pointer mr-4 ${activeTab === 0 ? `active-tab` : ``}`}
+                    className={`mouse-pointer mr-4 ${alertType === 'open-alerts' ? `active-tab` : ``}`}
                     style={{ color: colorPalette.primaryGray500 }}
                     onClick={handleTabSwitch}>
-                    {`Open Alerts`}
+                    Open Alerts
                 </Typography.Header>
                 <Typography.Header
-                    id="1"
+                    id="closed-alerts"
                     size={Typography.Sizes.xs}
-                    className={`mouse-pointer mr-4 ${activeTab === 1 ? `active-tab` : ``}`}
+                    className={`mouse-pointer mr-4 ${alertType === 'closed-alerts' ? `active-tab` : ``}`}
                     style={{ color: colorPalette.primaryGray500 }}
                     onClick={handleTabSwitch}>
-                    {`Closed Alerts`}
+                    Closed Alerts
                 </Typography.Header>
                 <Typography.Header
-                    id="2"
+                    id="alert-settings"
                     size={Typography.Sizes.xs}
-                    className={`mouse-pointer mr-4 ${activeTab === 2 ? `active-tab` : ``}`}
+                    className={`mouse-pointer mr-4 ${alertType === 'alert-settings' ? `active-tab` : ``}`}
                     style={{ color: colorPalette.primaryGray500 }}
                     onClick={handleTabSwitch}>
                     {`Alert Settings`}

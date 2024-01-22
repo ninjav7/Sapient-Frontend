@@ -63,3 +63,5 @@ export const metricForPassiveWithMultipleBreaker = [
         Consumption: 'Min Phase Imbalance Percent',
     },
 ];
+
+export const metricsWithMultipleSensors = ['sensor_rms_current', 'sensor_max_current', 'sensor_min_current'];

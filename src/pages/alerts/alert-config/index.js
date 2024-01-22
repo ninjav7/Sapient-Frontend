@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { Row, Col, CardBody, CardHeader } from 'reactstrap';
 
 import Typography from '../../../sharedComponents/typography';
@@ -19,7 +19,7 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as CheckMarkSVG } from '../../../assets/icon/check-mark.svg';
 
-import { createAlertServiceAPI } from '../services';
+import { createAlertServiceAPI, fetchConfiguredAlertById } from '../services';
 import { getEquipmentsList } from '../../settings/panels/services';
 import { fetchBuildingsList } from '../../../services/buildings';
 import { getEquipTypeData } from '../../settings/equipment-type/services';
@@ -32,7 +32,14 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const CreateAlertHeader = (props) => {
-    const { activeTab, setActiveTab, isAlertConfigured = false, onAlertCreate } = props;
+    const {
+        activeTab,
+        setActiveTab,
+        isAlertConfigured = false,
+        onAlertCreate,
+        reqType,
+        isCreatingAlert = false,
+    } = props;
 
     const history = useHistory();
 
@@ -42,7 +49,9 @@ const CreateAlertHeader = (props) => {
                 <Typography.Header
                     size={Typography.Sizes.lg}
                     style={{ color: colorPalette.primaryGray700 }}
-                    className="font-weight-bold">{`Create New Alert`}</Typography.Header>
+                    className="font-weight-bold">
+                    {`${reqType === 'create' ? `Create New` : `Edit`} Alert`}
+                </Typography.Header>
                 <div className="d-flex" style={{ gap: '0.75rem' }}>
                     {activeTab === 0 ? (
                         <Button
@@ -50,7 +59,7 @@ const CreateAlertHeader = (props) => {
                             size={Button.Sizes.md}
                             type={Button.Type.secondaryGrey}
                             onClick={() => {
-                                history.push({ pathname: '/alerts/overall' });
+                                history.push({ pathname: '/alerts/overview/open-alerts' });
                             }}
                         />
                     ) : (
@@ -76,6 +85,7 @@ const CreateAlertHeader = (props) => {
                             size={Button.Sizes.md}
                             type={Button.Type.primary}
                             onClick={onAlertCreate}
+                            disabled={isCreatingAlert}
                         />
                     )}
                 </div>
@@ -187,8 +197,8 @@ const ConfigureAlerts = (props) => {
 
     const renderTargetTypeHeader = (alert_obj) => {
         let label = '';
-        if (alert_obj?.target?.type === TARGET_TYPES.BUILDING) label = TARGET_TYPES.BUILDING;
-        if (alert_obj?.target?.type === TARGET_TYPES.EQUIPMENT) label = TARGET_TYPES.EQUIPMENT;
+        if (alert_obj?.target?.type === TARGET_TYPES.BUILDING) label = 'Building';
+        if (alert_obj?.target?.type === TARGET_TYPES.EQUIPMENT) label = 'Equipment';
         return label;
     };
 
@@ -435,10 +445,48 @@ const NotificationSettings = (props) => {
     );
 };
 
-const AddAlerts = () => {
+const AlertConfig = () => {
+    const { reqType, alertId } = useParams();
+    const history = useHistory();
+
     const [activeTab, setActiveTab] = useState(0);
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
     const [typeSelectedLabel, setTypeSelectedLabel] = useState(null);
+
+    const [isCreatingAlert, setProcessing] = useState(false);
+    const [isFetchingAlertData, setFetchingAlertData] = useState(false);
+
+    const isTargetSetAndSubmitted = alertObj?.target?.type !== '' && alertObj?.target?.submitted;
+
+    const isBuildingConfigured =
+        alertObj?.target?.type === TARGET_TYPES.BUILDING &&
+        alertObj?.target?.lists.length !== 0 &&
+        alertObj?.target?.typesList.length !== 0;
+
+    const isEquipmentConfigured =
+        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
+        alertObj?.target?.lists.length !== 0 &&
+        alertObj?.target?.typesList.length !== 0 &&
+        alertObj?.target?.buildingIDs.length !== 0;
+
+    const isConditionSet = alertObj?.condition?.type !== '';
+
+    const isBuildingConditionsSet =
+        alertObj?.target?.type === TARGET_TYPES.BUILDING &&
+        (alertObj?.condition?.filterType === 'previous_month' ||
+            alertObj?.condition?.filterType === 'previous_year' ||
+            (alertObj?.condition?.filterType === 'number' && alertObj?.condition?.thresholdValue !== ''));
+
+    const isEquipmentConditionsSet =
+        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
+        ((alertObj?.condition?.type === 'rms_current' && alertObj?.condition?.thresholdPercentage !== '') ||
+            (alertObj?.condition?.type === 'shortcycling' && alertObj?.condition?.shortcyclingMinutes !== '') ||
+            (alertObj?.condition?.type !== 'rms_current' &&
+                alertObj?.condition?.type !== 'shortcycling' &&
+                alertObj?.condition?.thresholdPercentage !== ''));
+
+    const isTargetConfigured = isTargetSetAndSubmitted && (isBuildingConfigured || isEquipmentConfigured);
+    const isConditionConfigured = isConditionSet && (isBuildingConditionsSet || isEquipmentConditionsSet);
 
     const handleTargetChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
@@ -502,33 +550,61 @@ const AddAlerts = () => {
     const handleCreateAlert = async (alert_obj) => {
         if (!alert_obj) return;
 
+        setProcessing(true);
+
+        const { target, recurrence, condition, notification } = alert_obj;
+
+        // Alert Payload to be send to Backend
         let payload = {
-            target: alert_obj?.target?.type,
-            // building_id: 'string',
-            target_type: alert_obj?.target?.typesList.map((item) => item?.value),
-            target_list: alert_obj?.target?.lists.map((item) => item?.value),
-            condition: alert_obj?.condition?.type,
-            // condition_interval_period: 1,
-            condition_type: alert_obj?.condition?.level,
-            threshold_at: [],
-            notify_type: alert_obj?.notification?.method,
-            // notify_to: 'string',
-            // notify_condition: 'immediate',
-            // notify_in: 0,
-            // snooze: 0,
+            target_type: target?.type,
         };
 
-        if (alert_obj?.condition?.level === 'number' && alert_obj?.condition?.thresholdValue) {
-            payload.condition_threshold = alert_obj?.condition?.thresholdValue;
+        // When Target type is 'Building'
+        if (target?.type === TARGET_TYPES.BUILDING) {
+            let bldgObj = {
+                building_ids: target?.lists.map((el) => el?.value),
+                building_filter_condition: condition?.type,
+                building_condition_operator: condition?.level,
+                building_condition_type: condition?.filterType,
+                building_condition_alert_50: condition?.threshold50,
+                building_condition_alert_75: condition?.threshold75,
+                building_condition_alert_90: condition?.threshold90,
+            };
+
+            if (condition?.filterType === 'number') {
+                bldgObj.building_condition_value = +condition?.thresholdValue;
+            }
+
+            payload = { ...payload, ...bldgObj };
         }
 
-        if (alert_obj?.condition?.threshold50) payload.threshold_at.push(50);
-        if (alert_obj?.condition?.threshold75) payload.threshold_at.push(75);
-        if (alert_obj?.condition?.threshold90) payload.threshold_at.push(90);
+        // When Target type is 'Equipment'
+        if (target?.type === TARGET_TYPES.EQUIPMENT) {
+            let equipObj = {
+                equipment_ids: target?.lists.map((el) => el?.value),
+                equipment_filter_condition: condition?.type,
+                equipment_condition_operator: condition?.level,
+                equipment_condition_threshold_value: +condition?.thresholdPercentage,
+                equipment_condition_reccurence: recurrence?.triggerAlert,
+                equipment_condition_reccurence_minutes: +recurrence?.triggerAt,
+            };
 
-        if (alert_obj?.condition?.filterType !== 'number') {
-            if (alert_obj?.condition?.filterType.includes('month')) payload.condition_interval = 'month';
-            if (alert_obj?.condition?.filterType.includes('year')) payload.condition_interval = 'year';
+            if (condition?.type === 'rms_current') {
+                equipObj.equipment_condition_threshold_type = condition?.thresholdName;
+            }
+
+            payload = { ...payload, ...equipObj };
+        }
+
+        // Notification and its recurrence setup
+        const method = notification?.method[0];
+
+        if (method === 'email') payload.alert_emails = notification?.selectedUserEmailId;
+        if (method === 'user') payload.alert_user_ids = notification?.selectedUserId.map((el) => el?.value);
+
+        if (method === 'email' || method === 'user') {
+            payload.alert_reccurence = recurrence?.resendAlert;
+            payload.alert_reccurence_minutes = +recurrence?.resendAt;
         }
 
         await createAlertServiceAPI(payload)
@@ -539,6 +615,9 @@ const AddAlerts = () => {
                         s.showNotification = true;
                         s.notificationMessage = 'Alert created successfully.';
                         s.notificationType = 'success';
+                    });
+                    history.push({
+                        pathname: '/alerts/overview/alert-settings',
                     });
                 } else {
                     UserStore.update((s) => {
@@ -555,7 +634,28 @@ const AddAlerts = () => {
                     s.notificationType = 'error';
                 });
             })
-            .finally(() => {});
+            .finally(() => {
+                setProcessing(false);
+            });
+    };
+
+    const getConfiguredAlertById = async (alert_id) => {
+        if (!alert_id) return;
+
+        setFetchingAlertData(true);
+
+        await fetchConfiguredAlertById(alert_id)
+            .then((res) => {
+                const response = res?.data;
+                const { success: isSuccessful, data } = response;
+                if (isSuccessful && data) {
+                    // To set response as alertObj;
+                }
+            })
+            .catch(() => {})
+            .finally(() => {
+                setFetchingAlertData(false);
+            });
     };
 
     const updateBreadcrumbStore = () => {
@@ -563,12 +663,12 @@ const AddAlerts = () => {
             let newList = [
                 {
                     label: 'Alerts',
-                    path: '/alerts/overall',
+                    path: '/alerts/overview/open-alerts',
                     active: false,
                 },
                 {
-                    label: 'Create Alert',
-                    path: '/alerts/overall/add-alert',
+                    label: `${reqType === 'create' ? `Create` : `Edit`} Alert`,
+                    path: '/alerts/overview/alert/create',
                     active: true,
                 },
             ];
@@ -579,40 +679,9 @@ const AddAlerts = () => {
         });
     };
 
-    const isTargetSetAndSubmitted = alertObj?.target?.type !== '' && alertObj?.target?.submitted;
-
-    const isBuildingConfigured =
-        alertObj?.target?.type === TARGET_TYPES.BUILDING &&
-        alertObj?.target?.lists.length !== 0 &&
-        alertObj?.target?.typesList.length !== 0;
-
-    const isEquipmentConfigured =
-        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
-        alertObj?.target?.lists.length !== 0 &&
-        alertObj?.target?.typesList.length !== 0 &&
-        alertObj?.target?.buildingIDs.length !== 0;
-
-    const isConditionSet = alertObj?.condition?.type !== '';
-
-    const isBuildingConditionsSet =
-        alertObj?.target?.type === TARGET_TYPES.BUILDING &&
-        (alertObj?.condition?.filterType === 'previous_month' ||
-            alertObj?.condition?.filterType === 'previous_year' ||
-            (alertObj?.condition?.filterType === 'number' && alertObj?.condition?.thresholdValue !== ''));
-
-    const isEquipmentConditionsSet =
-        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
-        ((alertObj?.condition?.type === 'rms_current' && alertObj?.condition?.thresholdPercentage !== '') ||
-            (alertObj?.condition?.type === 'shortcycling' && alertObj?.condition?.shortcyclingMinutes !== '') ||
-            (alertObj?.condition?.type !== 'rms_current' &&
-                alertObj?.condition?.type !== 'shortcycling' &&
-                alertObj?.condition?.thresholdPercentage !== ''));
-
-    const isTargetConfigured = isTargetSetAndSubmitted && (isBuildingConfigured || isEquipmentConfigured);
-    const isConditionConfigured = isConditionSet && (isBuildingConditionsSet || isEquipmentConditionsSet);
-
     useEffect(() => {
         updateBreadcrumbStore();
+        window.scrollTo(0, 0);
     }, []);
 
     useEffect(() => {
@@ -629,6 +698,10 @@ const AddAlerts = () => {
         };
     }, []);
 
+    useEffect(() => {
+        if (alertId) getConfiguredAlertById(alertId);
+    }, [alertId]);
+
     return (
         <React.Fragment>
             <Row>
@@ -640,6 +713,8 @@ const AddAlerts = () => {
                         onAlertCreate={() => {
                             handleCreateAlert(alertObj);
                         }}
+                        reqType={reqType}
+                        isCreatingAlert={isCreatingAlert}
                     />
                 </Col>
             </Row>
@@ -671,4 +746,4 @@ const AddAlerts = () => {
     );
 };
 
-export default AddAlerts;
+export default AlertConfig;

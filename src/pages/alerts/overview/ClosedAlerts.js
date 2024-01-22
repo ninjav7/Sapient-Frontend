@@ -13,17 +13,17 @@ import { TARGET_TYPES } from '../constants';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
-const OpenAlerts = (props) => {
+const ClosedAlerts = (props) => {
     const { alertsList = [], isProcessing = false, handleAlertAcknowledgement } = props;
 
     const [selectedAlertIds, setSelectedAlertIds] = useState([]);
 
     const [count, setCount] = useState(0);
     const [pageNo, setPageNo] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(100);
 
-    const handleAcknowledgement = (selectedIds) => {
-        handleAlertAcknowledgement('acknowledged', selectedIds);
+    const handleUnacknowledgement = (selectedIds) => {
+        handleAlertAcknowledgement('unacknowledged', selectedIds);
         setSelectedAlertIds([]);
     };
 
@@ -36,14 +36,24 @@ const OpenAlerts = (props) => {
                     <EquipmentTypeSVG className="p-0 square" />
                 )}
                 <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
-                    {`${row?.target}`}
+                    {`${row?.target_description}`}
                 </Typography.Body>
             </div>
         );
     };
 
+    const renderTargetType = (row) => {
+        const formattedText = `${row?.target_type?.charAt(0).toUpperCase()}${row?.target_type?.slice(1)}`;
+
+        return (
+            <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
+                {formattedText ? formattedText : '-'}
+            </Typography.Body>
+        );
+    };
+
     const renderAlertTimestamp = (row) => {
-        const data = moment(row?.timestamps).fromNow();
+        const data = moment(row?.created_at).fromNow();
         return <Typography.Body size={Typography.Sizes.lg}>{data}</Typography.Body>;
     };
 
@@ -69,7 +79,7 @@ const OpenAlerts = (props) => {
     return (
         <div className="custom-padding">
             <DataTableWidget
-                id="open_alerts_list"
+                id="closed_alerts_list"
                 isLoading={isProcessing}
                 isLoadingComponent={<SkeletonLoader noOfColumns={5} noOfRows={10} />}
                 onSearch={(query) => {}}
@@ -87,10 +97,11 @@ const OpenAlerts = (props) => {
                     {
                         name: 'Target Type',
                         accessor: 'target_type',
+                        callbackValue: renderTargetType,
                     },
                     {
                         name: 'Condition',
-                        accessor: 'condition',
+                        accessor: 'alert_condition_description',
                     },
                     {
                         name: 'Timestamps',
@@ -103,8 +114,8 @@ const OpenAlerts = (props) => {
                     <Checkbox
                         label=""
                         type="checkbox"
-                        id="open_alerts"
-                        name="open_alerts"
+                        id="closed_alerts"
+                        name="closed_alerts"
                         checked={selectedAlertIds.length === alertsList.length}
                         value={selectedAlertIds.length === alertsList.length}
                         onClick={(e) => {
@@ -117,8 +128,8 @@ const OpenAlerts = (props) => {
                     <Checkbox
                         label=""
                         type="checkbox"
-                        id="open_alerts_check"
-                        name="open_alerts_check"
+                        id="closed_alerts_check"
+                        name="closed_alerts_check"
                         checked={selectedAlertIds.includes(record?.id)}
                         value={selectedAlertIds.includes(record?.id)}
                         onClick={(e) => {
@@ -135,9 +146,9 @@ const OpenAlerts = (props) => {
                 })()}
                 showExternalButton={true}
                 externalButtonObj={{
-                    label: 'Acknowledged',
+                    label: 'Unacknowledged',
                     onClick: () => {
-                        handleAcknowledgement(selectedAlertIds);
+                        handleUnacknowledgement(selectedAlertIds);
                     },
                     isBtnDisabled: selectedAlertIds.length === 0,
                 }}
@@ -146,4 +157,4 @@ const OpenAlerts = (props) => {
     );
 };
 
-export default OpenAlerts;
+export default ClosedAlerts;
