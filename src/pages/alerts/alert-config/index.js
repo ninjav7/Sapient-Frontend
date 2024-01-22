@@ -32,7 +32,14 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const CreateAlertHeader = (props) => {
-    const { activeTab, setActiveTab, isAlertConfigured = false, onAlertCreate, reqType } = props;
+    const {
+        activeTab,
+        setActiveTab,
+        isAlertConfigured = false,
+        onAlertCreate,
+        reqType,
+        isCreatingAlert = false,
+    } = props;
 
     const history = useHistory();
 
@@ -78,6 +85,7 @@ const CreateAlertHeader = (props) => {
                             size={Button.Sizes.md}
                             type={Button.Type.primary}
                             onClick={onAlertCreate}
+                            disabled={isCreatingAlert}
                         />
                     )}
                 </div>
@@ -439,11 +447,13 @@ const NotificationSettings = (props) => {
 
 const AlertConfig = () => {
     const { reqType, alertId } = useParams();
+    const history = useHistory();
 
     const [activeTab, setActiveTab] = useState(0);
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
     const [typeSelectedLabel, setTypeSelectedLabel] = useState(null);
 
+    const [isCreatingAlert, setProcessing] = useState(false);
     const [isFetchingAlertData, setFetchingAlertData] = useState(false);
 
     const isTargetSetAndSubmitted = alertObj?.target?.type !== '' && alertObj?.target?.submitted;
@@ -537,116 +547,82 @@ const AlertConfig = () => {
         setAlertObj(obj);
     };
 
-    const handleCreateAlertMock = async (alert_obj) => {
-        if (!alert_obj) return;
-
-        console.log('SSR alert_obj => ', alert_obj);
-
-        let payload = {
-            target: alert_obj?.target?.type,
-            // building_id: 'string',
-            target_type: alert_obj?.target?.typesList.map((item) => item?.value),
-            target_list: alert_obj?.target?.lists.map((item) => item?.value),
-            condition: alert_obj?.condition?.type,
-            // condition_interval_period: 1,
-            condition_type: alert_obj?.condition?.level,
-            threshold_at: [],
-            notify_type: alert_obj?.notification?.method,
-            // notify_to: 'string',
-            // notify_condition: 'immediate',
-            // notify_in: 0,
-            // snooze: 0,
-        };
-
-        if (alert_obj?.condition?.level === 'number' && alert_obj?.condition?.thresholdValue) {
-            payload.condition_threshold = alert_obj?.condition?.thresholdValue;
-        }
-
-        if (alert_obj?.condition?.threshold50) payload.threshold_at.push(50);
-        if (alert_obj?.condition?.threshold75) payload.threshold_at.push(75);
-        if (alert_obj?.condition?.threshold90) payload.threshold_at.push(90);
-
-        if (alert_obj?.condition?.filterType !== 'number') {
-            if (alert_obj?.condition?.filterType.includes('month')) payload.condition_interval = 'month';
-            if (alert_obj?.condition?.filterType.includes('year')) payload.condition_interval = 'year';
-        }
-
-        await createAlertServiceAPI(payload)
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = 'Alert created successfully.';
-                        s.notificationType = 'success';
-                    });
-                } else {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = 'Failed to create Alert.';
-                        s.notificationType = 'error';
-                    });
-                }
-            })
-            .catch(() => {
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Failed to create Alert status due to Internal Server Error.';
-                    s.notificationType = 'error';
-                });
-            })
-            .finally(() => {});
-    };
-
     const handleCreateAlert = async (alert_obj) => {
         if (!alert_obj) return;
 
+        setProcessing(true);
+
+        const { target, recurrence, condition, notification } = alert_obj;
+
+        // Alert Payload to be send to Backend
         let payload = {
-            alert_user_ids: alert_obj?.notification?.selectedUserId.map(({ value }) => value),
-            alert_emails: alert_obj?.notification?.selectedUserEmailId,
-            alert_reccurence: alert_obj?.recurrence?.resendAlert,
-            alert_reccurence_minutes: alert_obj?.recurrence?.resendAt,
-            building_ids: alert_obj?.target?.lists,
-            building_filter_condition: alert_obj?.condition?.type,
-            building_condition_operator: alert_obj?.condition?.level,
-            building_condition_type: alert_obj?.condition?.filterType,
-            building_condition_value: alert_obj?.condition?.thresholdValue,
-            building_condition_alert_50: alert_obj?.condition?.threshold50,
-            building_condition_alert_75: alert_obj?.condition?.threshold75,
-            building_condition_alert_90: alert_obj?.condition?.threshold90,
-            equipment_ids: alert_obj?.target?.lists,
-            equipment_filter_condition: alert_obj?.condition?.type,
-            equipment_condition_operator: alert_obj?.condition?.level,
-            equipment_condition_threshold_value: alert_obj?.condition?.thresholdValue,
-            equipment_condition_threshold_type: alert_obj?.condition?.filterType,
-            equipment_condition_reccurence: false,
-            equipment_condition_reccurence_minutes: 0,
-            description: 'string',
-            target_description: 'string',
-            alert_condition_description: 'string',
+            target_type: target?.type,
         };
 
-        if (alert_obj?.condition?.level === 'number' && alert_obj?.condition?.thresholdValue) {
-            payload.condition_threshold = alert_obj?.condition?.thresholdValue;
+        // When Target type is 'Building'
+        if (target?.type === TARGET_TYPES.BUILDING) {
+            let bldgObj = {
+                building_ids: target?.lists.map((el) => el?.value),
+                building_filter_condition: condition?.type,
+                building_condition_operator: condition?.level,
+                building_condition_type: condition?.filterType,
+                building_condition_alert_50: condition?.threshold50,
+                building_condition_alert_75: condition?.threshold75,
+                building_condition_alert_90: condition?.threshold90,
+            };
+
+            if (condition?.filterType === 'number') {
+                bldgObj.building_condition_value = +condition?.thresholdValue;
+            }
+
+            payload = { ...payload, ...bldgObj };
         }
 
-        if (alert_obj?.condition?.threshold50) payload.threshold_at.push(50);
-        if (alert_obj?.condition?.threshold75) payload.threshold_at.push(75);
-        if (alert_obj?.condition?.threshold90) payload.threshold_at.push(90);
+        // When Target type is 'Equipment'
+        if (target?.type === TARGET_TYPES.EQUIPMENT) {
+            let equipObj = {
+                equipment_ids: target?.lists.map((el) => el?.value),
+                equipment_filter_condition: alert_obj?.condition?.type,
+                equipment_condition_operator: alert_obj?.condition?.level,
+                equipment_condition_threshold_value: alert_obj?.condition?.thresholdValue,
+                equipment_condition_threshold_type: alert_obj?.condition?.filterType,
+                equipment_condition_reccurence: false,
+                equipment_condition_reccurence_minutes: 0,
+            };
 
-        if (alert_obj?.condition?.filterType !== 'number') {
-            if (alert_obj?.condition?.filterType.includes('month')) payload.condition_interval = 'month';
-            if (alert_obj?.condition?.filterType.includes('year')) payload.condition_interval = 'year';
+            if (condition?.filterType === 'number') {
+                equipObj.building_condition_value = +condition?.thresholdValue;
+            }
+
+            payload = { ...payload, ...equipObj };
+        }
+
+        // Notification and its recurrence setup
+        const method = notification?.method[0];
+
+        if (method === 'email') {
+            payload.alert_emails = notification?.selectedUserEmailId;
+        } else if (method === 'user') {
+            payload.alert_user_ids = notification?.selectedUserId.map((el) => el?.value);
+        }
+
+        if (method === 'email' || method === 'user') {
+            payload.alert_reccurence = recurrence?.resendAlert;
+            payload.alert_reccurence_minutes = recurrence?.resendAt;
         }
 
         await createAlertServiceAPI(payload)
             .then((res) => {
                 const response = res?.data;
+                console.log('SSR response => ', response);
                 if (response?.success) {
                     UserStore.update((s) => {
                         s.showNotification = true;
                         s.notificationMessage = 'Alert created successfully.';
                         s.notificationType = 'success';
+                    });
+                    history.push({
+                        pathname: '/alerts/overview/alert-settings',
                     });
                 } else {
                     UserStore.update((s) => {
@@ -663,7 +639,9 @@ const AlertConfig = () => {
                     s.notificationType = 'error';
                 });
             })
-            .finally(() => {});
+            .finally(() => {
+                setProcessing(false);
+            });
     };
 
     const getConfiguredAlertById = async (alert_id) => {
@@ -741,6 +719,7 @@ const AlertConfig = () => {
                             handleCreateAlert(alertObj);
                         }}
                         reqType={reqType}
+                        isCreatingAlert={isCreatingAlert}
                     />
                 </Col>
             </Row>

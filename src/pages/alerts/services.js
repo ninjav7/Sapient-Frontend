@@ -16,7 +16,7 @@ export function updateAlertAcknowledgement(params, payload) {
     return axiosInstance.patch(`${alertAcknowledgement}${params}`, payload).then((res) => res);
 }
 
-export function createAlertServiceAPI(payload) {
+export function createAlertServiceAPI(payload = {}) {
     return axiosInstance.post(`${createAlert}`, payload).then((res) => res);
 }
 
