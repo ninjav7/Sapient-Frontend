@@ -5,6 +5,7 @@ import {
     createAlert,
     getConfiguredAlerts,
     deleteAlert,
+    getConfiguredAlertsById,
 } from '../../services/Network';
 
 export function fetchAlertsList(alertType = 'unacknowledged') {
@@ -21,6 +22,10 @@ export function createAlertServiceAPI(payload) {
 
 export function fetchAllConfiguredAlerts() {
     return axiosInstance.get(getConfiguredAlerts).then((res) => res);
+}
+
+export function fetchConfiguredAlertById(alert_id) {
+    return axiosInstance.get(`${getConfiguredAlertsById}/${alert_id}`).then((res) => res);
 }
 
 export function deleteConfiguredAlert(params) {

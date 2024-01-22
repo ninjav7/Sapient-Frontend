@@ -19,7 +19,7 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as CheckMarkSVG } from '../../../assets/icon/check-mark.svg';
 
-import { createAlertServiceAPI } from '../services';
+import { createAlertServiceAPI, fetchConfiguredAlertById } from '../services';
 import { getEquipmentsList } from '../../settings/panels/services';
 import { fetchBuildingsList } from '../../../services/buildings';
 import { getEquipTypeData } from '../../settings/equipment-type/services';
@@ -444,6 +444,40 @@ const AlertConfig = () => {
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
     const [typeSelectedLabel, setTypeSelectedLabel] = useState(null);
 
+    const [isFetchingAlertData, setFetchingAlertData] = useState(false);
+
+    const isTargetSetAndSubmitted = alertObj?.target?.type !== '' && alertObj?.target?.submitted;
+
+    const isBuildingConfigured =
+        alertObj?.target?.type === TARGET_TYPES.BUILDING &&
+        alertObj?.target?.lists.length !== 0 &&
+        alertObj?.target?.typesList.length !== 0;
+
+    const isEquipmentConfigured =
+        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
+        alertObj?.target?.lists.length !== 0 &&
+        alertObj?.target?.typesList.length !== 0 &&
+        alertObj?.target?.buildingIDs.length !== 0;
+
+    const isConditionSet = alertObj?.condition?.type !== '';
+
+    const isBuildingConditionsSet =
+        alertObj?.target?.type === TARGET_TYPES.BUILDING &&
+        (alertObj?.condition?.filterType === 'previous_month' ||
+            alertObj?.condition?.filterType === 'previous_year' ||
+            (alertObj?.condition?.filterType === 'number' && alertObj?.condition?.thresholdValue !== ''));
+
+    const isEquipmentConditionsSet =
+        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
+        ((alertObj?.condition?.type === 'rms_current' && alertObj?.condition?.thresholdPercentage !== '') ||
+            (alertObj?.condition?.type === 'shortcycling' && alertObj?.condition?.shortcyclingMinutes !== '') ||
+            (alertObj?.condition?.type !== 'rms_current' &&
+                alertObj?.condition?.type !== 'shortcycling' &&
+                alertObj?.condition?.thresholdPercentage !== ''));
+
+    const isTargetConfigured = isTargetSetAndSubmitted && (isBuildingConfigured || isEquipmentConfigured);
+    const isConditionConfigured = isConditionSet && (isBuildingConditionsSet || isEquipmentConditionsSet);
+
     const handleTargetChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
         if (key === 'type' && obj?.target?.type !== value) obj = _.cloneDeep(defaultAlertObj);
@@ -503,7 +537,7 @@ const AlertConfig = () => {
         setAlertObj(obj);
     };
 
-    const handleCreateAlertOld = async (alert_obj) => {
+    const handleCreateAlertMock = async (alert_obj) => {
         if (!alert_obj) return;
 
         console.log('SSR alert_obj => ', alert_obj);
@@ -632,6 +666,25 @@ const AlertConfig = () => {
             .finally(() => {});
     };
 
+    const getConfiguredAlertById = async (alert_id) => {
+        if (!alert_id) return;
+
+        setFetchingAlertData(true);
+
+        await fetchConfiguredAlertById(alert_id)
+            .then((res) => {
+                const response = res?.data;
+                const { success: isSuccessful, data } = response;
+                if (isSuccessful && data) {
+                    console.log('SSR data => ', data);
+                }
+            })
+            .catch(() => {})
+            .finally(() => {
+                setFetchingAlertData(false);
+            });
+    };
+
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
@@ -653,38 +706,6 @@ const AlertConfig = () => {
         });
     };
 
-    const isTargetSetAndSubmitted = alertObj?.target?.type !== '' && alertObj?.target?.submitted;
-
-    const isBuildingConfigured =
-        alertObj?.target?.type === TARGET_TYPES.BUILDING &&
-        alertObj?.target?.lists.length !== 0 &&
-        alertObj?.target?.typesList.length !== 0;
-
-    const isEquipmentConfigured =
-        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
-        alertObj?.target?.lists.length !== 0 &&
-        alertObj?.target?.typesList.length !== 0 &&
-        alertObj?.target?.buildingIDs.length !== 0;
-
-    const isConditionSet = alertObj?.condition?.type !== '';
-
-    const isBuildingConditionsSet =
-        alertObj?.target?.type === TARGET_TYPES.BUILDING &&
-        (alertObj?.condition?.filterType === 'previous_month' ||
-            alertObj?.condition?.filterType === 'previous_year' ||
-            (alertObj?.condition?.filterType === 'number' && alertObj?.condition?.thresholdValue !== ''));
-
-    const isEquipmentConditionsSet =
-        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
-        ((alertObj?.condition?.type === 'rms_current' && alertObj?.condition?.thresholdPercentage !== '') ||
-            (alertObj?.condition?.type === 'shortcycling' && alertObj?.condition?.shortcyclingMinutes !== '') ||
-            (alertObj?.condition?.type !== 'rms_current' &&
-                alertObj?.condition?.type !== 'shortcycling' &&
-                alertObj?.condition?.thresholdPercentage !== ''));
-
-    const isTargetConfigured = isTargetSetAndSubmitted && (isBuildingConfigured || isEquipmentConfigured);
-    const isConditionConfigured = isConditionSet && (isBuildingConditionsSet || isEquipmentConditionsSet);
-
     useEffect(() => {
         updateBreadcrumbStore();
         window.scrollTo(0, 0);
@@ -703,6 +724,10 @@ const AlertConfig = () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
     }, []);
+
+    useEffect(() => {
+        if (alertId) getConfiguredAlertById(alertId);
+    }, [alertId]);
 
     return (
         <React.Fragment>
