@@ -20,7 +20,7 @@ const OpenAlerts = (props) => {
 
     const [count, setCount] = useState(0);
     const [pageNo, setPageNo] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(100);
 
     const handleAcknowledgement = (selectedIds) => {
         handleAlertAcknowledgement('acknowledged', selectedIds);
