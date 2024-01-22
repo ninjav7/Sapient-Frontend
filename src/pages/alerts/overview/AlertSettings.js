@@ -61,10 +61,11 @@ const AlertSettings = (props) => {
             </Typography.Body>
         );
     };
+
     const renderSentAddress = (row) => {
         const emailIds = separateEmails(row?.alert_emails);
         let renderText = '';
-        if (emailIds.length === 0) renderText = `No Email Adress configured`;
+        if (emailIds.length === 0) renderText = `No Email Address configured`;
         if (emailIds.length === 1) renderText = emailIds[0];
         if (emailIds.length > 1) renderText = `Email Addresses configured: ${emailIds.length}`;
 
@@ -85,7 +86,7 @@ const AlertSettings = (props) => {
                 {row?.alert_reccurence && (
                     <Typography.Body size={Typography.Sizes.sm} style={{ color: colorPalette.primaryGray400 }}>
                         {/* {`Send if condition lasts 0 min, resend every 60 mins`} */}
-                        {`Resend every after ${row?.alert_reccurence_minutes} mins`}
+                        {`Resend alert every ${row?.alert_reccurence_minutes} mins`}
                     </Typography.Body>
                 )}
             </div>
