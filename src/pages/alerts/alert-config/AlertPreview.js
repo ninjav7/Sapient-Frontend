@@ -97,10 +97,10 @@ const AlertPreview = (props) => {
                             </Typography.Body>
                         </div>
 
-                        {(alertObj?.condition?.type === 'energy_consumption' ||
-                            alertObj?.condition?.type === 'peak_demand') && <Brick sizeInRem={0.5} />}
+                        {(alertObj?.condition?.type === 'energy_consumption_month' ||
+                            alertObj?.condition?.type === 'peak_demand_month') && <Brick sizeInRem={0.5} />}
 
-                        {alertObj?.condition?.type === 'energy_consumption' && (
+                        {alertObj?.condition?.type === 'energy_consumption_month' && (
                             <div className="d-flex" style={{ gap: '1rem' }}>
                                 <Checkbox
                                     label="Alert at 50%"
@@ -129,7 +129,7 @@ const AlertPreview = (props) => {
                             </div>
                         )}
 
-                        {alertObj?.condition?.type === 'peak_demand' && (
+                        {alertObj?.condition?.type === 'peak_demand_month' && (
                             <Checkbox
                                 label="Alert at 90%"
                                 type="checkbox"
