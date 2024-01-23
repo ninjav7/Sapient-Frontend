@@ -61,7 +61,7 @@ const MachineHealthContainer = () => {
 
             <div className="d-flex flex-column w-auto h-auto metadata-container">
                 <div>
-                    <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                    <Typography.Subheader size={Typography.Sizes.lg}>
                         {`Current Period (${moment(startDate).format(dateFormat)} to ${moment(endDate).format(
                             dateFormat
                         )})`}
@@ -72,23 +72,17 @@ const MachineHealthContainer = () => {
                     <div style={{ gap: '0.5rem' }}>
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Running Minutes:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
-                                6.342
-                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>6.342</Typography.Subheader>
                         </div>
 
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Total Minutes:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
-                                10.080
-                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>10.080</Typography.Subheader>
                         </div>
 
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Percent Runtime:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
-                                62.9%
-                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>62.9%</Typography.Subheader>
                         </div>
                     </div>
 
@@ -97,32 +91,24 @@ const MachineHealthContainer = () => {
                     <div style={{ gap: '0.5rem' }}>
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Starts:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
-                                3
-                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>3</Typography.Subheader>
                         </div>
 
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Stops:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
-                                3
-                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>3</Typography.Subheader>
                         </div>
 
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>
                                 Average Runtime/Start:
                             </Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
-                                62.9%
-                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>62.9%</Typography.Subheader>
                         </div>
 
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Last Start Time:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
-                                20
-                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>20</Typography.Subheader>
                         </div>
                     </div>
 
@@ -130,9 +116,7 @@ const MachineHealthContainer = () => {
 
                     <div style={{ gap: '0.5rem' }}>
                         <div>
-                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
-                                Phase Imbalance
-                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>Phase Imbalance</Typography.Subheader>
                         </div>
 
                         <Brick sizeInRem={0.25} />
@@ -141,18 +125,14 @@ const MachineHealthContainer = () => {
                             <Typography.Subheader size={Typography.Sizes.md}>
                                 Average Imbalance Percent:
                             </Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
-                                36.1%
-                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>36.1%</Typography.Subheader>
                         </div>
 
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>
                                 Average Imballance Current:
                             </Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
-                                36.7A
-                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>36.7A</Typography.Subheader>
                         </div>
                     </div>
                 </div>
@@ -183,7 +163,7 @@ const EnergyMetaDataContainer = (props) => {
             <Brick sizeInRem={0.5} />
             <div className="d-flex flex-column w-auto h-auto metadata-container">
                 <div>
-                    <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                    <Typography.Subheader size={Typography.Sizes.lg}>
                         {`Total Consumption (${moment(startDate).format(dateFormat)} to ${moment(endDate).format(
                             dateFormat
                         )})`}
@@ -199,7 +179,7 @@ const EnergyMetaDataContainer = (props) => {
                     )}
                 </div>
                 <div>
-                    <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                    <Typography.Subheader size={Typography.Sizes.lg}>
                         {`Peak kW (${moment(startDate).format(dateFormat)} to ${moment(endDate).format(dateFormat)})`}
                     </Typography.Subheader>
 
