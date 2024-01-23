@@ -37,6 +37,7 @@ const EndUseType = () => {
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefUnits = UserStore.useState((s) => s.unit);
 
     const consumptionType = validateIntervalsForEndUse(daysCount);
 
@@ -205,22 +206,29 @@ const EndUseType = () => {
                     const highTemp = {
                         type: LOW_MED_HIGH_TYPES.HIGH,
                         data: [],
-                        color: colorPalette.datavizRed500,
+                        color: colorPalette.datavizRed700,
                         name: 'max temperature',
                     };
 
                     const avgTemp = {
                         type: LOW_MED_HIGH_TYPES.MED,
                         data: [],
-                        color: colorPalette.primaryGray450,
+                        color: colorPalette.primaryGray900,
                         name: 'avg temperature',
                     };
 
                     const lowTemp = {
                         type: LOW_MED_HIGH_TYPES.LOW,
                         data: [],
-                        color: colorPalette.datavizBlue400,
+                        color: colorPalette.success700,
                         name: 'min temperature',
+                    };
+
+                    const temp = {
+                        type: LOW_MED_HIGH_TYPES.MED,
+                        data: [],
+                        color: colorPalette.datavizRed700,
+                        name: 'temperature',
                     };
 
                     res.data.forEach((record) => {
@@ -242,16 +250,17 @@ const EndUseType = () => {
                             }
                         } else {
                             if (record.hasOwnProperty('temp_f')) {
-                                avgTemp.data.push(record?.temp_f);
+                                temp.data.push(record?.temp_f);
                             } else {
-                                avgTemp.data.push(record?.temp_c);
+                                temp.data.push(record?.temp_c);
                             }
                         }
                     });
 
-                    if (avgTemp?.data.length !== 0) tempData.push(avgTemp);
                     if (highTemp?.data.length !== 0) tempData.push(highTemp);
+                    if (avgTemp?.data.length !== 0) tempData.push(avgTemp);
                     if (lowTemp?.data.length !== 0) tempData.push(lowTemp);
+                    if (temp?.data.length !== 0) tempData.push(temp);
 
                     if (tempData.length !== 0) setWeatherData(tempData);
                 } else {
@@ -380,7 +389,7 @@ const EndUseType = () => {
         endUsesDataFetch(endUseTypeRequest, time_zone);
         // equipmentUsageDataFetch(); // Planned for Future Enable of this integration
         plugUsageDataFetch(endUseTypeRequest, time_zone);
-    }, [startDate, endDate, endUseType, bldgId]);
+    }, [startDate, endDate, endUseType, bldgId, userPrefUnits]);
 
     useEffect(() => {
         if (isWeatherChartVisible && bldgId) {
@@ -443,7 +452,7 @@ const EndUseType = () => {
                     }}
                     withTemp={isWeatherChartVisible}
                     isChartLoading={isEnergyChartLoading || isWeatherLoading}
-                    exportingTitle={`Total_Energy_Consumption_Building_${moment().format('YYYY-MM-DD')}`}
+                    tempUnit={userPrefUnits === 'si' ? UNITS.C : UNITS.F}
                 />
             </div>
 
