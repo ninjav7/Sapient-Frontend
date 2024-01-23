@@ -114,7 +114,7 @@ const BuildingOverview = () => {
     const [topEnergyDataFetching, setTopEnergyDataFetching] = useState(false);
 
     const [weatherData, setWeatherData] = useState(null);
-    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
+    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(true);
 
     const [equipTypeData, setEquipTypeData] = useState([]);
     const [spaceTypeData, setSpaceTypeData] = useState([]);
@@ -544,22 +544,29 @@ const BuildingOverview = () => {
                     const highTemp = {
                         type: LOW_MED_HIGH_TYPES.HIGH,
                         data: [],
-                        color: colors.datavizRed500,
+                        color: colors.datavizRed700,
                         name: 'max temperature',
                     };
 
                     const avgTemp = {
                         type: LOW_MED_HIGH_TYPES.MED,
                         data: [],
-                        color: colors.primaryGray450,
+                        color: colors.primaryGray900,
                         name: 'avg temperature',
                     };
 
                     const lowTemp = {
                         type: LOW_MED_HIGH_TYPES.LOW,
                         data: [],
-                        color: colors.datavizBlue400,
+                        color: colors.success700,
                         name: 'min temperature',
+                    };
+
+                    const temp = {
+                        type: LOW_MED_HIGH_TYPES.MED,
+                        data: [],
+                        color: colors.datavizRed700,
+                        name: 'temperature',
                     };
 
                     res.data.forEach((record) => {
@@ -581,16 +588,17 @@ const BuildingOverview = () => {
                             }
                         } else {
                             if (record.hasOwnProperty('temp_f')) {
-                                avgTemp.data.push(record?.temp_f);
+                                temp.data.push(record?.temp_f);
                             } else {
-                                avgTemp.data.push(record?.temp_c);
+                                temp.data.push(record?.temp_c);
                             }
                         }
                     });
 
-                    if (avgTemp?.data.length !== 0) tempData.push(avgTemp);
                     if (highTemp?.data.length !== 0) tempData.push(highTemp);
+                    if (avgTemp?.data.length !== 0) tempData.push(avgTemp);
                     if (lowTemp?.data.length !== 0) tempData.push(lowTemp);
+                    if (temp?.data.length !== 0) tempData.push(temp);
 
                     if (tempData.length !== 0) setWeatherData(tempData);
                 } else {
