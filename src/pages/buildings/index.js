@@ -114,7 +114,7 @@ const BuildingOverview = () => {
     const [topEnergyDataFetching, setTopEnergyDataFetching] = useState(false);
 
     const [weatherData, setWeatherData] = useState(null);
-    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
+    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(true);
 
     const [equipTypeData, setEquipTypeData] = useState([]);
     const [spaceTypeData, setSpaceTypeData] = useState([]);

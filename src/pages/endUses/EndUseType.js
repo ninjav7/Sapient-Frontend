@@ -45,7 +45,7 @@ const EndUseType = () => {
     const [isPlugOnly, setIsPlugOnly] = useState(false);
 
     const [weatherData, setWeatherData] = useState(null);
-    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
+    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(true);
 
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
