@@ -37,3 +37,12 @@
     padding: 2rem 2rem 0rem 2rem;
     background: $primary-gray-50;
 }
+
+.metadata-container {
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: $base-white;
+    border: 0.0625rem solid $primary-gray-200;
+    box-shadow: 0rem 0.0625rem 0.1875rem rgba(16, 24, 40, 0.01), 0rem 0.0625rem 0.125rem rgba(16, 24, 40, 0.06);
+    border-radius: 0.5rem;
+}

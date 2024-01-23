@@ -46,6 +46,192 @@ import { handleDataConversion, renderEquipChartMetrics } from './helper';
 import '../settings/passive-devices/styles.scss';
 import './styles.scss';
 
+const MachineHealthContainer = () => {
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
+
+    return (
+        <>
+            <Typography.Subheader size={Typography.Sizes.md}>Machine Health</Typography.Subheader>
+
+            <Brick sizeInRem={0.5} />
+
+            <div className="d-flex flex-column w-auto h-auto metadata-container">
+                <div>
+                    <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                        {`Current Period (${moment(startDate).format(dateFormat)} to ${moment(endDate).format(
+                            dateFormat
+                        )})`}
+                    </Typography.Subheader>
+
+                    <Brick sizeInRem={0.25} />
+
+                    <div style={{ gap: '0.5rem' }}>
+                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                            <Typography.Subheader size={Typography.Sizes.md}>Running Minutes:</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                                6.342
+                            </Typography.Subheader>
+                        </div>
+
+                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                            <Typography.Subheader size={Typography.Sizes.md}>Total Minutes:</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                                10.080
+                            </Typography.Subheader>
+                        </div>
+
+                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                            <Typography.Subheader size={Typography.Sizes.md}>Percent Runtime:</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                                62.9%
+                            </Typography.Subheader>
+                        </div>
+                    </div>
+
+                    <Brick sizeInRem={0.75} />
+
+                    <div style={{ gap: '0.5rem' }}>
+                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                            <Typography.Subheader size={Typography.Sizes.md}>Starts:</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                                3
+                            </Typography.Subheader>
+                        </div>
+
+                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                            <Typography.Subheader size={Typography.Sizes.md}>Stops:</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                                3
+                            </Typography.Subheader>
+                        </div>
+
+                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                            <Typography.Subheader size={Typography.Sizes.md}>
+                                Average Runtime/Start:
+                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                                62.9%
+                            </Typography.Subheader>
+                        </div>
+
+                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                            <Typography.Subheader size={Typography.Sizes.md}>Last Start Time:</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                                20
+                            </Typography.Subheader>
+                        </div>
+                    </div>
+
+                    <Brick sizeInRem={0.75} />
+
+                    <div style={{ gap: '0.5rem' }}>
+                        <div>
+                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                                Phase Imbalance
+                            </Typography.Subheader>
+                        </div>
+
+                        <Brick sizeInRem={0.25} />
+
+                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                            <Typography.Subheader size={Typography.Sizes.md}>
+                                Average Imbalance Percent:
+                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                                36.1%
+                            </Typography.Subheader>
+                        </div>
+
+                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                            <Typography.Subheader size={Typography.Sizes.md}>
+                                Average Imballance Current:
+                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                                36.7A
+                            </Typography.Subheader>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+};
+
+const EnergyMetaDataContainer = (props) => {
+    const { energyMetaDataObj = {}, isFetching = false } = props;
+
+    const { ytd, ytd_peak } = energyMetaDataObj;
+
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+
+    const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
+    const totalConsumptionValue = ytd?.ytd ? formatConsumptionValue(ytd?.ytd / 1000, 0) : 0;
+    const powerConsumptionValue = ytd_peak?.power ? formatConsumptionValue(ytd_peak?.power / 1000000, 2) : 0;
+
+    return (
+        <>
+            <Typography.Subheader size={Typography.Sizes.md}>Energy</Typography.Subheader>
+            <Brick sizeInRem={0.5} />
+            <div className="d-flex flex-column w-auto h-auto metadata-container">
+                <div>
+                    <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                        {`Total Consumption (${moment(startDate).format(dateFormat)} to ${moment(endDate).format(
+                            dateFormat
+                        )})`}
+                    </Typography.Subheader>
+
+                    {isFetching ? (
+                        <Skeleton count={1} />
+                    ) : (
+                        <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
+                            <span className="ytd-value">{totalConsumptionValue}</span>
+                            <span className="ytd-unit">kWh</span>
+                        </div>
+                    )}
+                </div>
+                <div>
+                    <Typography.Subheader size={Typography.Sizes.lg} className="font-weight-bold">
+                        {`Peak kW (${moment(startDate).format(dateFormat)} to ${moment(endDate).format(dateFormat)})`}
+                    </Typography.Subheader>
+
+                    {isFetching ? (
+                        <Skeleton count={1} />
+                    ) : (
+                        <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
+                            <span className="ytd-value">{powerConsumptionValue}</span>
+
+                            {ytd_peak?.time_stamp ? (
+                                <span className="ytd-unit">
+                                    {`kW @ ${moment
+                                        .utc(ytd_peak?.time_stamp)
+                                        .clone()
+                                        .tz(timeZone)
+                                        .format(
+                                            `${userPrefDateFormat === `DD-MM-YYYY` ? `DD/MM` : `MM/DD`} ${
+                                                userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`
+                                            }`
+                                        )}`}
+                                </span>
+                            ) : (
+                                <span className="ytd-unit">kW</span>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </>
+    );
+};
+
 const EquipChartModal = ({
     showEquipmentChart,
     handleChartClose,
@@ -90,8 +276,10 @@ const EquipChartModal = ({
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
-    const [isYtdDataFetching, setIsYtdDataFetching] = useState(false);
-    const [ytdData, setYtdData] = useState({});
+
+    const [energyMetaData, setEnergyMetaData] = useState({});
+    const [isFetchingEnergyMetaData, setFetchingEnergyMetaData] = useState(false);
+
     const [sensors, setSensors] = useState([]);
     const [isModified, setModification] = useState(false);
     const [isProcessing, setProcessing] = useState(false);
@@ -353,17 +541,24 @@ const EquipChartModal = ({
     };
 
     const fetchEquipmentYTDUsageData = async (equipId) => {
-        setIsYtdDataFetching(true);
-        let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
-        let payload = apiRequestBody(startDate, endDate, timeZone);
+        if (!equipId) return;
+
+        setFetchingEnergyMetaData(true);
+        setEnergyMetaData({});
+
+        const params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
+        const payload = apiRequestBody(startDate, endDate, timeZone);
+
         await updateExploreEquipmentYTDUsage(payload, params)
             .then((res) => {
-                let response = res.data.data;
-                setYtdData(response[0]);
-                setIsYtdDataFetching(false);
+                const response = res?.data;
+                if (response?.success) {
+                    if (response?.data && response?.data.length !== 0) setEnergyMetaData(response[0]);
+                }
             })
-            .catch((error) => {
-                setIsYtdDataFetching(false);
+            .catch((err) => {})
+            .finally(() => {
+                setFetchingEnergyMetaData(false);
             });
     };
 
@@ -557,74 +752,14 @@ const EquipChartModal = ({
                         {selectedTab === 0 && (
                             <Row>
                                 <Col xl={3}>
-                                    <div className="ytd-container">
-                                        <div>
-                                            <div className="ytd-heading">
-                                                {`Total Consumption (${moment(startDate).format(
-                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
-                                                )} to ${moment(endDate).format(
-                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
-                                                )})`}
-                                            </div>
-                                            {isYtdDataFetching ? (
-                                                <Skeleton count={1} />
-                                            ) : (
-                                                <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
-                                                    <span className="ytd-value">
-                                                        {ytdData?.ytd?.ytd
-                                                            ? formatConsumptionValue(ytdData?.ytd?.ytd / 1000, 0)
-                                                            : 0}
-                                                    </span>
-                                                    <span className="ytd-unit">kWh</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <div className="ytd-heading">
-                                                {`Peak kW (${moment(startDate).format(
-                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
-                                                )} to ${moment(endDate).format(
-                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
-                                                )})`}
-                                            </div>
-                                            {isYtdDataFetching ? (
-                                                <Skeleton count={1} />
-                                            ) : (
-                                                <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
-                                                    <span className="ytd-value">
-                                                        {ytdData?.ytd_peak?.power
-                                                            ? formatConsumptionValue(
-                                                                  ytdData?.ytd_peak?.power / 1000000,
-                                                                  2
-                                                              )
-                                                            : 0}
-                                                    </span>
+                                    <EnergyMetaDataContainer
+                                        energyMetaDataObj={energyMetaData}
+                                        isFetching={isFetchingEnergyMetaData}
+                                    />
 
-                                                    {ytdData?.ytd_peak?.time_stamp ? (
-                                                        <span className="ytd-unit">
-                                                            {`kW @ ${moment
-                                                                .utc(ytdData?.ytd_peak?.time_stamp)
-                                                                .clone()
-                                                                .tz(timeZone)
-                                                                .format(
-                                                                    `${
-                                                                        userPrefDateFormat === `DD-MM-YYYY`
-                                                                            ? `DD/MM`
-                                                                            : `MM/DD`
-                                                                    } ${
-                                                                        userPrefTimeFormat === `12h`
-                                                                            ? `hh:mm A`
-                                                                            : `HH:mm`
-                                                                    }`
-                                                                )}`}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="ytd-unit">kW</span>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
+                                    <Brick sizeInRem={2} />
+
+                                    <MachineHealthContainer />
                                 </Col>
 
                                 <Col xl={9}>
