@@ -22,7 +22,7 @@ const tempSeries = (data) =>
         lineWidth: 1,
         showInLegend: false,
         yAxis: 1,
-        zIndex: -1,
+        zIndex: 2,
         states: {
             hover: {
                 enabled: false,

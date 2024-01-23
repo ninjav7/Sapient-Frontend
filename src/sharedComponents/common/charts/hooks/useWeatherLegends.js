@@ -5,7 +5,7 @@ const useWeatherLegends = () => {
         renderWeatherLegends: [
             {
                 label: 'Weather',
-                styles: { background: colors.datavizDark8, border: `0.0625rem solid ${colors.primaryGray500}` },
+                styles: { background: colors.datavizRed700 },
             },
         ],
     };
