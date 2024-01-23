@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, FormGroup, Spinner, Modal, UncontrolledTooltip } from 'reactstrap';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
-import { ReactComponent as WarningAlertSVG } from '../../assets/icon/alert-warning.svg';
 import { ReactComponent as DangerAlertSVG } from '../../assets/icon/alert-danger.svg';
 import { fetchEquipmentChartDataV2, fetchExploreEquipmentChart } from '../explore/services';
 import {
@@ -183,7 +182,7 @@ const MachineHealthContainer = (props) => {
                                     <UncontrolledTooltip placement="top" target={'tooltip-imbalance-current'}>
                                         {`Phase Imbanace occurs when the phases of current on an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
                                     </UncontrolledTooltip>
-                                    <WarningAlertSVG
+                                    <DangerAlertSVG
                                         width={16}
                                         height={16}
                                         className="mouse-pointer"
