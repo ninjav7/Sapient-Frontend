@@ -3,17 +3,20 @@ import { SingleDatePicker, DateRangePicker } from 'react-dates';
 import moment from 'moment';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
+import { TimePicker } from 'antd';
 
 import Typography from '../typography';
 import { Button } from '../button';
+import { Checkbox } from '../form/checkbox';
 
 import { ReactComponent as CalendarIcon } from '../assets/icons/calendar.svg';
 import { ReactComponent as ArrowSVG } from '../../assets/icon/arrow.svg';
 
+import { UserStore } from '../../store/UserStore';
+
 import 'react-dates/initialize';
 import 'react-dates/lib/css/_datepicker.css';
 import './Datepicker.scss';
-import { Checkbox } from '../form/checkbox';
 
 moment.updateLocale('en', {
     week: {
@@ -36,11 +39,21 @@ const Datepicker = ({
     const [focusedInput, setFocusedInput] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
 
-    const [startTime, setStartTime] = useState('12:00');
-    const [endTime, setEndTime] = useState('23:00');
-    const [isTimeSelectionEnabled, setTimeSelectionEnabled] = useState(false);
-
     const refApi = useRef(null);
+
+    const [startTime, setStartTime] = useState(moment('00:00', 'HH:mm'));
+    const [endTime, setEndTime] = useState(moment('23:59', 'HH:mm'));
+    const [isTimeSelectionEnabled, setTimeSelectionEnabled] = useState(false);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+
+    const handleStartTimeChange = (time, timeString) => {
+        console.log('SSR timeString => ', timeString);
+        setStartTime(time);
+    };
+
+    const handleEndTimeChange = (time, timeString) => {
+        setEndTime(time);
+    };
 
     const onDateChangeSingle = (startDate) => {
         setStartDate(startDate);
@@ -180,19 +193,17 @@ const Datepicker = ({
                                             <Typography.Body size={Typography.Sizes.sm} className="gray-550">
                                                 {`Start Time`}
                                             </Typography.Body>
-                                            <div className="timepicker">
-                                                <input
-                                                    className="time-input-select"
-                                                    type="time"
-                                                    name="appt"
-                                                    value={startTime}
-                                                    step="60"
-                                                    onChange={(e) => {
-                                                        setStartTime(e.target.value);
-                                                    }}
-                                                    disabled={!isTimeSelectionEnabled}
-                                                />
-                                            </div>
+
+                                            <TimePicker
+                                                format={userPrefTimeFormat === '12h' ? 'hh:mm A' : 'HH:mm'}
+                                                minuteStep={1}
+                                                use12Hours={userPrefTimeFormat === '12h' ? true : false}
+                                                showNow={false}
+                                                value={startTime}
+                                                placeholder="Start time"
+                                                onChange={handleStartTimeChange}
+                                                disabled={!isTimeSelectionEnabled}
+                                            />
                                         </div>
 
                                         <div>
@@ -200,23 +211,20 @@ const Datepicker = ({
                                                 {`End Time`}
                                             </Typography.Body>
 
-                                            <div className="timepicker">
-                                                <input
-                                                    id="appt"
-                                                    name="appt"
-                                                    type="time"
-                                                    className="time-input-select"
-                                                    value={endTime}
-                                                    onChange={(e) => {
-                                                        setEndTime(e.target.value);
-                                                    }}
-                                                    disabled={!isTimeSelectionEnabled}
-                                                />
-                                            </div>
+                                            <TimePicker
+                                                format={userPrefTimeFormat === '12h' ? 'hh:mm A' : 'HH:mm'}
+                                                minuteStep={1}
+                                                use12Hours={userPrefTimeFormat === '12h' ? true : false}
+                                                showNow={false}
+                                                value={endTime}
+                                                placeholder="End time"
+                                                onChange={handleEndTimeChange}
+                                                disabled={!isTimeSelectionEnabled}
+                                            />
                                         </div>
                                     </div>
                                     <Checkbox
-                                        label="Enable Time Selection"
+                                        label="Custom Time Select"
                                         type="checkbox"
                                         id="select-time"
                                         name="select-time"
