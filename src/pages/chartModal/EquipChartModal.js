@@ -1,30 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, FormGroup, Spinner, Modal } from 'reactstrap';
-import { DateRangeStore } from '../../store/DateRangeStore';
-import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
-import { fetchEquipmentChartDataV2, fetchExploreEquipmentChart } from '../explore/services';
-import {
-    updateListSensor,
-    updateEquipmentDetails,
-    getEquipmentDetails,
-    updateExploreEquipmentYTDUsage,
-    getMetadataRequest,
-} from './services';
-import { useHistory, Link } from 'react-router-dom';
 import { useAtom } from 'jotai';
-import { userPermissionData } from '../../store/globalState';
 import moment from 'moment';
 import 'moment-timezone';
+import { useHistory, Link } from 'react-router-dom';
 import { TagsInput } from 'react-tag-input-component';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { Row, Col, FormGroup, Spinner, Modal, UncontrolledTooltip } from 'reactstrap';
+
+import Header from '../../components/Header';
+import Button from '../../sharedComponents/button/Button';
+import Select from '../../sharedComponents/form/select';
+import LineChart from '../../sharedComponents/lineChart/LineChart';
+import Typography from '../../sharedComponents/typography';
+import Brick from '../../sharedComponents/brick';
+import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
+import Textarea from '../../sharedComponents/form/textarea/Textarea';
+
 import { BuildingStore } from '../../store/BuildingStore';
 import { UserStore } from '../../store/UserStore';
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
-import Header from '../../components/Header';
-import { formatConsumptionValue } from '../../helpers/explorehelpers';
-import Button from '../../sharedComponents/button/Button';
-import './style.css';
-import '../../sharedComponents/typography/style.scss';
+import { DateRangeStore } from '../../store/DateRangeStore';
+import { userPermissionData } from '../../store/globalState';
+
 import {
     apiRequestBody,
     compareObjData,
@@ -32,19 +28,276 @@ import {
     formatXaxisForHighCharts,
 } from '../../helpers/helpers';
 import { metricsWithMultipleSensors } from './constants';
-import Select from '../../sharedComponents/form/select';
-import LineChart from '../../sharedComponents/lineChart/LineChart';
-import Typography from '../../sharedComponents/typography';
-import Brick from '../../sharedComponents/brick';
-import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
-import Textarea from '../../sharedComponents/form/textarea/Textarea';
+import { handleDataConversion, renderEquipChartMetrics } from './helper';
+import { formatConsumptionValue } from '../../helpers/explorehelpers';
+import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
+
 import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/attached.svg';
 import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
-import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
-import { handleDataConversion, renderEquipChartMetrics } from './helper';
+import { ReactComponent as DangerAlertSVG } from '../../assets/icon/alert-danger.svg';
+import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
 
+import {
+    updateListSensor,
+    updateEquipmentDetails,
+    getEquipmentDetails,
+    updateExploreEquipmentYTDUsage,
+    getMetadataRequest,
+    fetchEquipmentKPIs,
+} from './services';
+import { fetchEquipmentChartDataV2, fetchExploreEquipmentChart } from '../explore/services';
+
+import './style.css';
+import '../../sharedComponents/typography/style.scss';
+import colorPalette from '../../assets/scss/_colors.scss';
+import 'react-loading-skeleton/dist/skeleton.css';
 import '../settings/passive-devices/styles.scss';
 import './styles.scss';
+
+const MachineHealthContainer = (props) => {
+    const { equipMetaData = {}, isFetching = false } = props;
+
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+    const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
+
+    return (
+        <>
+            <Typography.Subheader size={Typography.Sizes.md}>Machine Health</Typography.Subheader>
+            <Brick sizeInRem={0.5} />
+            <div className="d-flex flex-column w-auto h-auto metadata-container">
+                {isFetching ? (
+                    <SkeletonTheme
+                        baseColor={colorPalette.primaryGray150}
+                        highlightColor={colorPalette.baseBackground}
+                        borderRadius={10}
+                        height={15}>
+                        <Skeleton count={10} className="mb-2" />
+                    </SkeletonTheme>
+                ) : (
+                    <div>
+                        <Typography.Subheader size={Typography.Sizes.lg}>
+                            {`Current Period (${moment(startDate).format(dateFormat)} to ${moment(endDate).format(
+                                dateFormat
+                            )})`}
+                        </Typography.Subheader>
+
+                        <Brick sizeInRem={0.25} />
+
+                        <div style={{ gap: '0.5rem' }}>
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Running Minutes:</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.running_minutes
+                                        ? formatConsumptionValue(equipMetaData?.running_minutes)
+                                        : '-'}
+                                </Typography.Subheader>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Total Minutes:</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.total_minutes
+                                        ? formatConsumptionValue(equipMetaData?.total_minutes, 4)
+                                        : '-'}
+                                </Typography.Subheader>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Percent Runtime:</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.percent_runtime
+                                        ? `${formatConsumptionValue(equipMetaData?.percent_runtime, 2)} %`
+                                        : '-'}
+                                </Typography.Subheader>
+                            </div>
+                        </div>
+
+                        <Brick sizeInRem={0.75} />
+
+                        <div style={{ gap: '0.5rem' }}>
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Starts:</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.starts ? formatConsumptionValue(equipMetaData?.starts) : '-'}
+                                </Typography.Subheader>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Stops:</Typography.Subheader>
+                                {equipMetaData?.stops ? formatConsumptionValue(equipMetaData?.stops) : '-'}
+                                <Typography.Subheader size={Typography.Sizes.lg}></Typography.Subheader>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    Average Runtime/Start:
+                                </Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.average_runtime_start
+                                        ? `${formatConsumptionValue(equipMetaData?.average_runtime_start, 2)} %`
+                                        : '-'}
+                                </Typography.Subheader>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Last Start Time:</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.last_start_time
+                                        ? `${moment
+                                              .utc(equipMetaData?.last_start_time)
+                                              .clone()
+                                              .format(
+                                                  `${userPrefDateFormat === `DD-MM-YYYY` ? `DD/MM` : `MM/DD`} ${
+                                                      userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`
+                                                  }`
+                                              )}`
+                                        : '-'}
+                                </Typography.Subheader>
+                            </div>
+                        </div>
+
+                        <Brick sizeInRem={0.75} />
+
+                        <div style={{ gap: '0.5rem' }}>
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.lg}>Phase Imbalance</Typography.Subheader>
+                            </div>
+
+                            <Brick sizeInRem={0.25} />
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    Average Imbalance Percent:
+                                </Typography.Subheader>
+                                <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                    <Typography.Subheader size={Typography.Sizes.lg}>
+                                        {equipMetaData?.average_imbalance_percent
+                                            ? `${formatConsumptionValue(equipMetaData?.average_imbalance_percent, 2)} %`
+                                            : '-'}
+                                    </Typography.Subheader>
+                                    {equipMetaData?.average_imbalance_percent && (
+                                        <>
+                                            <UncontrolledTooltip placement="top" target={'tooltip-imbalance-percent'}>
+                                                {`Phase Imbanace occurs when average percentage of an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
+                                            </UncontrolledTooltip>
+                                            <DangerAlertSVG
+                                                width={16}
+                                                height={16}
+                                                className="mouse-pointer"
+                                                id={'tooltip-imbalance-percent'}
+                                            />
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    Average Imballance Current:
+                                </Typography.Subheader>
+                                <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                    <Typography.Subheader size={Typography.Sizes.lg}>
+                                        {equipMetaData?.average_imbalance_current
+                                            ? `${formatConsumptionValue(equipMetaData?.average_imbalance_current, 4)} A`
+                                            : '-'}
+                                    </Typography.Subheader>
+                                    {equipMetaData?.average_imbalance_current && (
+                                        <>
+                                            <UncontrolledTooltip placement="top" target={'tooltip-imbalance-current'}>
+                                                {`Phase Imbanace occurs when the phases of current on an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
+                                            </UncontrolledTooltip>
+                                            <DangerAlertSVG
+                                                width={16}
+                                                height={16}
+                                                className="mouse-pointer"
+                                                id={'tooltip-imbalance-current'}
+                                            />
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </>
+    );
+};
+
+const EnergyMetaDataContainer = (props) => {
+    const { equipMetaData = {}, isFetching = false } = props;
+
+    const { total_energy_consumption, peak_power = {} } = equipMetaData;
+
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+
+    const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
+    const totalConsumptionValue = total_energy_consumption
+        ? formatConsumptionValue(total_energy_consumption / 1000, 0)
+        : 0;
+    const powerConsumptionValue = peak_power?.avgPower ? formatConsumptionValue(peak_power?.avgPower / 1000000, 2) : 0;
+
+    return (
+        <>
+            <Typography.Subheader size={Typography.Sizes.md}>Energy</Typography.Subheader>
+            <Brick sizeInRem={0.5} />
+            <div className="d-flex flex-column w-auto h-auto metadata-container">
+                <div>
+                    <Typography.Subheader size={Typography.Sizes.lg}>
+                        {`Total Consumption (${moment(startDate).format(dateFormat)} to ${moment(endDate).format(
+                            dateFormat
+                        )})`}
+                    </Typography.Subheader>
+
+                    {isFetching ? (
+                        <Skeleton count={1} />
+                    ) : (
+                        <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
+                            <span className="ytd-value">{totalConsumptionValue}</span>
+                            <span className="ytd-unit">kWh</span>
+                        </div>
+                    )}
+                </div>
+                <div>
+                    <Typography.Subheader size={Typography.Sizes.lg}>
+                        {`Peak kW (${moment(startDate).format(dateFormat)} to ${moment(endDate).format(dateFormat)})`}
+                    </Typography.Subheader>
+
+                    {isFetching ? (
+                        <Skeleton count={1} />
+                    ) : (
+                        <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
+                            <span className="ytd-value">{powerConsumptionValue}</span>
+
+                            {peak_power?.timestamp ? (
+                                <span className="ytd-unit">
+                                    {`kW @ ${moment
+                                        .utc(peak_power?.timestamp)
+                                        .clone()
+                                        .format(
+                                            `${userPrefDateFormat === `DD-MM-YYYY` ? `DD/MM` : `MM/DD`} ${
+                                                userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`
+                                            }`
+                                        )}`}
+                                </span>
+                            ) : (
+                                <span className="ytd-unit">kW</span>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </>
+    );
+};
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -90,8 +343,13 @@ const EquipChartModal = ({
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
-    const [isYtdDataFetching, setIsYtdDataFetching] = useState(false);
-    const [ytdData, setYtdData] = useState({});
+
+    const [energyMetaData, setEnergyMetaData] = useState({});
+    const [isFetchingEnergyMetaData, setFetchingEnergyMetaData] = useState(false);
+
+    const [equipMetaData, setEquipMetaData] = useState({});
+    const [isFetchingMetaData, setFetchingMetaData] = useState(false);
+
     const [sensors, setSensors] = useState([]);
     const [isModified, setModification] = useState(false);
     const [isProcessing, setProcessing] = useState(false);
@@ -353,17 +611,24 @@ const EquipChartModal = ({
     };
 
     const fetchEquipmentYTDUsageData = async (equipId) => {
-        setIsYtdDataFetching(true);
-        let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
-        let payload = apiRequestBody(startDate, endDate, timeZone);
+        if (!equipId) return;
+
+        setFetchingEnergyMetaData(true);
+        setEnergyMetaData({});
+
+        const params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
+        const payload = apiRequestBody(startDate, endDate, timeZone);
+
         await updateExploreEquipmentYTDUsage(payload, params)
             .then((res) => {
-                let response = res.data.data;
-                setYtdData(response[0]);
-                setIsYtdDataFetching(false);
+                const response = res?.data;
+                if (response?.success) {
+                    if (response?.data && response?.data.length !== 0) setEnergyMetaData(response[0]);
+                }
             })
-            .catch((error) => {
-                setIsYtdDataFetching(false);
+            .catch((err) => {})
+            .finally(() => {
+                setFetchingEnergyMetaData(false);
             });
     };
 
@@ -380,6 +645,29 @@ const EquipChartModal = ({
                 }
             })
             .catch((error) => {});
+    };
+
+    const fetchEquipmentMachineHealth = async (equipId) => {
+        if (!equipId) return;
+
+        setFetchingMetaData(true);
+        setEquipMetaData({});
+
+        const params = `?building_id=${bldgId}&date_from=${encodeURIComponent(startDate)}&date_to=${encodeURIComponent(
+            endDate
+        )}&tz_info=${encodeURIComponent(timeZone)}`;
+
+        await fetchEquipmentKPIs(params, equipId)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    if (response?.data) setEquipMetaData(response?.data);
+                }
+            })
+            .catch((err) => {})
+            .finally(() => {
+                setFetchingMetaData(false);
+            });
     };
 
     useEffect(() => {
@@ -423,6 +711,7 @@ const EquipChartModal = ({
         fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
         fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
+        fetchEquipmentMachineHealth(equipmentFilter?.equipment_id);
         fetchMetadata();
     }, [equipmentFilter]);
 
@@ -470,6 +759,7 @@ const EquipChartModal = ({
         if (closeFlag !== true) {
             fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
             fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
+            fetchEquipmentMachineHealth(equipmentFilter?.equipment_id);
         } else {
             setCloseFlag(false);
         }
@@ -557,74 +847,17 @@ const EquipChartModal = ({
                         {selectedTab === 0 && (
                             <Row>
                                 <Col xl={3}>
-                                    <div className="ytd-container">
-                                        <div>
-                                            <div className="ytd-heading">
-                                                {`Total Consumption (${moment(startDate).format(
-                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
-                                                )} to ${moment(endDate).format(
-                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
-                                                )})`}
-                                            </div>
-                                            {isYtdDataFetching ? (
-                                                <Skeleton count={1} />
-                                            ) : (
-                                                <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
-                                                    <span className="ytd-value">
-                                                        {ytdData?.ytd?.ytd
-                                                            ? formatConsumptionValue(ytdData?.ytd?.ytd / 1000, 0)
-                                                            : 0}
-                                                    </span>
-                                                    <span className="ytd-unit">kWh</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <div className="ytd-heading">
-                                                {`Peak kW (${moment(startDate).format(
-                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
-                                                )} to ${moment(endDate).format(
-                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
-                                                )})`}
-                                            </div>
-                                            {isYtdDataFetching ? (
-                                                <Skeleton count={1} />
-                                            ) : (
-                                                <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
-                                                    <span className="ytd-value">
-                                                        {ytdData?.ytd_peak?.power
-                                                            ? formatConsumptionValue(
-                                                                  ytdData?.ytd_peak?.power / 1000000,
-                                                                  2
-                                                              )
-                                                            : 0}
-                                                    </span>
+                                    <EnergyMetaDataContainer
+                                        equipMetaData={equipMetaData}
+                                        isFetching={isFetchingMetaData}
+                                    />
 
-                                                    {ytdData?.ytd_peak?.time_stamp ? (
-                                                        <span className="ytd-unit">
-                                                            {`kW @ ${moment
-                                                                .utc(ytdData?.ytd_peak?.time_stamp)
-                                                                .clone()
-                                                                .tz(timeZone)
-                                                                .format(
-                                                                    `${
-                                                                        userPrefDateFormat === `DD-MM-YYYY`
-                                                                            ? `DD/MM`
-                                                                            : `MM/DD`
-                                                                    } ${
-                                                                        userPrefTimeFormat === `12h`
-                                                                            ? `hh:mm A`
-                                                                            : `HH:mm`
-                                                                    }`
-                                                                )}`}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="ytd-unit">kW</span>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
+                                    <Brick sizeInRem={2} />
+
+                                    <MachineHealthContainer
+                                        equipMetaData={equipMetaData}
+                                        isFetching={isFetchingMetaData}
+                                    />
                                 </Col>
 
                                 <Col xl={9}>
