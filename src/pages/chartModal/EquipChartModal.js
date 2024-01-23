@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, FormGroup, Spinner, Modal } from 'reactstrap';
+import { Row, Col, FormGroup, Spinner, Modal, UncontrolledTooltip } from 'reactstrap';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
+import { ReactComponent as WarningAlertSVG } from '../../assets/icon/alert-warning.svg';
+import { ReactComponent as DangerAlertSVG } from '../../assets/icon/alert-danger.svg';
 import { fetchEquipmentChartDataV2, fetchExploreEquipmentChart } from '../explore/services';
 import {
     updateListSensor,
@@ -125,14 +127,40 @@ const MachineHealthContainer = () => {
                             <Typography.Subheader size={Typography.Sizes.md}>
                                 Average Imbalance Percent:
                             </Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>36.1%</Typography.Subheader>
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.lg}>36.1%</Typography.Subheader>
+                                <>
+                                    <UncontrolledTooltip placement="top" target={'tooltip-imbalance-percent'}>
+                                        {`Phase Imbanace occurs when average percentage of an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
+                                    </UncontrolledTooltip>
+                                    <DangerAlertSVG
+                                        width={16}
+                                        height={16}
+                                        className="mouse-pointer"
+                                        id={'tooltip-imbalance-percent'}
+                                    />
+                                </>
+                            </div>
                         </div>
 
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>
                                 Average Imballance Current:
                             </Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>36.7A</Typography.Subheader>
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.lg}>36.7A</Typography.Subheader>
+                                <>
+                                    <UncontrolledTooltip placement="top" target={'tooltip-imbalance-current'}>
+                                        {`Phase Imbanace occurs when the phases of current on an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
+                                    </UncontrolledTooltip>
+                                    <WarningAlertSVG
+                                        width={16}
+                                        height={16}
+                                        className="mouse-pointer"
+                                        id={'tooltip-imbalance-current'}
+                                    />
+                                </>
+                            </div>
                         </div>
                     </div>
                 </div>
