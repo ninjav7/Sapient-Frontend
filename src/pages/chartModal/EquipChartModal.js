@@ -1,9 +1,42 @@
 import React, { useEffect, useState } from 'react';
+import { useAtom } from 'jotai';
+import moment from 'moment';
+import 'moment-timezone';
+import { useHistory, Link } from 'react-router-dom';
+import { TagsInput } from 'react-tag-input-component';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Row, Col, FormGroup, Spinner, Modal, UncontrolledTooltip } from 'reactstrap';
+
+import Header from '../../components/Header';
+import Button from '../../sharedComponents/button/Button';
+import Select from '../../sharedComponents/form/select';
+import LineChart from '../../sharedComponents/lineChart/LineChart';
+import Typography from '../../sharedComponents/typography';
+import Brick from '../../sharedComponents/brick';
+import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
+import Textarea from '../../sharedComponents/form/textarea/Textarea';
+
+import { BuildingStore } from '../../store/BuildingStore';
+import { UserStore } from '../../store/UserStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
+import { userPermissionData } from '../../store/globalState';
+
+import {
+    apiRequestBody,
+    compareObjData,
+    dateTimeFormatForHighChart,
+    formatXaxisForHighCharts,
+} from '../../helpers/helpers';
+import { metricsWithMultipleSensors } from './constants';
+import { handleDataConversion, renderEquipChartMetrics } from './helper';
+import { formatConsumptionValue } from '../../helpers/explorehelpers';
+import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
+
+import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/attached.svg';
+import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
 import { ReactComponent as DangerAlertSVG } from '../../assets/icon/alert-danger.svg';
-import { fetchEquipmentChartDataV2, fetchExploreEquipmentChart } from '../explore/services';
+import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
+
 import {
     updateListSensor,
     updateEquipmentDetails,
@@ -12,39 +45,12 @@ import {
     getMetadataRequest,
     fetchEquipmentKPIs,
 } from './services';
-import { useHistory, Link } from 'react-router-dom';
-import { useAtom } from 'jotai';
-import { userPermissionData } from '../../store/globalState';
-import moment from 'moment';
-import 'moment-timezone';
-import { TagsInput } from 'react-tag-input-component';
-import { BuildingStore } from '../../store/BuildingStore';
-import { UserStore } from '../../store/UserStore';
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
-import Header from '../../components/Header';
-import { formatConsumptionValue } from '../../helpers/explorehelpers';
-import Button from '../../sharedComponents/button/Button';
+import { fetchEquipmentChartDataV2, fetchExploreEquipmentChart } from '../explore/services';
+
 import './style.css';
 import '../../sharedComponents/typography/style.scss';
-import {
-    apiRequestBody,
-    compareObjData,
-    dateTimeFormatForHighChart,
-    formatXaxisForHighCharts,
-} from '../../helpers/helpers';
-import { metricsWithMultipleSensors } from './constants';
-import Select from '../../sharedComponents/form/select';
-import LineChart from '../../sharedComponents/lineChart/LineChart';
-import Typography from '../../sharedComponents/typography';
-import Brick from '../../sharedComponents/brick';
-import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
-import Textarea from '../../sharedComponents/form/textarea/Textarea';
-import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/attached.svg';
-import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
-import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
-import { handleDataConversion, renderEquipChartMetrics } from './helper';
-
+import colorPalette from '../../assets/scss/_colors.scss';
+import 'react-loading-skeleton/dist/skeleton.css';
 import '../settings/passive-devices/styles.scss';
 import './styles.scss';
 
@@ -63,150 +69,160 @@ const MachineHealthContainer = (props) => {
             <Typography.Subheader size={Typography.Sizes.md}>Machine Health</Typography.Subheader>
             <Brick sizeInRem={0.5} />
             <div className="d-flex flex-column w-auto h-auto metadata-container">
-                <div>
-                    <Typography.Subheader size={Typography.Sizes.lg}>
-                        {`Current Period (${moment(startDate).format(dateFormat)} to ${moment(endDate).format(
-                            dateFormat
-                        )})`}
-                    </Typography.Subheader>
-
-                    <Brick sizeInRem={0.25} />
-
-                    <div style={{ gap: '0.5rem' }}>
-                        <div className="d-flex" style={{ gap: '0.5rem' }}>
-                            <Typography.Subheader size={Typography.Sizes.md}>Running Minutes:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>
-                                {equipMetaData?.running_minutes
-                                    ? formatConsumptionValue(equipMetaData?.running_minutes)
-                                    : '-'}
-                            </Typography.Subheader>
-                        </div>
-
-                        <div className="d-flex" style={{ gap: '0.5rem' }}>
-                            <Typography.Subheader size={Typography.Sizes.md}>Total Minutes:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>
-                                {equipMetaData?.total_minutes
-                                    ? formatConsumptionValue(equipMetaData?.total_minutes, 4)
-                                    : '-'}
-                            </Typography.Subheader>
-                        </div>
-
-                        <div className="d-flex" style={{ gap: '0.5rem' }}>
-                            <Typography.Subheader size={Typography.Sizes.md}>Percent Runtime:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>
-                                {equipMetaData?.percent_runtime
-                                    ? `${formatConsumptionValue(equipMetaData?.percent_runtime, 2)} %`
-                                    : '-'}
-                            </Typography.Subheader>
-                        </div>
-                    </div>
-
-                    <Brick sizeInRem={0.75} />
-
-                    <div style={{ gap: '0.5rem' }}>
-                        <div className="d-flex" style={{ gap: '0.5rem' }}>
-                            <Typography.Subheader size={Typography.Sizes.md}>Starts:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>
-                                {equipMetaData?.starts ? formatConsumptionValue(equipMetaData?.starts) : '-'}
-                            </Typography.Subheader>
-                        </div>
-
-                        <div className="d-flex" style={{ gap: '0.5rem' }}>
-                            <Typography.Subheader size={Typography.Sizes.md}>Stops:</Typography.Subheader>
-                            {equipMetaData?.stops ? formatConsumptionValue(equipMetaData?.stops) : '-'}
-                            <Typography.Subheader size={Typography.Sizes.lg}></Typography.Subheader>
-                        </div>
-
-                        <div className="d-flex" style={{ gap: '0.5rem' }}>
-                            <Typography.Subheader size={Typography.Sizes.md}>
-                                Average Runtime/Start:
-                            </Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>
-                                {equipMetaData?.average_runtime_start
-                                    ? `${formatConsumptionValue(equipMetaData?.average_runtime_start, 2)} %`
-                                    : '-'}
-                            </Typography.Subheader>
-                        </div>
-
-                        <div className="d-flex" style={{ gap: '0.5rem' }}>
-                            <Typography.Subheader size={Typography.Sizes.md}>Last Start Time:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>
-                                {equipMetaData?.last_start_time
-                                    ? `${moment
-                                          .utc(equipMetaData?.last_start_time)
-                                          .clone()
-                                          .format(
-                                              `${userPrefDateFormat === `DD-MM-YYYY` ? `DD/MM` : `MM/DD`} ${
-                                                  userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`
-                                              }`
-                                          )}`
-                                    : '-'}
-                            </Typography.Subheader>
-                        </div>
-                    </div>
-
-                    <Brick sizeInRem={0.75} />
-
-                    <div style={{ gap: '0.5rem' }}>
-                        <div>
-                            <Typography.Subheader size={Typography.Sizes.lg}>Phase Imbalance</Typography.Subheader>
-                        </div>
+                {isFetching ? (
+                    <SkeletonTheme
+                        baseColor={colorPalette.primaryGray150}
+                        highlightColor={colorPalette.baseBackground}
+                        borderRadius={10}
+                        height={15}>
+                        <Skeleton count={10} className="mb-2" />
+                    </SkeletonTheme>
+                ) : (
+                    <div>
+                        <Typography.Subheader size={Typography.Sizes.lg}>
+                            {`Current Period (${moment(startDate).format(dateFormat)} to ${moment(endDate).format(
+                                dateFormat
+                            )})`}
+                        </Typography.Subheader>
 
                         <Brick sizeInRem={0.25} />
 
-                        <div className="d-flex" style={{ gap: '0.5rem' }}>
-                            <Typography.Subheader size={Typography.Sizes.md}>
-                                Average Imbalance Percent:
-                            </Typography.Subheader>
+                        <div style={{ gap: '0.5rem' }}>
                             <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Running Minutes:</Typography.Subheader>
                                 <Typography.Subheader size={Typography.Sizes.lg}>
-                                    {equipMetaData?.average_imbalance_percent
-                                        ? `${formatConsumptionValue(equipMetaData?.average_imbalance_percent, 2)} %`
+                                    {equipMetaData?.running_minutes
+                                        ? formatConsumptionValue(equipMetaData?.running_minutes)
                                         : '-'}
                                 </Typography.Subheader>
-                                {equipMetaData?.average_imbalance_percent && (
-                                    <>
-                                        <UncontrolledTooltip placement="top" target={'tooltip-imbalance-percent'}>
-                                            {`Phase Imbanace occurs when average percentage of an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
-                                        </UncontrolledTooltip>
-                                        <DangerAlertSVG
-                                            width={16}
-                                            height={16}
-                                            className="mouse-pointer"
-                                            id={'tooltip-imbalance-percent'}
-                                        />
-                                    </>
-                                )}
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Total Minutes:</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.total_minutes
+                                        ? formatConsumptionValue(equipMetaData?.total_minutes, 4)
+                                        : '-'}
+                                </Typography.Subheader>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Percent Runtime:</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.percent_runtime
+                                        ? `${formatConsumptionValue(equipMetaData?.percent_runtime, 2)} %`
+                                        : '-'}
+                                </Typography.Subheader>
                             </div>
                         </div>
 
-                        <div className="d-flex" style={{ gap: '0.5rem' }}>
-                            <Typography.Subheader size={Typography.Sizes.md}>
-                                Average Imballance Current:
-                            </Typography.Subheader>
+                        <Brick sizeInRem={0.75} />
+
+                        <div style={{ gap: '0.5rem' }}>
                             <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Starts:</Typography.Subheader>
                                 <Typography.Subheader size={Typography.Sizes.lg}>
-                                    {equipMetaData?.average_imbalance_current
-                                        ? `${formatConsumptionValue(equipMetaData?.average_imbalance_current, 4)} A`
+                                    {equipMetaData?.starts ? formatConsumptionValue(equipMetaData?.starts) : '-'}
+                                </Typography.Subheader>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Stops:</Typography.Subheader>
+                                {equipMetaData?.stops ? formatConsumptionValue(equipMetaData?.stops) : '-'}
+                                <Typography.Subheader size={Typography.Sizes.lg}></Typography.Subheader>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    Average Runtime/Start:
+                                </Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.average_runtime_start
+                                        ? `${formatConsumptionValue(equipMetaData?.average_runtime_start, 2)} %`
                                         : '-'}
                                 </Typography.Subheader>
-                                {equipMetaData?.average_imbalance_current && (
-                                    <>
-                                        <UncontrolledTooltip placement="top" target={'tooltip-imbalance-current'}>
-                                            {`Phase Imbanace occurs when the phases of current on an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
-                                        </UncontrolledTooltip>
-                                        <DangerAlertSVG
-                                            width={16}
-                                            height={16}
-                                            className="mouse-pointer"
-                                            id={'tooltip-imbalance-current'}
-                                        />
-                                    </>
-                                )}
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Last Start Time:</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.last_start_time
+                                        ? `${moment
+                                              .utc(equipMetaData?.last_start_time)
+                                              .clone()
+                                              .format(
+                                                  `${userPrefDateFormat === `DD-MM-YYYY` ? `DD/MM` : `MM/DD`} ${
+                                                      userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`
+                                                  }`
+                                              )}`
+                                        : '-'}
+                                </Typography.Subheader>
+                            </div>
+                        </div>
+
+                        <Brick sizeInRem={0.75} />
+
+                        <div style={{ gap: '0.5rem' }}>
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.lg}>Phase Imbalance</Typography.Subheader>
+                            </div>
+
+                            <Brick sizeInRem={0.25} />
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    Average Imbalance Percent:
+                                </Typography.Subheader>
+                                <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                    <Typography.Subheader size={Typography.Sizes.lg}>
+                                        {equipMetaData?.average_imbalance_percent
+                                            ? `${formatConsumptionValue(equipMetaData?.average_imbalance_percent, 2)} %`
+                                            : '-'}
+                                    </Typography.Subheader>
+                                    {equipMetaData?.average_imbalance_percent && (
+                                        <>
+                                            <UncontrolledTooltip placement="top" target={'tooltip-imbalance-percent'}>
+                                                {`Phase Imbanace occurs when average percentage of an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
+                                            </UncontrolledTooltip>
+                                            <DangerAlertSVG
+                                                width={16}
+                                                height={16}
+                                                className="mouse-pointer"
+                                                id={'tooltip-imbalance-percent'}
+                                            />
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    Average Imballance Current:
+                                </Typography.Subheader>
+                                <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                    <Typography.Subheader size={Typography.Sizes.lg}>
+                                        {equipMetaData?.average_imbalance_current
+                                            ? `${formatConsumptionValue(equipMetaData?.average_imbalance_current, 4)} A`
+                                            : '-'}
+                                    </Typography.Subheader>
+                                    {equipMetaData?.average_imbalance_current && (
+                                        <>
+                                            <UncontrolledTooltip placement="top" target={'tooltip-imbalance-current'}>
+                                                {`Phase Imbanace occurs when the phases of current on an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
+                                            </UncontrolledTooltip>
+                                            <DangerAlertSVG
+                                                width={16}
+                                                height={16}
+                                                className="mouse-pointer"
+                                                id={'tooltip-imbalance-current'}
+                                            />
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
         </>
     );
