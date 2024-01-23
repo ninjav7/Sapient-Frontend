@@ -326,9 +326,9 @@ const EquipChartModal = ({
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
-    const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
     const [equipData, setEquipData] = useState({});
     const [originalEquipData, setOriginalEquipData] = useState({});
+    const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
 
     const metric = renderEquipChartMetrics(originalEquipData);
 
@@ -343,9 +343,6 @@ const EquipChartModal = ({
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
-
-    const [energyMetaData, setEnergyMetaData] = useState({});
-    const [isFetchingEnergyMetaData, setFetchingEnergyMetaData] = useState(false);
 
     const [equipMetaData, setEquipMetaData] = useState({});
     const [isFetchingMetaData, setFetchingMetaData] = useState(false);
@@ -610,28 +607,6 @@ const EquipChartModal = ({
         }
     };
 
-    const fetchEquipmentYTDUsageData = async (equipId) => {
-        if (!equipId) return;
-
-        setFetchingEnergyMetaData(true);
-        setEnergyMetaData({});
-
-        const params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
-        const payload = apiRequestBody(startDate, endDate, timeZone);
-
-        await updateExploreEquipmentYTDUsage(payload, params)
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    if (response?.data && response?.data.length !== 0) setEnergyMetaData(response[0]);
-                }
-            })
-            .catch((err) => {})
-            .finally(() => {
-                setFetchingEnergyMetaData(false);
-            });
-    };
-
     const fetchEquipmentDetails = async (equipId) => {
         const params = `/${equipId}`;
         await getEquipmentDetails(params)
@@ -709,7 +684,6 @@ const EquipChartModal = ({
         };
 
         fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
-        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
         fetchEquipmentMachineHealth(equipmentFilter?.equipment_id);
         fetchMetadata();
@@ -746,19 +720,10 @@ const EquipChartModal = ({
     }, [equipData]);
 
     useEffect(() => {
-        if (!equipmentFilter?.equipment_id) {
-            return;
-        }
-        if (startDate === null) {
-            return;
-        }
+        if (!equipmentFilter?.equipment_id || startDate === null || endDate === null) return;
 
-        if (endDate === null) {
-            return;
-        }
         if (closeFlag !== true) {
             fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
-            fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
             fetchEquipmentMachineHealth(equipmentFilter?.equipment_id);
         } else {
             setCloseFlag(false);
