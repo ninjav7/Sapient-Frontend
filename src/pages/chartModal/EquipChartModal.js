@@ -41,7 +41,6 @@ import {
     updateListSensor,
     updateEquipmentDetails,
     getEquipmentDetails,
-    updateExploreEquipmentYTDUsage,
     getMetadataRequest,
     fetchEquipmentKPIs,
 } from './services';
@@ -55,7 +54,7 @@ import '../settings/passive-devices/styles.scss';
 import './styles.scss';
 
 const MachineHealthContainer = (props) => {
-    const { equipMetaData = {}, isFetching = false } = props;
+    const { equipMetaData = {}, isFetching = false, equipDataObj = {} } = props;
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -160,67 +159,83 @@ const MachineHealthContainer = (props) => {
                             </div>
                         </div>
 
-                        <Brick sizeInRem={0.75} />
+                        {equipDataObj?.device_type === 'passive' && equipDataObj?.breaker_link?.length > 1 && (
+                            <>
+                                <Brick sizeInRem={0.75} />
 
-                        <div style={{ gap: '0.5rem' }}>
-                            <div>
-                                <Typography.Subheader size={Typography.Sizes.lg}>Phase Imbalance</Typography.Subheader>
-                            </div>
+                                <div style={{ gap: '0.5rem' }}>
+                                    <div>
+                                        <Typography.Subheader size={Typography.Sizes.lg}>
+                                            Phase Imbalance
+                                        </Typography.Subheader>
+                                    </div>
 
-                            <Brick sizeInRem={0.25} />
+                                    <Brick sizeInRem={0.25} />
 
-                            <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                <Typography.Subheader size={Typography.Sizes.md}>
-                                    Average Imbalance Percent:
-                                </Typography.Subheader>
-                                <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                    <Typography.Subheader size={Typography.Sizes.lg}>
-                                        {equipMetaData?.average_imbalance_percent
-                                            ? `${formatConsumptionValue(equipMetaData?.average_imbalance_percent, 2)} %`
-                                            : '-'}
-                                    </Typography.Subheader>
-                                    {equipMetaData?.average_imbalance_percent && (
-                                        <>
-                                            <UncontrolledTooltip placement="top" target={'tooltip-imbalance-percent'}>
-                                                {`Phase Imbanace occurs when average percentage of an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
-                                            </UncontrolledTooltip>
-                                            <DangerAlertSVG
-                                                width={16}
-                                                height={16}
-                                                className="mouse-pointer"
-                                                id={'tooltip-imbalance-percent'}
-                                            />
-                                        </>
-                                    )}
+                                    <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                        <Typography.Subheader size={Typography.Sizes.md}>
+                                            Average Imbalance Percent:
+                                        </Typography.Subheader>
+                                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                            <Typography.Subheader size={Typography.Sizes.lg}>
+                                                {equipMetaData?.average_imbalance_percent
+                                                    ? `${formatConsumptionValue(
+                                                          equipMetaData?.average_imbalance_percent,
+                                                          2
+                                                      )} %`
+                                                    : '-'}
+                                            </Typography.Subheader>
+                                            {equipMetaData?.average_imbalance_percent && (
+                                                <>
+                                                    <UncontrolledTooltip
+                                                        placement="top"
+                                                        target={'tooltip-imbalance-percent'}>
+                                                        {`Phase Imbanace occurs when average percentage of an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
+                                                    </UncontrolledTooltip>
+                                                    <DangerAlertSVG
+                                                        width={16}
+                                                        height={16}
+                                                        className="mouse-pointer"
+                                                        id={'tooltip-imbalance-percent'}
+                                                    />
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                        <Typography.Subheader size={Typography.Sizes.md}>
+                                            Average Imballance Current:
+                                        </Typography.Subheader>
+                                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                            <Typography.Subheader size={Typography.Sizes.lg}>
+                                                {equipMetaData?.average_imbalance_current
+                                                    ? `${formatConsumptionValue(
+                                                          equipMetaData?.average_imbalance_current,
+                                                          4
+                                                      )} A`
+                                                    : '-'}
+                                            </Typography.Subheader>
+                                            {equipMetaData?.average_imbalance_current && (
+                                                <>
+                                                    <UncontrolledTooltip
+                                                        placement="top"
+                                                        target={'tooltip-imbalance-current'}>
+                                                        {`Phase Imbanace occurs when the phases of current on an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
+                                                    </UncontrolledTooltip>
+                                                    <DangerAlertSVG
+                                                        width={16}
+                                                        height={16}
+                                                        className="mouse-pointer"
+                                                        id={'tooltip-imbalance-current'}
+                                                    />
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                <Typography.Subheader size={Typography.Sizes.md}>
-                                    Average Imballance Current:
-                                </Typography.Subheader>
-                                <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                    <Typography.Subheader size={Typography.Sizes.lg}>
-                                        {equipMetaData?.average_imbalance_current
-                                            ? `${formatConsumptionValue(equipMetaData?.average_imbalance_current, 4)} A`
-                                            : '-'}
-                                    </Typography.Subheader>
-                                    {equipMetaData?.average_imbalance_current && (
-                                        <>
-                                            <UncontrolledTooltip placement="top" target={'tooltip-imbalance-current'}>
-                                                {`Phase Imbanace occurs when the phases of current on an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
-                                            </UncontrolledTooltip>
-                                            <DangerAlertSVG
-                                                width={16}
-                                                height={16}
-                                                className="mouse-pointer"
-                                                id={'tooltip-imbalance-current'}
-                                            />
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+                            </>
+                        )}
                     </div>
                 )}
             </div>
@@ -622,7 +637,7 @@ const EquipChartModal = ({
             .catch((error) => {});
     };
 
-    const fetchEquipmentMachineHealth = async (equipId) => {
+    const fetchEquipmentKPIData = async (equipId) => {
         if (!equipId) return;
 
         setFetchingMetaData(true);
@@ -685,7 +700,7 @@ const EquipChartModal = ({
 
         fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
-        fetchEquipmentMachineHealth(equipmentFilter?.equipment_id);
+        fetchEquipmentKPIData(equipmentFilter?.equipment_id);
         fetchMetadata();
     }, [equipmentFilter]);
 
@@ -724,7 +739,7 @@ const EquipChartModal = ({
 
         if (closeFlag !== true) {
             fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
-            fetchEquipmentMachineHealth(equipmentFilter?.equipment_id);
+            fetchEquipmentKPIData(equipmentFilter?.equipment_id);
         } else {
             setCloseFlag(false);
         }
@@ -822,6 +837,7 @@ const EquipChartModal = ({
                                     <MachineHealthContainer
                                         equipMetaData={equipMetaData}
                                         isFetching={isFetchingMetaData}
+                                        equipDataObj={originalEquipData}
                                     />
                                 </Col>
 
