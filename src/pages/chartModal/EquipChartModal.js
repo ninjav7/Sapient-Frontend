@@ -11,6 +11,7 @@ import {
     getEquipmentDetails,
     updateExploreEquipmentYTDUsage,
     getMetadataRequest,
+    fetchEquipmentKPIs,
 } from './services';
 import { useHistory, Link } from 'react-router-dom';
 import { useAtom } from 'jotai';
@@ -48,7 +49,9 @@ import { handleDataConversion, renderEquipChartMetrics } from './helper';
 import '../settings/passive-devices/styles.scss';
 import './styles.scss';
 
-const MachineHealthContainer = () => {
+const MachineHealthContainer = (props) => {
+    const { machineHealthData = {}, isFetching = false } = props;
+
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
@@ -74,17 +77,29 @@ const MachineHealthContainer = () => {
                     <div style={{ gap: '0.5rem' }}>
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Running Minutes:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>6.342</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>
+                                {machineHealthData?.running_minutes
+                                    ? formatConsumptionValue(machineHealthData?.running_minutes)
+                                    : '-'}
+                            </Typography.Subheader>
                         </div>
 
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Total Minutes:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>10.080</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>
+                                {machineHealthData?.total_minutes
+                                    ? formatConsumptionValue(machineHealthData?.total_minutes, 4)
+                                    : '-'}
+                            </Typography.Subheader>
                         </div>
 
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Percent Runtime:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>62.9%</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>
+                                {machineHealthData?.percent_runtime
+                                    ? `${formatConsumptionValue(machineHealthData?.percent_runtime, 2)} %`
+                                    : '-'}
+                            </Typography.Subheader>
                         </div>
                     </div>
 
@@ -93,24 +108,31 @@ const MachineHealthContainer = () => {
                     <div style={{ gap: '0.5rem' }}>
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Starts:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>3</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>
+                                {machineHealthData?.starts ? formatConsumptionValue(machineHealthData?.starts) : '-'}
+                            </Typography.Subheader>
                         </div>
 
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Stops:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>3</Typography.Subheader>
+                            {machineHealthData?.stops ? formatConsumptionValue(machineHealthData?.stops) : '-'}
+                            <Typography.Subheader size={Typography.Sizes.lg}></Typography.Subheader>
                         </div>
 
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>
                                 Average Runtime/Start:
                             </Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>62.9%</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>Pending%</Typography.Subheader>
                         </div>
 
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Last Start Time:</Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>20</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>
+                                {machineHealthData?.latest_start_time
+                                    ? `${moment(machineHealthData?.latest_start_time).format('HH')}`
+                                    : '-'}
+                            </Typography.Subheader>
                         </div>
                     </div>
 
@@ -128,7 +150,11 @@ const MachineHealthContainer = () => {
                                 Average Imbalance Percent:
                             </Typography.Subheader>
                             <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                <Typography.Subheader size={Typography.Sizes.lg}>36.1%</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {machineHealthData?.average_imbalance_percent
+                                        ? `${formatConsumptionValue(machineHealthData?.average_imbalance_percent, 2)} %`
+                                        : '-'}
+                                </Typography.Subheader>
                                 <>
                                     <UncontrolledTooltip placement="top" target={'tooltip-imbalance-percent'}>
                                         {`Phase Imbanace occurs when average percentage of an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
@@ -148,7 +174,11 @@ const MachineHealthContainer = () => {
                                 Average Imballance Current:
                             </Typography.Subheader>
                             <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                <Typography.Subheader size={Typography.Sizes.lg}>36.7A</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {machineHealthData?.average_imbalance_current
+                                        ? `${formatConsumptionValue(machineHealthData?.average_imbalance_current, 4)} A`
+                                        : '-'}
+                                </Typography.Subheader>
                                 <>
                                     <UncontrolledTooltip placement="top" target={'tooltip-imbalance-current'}>
                                         {`Phase Imbanace occurs when the phases of current on an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
@@ -287,6 +317,9 @@ const EquipChartModal = ({
 
     const [energyMetaData, setEnergyMetaData] = useState({});
     const [isFetchingEnergyMetaData, setFetchingEnergyMetaData] = useState(false);
+
+    const [machineHealthData, setMachineHealthData] = useState({});
+    const [isFetchingMachineHealthData, setFetchingMachineHealthData] = useState(false);
 
     const [sensors, setSensors] = useState([]);
     const [isModified, setModification] = useState(false);
@@ -585,6 +618,29 @@ const EquipChartModal = ({
             .catch((error) => {});
     };
 
+    const fetchEquipmentMachineHealth = async (equipId) => {
+        if (!equipId) return;
+
+        setFetchingMachineHealthData(true);
+        setMachineHealthData({});
+
+        const params = `?building_id=${bldgId}&date_from=${encodeURIComponent(startDate)}&date_to=${encodeURIComponent(
+            endDate
+        )}&tz_info=${encodeURIComponent(timeZone)}`;
+
+        await fetchEquipmentKPIs(params, equipId)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    if (response?.data) setMachineHealthData(response?.data);
+                }
+            })
+            .catch((err) => {})
+            .finally(() => {
+                setFetchingMachineHealthData(false);
+            });
+    };
+
     useEffect(() => {
         if (!equipmentFilter?.equipment_id) return;
 
@@ -626,6 +682,7 @@ const EquipChartModal = ({
         fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
         fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
+        fetchEquipmentMachineHealth(equipmentFilter?.equipment_id);
         fetchMetadata();
     }, [equipmentFilter]);
 
@@ -673,6 +730,7 @@ const EquipChartModal = ({
         if (closeFlag !== true) {
             fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
             fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
+            fetchEquipmentMachineHealth(equipmentFilter?.equipment_id);
         } else {
             setCloseFlag(false);
         }
@@ -767,7 +825,10 @@ const EquipChartModal = ({
 
                                     <Brick sizeInRem={2} />
 
-                                    <MachineHealthContainer />
+                                    <MachineHealthContainer
+                                        machineHealthData={machineHealthData}
+                                        isFetching={isFetchingMachineHealthData}
+                                    />
                                 </Col>
 
                                 <Col xl={9}>

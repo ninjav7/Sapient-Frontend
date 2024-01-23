@@ -5,6 +5,7 @@ import {
     equipmentDetails,
     getExploreEquipmentYTDUsage,
     getMetadata,
+    getEquipmentKPIs,
 } from '../../services/Network';
 
 export function updateListSensor(params) {
@@ -14,9 +15,7 @@ export function updateListSensor(params) {
 }
 
 export function getEquipmentDetails(params) {
-    return axiosInstance.get(`${equipmentDetails}${params}`).then((res) => {
-        return res;
-    });
+    return axiosInstance.get(`${equipmentDetails}${params}`).then((res) => res);
 }
 
 export function updateEquipmentDetails(params, payload) {
@@ -36,4 +35,8 @@ export function getMetadataRequest(bldgId) {
     return axiosInstance.get(`${getMetadata}${params}`).then((res) => {
         return res.data;
     });
+}
+
+export function fetchEquipmentKPIs(params, equipId) {
+    return axiosInstance.get(`${getEquipmentKPIs}/${equipId}${params}`).then((res) => res);
 }
