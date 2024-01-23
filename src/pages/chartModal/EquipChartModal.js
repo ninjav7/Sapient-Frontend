@@ -49,20 +49,19 @@ import '../settings/passive-devices/styles.scss';
 import './styles.scss';
 
 const MachineHealthContainer = (props) => {
-    const { machineHealthData = {}, isFetching = false } = props;
+    const { equipMetaData = {}, isFetching = false } = props;
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
     const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
 
     return (
         <>
             <Typography.Subheader size={Typography.Sizes.md}>Machine Health</Typography.Subheader>
-
             <Brick sizeInRem={0.5} />
-
             <div className="d-flex flex-column w-auto h-auto metadata-container">
                 <div>
                     <Typography.Subheader size={Typography.Sizes.lg}>
@@ -77,8 +76,8 @@ const MachineHealthContainer = (props) => {
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Running Minutes:</Typography.Subheader>
                             <Typography.Subheader size={Typography.Sizes.lg}>
-                                {machineHealthData?.running_minutes
-                                    ? formatConsumptionValue(machineHealthData?.running_minutes)
+                                {equipMetaData?.running_minutes
+                                    ? formatConsumptionValue(equipMetaData?.running_minutes)
                                     : '-'}
                             </Typography.Subheader>
                         </div>
@@ -86,8 +85,8 @@ const MachineHealthContainer = (props) => {
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Total Minutes:</Typography.Subheader>
                             <Typography.Subheader size={Typography.Sizes.lg}>
-                                {machineHealthData?.total_minutes
-                                    ? formatConsumptionValue(machineHealthData?.total_minutes, 4)
+                                {equipMetaData?.total_minutes
+                                    ? formatConsumptionValue(equipMetaData?.total_minutes, 4)
                                     : '-'}
                             </Typography.Subheader>
                         </div>
@@ -95,8 +94,8 @@ const MachineHealthContainer = (props) => {
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Percent Runtime:</Typography.Subheader>
                             <Typography.Subheader size={Typography.Sizes.lg}>
-                                {machineHealthData?.percent_runtime
-                                    ? `${formatConsumptionValue(machineHealthData?.percent_runtime, 2)} %`
+                                {equipMetaData?.percent_runtime
+                                    ? `${formatConsumptionValue(equipMetaData?.percent_runtime, 2)} %`
                                     : '-'}
                             </Typography.Subheader>
                         </div>
@@ -108,13 +107,13 @@ const MachineHealthContainer = (props) => {
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Starts:</Typography.Subheader>
                             <Typography.Subheader size={Typography.Sizes.lg}>
-                                {machineHealthData?.starts ? formatConsumptionValue(machineHealthData?.starts) : '-'}
+                                {equipMetaData?.starts ? formatConsumptionValue(equipMetaData?.starts) : '-'}
                             </Typography.Subheader>
                         </div>
 
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Stops:</Typography.Subheader>
-                            {machineHealthData?.stops ? formatConsumptionValue(machineHealthData?.stops) : '-'}
+                            {equipMetaData?.stops ? formatConsumptionValue(equipMetaData?.stops) : '-'}
                             <Typography.Subheader size={Typography.Sizes.lg}></Typography.Subheader>
                         </div>
 
@@ -122,14 +121,25 @@ const MachineHealthContainer = (props) => {
                             <Typography.Subheader size={Typography.Sizes.md}>
                                 Average Runtime/Start:
                             </Typography.Subheader>
-                            <Typography.Subheader size={Typography.Sizes.lg}>Pending%</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>
+                                {equipMetaData?.average_runtime_start
+                                    ? `${formatConsumptionValue(equipMetaData?.average_runtime_start, 2)} %`
+                                    : '-'}
+                            </Typography.Subheader>
                         </div>
 
                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                             <Typography.Subheader size={Typography.Sizes.md}>Last Start Time:</Typography.Subheader>
                             <Typography.Subheader size={Typography.Sizes.lg}>
-                                {machineHealthData?.latest_start_time
-                                    ? `${moment(machineHealthData?.latest_start_time).format('HH')}`
+                                {equipMetaData?.last_start_time
+                                    ? `${moment
+                                          .utc(equipMetaData?.last_start_time)
+                                          .clone()
+                                          .format(
+                                              `${userPrefDateFormat === `DD-MM-YYYY` ? `DD/MM` : `MM/DD`} ${
+                                                  userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`
+                                              }`
+                                          )}`
                                     : '-'}
                             </Typography.Subheader>
                         </div>
@@ -150,21 +160,23 @@ const MachineHealthContainer = (props) => {
                             </Typography.Subheader>
                             <div className="d-flex" style={{ gap: '0.5rem' }}>
                                 <Typography.Subheader size={Typography.Sizes.lg}>
-                                    {machineHealthData?.average_imbalance_percent
-                                        ? `${formatConsumptionValue(machineHealthData?.average_imbalance_percent, 2)} %`
+                                    {equipMetaData?.average_imbalance_percent
+                                        ? `${formatConsumptionValue(equipMetaData?.average_imbalance_percent, 2)} %`
                                         : '-'}
                                 </Typography.Subheader>
-                                <>
-                                    <UncontrolledTooltip placement="top" target={'tooltip-imbalance-percent'}>
-                                        {`Phase Imbanace occurs when average percentage of an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
-                                    </UncontrolledTooltip>
-                                    <DangerAlertSVG
-                                        width={16}
-                                        height={16}
-                                        className="mouse-pointer"
-                                        id={'tooltip-imbalance-percent'}
-                                    />
-                                </>
+                                {equipMetaData?.average_imbalance_percent && (
+                                    <>
+                                        <UncontrolledTooltip placement="top" target={'tooltip-imbalance-percent'}>
+                                            {`Phase Imbanace occurs when average percentage of an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
+                                        </UncontrolledTooltip>
+                                        <DangerAlertSVG
+                                            width={16}
+                                            height={16}
+                                            className="mouse-pointer"
+                                            id={'tooltip-imbalance-percent'}
+                                        />
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -174,21 +186,23 @@ const MachineHealthContainer = (props) => {
                             </Typography.Subheader>
                             <div className="d-flex" style={{ gap: '0.5rem' }}>
                                 <Typography.Subheader size={Typography.Sizes.lg}>
-                                    {machineHealthData?.average_imbalance_current
-                                        ? `${formatConsumptionValue(machineHealthData?.average_imbalance_current, 4)} A`
+                                    {equipMetaData?.average_imbalance_current
+                                        ? `${formatConsumptionValue(equipMetaData?.average_imbalance_current, 4)} A`
                                         : '-'}
                                 </Typography.Subheader>
-                                <>
-                                    <UncontrolledTooltip placement="top" target={'tooltip-imbalance-current'}>
-                                        {`Phase Imbanace occurs when the phases of current on an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
-                                    </UncontrolledTooltip>
-                                    <DangerAlertSVG
-                                        width={16}
-                                        height={16}
-                                        className="mouse-pointer"
-                                        id={'tooltip-imbalance-current'}
-                                    />
-                                </>
+                                {equipMetaData?.average_imbalance_current && (
+                                    <>
+                                        <UncontrolledTooltip placement="top" target={'tooltip-imbalance-current'}>
+                                            {`Phase Imbanace occurs when the phases of current on an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
+                                        </UncontrolledTooltip>
+                                        <DangerAlertSVG
+                                            width={16}
+                                            height={16}
+                                            className="mouse-pointer"
+                                            id={'tooltip-imbalance-current'}
+                                        />
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -199,20 +213,21 @@ const MachineHealthContainer = (props) => {
 };
 
 const EnergyMetaDataContainer = (props) => {
-    const { energyMetaDataObj = {}, isFetching = false } = props;
+    const { equipMetaData = {}, isFetching = false } = props;
 
-    const { ytd, ytd_peak } = energyMetaDataObj;
+    const { total_energy_consumption, peak_power = {} } = equipMetaData;
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
-    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
-    const totalConsumptionValue = ytd?.ytd ? formatConsumptionValue(ytd?.ytd / 1000, 0) : 0;
-    const powerConsumptionValue = ytd_peak?.power ? formatConsumptionValue(ytd_peak?.power / 1000000, 2) : 0;
+    const totalConsumptionValue = total_energy_consumption
+        ? formatConsumptionValue(total_energy_consumption / 1000, 0)
+        : 0;
+    const powerConsumptionValue = peak_power?.avgPower ? formatConsumptionValue(peak_power?.avgPower / 1000000, 2) : 0;
 
     return (
         <>
@@ -246,12 +261,11 @@ const EnergyMetaDataContainer = (props) => {
                         <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
                             <span className="ytd-value">{powerConsumptionValue}</span>
 
-                            {ytd_peak?.time_stamp ? (
+                            {peak_power?.timestamp ? (
                                 <span className="ytd-unit">
                                     {`kW @ ${moment
-                                        .utc(ytd_peak?.time_stamp)
+                                        .utc(peak_power?.timestamp)
                                         .clone()
-                                        .tz(timeZone)
                                         .format(
                                             `${userPrefDateFormat === `DD-MM-YYYY` ? `DD/MM` : `MM/DD`} ${
                                                 userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`
@@ -317,8 +331,8 @@ const EquipChartModal = ({
     const [energyMetaData, setEnergyMetaData] = useState({});
     const [isFetchingEnergyMetaData, setFetchingEnergyMetaData] = useState(false);
 
-    const [machineHealthData, setMachineHealthData] = useState({});
-    const [isFetchingMachineHealthData, setFetchingMachineHealthData] = useState(false);
+    const [equipMetaData, setEquipMetaData] = useState({});
+    const [isFetchingMetaData, setFetchingMetaData] = useState(false);
 
     const [sensors, setSensors] = useState([]);
     const [isModified, setModification] = useState(false);
@@ -620,8 +634,8 @@ const EquipChartModal = ({
     const fetchEquipmentMachineHealth = async (equipId) => {
         if (!equipId) return;
 
-        setFetchingMachineHealthData(true);
-        setMachineHealthData({});
+        setFetchingMetaData(true);
+        setEquipMetaData({});
 
         const params = `?building_id=${bldgId}&date_from=${encodeURIComponent(startDate)}&date_to=${encodeURIComponent(
             endDate
@@ -631,12 +645,12 @@ const EquipChartModal = ({
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
-                    if (response?.data) setMachineHealthData(response?.data);
+                    if (response?.data) setEquipMetaData(response?.data);
                 }
             })
             .catch((err) => {})
             .finally(() => {
-                setFetchingMachineHealthData(false);
+                setFetchingMetaData(false);
             });
     };
 
@@ -818,15 +832,15 @@ const EquipChartModal = ({
                             <Row>
                                 <Col xl={3}>
                                     <EnergyMetaDataContainer
-                                        energyMetaDataObj={energyMetaData}
-                                        isFetching={isFetchingEnergyMetaData}
+                                        equipMetaData={equipMetaData}
+                                        isFetching={isFetchingMetaData}
                                     />
 
                                     <Brick sizeInRem={2} />
 
                                     <MachineHealthContainer
-                                        machineHealthData={machineHealthData}
-                                        isFetching={isFetchingMachineHealthData}
+                                        equipMetaData={equipMetaData}
+                                        isFetching={isFetchingMetaData}
                                     />
                                 </Col>
 
