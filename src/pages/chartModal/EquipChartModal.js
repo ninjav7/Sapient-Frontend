@@ -41,7 +41,6 @@ import {
     updateListSensor,
     updateEquipmentDetails,
     getEquipmentDetails,
-    updateExploreEquipmentYTDUsage,
     getMetadataRequest,
     fetchEquipmentKPIs,
 } from './services';
@@ -55,7 +54,7 @@ import '../settings/passive-devices/styles.scss';
 import './styles.scss';
 
 const MachineHealthContainer = (props) => {
-    const { equipMetaData = {}, isFetching = false } = props;
+    const { equipMetaData = {}, isFetching = false, equipDataObj = {} } = props;
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -63,6 +62,9 @@ const MachineHealthContainer = (props) => {
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
     const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
+
+    const isMultipleSensorAttachedToEquipment =
+        equipDataObj?.device_type === 'passive' && equipDataObj?.breaker_link && equipDataObj?.breaker_link?.length > 1;
 
     return (
         <>
@@ -92,7 +94,7 @@ const MachineHealthContainer = (props) => {
                                 <Typography.Subheader size={Typography.Sizes.md}>Running Minutes:</Typography.Subheader>
                                 <Typography.Subheader size={Typography.Sizes.lg}>
                                     {equipMetaData?.running_minutes
-                                        ? formatConsumptionValue(equipMetaData?.running_minutes)
+                                        ? formatConsumptionValue(Math.round(equipMetaData?.running_minutes))
                                         : '-'}
                                 </Typography.Subheader>
                             </div>
@@ -101,7 +103,7 @@ const MachineHealthContainer = (props) => {
                                 <Typography.Subheader size={Typography.Sizes.md}>Total Minutes:</Typography.Subheader>
                                 <Typography.Subheader size={Typography.Sizes.lg}>
                                     {equipMetaData?.total_minutes
-                                        ? formatConsumptionValue(equipMetaData?.total_minutes, 4)
+                                        ? formatConsumptionValue(Math.round(equipMetaData?.total_minutes))
                                         : '-'}
                                 </Typography.Subheader>
                             </div>
@@ -122,13 +124,15 @@ const MachineHealthContainer = (props) => {
                             <div className="d-flex" style={{ gap: '0.5rem' }}>
                                 <Typography.Subheader size={Typography.Sizes.md}>Starts:</Typography.Subheader>
                                 <Typography.Subheader size={Typography.Sizes.lg}>
-                                    {equipMetaData?.starts ? formatConsumptionValue(equipMetaData?.starts) : '-'}
+                                    {equipMetaData?.starts
+                                        ? formatConsumptionValue(Math.round(equipMetaData?.starts))
+                                        : '-'}
                                 </Typography.Subheader>
                             </div>
 
                             <div className="d-flex" style={{ gap: '0.5rem' }}>
                                 <Typography.Subheader size={Typography.Sizes.md}>Stops:</Typography.Subheader>
-                                {equipMetaData?.stops ? formatConsumptionValue(equipMetaData?.stops) : '-'}
+                                {equipMetaData?.stops ? formatConsumptionValue(Math.round(equipMetaData?.stops)) : '-'}
                                 <Typography.Subheader size={Typography.Sizes.lg}></Typography.Subheader>
                             </div>
 
@@ -138,7 +142,7 @@ const MachineHealthContainer = (props) => {
                                 </Typography.Subheader>
                                 <Typography.Subheader size={Typography.Sizes.lg}>
                                     {equipMetaData?.average_runtime_start
-                                        ? `${formatConsumptionValue(equipMetaData?.average_runtime_start, 2)} %`
+                                        ? `${formatConsumptionValue(Math.round(equipMetaData?.average_runtime_start))}`
                                         : '-'}
                                 </Typography.Subheader>
                             </div>
@@ -160,67 +164,83 @@ const MachineHealthContainer = (props) => {
                             </div>
                         </div>
 
-                        <Brick sizeInRem={0.75} />
+                        {isMultipleSensorAttachedToEquipment && (
+                            <>
+                                <Brick sizeInRem={0.75} />
 
-                        <div style={{ gap: '0.5rem' }}>
-                            <div>
-                                <Typography.Subheader size={Typography.Sizes.lg}>Phase Imbalance</Typography.Subheader>
-                            </div>
+                                <div style={{ gap: '0.5rem' }}>
+                                    <div>
+                                        <Typography.Subheader size={Typography.Sizes.lg}>
+                                            Phase Imbalance
+                                        </Typography.Subheader>
+                                    </div>
 
-                            <Brick sizeInRem={0.25} />
+                                    <Brick sizeInRem={0.25} />
 
-                            <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                <Typography.Subheader size={Typography.Sizes.md}>
-                                    Average Imbalance Percent:
-                                </Typography.Subheader>
-                                <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                    <Typography.Subheader size={Typography.Sizes.lg}>
-                                        {equipMetaData?.average_imbalance_percent
-                                            ? `${formatConsumptionValue(equipMetaData?.average_imbalance_percent, 2)} %`
-                                            : '-'}
-                                    </Typography.Subheader>
-                                    {equipMetaData?.average_imbalance_percent && (
-                                        <>
-                                            <UncontrolledTooltip placement="top" target={'tooltip-imbalance-percent'}>
-                                                {`Phase Imbanace occurs when average percentage of an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
-                                            </UncontrolledTooltip>
-                                            <DangerAlertSVG
-                                                width={16}
-                                                height={16}
-                                                className="mouse-pointer"
-                                                id={'tooltip-imbalance-percent'}
-                                            />
-                                        </>
-                                    )}
+                                    <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                        <Typography.Subheader size={Typography.Sizes.md}>
+                                            Average Imbalance Percent:
+                                        </Typography.Subheader>
+                                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                            <Typography.Subheader size={Typography.Sizes.lg}>
+                                                {equipMetaData?.average_imbalance_percent
+                                                    ? `${formatConsumptionValue(
+                                                          equipMetaData?.average_imbalance_percent,
+                                                          2
+                                                      )} %`
+                                                    : '-'}
+                                            </Typography.Subheader>
+                                            {equipMetaData?.average_imbalance_percent > 10 && (
+                                                <>
+                                                    <UncontrolledTooltip
+                                                        placement="top"
+                                                        target={'tooltip-imbalance-percent'}>
+                                                        {`Phase Imbanace occurs when average percentage of an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
+                                                    </UncontrolledTooltip>
+                                                    <DangerAlertSVG
+                                                        width={16}
+                                                        height={16}
+                                                        className="mouse-pointer"
+                                                        id={'tooltip-imbalance-percent'}
+                                                    />
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                        <Typography.Subheader size={Typography.Sizes.md}>
+                                            Average Imbalance Current:
+                                        </Typography.Subheader>
+                                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                            <Typography.Subheader size={Typography.Sizes.lg}>
+                                                {equipMetaData?.average_imbalance_current
+                                                    ? `${formatConsumptionValue(
+                                                          equipMetaData?.average_imbalance_current,
+                                                          4
+                                                      )} A`
+                                                    : '-'}
+                                            </Typography.Subheader>
+                                            {equipMetaData?.average_imbalance_current && (
+                                                <>
+                                                    <UncontrolledTooltip
+                                                        placement="top"
+                                                        target={'tooltip-imbalance-current'}>
+                                                        {`Phase Imbanace occurs when the phases of current on an equipment are unequal.`}
+                                                    </UncontrolledTooltip>
+                                                    <DangerAlertSVG
+                                                        width={16}
+                                                        height={16}
+                                                        className="mouse-pointer"
+                                                        id={'tooltip-imbalance-current'}
+                                                    />
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                <Typography.Subheader size={Typography.Sizes.md}>
-                                    Average Imballance Current:
-                                </Typography.Subheader>
-                                <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                    <Typography.Subheader size={Typography.Sizes.lg}>
-                                        {equipMetaData?.average_imbalance_current
-                                            ? `${formatConsumptionValue(equipMetaData?.average_imbalance_current, 4)} A`
-                                            : '-'}
-                                    </Typography.Subheader>
-                                    {equipMetaData?.average_imbalance_current && (
-                                        <>
-                                            <UncontrolledTooltip placement="top" target={'tooltip-imbalance-current'}>
-                                                {`Phase Imbanace occurs when the phases of current on an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
-                                            </UncontrolledTooltip>
-                                            <DangerAlertSVG
-                                                width={16}
-                                                height={16}
-                                                className="mouse-pointer"
-                                                id={'tooltip-imbalance-current'}
-                                            />
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+                            </>
+                        )}
                     </div>
                 )}
             </div>
@@ -326,9 +346,9 @@ const EquipChartModal = ({
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
-    const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
     const [equipData, setEquipData] = useState({});
     const [originalEquipData, setOriginalEquipData] = useState({});
+    const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
 
     const metric = renderEquipChartMetrics(originalEquipData);
 
@@ -343,9 +363,6 @@ const EquipChartModal = ({
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
-
-    const [energyMetaData, setEnergyMetaData] = useState({});
-    const [isFetchingEnergyMetaData, setFetchingEnergyMetaData] = useState(false);
 
     const [equipMetaData, setEquipMetaData] = useState({});
     const [isFetchingMetaData, setFetchingMetaData] = useState(false);
@@ -382,6 +399,8 @@ const EquipChartModal = ({
         if (originalEquipData?.serial !== equipData?.serial) obj.serial = equipData?.serial;
 
         if (originalEquipData?.location_id !== equipData?.location_id) obj.space_id = equipData?.location_id;
+        if (originalEquipData?.location_served !== equipData?.location_served)
+            obj.location_served = equipData?.location_served;
 
         if (originalEquipData?.equipments_type_id !== equipData?.equipments_type_id) {
             obj.equipment_type = equipData?.equipments_type_id;
@@ -395,6 +414,7 @@ const EquipChartModal = ({
         if (!compareObjData(originalEquipData?.tags, equipData?.tags)) obj.tag = equipData?.tags;
 
         const params = `?equipment_id=${equipData?.equipments_id}`;
+
         await updateEquipmentDetails(params, obj)
             .then((res) => {
                 const response = res?.data;
@@ -404,7 +424,7 @@ const EquipChartModal = ({
                 if (response?.success) {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = 'Equipment updated Successfully!';
+                        s.notificationMessage = 'Equipment updated successfully!';
                         s.notificationType = 'success';
                     });
                     const arr = apiRequestBody(startDate, endDate, timeZone);
@@ -610,28 +630,6 @@ const EquipChartModal = ({
         }
     };
 
-    const fetchEquipmentYTDUsageData = async (equipId) => {
-        if (!equipId) return;
-
-        setFetchingEnergyMetaData(true);
-        setEnergyMetaData({});
-
-        const params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
-        const payload = apiRequestBody(startDate, endDate, timeZone);
-
-        await updateExploreEquipmentYTDUsage(payload, params)
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    if (response?.data && response?.data.length !== 0) setEnergyMetaData(response[0]);
-                }
-            })
-            .catch((err) => {})
-            .finally(() => {
-                setFetchingEnergyMetaData(false);
-            });
-    };
-
     const fetchEquipmentDetails = async (equipId) => {
         const params = `/${equipId}`;
         await getEquipmentDetails(params)
@@ -647,7 +645,7 @@ const EquipChartModal = ({
             .catch((error) => {});
     };
 
-    const fetchEquipmentMachineHealth = async (equipId) => {
+    const fetchEquipmentKPIData = async (equipId) => {
         if (!equipId) return;
 
         setFetchingMetaData(true);
@@ -709,9 +707,8 @@ const EquipChartModal = ({
         };
 
         fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
-        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
-        fetchEquipmentMachineHealth(equipmentFilter?.equipment_id);
+        fetchEquipmentKPIData(equipmentFilter?.equipment_id);
         fetchMetadata();
     }, [equipmentFilter]);
 
@@ -746,20 +743,11 @@ const EquipChartModal = ({
     }, [equipData]);
 
     useEffect(() => {
-        if (!equipmentFilter?.equipment_id) {
-            return;
-        }
-        if (startDate === null) {
-            return;
-        }
+        if (!equipmentFilter?.equipment_id || startDate === null || endDate === null) return;
 
-        if (endDate === null) {
-            return;
-        }
         if (closeFlag !== true) {
             fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
-            fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
-            fetchEquipmentMachineHealth(equipmentFilter?.equipment_id);
+            fetchEquipmentKPIData(equipmentFilter?.equipment_id);
         } else {
             setCloseFlag(false);
         }
@@ -854,10 +842,13 @@ const EquipChartModal = ({
 
                                     <Brick sizeInRem={2} />
 
-                                    <MachineHealthContainer
-                                        equipMetaData={equipMetaData}
-                                        isFetching={isFetchingMetaData}
-                                    />
+                                    {originalEquipData?.device_type && originalEquipData?.device_type !== 'active' && (
+                                        <MachineHealthContainer
+                                            equipMetaData={equipMetaData}
+                                            isFetching={isFetchingMetaData}
+                                            equipDataObj={originalEquipData}
+                                        />
+                                    )}
                                 </Col>
 
                                 <Col xl={9}>
@@ -1094,31 +1085,60 @@ const EquipChartModal = ({
 
                                         <Brick sizeInRem={1.25} />
 
-                                        <div>
-                                            <Typography.Body size={Typography.Sizes.md}>
-                                                Equipment Location
-                                            </Typography.Body>
-                                            <Brick sizeInRem={0.25} />
-                                            <Select
-                                                placeholder="Select Location"
-                                                options={locationData}
-                                                currentValue={locationData.filter(
-                                                    (option) => option.value === equipData?.location_id
-                                                )}
-                                                onChange={(e) => {
-                                                    handleDataChange('location_id', e.value);
-                                                }}
-                                                isSearchable={true}
-                                                customSearchCallback={({ data, query }) =>
-                                                    defaultDropdownSearch(data, query?.value)
-                                                }
-                                                disabled={!(isSuperAdmin || canUserEdit)}
-                                            />
+                                        <div className="d-flex">
+                                            <div className="w-100">
+                                                <Typography.Body size={Typography.Sizes.md}>
+                                                    Equipment Location
+                                                </Typography.Body>
+                                                <Brick sizeInRem={0.25} />
+                                                <Select
+                                                    placeholder="Select Location"
+                                                    options={locationData}
+                                                    currentValue={locationData.filter(
+                                                        (option) => option.value === equipData?.location_id
+                                                    )}
+                                                    onChange={(e) => {
+                                                        handleDataChange('location_id', e.value);
+                                                    }}
+                                                    isSearchable={true}
+                                                    customSearchCallback={({ data, query }) =>
+                                                        defaultDropdownSearch(data, query?.value)
+                                                    }
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
+                                                />
 
-                                            <Brick sizeInRem={0.25} />
-                                            <Typography.Body size={Typography.Sizes.sm}>
-                                                Location this equipment is installed in.
-                                            </Typography.Body>
+                                                <Brick sizeInRem={0.25} />
+                                                <Typography.Body size={Typography.Sizes.sm}>
+                                                    Location this equipment is installed in.
+                                                </Typography.Body>
+                                            </div>
+
+                                            <div className="w-100 ml-2">
+                                                <Typography.Body size={Typography.Sizes.md}>
+                                                    Location Served
+                                                </Typography.Body>
+                                                <Brick sizeInRem={0.25} />
+                                                <Select
+                                                    placeholder="Select Location"
+                                                    options={locationData}
+                                                    currentValue={locationData.filter(
+                                                        (option) => option.value === equipData?.location_served
+                                                    )}
+                                                    onChange={(e) => {
+                                                        handleDataChange('location_served', e.value);
+                                                    }}
+                                                    isSearchable={true}
+                                                    customSearchCallback={({ data, query }) =>
+                                                        defaultDropdownSearch(data, query?.value)
+                                                    }
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
+                                                />
+
+                                                <Brick sizeInRem={0.25} />
+                                                <Typography.Body size={Typography.Sizes.sm}>
+                                                    Location that this equipment serves.
+                                                </Typography.Body>
+                                            </div>
                                         </div>
 
                                         <Brick sizeInRem={1.25} />
