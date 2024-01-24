@@ -35,6 +35,7 @@ import { defaultDropdownSearch } from '../../sharedComponents/form/select/helper
 import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/attached.svg';
 import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
 import { ReactComponent as DangerAlertSVG } from '../../assets/icon/alert-danger.svg';
+import { ReactComponent as TooltipIcon } from '../../sharedComponents/assets/icons/tooltip.svg';
 import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
 
 import {
@@ -217,25 +218,10 @@ const MachineHealthContainer = (props) => {
                                                 {equipMetaData?.average_imbalance_current
                                                     ? `${formatConsumptionValue(
                                                           equipMetaData?.average_imbalance_current,
-                                                          4
+                                                          2
                                                       )} A`
                                                     : '-'}
                                             </Typography.Subheader>
-                                            {equipMetaData?.average_imbalance_current && (
-                                                <>
-                                                    <UncontrolledTooltip
-                                                        placement="top"
-                                                        target={'tooltip-imbalance-current'}>
-                                                        {`Phase Imbanace occurs when the phases of current on an equipment are unequal.`}
-                                                    </UncontrolledTooltip>
-                                                    <DangerAlertSVG
-                                                        width={16}
-                                                        height={16}
-                                                        className="mouse-pointer"
-                                                        id={'tooltip-imbalance-current'}
-                                                    />
-                                                </>
-                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -381,6 +367,20 @@ const EquipChartModal = ({
         let obj = Object.assign({}, equipData);
         obj[key] = value;
         setEquipData(obj);
+    };
+
+    const CustomToolTip = ({ id, message = '' }) => {
+        return (
+            <div>
+                <UncontrolledTooltip placement="top" target={`tooltip-for-${id}`}>
+                    {message}
+                </UncontrolledTooltip>
+
+                <button type="button" className="tooltip-button" id={`tooltip-for-${id}`}>
+                    <TooltipIcon className="tooltip-icon" />
+                </button>
+            </div>
+        );
     };
 
     // Update Equipment
@@ -1073,9 +1073,15 @@ const EquipChartModal = ({
 
                                         <div className="d-flex">
                                             <div className="w-100">
-                                                <Typography.Body size={Typography.Sizes.md}>
-                                                    Equipment Location
-                                                </Typography.Body>
+                                                <div className="d-flex align-items-center">
+                                                    <Typography.Body size={Typography.Sizes.md}>
+                                                        Equipment Location
+                                                    </Typography.Body>
+                                                    <CustomToolTip
+                                                        id="equip-location"
+                                                        message="Location this equipment is installed in."
+                                                    />
+                                                </div>
                                                 <Brick sizeInRem={0.25} />
                                                 <Select
                                                     placeholder="Select Location"
@@ -1092,17 +1098,18 @@ const EquipChartModal = ({
                                                     }
                                                     disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
-
-                                                <Brick sizeInRem={0.25} />
-                                                <Typography.Body size={Typography.Sizes.sm}>
-                                                    Location this equipment is installed in.
-                                                </Typography.Body>
                                             </div>
 
                                             <div className="w-100 ml-2">
-                                                <Typography.Body size={Typography.Sizes.md}>
-                                                    Location Served
-                                                </Typography.Body>
+                                                <div className="d-flex align-items-center">
+                                                    <Typography.Body size={Typography.Sizes.md}>
+                                                        Location Served
+                                                    </Typography.Body>
+                                                    <CustomToolTip
+                                                        id="location-serverd"
+                                                        message="Location that this equipment serves."
+                                                    />
+                                                </div>
                                                 <Brick sizeInRem={0.25} />
                                                 <Select
                                                     placeholder="Select Location"
@@ -1119,11 +1126,6 @@ const EquipChartModal = ({
                                                     }
                                                     disabled={!(isSuperAdmin || canUserEdit)}
                                                 />
-
-                                                <Brick sizeInRem={0.25} />
-                                                <Typography.Body size={Typography.Sizes.sm}>
-                                                    Location that this equipment serves.
-                                                </Typography.Body>
                                             </div>
                                         </div>
 
