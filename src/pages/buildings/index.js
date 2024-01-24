@@ -285,12 +285,13 @@ const BuildingOverview = () => {
     };
 
     const handleClick = (row) => {
-        let arr = topEnergyConsumptionData.filter((item) => item.label === row);
+        const selectedEquipObj = topEnergyConsumptionData.find((el) => el?.label === row);
         setEquipmentFilter({
-            equipment_id: arr[0]?.id,
-            equipment_name: arr[0]?.label,
+            equipment_id: selectedEquipObj?.id,
+            equipment_name: selectedEquipObj?.label,
+            equipment_type: selectedEquipObj?.equipment_type,
         });
-        localStorage.setItem('exploreEquipName', arr[0]?.label);
+        localStorage.setItem('exploreEquipName', selectedEquipObj?.label);
         handleChartOpen();
     };
 
@@ -300,10 +301,10 @@ const BuildingOverview = () => {
 
         await fetchBuildingEquipments(bldgId, payload)
             .then((res) => {
-                let response = res.data[0].top_contributors;
+                let response = res?.data[0]?.top_contributors;
                 let topEnergyData = [];
                 response.forEach((record) => {
-                    let obj = {
+                    const obj = {
                         link: '#',
                         id: record?.equipment_id,
                         label: record?.equipment_name ? record?.equipment_name : `-`,
@@ -953,7 +954,7 @@ const BuildingOverview = () => {
                 <EquipChartModal
                     showEquipmentChart={showEquipmentChart}
                     handleChartClose={handleChartClose}
-                    equipmentFilter={equipmentFilter}
+                    selectedEquipObj={equipmentFilter}
                     fetchEquipmentData={builidingEquipmentsData}
                     selectedTab={selectedModalTab}
                     setSelectedTab={setSelectedModalTab}

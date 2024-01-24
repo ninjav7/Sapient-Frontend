@@ -269,6 +269,7 @@ const ExploreByEquipment = () => {
                         setEquipmentFilter({
                             equipment_id: row?.equipment_id,
                             equipment_name: row?.equipment_name,
+                            equipment_type: row?.device_type,
                         });
                         localStorage.setItem('exploreEquipName', row?.equipment_name);
                         handleChartOpen();
@@ -1333,7 +1334,7 @@ const ExploreByEquipment = () => {
             <EquipChartModal
                 showEquipmentChart={showEquipmentChart}
                 handleChartClose={handleChartClose}
-                equipmentFilter={equipmentFilter}
+                selectedEquipObj={equipmentFilter}
                 fetchEquipmentData={fetchEquipDataList}
                 selectedTab={selectedModalTab}
                 setSelectedTab={setSelectedModalTab}
