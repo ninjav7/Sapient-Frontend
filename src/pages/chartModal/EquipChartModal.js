@@ -63,6 +63,9 @@ const MachineHealthContainer = (props) => {
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
     const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
 
+    const isMultipleSensorAttachedToEquipment =
+        equipDataObj?.device_type === 'passive' && equipDataObj?.breaker_link && equipDataObj?.breaker_link?.length > 1;
+
     return (
         <>
             <Typography.Subheader size={Typography.Sizes.md}>Machine Health</Typography.Subheader>
@@ -91,7 +94,7 @@ const MachineHealthContainer = (props) => {
                                 <Typography.Subheader size={Typography.Sizes.md}>Running Minutes:</Typography.Subheader>
                                 <Typography.Subheader size={Typography.Sizes.lg}>
                                     {equipMetaData?.running_minutes
-                                        ? formatConsumptionValue(equipMetaData?.running_minutes)
+                                        ? formatConsumptionValue(Math.round(equipMetaData?.running_minutes))
                                         : '-'}
                                 </Typography.Subheader>
                             </div>
@@ -100,7 +103,7 @@ const MachineHealthContainer = (props) => {
                                 <Typography.Subheader size={Typography.Sizes.md}>Total Minutes:</Typography.Subheader>
                                 <Typography.Subheader size={Typography.Sizes.lg}>
                                     {equipMetaData?.total_minutes
-                                        ? formatConsumptionValue(equipMetaData?.total_minutes, 4)
+                                        ? formatConsumptionValue(Math.round(equipMetaData?.total_minutes))
                                         : '-'}
                                 </Typography.Subheader>
                             </div>
@@ -121,13 +124,15 @@ const MachineHealthContainer = (props) => {
                             <div className="d-flex" style={{ gap: '0.5rem' }}>
                                 <Typography.Subheader size={Typography.Sizes.md}>Starts:</Typography.Subheader>
                                 <Typography.Subheader size={Typography.Sizes.lg}>
-                                    {equipMetaData?.starts ? formatConsumptionValue(equipMetaData?.starts) : '-'}
+                                    {equipMetaData?.starts
+                                        ? formatConsumptionValue(Math.round(equipMetaData?.starts))
+                                        : '-'}
                                 </Typography.Subheader>
                             </div>
 
                             <div className="d-flex" style={{ gap: '0.5rem' }}>
                                 <Typography.Subheader size={Typography.Sizes.md}>Stops:</Typography.Subheader>
-                                {equipMetaData?.stops ? formatConsumptionValue(equipMetaData?.stops) : '-'}
+                                {equipMetaData?.stops ? formatConsumptionValue(Math.round(equipMetaData?.stops)) : '-'}
                                 <Typography.Subheader size={Typography.Sizes.lg}></Typography.Subheader>
                             </div>
 
@@ -137,7 +142,7 @@ const MachineHealthContainer = (props) => {
                                 </Typography.Subheader>
                                 <Typography.Subheader size={Typography.Sizes.lg}>
                                     {equipMetaData?.average_runtime_start
-                                        ? `${formatConsumptionValue(equipMetaData?.average_runtime_start, 2)} %`
+                                        ? `${formatConsumptionValue(Math.round(equipMetaData?.average_runtime_start))}`
                                         : '-'}
                                 </Typography.Subheader>
                             </div>
@@ -159,7 +164,7 @@ const MachineHealthContainer = (props) => {
                             </div>
                         </div>
 
-                        {equipDataObj?.device_type === 'passive' && equipDataObj?.breaker_link?.length > 1 && (
+                        {isMultipleSensorAttachedToEquipment && (
                             <>
                                 <Brick sizeInRem={0.75} />
 
@@ -205,7 +210,7 @@ const MachineHealthContainer = (props) => {
 
                                     <div className="d-flex" style={{ gap: '0.5rem' }}>
                                         <Typography.Subheader size={Typography.Sizes.md}>
-                                            Average Imballance Current:
+                                            Average Imbalance Current:
                                         </Typography.Subheader>
                                         <div className="d-flex" style={{ gap: '0.5rem' }}>
                                             <Typography.Subheader size={Typography.Sizes.lg}>
