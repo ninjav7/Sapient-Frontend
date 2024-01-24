@@ -308,20 +308,23 @@ const BuildingOverview = () => {
                         link: '#',
                         id: record?.equipment_id,
                         label: record?.equipment_name ? record?.equipment_name : `-`,
-                        value: Math.round(record?.energy_consumption.now / 1000),
+                        value: Math.round(record?.energy_consumption?.now / 1000),
                         unit: UNITS.KWH,
                         badgePercentage: percentageHandler(
-                            record?.energy_consumption.now,
-                            record?.energy_consumption.old
+                            record?.energy_consumption?.now,
+                            record?.energy_consumption?.old
                         ),
-                        badgeType: fetchTrendBadgeType(record?.energy_consumption.now, record?.energy_consumption.old),
+                        badgeType: fetchTrendBadgeType(
+                            record?.energy_consumption?.now,
+                            record?.energy_consumption?.old
+                        ),
                     };
                     topEnergyData.push(obj);
                 });
                 setTopEnergyConsumptionData(topEnergyData);
-                setTopEnergyDataFetching(false);
             })
-            .catch((error) => {
+            .catch((error) => {})
+            .finally(() => {
                 setTopEnergyDataFetching(false);
             });
     };
