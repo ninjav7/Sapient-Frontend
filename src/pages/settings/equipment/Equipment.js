@@ -401,6 +401,7 @@ const Equipment = () => {
         setEquipmentFilter({
             equipment_id: row?.equipments_id,
             equipment_name: row?.equipments_name,
+            equipment_type: row?.device_type,
         });
         handleChartOpen();
     };
@@ -963,7 +964,7 @@ const Equipment = () => {
             <EquipChartModal
                 showEquipmentChart={showEquipmentChart}
                 handleChartClose={handleChartClose}
-                equipmentFilter={equipmentFilter}
+                selectedEquipObj={equipmentFilter}
                 fetchEquipmentData={fetchEquipmentData}
                 selectedTab={selectedModalTab}
                 setSelectedTab={setSelectedModalTab}

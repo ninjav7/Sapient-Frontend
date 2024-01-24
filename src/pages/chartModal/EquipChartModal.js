@@ -27,7 +27,7 @@ import {
     dateTimeFormatForHighChart,
     formatXaxisForHighCharts,
 } from '../../helpers/helpers';
-import { metricsWithMultipleSensors } from './constants';
+import { metricsWithMultipleSensors, rulesAlert } from './constants';
 import { handleDataConversion, renderEquipChartMetrics } from './helper';
 import { formatConsumptionValue } from '../../helpers/explorehelpers';
 import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
@@ -323,18 +323,21 @@ const EquipChartModal = ({
     showEquipmentChart,
     handleChartClose,
     fetchEquipmentData,
-    equipmentFilter,
+    selectedEquipObj,
     selectedTab,
     setSelectedTab,
     activePage,
 }) => {
+    const history = useHistory();
+
     const [userPermission] = useAtom(userPermissionData);
     const isUserAdmin = userPermission?.is_admin ?? false;
     const isSuperUser = userPermission?.is_superuser ?? false;
     const isSuperAdmin = isUserAdmin || isSuperUser;
     const canUserEdit = userPermission?.permissions?.permissions?.building_equipment_permission?.edit ?? false;
 
-    const history = useHistory();
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -343,19 +346,12 @@ const EquipChartModal = ({
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
-    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
-
     const [equipData, setEquipData] = useState({});
     const [originalEquipData, setOriginalEquipData] = useState({});
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
 
     const metric = renderEquipChartMetrics(originalEquipData);
-
-    const rulesAlert = [
-        { value: 'desktop-pc', label: 'Desktop PC' },
-        { value: 'refigerator', label: 'Refigerator' },
-    ];
+    const isEquipmentConfigModified = compareObjData(equipData, originalEquipData);
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0]?.unit);
     const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0]?.Consumption);
@@ -368,19 +364,17 @@ const EquipChartModal = ({
     const [isFetchingMetaData, setFetchingMetaData] = useState(false);
 
     const [sensors, setSensors] = useState([]);
-    const [isModified, setModification] = useState(false);
     const [isProcessing, setProcessing] = useState(false);
     const [selectedConsumption, setConsumption] = useState(metric[0]?.value);
     const [equipBreakerLink, setEquipBreakerLink] = useState([]);
-    const [closeFlag, setCloseFlag] = useState(false);
 
     const handleUnitChange = (value) => {
-        let obj = metric.find((record) => record.value === value);
-        setSelectedUnit(obj.unit);
+        const obj = metric.find((record) => record?.value === value);
+        setSelectedUnit(obj?.unit);
     };
     const handleConsumptionChange = (value) => {
-        let obj = metric.find((record) => record.value === value);
-        setSelectedConsumptionLabel(obj.Consumption);
+        const obj = metric.find((record) => record?.value === value);
+        setSelectedConsumptionLabel(obj?.Consumption);
     };
 
     const handleDataChange = (key, value) => {
@@ -389,6 +383,7 @@ const EquipChartModal = ({
         setEquipData(obj);
     };
 
+    // Update Equipment
     const handleEquipmentUpdate = async () => {
         setProcessing(true);
         let obj = {};
@@ -430,7 +425,6 @@ const EquipChartModal = ({
                     const arr = apiRequestBody(startDate, endDate, timeZone);
                     setEquipData({});
                     setOriginalEquipData({});
-                    setModification(false);
                     setProcessing(false);
                     handleChartClose();
                     fetchEquipmentData(arr);
@@ -452,11 +446,10 @@ const EquipChartModal = ({
             });
     };
 
+    // Close Equipment Modal
     const handleCloseWithoutSave = () => {
         setOriginalEquipData({});
         setEquipData({});
-        setCloseFlag(true);
-        setModification(false);
         setSelectedUnit(metric[0].unit);
         setConsumption(metric[0].value);
         setDeviceData([]);
@@ -475,7 +468,8 @@ const EquipChartModal = ({
         handleChartClose();
     };
 
-    const fetchEquipmentChart = async (equipId, equiName) => {
+    // Fetch Equipment Chart V1 API
+    const fetchEquipmentChartV1 = async (equipId, equiName) => {
         setIsEquipDataFetched(true);
 
         const payload = apiRequestBody(startDate, endDate, timeZone);
@@ -536,6 +530,7 @@ const EquipChartModal = ({
             });
     };
 
+    // Fetch Equipment Chart V2 API
     const fetchEquipmentChartV2 = async (equipId, equiName) => {
         if (!equipId || !bldgId || !startDate || !endDate || !selectedConsumption) {
             return;
@@ -630,23 +625,42 @@ const EquipChartModal = ({
         }
     };
 
-    const fetchEquipmentDetails = async (equipId) => {
-        const params = `/${equipId}`;
+    const fetchActiveDeviceSensorData = async (device_id) => {
+        if (!device_id) return;
+
+        const params = `?device_id=${device_id}`;
+
+        await updateListSensor(params)
+            .then((res) => {
+                const response = res?.data;
+                if (response) setSensors(response);
+            })
+            .catch((error) => {});
+    };
+
+    const fetchEquipmentDetails = async (equip_id) => {
+        if (!equip_id) return;
+
+        const params = `/${equip_id}`;
+
         await getEquipmentDetails(params)
             .then((res) => {
-                const response = res?.data?.data;
+                const { success: isSuccessful, data } = res?.data;
+                if (isSuccessful && data && data?.equipments_id) {
+                    setOriginalEquipData(data);
+                    setEquipData(data);
+                    setEquipBreakerLink(data?.breaker_link);
 
-                if (response) {
-                    setOriginalEquipData(response);
-                    setEquipData(response);
-                    setEquipBreakerLink(response?.breaker_link);
+                    if (data?.device_type === 'active' && data?.device_id) {
+                        fetchActiveDeviceSensorData(data?.device_id);
+                    }
                 }
             })
             .catch((error) => {});
     };
 
-    const fetchEquipmentKPIData = async (equipId) => {
-        if (!equipId) return;
+    const fetchEquipmentKPIData = async (equip_id) => {
+        if (!equip_id) return;
 
         setFetchingMetaData(true);
         setEquipMetaData({});
@@ -655,11 +669,11 @@ const EquipChartModal = ({
             endDate
         )}&tz_info=${encodeURIComponent(timeZone)}`;
 
-        await fetchEquipmentKPIs(params, equipId)
+        await fetchEquipmentKPIs(params, equip_id)
             .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    if (response?.data) setEquipMetaData(response?.data);
+                const { success: isSuccessful, data } = res?.data;
+                if (isSuccessful && data) {
+                    setEquipMetaData(data);
                 }
             })
             .catch((err) => {})
@@ -668,94 +682,62 @@ const EquipChartModal = ({
             });
     };
 
+    const fetchMetadata = async () => {
+        await getMetadataRequest(bldgId)
+            .then((res) => {
+                const { end_uses, equipment_type, location } = res?.data;
+
+                const endUseData = end_uses.map((el) => {
+                    return {
+                        label: el?.name,
+                        value: el?.end_use_id,
+                    };
+                });
+
+                const locationDataLocal = location.map((el) => {
+                    return {
+                        label: el?.location_name,
+                        value: el?.location_id,
+                    };
+                });
+
+                const equipTypeData = equipment_type.map((el) => {
+                    return {
+                        label: el?.equipment_type,
+                        value: el?.equipment_id,
+                        end_use_name: el?.end_use_name,
+                    };
+                });
+                const sortedLocationData = locationDataLocal.slice().sort((a, b) => a.label.localeCompare(b.label));
+
+                setEquipmentTypeData(equipTypeData);
+                setEndUse(endUseData);
+                setLocationData(sortedLocationData);
+            })
+            .finally(() => {});
+    };
+
     useEffect(() => {
-        if (!equipmentFilter?.equipment_id) return;
+        if (!selectedEquipObj?.equipment_id || !showEquipmentChart) return;
 
-        const fetchMetadata = async () => {
-            await getMetadataRequest(bldgId)
-                .then((res) => {
-                    const { end_uses, equipment_type, location } = res?.data;
+        fetchEquipmentDetails(selectedEquipObj?.equipment_id);
+    }, [selectedEquipObj]);
 
-                    const endUseData = end_uses.map((el) => {
-                        return {
-                            label: el?.name,
-                            value: el?.end_use_id,
-                        };
-                    });
+    useEffect(() => {
+        if (!selectedEquipObj?.equipment_id || !showEquipmentChart) return;
+        if (!selectedConsumption || !bldgId || !startDate || !endDate) return;
 
-                    const locationDataLocal = location.map((el) => {
-                        return {
-                            label: el?.location_name,
-                            value: el?.location_id,
-                        };
-                    });
+        const { equipment_id, equipment_name } = selectedEquipObj;
 
-                    const equipTypeData = equipment_type.map((el) => {
-                        return {
-                            label: el?.equipment_type,
-                            value: el?.equipment_id,
-                            end_use_name: el?.end_use_name,
-                        };
-                    });
-                    const sortedLocationData = locationDataLocal.slice().sort((a, b) => a.label.localeCompare(b.label));
-
-                    setEquipmentTypeData(equipTypeData);
-                    setEndUse(endUseData);
-                    setLocationData(sortedLocationData);
-                })
-                .finally(() => {});
-        };
-
-        fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
-        fetchEquipmentDetails(equipmentFilter?.equipment_id);
-        fetchEquipmentKPIData(equipmentFilter?.equipment_id);
+        fetchEquipmentKPIData(equipment_id);
         fetchMetadata();
-    }, [equipmentFilter]);
 
-    useEffect(() => {
-        if (equipData.length === 0) {
-            return;
-        }
-        const fetchActiveDeviceSensorData = async () => {
-            if (equipData !== null) {
-                if (
-                    equipData?.device_type === 'passive' ||
-                    equipData?.device_id === '' ||
-                    equipData?.device_id === undefined
-                ) {
-                    return;
-                }
-            }
-            let params = `?device_id=${equipData.device_id}`;
-            await updateListSensor(params)
-                .then((res) => {
-                    let response = res.data;
-                    setSensors(response);
-                })
-                .catch((error) => {});
-        };
-
-        if (equipData !== null) {
-            if (equipData?.device_type !== 'passive') {
-                fetchActiveDeviceSensorData();
-            }
-        }
-    }, [equipData]);
-
-    useEffect(() => {
-        if (!equipmentFilter?.equipment_id || startDate === null || endDate === null) return;
-
-        if (closeFlag !== true) {
-            fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
-            fetchEquipmentKPIData(equipmentFilter?.equipment_id);
+        if (selectedEquipObj?.equipment_type === 'active') {
+            fetchEquipmentChartV1(equipment_id, equipment_name);
         } else {
-            setCloseFlag(false);
+            fetchEquipmentChartV2(equipment_id, equipment_name);
         }
-    }, [startDate, endDate, selectedConsumption]);
-
-    useEffect(() => {
-        if (equipData) setModification(compareObjData(equipData, originalEquipData));
-    }, [equipData]);
+    }, [selectedEquipObj, startDate, endDate, selectedConsumption, bldgId]);
 
     return (
         <div>
@@ -821,7 +803,11 @@ const EquipChartModal = ({
                                                 size={Button.Sizes.md}
                                                 type={Button.Type.primary}
                                                 onClick={handleEquipmentUpdate}
-                                                disabled={isModified || isProcessing || !(isSuperAdmin || canUserEdit)}
+                                                disabled={
+                                                    isProcessing ||
+                                                    isEquipmentConfigModified ||
+                                                    !(isSuperAdmin || canUserEdit)
+                                                }
                                                 className="ml-2"
                                             />
                                         </div>

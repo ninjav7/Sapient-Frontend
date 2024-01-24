@@ -65,3 +65,8 @@ export const metricForPassiveWithMultipleBreaker = [
 ];
 
 export const metricsWithMultipleSensors = ['sensor_rms_current', 'sensor_max_current', 'sensor_min_current'];
+
+export const rulesAlert = [
+    { value: 'desktop-pc', label: 'Desktop PC' },
+    { value: 'refigerator', label: 'Refigerator' },
+];
