@@ -394,6 +394,8 @@ const EquipChartModal = ({
         if (originalEquipData?.serial !== equipData?.serial) obj.serial = equipData?.serial;
 
         if (originalEquipData?.location_id !== equipData?.location_id) obj.space_id = equipData?.location_id;
+        if (originalEquipData?.location_served !== equipData?.location_served)
+            obj.location_served = equipData?.location_served;
 
         if (originalEquipData?.equipments_type_id !== equipData?.equipments_type_id) {
             obj.equipment_type = equipData?.equipments_type_id;
@@ -407,6 +409,7 @@ const EquipChartModal = ({
         if (!compareObjData(originalEquipData?.tags, equipData?.tags)) obj.tag = equipData?.tags;
 
         const params = `?equipment_id=${equipData?.equipments_id}`;
+
         await updateEquipmentDetails(params, obj)
             .then((res) => {
                 const response = res?.data;
@@ -416,7 +419,7 @@ const EquipChartModal = ({
                 if (response?.success) {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = 'Equipment updated Successfully!';
+                        s.notificationMessage = 'Equipment updated successfully!';
                         s.notificationType = 'success';
                     });
                     const arr = apiRequestBody(startDate, endDate, timeZone);
@@ -1075,31 +1078,60 @@ const EquipChartModal = ({
 
                                         <Brick sizeInRem={1.25} />
 
-                                        <div>
-                                            <Typography.Body size={Typography.Sizes.md}>
-                                                Equipment Location
-                                            </Typography.Body>
-                                            <Brick sizeInRem={0.25} />
-                                            <Select
-                                                placeholder="Select Location"
-                                                options={locationData}
-                                                currentValue={locationData.filter(
-                                                    (option) => option.value === equipData?.location_id
-                                                )}
-                                                onChange={(e) => {
-                                                    handleDataChange('location_id', e.value);
-                                                }}
-                                                isSearchable={true}
-                                                customSearchCallback={({ data, query }) =>
-                                                    defaultDropdownSearch(data, query?.value)
-                                                }
-                                                disabled={!(isSuperAdmin || canUserEdit)}
-                                            />
+                                        <div className="d-flex">
+                                            <div className="w-100">
+                                                <Typography.Body size={Typography.Sizes.md}>
+                                                    Equipment Location
+                                                </Typography.Body>
+                                                <Brick sizeInRem={0.25} />
+                                                <Select
+                                                    placeholder="Select Location"
+                                                    options={locationData}
+                                                    currentValue={locationData.filter(
+                                                        (option) => option.value === equipData?.location_id
+                                                    )}
+                                                    onChange={(e) => {
+                                                        handleDataChange('location_id', e.value);
+                                                    }}
+                                                    isSearchable={true}
+                                                    customSearchCallback={({ data, query }) =>
+                                                        defaultDropdownSearch(data, query?.value)
+                                                    }
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
+                                                />
 
-                                            <Brick sizeInRem={0.25} />
-                                            <Typography.Body size={Typography.Sizes.sm}>
-                                                Location this equipment is installed in.
-                                            </Typography.Body>
+                                                <Brick sizeInRem={0.25} />
+                                                <Typography.Body size={Typography.Sizes.sm}>
+                                                    Location this equipment is installed in.
+                                                </Typography.Body>
+                                            </div>
+
+                                            <div className="w-100 ml-2">
+                                                <Typography.Body size={Typography.Sizes.md}>
+                                                    Location Served
+                                                </Typography.Body>
+                                                <Brick sizeInRem={0.25} />
+                                                <Select
+                                                    placeholder="Select Location"
+                                                    options={locationData}
+                                                    currentValue={locationData.filter(
+                                                        (option) => option.value === equipData?.location_served
+                                                    )}
+                                                    onChange={(e) => {
+                                                        handleDataChange('location_served', e.value);
+                                                    }}
+                                                    isSearchable={true}
+                                                    customSearchCallback={({ data, query }) =>
+                                                        defaultDropdownSearch(data, query?.value)
+                                                    }
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
+                                                />
+
+                                                <Brick sizeInRem={0.25} />
+                                                <Typography.Body size={Typography.Sizes.sm}>
+                                                    Location that this equipment serves.
+                                                </Typography.Body>
+                                            </div>
                                         </div>
 
                                         <Brick sizeInRem={1.25} />
