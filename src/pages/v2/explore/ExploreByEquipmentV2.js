@@ -268,7 +268,7 @@ const ExploreByEquipmentV2 = () => {
                         setEquipmentFilter({
                             equipment_id: row?.equipment_id,
                             equipment_name: row?.equipment_name,
-                            equipment_type: row?.device_type,
+                            device_type: row?.device_type,
                         });
                         localStorage.setItem('exploreEquipName', row?.equipment_name);
                         handleChartOpen();

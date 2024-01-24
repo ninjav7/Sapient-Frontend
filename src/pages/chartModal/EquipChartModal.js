@@ -732,7 +732,7 @@ const EquipChartModal = ({
         fetchEquipmentKPIData(equipment_id);
         fetchMetadata();
 
-        if (selectedEquipObj?.equipment_type === 'active') {
+        if (selectedEquipObj?.device_type === 'active') {
             fetchEquipmentChartV1(equipment_id, equipment_name);
         } else {
             fetchEquipmentChartV2(equipment_id, equipment_name);
