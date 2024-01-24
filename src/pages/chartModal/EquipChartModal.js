@@ -842,11 +842,13 @@ const EquipChartModal = ({
 
                                     <Brick sizeInRem={2} />
 
-                                    <MachineHealthContainer
-                                        equipMetaData={equipMetaData}
-                                        isFetching={isFetchingMetaData}
-                                        equipDataObj={originalEquipData}
-                                    />
+                                    {originalEquipData?.device_type && originalEquipData?.device_type !== 'active' && (
+                                        <MachineHealthContainer
+                                            equipMetaData={equipMetaData}
+                                            isFetching={isFetchingMetaData}
+                                            equipDataObj={originalEquipData}
+                                        />
+                                    )}
                                 </Col>
 
                                 <Col xl={9}>
