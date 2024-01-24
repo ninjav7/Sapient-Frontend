@@ -190,7 +190,7 @@ const MachineHealthContainer = (props) => {
                                                       )} %`
                                                     : '-'}
                                             </Typography.Subheader>
-                                            {equipMetaData?.average_imbalance_percent && (
+                                            {equipMetaData?.average_imbalance_percent > 10 && (
                                                 <>
                                                     <UncontrolledTooltip
                                                         placement="top"
@@ -226,7 +226,7 @@ const MachineHealthContainer = (props) => {
                                                     <UncontrolledTooltip
                                                         placement="top"
                                                         target={'tooltip-imbalance-current'}>
-                                                        {`Phase Imbanace occurs when the phases of current on an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
+                                                        {`Phase Imbanace occurs when the phases of current on an equipment are unequal.`}
                                                     </UncontrolledTooltip>
                                                     <DangerAlertSVG
                                                         width={16}
