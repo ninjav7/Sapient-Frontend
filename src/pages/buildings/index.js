@@ -289,7 +289,7 @@ const BuildingOverview = () => {
         setEquipmentFilter({
             equipment_id: selectedEquipObj?.id,
             equipment_name: selectedEquipObj?.label,
-            equipment_type: selectedEquipObj?.equipment_type,
+            device_type: selectedEquipObj?.device_type,
         });
         localStorage.setItem('exploreEquipName', selectedEquipObj?.label);
         handleChartOpen();

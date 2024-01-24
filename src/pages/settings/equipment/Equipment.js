@@ -401,7 +401,7 @@ const Equipment = () => {
         setEquipmentFilter({
             equipment_id: row?.equipments_id,
             equipment_name: row?.equipments_name,
-            equipment_type: row?.device_type,
+            device_type: row?.device_type,
         });
         handleChartOpen();
     };
