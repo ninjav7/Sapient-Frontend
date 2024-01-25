@@ -1,67 +1,329 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, FormGroup, Spinner, Modal } from 'reactstrap';
-import { DateRangeStore } from '../../store/DateRangeStore';
-import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
-import { fetchEquipmentChartDataV2, fetchExploreEquipmentChart } from '../explore/services';
-import {
-    updateListSensor,
-    updateEquipmentDetails,
-    getEquipmentDetails,
-    updateExploreEquipmentYTDUsage,
-    getMetadataRequest,
-} from './services';
-import { useHistory, Link } from 'react-router-dom';
 import { useAtom } from 'jotai';
-import { userPermissionData } from '../../store/globalState';
 import moment from 'moment';
 import 'moment-timezone';
+import { useHistory, Link } from 'react-router-dom';
 import { TagsInput } from 'react-tag-input-component';
-import { BuildingStore } from '../../store/BuildingStore';
-import { UserStore } from '../../store/UserStore';
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { Row, Col, FormGroup, Spinner, Modal, UncontrolledTooltip } from 'reactstrap';
+
 import Header from '../../components/Header';
-import { formatConsumptionValue } from '../../helpers/explorehelpers';
 import Button from '../../sharedComponents/button/Button';
-import './style.css';
-import '../../sharedComponents/typography/style.scss';
-import {
-    apiRequestBody,
-    compareObjData,
-    dateTimeFormatForHighChart,
-    formatXaxisForHighCharts,
-} from '../../helpers/helpers';
-import { metricsWithMultipleSensors } from './constants';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import Typography from '../../sharedComponents/typography';
 import Brick from '../../sharedComponents/brick';
 import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import Textarea from '../../sharedComponents/form/textarea/Textarea';
+
+import { BuildingStore } from '../../store/BuildingStore';
+import { UserStore } from '../../store/UserStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
+import { userPermissionData } from '../../store/globalState';
+
+import {
+    apiRequestBody,
+    compareObjData,
+    dateTimeFormatForHighChart,
+    formatXaxisForHighCharts,
+} from '../../helpers/helpers';
+import { metricsWithMultipleSensors, rulesAlert } from './constants';
+import { handleDataConversion, renderEquipChartMetrics } from './helper';
+import { formatConsumptionValue } from '../../helpers/explorehelpers';
+import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
+
 import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/attached.svg';
 import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
-import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
-import { handleDataConversion, renderEquipChartMetrics } from './helper';
+import { ReactComponent as DangerAlertSVG } from '../../assets/icon/alert-danger.svg';
+import { ReactComponent as TooltipIcon } from '../../sharedComponents/assets/icons/tooltip.svg';
+import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
 
+import {
+    updateListSensor,
+    updateEquipmentDetails,
+    getEquipmentDetails,
+    getMetadataRequest,
+    fetchEquipmentKPIs,
+} from './services';
+import { fetchEquipmentChartDataV2, fetchExploreEquipmentChart } from '../explore/services';
+
+import './style.css';
+import '../../sharedComponents/typography/style.scss';
+import colorPalette from '../../assets/scss/_colors.scss';
+import 'react-loading-skeleton/dist/skeleton.css';
 import '../settings/passive-devices/styles.scss';
 import './styles.scss';
+
+const MachineHealthContainer = (props) => {
+    const { equipMetaData = {}, isFetching = false, equipDataObj = {} } = props;
+
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+    const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
+
+    const isMultipleSensorAttachedToEquipment =
+        equipDataObj?.device_type === 'passive' && equipDataObj?.breaker_link && equipDataObj?.breaker_link?.length > 1;
+
+    return (
+        <>
+            <Typography.Subheader size={Typography.Sizes.md}>Machine Health</Typography.Subheader>
+            <Brick sizeInRem={0.5} />
+            <div className="d-flex flex-column w-auto h-auto metadata-container">
+                {isFetching ? (
+                    <SkeletonTheme
+                        baseColor={colorPalette.primaryGray150}
+                        highlightColor={colorPalette.baseBackground}
+                        borderRadius={10}
+                        height={15}>
+                        <Skeleton count={10} className="mb-2" />
+                    </SkeletonTheme>
+                ) : (
+                    <div>
+                        <Typography.Subheader size={Typography.Sizes.lg}>
+                            {`Current Period (${moment(startDate).format(dateFormat)} to ${moment(endDate).format(
+                                dateFormat
+                            )})`}
+                        </Typography.Subheader>
+
+                        <Brick sizeInRem={0.25} />
+
+                        <div style={{ gap: '0.5rem' }}>
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Running Minutes:</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.running_minutes
+                                        ? formatConsumptionValue(Math.round(equipMetaData?.running_minutes))
+                                        : '-'}
+                                </Typography.Subheader>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Total Minutes:</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.total_minutes
+                                        ? formatConsumptionValue(Math.round(equipMetaData?.total_minutes))
+                                        : '-'}
+                                </Typography.Subheader>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Percent Runtime:</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.percent_runtime
+                                        ? `${formatConsumptionValue(equipMetaData?.percent_runtime, 2)} %`
+                                        : '-'}
+                                </Typography.Subheader>
+                            </div>
+                        </div>
+
+                        <Brick sizeInRem={0.75} />
+
+                        <div style={{ gap: '0.5rem' }}>
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Starts:</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.starts
+                                        ? formatConsumptionValue(Math.round(equipMetaData?.starts))
+                                        : '-'}
+                                </Typography.Subheader>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Stops:</Typography.Subheader>
+                                {equipMetaData?.stops ? formatConsumptionValue(Math.round(equipMetaData?.stops)) : '-'}
+                                <Typography.Subheader size={Typography.Sizes.lg}></Typography.Subheader>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    Average Runtime/Start:
+                                </Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.average_runtime_start
+                                        ? `${formatConsumptionValue(Math.round(equipMetaData?.average_runtime_start))}`
+                                        : '-'}
+                                </Typography.Subheader>
+                            </div>
+
+                            <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                <Typography.Subheader size={Typography.Sizes.md}>Last Start Time:</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.lg}>
+                                    {equipMetaData?.last_start_time
+                                        ? `${moment
+                                              .utc(equipMetaData?.last_start_time)
+                                              .clone()
+                                              .format(
+                                                  `${userPrefDateFormat === `DD-MM-YYYY` ? `DD/MM` : `MM/DD`} ${
+                                                      userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`
+                                                  }`
+                                              )}`
+                                        : '-'}
+                                </Typography.Subheader>
+                            </div>
+                        </div>
+
+                        {isMultipleSensorAttachedToEquipment && (
+                            <>
+                                <Brick sizeInRem={0.75} />
+
+                                <div style={{ gap: '0.5rem' }}>
+                                    <div>
+                                        <Typography.Subheader size={Typography.Sizes.lg}>
+                                            Phase Imbalance
+                                        </Typography.Subheader>
+                                    </div>
+
+                                    <Brick sizeInRem={0.25} />
+
+                                    <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                        <Typography.Subheader size={Typography.Sizes.md}>
+                                            Average Imbalance Percent:
+                                        </Typography.Subheader>
+                                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                            <Typography.Subheader size={Typography.Sizes.lg}>
+                                                {equipMetaData?.average_imbalance_percent
+                                                    ? `${formatConsumptionValue(
+                                                          equipMetaData?.average_imbalance_percent,
+                                                          2
+                                                      )} %`
+                                                    : '-'}
+                                            </Typography.Subheader>
+                                            {equipMetaData?.average_imbalance_percent > 10 && (
+                                                <>
+                                                    <UncontrolledTooltip
+                                                        placement="top"
+                                                        target={'tooltip-imbalance-percent'}>
+                                                        {`Phase Imbanace occurs when average percentage of an equipment are unequal. Phase Imbalance above 10% can damange 3-phase motors`}
+                                                    </UncontrolledTooltip>
+                                                    <DangerAlertSVG
+                                                        width={16}
+                                                        height={16}
+                                                        className="mouse-pointer"
+                                                        id={'tooltip-imbalance-percent'}
+                                                    />
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                        <Typography.Subheader size={Typography.Sizes.md}>
+                                            Average Imbalance Current:
+                                        </Typography.Subheader>
+                                        <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                            <Typography.Subheader size={Typography.Sizes.lg}>
+                                                {equipMetaData?.average_imbalance_current
+                                                    ? `${formatConsumptionValue(
+                                                          equipMetaData?.average_imbalance_current,
+                                                          2
+                                                      )} A`
+                                                    : '-'}
+                                            </Typography.Subheader>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
+            </div>
+        </>
+    );
+};
+
+const EnergyMetaDataContainer = (props) => {
+    const { equipMetaData = {}, isFetching = false } = props;
+
+    const { total_energy_consumption, peak_power = {} } = equipMetaData;
+
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
+
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+
+    const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
+    const totalConsumptionValue = total_energy_consumption
+        ? formatConsumptionValue(total_energy_consumption / 1000, 0)
+        : 0;
+    const powerConsumptionValue = peak_power?.avgPower ? formatConsumptionValue(peak_power?.avgPower / 1000000, 2) : 0;
+
+    return (
+        <>
+            <Typography.Subheader size={Typography.Sizes.md}>Energy</Typography.Subheader>
+            <Brick sizeInRem={0.5} />
+            <div className="d-flex flex-column w-auto h-auto metadata-container">
+                <div>
+                    <Typography.Subheader size={Typography.Sizes.lg}>
+                        {`Total Consumption (${moment(startDate).format(dateFormat)} to ${moment(endDate).format(
+                            dateFormat
+                        )})`}
+                    </Typography.Subheader>
+
+                    {isFetching ? (
+                        <Skeleton count={1} />
+                    ) : (
+                        <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
+                            <span className="ytd-value">{totalConsumptionValue}</span>
+                            <span className="ytd-unit">kWh</span>
+                        </div>
+                    )}
+                </div>
+                <div>
+                    <Typography.Subheader size={Typography.Sizes.lg}>
+                        {`Peak kW (${moment(startDate).format(dateFormat)} to ${moment(endDate).format(dateFormat)})`}
+                    </Typography.Subheader>
+
+                    {isFetching ? (
+                        <Skeleton count={1} />
+                    ) : (
+                        <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
+                            <span className="ytd-value">{powerConsumptionValue}</span>
+
+                            {peak_power?.timestamp ? (
+                                <span className="ytd-unit">
+                                    {`kW @ ${moment
+                                        .utc(peak_power?.timestamp)
+                                        .clone()
+                                        .format(
+                                            `${userPrefDateFormat === `DD-MM-YYYY` ? `DD/MM` : `MM/DD`} ${
+                                                userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`
+                                            }`
+                                        )}`}
+                                </span>
+                            ) : (
+                                <span className="ytd-unit">kW</span>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </>
+    );
+};
 
 const EquipChartModal = ({
     showEquipmentChart,
     handleChartClose,
     fetchEquipmentData,
-    equipmentFilter,
+    selectedEquipObj,
     selectedTab,
     setSelectedTab,
     activePage,
 }) => {
+    const history = useHistory();
+
     const [userPermission] = useAtom(userPermissionData);
     const isUserAdmin = userPermission?.is_admin ?? false;
     const isSuperUser = userPermission?.is_superuser ?? false;
     const isSuperAdmin = isUserAdmin || isSuperUser;
     const canUserEdit = userPermission?.permissions?.permissions?.building_equipment_permission?.edit ?? false;
 
-    const history = useHistory();
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -70,19 +332,12 @@ const EquipChartModal = ({
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
-    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
-
-    const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
     const [equipData, setEquipData] = useState({});
     const [originalEquipData, setOriginalEquipData] = useState({});
+    const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
 
     const metric = renderEquipChartMetrics(originalEquipData);
-
-    const rulesAlert = [
-        { value: 'desktop-pc', label: 'Desktop PC' },
-        { value: 'refigerator', label: 'Refigerator' },
-    ];
+    const isEquipmentConfigModified = compareObjData(equipData, originalEquipData);
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0]?.unit);
     const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0]?.Consumption);
@@ -90,22 +345,22 @@ const EquipChartModal = ({
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
-    const [isYtdDataFetching, setIsYtdDataFetching] = useState(false);
-    const [ytdData, setYtdData] = useState({});
+
+    const [equipMetaData, setEquipMetaData] = useState({});
+    const [isFetchingMetaData, setFetchingMetaData] = useState(false);
+
     const [sensors, setSensors] = useState([]);
-    const [isModified, setModification] = useState(false);
     const [isProcessing, setProcessing] = useState(false);
     const [selectedConsumption, setConsumption] = useState(metric[0]?.value);
     const [equipBreakerLink, setEquipBreakerLink] = useState([]);
-    const [closeFlag, setCloseFlag] = useState(false);
 
     const handleUnitChange = (value) => {
-        let obj = metric.find((record) => record.value === value);
-        setSelectedUnit(obj.unit);
+        const obj = metric.find((record) => record?.value === value);
+        setSelectedUnit(obj?.unit);
     };
     const handleConsumptionChange = (value) => {
-        let obj = metric.find((record) => record.value === value);
-        setSelectedConsumptionLabel(obj.Consumption);
+        const obj = metric.find((record) => record?.value === value);
+        setSelectedConsumptionLabel(obj?.Consumption);
     };
 
     const handleDataChange = (key, value) => {
@@ -114,6 +369,21 @@ const EquipChartModal = ({
         setEquipData(obj);
     };
 
+    const CustomToolTip = ({ id, message = '' }) => {
+        return (
+            <div>
+                <UncontrolledTooltip placement="top" target={`tooltip-for-${id}`}>
+                    {message}
+                </UncontrolledTooltip>
+
+                <button type="button" className="tooltip-button" id={`tooltip-for-${id}`}>
+                    <TooltipIcon className="tooltip-icon" />
+                </button>
+            </div>
+        );
+    };
+
+    // Update Equipment
     const handleEquipmentUpdate = async () => {
         setProcessing(true);
         let obj = {};
@@ -124,6 +394,8 @@ const EquipChartModal = ({
         if (originalEquipData?.serial !== equipData?.serial) obj.serial = equipData?.serial;
 
         if (originalEquipData?.location_id !== equipData?.location_id) obj.space_id = equipData?.location_id;
+        if (originalEquipData?.location_served !== equipData?.location_served)
+            obj.location_served = equipData?.location_served;
 
         if (originalEquipData?.equipments_type_id !== equipData?.equipments_type_id) {
             obj.equipment_type = equipData?.equipments_type_id;
@@ -137,6 +409,7 @@ const EquipChartModal = ({
         if (!compareObjData(originalEquipData?.tags, equipData?.tags)) obj.tag = equipData?.tags;
 
         const params = `?equipment_id=${equipData?.equipments_id}`;
+
         await updateEquipmentDetails(params, obj)
             .then((res) => {
                 const response = res?.data;
@@ -146,13 +419,12 @@ const EquipChartModal = ({
                 if (response?.success) {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = 'Equipment updated Successfully!';
+                        s.notificationMessage = 'Equipment updated successfully!';
                         s.notificationType = 'success';
                     });
                     const arr = apiRequestBody(startDate, endDate, timeZone);
                     setEquipData({});
                     setOriginalEquipData({});
-                    setModification(false);
                     setProcessing(false);
                     handleChartClose();
                     fetchEquipmentData(arr);
@@ -174,11 +446,10 @@ const EquipChartModal = ({
             });
     };
 
+    // Close Equipment Modal
     const handleCloseWithoutSave = () => {
         setOriginalEquipData({});
         setEquipData({});
-        setCloseFlag(true);
-        setModification(false);
         setSelectedUnit(metric[0].unit);
         setConsumption(metric[0].value);
         setDeviceData([]);
@@ -197,7 +468,8 @@ const EquipChartModal = ({
         handleChartClose();
     };
 
-    const fetchEquipmentChart = async (equipId, equiName) => {
+    // Fetch Equipment Chart V1 API
+    const fetchEquipmentChartV1 = async (equipId, equiName) => {
         setIsEquipDataFetched(true);
 
         const payload = apiRequestBody(startDate, endDate, timeZone);
@@ -258,6 +530,7 @@ const EquipChartModal = ({
             });
     };
 
+    // Fetch Equipment Chart V2 API
     const fetchEquipmentChartV2 = async (equipId, equiName) => {
         if (!equipId || !bldgId || !startDate || !endDate || !selectedConsumption) {
             return;
@@ -352,132 +625,119 @@ const EquipChartModal = ({
         }
     };
 
-    const fetchEquipmentYTDUsageData = async (equipId) => {
-        setIsYtdDataFetching(true);
-        let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
-        let payload = apiRequestBody(startDate, endDate, timeZone);
-        await updateExploreEquipmentYTDUsage(payload, params)
+    const fetchActiveDeviceSensorData = async (device_id) => {
+        if (!device_id) return;
+
+        const params = `?device_id=${device_id}`;
+
+        await updateListSensor(params)
             .then((res) => {
-                let response = res.data.data;
-                setYtdData(response[0]);
-                setIsYtdDataFetching(false);
+                const response = res?.data;
+                if (response) setSensors(response);
             })
-            .catch((error) => {
-                setIsYtdDataFetching(false);
-            });
+            .catch((error) => {});
     };
 
-    const fetchEquipmentDetails = async (equipId) => {
-        const params = `/${equipId}`;
+    const fetchEquipmentDetails = async (equip_id) => {
+        if (!equip_id) return;
+
+        const params = `/${equip_id}`;
+
         await getEquipmentDetails(params)
             .then((res) => {
-                const response = res?.data?.data;
+                const { success: isSuccessful, data } = res?.data;
+                if (isSuccessful && data && data?.equipments_id) {
+                    setOriginalEquipData(data);
+                    setEquipData(data);
+                    setEquipBreakerLink(data?.breaker_link);
 
-                if (response) {
-                    setOriginalEquipData(response);
-                    setEquipData(response);
-                    setEquipBreakerLink(response?.breaker_link);
+                    if (data?.device_type === 'active' && data?.device_id) {
+                        fetchActiveDeviceSensorData(data?.device_id);
+                    }
                 }
             })
             .catch((error) => {});
     };
 
-    useEffect(() => {
-        if (!equipmentFilter?.equipment_id) return;
+    const fetchEquipmentKPIData = async (equip_id) => {
+        if (!equip_id) return;
 
-        const fetchMetadata = async () => {
-            await getMetadataRequest(bldgId)
-                .then((res) => {
-                    const { end_uses, equipment_type, location } = res?.data;
+        setFetchingMetaData(true);
+        setEquipMetaData({});
 
-                    const endUseData = end_uses.map((el) => {
-                        return {
-                            label: el?.name,
-                            value: el?.end_use_id,
-                        };
-                    });
+        const params = `?building_id=${bldgId}&date_from=${encodeURIComponent(startDate)}&date_to=${encodeURIComponent(
+            endDate
+        )}&tz_info=${encodeURIComponent(timeZone)}`;
 
-                    const locationDataLocal = location.map((el) => {
-                        return {
-                            label: el?.location_name,
-                            value: el?.location_id,
-                        };
-                    });
-
-                    const equipTypeData = equipment_type.map((el) => {
-                        return {
-                            label: el?.equipment_type,
-                            value: el?.equipment_id,
-                            end_use_name: el?.end_use_name,
-                        };
-                    });
-                    const sortedLocationData = locationDataLocal.slice().sort((a, b) => a.label.localeCompare(b.label));
-
-                    setEquipmentTypeData(equipTypeData);
-                    setEndUse(endUseData);
-                    setLocationData(sortedLocationData);
-                })
-                .finally(() => {});
-        };
-
-        fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
-        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
-        fetchEquipmentDetails(equipmentFilter?.equipment_id);
-        fetchMetadata();
-    }, [equipmentFilter]);
-
-    useEffect(() => {
-        if (equipData.length === 0) {
-            return;
-        }
-        const fetchActiveDeviceSensorData = async () => {
-            if (equipData !== null) {
-                if (
-                    equipData?.device_type === 'passive' ||
-                    equipData?.device_id === '' ||
-                    equipData?.device_id === undefined
-                ) {
-                    return;
+        await fetchEquipmentKPIs(params, equip_id)
+            .then((res) => {
+                const { success: isSuccessful, data } = res?.data;
+                if (isSuccessful && data) {
+                    setEquipMetaData(data);
                 }
-            }
-            let params = `?device_id=${equipData.device_id}`;
-            await updateListSensor(params)
-                .then((res) => {
-                    let response = res.data;
-                    setSensors(response);
-                })
-                .catch((error) => {});
-        };
+            })
+            .catch((err) => {})
+            .finally(() => {
+                setFetchingMetaData(false);
+            });
+    };
 
-        if (equipData !== null) {
-            if (equipData?.device_type !== 'passive') {
-                fetchActiveDeviceSensorData();
-            }
-        }
-    }, [equipData]);
+    const fetchMetadata = async () => {
+        await getMetadataRequest(bldgId)
+            .then((res) => {
+                const { end_uses, equipment_type, location } = res?.data;
+
+                const endUseData = end_uses.map((el) => {
+                    return {
+                        label: el?.name,
+                        value: el?.end_use_id,
+                    };
+                });
+
+                const locationDataLocal = location.map((el) => {
+                    return {
+                        label: el?.location_name,
+                        value: el?.location_id,
+                    };
+                });
+
+                const equipTypeData = equipment_type.map((el) => {
+                    return {
+                        label: el?.equipment_type,
+                        value: el?.equipment_id,
+                        end_use_name: el?.end_use_name,
+                    };
+                });
+                const sortedLocationData = locationDataLocal.slice().sort((a, b) => a.label.localeCompare(b.label));
+
+                setEquipmentTypeData(equipTypeData);
+                setEndUse(endUseData);
+                setLocationData(sortedLocationData);
+            })
+            .finally(() => {});
+    };
 
     useEffect(() => {
-        if (!equipmentFilter?.equipment_id) {
-            return;
-        }
-        if (startDate === null) {
-            return;
-        }
+        if (!selectedEquipObj?.equipment_id || !showEquipmentChart) return;
 
-        if (endDate === null) {
-            return;
-        }
-        if (closeFlag !== true) {
-            fetchEquipmentChartV2(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
-            fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
+        fetchEquipmentDetails(selectedEquipObj?.equipment_id);
+    }, [selectedEquipObj]);
+
+    useEffect(() => {
+        if (!selectedEquipObj?.equipment_id || !showEquipmentChart) return;
+        if (!selectedConsumption || !bldgId || !startDate || !endDate) return;
+
+        const { equipment_id, equipment_name } = selectedEquipObj;
+
+        fetchEquipmentKPIData(equipment_id);
+        fetchMetadata();
+
+        if (selectedEquipObj?.device_type === 'active') {
+            fetchEquipmentChartV1(equipment_id, equipment_name);
         } else {
-            setCloseFlag(false);
+            fetchEquipmentChartV2(equipment_id, equipment_name);
         }
-    }, [startDate, endDate, selectedConsumption]);
-
-    useEffect(() => {
-        if (equipData) setModification(compareObjData(equipData, originalEquipData));
-    }, [equipData]);
+    }, [selectedEquipObj, startDate, endDate, selectedConsumption, bldgId]);
 
     return (
         <div>
@@ -543,7 +803,11 @@ const EquipChartModal = ({
                                                 size={Button.Sizes.md}
                                                 type={Button.Type.primary}
                                                 onClick={handleEquipmentUpdate}
-                                                disabled={isModified || isProcessing || !(isSuperAdmin || canUserEdit)}
+                                                disabled={
+                                                    isProcessing ||
+                                                    isEquipmentConfigModified ||
+                                                    !(isSuperAdmin || canUserEdit)
+                                                }
                                                 className="ml-2"
                                             />
                                         </div>
@@ -557,74 +821,20 @@ const EquipChartModal = ({
                         {selectedTab === 0 && (
                             <Row>
                                 <Col xl={3}>
-                                    <div className="ytd-container">
-                                        <div>
-                                            <div className="ytd-heading">
-                                                {`Total Consumption (${moment(startDate).format(
-                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
-                                                )} to ${moment(endDate).format(
-                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
-                                                )})`}
-                                            </div>
-                                            {isYtdDataFetching ? (
-                                                <Skeleton count={1} />
-                                            ) : (
-                                                <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
-                                                    <span className="ytd-value">
-                                                        {ytdData?.ytd?.ytd
-                                                            ? formatConsumptionValue(ytdData?.ytd?.ytd / 1000, 0)
-                                                            : 0}
-                                                    </span>
-                                                    <span className="ytd-unit">kWh</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <div className="ytd-heading">
-                                                {`Peak kW (${moment(startDate).format(
-                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
-                                                )} to ${moment(endDate).format(
-                                                    `${userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`}`
-                                                )})`}
-                                            </div>
-                                            {isYtdDataFetching ? (
-                                                <Skeleton count={1} />
-                                            ) : (
-                                                <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
-                                                    <span className="ytd-value">
-                                                        {ytdData?.ytd_peak?.power
-                                                            ? formatConsumptionValue(
-                                                                  ytdData?.ytd_peak?.power / 1000000,
-                                                                  2
-                                                              )
-                                                            : 0}
-                                                    </span>
+                                    <EnergyMetaDataContainer
+                                        equipMetaData={equipMetaData}
+                                        isFetching={isFetchingMetaData}
+                                    />
 
-                                                    {ytdData?.ytd_peak?.time_stamp ? (
-                                                        <span className="ytd-unit">
-                                                            {`kW @ ${moment
-                                                                .utc(ytdData?.ytd_peak?.time_stamp)
-                                                                .clone()
-                                                                .tz(timeZone)
-                                                                .format(
-                                                                    `${
-                                                                        userPrefDateFormat === `DD-MM-YYYY`
-                                                                            ? `DD/MM`
-                                                                            : `MM/DD`
-                                                                    } ${
-                                                                        userPrefTimeFormat === `12h`
-                                                                            ? `hh:mm A`
-                                                                            : `HH:mm`
-                                                                    }`
-                                                                )}`}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="ytd-unit">kW</span>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
+                                    <Brick sizeInRem={2} />
+
+                                    {originalEquipData?.device_type && originalEquipData?.device_type !== 'active' && (
+                                        <MachineHealthContainer
+                                            equipMetaData={equipMetaData}
+                                            isFetching={isFetchingMetaData}
+                                            equipDataObj={originalEquipData}
+                                        />
+                                    )}
                                 </Col>
 
                                 <Col xl={9}>
@@ -861,31 +1071,62 @@ const EquipChartModal = ({
 
                                         <Brick sizeInRem={1.25} />
 
-                                        <div>
-                                            <Typography.Body size={Typography.Sizes.md}>
-                                                Equipment Location
-                                            </Typography.Body>
-                                            <Brick sizeInRem={0.25} />
-                                            <Select
-                                                placeholder="Select Location"
-                                                options={locationData}
-                                                currentValue={locationData.filter(
-                                                    (option) => option.value === equipData?.location_id
-                                                )}
-                                                onChange={(e) => {
-                                                    handleDataChange('location_id', e.value);
-                                                }}
-                                                isSearchable={true}
-                                                customSearchCallback={({ data, query }) =>
-                                                    defaultDropdownSearch(data, query?.value)
-                                                }
-                                                disabled={!(isSuperAdmin || canUserEdit)}
-                                            />
+                                        <div className="d-flex">
+                                            <div className="w-100">
+                                                <div className="d-flex align-items-center">
+                                                    <Typography.Body size={Typography.Sizes.md}>
+                                                        Equipment Location
+                                                    </Typography.Body>
+                                                    <CustomToolTip
+                                                        id="equip-location"
+                                                        message="Location this equipment is installed in."
+                                                    />
+                                                </div>
+                                                <Brick sizeInRem={0.25} />
+                                                <Select
+                                                    placeholder="Select Location"
+                                                    options={locationData}
+                                                    currentValue={locationData.filter(
+                                                        (option) => option.value === equipData?.location_id
+                                                    )}
+                                                    onChange={(e) => {
+                                                        handleDataChange('location_id', e.value);
+                                                    }}
+                                                    isSearchable={true}
+                                                    customSearchCallback={({ data, query }) =>
+                                                        defaultDropdownSearch(data, query?.value)
+                                                    }
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
+                                                />
+                                            </div>
 
-                                            <Brick sizeInRem={0.25} />
-                                            <Typography.Body size={Typography.Sizes.sm}>
-                                                Location this equipment is installed in.
-                                            </Typography.Body>
+                                            <div className="w-100 ml-2">
+                                                <div className="d-flex align-items-center">
+                                                    <Typography.Body size={Typography.Sizes.md}>
+                                                        Location Served
+                                                    </Typography.Body>
+                                                    <CustomToolTip
+                                                        id="location-serverd"
+                                                        message="Location that this equipment serves."
+                                                    />
+                                                </div>
+                                                <Brick sizeInRem={0.25} />
+                                                <Select
+                                                    placeholder="Select Location"
+                                                    options={locationData}
+                                                    currentValue={locationData.filter(
+                                                        (option) => option.value === equipData?.location_served
+                                                    )}
+                                                    onChange={(e) => {
+                                                        handleDataChange('location_served', e.value);
+                                                    }}
+                                                    isSearchable={true}
+                                                    customSearchCallback={({ data, query }) =>
+                                                        defaultDropdownSearch(data, query?.value)
+                                                    }
+                                                    disabled={!(isSuperAdmin || canUserEdit)}
+                                                />
+                                            </div>
                                         </div>
 
                                         <Brick sizeInRem={1.25} />
