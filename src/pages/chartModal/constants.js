@@ -9,8 +9,8 @@ export const metricForActiveDevice = [
     { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
     { value: 'current', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
     { value: 'voltage', label: 'Voltage (V)', unit: 'V', Consumption: 'Voltage' },
-    { value: 'runtime', label: 'Runtime', unit: 'minutes', Consumption: 'Runtime' },
-    { value: 'starts', label: 'Starts', unit: '', Consumption: 'Starts' },
+    // { value: 'runtime', label: 'Runtime', unit: 'minutes', Consumption: 'Runtime' }, PLT-1829: New Active Device Metric disabled.
+    // { value: 'starts', label: 'Starts', unit: '', Consumption: 'Starts' }, PLT-1829: New Active Device Metric disabled.
 ];
 
 export const metricForPassiveWithOneBreaker = [
