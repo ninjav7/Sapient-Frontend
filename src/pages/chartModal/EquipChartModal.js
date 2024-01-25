@@ -348,7 +348,6 @@ const EquipChartModal = ({
     const [deviceData, setDeviceData] = useState([]);
 
     const [equipMetaData, setEquipMetaData] = useState({});
-    console.log('SSR equipMetaData => ', equipMetaData);
     const [isFetchingMetaData, setFetchingMetaData] = useState(false);
 
     const [sensors, setSensors] = useState([]);
