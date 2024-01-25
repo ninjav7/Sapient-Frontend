@@ -6,6 +6,7 @@ import { Button } from '../../../../sharedComponents/button';
 import { DataTableWidget } from '../../../../sharedComponents/dataTableWidget';
 import SkeletonLoader from '../../../../components/SkeletonLoader';
 import { Badge } from '../../../../sharedComponents/badge';
+import { Checkbox } from '../../../../sharedComponents/form/checkbox';
 
 import { UserStore } from '../../../../store/UserStore';
 
@@ -24,6 +25,9 @@ const BuildingConfig = (props) => {
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
+
+    const [checkedAll, setCheckedAll] = useState(false);
+    const [userSelectedBldgIds, setUserSelectedBldgIds] = useState([]);
 
     const [buildingsList, setBuildingsList] = useState([]);
     const [buildingTypes, setBuildingTypes] = useState([]);
@@ -97,6 +101,15 @@ const BuildingConfig = (props) => {
         return buildingsList;
     };
 
+    const handleRowCheck = (value, selectedBldgObj) => {
+        if (value === 'true') {
+            const updatedBldgIds = userSelectedBldgIds.filter((bldgId) => bldgId !== selectedBldgObj?.building_id);
+            setUserSelectedBldgIds(updatedBldgIds);
+        } else if (value === 'false') {
+            setUserSelectedBldgIds((prevBldgIds) => [...prevBldgIds, selectedBldgObj?.building_id]);
+        }
+    };
+
     const getBuildingsList = async (user_pref_units, selected_bldg_type = []) => {
         setDataFetching(true);
 
@@ -140,6 +153,15 @@ const BuildingConfig = (props) => {
                 setFetchingFilterData(false);
             });
     };
+
+    useEffect(() => {
+        if (checkedAll && buildingsList && buildingsList.length !== 0) {
+            const allBldgsIds = buildingsList.map((el) => el?.building_id);
+            setUserSelectedBldgIds(allBldgsIds);
+        } else if (!checkedAll) {
+            setUserSelectedBldgIds([]);
+        }
+    }, [checkedAll, buildingsList]);
 
     useEffect(() => {
         if (isModalOpen) {
@@ -209,6 +231,7 @@ const BuildingConfig = (props) => {
                                     type={Button.Type.primary}
                                     onClick={handleModalClose}
                                     className="ml-2"
+                                    disabled={userSelectedBldgIds && userSelectedBldgIds.length === 0}
                                 />
                             </div>
                         </div>
@@ -217,10 +240,35 @@ const BuildingConfig = (props) => {
                     {/* Modal Body */}
                     <div style={{ padding: '2rem' }}>
                         <DataTableWidget
+                            id="building_target_type"
                             isLoading={isFetchingData}
                             isFilterLoading={isFetchingFilterData}
                             isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={12} />}
-                            id="buildings_list"
+                            customCheckAll={() => (
+                                <Checkbox
+                                    label=""
+                                    type="checkbox"
+                                    id="building_check_all"
+                                    name="building_check_all"
+                                    checked={checkedAll}
+                                    onChange={() => {
+                                        setCheckedAll(!checkedAll);
+                                    }}
+                                />
+                            )}
+                            customCheckboxForCell={(record) => (
+                                <Checkbox
+                                    label=""
+                                    type="checkbox"
+                                    id="building_target-type_check"
+                                    name="building_target-type_check"
+                                    checked={userSelectedBldgIds.includes(record?.building_id)}
+                                    value={userSelectedBldgIds.includes(record?.building_id)}
+                                    onChange={(e) => {
+                                        handleRowCheck(e.target.value, record);
+                                    }}
+                                />
+                            )}
                             buttonGroupFilterOptions={[]}
                             onSearch={setSearch}
                             onStatus={[]}
