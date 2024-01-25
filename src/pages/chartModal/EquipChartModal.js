@@ -44,6 +44,7 @@ import {
     getEquipmentDetails,
     getMetadataRequest,
     fetchEquipmentKPIs,
+    updateExploreEquipmentYTDUsage,
 } from './services';
 import { fetchEquipmentChartDataV2, fetchExploreEquipmentChart } from '../explore/services';
 
@@ -217,7 +218,7 @@ const MachineHealthContainer = (props) => {
                                             <Typography.Subheader size={Typography.Sizes.lg}>
                                                 {equipMetaData?.average_imbalance_current
                                                     ? `${formatConsumptionValue(
-                                                          equipMetaData?.average_imbalance_current,
+                                                          equipMetaData?.average_imbalance_current / 1000,
                                                           2
                                                       )} A`
                                                     : '-'}
@@ -471,16 +472,11 @@ const EquipChartModal = ({
     // Fetch Equipment Chart V1 API
     const fetchEquipmentChartV1 = async (equipId, equiName) => {
         setIsEquipDataFetched(true);
+        setDeviceData([]);
 
         const payload = apiRequestBody(startDate, endDate, timeZone);
 
-        const params = `?building_id=${bldgId}&consumption=${
-            selectedConsumption === 'rmsCurrentMilliAmps' && equipData?.device_type === 'active'
-                ? 'mAh'
-                : selectedConsumption
-        }&equipment_id=${equipId}&divisible_by=1000${
-            selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
-        }`;
+        const params = `?building_id=${bldgId}&consumption=${selectedConsumption}&equipment_id=${equipId}&divisible_by=1000`;
 
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
@@ -491,37 +487,17 @@ const EquipChartModal = ({
 
                     if (!data || data.length === 0) return;
 
-                    if (selectedConsumption === 'rmsCurrentMilliAmps') {
-                        const chartData = [];
+                    const newEquipMappedData = data.map((el) => ({
+                        x: new Date(el?.time_stamp).getTime(),
+                        y: el?.consumption === '' ? null : el?.consumption,
+                    }));
 
-                        data.forEach((sensorObj) => {
-                            const newSensorMappedData = sensorObj?.data.map((el) => ({
-                                x: new Date(el?.time_stamp).getTime(),
-                                y: el?.consumption === '' ? null : el?.consumption,
-                            }));
+                    const recordToInsert = {
+                        name: equiName,
+                        data: newEquipMappedData,
+                    };
 
-                            chartData.push({
-                                name: `Sensor ${sensorObj?.index_alias}`,
-                                data: newSensorMappedData,
-                            });
-                        });
-
-                        setDeviceData(chartData);
-                    }
-
-                    if (selectedConsumption !== 'rmsCurrentMilliAmps') {
-                        const newEquipMappedData = data.map((el) => ({
-                            x: new Date(el?.time_stamp).getTime(),
-                            y: el?.consumption === '' ? null : el?.consumption,
-                        }));
-
-                        const recordToInsert = {
-                            name: equiName,
-                            data: newEquipMappedData,
-                        };
-
-                        setDeviceData([recordToInsert]);
-                    }
+                    setDeviceData([recordToInsert]);
                 }
             })
             .catch((error) => {})
@@ -659,7 +635,38 @@ const EquipChartModal = ({
             .catch((error) => {});
     };
 
-    const fetchEquipmentKPIData = async (equip_id) => {
+    const fetchEquipmentKPIDataV1 = async (equipId) => {
+        if (!equipId) return;
+
+        setFetchingMetaData(true);
+        setEquipMetaData({});
+
+        const params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
+        const payload = apiRequestBody(startDate, endDate, timeZone);
+
+        await updateExploreEquipmentYTDUsage(payload, params)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    if (response?.data && response?.data.length !== 0) {
+                        const data = response?.data[0];
+                        setEquipMetaData({
+                            total_energy_consumption: data?.ytd?.ytd,
+                            peak_power: {
+                                avgPower: data?.ytd_peak?.power,
+                                timestamp: data?.ytd_peak?.time_stamp,
+                            },
+                        });
+                    }
+                }
+            })
+            .catch((err) => {})
+            .finally(() => {
+                setFetchingMetaData(false);
+            });
+    };
+
+    const fetchEquipmentKPIDataV2 = async (equip_id) => {
         if (!equip_id) return;
 
         setFetchingMetaData(true);
@@ -729,13 +736,14 @@ const EquipChartModal = ({
 
         const { equipment_id, equipment_name } = selectedEquipObj;
 
-        fetchEquipmentKPIData(equipment_id);
         fetchMetadata();
 
         if (selectedEquipObj?.device_type === 'active') {
             fetchEquipmentChartV1(equipment_id, equipment_name);
+            fetchEquipmentKPIDataV1(equipment_id);
         } else {
             fetchEquipmentChartV2(equipment_id, equipment_name);
+            fetchEquipmentKPIDataV2(equipment_id);
         }
     }, [selectedEquipObj, startDate, endDate, selectedConsumption, bldgId]);
 
