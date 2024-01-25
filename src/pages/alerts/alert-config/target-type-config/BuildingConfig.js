@@ -187,51 +187,53 @@ const BuildingConfig = (props) => {
     return (
         <React.Fragment>
             <Modal show={isModalOpen} onHide={handleModalClose} size="xl" centered backdrop="static" keyboard={false}>
-                {/* Modal Header  */}
-                <div className="alert-config-header-wrapper d-flex justify-content-between">
-                    <div>
-                        <Typography.Header size={Typography.Sizes.lg}>Select Building</Typography.Header>
-                    </div>
-                    <div className="d-flex">
+                <div className="custom-modal-body">
+                    {/* Modal Header  */}
+                    <div className="alert-config-header-wrapper d-flex justify-content-between">
                         <div>
-                            <Button
-                                label="Cancel"
-                                size={Button.Sizes.md}
-                                type={Button.Type.secondaryGrey}
-                                onClick={handleModalClose}
-                            />
+                            <Typography.Header size={Typography.Sizes.lg}>Select Building</Typography.Header>
                         </div>
-                        <div>
-                            <Button
-                                label={'Add Target'}
-                                size={Button.Sizes.md}
-                                type={Button.Type.primary}
-                                onClick={handleModalClose}
-                                className="ml-2"
-                            />
+                        <div className="d-flex">
+                            <div>
+                                <Button
+                                    label="Cancel"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryGrey}
+                                    onClick={handleModalClose}
+                                />
+                            </div>
+                            <div>
+                                <Button
+                                    label={'Add Target'}
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.primary}
+                                    onClick={handleModalClose}
+                                    className="ml-2"
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Modal Body */}
-                <div style={{ padding: '2rem' }}>
-                    <DataTableWidget
-                        isLoading={isFetchingData}
-                        isFilterLoading={isFetchingFilterData}
-                        isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={12} />}
-                        id="buildings_list"
-                        buttonGroupFilterOptions={[]}
-                        onSearch={setSearch}
-                        onStatus={[]}
-                        rows={currentRow()}
-                        searchResultRows={currentRow()}
-                        disableColumnDragging={true}
-                        filterOptions={filterOptions}
-                        headers={tableHeader}
-                        totalCount={(() => {
-                            return 0;
-                        })()}
-                    />
+                    {/* Modal Body */}
+                    <div style={{ padding: '2rem' }}>
+                        <DataTableWidget
+                            isLoading={isFetchingData}
+                            isFilterLoading={isFetchingFilterData}
+                            isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={12} />}
+                            id="buildings_list"
+                            buttonGroupFilterOptions={[]}
+                            onSearch={setSearch}
+                            onStatus={[]}
+                            rows={currentRow()}
+                            searchResultRows={currentRow()}
+                            disableColumnDragging={true}
+                            filterOptions={filterOptions}
+                            headers={tableHeader}
+                            totalCount={(() => {
+                                return 0;
+                            })()}
+                        />
+                    </div>
                 </div>
             </Modal>
         </React.Fragment>

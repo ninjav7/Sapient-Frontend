@@ -119,3 +119,8 @@
     border-bottom: 0.0625rem solid $primary-gray-200;
     padding: 2rem 2rem 0rem 2rem;
 }
+
+.custom-modal-body {
+    min-height: 90vh;
+    overflow-y: auto;
+}
