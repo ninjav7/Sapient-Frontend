@@ -10,6 +10,8 @@ import Brick from '../../../sharedComponents/brick';
 import Target from './Target';
 import Condition from './Condition';
 import AlertPreview from './AlertPreview';
+import EquipConfig from './EquipConfig';
+import BuildingConfig from './BuildingConfig';
 import NotificationMethod from './NotificationMethod';
 
 import { UserStore } from '../../../store/UserStore';
@@ -456,6 +458,16 @@ const AlertConfig = () => {
     const [isCreatingAlert, setProcessing] = useState(false);
     const [isFetchingAlertData, setFetchingAlertData] = useState(false);
 
+    // Building Configuration Modal
+    const [showBldgConfigModal, setBldgConfigModalStatus] = useState(false);
+    const closeBldgConfigModel = () => setBldgConfigModalStatus(false);
+    const openBldgConfigModel = () => setBldgConfigModalStatus(true);
+
+    // Equipment Configuration Modal
+    const [showEquipConfigModal, setEquipConfigModalStatus] = useState(false);
+    const closeEquipConfigModel = () => setEquipConfigModalStatus(false);
+    const openEquipConfigModel = () => setEquipConfigModalStatus(true);
+
     const isTargetSetAndSubmitted = alertObj?.target?.type !== '' && alertObj?.target?.submitted;
 
     const isBuildingConfigured =
@@ -487,6 +499,13 @@ const AlertConfig = () => {
 
     const isTargetConfigured = isTargetSetAndSubmitted && (isBuildingConfigured || isEquipmentConfigured);
     const isConditionConfigured = isConditionSet && (isBuildingConditionsSet || isEquipmentConditionsSet);
+
+    const handleModalClick = (configType) => {
+        if (configType) {
+            if (configType === TARGET_TYPES.BUILDING) openBldgConfigModel();
+            if (configType === TARGET_TYPES.EQUIPMENT) openEquipConfigModel();
+        }
+    };
 
     const handleTargetChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
@@ -729,6 +748,7 @@ const AlertConfig = () => {
                         updateAlertForBuildingTypeData={updateAlertForBuildingTypeData}
                         updateAlertForEquipmentTypeData={updateAlertForEquipmentTypeData}
                         setTypeSelectedLabel={setTypeSelectedLabel}
+                        handleModalClick={handleModalClick}
                     />
                 )}
 
@@ -742,6 +762,9 @@ const AlertConfig = () => {
                     />
                 )}
             </div>
+
+            <BuildingConfig isModalOpen={showBldgConfigModal} handleModalClose={closeBldgConfigModel} />
+            <EquipConfig isModalOpen={showEquipConfigModal} handleModalClose={closeEquipConfigModel} />
         </React.Fragment>
     );
 };

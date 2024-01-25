@@ -53,6 +53,7 @@ const Target = (props) => {
         setBuildingsList,
         fetchAllEquipmentsList,
         handleEquipmentListChange,
+        handleModalClick,
     } = props;
 
     const [selectedBldgsForEquip, setSelectedBldgsForEquip] = useState([]);
@@ -107,14 +108,15 @@ const Target = (props) => {
 
                             <div className="d-flex" style={{ gap: '0.75rem' }}>
                                 <div
+                                    id={TARGET_TYPES.BUILDING}
                                     className={`d-flex align-items-center mouse-pointer ${
                                         alertObj?.target?.type === TARGET_TYPES.BUILDING
                                             ? `target-type-container-active`
                                             : `target-type-container`
                                     }`}
-                                    onClick={() => {
-                                        !(isFetchingData || isFetchingEquipments) &&
-                                            handleTargetChange('type', TARGET_TYPES.BUILDING);
+                                    onClick={(e) => {
+                                        handleModalClick(e.currentTarget.id);
+                                        handleTargetChange('type', TARGET_TYPES.BUILDING);
                                     }}>
                                     <BuildingTypeSVG className="p-0 square" width={20} height={20} />
                                     <Typography.Subheader
@@ -125,14 +127,15 @@ const Target = (props) => {
                                 </div>
 
                                 <div
+                                    id={TARGET_TYPES.EQUIPMENT}
                                     className={`d-flex align-items-center mouse-pointer ${
                                         alertObj?.target?.type === TARGET_TYPES.EQUIPMENT
                                             ? `target-type-container-active`
                                             : `target-type-container`
                                     }`}
-                                    onClick={() => {
-                                        !(isFetchingData || isFetchingEquipments) &&
-                                            handleTargetChange('type', TARGET_TYPES.EQUIPMENT);
+                                    onClick={(e) => {
+                                        handleModalClick(e.currentTarget.id);
+                                        handleTargetChange('type', TARGET_TYPES.EQUIPMENT);
                                     }}>
                                     <EquipmentTypeSVG className="p-0 square" width={20} height={20} />
                                     <Typography.Subheader
