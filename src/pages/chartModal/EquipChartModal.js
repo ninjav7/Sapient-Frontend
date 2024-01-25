@@ -44,6 +44,7 @@ import {
     getEquipmentDetails,
     getMetadataRequest,
     fetchEquipmentKPIs,
+    updateExploreEquipmentYTDUsage,
 } from './services';
 import { fetchEquipmentChartDataV2, fetchExploreEquipmentChart } from '../explore/services';
 
@@ -347,6 +348,7 @@ const EquipChartModal = ({
     const [deviceData, setDeviceData] = useState([]);
 
     const [equipMetaData, setEquipMetaData] = useState({});
+    console.log('SSR equipMetaData => ', equipMetaData);
     const [isFetchingMetaData, setFetchingMetaData] = useState(false);
 
     const [sensors, setSensors] = useState([]);
@@ -660,7 +662,38 @@ const EquipChartModal = ({
             .catch((error) => {});
     };
 
-    const fetchEquipmentKPIData = async (equip_id) => {
+    const fetchEquipmentKPIDataV1 = async (equipId) => {
+        if (!equipId) return;
+
+        setFetchingMetaData(true);
+        setEquipMetaData({});
+
+        const params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
+        const payload = apiRequestBody(startDate, endDate, timeZone);
+
+        await updateExploreEquipmentYTDUsage(payload, params)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    if (response?.data && response?.data.length !== 0) {
+                        const data = response?.data[0];
+                        setEquipMetaData({
+                            total_energy_consumption: data?.ytd?.ytd,
+                            peak_power: {
+                                avgPower: data?.ytd_peak?.power,
+                                timestamp: data?.ytd_peak?.time_stamp,
+                            },
+                        });
+                    }
+                }
+            })
+            .catch((err) => {})
+            .finally(() => {
+                setFetchingMetaData(false);
+            });
+    };
+
+    const fetchEquipmentKPIDataV2 = async (equip_id) => {
         if (!equip_id) return;
 
         setFetchingMetaData(true);
@@ -730,13 +763,14 @@ const EquipChartModal = ({
 
         const { equipment_id, equipment_name } = selectedEquipObj;
 
-        fetchEquipmentKPIData(equipment_id);
         fetchMetadata();
 
         if (selectedEquipObj?.device_type === 'active') {
             fetchEquipmentChartV1(equipment_id, equipment_name);
+            fetchEquipmentKPIDataV1(equipment_id);
         } else {
             fetchEquipmentChartV2(equipment_id, equipment_name);
+            fetchEquipmentKPIDataV2(equipment_id);
         }
     }, [selectedEquipObj, startDate, endDate, selectedConsumption, bldgId]);
 
