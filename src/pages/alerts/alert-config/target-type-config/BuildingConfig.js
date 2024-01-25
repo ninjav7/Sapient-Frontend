@@ -27,7 +27,7 @@ const BuildingConfig = (props) => {
     const [sortBy, setSortBy] = useState({});
 
     const [checkedAll, setCheckedAll] = useState(false);
-    const [userSelectedBldgIds, setUserSelectedBldgIds] = useState([]);
+    const [userSelectedBldgs, setUserSelectedBldgs] = useState([]);
 
     const [buildingsList, setBuildingsList] = useState([]);
     const [buildingTypes, setBuildingTypes] = useState([]);
@@ -103,10 +103,18 @@ const BuildingConfig = (props) => {
 
     const handleRowCheck = (value, selectedBldgObj) => {
         if (value === 'true') {
-            const updatedBldgIds = userSelectedBldgIds.filter((bldgId) => bldgId !== selectedBldgObj?.building_id);
-            setUserSelectedBldgIds(updatedBldgIds);
+            const updatedBldgs = userSelectedBldgs.filter(
+                (bldgObj) => bldgObj?.building_id !== selectedBldgObj?.building_id
+            );
+            setUserSelectedBldgs(updatedBldgs);
         } else if (value === 'false') {
-            setUserSelectedBldgIds((prevBldgIds) => [...prevBldgIds, selectedBldgObj?.building_id]);
+            setUserSelectedBldgs((prevBldgs) => [
+                ...prevBldgs,
+                {
+                    building_id: selectedBldgObj?.building_id,
+                    building_name: selectedBldgObj?.building_name,
+                },
+            ]);
         }
     };
 
@@ -120,8 +128,6 @@ const BuildingConfig = (props) => {
         await fetchBuildingList(search, sort_by, ordered_by, '', formattedBldgTypeSelected)
             .then((res) => {
                 const data = res?.data;
-
-                console.log('SSR data => ', data);
 
                 if (data && data.length !== 0) {
                     data.forEach((el) => {
@@ -156,10 +162,15 @@ const BuildingConfig = (props) => {
 
     useEffect(() => {
         if (checkedAll && buildingsList && buildingsList.length !== 0) {
-            const allBldgsIds = buildingsList.map((el) => el?.building_id);
-            setUserSelectedBldgIds(allBldgsIds);
+            const allBldgs = buildingsList.map((el) => {
+                return {
+                    building_id: el?.building_id,
+                    building_name: el?.building_name,
+                };
+            });
+            setUserSelectedBldgs(allBldgs);
         } else if (!checkedAll) {
-            setUserSelectedBldgIds([]);
+            setUserSelectedBldgs([]);
         }
     }, [checkedAll, buildingsList]);
 
@@ -231,7 +242,7 @@ const BuildingConfig = (props) => {
                                     type={Button.Type.primary}
                                     onClick={handleModalClose}
                                     className="ml-2"
-                                    disabled={userSelectedBldgIds && userSelectedBldgIds.length === 0}
+                                    disabled={userSelectedBldgs && userSelectedBldgs.length === 0}
                                 />
                             </div>
                         </div>
@@ -256,19 +267,25 @@ const BuildingConfig = (props) => {
                                     }}
                                 />
                             )}
-                            customCheckboxForCell={(record) => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="building_target-type_check"
-                                    name="building_target-type_check"
-                                    checked={userSelectedBldgIds.includes(record?.building_id)}
-                                    value={userSelectedBldgIds.includes(record?.building_id)}
-                                    onChange={(e) => {
-                                        handleRowCheck(e.target.value, record);
-                                    }}
-                                />
-                            )}
+                            customCheckboxForCell={(record) => {
+                                const isRecordSelected = userSelectedBldgs.some(
+                                    (el) => el?.building_id === record?.building_id
+                                );
+
+                                return (
+                                    <Checkbox
+                                        label=""
+                                        type="checkbox"
+                                        id="building_target-type_check"
+                                        name="building_target-type_check"
+                                        checked={isRecordSelected}
+                                        value={isRecordSelected}
+                                        onChange={(e) => {
+                                            handleRowCheck(e.target.value, record);
+                                        }}
+                                    />
+                                );
+                            }}
                             buttonGroupFilterOptions={[]}
                             onSearch={setSearch}
                             onStatus={[]}
