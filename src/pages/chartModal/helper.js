@@ -1,6 +1,7 @@
 import {
     defaultMetrics,
     metricForActiveDevice,
+    metricForActiveDeviceOld,
     metricForPassiveWithMultipleBreaker,
     metricForPassiveWithOneBreaker,
 } from './constants';
@@ -9,7 +10,7 @@ export const renderEquipChartMetrics = (equipObj) => {
     const { device_type, breaker_link = [] } = equipObj || {};
 
     if (device_type === 'active') {
-        return metricForActiveDevice;
+        return metricForActiveDeviceOld;
     }
 
     if (device_type === '') {
