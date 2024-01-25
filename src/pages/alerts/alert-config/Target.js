@@ -147,9 +147,9 @@ const Target = (props) => {
                             </div>
                         </div>
 
-                        {alertObj?.target?.type && <hr />}
+                        {alertObj?.target?.type === TARGET_TYPES.EQUIPMENT && <hr />}
 
-                        {alertObj?.target?.type && (
+                        {alertObj?.target?.type === TARGET_TYPES.EQUIPMENT && (
                             <>
                                 <Typography.Subheader size={Typography.Sizes.md}>
                                     {`Select a Target`}
@@ -157,104 +157,6 @@ const Target = (props) => {
 
                                 <Brick sizeInRem={1.25} />
                             </>
-                        )}
-
-                        {alertObj?.target?.type === TARGET_TYPES.BUILDING && (
-                            <div>
-                                {isFetchingData ? (
-                                    <Skeleton count={2} width={1000} height={20} />
-                                ) : (
-                                    <div className="d-flex w-100 justify-content-between">
-                                        <div className="d-flex w-75" style={{ gap: '0.75rem' }}>
-                                            <div className="w-100">
-                                                <Typography.Body size={Typography.Sizes.sm}>
-                                                    {`Building Type`}
-                                                </Typography.Body>
-                                                <Brick sizeInRem={0.25} />
-                                                <Select.Multi
-                                                    id="endUseSelect"
-                                                    placeholder="Select Building Type"
-                                                    name="select"
-                                                    className="w-100"
-                                                    isSearchable={true}
-                                                    isSelectAll={buildingTypeList && buildingTypeList.length !== 0}
-                                                    options={buildingTypeList}
-                                                    onChange={(newBldgTypeList) => {
-                                                        const values = filterOutSelectAllOption(newBldgTypeList);
-                                                        handleTargetChange('lists', []);
-                                                        setBuildingsList(
-                                                            filteredBuildingsList(values, originalBuildingsList)
-                                                        );
-                                                        handleTargetChange('typesList', values);
-                                                    }}
-                                                    value={alertObj?.target?.typesList ?? []}
-                                                    menuPlacement="auto"
-                                                />
-                                            </div>
-
-                                            <div className="w-100">
-                                                <Typography.Body size={Typography.Sizes.sm}>
-                                                    {`Building`}
-                                                </Typography.Body>
-                                                <Brick sizeInRem={0.25} />
-                                                <Select.Multi
-                                                    id="endUseSelect"
-                                                    placeholder="Select Building"
-                                                    name="select"
-                                                    className="w-100"
-                                                    isSearchable={true}
-                                                    isSelectAll={buildingsList && buildingsList.length !== 0}
-                                                    options={buildingsList}
-                                                    onChange={(selectedBldgTypeList) => {
-                                                        handleTargetChange(
-                                                            'lists',
-                                                            filterOutSelectAllOption(selectedBldgTypeList)
-                                                        );
-                                                    }}
-                                                    value={alertObj?.target?.lists ?? []}
-                                                    menuPlacement="auto"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <Brick sizeInRem={1.35} />
-                                            <div
-                                                className="d-flex"
-                                                style={{
-                                                    gap: '0.5rem',
-                                                    maxHeight: '2.25rem',
-                                                }}>
-                                                <Button
-                                                    label={'Cancel'}
-                                                    size={Button.Sizes.md}
-                                                    type={Button.Type.secondaryGrey}
-                                                    className="w-100"
-                                                    onClick={() => {
-                                                        handleTargetChange('submitted', !alertObj?.target.submitted);
-                                                    }}
-                                                    disabled={
-                                                        alertObj?.target?.lists.length === 0 ||
-                                                        alertObj?.target?.typesList.length === 0
-                                                    }
-                                                />
-                                                <Button
-                                                    label={'Add target'}
-                                                    size={Button.Sizes.md}
-                                                    type={Button.Type.primary}
-                                                    className="w-100"
-                                                    onClick={() => {
-                                                        handleTargetChange('submitted', !alertObj?.target?.submitted);
-                                                    }}
-                                                    disabled={
-                                                        alertObj?.target?.lists && alertObj?.target?.lists.length === 0
-                                                    }
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
                         )}
 
                         {alertObj?.target?.type === TARGET_TYPES.EQUIPMENT && (

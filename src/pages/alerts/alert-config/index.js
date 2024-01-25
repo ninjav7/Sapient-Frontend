@@ -298,55 +298,6 @@ const ConfigureAlerts = (props) => {
     }, [alertObj?.target?.lists, originalBuildingsList]);
 
     useEffect(() => {
-        if (alertObj?.target?.type === TARGET_TYPES.BUILDING) {
-            setFetching(true);
-            setOriginalBuildingsList([]);
-            setBuildingsList([]);
-
-            const promiseOne = getAllBuildingTypes();
-            const promiseTwo = fetchBuildingsList(false);
-
-            Promise.all([promiseOne, promiseTwo])
-                .then((res) => {
-                    const response = res;
-
-                    if (response && response[0]?.status === 200 && response[1]?.status === 200) {
-                        const buildingTypesResponse = response[0]?.data?.data?.data;
-                        const buildingsListResponse = response[1]?.data;
-
-                        if (buildingTypesResponse && buildingsListResponse) {
-                            const newMappedBuildingTypesData = buildingTypesResponse.map((el) => ({
-                                label: el?.building_type,
-                                value: el?.building_type_id,
-                            }));
-                            setBuildingTypeList(newMappedBuildingTypesData);
-
-                            const newMappedBldgsData = buildingsListResponse.map((el) => ({
-                                label: el?.building_name,
-                                value: el?.building_id,
-                                building_type_id: el?.building_type_id,
-                            }));
-                            setOriginalBuildingsList(newMappedBldgsData);
-                            setBuildingsList(newMappedBldgsData);
-
-                            if (alertObj?.target?.typesList.length === 0 && alertObj?.target?.lists.length === 0) {
-                                updateAlertForBuildingTypeData(newMappedBuildingTypesData, newMappedBldgsData);
-                            } else {
-                                const newFilteredBldgsList = filteredBuildingsList(
-                                    alertObj?.target?.typesList,
-                                    newMappedBldgsData
-                                );
-                                if (newFilteredBldgsList) setBuildingsList(newFilteredBldgsList);
-                            }
-                        }
-                    }
-                })
-                .catch(() => {})
-                .finally(() => {
-                    setFetching(false);
-                });
-        }
-
         if (alertObj?.target?.type === TARGET_TYPES.EQUIPMENT) {
             setFetching(true);
             setOriginalBuildingsList([]);
@@ -453,6 +404,7 @@ const AlertConfig = () => {
 
     const [activeTab, setActiveTab] = useState(0);
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
+    console.log('SSR alertObj => ', alertObj);
     const [typeSelectedLabel, setTypeSelectedLabel] = useState(null);
 
     const [isCreatingAlert, setProcessing] = useState(false);
