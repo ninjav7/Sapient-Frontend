@@ -423,9 +423,7 @@ const AlertConfig = () => {
     const isTargetSetAndSubmitted = alertObj?.target?.type !== '' && alertObj?.target?.submitted;
 
     const isBuildingConfigured =
-        alertObj?.target?.type === TARGET_TYPES.BUILDING &&
-        alertObj?.target?.lists.length !== 0 &&
-        alertObj?.target?.typesList.length !== 0;
+        alertObj?.target?.type === TARGET_TYPES.BUILDING && alertObj?.target?.lists.length !== 0;
 
     const isEquipmentConfigured =
         alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
