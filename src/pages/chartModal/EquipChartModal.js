@@ -471,6 +471,7 @@ const EquipChartModal = ({
     // Fetch Equipment Chart V1 API
     const fetchEquipmentChartV1 = async (equipId, equiName) => {
         setIsEquipDataFetched(true);
+        setDeviceData([]);
 
         const payload = apiRequestBody(startDate, endDate, timeZone);
 
