@@ -213,7 +213,7 @@ const BuildingConfig = (props) => {
                     {/* Modal Header  */}
                     <div className="alert-config-header-wrapper d-flex justify-content-between">
                         <div>
-                            <Typography.Header size={Typography.Sizes.lg}>Select Building</Typography.Header>
+                            <Typography.Header size={Typography.Sizes.lg}>Select a Target</Typography.Header>
                         </div>
                         <div className="d-flex">
                             <div>
