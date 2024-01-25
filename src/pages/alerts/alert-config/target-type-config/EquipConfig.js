@@ -1,10 +1,10 @@
 import React from 'react';
 import Modal from 'react-bootstrap/Modal';
-import Typography from '../../../sharedComponents/typography';
-import { Button } from '../../../sharedComponents/button';
-import './styles.scss';
+import Typography from '../../../../sharedComponents/typography';
+import { Button } from '../../../../sharedComponents/button';
+import '../styles.scss';
 
-const BuildingConfig = (props) => {
+const EquipConfig = (props) => {
     const { isModalOpen, handleModalClose } = props;
 
     return (
@@ -13,7 +13,7 @@ const BuildingConfig = (props) => {
                 {/* Modal Header  */}
                 <div className="alert-config-header-wrapper d-flex justify-content-between">
                     <div>
-                        <Typography.Header size={Typography.Sizes.lg}>Building Configuration</Typography.Header>
+                        <Typography.Header size={Typography.Sizes.lg}>Equipment Configuration</Typography.Header>
                     </div>
                     <div className="d-flex">
                         <div>
@@ -42,4 +42,4 @@ const BuildingConfig = (props) => {
     );
 };
 
-export default BuildingConfig;
+export default EquipConfig;

@@ -10,8 +10,8 @@ import Brick from '../../../sharedComponents/brick';
 import Target from './Target';
 import Condition from './Condition';
 import AlertPreview from './AlertPreview';
-import EquipConfig from './EquipConfig';
-import BuildingConfig from './BuildingConfig';
+import BuildingConfig from './target-type-config/BuildingConfig';
+import EquipConfig from './target-type-config/EquipConfig';
 import NotificationMethod from './NotificationMethod';
 
 import { UserStore } from '../../../store/UserStore';
