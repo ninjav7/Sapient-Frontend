@@ -476,13 +476,7 @@ const EquipChartModal = ({
 
         const payload = apiRequestBody(startDate, endDate, timeZone);
 
-        const params = `?building_id=${bldgId}&consumption=${
-            selectedConsumption === 'rmsCurrentMilliAmps' && equipData?.device_type === 'active'
-                ? 'mAh'
-                : selectedConsumption
-        }&equipment_id=${equipId}&divisible_by=1000${
-            selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
-        }`;
+        const params = `?building_id=${bldgId}&consumption=${selectedConsumption}&equipment_id=${equipId}&divisible_by=1000`;
 
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
@@ -493,37 +487,17 @@ const EquipChartModal = ({
 
                     if (!data || data.length === 0) return;
 
-                    if (selectedConsumption === 'rmsCurrentMilliAmps') {
-                        const chartData = [];
+                    const newEquipMappedData = data.map((el) => ({
+                        x: new Date(el?.time_stamp).getTime(),
+                        y: el?.consumption === '' ? null : el?.consumption,
+                    }));
 
-                        data.forEach((sensorObj) => {
-                            const newSensorMappedData = sensorObj?.data.map((el) => ({
-                                x: new Date(el?.time_stamp).getTime(),
-                                y: el?.consumption === '' ? null : el?.consumption,
-                            }));
+                    const recordToInsert = {
+                        name: equiName,
+                        data: newEquipMappedData,
+                    };
 
-                            chartData.push({
-                                name: `Sensor ${sensorObj?.index_alias}`,
-                                data: newSensorMappedData,
-                            });
-                        });
-
-                        setDeviceData(chartData);
-                    }
-
-                    if (selectedConsumption !== 'rmsCurrentMilliAmps') {
-                        const newEquipMappedData = data.map((el) => ({
-                            x: new Date(el?.time_stamp).getTime(),
-                            y: el?.consumption === '' ? null : el?.consumption,
-                        }));
-
-                        const recordToInsert = {
-                            name: equiName,
-                            data: newEquipMappedData,
-                        };
-
-                        setDeviceData([recordToInsert]);
-                    }
+                    setDeviceData([recordToInsert]);
                 }
             })
             .catch((error) => {})
