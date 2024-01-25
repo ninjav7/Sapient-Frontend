@@ -19,7 +19,7 @@ import { fetchBuildingList, getFiltersForBuildingsRequest } from '../../../setti
 import '../styles.scss';
 
 const BuildingConfig = (props) => {
-    const { isModalOpen, handleModalClose } = props;
+    const { isModalOpen = false, handleModalClose, alertObj = {}, handleTargetChange } = props;
 
     const userPrefUnits = UserStore.useState((s) => s.unit);
 
@@ -103,19 +103,47 @@ const BuildingConfig = (props) => {
 
     const handleRowCheck = (value, selectedBldgObj) => {
         if (value === 'true') {
-            const updatedBldgs = userSelectedBldgs.filter(
-                (bldgObj) => bldgObj?.building_id !== selectedBldgObj?.building_id
-            );
+            const updatedBldgs = userSelectedBldgs.filter((el) => el?.value !== selectedBldgObj?.value);
             setUserSelectedBldgs(updatedBldgs);
         } else if (value === 'false') {
             setUserSelectedBldgs((prevBldgs) => [
                 ...prevBldgs,
                 {
-                    building_id: selectedBldgObj?.building_id,
-                    building_name: selectedBldgObj?.building_name,
+                    value: selectedBldgObj?.value,
+                    label: selectedBldgObj?.label,
                 },
             ]);
         }
+    };
+
+    const handleAddTarget = (selected_bldgs) => {
+        if (selected_bldgs.length !== 0) {
+            handleTargetChange('submitted', true);
+            handleTargetChange('lists', selected_bldgs);
+        }
+        handleModalClose();
+    };
+
+    const handleCancelClick = (selected_bldgs) => {
+        if (selected_bldgs.length === 0) {
+            handleTargetChange('type', '');
+        }
+        handleModalClose();
+    };
+
+    const handleCheckAllClick = (is_checked, buildings_list) => {
+        if (is_checked) {
+            setUserSelectedBldgs([]);
+        } else if (!is_checked && buildings_list && buildings_list.length !== 0) {
+            const allBldgs = buildings_list.map((el) => {
+                return {
+                    label: el?.label,
+                    value: el?.value,
+                };
+            });
+            setUserSelectedBldgs(allBldgs);
+        }
+        setCheckedAll(!is_checked);
     };
 
     const getBuildingsList = async (user_pref_units, selected_bldg_type = []) => {
@@ -132,6 +160,8 @@ const BuildingConfig = (props) => {
                 if (data && data.length !== 0) {
                     data.forEach((el) => {
                         el.building_size = Math.round(handleUnitConverstion(el?.building_size, user_pref_units));
+                        el.label = el?.building_name;
+                        el.value = el?.building_id;
                     });
                     setBuildingsList(data);
                 }
@@ -159,20 +189,6 @@ const BuildingConfig = (props) => {
                 setFetchingFilterData(false);
             });
     };
-
-    useEffect(() => {
-        if (checkedAll && buildingsList && buildingsList.length !== 0) {
-            const allBldgs = buildingsList.map((el) => {
-                return {
-                    building_id: el?.building_id,
-                    building_name: el?.building_name,
-                };
-            });
-            setUserSelectedBldgs(allBldgs);
-        } else if (!checkedAll) {
-            setUserSelectedBldgs([]);
-        }
-    }, [checkedAll, buildingsList]);
 
     useEffect(() => {
         if (isModalOpen) {
@@ -217,6 +233,12 @@ const BuildingConfig = (props) => {
         }
     }, [buildingTypes]);
 
+    useEffect(() => {
+        if (isModalOpen && alertObj?.target?.lists && alertObj?.target?.lists.length !== 0) {
+            setUserSelectedBldgs([...alertObj?.target?.lists]);
+        }
+    }, [alertObj]);
+
     return (
         <React.Fragment>
             <Modal show={isModalOpen} onHide={handleModalClose} size="xl" centered backdrop="static" keyboard={false}>
@@ -232,7 +254,7 @@ const BuildingConfig = (props) => {
                                     label="Cancel"
                                     size={Button.Sizes.md}
                                     type={Button.Type.secondaryGrey}
-                                    onClick={handleModalClose}
+                                    onClick={() => handleCancelClick(userSelectedBldgs)}
                                 />
                             </div>
                             <div>
@@ -240,7 +262,7 @@ const BuildingConfig = (props) => {
                                     label={'Add Target'}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    onClick={handleModalClose}
+                                    onClick={() => handleAddTarget(userSelectedBldgs)}
                                     className="ml-2"
                                     disabled={userSelectedBldgs && userSelectedBldgs.length === 0}
                                 />
@@ -262,15 +284,11 @@ const BuildingConfig = (props) => {
                                     id="building_check_all"
                                     name="building_check_all"
                                     checked={checkedAll}
-                                    onChange={() => {
-                                        setCheckedAll(!checkedAll);
-                                    }}
+                                    onChange={() => handleCheckAllClick(checkedAll, buildingsList)}
                                 />
                             )}
                             customCheckboxForCell={(record) => {
-                                const isRecordSelected = userSelectedBldgs.some(
-                                    (el) => el?.building_id === record?.building_id
-                                );
+                                const isRecordSelected = userSelectedBldgs.some((el) => el?.value === record?.value);
 
                                 return (
                                     <Checkbox

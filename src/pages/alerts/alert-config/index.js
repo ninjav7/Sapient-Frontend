@@ -715,8 +715,18 @@ const AlertConfig = () => {
                 )}
             </div>
 
-            <BuildingConfig isModalOpen={showBldgConfigModal} handleModalClose={closeBldgConfigModel} />
-            <EquipConfig isModalOpen={showEquipConfigModal} handleModalClose={closeEquipConfigModel} />
+            <BuildingConfig
+                isModalOpen={showBldgConfigModal}
+                handleModalClose={closeBldgConfigModel}
+                alertObj={alertObj}
+                handleTargetChange={handleTargetChange}
+            />
+            <EquipConfig
+                isModalOpen={showEquipConfigModal}
+                handleModalClose={closeEquipConfigModel}
+                alertObj={alertObj}
+                handleTargetChange={handleTargetChange}
+            />
         </React.Fragment>
     );
 };
