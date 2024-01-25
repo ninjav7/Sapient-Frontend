@@ -217,7 +217,7 @@ const MachineHealthContainer = (props) => {
                                             <Typography.Subheader size={Typography.Sizes.lg}>
                                                 {equipMetaData?.average_imbalance_current
                                                     ? `${formatConsumptionValue(
-                                                          equipMetaData?.average_imbalance_current,
+                                                          equipMetaData?.average_imbalance_current / 1000,
                                                           2
                                                       )} A`
                                                     : '-'}
