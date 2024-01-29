@@ -127,7 +127,6 @@
 
 .equip-config-modal-fullscreen {
     width: 92vw !important;
-    height: 92vh !important;
     max-width: none !important;
 }
 
@@ -137,6 +136,6 @@
 }
 
 .equip-config-modal-fullscreen .modal-content {
-    height: 100% !important;
+    min-height: 92vh !important;
     border-radius: 0 !important;
 }

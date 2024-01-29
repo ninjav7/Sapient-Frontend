@@ -297,7 +297,7 @@ const EquipConfig = (props) => {
                 {/* Modal Header  */}
                 <div className="alert-config-header-wrapper d-flex justify-content-between">
                     <div>
-                        <Typography.Header size={Typography.Sizes.lg}>Equipment Configuration</Typography.Header>
+                        <Typography.Header size={Typography.Sizes.lg}>Select a Target</Typography.Header>
                     </div>
                     <div className="d-flex">
                         <div>
@@ -341,50 +341,52 @@ const EquipConfig = (props) => {
 
                     <Brick sizeInRem={2} />
 
-                    <DataTableWidget
-                        id="equipment_target_type"
-                        isLoading={isEquipFetching}
-                        isFilterLoading={isFilterFetching}
-                        isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={12} />}
-                        customCheckAll={() => (
-                            <Checkbox
-                                label=""
-                                type="checkbox"
-                                id="building_check_all"
-                                name="building_check_all"
-                                checked={checkedAll}
-                                onChange={() => handleCheckAllClick(checkedAll, equipmentsList)}
-                            />
-                        )}
-                        customCheckboxForCell={(record) => {
-                            const isRecordSelected = userSelectedEquips.some((el) => el?.value === record?.value);
-
-                            return (
+                    <div>
+                        <DataTableWidget
+                            id="equipment_target_type"
+                            isLoading={isEquipFetching}
+                            isFilterLoading={isFilterFetching}
+                            isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length + 1} noOfRows={12} />}
+                            customCheckAll={() => (
                                 <Checkbox
                                     label=""
                                     type="checkbox"
-                                    id="building_target-type_check"
-                                    name="building_target-type_check"
-                                    checked={isRecordSelected}
-                                    value={isRecordSelected}
-                                    onChange={(e) => {
-                                        handleRowCheck(e.target.value, record);
-                                    }}
+                                    id="building_check_all"
+                                    name="building_check_all"
+                                    checked={checkedAll}
+                                    onChange={() => handleCheckAllClick(checkedAll, equipmentsList)}
                                 />
-                            );
-                        }}
-                        buttonGroupFilterOptions={[]}
-                        onSearch={setSearch}
-                        onStatus={[]}
-                        rows={currentRow()}
-                        searchResultRows={currentRow()}
-                        disableColumnDragging={true}
-                        filterOptions={filterOptions}
-                        headers={tableHeader}
-                        totalCount={(() => {
-                            return 0;
-                        })()}
-                    />
+                            )}
+                            customCheckboxForCell={(record) => {
+                                const isRecordSelected = userSelectedEquips.some((el) => el?.value === record?.value);
+
+                                return (
+                                    <Checkbox
+                                        label=""
+                                        type="checkbox"
+                                        id="building_target-type_check"
+                                        name="building_target-type_check"
+                                        checked={isRecordSelected}
+                                        value={isRecordSelected}
+                                        onChange={(e) => {
+                                            handleRowCheck(e.target.value, record);
+                                        }}
+                                    />
+                                );
+                            }}
+                            buttonGroupFilterOptions={[]}
+                            onSearch={setSearch}
+                            onStatus={[]}
+                            rows={currentRow()}
+                            searchResultRows={currentRow()}
+                            disableColumnDragging={true}
+                            filterOptions={filterOptions}
+                            headers={tableHeader}
+                            totalCount={(() => {
+                                return 0;
+                            })()}
+                        />
+                    </div>
                 </div>
             </Modal>
         </React.Fragment>
