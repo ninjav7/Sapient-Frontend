@@ -297,56 +297,6 @@ const ConfigureAlerts = (props) => {
         setTypeSelectedLabel(label);
     }, [alertObj?.target?.lists, originalBuildingsList]);
 
-    useEffect(() => {
-        if (alertObj?.target?.type === TARGET_TYPES.EQUIPMENT) {
-            setFetching(true);
-            setOriginalBuildingsList([]);
-            setBuildingsList([]);
-            setEquipmentTypeList([]);
-
-            const promiseOne = fetchBuildingsList(false);
-            const promiseTwo = getEquipTypeData();
-
-            Promise.all([promiseOne, promiseTwo])
-                .then((res) => {
-                    const response = res;
-
-                    if (response && response[0]?.status === 200 && response[1]?.status === 200) {
-                        const buildingsListResponse = response[0]?.data ?? [];
-                        const equipTypesResponse = response[1]?.data?.data ?? [];
-
-                        if (buildingsListResponse && equipTypesResponse) {
-                            const newMappedBldgsData = buildingsListResponse.map((el) => ({
-                                label: el?.building_name,
-                                value: el?.building_id,
-                                building_type_id: el?.building_type_id,
-                            }));
-                            setOriginalBuildingsList(newMappedBldgsData);
-                            setBuildingsList(newMappedBldgsData);
-
-                            const newMappedEquipTypesData = equipTypesResponse.map((el) => ({
-                                label: el?.equipment_type,
-                                value: el?.equipment_id,
-                            }));
-                            setEquipmentTypeList(newMappedEquipTypesData);
-
-                            if (
-                                alertObj?.target?.typesList.length === 0 &&
-                                alertObj?.target?.lists.length === 0 &&
-                                alertObj?.target?.buildingIDs.length === 0
-                            ) {
-                                updateAlertForEquipmentTypeData(newMappedEquipTypesData, newMappedBldgsData);
-                            }
-                        }
-                    }
-                })
-                .catch(() => {})
-                .finally(() => {
-                    setFetching(false);
-                });
-        }
-    }, [alertObj?.target?.type]);
-
     return (
         <>
             <Row>
