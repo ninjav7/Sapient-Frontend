@@ -376,10 +376,7 @@ const AlertConfig = () => {
         alertObj?.target?.type === TARGET_TYPES.BUILDING && alertObj?.target?.lists.length !== 0;
 
     const isEquipmentConfigured =
-        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
-        alertObj?.target?.lists.length !== 0 &&
-        alertObj?.target?.typesList.length !== 0 &&
-        alertObj?.target?.buildingIDs.length !== 0;
+        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT && alertObj?.target?.lists.length !== 0;
 
     const isConditionSet = alertObj?.condition?.type !== '';
 
@@ -409,7 +406,6 @@ const AlertConfig = () => {
 
     const handleTargetChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
-        if (key === 'type' && obj?.target?.type !== value) obj = _.cloneDeep(defaultAlertObj);
         obj.target[key] = value;
         setAlertObj(obj);
     };
@@ -649,6 +645,8 @@ const AlertConfig = () => {
                         updateAlertForEquipmentTypeData={updateAlertForEquipmentTypeData}
                         setTypeSelectedLabel={setTypeSelectedLabel}
                         handleModalClick={handleModalClick}
+                        openBldgConfigModel={openBldgConfigModel}
+                        openEquipConfigModel={openEquipConfigModel}
                     />
                 )}
 

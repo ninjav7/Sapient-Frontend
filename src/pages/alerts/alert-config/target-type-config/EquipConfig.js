@@ -15,6 +15,7 @@ import { getEquipmentsList } from '../../../settings/panels/services';
 import { fetchBuildingList } from '../../../settings/buildings/services';
 
 import '../styles.scss';
+import Skeleton from 'react-loading-skeleton';
 
 const EquipConfig = (props) => {
     const { isModalOpen = false, handleModalClose, alertObj = {}, handleTargetChange } = props;
@@ -42,11 +43,19 @@ const EquipConfig = (props) => {
         handleModalClose();
     };
 
-    const handleCheckAllClick = (is_checked, buildings_list) => {
+    const handleAddTarget = (selected_bldg_id, selected_equips) => {
+        if (selected_bldg_id && selected_equips.length !== 0) {
+            handleTargetChange('buildingIDs', selected_bldg_id);
+            handleTargetChange('lists', selected_equips);
+        }
+        handleModalClose();
+    };
+
+    const handleCheckAllClick = (is_checked, equipments_list) => {
         if (is_checked) {
             setUserSelectedEquips([]);
-        } else if (!is_checked && buildings_list && buildings_list.length !== 0) {
-            const allBldgs = buildings_list.map((el) => {
+        } else if (!is_checked && equipments_list && equipments_list.length !== 0) {
+            const allBldgs = equipments_list.map((el) => {
                 return {
                     label: el?.label,
                     value: el?.value,
@@ -55,6 +64,21 @@ const EquipConfig = (props) => {
             setUserSelectedEquips(allBldgs);
         }
         setCheckedAll(!is_checked);
+    };
+
+    const handleRowCheck = (value, selectedEquipObj) => {
+        if (value === 'true') {
+            const updatedBldgs = userSelectedEquips.filter((el) => el?.value !== selectedEquipObj?.value);
+            setUserSelectedEquips(updatedBldgs);
+        } else if (value === 'false') {
+            setUserSelectedEquips((prevEquips) => [
+                ...prevEquips,
+                {
+                    value: selectedEquipObj?.value,
+                    label: selectedEquipObj?.label,
+                },
+            ]);
+        }
     };
 
     const getBuildingsList = async () => {
@@ -89,6 +113,10 @@ const EquipConfig = (props) => {
                 const { data } = res?.data;
 
                 if (data && data.length !== 0) {
+                    data.forEach((el) => {
+                        el.label = el?.equipments_name;
+                        el.value = el?.equipments_id;
+                    });
                     setEquipmentsList(data);
                 }
             })
@@ -96,21 +124,6 @@ const EquipConfig = (props) => {
             .finally(() => {
                 setEquipFetching(false);
             });
-    };
-
-    const handleRowCheck = (value, selectedBldgObj) => {
-        if (value === 'true') {
-            // const updatedBldgs = userSelectedBldgs.filter((el) => el?.value !== selectedBldgObj?.value);
-            // setUserSelectedBldgs(updatedBldgs);
-        } else if (value === 'false') {
-            // setUserSelectedBldgs((prevBldgs) => [
-            //     ...prevBldgs,
-            //     {
-            //         value: selectedBldgObj?.value,
-            //         label: selectedBldgObj?.label,
-            //     },
-            // ]);
-        }
     };
 
     const renderEquipmentsName = (row) => {
@@ -284,10 +297,10 @@ const EquipConfig = (props) => {
         if (isModalOpen) {
             getBuildingsList();
         } else {
-            setUserSelectedBldgId('');
-            setUserSelectedEquips([]);
             setBuildingsList([]);
             setEquipmentsList([]);
+            setUserSelectedBldgId('');
+            setUserSelectedEquips([]);
         }
     }, [isModalOpen]);
 
@@ -313,7 +326,7 @@ const EquipConfig = (props) => {
                                 label={'Add Target'}
                                 size={Button.Sizes.md}
                                 type={Button.Type.primary}
-                                onClick={handleModalClose}
+                                onClick={() => handleAddTarget(userSelectedBldgId, userSelectedEquips)}
                                 className="ml-2"
                             />
                         </div>
@@ -323,20 +336,25 @@ const EquipConfig = (props) => {
                 {/* Modal Body */}
                 <div style={{ padding: '2rem' }}>
                     <div style={{ width: '25%' }}>
-                        <Typography.Body size={Typography.Sizes.md}>Building</Typography.Body>
+                        <Typography.Body size={Typography.Sizes.md}>Select Building</Typography.Body>
                         <Brick sizeInRem={0.25} />
-                        <Select
-                            id="buildingSelect"
-                            placeholder="Select a Building"
-                            name="select"
-                            options={buildingsList}
-                            className="w-100"
-                            onChange={(e) => {
-                                setUserSelectedBldgId(e.value);
-                            }}
-                            currentValue={buildingsList.filter((option) => option.value === userSelectedBldgId)}
-                            menuPlacement="auto"
-                        />
+                        {isBldgFetching ? (
+                            <Skeleton count={1} height={35} />
+                        ) : (
+                            <Select
+                                id="buildingSelect"
+                                placeholder="Select a Building"
+                                name="select"
+                                options={buildingsList}
+                                className="w-100"
+                                onChange={(e) => {
+                                    setUserSelectedBldgId(e.value);
+                                    setUserSelectedEquips([]);
+                                }}
+                                currentValue={buildingsList.filter((option) => option.value === userSelectedBldgId)}
+                                menuPlacement="auto"
+                            />
+                        )}
                     </div>
 
                     <Brick sizeInRem={2} />

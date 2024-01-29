@@ -54,6 +54,8 @@ const Target = (props) => {
         fetchAllEquipmentsList,
         handleEquipmentListChange,
         handleModalClick,
+        openBldgConfigModel,
+        openEquipConfigModel,
     } = props;
 
     const [selectedBldgsForEquip, setSelectedBldgsForEquip] = useState([]);
@@ -75,7 +77,7 @@ const Target = (props) => {
                 </div>
             </CardHeader>
             <CardBody>
-                {alertObj?.target?.submitted ? (
+                {alertObj?.target?.type && alertObj?.target?.lists.length !== 0 ? (
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
                             <Typography.Subheader size={Typography.Sizes.md}>
@@ -92,61 +94,63 @@ const Target = (props) => {
                                 width={17}
                                 height={17}
                                 onClick={() => {
+                                    if (alertObj?.target?.type === TARGET_TYPES.BUILDING) {
+                                        openBldgConfigModel();
+                                    } else if (alertObj?.target?.type === TARGET_TYPES.EQUIPMENT) {
+                                        openEquipConfigModel();
+                                    }
                                     handleTargetChange('submitted', !alertObj?.target?.submitted);
                                 }}
                             />
                         </div>
                     </div>
                 ) : (
-                    <>
-                        <div>
-                            <Typography.Subheader size={Typography.Sizes.md}>
-                                {`Select a Target Type`}
-                            </Typography.Subheader>
+                    <div>
+                        <Typography.Subheader size={Typography.Sizes.md}>{`Select a Target Type`}</Typography.Subheader>
+                        <Brick sizeInRem={1.25} />
 
-                            <Brick sizeInRem={1.25} />
+                        <div className="d-flex" style={{ gap: '0.75rem' }}>
+                            {/* Buidling */}
+                            <div
+                                id={TARGET_TYPES.BUILDING}
+                                className={`d-flex align-items-center mouse-pointer ${
+                                    alertObj?.target?.type === TARGET_TYPES.BUILDING
+                                        ? `target-type-container-active`
+                                        : `target-type-container`
+                                }`}
+                                onClick={(e) => {
+                                    handleModalClick(e.currentTarget.id);
+                                    handleTargetChange('type', TARGET_TYPES.BUILDING);
+                                }}>
+                                <BuildingTypeSVG className="p-0 square" width={20} height={20} />
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    style={{ color: colorPalette.primaryGray700 }}>
+                                    Building
+                                </Typography.Subheader>
+                            </div>
 
-                            <div className="d-flex" style={{ gap: '0.75rem' }}>
-                                <div
-                                    id={TARGET_TYPES.BUILDING}
-                                    className={`d-flex align-items-center mouse-pointer ${
-                                        alertObj?.target?.type === TARGET_TYPES.BUILDING
-                                            ? `target-type-container-active`
-                                            : `target-type-container`
-                                    }`}
-                                    onClick={(e) => {
-                                        handleModalClick(e.currentTarget.id);
-                                        handleTargetChange('type', TARGET_TYPES.BUILDING);
-                                    }}>
-                                    <BuildingTypeSVG className="p-0 square" width={20} height={20} />
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        style={{ color: colorPalette.primaryGray700 }}>
-                                        Building
-                                    </Typography.Subheader>
-                                </div>
-
-                                <div
-                                    id={TARGET_TYPES.EQUIPMENT}
-                                    className={`d-flex align-items-center mouse-pointer ${
-                                        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT
-                                            ? `target-type-container-active`
-                                            : `target-type-container`
-                                    }`}
-                                    onClick={(e) => {
-                                        handleModalClick(e.currentTarget.id);
-                                        handleTargetChange('type', TARGET_TYPES.EQUIPMENT);
-                                    }}>
-                                    <EquipmentTypeSVG className="p-0 square" width={20} height={20} />
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        style={{ color: colorPalette.primaryGray700 }}>
-                                        Equipment
-                                    </Typography.Subheader>
-                                </div>
+                            {/* Equipment */}
+                            <div
+                                id={TARGET_TYPES.EQUIPMENT}
+                                className={`d-flex align-items-center mouse-pointer ${
+                                    alertObj?.target?.type === TARGET_TYPES.EQUIPMENT
+                                        ? `target-type-container-active`
+                                        : `target-type-container`
+                                }`}
+                                onClick={(e) => {
+                                    handleModalClick(e.currentTarget.id);
+                                    handleTargetChange('type', TARGET_TYPES.EQUIPMENT);
+                                }}>
+                                <EquipmentTypeSVG className="p-0 square" width={20} height={20} />
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    style={{ color: colorPalette.primaryGray700 }}>
+                                    Equipment
+                                </Typography.Subheader>
                             </div>
                         </div>
-                    </>
+                    </div>
                 )}
             </CardBody>
         </div>

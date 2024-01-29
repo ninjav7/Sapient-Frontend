@@ -118,7 +118,6 @@ const BuildingConfig = (props) => {
 
     const handleAddTarget = (selected_bldgs) => {
         if (selected_bldgs.length !== 0) {
-            handleTargetChange('submitted', true);
             handleTargetChange('lists', selected_bldgs);
         }
         handleModalClose();

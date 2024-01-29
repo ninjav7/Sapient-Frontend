@@ -33,10 +33,8 @@ export const defaultNotificationObj = {
 export const defaultAlertObj = {
     target: {
         type: '',
-        typesList: [],
         lists: [],
-        buildingIDs: [],
-        submitted: false,
+        buildingIDs: '',
     },
     recurrence: defaultRecurrenceObj,
     condition: {
