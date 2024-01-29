@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import HighchartsExporting from 'highcharts/modules/exporting';
 import Highcharts from 'highcharts';
 import { Spinner } from 'reactstrap';
@@ -6,6 +6,7 @@ import HighchartsData from 'highcharts/modules/export-data';
 import highchartsAccessibility from 'highcharts/modules/accessibility';
 import HighchartsReact from 'highcharts-react-official';
 import PropTypes from 'prop-types';
+import cx from 'classnames';
 
 import Button from '../button/Button';
 import Typography from '../typography';
@@ -30,7 +31,7 @@ HighchartsData(Highcharts);
 highchartsAccessibility(Highcharts);
 
 const StackedColumnChart = (props) => {
-    const { isChartLoading = false } = props;
+    const { isChartLoading = false, parentChartComponentRef = {}, showExport = true, ownTooltip = false } = props;
     const chartComponentRef = useRef(null);
     const [plotBandsShown, setPlotBandsShown] = useState(true);
 
@@ -64,7 +65,14 @@ const StackedColumnChart = (props) => {
         }
     };
 
-    const chartConfig = options({ ...props, plotBands });
+    const chartConfig = options({
+        ...props,
+        plotBands,
+    });
+
+    useEffect(() => {
+        parentChartComponentRef.current = chartComponentRef.current;
+    }, [chartComponentRef.current]);
 
     const showUpperLegends = !!renderPlotBandsLegends?.length;
 
@@ -112,30 +120,30 @@ const StackedColumnChart = (props) => {
                         )}
                     </div>
                     {props.selectUnit && <Select {...props.selectUnit} className="stacked-column-chart-select-unit" />}
-                    <DropDownIcon
-                        classNameButton="stacked-column-chart-download-button"
-                        options={[
-                            {
-                                name: DOWNLOAD_TYPES.downloadSVG,
-                                label: 'Download SVG',
-                            },
-                            {
-                                name: DOWNLOAD_TYPES.downloadPNG,
-                                label: 'Download PNG',
-                            },
-                            {
-                                name: DOWNLOAD_TYPES.downloadCSV,
-                                label: 'Download CSV',
-                            },
-                        ]}
-                        label={''}
-                        triggerButtonIcon={<BurgerIcon />}
-                        handleClick={handleDropDownOptionClicked}
-                    />
+                    {showExport && (
+                        <DropDownIcon
+                            classNameButton="stacked-column-chart-download-button"
+                            options={[
+                                {
+                                    name: DOWNLOAD_TYPES.downloadSVG,
+                                    label: 'Download SVG',
+                                },
+                                {
+                                    name: DOWNLOAD_TYPES.downloadPNG,
+                                    label: 'Download PNG',
+                                },
+                                {
+                                    name: DOWNLOAD_TYPES.downloadCSV,
+                                    label: 'Download CSV',
+                                },
+                            ]}
+                            label={''}
+                            triggerButtonIcon={<BurgerIcon />}
+                            handleClick={handleDropDownOptionClicked}
+                        />
+                    )}
                 </div>
             </div>
-            <Brick sizeInRem={1.5} />
-
             {isChartLoading ? (
                 <div className="stacked-column-container w-100">
                     <div className="stacked-column-container-loader">
@@ -148,7 +156,9 @@ const StackedColumnChart = (props) => {
 
             {props.onMoreDetail && (
                 <Button
-                    className="stacked-column-chart-more-detail"
+                    className={cx('column-chart-more-detail', {
+                        'no-legends': props?.restChartProps?.legend?.enabled === false,
+                    })}
                     label="More Details"
                     size={Button.Sizes.lg}
                     icon={<ArrowRight style={{ height: 11 }} />}
@@ -180,6 +190,9 @@ StackedColumnChart.propTypes = {
     xAxisCallBackValue: PropTypes.func,
     tooltipCallBackValue: PropTypes.func,
     timeZone: PropTypes.string,
+    parentChartComponentRef: PropTypes.object,
+    showExport: PropTypes.bool,
+    ownTooltip: PropTypes.bool,
     // Props for select
     selectUnit: PropTypes.object,
     unitInfo: PropTypes.shape({

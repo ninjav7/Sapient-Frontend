@@ -46,6 +46,7 @@ import colorPalette from '../../assets/scss/_colors.scss';
 import './style.css';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { getEnergyConsumptionCSVExport } from '../../utils/tablesExport';
+// import EnergyConsumptionBySpaceChart from './energy-consumption/EnergyConsumptionBySpaceChart';
 
 const BuildingOverview = () => {
     const { download } = useCSVDownload();
@@ -134,6 +135,12 @@ const BuildingOverview = () => {
     const [showEquipmentChart, setShowEquipmentChart] = useState(false);
     const handleChartOpen = () => setShowEquipmentChart(true);
     const handleChartClose = () => setShowEquipmentChart(false);
+
+    // Consumption by Space Chart
+    // const [spacesData, setSpacesData] = useState([]);
+    // const [spacesDataCategories, setSpacesDataCategories] = useState([]);
+    // const [spacesColumnCategories, setSpacesColumnCategories] = useState([]);
+    // const [spacesColumnChartData, setSpacesColumnChartData] = useState([]);
 
     const checkWhetherShowAfterHours = () => {
         const fDayHour = moment(energyConsumptionsCategories[0]);
@@ -786,6 +793,150 @@ const BuildingOverview = () => {
         }
     }, [buildingListData, bldgId]);
 
+    // const endUsesData = [
+    //     {
+    //         device: 'Room1',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#B863CF',
+    //     },
+    //     {
+    //         device: 'Room2',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#5E94E4',
+    //     },
+    //     {
+    //         device: 'Room3',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#44B87F',
+    //     },
+    //     {
+    //         device: 'Room4',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#E2AD5B',
+    //     },
+    //     {
+    //         device: 'Room5',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#E858A6',
+    //     },
+    //     {
+    //         device: 'Room6',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#FC9337',
+    //     },
+    //     {
+    //         device: 'Room7',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#8277CA',
+    //     },
+    //     {
+    //         device: 'Room8',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#45E6D9',
+    //     },
+    //     {
+    //         device: 'Room9',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#E55B5B',
+    //     },
+    //     {
+    //         device: 'Room10',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#E55B1B',
+    //     },
+    //     {
+    //         device: 'Room11',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#B863CF',
+    //     },
+    //     {
+    //         device: 'Room12',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#5E94E4',
+    //     },
+    //     {
+    //         device: 'Room13',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#44B87F',
+    //     },
+    //     {
+    //         device: 'Room14',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#E2AD5B',
+    //     },
+    //     {
+    //         device: 'Room15',
+    //         energy_consumption: { now: '0', old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         after_hours_energy_consumption: { now: 0, old: 0, yearly: 0, change: 0, off_hours: 0 },
+    //         color: '#E858A6',
+    //     },
+    // ];
+
+    // const stackedColumnChartData = [
+    //     { name: 'Room1', data: [0, 87, 87, 87, 87, 87, 41, 87, 87, 87, 87, 87] },
+    //     { name: 'Room2', data: [0, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87] },
+    //     { name: 'Room3', data: [0, 87, 12, 87, 87, 87, 87, 87, 87, 87, 87, 89] },
+    //     { name: 'Room4', data: [0, 87, 87, 42, 87, 87, 87, 87, 87, 12, 87, 87] },
+    //     { name: 'Room5', data: [0, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87] },
+    //     { name: 'Room6', data: [0, 87, 87, 41, 87, 87, 23, 87, 87, 87, 87, 87] },
+    //     { name: 'Room7', data: [0, 87, 34, 87, 87, 87, 87, 87, 87, 87, 87, 65] },
+    //     { name: 'Room8', data: [0, 87, 87, 87, 87, 87, 87, 87, 87, 12, 87, 87] },
+    //     { name: 'Room9', data: [0, 87, 87, 65, 87, 87, 87, 43, 87, 87, 87, 87] },
+    //     { name: 'Room10', data: [0, 12, 42, 12, 87, 123, 72, 13, 231, 42, 87, 87] },
+    //     { name: 'Room11', data: [0, 87, 87, 87, 87, 87, 41, 87, 87, 87, 87, 87] },
+    //     { name: 'Room12', data: [0, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87] },
+    //     { name: 'Room13', data: [0, 87, 12, 87, 87, 87, 87, 87, 87, 87, 87, 89] },
+    //     { name: 'Room14', data: [0, 87, 87, 42, 87, 87, 87, 87, 87, 12, 87, 87] },
+    //     { name: 'Room15', data: [0, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87] },
+    // ];
+
+    // const stackedColumnChartCategories = [
+    //     '2023-02-01T00:00:00+00:00',
+    //     '2023-03-01T00:00:00+00:00',
+    //     '2023-04-01T00:00:00+00:00',
+    //     '2023-05-01T00:00:00+00:00',
+    //     '2023-06-01T00:00:00+00:00',
+    //     '2023-07-01T00:00:00+00:00',
+    //     '2023-08-01T00:00:00+00:00',
+    //     '2023-09-01T00:00:00+00:00',
+    //     '2023-10-01T00:00:00+00:00',
+    //     '2023-11-01T00:00:00+00:00',
+    //     '2023-12-01T00:00:00+00:00',
+    //     '2024-01-01T00:00:00+00:00',
+    // ];
+
+    // const endUseCategories = [
+    //     '#B863CF',
+    //     '#5E94E4',
+    //     '#44B87F',
+    //     '#E2AD5B',
+    //     '#E858A6',
+    //     '#FC9337',
+    //     '#8277CA',
+    //     '#45E6D9',
+    //     '#E55B5B',
+    //     '#E55B1B',
+    //     '#B163EC',
+    //     '#5E94E4',
+    //     '#44B87F',
+    //     '#E2AD5B',
+    //     '#E858A6',
+    // ];
+
     return (
         <React.Fragment>
             <Header title="Building Overview" type="page" />
@@ -811,6 +962,23 @@ const BuildingOverview = () => {
 
             <div className="bldg-page-grid-style">
                 <div>
+                    {/* <EnergyConsumptionBySpaceChart
+                        propTitle="Energy Consumption by Space (kWh)"
+                        propSubTitle="Top 15 Energy Consumers"
+                        spacesData={endUsesData}
+                        stackedColumnChartData={stackedColumnChartData}
+                        stackedColumnChartCategories={stackedColumnChartCategories}
+                        spaceCategories={endUseCategories}
+                        xAxisObj={xAxisObj}
+                        timeZone={timeZone}
+                        dateFormat={dateFormat}
+                        daysCount={daysCount}
+                        // isChartLoading={isChartLoading}
+                        // isFetchingSpacesData={isFetchingEndUseData}
+                        onMoreDetail={() => handleRouteChange('')}
+                    />
+                    <Brick sizeInRem={1.5} /> */}
+
                     {!isPlugOnly && (
                         <EnergyConsumptionByEndUse
                             title="Energy Consumption by End Use"

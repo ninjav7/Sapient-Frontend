@@ -98,3 +98,36 @@
     border-radius: 0.2rem;
     background-color: $dataviz-background-2;
 }
+
+.spacedata-type-widget-wrapper {
+    border: 0.0625rem solid $primary-gray-200;
+    border-radius: 0.5rem;
+}
+
+.spacedata-type {
+    min-height: 3rem;
+
+    &-title {
+        color: $primary-gray-700;
+        font-size: 0.75rem;
+        font-weight: 500;
+        line-height: 0.9375rem;
+    }
+
+    &-text {
+        font-family: 'Space Grotesk' !important;
+        margin: 0;
+        font-style: normal;
+        font-weight: 700;
+        font-size: 1.25rem;
+        line-height: 1.625rem;
+        color: $primary-gray-800;
+    }
+
+    &-unit {
+        font-weight: 600;
+        font-size: 0.75rem;
+        line-height: 0.75rem;
+        color: $primary-gray-700;
+    }
+}
