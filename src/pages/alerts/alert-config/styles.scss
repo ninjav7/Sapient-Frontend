@@ -124,3 +124,19 @@
     min-height: 90vh;
     overflow-y: auto;
 }
+
+.equip-config-modal-fullscreen {
+    width: 92vw !important;
+    height: 92vh !important;
+    max-width: none !important;
+}
+
+.equip-config-modal-fullscreen .modal-dialog {
+    margin: 0 !important;
+    max-width: none !important;
+}
+
+.equip-config-modal-fullscreen .modal-content {
+    height: 100% !important;
+    border-radius: 0 !important;
+}
