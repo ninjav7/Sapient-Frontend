@@ -55,7 +55,7 @@ export const initialFilterState = {
 const DataTableWidget = (props) => {
     const {
         customExcludedHeaders = [],
-        shouldSortHeader = true,
+        shouldSortHeader = false,
         showExternalButton = false,
         externalButtonObj = {},
     } = props;

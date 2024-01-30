@@ -70,6 +70,10 @@ export const singleUserPermissionDetail = '/api/user_role/user-permission-role/u
 // Search
 export const serachUser = '/api/user_role/user-permission-role/all-member-users';
 
+// spaces
+export const energyConsumptionBySpaceV2 = '/api/v2/metrics/space';
+export const getAllSpaces = '/api/v2/metrics/space/list';
+
 // end-uses
 export const energyEndUseInfo = '/api/energy/portfolio/end-uses-info';
 export const endUsesChart = '/api/energy/end_use/chart/end-uses';

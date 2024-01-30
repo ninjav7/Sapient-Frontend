@@ -31,7 +31,7 @@ HighchartsData(Highcharts);
 highchartsAccessibility(Highcharts);
 
 const StackedColumnChart = (props) => {
-    const { isChartLoading = false, parentChartComponentRef = {}, showExport = true, ownTooltip = false } = props;
+    const { isChartLoading = false, parentChartComponentRef = {}, showExport = true } = props;
     const chartComponentRef = useRef(null);
     const [plotBandsShown, setPlotBandsShown] = useState(true);
 
@@ -69,10 +69,6 @@ const StackedColumnChart = (props) => {
         ...props,
         plotBands,
     });
-
-    useEffect(() => {
-        parentChartComponentRef.current = chartComponentRef.current;
-    }, [chartComponentRef.current]);
 
     const showUpperLegends = !!renderPlotBandsLegends?.length;
 
@@ -151,7 +147,11 @@ const StackedColumnChart = (props) => {
                     </div>
                 </div>
             ) : (
-                <HighchartsReact highcharts={Highcharts} options={chartConfig} ref={chartComponentRef} />
+                <HighchartsReact
+                    highcharts={Highcharts}
+                    options={chartConfig}
+                    ref={showExport ? chartComponentRef : parentChartComponentRef}
+                />
             )}
 
             {props.onMoreDetail && (
