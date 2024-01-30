@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Modal } from 'reactstrap';
+import Skeleton from 'react-loading-skeleton';
 import { UncontrolledTooltip } from 'reactstrap';
 
 import Typography from '../../../../sharedComponents/typography';
@@ -15,7 +16,6 @@ import { getEquipmentsList } from '../../../settings/panels/services';
 import { fetchBuildingList } from '../../../settings/buildings/services';
 
 import '../styles.scss';
-import Skeleton from 'react-loading-skeleton';
 
 const EquipConfig = (props) => {
     const { isModalOpen = false, handleModalClose, alertObj = {}, handleTargetChange } = props;
@@ -288,6 +288,22 @@ const EquipConfig = (props) => {
     };
 
     useEffect(() => {
+        const { target } = alertObj || {};
+
+        if (isModalOpen && target) {
+            const { buildingIDs, lists } = target;
+
+            if (buildingIDs) {
+                setUserSelectedBldgId(buildingIDs);
+            }
+
+            if (lists && lists.length !== 0) {
+                setUserSelectedEquips(lists);
+            }
+        }
+    }, [alertObj, isModalOpen]);
+
+    useEffect(() => {
         if (userSelectedBldgId) {
             getEquipmentsForBldg(userSelectedBldgId);
         }
@@ -328,6 +344,7 @@ const EquipConfig = (props) => {
                                 type={Button.Type.primary}
                                 onClick={() => handleAddTarget(userSelectedBldgId, userSelectedEquips)}
                                 className="ml-2"
+                                disabled={userSelectedEquips && userSelectedEquips.length === 0}
                             />
                         </div>
                     </div>

@@ -238,6 +238,15 @@ const BuildingConfig = (props) => {
         }
     }, [alertObj]);
 
+    useEffect(() => {
+        const { target } = alertObj || {};
+        const { lists } = target || {};
+
+        if (isModalOpen && lists && lists.length !== 0) {
+            setUserSelectedBldgs([...lists]);
+        }
+    }, [alertObj, isModalOpen]);
+
     return (
         <React.Fragment>
             <Modal show={isModalOpen} onHide={handleModalClose} size="xl" centered backdrop="static" keyboard={false}>
