@@ -229,7 +229,6 @@ const AlertConfig = () => {
     const [activeTab, setActiveTab] = useState(0);
 
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
-    console.log('SSR alertObj => ', alertObj);
 
     const [originalBldgsList, setOriginalBldgsList] = useState([]);
     const [originalEquipsList, setOriginalEquipsList] = useState([]);
@@ -362,6 +361,7 @@ const AlertConfig = () => {
         if (target?.type === TARGET_TYPES.EQUIPMENT) {
             let equipObj = {
                 equipment_ids: target?.lists.map((el) => el?.value),
+                equipment_building_ids: [target?.buildingIDs],
                 equipment_filter_condition: condition?.type,
                 equipment_condition_operator: condition?.level,
                 equipment_condition_threshold_value: +condition?.thresholdPercentage,
