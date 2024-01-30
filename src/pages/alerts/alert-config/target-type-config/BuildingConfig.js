@@ -19,7 +19,7 @@ import { fetchBuildingList, getFiltersForBuildingsRequest } from '../../../setti
 import '../styles.scss';
 
 const BuildingConfig = (props) => {
-    const { isModalOpen = false, handleModalClose, alertObj = {}, handleTargetChange } = props;
+    const { isModalOpen = false, handleModalClose, alertObj = {}, handleTargetChange, setOriginalBldgsList } = props;
 
     const userPrefUnits = UserStore.useState((s) => s.unit);
 
@@ -163,6 +163,7 @@ const BuildingConfig = (props) => {
                         el.value = el?.building_id;
                     });
                     setBuildingsList(data);
+                    setOriginalBldgsList(data);
                 }
             })
             .catch(() => {})

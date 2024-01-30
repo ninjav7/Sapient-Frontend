@@ -18,7 +18,7 @@ import { fetchBuildingList } from '../../../settings/buildings/services';
 import '../styles.scss';
 
 const EquipConfig = (props) => {
-    const { isModalOpen = false, handleModalClose, alertObj = {}, handleTargetChange } = props;
+    const { isModalOpen = false, handleModalClose, alertObj = {}, handleTargetChange, setOriginalEquipsList } = props;
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
@@ -118,6 +118,7 @@ const EquipConfig = (props) => {
                         el.value = el?.equipments_id;
                     });
                     setEquipmentsList(data);
+                    setOriginalEquipsList(data);
                 }
             })
             .catch(() => {})

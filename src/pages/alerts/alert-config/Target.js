@@ -36,26 +36,14 @@ const TargetToolTip = () => {
 const Target = (props) => {
     const {
         alertObj = {},
-        isFetchingData,
-        isFetchingEquipments,
         handleTargetChange,
-        renderTargetedBuildingsList,
+        renderTargetedList,
         renderTargetTypeHeader,
-        buildingsList = [],
-        equipmentTypeList = [],
-        equipmentsList = [],
-        setEquipmentsList,
-        setOriginalEquipmentsList,
-        originalBuildingsList = [],
-        originalEquipmentsList = [],
-        buildingTypeList,
-        filteredBuildingsList,
-        setBuildingsList,
-        fetchAllEquipmentsList,
-        handleEquipmentListChange,
         handleModalClick,
         openBldgConfigModel,
         openEquipConfigModel,
+        originalBldgsList,
+        originalEquipsList,
     } = props;
 
     const [selectedBldgsForEquip, setSelectedBldgsForEquip] = useState([]);
@@ -85,7 +73,11 @@ const Target = (props) => {
                             </Typography.Subheader>
                             <Brick sizeInRem={0.25} />
                             <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                {renderTargetedBuildingsList(alertObj, originalBuildingsList)}
+                                {alertObj?.target?.type === TARGET_TYPES.BUILDING &&
+                                    renderTargetedList(alertObj, originalBldgsList)}
+
+                                {alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
+                                    renderTargetedList(alertObj, originalEquipsList)}
                             </Typography.Body>
                         </div>
                         <div>
