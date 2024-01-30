@@ -370,13 +370,13 @@ const AlertConfig = () => {
     const closeEquipConfigModel = () => setEquipConfigModalStatus(false);
     const openEquipConfigModel = () => setEquipConfigModalStatus(true);
 
-    const isTargetSetAndSubmitted = alertObj?.target?.type !== '' && alertObj?.target?.submitted;
-
     const isBuildingConfigured =
         alertObj?.target?.type === TARGET_TYPES.BUILDING && alertObj?.target?.lists.length !== 0;
 
     const isEquipmentConfigured =
-        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT && alertObj?.target?.lists.length !== 0;
+        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
+        alertObj?.target?.lists.length !== 0 &&
+        alertObj?.target?.buildingIDs !== '';
 
     const isConditionSet = alertObj?.condition?.type !== '';
 
@@ -394,7 +394,7 @@ const AlertConfig = () => {
                 alertObj?.condition?.type !== 'shortcycling' &&
                 alertObj?.condition?.thresholdPercentage !== ''));
 
-    const isTargetConfigured = isTargetSetAndSubmitted && (isBuildingConfigured || isEquipmentConfigured);
+    const isTargetConfigured = isBuildingConfigured || isEquipmentConfigured;
     const isConditionConfigured = isConditionSet && (isBuildingConditionsSet || isEquipmentConditionsSet);
 
     const handleModalClick = (configType) => {
