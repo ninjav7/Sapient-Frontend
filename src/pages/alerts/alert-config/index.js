@@ -10,6 +10,8 @@ import Brick from '../../../sharedComponents/brick';
 import Target from './Target';
 import Condition from './Condition';
 import AlertPreview from './AlertPreview';
+import BuildingConfig from './target-type-config/BuildingConfig';
+import EquipConfig from './target-type-config/EquipConfig';
 import NotificationMethod from './NotificationMethod';
 
 import { UserStore } from '../../../store/UserStore';
@@ -149,46 +151,16 @@ const RemoveAlert = () => {
 };
 
 const ConfigureAlerts = (props) => {
-    const {
-        alertObj = {},
-        handleTargetChange,
-        updateAlertForBuildingTypeData,
-        updateAlertForEquipmentTypeData,
-        setTypeSelectedLabel,
-    } = props;
+    const { alertObj = {}, setTypeSelectedLabel, originalBldgsList, originalEquipsList } = props;
 
-    const [isFetchingData, setFetching] = useState(false);
-    const [isFetchingEquipments, setFetchingEquipments] = useState(false);
-
-    const [buildingsList, setBuildingsList] = useState([]);
-    const [originalBuildingsList, setOriginalBuildingsList] = useState([]);
-
-    const [buildingTypeList, setBuildingTypeList] = useState([]);
-
-    const [equipmentsList, setEquipmentsList] = useState([]);
-    const [originalEquipmentsList, setOriginalEquipmentsList] = useState([]);
-
-    const [equipmentTypeList, setEquipmentTypeList] = useState([]);
-
-    const filteredBuildingsList = (newBldgTypeList = [], originalBldgList) => {
-        let newBldgList = [];
-        if (newBldgTypeList.length !== 0) {
-            originalBldgList.forEach((bldgObj) => {
-                const isExist = newBldgTypeList.some((bldgTypeObj) => bldgTypeObj?.value === bldgObj?.building_type_id);
-                if (isExist) newBldgList.push(bldgObj);
-            });
-        }
-        return newBldgList;
-    };
-
-    const renderTargetedBuildingsList = (alert_obj, buildingsList = []) => {
+    const renderTargetedList = (alert_obj, originalDataList = []) => {
         const count = alert_obj?.target?.lists?.length ?? 0;
         const targetType = alert_obj?.target?.type;
 
         let label = '';
 
         if (count === 0) label = `No ${targetType} selected.`;
-        else if (count === buildingsList.length) label = `All ${capitalizeFirstLetter(targetType)}s selected.`;
+        else if (count === originalDataList.length) label = `All ${capitalizeFirstLetter(targetType)}s selected.`;
         else if (count === 1) label = alertObj.target.lists[0].label;
         else if (count > 1) label = `${count} ${targetType}s selected.`;
 
@@ -202,219 +174,24 @@ const ConfigureAlerts = (props) => {
         return label;
     };
 
-    const handleEquipmentListChange = (originalEquipsList, equipTypeList, selectedBldgslist) => {
-        const newMappedEquipList = [];
-
-        originalEquipsList.forEach((el) => {
-            const bldgExist = selectedBldgslist.some((item) => item?.value === el?.building_id);
-            const equipTypeExist = equipTypeList.some((item) => item?.value === el?.equipments_type_id);
-            if (bldgExist && equipTypeExist) newMappedEquipList.push(el);
-        });
-
-        handleTargetChange('lists', newMappedEquipList);
-        setEquipmentsList(newMappedEquipList);
-    };
-
-    const fetchAllEquipmentsList = (bldgList = [], equipTypeList = []) => {
-        if (!bldgList || bldgList.length === 0) return;
-
-        setFetchingEquipments(true);
-        let promisesList = [];
-
-        bldgList.forEach((el) => {
-            if (el?.value) promisesList.push(getEquipmentsList(`?building_id=${el?.value}`));
-        });
-
-        Promise.all(promisesList)
-            .then((res) => {
-                const response = res;
-                let newMappedEquipmentList = [];
-                let newMappedOriginalEquipmentList = [];
-
-                response.forEach((record, index) => {
-                    if (record?.status === 200) {
-                        const responseData = record?.data?.data;
-
-                        if (responseData) {
-                            let newFilteredEquipmentsList = [];
-
-                            responseData.forEach((el) => {
-                                const mappedEquipObj = {
-                                    label: el?.equipments_name,
-                                    value: el?.equipments_id,
-                                    building_id: buildingsList[index]?.value,
-                                    equipments_type_id: el?.equipments_type_id,
-                                };
-
-                                newMappedOriginalEquipmentList.push(mappedEquipObj);
-
-                                const matchedType = equipTypeList.find(
-                                    (type) => type?.value === el?.equipments_type_id
-                                );
-                                if (matchedType?.value) {
-                                    newFilteredEquipmentsList.push(mappedEquipObj);
-                                }
-                            });
-                            newMappedEquipmentList = [...newMappedEquipmentList, ...newFilteredEquipmentsList];
-                        }
-                    }
-                });
-
-                let newFilteredList = [];
-
-                newMappedOriginalEquipmentList.forEach((el) => {
-                    const bldgExist = alertObj?.target?.buildingIDs.some((item) => item?.value === el?.building_id);
-                    const equipTypeExist = alertObj?.target?.typesList.some(
-                        (item) => item?.value === el?.equipments_type_id
-                    );
-                    if (bldgExist && equipTypeExist) newFilteredList.push(el);
-                });
-
-                setOriginalEquipmentsList(newMappedOriginalEquipmentList);
-                if (alertObj?.target?.lists.length === 0) handleTargetChange('lists', newMappedEquipmentList);
-                setEquipmentsList(newFilteredList);
-            })
-            .catch(() => {})
-            .finally(() => {
-                setFetchingEquipments(false);
-            });
-    };
-
     useEffect(() => {
-        if (
-            alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
-            buildingsList.length !== 0 &&
-            equipmentTypeList.length !== 0
-        ) {
-            fetchAllEquipmentsList(buildingsList, equipmentTypeList);
-        }
-    }, [buildingsList, equipmentTypeList]);
-
-    useEffect(() => {
-        const label = renderTargetedBuildingsList(alertObj, originalBuildingsList);
-        setTypeSelectedLabel(label);
-    }, [alertObj?.target?.lists, originalBuildingsList]);
-
-    useEffect(() => {
+        let label = '';
         if (alertObj?.target?.type === TARGET_TYPES.BUILDING) {
-            setFetching(true);
-            setOriginalBuildingsList([]);
-            setBuildingsList([]);
-
-            const promiseOne = getAllBuildingTypes();
-            const promiseTwo = fetchBuildingsList(false);
-
-            Promise.all([promiseOne, promiseTwo])
-                .then((res) => {
-                    const response = res;
-
-                    if (response && response[0]?.status === 200 && response[1]?.status === 200) {
-                        const buildingTypesResponse = response[0]?.data?.data?.data;
-                        const buildingsListResponse = response[1]?.data;
-
-                        if (buildingTypesResponse && buildingsListResponse) {
-                            const newMappedBuildingTypesData = buildingTypesResponse.map((el) => ({
-                                label: el?.building_type,
-                                value: el?.building_type_id,
-                            }));
-                            setBuildingTypeList(newMappedBuildingTypesData);
-
-                            const newMappedBldgsData = buildingsListResponse.map((el) => ({
-                                label: el?.building_name,
-                                value: el?.building_id,
-                                building_type_id: el?.building_type_id,
-                            }));
-                            setOriginalBuildingsList(newMappedBldgsData);
-                            setBuildingsList(newMappedBldgsData);
-
-                            if (alertObj?.target?.typesList.length === 0 && alertObj?.target?.lists.length === 0) {
-                                updateAlertForBuildingTypeData(newMappedBuildingTypesData, newMappedBldgsData);
-                            } else {
-                                const newFilteredBldgsList = filteredBuildingsList(
-                                    alertObj?.target?.typesList,
-                                    newMappedBldgsData
-                                );
-                                if (newFilteredBldgsList) setBuildingsList(newFilteredBldgsList);
-                            }
-                        }
-                    }
-                })
-                .catch(() => {})
-                .finally(() => {
-                    setFetching(false);
-                });
+            label = renderTargetedList(alertObj, originalBldgsList);
         }
-
         if (alertObj?.target?.type === TARGET_TYPES.EQUIPMENT) {
-            setFetching(true);
-            setOriginalBuildingsList([]);
-            setBuildingsList([]);
-            setEquipmentTypeList([]);
-
-            const promiseOne = fetchBuildingsList(false);
-            const promiseTwo = getEquipTypeData();
-
-            Promise.all([promiseOne, promiseTwo])
-                .then((res) => {
-                    const response = res;
-
-                    if (response && response[0]?.status === 200 && response[1]?.status === 200) {
-                        const buildingsListResponse = response[0]?.data ?? [];
-                        const equipTypesResponse = response[1]?.data?.data ?? [];
-
-                        if (buildingsListResponse && equipTypesResponse) {
-                            const newMappedBldgsData = buildingsListResponse.map((el) => ({
-                                label: el?.building_name,
-                                value: el?.building_id,
-                                building_type_id: el?.building_type_id,
-                            }));
-                            setOriginalBuildingsList(newMappedBldgsData);
-                            setBuildingsList(newMappedBldgsData);
-
-                            const newMappedEquipTypesData = equipTypesResponse.map((el) => ({
-                                label: el?.equipment_type,
-                                value: el?.equipment_id,
-                            }));
-                            setEquipmentTypeList(newMappedEquipTypesData);
-
-                            if (
-                                alertObj?.target?.typesList.length === 0 &&
-                                alertObj?.target?.lists.length === 0 &&
-                                alertObj?.target?.buildingIDs.length === 0
-                            ) {
-                                updateAlertForEquipmentTypeData(newMappedEquipTypesData, newMappedBldgsData);
-                            }
-                        }
-                    }
-                })
-                .catch(() => {})
-                .finally(() => {
-                    setFetching(false);
-                });
+            label = renderTargetedList(alertObj, originalEquipsList);
         }
-    }, [alertObj?.target?.type]);
+        setTypeSelectedLabel(label);
+    }, [alertObj?.target?.lists, originalBldgsList]);
 
     return (
         <>
             <Row>
                 <Col lg={9}>
                     <Target
-                        isFetchingData={isFetchingData}
-                        isFetchingEquipments={isFetchingEquipments}
-                        buildingsList={buildingsList}
-                        originalBuildingsList={originalBuildingsList}
-                        buildingTypeList={buildingTypeList}
-                        equipmentTypeList={equipmentTypeList}
-                        equipmentsList={equipmentsList}
-                        setEquipmentsList={setEquipmentsList}
-                        setOriginalEquipmentsList={setOriginalEquipmentsList}
-                        originalEquipmentsList={originalEquipmentsList}
-                        renderTargetedBuildingsList={renderTargetedBuildingsList}
+                        renderTargetedList={renderTargetedList}
                         renderTargetTypeHeader={renderTargetTypeHeader}
-                        filteredBuildingsList={filteredBuildingsList}
-                        setBuildingsList={setBuildingsList}
-                        fetchAllEquipmentsList={fetchAllEquipmentsList}
-                        handleEquipmentListChange={handleEquipmentListChange}
                         {...props}
                     />
                 </Col>
@@ -450,24 +227,34 @@ const AlertConfig = () => {
     const history = useHistory();
 
     const [activeTab, setActiveTab] = useState(0);
+
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
+
+    const [originalBldgsList, setOriginalBldgsList] = useState([]);
+    const [originalEquipsList, setOriginalEquipsList] = useState([]);
+
     const [typeSelectedLabel, setTypeSelectedLabel] = useState(null);
 
-    const [isCreatingAlert, setProcessing] = useState(false);
+    const [isCreatingAlert, setCreating] = useState(false);
     const [isFetchingAlertData, setFetchingAlertData] = useState(false);
 
-    const isTargetSetAndSubmitted = alertObj?.target?.type !== '' && alertObj?.target?.submitted;
+    // Building Configuration Modal
+    const [showBldgConfigModal, setBldgConfigModalStatus] = useState(false);
+    const closeBldgConfigModel = () => setBldgConfigModalStatus(false);
+    const openBldgConfigModel = () => setBldgConfigModalStatus(true);
+
+    // Equipment Configuration Modal
+    const [showEquipConfigModal, setEquipConfigModalStatus] = useState(false);
+    const closeEquipConfigModel = () => setEquipConfigModalStatus(false);
+    const openEquipConfigModel = () => setEquipConfigModalStatus(true);
 
     const isBuildingConfigured =
-        alertObj?.target?.type === TARGET_TYPES.BUILDING &&
-        alertObj?.target?.lists.length !== 0 &&
-        alertObj?.target?.typesList.length !== 0;
+        alertObj?.target?.type === TARGET_TYPES.BUILDING && alertObj?.target?.lists.length !== 0;
 
     const isEquipmentConfigured =
         alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
         alertObj?.target?.lists.length !== 0 &&
-        alertObj?.target?.typesList.length !== 0 &&
-        alertObj?.target?.buildingIDs.length !== 0;
+        alertObj?.target?.buildingIDs !== '';
 
     const isConditionSet = alertObj?.condition?.type !== '';
 
@@ -485,12 +272,18 @@ const AlertConfig = () => {
                 alertObj?.condition?.type !== 'shortcycling' &&
                 alertObj?.condition?.thresholdPercentage !== ''));
 
-    const isTargetConfigured = isTargetSetAndSubmitted && (isBuildingConfigured || isEquipmentConfigured);
+    const isTargetConfigured = isBuildingConfigured || isEquipmentConfigured;
     const isConditionConfigured = isConditionSet && (isBuildingConditionsSet || isEquipmentConditionsSet);
+
+    const handleModalClick = (configType) => {
+        if (configType) {
+            if (configType === TARGET_TYPES.BUILDING) openBldgConfigModel();
+            if (configType === TARGET_TYPES.EQUIPMENT) openEquipConfigModel();
+        }
+    };
 
     const handleTargetChange = (key, value) => {
         let obj = Object.assign({}, alertObj);
-        if (key === 'type' && obj?.target?.type !== value) obj = _.cloneDeep(defaultAlertObj);
         obj.target[key] = value;
         setAlertObj(obj);
     };
@@ -533,24 +326,10 @@ const AlertConfig = () => {
         setAlertObj(obj);
     };
 
-    const updateAlertForBuildingTypeData = (types_list, list) => {
-        let obj = Object.assign({}, alertObj);
-        obj.target.typesList = types_list ?? [];
-        obj.target.lists = list ?? [];
-        setAlertObj(obj);
-    };
-
-    const updateAlertForEquipmentTypeData = (types_list, bldgs_list) => {
-        let obj = Object.assign({}, alertObj);
-        obj.target.typesList = types_list ?? [];
-        obj.target.buildingIDs = bldgs_list ?? [];
-        setAlertObj(obj);
-    };
-
     const handleCreateAlert = async (alert_obj) => {
         if (!alert_obj) return;
 
-        setProcessing(true);
+        setCreating(true);
 
         const { target, recurrence, condition, notification } = alert_obj;
 
@@ -582,6 +361,7 @@ const AlertConfig = () => {
         if (target?.type === TARGET_TYPES.EQUIPMENT) {
             let equipObj = {
                 equipment_ids: target?.lists.map((el) => el?.value),
+                equipment_building_ids: [target?.buildingIDs],
                 equipment_filter_condition: condition?.type,
                 equipment_condition_operator: condition?.level,
                 equipment_condition_threshold_value: +condition?.thresholdPercentage,
@@ -635,7 +415,7 @@ const AlertConfig = () => {
                 });
             })
             .finally(() => {
-                setProcessing(false);
+                setCreating(false);
             });
     };
 
@@ -724,11 +504,14 @@ const AlertConfig = () => {
                     <ConfigureAlerts
                         alertObj={alertObj}
                         handleTargetChange={handleTargetChange}
+                        originalBldgsList={originalBldgsList}
+                        originalEquipsList={originalEquipsList}
                         handleRecurrenceChange={handleRecurrenceChange}
                         handleConditionChange={handleConditionChange}
-                        updateAlertForBuildingTypeData={updateAlertForBuildingTypeData}
-                        updateAlertForEquipmentTypeData={updateAlertForEquipmentTypeData}
                         setTypeSelectedLabel={setTypeSelectedLabel}
+                        handleModalClick={handleModalClick}
+                        openBldgConfigModel={openBldgConfigModel}
+                        openEquipConfigModel={openEquipConfigModel}
                     />
                 )}
 
@@ -742,6 +525,21 @@ const AlertConfig = () => {
                     />
                 )}
             </div>
+
+            <BuildingConfig
+                isModalOpen={showBldgConfigModal}
+                handleModalClose={closeBldgConfigModel}
+                alertObj={alertObj}
+                handleTargetChange={handleTargetChange}
+                setOriginalBldgsList={setOriginalBldgsList}
+            />
+            <EquipConfig
+                isModalOpen={showEquipConfigModal}
+                handleModalClose={closeEquipConfigModel}
+                alertObj={alertObj}
+                handleTargetChange={handleTargetChange}
+                setOriginalEquipsList={setOriginalEquipsList}
+            />
         </React.Fragment>
     );
 };

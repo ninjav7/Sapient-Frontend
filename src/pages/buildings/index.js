@@ -325,6 +325,7 @@ const BuildingOverview = () => {
                             record?.energy_consumption?.now,
                             record?.energy_consumption?.old
                         ),
+                        device_type: record?.device_type,
                     };
                     topEnergyData.push(obj);
                 });

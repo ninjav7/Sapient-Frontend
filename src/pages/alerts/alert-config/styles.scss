@@ -111,3 +111,31 @@
 .active-header-style {
     color: $dataviz-blue-600;
 }
+
+.alert-config-header-wrapper {
+    width: 100%;
+    height: 5.75rem;
+    background: $primary-gray-50;
+    border-bottom: 0.0625rem solid $primary-gray-200;
+    padding: 2rem 2rem 0rem 2rem;
+}
+
+.custom-modal-body {
+    min-height: 90vh;
+    overflow-y: auto;
+}
+
+.equip-config-modal-fullscreen {
+    width: 92vw !important;
+    max-width: none !important;
+}
+
+.equip-config-modal-fullscreen .modal-dialog {
+    margin: 0 !important;
+    max-width: none !important;
+}
+
+.equip-config-modal-fullscreen .modal-content {
+    min-height: 92vh !important;
+    border-radius: 0 !important;
+}
