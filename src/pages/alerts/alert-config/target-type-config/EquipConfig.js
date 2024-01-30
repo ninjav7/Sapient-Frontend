@@ -102,11 +102,12 @@ const EquipConfig = (props) => {
             });
     };
 
-    const getEquipmentsForBldg = async (selected_bldg) => {
+    const getEquipmentsForBldg = async (selected_bldg, search) => {
         setEquipFetching(true);
         setEquipmentsList([]);
 
-        const params = `?building_id=${selected_bldg}`;
+        let params = `?building_id=${selected_bldg}`;
+        if (search) params += `&equipment_search=${search}`;
 
         await getEquipmentsList(params)
             .then((res) => {
@@ -306,9 +307,9 @@ const EquipConfig = (props) => {
 
     useEffect(() => {
         if (userSelectedBldgId) {
-            getEquipmentsForBldg(userSelectedBldgId);
+            getEquipmentsForBldg(userSelectedBldgId, search);
         }
-    }, [userSelectedBldgId]);
+    }, [userSelectedBldgId, search]);
 
     useEffect(() => {
         if (isModalOpen) {
@@ -395,7 +396,6 @@ const EquipConfig = (props) => {
                             )}
                             customCheckboxForCell={(record) => {
                                 const isRecordSelected = userSelectedEquips.some((el) => el?.value === record?.value);
-
                                 return (
                                     <Checkbox
                                         label=""
@@ -410,13 +410,13 @@ const EquipConfig = (props) => {
                                     />
                                 );
                             }}
-                            buttonGroupFilterOptions={[]}
                             onSearch={setSearch}
+                            buttonGroupFilterOptions={[]}
                             onStatus={[]}
                             rows={currentRow()}
                             searchResultRows={currentRow()}
                             disableColumnDragging={true}
-                            filterOptions={filterOptions}
+                            // filterOptions={filterOptions}
                             headers={tableHeader}
                             totalCount={(() => {
                                 return 0;
