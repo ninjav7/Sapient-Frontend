@@ -46,8 +46,8 @@ import colorPalette from '../../assets/scss/_colors.scss';
 import './style.css';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { getEnergyConsumptionCSVExport } from '../../utils/tablesExport';
-import EnergyConsumptionBySpaceChart from '../../sharedComponents/energyConsumptionBySpace';
-import { fetchEnergyConsumptionBySpaceDataHelper } from '../../sharedComponents/energyConsumptionBySpace/helpers';
+import EnergyConsumptionBySpaceChart from '../../components/energyConsumptionBySpace';
+import { fetchEnergyConsumptionBySpaceDataHelper } from '../../components/energyConsumptionBySpace/helpers';
 
 const BuildingOverview = () => {
     const { download } = useCSVDownload();
