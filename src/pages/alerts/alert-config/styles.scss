@@ -173,3 +173,9 @@
 .targettype-modal-container::-webkit-scrollbar-thumb:active {
     background-color: $primary-gray-600;
 }
+
+.selected-target-label {
+    color: $dataviz-blue-500;
+    text-decoration: dotted;
+    text-underline-position: under;
+}

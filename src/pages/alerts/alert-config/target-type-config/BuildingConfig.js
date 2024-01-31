@@ -260,11 +260,18 @@ const BuildingConfig = (props) => {
             <Modal show={isModalOpen} onHide={handleModalClose} size="xl" centered backdrop="static" keyboard={false}>
                 <div className="custom-modal-body targettype-modal-container" style={customModalStyle.modalContent}>
                     {/* Modal Header  */}
-                    <div className="alert-config-header-wrapper d-flex justify-content-between">
+                    <div className="alert-config-header-wrapper d-flex justify-content-between align-items-start">
                         <div>
                             <Typography.Header size={Typography.Sizes.lg}>Select a Target</Typography.Header>
                         </div>
-                        <div className="d-flex">
+                        <div className="d-flex align-items-center">
+                            {userSelectedBldgs && userSelectedBldgs.length > 0 && (
+                                <div className="mr-4">
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.lg}
+                                        className="selected-target-label">{`${userSelectedBldgs.length} Building selected`}</Typography.Subheader>
+                                </div>
+                            )}
                             <div>
                                 <Button
                                     label="Cancel"

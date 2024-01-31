@@ -338,7 +338,14 @@ const EquipConfig = (props) => {
                         <div>
                             <Typography.Header size={Typography.Sizes.lg}>Select a Target</Typography.Header>
                         </div>
-                        <div className="d-flex">
+                        <div className="d-flex align-items-center">
+                            {userSelectedEquips && userSelectedEquips.length > 0 && (
+                                <div className="mr-4">
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.lg}
+                                        className="selected-target-label">{`${userSelectedEquips.length} Equipment selected`}</Typography.Subheader>
+                                </div>
+                            )}
                             <div>
                                 <Button
                                     label="Cancel"
