@@ -38,6 +38,13 @@ const BuildingConfig = (props) => {
 
     const [filterOptions, setFilterOptions] = useState([]);
 
+    const customModalStyle = {
+        modalContent: {
+            height: '90vh',
+            overflowY: 'auto', // Enable vertical scrolling when content exceeds the height
+        },
+    };
+
     const renderBldgName = (row) => {
         return <div className="typography-wrapper link">{row?.building_name === '' ? '-' : row?.building_name}</div>;
     };
@@ -251,7 +258,7 @@ const BuildingConfig = (props) => {
     return (
         <React.Fragment>
             <Modal show={isModalOpen} onHide={handleModalClose} size="xl" centered backdrop="static" keyboard={false}>
-                <div className="custom-modal-body">
+                <div className="custom-modal-body targettype-modal-container" style={customModalStyle.modalContent}>
                     {/* Modal Header  */}
                     <div className="alert-config-header-wrapper d-flex justify-content-between">
                         <div>

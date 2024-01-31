@@ -36,6 +36,13 @@ const EquipConfig = (props) => {
 
     const [checkedAll, setCheckedAll] = useState(false);
 
+    const customModalStyle = {
+        modalContent: {
+            height: '90vh',
+            overflowY: 'auto', // Enable vertical scrolling when content exceeds the height
+        },
+    };
+
     const handleCancelClick = (selected_bldg = '', selected_equips = []) => {
         if (selected_bldg === '' || selected_equips.length === 0) {
             handleTargetChange('type', '');
@@ -325,103 +332,109 @@ const EquipConfig = (props) => {
     return (
         <React.Fragment>
             <Modal isOpen={isModalOpen} className="equip-config-modal-fullscreen">
-                {/* Modal Header  */}
-                <div className="alert-config-header-wrapper d-flex justify-content-between">
-                    <div>
-                        <Typography.Header size={Typography.Sizes.lg}>Select a Target</Typography.Header>
-                    </div>
-                    <div className="d-flex">
+                <div className="targettype-modal-container" style={customModalStyle.modalContent}>
+                    {/* Modal Header  */}
+                    <div className="alert-config-header-wrapper d-flex justify-content-between">
                         <div>
-                            <Button
-                                label="Cancel"
-                                size={Button.Sizes.md}
-                                type={Button.Type.secondaryGrey}
-                                onClick={() => handleCancelClick(userSelectedBldgId, userSelectedEquips)}
-                            />
+                            <Typography.Header size={Typography.Sizes.lg}>Select a Target</Typography.Header>
                         </div>
-                        <div>
-                            <Button
-                                label={'Add Target'}
-                                size={Button.Sizes.md}
-                                type={Button.Type.primary}
-                                onClick={() => handleAddTarget(userSelectedBldgId, userSelectedEquips)}
-                                className="ml-2"
-                                disabled={userSelectedEquips && userSelectedEquips.length === 0}
-                            />
+                        <div className="d-flex">
+                            <div>
+                                <Button
+                                    label="Cancel"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryGrey}
+                                    onClick={() => handleCancelClick(userSelectedBldgId, userSelectedEquips)}
+                                />
+                            </div>
+                            <div>
+                                <Button
+                                    label={'Add Target'}
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.primary}
+                                    onClick={() => handleAddTarget(userSelectedBldgId, userSelectedEquips)}
+                                    className="ml-2"
+                                    disabled={userSelectedEquips && userSelectedEquips.length === 0}
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Modal Body */}
-                <div style={{ padding: '2rem' }}>
-                    <div style={{ width: '25%' }}>
-                        <Typography.Body size={Typography.Sizes.md}>Select Building</Typography.Body>
-                        <Brick sizeInRem={0.25} />
-                        {isBldgFetching ? (
-                            <Skeleton count={1} height={35} />
-                        ) : (
-                            <Select
-                                id="buildingSelect"
-                                placeholder="Select a Building"
-                                name="select"
-                                options={buildingsList}
-                                className="w-100"
-                                onChange={(e) => {
-                                    setUserSelectedBldgId(e.value);
-                                    setUserSelectedEquips([]);
-                                }}
-                                currentValue={buildingsList.filter((option) => option.value === userSelectedBldgId)}
-                                menuPlacement="auto"
-                            />
-                        )}
-                    </div>
-
-                    <Brick sizeInRem={2} />
-
-                    <div>
-                        <DataTableWidget
-                            id="equipment_target_type"
-                            isLoading={isEquipFetching}
-                            isFilterLoading={isFilterFetching}
-                            isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length + 1} noOfRows={12} />}
-                            customCheckAll={() => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="building_check_all"
-                                    name="building_check_all"
-                                    checked={checkedAll}
-                                    onChange={() => handleCheckAllClick(checkedAll, equipmentsList)}
+                    {/* Modal Body */}
+                    <div style={{ padding: '2rem' }}>
+                        <div style={{ width: '25%' }}>
+                            <Typography.Body size={Typography.Sizes.md}>Select Building</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            {isBldgFetching ? (
+                                <Skeleton count={1} height={35} />
+                            ) : (
+                                <Select
+                                    id="buildingSelect"
+                                    placeholder="Select a Building"
+                                    name="select"
+                                    options={buildingsList}
+                                    className="w-100"
+                                    onChange={(e) => {
+                                        setUserSelectedBldgId(e.value);
+                                        setUserSelectedEquips([]);
+                                    }}
+                                    currentValue={buildingsList.filter((option) => option.value === userSelectedBldgId)}
+                                    menuPlacement="auto"
                                 />
                             )}
-                            customCheckboxForCell={(record) => {
-                                const isRecordSelected = userSelectedEquips.some((el) => el?.value === record?.value);
-                                return (
+                        </div>
+
+                        <Brick sizeInRem={2} />
+
+                        <div>
+                            <DataTableWidget
+                                id="equipment_target_type"
+                                isLoading={isEquipFetching}
+                                isFilterLoading={isFilterFetching}
+                                isLoadingComponent={
+                                    <SkeletonLoader noOfColumns={tableHeader.length + 1} noOfRows={12} />
+                                }
+                                customCheckAll={() => (
                                     <Checkbox
                                         label=""
                                         type="checkbox"
-                                        id="building_target-type_check"
-                                        name="building_target-type_check"
-                                        checked={isRecordSelected}
-                                        value={isRecordSelected}
-                                        onChange={(e) => {
-                                            handleRowCheck(e.target.value, record);
-                                        }}
+                                        id="building_check_all"
+                                        name="building_check_all"
+                                        checked={checkedAll}
+                                        onChange={() => handleCheckAllClick(checkedAll, equipmentsList)}
                                     />
-                                );
-                            }}
-                            onSearch={setSearch}
-                            buttonGroupFilterOptions={[]}
-                            onStatus={[]}
-                            rows={currentRow()}
-                            searchResultRows={currentRow()}
-                            disableColumnDragging={true}
-                            // filterOptions={filterOptions}
-                            headers={tableHeader}
-                            totalCount={(() => {
-                                return 0;
-                            })()}
-                        />
+                                )}
+                                customCheckboxForCell={(record) => {
+                                    const isRecordSelected = userSelectedEquips.some(
+                                        (el) => el?.value === record?.value
+                                    );
+                                    return (
+                                        <Checkbox
+                                            label=""
+                                            type="checkbox"
+                                            id="building_target-type_check"
+                                            name="building_target-type_check"
+                                            checked={isRecordSelected}
+                                            value={isRecordSelected}
+                                            onChange={(e) => {
+                                                handleRowCheck(e.target.value, record);
+                                            }}
+                                        />
+                                    );
+                                }}
+                                onSearch={setSearch}
+                                buttonGroupFilterOptions={[]}
+                                onStatus={[]}
+                                rows={currentRow()}
+                                searchResultRows={currentRow()}
+                                disableColumnDragging={true}
+                                // filterOptions={filterOptions}
+                                headers={tableHeader}
+                                totalCount={(() => {
+                                    return 0;
+                                })()}
+                            />
+                        </div>
                     </div>
                 </div>
             </Modal>
