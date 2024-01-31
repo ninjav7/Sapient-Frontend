@@ -300,6 +300,7 @@ const Panels = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setPanelType([]);
                     },
                 },
@@ -323,6 +324,7 @@ const Panels = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setLocationId([]);
                     },
                 },
@@ -346,6 +348,7 @@ const Panels = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setParentPanel([]);
                     },
                 },
@@ -369,6 +372,7 @@ const Panels = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setBreakersCount([]);
                     },
                 },
@@ -392,6 +396,7 @@ const Panels = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setPanelVoltages([]);
                     },
                 },

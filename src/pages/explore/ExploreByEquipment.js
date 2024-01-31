@@ -821,6 +821,7 @@ const ExploreByEquipment = () => {
                         setConAPIFlag(options[0] + options[1]);
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         set_minConValue(bottomConsumption);
                         set_maxConValue(topConsumption);
                         setConAPIFlag('');
@@ -893,6 +894,7 @@ const ExploreByEquipment = () => {
                         setPerAPIFlag(options[0] + options[1]);
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         set_minPerValue(bottomPerChange);
                         set_maxPerValue(topPerChange);
                         setPerAPIFlag('');
@@ -920,6 +922,7 @@ const ExploreByEquipment = () => {
                         }
                     },
                     onDelete: (options) => {
+                        setPageNo(1);
                         setSelectedEquipType([]);
                     },
                 },
@@ -944,6 +947,7 @@ const ExploreByEquipment = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedEndUse([]);
                     },
                 },
@@ -968,6 +972,7 @@ const ExploreByEquipment = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedSpaceType([]);
                     },
                 },
@@ -991,6 +996,7 @@ const ExploreByEquipment = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedTags([]);
                     },
                 },
@@ -1014,6 +1020,7 @@ const ExploreByEquipment = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedPanels([]);
                     },
                 },
@@ -1037,6 +1044,7 @@ const ExploreByEquipment = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedBreakers([]);
                     },
                 },
@@ -1060,6 +1068,7 @@ const ExploreByEquipment = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedNotes([]);
                     },
                 },

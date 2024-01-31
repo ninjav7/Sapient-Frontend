@@ -1387,6 +1387,7 @@ const PlugRule = () => {
                           })),
                           onClose: (options) => filterHandler(setEquipmentTypeFilterStringUnlinked, options),
                           onDelete: () => {
+                              setPageNo(1);
                               setEquipmentTypeFilterStringUnlinked('');
                           },
                       },
@@ -1400,7 +1401,10 @@ const PlugRule = () => {
                               label: filterItem.floor_name,
                           })),
                           onClose: (options) => filterHandler(setFloorTypeFilterStringUnlinked, options),
-                          onDelete: () => setFloorTypeFilterStringUnlinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setFloorTypeFilterStringUnlinked('');
+                          },
                       },
                       {
                           label: 'Space',
@@ -1412,7 +1416,10 @@ const PlugRule = () => {
                               label: filterItem.space_name,
                           })),
                           onClose: (options) => filterHandler(setSpaceTypeFilterStringUnlinked, options),
-                          onDelete: () => setSpaceTypeFilterStringUnlinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setSpaceTypeFilterStringUnlinked('');
+                          },
                       },
                       {
                           label: 'Space Type',
@@ -1424,7 +1431,10 @@ const PlugRule = () => {
                               label: filterItem.space_type_name,
                           })),
                           onClose: (options) => filterHandler(setSpaceTypeTypeFilterStringUnlinked, options),
-                          onDelete: () => setSpaceTypeTypeFilterStringUnlinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setSpaceTypeTypeFilterStringUnlinked('');
+                          },
                       },
                       {
                           label: 'MAC Address',
@@ -1437,6 +1447,7 @@ const PlugRule = () => {
                           })),
                           onClose: (options) => filterHandler(setMacTypeFilterStringUnlinked, options),
                           onDelete: () => {
+                              setPageNo(1);
                               setMacTypeFilterStringUnlinked('');
                           },
                       },
@@ -1450,7 +1461,10 @@ const PlugRule = () => {
                               label: filterItem,
                           })),
                           onClose: (options) => filterHandler(setSensorTypeFilterStringUnlinked, options),
-                          onDelete: () => setSensorTypeFilterStringUnlinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setSensorTypeFilterStringUnlinked('');
+                          },
                       },
                       {
                           label: 'Assigned rule',
@@ -1462,7 +1476,10 @@ const PlugRule = () => {
                               label: filterItem.plug_rule_name,
                           })),
                           onClose: (options) => filterHandler(setAssignedRuleFilterStringUnlinked, options),
-                          onDelete: () => setAssignedRuleFilterStringUnlinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setAssignedRuleFilterStringUnlinked('');
+                          },
                       },
                       {
                           label: 'Tags',
@@ -1474,7 +1491,10 @@ const PlugRule = () => {
                               label: filterItem,
                           })),
                           onClose: (options) => filterHandler(setTagsFilterStringUnlinked, options),
-                          onDelete: () => setTagsFilterStringUnlinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setTagsFilterStringUnlinked('');
+                          },
                       },
                       {
                           label: 'Schedule status',
@@ -1486,7 +1506,10 @@ const PlugRule = () => {
                               label: filterItem,
                           })),
                           onClose: (options) => filterHandler(setSchedulerStatusStringUninked, options),
-                          onDelete: () => setSchedulerStatusStringUninked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setSchedulerStatusStringUninked('');
+                          },
                       },
                       {
                           label: 'Last used data',
@@ -1498,7 +1521,10 @@ const PlugRule = () => {
                               label: filterItem,
                           })),
                           onClose: (options) => filterHandler(setLastUsedDataFilterStringUnlinked, options),
-                          onDelete: () => setLastUsedDataFilterStringUnlinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setLastUsedDataFilterStringUnlinked('');
+                          },
                       },
                   ]
                 : [];
@@ -1538,6 +1564,7 @@ const PlugRule = () => {
                           })),
                           onClose: (options) => filterHandler(setEquipmentTypeFilterStringLinked, options),
                           onDelete: () => {
+                              setPageNo(1);
                               setEquipmentTypeFilterStringLinked('');
                           },
                       },
@@ -1551,7 +1578,10 @@ const PlugRule = () => {
                               label: filterItem.floor_name,
                           })),
                           onClose: (options) => filterHandler(setFloorTypeFilterStringLinked, options),
-                          onDelete: () => setFloorTypeFilterStringLinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setFloorTypeFilterStringLinked('');
+                          },
                       },
                       {
                           label: 'Space',
@@ -1563,7 +1593,10 @@ const PlugRule = () => {
                               label: filterItem.space_name,
                           })),
                           onClose: (options) => filterHandler(setSpaceTypeFilterStringLinked, options),
-                          onDelete: () => setSpaceTypeFilterStringLinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setSpaceTypeFilterStringLinked('');
+                          },
                       },
                       {
                           label: 'Space Type',
@@ -1575,7 +1608,10 @@ const PlugRule = () => {
                               label: filterItem.space_type_name,
                           })),
                           onClose: (options) => filterHandler(setSpaceTypeTypeFilterStringLinked, options),
-                          onDelete: () => setSpaceTypeTypeFilterStringLinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setSpaceTypeTypeFilterStringLinked('');
+                          },
                       },
                       {
                           label: 'MAC Address',
@@ -1588,6 +1624,7 @@ const PlugRule = () => {
                           })),
                           onClose: (options) => filterHandler(setMacTypeFilterStringLinked, options),
                           onDelete: () => {
+                              setPageNo(1);
                               setMacTypeFilterStringLinked('');
                           },
                       },
@@ -1601,7 +1638,10 @@ const PlugRule = () => {
                               label: filterItem,
                           })),
                           onClose: (options) => filterHandler(setSensorTypeFilterStringLinked, options),
-                          onDelete: () => setSensorTypeFilterStringLinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setSensorTypeFilterStringLinked('');
+                          },
                       },
                       {
                           label: 'Assigned rule',
@@ -1613,7 +1653,10 @@ const PlugRule = () => {
                               label: filterItem.plug_rule_name,
                           })),
                           onClose: (options) => filterHandler(setAssignedRuleFilterStringLinked, options),
-                          onDelete: () => setAssignedRuleFilterStringLinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setAssignedRuleFilterStringLinked('');
+                          },
                       },
                       {
                           label: 'Tags',
@@ -1625,7 +1668,10 @@ const PlugRule = () => {
                               label: filterItem,
                           })),
                           onClose: (options) => filterHandler(setTagsFilterStringLinked, options),
-                          onDelete: () => setTagsFilterStringLinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setTagsFilterStringLinked('');
+                          },
                       },
                       {
                           label: 'Schedule status',
@@ -1637,7 +1683,10 @@ const PlugRule = () => {
                               label: filterItem,
                           })),
                           onClose: (options) => filterHandler(setSchedulerStatusStringLinked, options),
-                          onDelete: () => setSchedulerStatusStringLinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setSchedulerStatusStringLinked('');
+                          },
                       },
                       {
                           label: 'Last used data',
@@ -1649,7 +1698,10 @@ const PlugRule = () => {
                               label: filterItem,
                           })),
                           onClose: (options) => filterHandler(setLastUsedDataFilterStringLinked, options),
-                          onDelete: () => setLastUsedDataFilterStringLinked(''),
+                          onDelete: () => {
+                              setPageNo(1);
+                              setLastUsedDataFilterStringLinked('');
+                          },
                       },
                   ]
                 : [];

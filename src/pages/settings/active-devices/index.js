@@ -135,6 +135,7 @@ const ActiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setDeviceIdFilterString([]);
                     },
                 },
@@ -158,6 +159,7 @@ const ActiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setDeviceModelString([]);
                     },
                 },
@@ -181,6 +183,7 @@ const ActiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setFloorString([]);
                     },
                 },
@@ -204,6 +207,7 @@ const ActiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSpaceString([]);
                     },
                 },
@@ -227,6 +231,7 @@ const ActiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSensorString([]);
                     },
                 },
@@ -250,6 +255,7 @@ const ActiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setFirmWareString([]);
                     },
                 },
@@ -273,6 +279,7 @@ const ActiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setHardWareString([]);
                     },
                 },
