@@ -37,13 +37,12 @@ const SpacesListTable = ({ colorfulSpaces }) => {
 
     const fetchEquipDataList = async () => {
         setSpacesLoading(true);
-        const orderedBy = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
-        const sortedBy = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
+        // const orderedBy = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
+        // const sortedBy = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
         const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo: timeZone };
 
         try {
-            const res = await fetchAllSpacesV2(query);
-            const { data, total_data, total_building_usage } = res;
+            const data = await fetchAllSpacesV2(query);
 
             if (data && Array.isArray(data) && data.length !== 0) {
                 const updatedData = data.map((space) => {
@@ -53,7 +52,6 @@ const SpacesListTable = ({ colorfulSpaces }) => {
 
                     const newSpaceData = {
                         ...space,
-                        totalBldgUsage: total_building_usage ? total_building_usage : 0,
                         consumptionBarColor: identicalColorfulSpace?.color,
                     };
 
@@ -61,8 +59,6 @@ const SpacesListTable = ({ colorfulSpaces }) => {
                 });
 
                 setSpaces(updatedData);
-
-                if (total_data) setTotalItems(total_data);
             }
         } catch {
             setSpaces([]);
@@ -125,14 +121,14 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {`${formatConsumptionValue(Math.round(row?.consumption?.now / 1000))} ${UNITS.KWH}`}
+                    {`${formatConsumptionValue(Math.round(row?.consumption?.new / 1000))} ${UNITS.KWH}`}
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
                 <Progress multi className="custom-progress-bar" style={{ height: '6px' }}>
                     <Progress
                         bar
-                        value={row?.consumption?.now}
-                        max={row?.totalBldgUsage}
+                        value={row?.consumption?.new}
+                        max={row?.total_building_usage}
                         barClassName="custom-on-hour"
                         style={{ backgroundColor: row?.consumptionBarColor }}
                     />
@@ -142,29 +138,35 @@ const SpacesListTable = ({ colorfulSpaces }) => {
     });
 
     const renderPerChange = useCallback((row) => {
+        const change = row?.consumption?.change;
+
         return (
-            <TrendsBadge
-                value={Math.abs(Math.round(row?.consumption?.change))}
-                type={
-                    row?.consumption?.change === 0
-                        ? TrendsBadge.Type.NEUTRAL_TREND
-                        : row?.consumption?.now < row?.consumption?.old
-                        ? TrendsBadge.Type.DOWNWARD_TREND
-                        : TrendsBadge.Type.UPWARD_TREND
-                }
-            />
+            change &&
+            Number.isInteger(change) && (
+                <TrendsBadge
+                    value={Math.abs(Math.round(change))}
+                    type={
+                        change === 0
+                            ? TrendsBadge.Type.NEUTRAL_TREND
+                            : row?.consumption?.new < row?.consumption?.old
+                            ? TrendsBadge.Type.DOWNWARD_TREND
+                            : TrendsBadge.Type.UPWARD_TREND
+                    }
+                />
+            )
         );
     });
+
     const renderSquareFootage = useCallback((row) => {
         return <Typography.Body size={Typography.Sizes.md}>{row?.square_footage + ' ' + 'm^2'}</Typography.Body>;
     });
 
     const renderTags = useCallback((row) => {
-        const slicedArr = row?.tags.slice(1);
+        const slicedArr = row?.tag.slice(1);
 
         return (
             <div className="tag-row-content">
-                <Badge text={<span className="gray-950">{row?.tags[0] ? row?.tags[0] : 'none'}</span>} />
+                <Badge text={<span className="gray-950">{row?.tag[0] ? row?.tag[0] : 'none'}</span>} />
                 {slicedArr?.length > 0 ? (
                     <>
                         <Badge
@@ -208,12 +210,12 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         },
         {
             name: 'Floor',
-            accessor: 'floor_id',
+            accessor: 'floor_name',
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Space Type',
-            accessor: 'space_type',
+            accessor: 'space_type_name',
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
@@ -229,7 +231,7 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         },
         {
             name: 'Tags',
-            accessor: 'tags',
+            accessor: 'tag',
             callbackValue: renderTags,
             onSort: (method, name) => setSortBy({ method, name }),
         },
@@ -252,12 +254,12 @@ const SpacesListTable = ({ colorfulSpaces }) => {
                 searchResultRows={spaces}
                 filterOptions={[]}
                 headers={headerProps}
-                pageSize={pageSize}
-                currentPage={pageNo}
-                onPageSize={setPageSize}
-                onChangePage={setPageNo}
-                pageListSizes={pageListSizes}
-                totalCount={totalItems}
+                // pageSize={pageSize}
+                // currentPage={pageNo}
+                // onPageSize={setPageSize}
+                // onChangePage={setPageNo}
+                // pageListSizes={pageListSizes}
+                // totalCount={totalItems}
                 isCSVDownloading={isCSVDownloading}
                 onDownload={handleDownloadCSV}
             />
