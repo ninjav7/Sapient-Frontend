@@ -702,27 +702,27 @@ const BuildingOverview = () => {
             });
     };
 
-    const fetchEnergyConsumptionBySpaceData = async (tzInfo) => {
-        setChartLoading(true);
+    // const fetchEnergyConsumptionBySpaceData = async (tzInfo) => {
+    //     setChartLoading(true);
 
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo };
+    //     const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo };
 
-        try {
-            const data = await fetchEnergyConsumptionBySpaceDataHelper({ query, spacesDataCategories });
+    //     try {
+    //         const data = await fetchEnergyConsumptionBySpaceDataHelper({ query, spacesDataCategories });
 
-            if (data?.newSpacesColumnCategories?.length > 0) setSpacesColumnCategories(data.newSpacesColumnCategories);
-            if (data?.newSpacesData?.length > 0) setSpacesData(data.newSpacesData);
-            if (data?.newSpacesColumnChartData?.length > 0) setSpacesColumnChartData(data.newSpacesColumnChartData);
-            if (data?.newSpacesDataCategories?.length > 0) setSpacesDataCategories(data.newSpacesDataCategories);
-        } catch {
-            setSpacesColumnCategories([]);
-            setSpacesData([]);
-            setSpacesColumnChartData([]);
-            setSpacesDataCategories([]);
-        }
+    //         if (data?.newSpacesColumnCategories?.length > 0) setSpacesColumnCategories(data.newSpacesColumnCategories);
+    //         if (data?.newSpacesData?.length > 0) setSpacesData(data.newSpacesData);
+    //         if (data?.newSpacesColumnChartData?.length > 0) setSpacesColumnChartData(data.newSpacesColumnChartData);
+    //         if (data?.newSpacesDataCategories?.length > 0) setSpacesDataCategories(data.newSpacesDataCategories);
+    //     } catch {
+    //         setSpacesColumnCategories([]);
+    //         setSpacesData([]);
+    //         setSpacesColumnChartData([]);
+    //         setSpacesDataCategories([]);
+    //     }
 
-        setChartLoading(false);
-    };
+    //     setChartLoading(false);
+    // };
 
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
@@ -797,7 +797,7 @@ const BuildingOverview = () => {
         getEnergyConsumptionByEquipType(time_zone);
         getEnergyConsumptionBySpaceType(time_zone);
         getEnergyConsumptionByFloor(time_zone);
-        fetchEnergyConsumptionBySpaceData(time_zone);
+        // fetchEnergyConsumptionBySpaceData(time_zone);
     }, [startDate, endDate, bldgId, userPrefUnits]);
 
     useEffect(() => {
@@ -844,7 +844,7 @@ const BuildingOverview = () => {
 
             <div className="bldg-page-grid-style">
                 <div>
-                    <EnergyConsumptionBySpaceChart
+                    {/* <EnergyConsumptionBySpaceChart
                         propTitle="Energy Consumption by Space (kWh)"
                         propSubTitle="Top 15 Energy Consumers"
                         spacesData={spacesData}
@@ -858,6 +858,7 @@ const BuildingOverview = () => {
                         isChartLoading={chartLoading}
                         onMoreDetail={() => handleRouteChange('/energy/spaces')}
                     />
+                     */}
                     <Brick sizeInRem={1.5} />
 
                     {!isPlugOnly && (
