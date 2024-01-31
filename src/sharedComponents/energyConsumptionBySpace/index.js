@@ -1,16 +1,16 @@
 import React, { useRef } from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import { UNITS } from '../../../constants/units';
-import { UserStore } from '../../../store/UserStore';
+import { UNITS } from '../../constants/units';
+import { UserStore } from '../../store/UserStore';
 import Skeleton from 'react-loading-skeleton';
-import StackedColumnChart from '../../../sharedComponents/stackedColumnChart/StackedColumnChart';
-import colorPalette from '../../../assets/scss/_colors.scss';
+import StackedColumnChart from '../../sharedComponents/stackedColumnChart/StackedColumnChart';
+import colorPalette from '../../assets/scss/_colors.scss';
 import './styles.scss';
-import Typography from '../../../sharedComponents/typography';
-import { DOWNLOAD_TYPES } from '../../../sharedComponents/constants';
-import DropDownIcon from '../../../sharedComponents/dropDowns/dropDownButton/DropDownIcon';
-import { ReactComponent as BurgerIcon } from '../../../assets/icon/burger.svg';
+import Typography from '../../sharedComponents/typography';
+import { DOWNLOAD_TYPES } from '../../sharedComponents/constants';
+import DropDownIcon from '../../sharedComponents/dropDowns/dropDownButton/DropDownIcon';
+import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
 
 const EnergyConsumptionBySpaceCategories = ({ spacesData }) => {
     return (
@@ -18,7 +18,7 @@ const EnergyConsumptionBySpaceCategories = ({ spacesData }) => {
             {spacesData?.map((record) => (
                 <div className="spacedata-type-body d-flex align-items-center pl-2 pr-2">
                     <p className="dot m-0" style={{ backgroundColor: record?.color }}></p>
-                    <h5 className="spacedata-type-title mt-0 mb-0 ml-2">{record?.device}</h5>
+                    <h5 className="spacedata-type-title mt-0 mb-0 ml-2">{record?.name}</h5>
                 </div>
             ))}
         </div>
@@ -37,7 +37,6 @@ const EnergyConsumptionBySpaceChart = (props) => {
         timeZone,
         dateFormat,
         daysCount,
-        isFetchingSpacesData = false,
         isChartLoading = false,
         plotBands: plotBandsProp,
         upperLegendsProps = {},
@@ -107,13 +106,13 @@ const EnergyConsumptionBySpaceChart = (props) => {
                         handleClick={handleDropDownOptionClicked}
                     />
                 </div>
-                {isFetchingSpacesData ? (
+                {isChartLoading ? (
                     <Skeleton
                         baseColor={colorPalette.primaryGray150}
                         highlightColor={colorPalette.baseBackground}
                         count={1}
-                        height={70}
-                        width={425}
+                        height={50}
+                        width="100%"
                         borderRadius={10}
                         className="ml-2"
                     />
@@ -158,7 +157,6 @@ EnergyConsumptionBySpaceChart.propTypes = {
     timeZone: PropTypes.string.isRequired,
     dateFormat: PropTypes.string.isRequired,
     daysCount: PropTypes.number.isRequired,
-    isFetchingSpacesData: PropTypes.bool.isRequired,
     plotBandsProp: PropTypes.array.isRequired,
     upperLegendsProps: PropTypes.object.isRequired,
     onMoreDetail: PropTypes.func.isRequired,

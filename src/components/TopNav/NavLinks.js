@@ -122,6 +122,7 @@ const NavLinks = () => {
 
         if (
             location.pathname.includes('/energy/building/overview') ||
+            location.pathname.includes('/energy/spaces') ||
             location.pathname.includes('/energy/end-uses') ||
             location.pathname.includes('/energy/time-of-day') ||
             location.pathname.includes('/control/plug-rules') ||
@@ -185,6 +186,7 @@ const NavLinks = () => {
 
         if (
             location.pathname.includes('/energy/building/overview') ||
+            location.pathname.includes('/energy/spaces') ||
             location.pathname.includes('/energy/end-uses') ||
             location.pathname.includes('/energy/time-of-day') ||
             location.pathname.includes('/control/plug-rules') ||

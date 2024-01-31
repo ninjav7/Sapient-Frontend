@@ -1,0 +1,44 @@
+{
+    "current_page": 1,
+    "page_size": 20,
+    "total_data": 20,
+    "pagination": {
+        "previous": null,
+        "next": null
+    },
+    "data": [
+        {
+            "space_id": "3bcba1c5-a640-4130-b185-343cb8ce9659",
+            "space_name": "Room 1",
+            "space_type": "Freezer",
+            "space_type_id": "UUID",
+            "floor_id": "Floor 1",
+            "square_footage": 100,
+            "tags": ["Dole Fruits"],
+            "note": "",
+            "equipment_count": 2,
+            "consumption": {
+                "now": 193214968.04926714,
+                "old": 59128460.74670012,
+                "change": 226.77151681147086
+            }
+        },
+        {
+            "space_id": "e942fe16-4925-4f6a-90cf-a6e6a3d20566",
+            "space_name": "Room 2",
+            "space_type": "Freezer",
+            "space_type_id": "UUID",
+            "floor_id": "Floor 2",
+            "square_footage": 100,
+            "tags": ["Green Giant"],
+            "note": "",
+            "equipment_count": 7,
+            "consumption": {
+                "now": 113214968.04926714,
+                "old": 59128460.74670012,
+                "change": 156.77151681147086
+            }
+        }
+    ],
+    "total_building_usage": 193214968.04926714
+}
