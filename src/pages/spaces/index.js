@@ -153,7 +153,7 @@ const Spaces = () => {
 
             <Brick sizeInRem={1.5} /> */}
 
-            {/* <SpacesListTable colorfulSpaces={spacesData} /> */}
+            <SpacesListTable colorfulSpaces={spacesData} />
         </>
     );
 };
