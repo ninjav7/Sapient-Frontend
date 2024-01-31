@@ -9,10 +9,10 @@ import { UserStore } from '../../store/UserStore';
 import { buildingData } from '../../store/globalState';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
-import EnergyConsumptionBySpaceChart from '../../sharedComponents/energyConsumptionBySpace';
+import EnergyConsumptionBySpaceChart from '../../components/energyConsumptionBySpace';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-import { fetchEnergyConsumptionBySpaceDataHelper } from '../../sharedComponents/energyConsumptionBySpace/helpers';
+import { fetchEnergyConsumptionBySpaceDataHelper } from '../../components/energyConsumptionBySpace/helpers';
 import SpacesListTable from './SpacesListTable';
 
 const Spaces = () => {
@@ -153,7 +153,7 @@ const Spaces = () => {
 
             <Brick sizeInRem={1.5} />
 
-            <SpacesListTable colorfulSpaces={spacesData} />
+            {/* <SpacesListTable colorfulSpaces={spacesData} /> */}
         </>
     );
 };
