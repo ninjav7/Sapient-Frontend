@@ -51,27 +51,27 @@ const Spaces = () => {
         },
     });
 
-    const fetchEnergyConsumptionBySpaceData = async (tzInfo) => {
-        setChartLoading(true);
+    // const fetchEnergyConsumptionBySpaceData = async (tzInfo) => {
+    //     setChartLoading(true);
 
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo };
+    //     const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo };
 
-        try {
-            const data = await fetchEnergyConsumptionBySpaceDataHelper({ query });
+    //     try {
+    //         const data = await fetchEnergyConsumptionBySpaceDataHelper({ query });
 
-            if (data?.newSpacesColumnCategories?.length > 0) setSpacesColumnCategories(data.newSpacesColumnCategories);
-            if (data?.newSpacesData?.length > 0) setSpacesData(data.newSpacesData);
-            if (data?.newSpacesColumnChartData?.length > 0) setSpacesColumnChartData(data.newSpacesColumnChartData);
-            if (data?.newSpacesDataCategories?.length > 0) setSpacesDataCategories(data.newSpacesDataCategories);
-        } catch {
-            setSpacesColumnCategories([]);
-            setSpacesData([]);
-            setSpacesColumnChartData([]);
-            setSpacesDataCategories([]);
-        }
+    //         if (data?.newSpacesColumnCategories?.length > 0) setSpacesColumnCategories(data.newSpacesColumnCategories);
+    //         if (data?.newSpacesData?.length > 0) setSpacesData(data.newSpacesData);
+    //         if (data?.newSpacesColumnChartData?.length > 0) setSpacesColumnChartData(data.newSpacesColumnChartData);
+    //         if (data?.newSpacesDataCategories?.length > 0) setSpacesDataCategories(data.newSpacesDataCategories);
+    //     } catch {
+    //         setSpacesColumnCategories([]);
+    //         setSpacesData([]);
+    //         setSpacesColumnChartData([]);
+    //         setSpacesDataCategories([]);
+    //     }
 
-        setChartLoading(false);
-    };
+    //     setChartLoading(false);
+    // };
 
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
@@ -129,7 +129,7 @@ const Spaces = () => {
             }
         }
 
-        fetchEnergyConsumptionBySpaceData(time_zone);
+        // fetchEnergyConsumptionBySpaceData(time_zone);
     }, [startDate, endDate, bldgId]);
 
     return (
@@ -137,7 +137,7 @@ const Spaces = () => {
             <Header title="Spaces" type="page" showExplore={true} />
             <Brick sizeInRem={1.5} />
 
-            <EnergyConsumptionBySpaceChart
+            {/* <EnergyConsumptionBySpaceChart
                 propTitle="Energy Consumption (kWh)"
                 propSubTitle="Top Energy Consumers"
                 spacesData={spacesData}
@@ -151,7 +151,7 @@ const Spaces = () => {
                 isChartLoading={chartLoading}
             />
 
-            <Brick sizeInRem={1.5} />
+            <Brick sizeInRem={1.5} /> */}
 
             {/* <SpacesListTable colorfulSpaces={spacesData} /> */}
         </>
