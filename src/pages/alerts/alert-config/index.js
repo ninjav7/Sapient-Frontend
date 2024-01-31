@@ -160,7 +160,6 @@ const ConfigureAlerts = (props) => {
         let label = '';
 
         if (count === 0) label = `No ${targetType} selected.`;
-        else if (count === originalDataList.length) label = `All ${capitalizeFirstLetter(targetType)}s selected.`;
         else if (count === 1) label = alertObj.target.lists[0].label;
         else if (count > 1) label = `${count} ${targetType}s selected.`;
 
