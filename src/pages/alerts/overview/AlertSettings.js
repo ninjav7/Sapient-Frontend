@@ -51,6 +51,14 @@ const AlertSettings = (props) => {
         );
     };
 
+    const renderTargetCount = (row) => {
+        return (
+            <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
+                {17}
+            </Typography.Body>
+        );
+    };
+
     const renderTargetType = (row) => {
         const { target_type = 'building' } = row;
         const formattedText = `${target_type?.charAt(0).toUpperCase()}${target_type?.slice(1)}`;
@@ -102,7 +110,7 @@ const AlertSettings = (props) => {
         return (
             <div style={{ maxWidth: '15vw' }}>
                 <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray500 }}>
-                    {row?.alert_condition_description ? row?.alert_condition_description : '-'}
+                    {row?.alert_condition_description ? row?.alert_condition_description : 'Condition of an Alert'}
                 </Typography.Body>
             </div>
         );
@@ -172,9 +180,14 @@ const AlertSettings = (props) => {
                 searchResultRows={currentRow()}
                 headers={[
                     {
-                        name: 'Target',
+                        name: 'Alert Name',
                         accessor: 'target_type',
                         callbackValue: renderAlertType,
+                    },
+                    {
+                        name: 'Target Count',
+                        accessor: 'target_type',
+                        callbackValue: renderTargetCount,
                     },
                     {
                         name: 'Target Type',
