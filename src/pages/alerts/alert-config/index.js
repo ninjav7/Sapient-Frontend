@@ -537,7 +537,6 @@ const AlertConfig = () => {
                 handleModalClose={closeEquipConfigModel}
                 alertObj={alertObj}
                 handleTargetChange={handleTargetChange}
-                setOriginalEquipsList={setOriginalEquipsList}
             />
         </React.Fragment>
     );
