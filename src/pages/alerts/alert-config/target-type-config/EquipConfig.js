@@ -384,6 +384,7 @@ const EquipConfig = (props) => {
                                     onChange={(e) => {
                                         setUserSelectedBldgId(e.value);
                                         setUserSelectedEquips([]);
+                                        setCheckedAll(false);
                                     }}
                                     currentValue={buildingsList.filter((option) => option.value === userSelectedBldgId)}
                                     menuPlacement="auto"
