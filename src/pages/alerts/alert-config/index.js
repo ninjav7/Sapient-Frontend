@@ -511,6 +511,7 @@ const AlertConfig = () => {
                         handleModalClick={handleModalClick}
                         openBldgConfigModel={openBldgConfigModel}
                         openEquipConfigModel={openEquipConfigModel}
+                        setAlertObj={setAlertObj}
                     />
                 )}
 

@@ -179,3 +179,12 @@
     text-decoration: dotted;
     text-underline-position: under;
 }
+
+.reset-target-style {
+    color: #444ce7;
+}
+
+.reset-target-style:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
