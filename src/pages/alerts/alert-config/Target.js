@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
-import Skeleton from 'react-loading-skeleton';
 import { CardBody, CardHeader, UncontrolledTooltip } from 'reactstrap';
 
 import Typography from '../../../sharedComponents/typography';
-import { Button } from '../../../sharedComponents/button';
 import Brick from '../../../sharedComponents/brick';
-import Select from '../../../sharedComponents/form/select';
 
 import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
 import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/assets/icons/building-type.svg';
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 
-import { TARGET_TYPES } from '../constants';
+import { TARGET_TYPES, defaultAlertObj } from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
@@ -43,6 +40,7 @@ const Target = (props) => {
         openEquipConfigModel,
         originalBldgsList,
         originalEquipsList,
+        setAlertObj,
     } = props;
 
     const [selectedBldgsForEquip, setSelectedBldgsForEquip] = useState([]);
@@ -63,9 +61,14 @@ const Target = (props) => {
                         </Typography.Subheader>
                         <TargetToolTip />
                     </div>
-                    <Typography.Subheader size={Typography.Sizes.lg} className="reset-target-style">
+                    {/* <Typography.Subheader
+                        size={Typography.Sizes.lg}
+                        className="reset-target-style"
+                        onClick={() => {
+                            setAlertObj(defaultAlertObj);
+                        }}>
                         {`Reset Target Type`}
-                    </Typography.Subheader>
+                    </Typography.Subheader> */}
                 </div>
             </CardHeader>
             <CardBody>
