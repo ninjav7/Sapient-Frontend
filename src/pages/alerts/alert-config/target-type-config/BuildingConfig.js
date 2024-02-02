@@ -198,6 +198,12 @@ const BuildingConfig = (props) => {
     };
 
     useEffect(() => {
+        if (userSelectedBldgs && buildingsList) {
+            setCheckedAll(userSelectedBldgs.length === buildingsList.length && buildingsList.length > 0);
+        }
+    }, [userSelectedBldgs, buildingsList]);
+
+    useEffect(() => {
         if (isModalOpen) {
             getBuildingsFilters();
         }

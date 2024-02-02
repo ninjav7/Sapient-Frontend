@@ -169,9 +169,15 @@ const EquipConfig = (props) => {
             true
         )
             .then((res) => {
-                const responseData = res.data;
-                setTotalItems(responseData?.total_data);
-                setEquipmentsList(responseData?.data);
+                const { total_data, data } = res?.data;
+                if (data && data.length !== 0) {
+                    data.forEach((el) => {
+                        el.label = el?.equipments_name;
+                        el.value = el?.equipments_id;
+                    });
+                    setEquipmentsList(data);
+                }
+                setTotalItems(total_data);
             })
             .catch((error) => {})
             .finally(() => {
@@ -439,18 +445,19 @@ const EquipConfig = (props) => {
                     <>
                         <Badge
                             text={
-                                <span className="gray-950" id={`tags-badge-${row.equipments_id}`}>
+                                <span className="gray-950" id={`tags-badge-${row?.equipments_id}`}>
                                     +{slicedArr.length} more
                                 </span>
                             }
                         />
                         <UncontrolledTooltip
                             placement="top"
-                            target={`tags-badge-${row.equipments_id}`}
+                            target={`tags-badge-${row?.equipments_id}`}
                             className="tags-tooltip">
-                            {slicedArr.map((el) => {
-                                return <Badge text={<span className="gray-950">{el}</span>} />;
-                            })}
+                            {slicedArr &&
+                                slicedArr.map((el) => {
+                                    return <Badge text={<span className="gray-950">{el}</span>} />;
+                                })}
                         </UncontrolledTooltip>
                     </>
                 ) : null}
@@ -625,6 +632,12 @@ const EquipConfig = (props) => {
             setUserSelectedEquips([]);
         }
     }, [isModalOpen]);
+
+    useEffect(() => {
+        if (userSelectedEquips && equipmentsList) {
+            setCheckedAll(userSelectedEquips.length === equipmentsList.length && equipmentsList.length > 0);
+        }
+    }, [userSelectedEquips, equipmentsList]);
 
     return (
         <React.Fragment>
