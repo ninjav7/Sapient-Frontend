@@ -622,7 +622,7 @@ const EquipChartModal = ({
             .then((res) => {
                 const { success: isSuccessful, data } = res?.data;
                 if (isSuccessful && data && data?.equipments_id) {
-                    if (data.location_served) data.location_served = [`${data.location_served[0]}`];
+                    if (data?.location_served) data.location_served = [`${data.location_served[0]}`];
 
                     setOriginalEquipData(data);
                     setEquipData(data);
