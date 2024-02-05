@@ -32,6 +32,8 @@ import { capitalizeFirstLetter } from '../../../helpers/helpers';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
+import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
+import Textarea from '../../../sharedComponents/form/textarea/Textarea';
 
 const CreateAlertHeader = (props) => {
     const {
@@ -151,7 +153,7 @@ const RemoveAlert = () => {
 };
 
 const ConfigureAlerts = (props) => {
-    const { alertObj = {}, setTypeSelectedLabel, originalBldgsList, originalEquipsList } = props;
+    const { alertObj = {}, setTypeSelectedLabel, originalBldgsList, originalEquipsList, handleChange } = props;
 
     const renderTargetedList = (alert_obj, originalDataList = []) => {
         const count = alert_obj?.target?.lists?.length ?? 0;
@@ -188,6 +190,27 @@ const ConfigureAlerts = (props) => {
         <>
             <Row>
                 <Col lg={9}>
+                    <div className="w-50">
+                        <Typography.Body size={Typography.Sizes.md}>
+                            Alert Name
+                            <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                                *
+                            </span>
+                        </Typography.Body>
+                        <Brick sizeInRem={0.25} />
+                        <InputTooltip
+                            placeholder="Enter Alert Name"
+                            type="text"
+                            onChange={(e) => {
+                                handleChange('alert_name', e.target.value);
+                            }}
+                            labelSize={Typography.Sizes.md}
+                            value={alertObj?.alert_name}
+                        />
+                    </div>
+
+                    <Brick sizeInRem={2} />
+
                     <Target
                         renderTargetedList={renderTargetedList}
                         renderTargetTypeHeader={renderTargetTypeHeader}
@@ -201,6 +224,23 @@ const ConfigureAlerts = (props) => {
             <Row>
                 <Col lg={9}>
                     <Condition {...props} />
+
+                    <Brick sizeInRem={2} />
+
+                    <div className="w-100">
+                        <Typography.Body size={Typography.Sizes.md}>Alert Description</Typography.Body>
+                        <Brick sizeInRem={0.25} />
+                        <Textarea
+                            type="textarea"
+                            rows="4"
+                            placeholder="Enter Alert description..."
+                            value={alertObj?.alert_description}
+                            onChange={(e) => {
+                                handleChange('alert_description', e.target.value);
+                            }}
+                            inputClassName="pt-2"
+                        />
+                    </div>
                 </Col>
             </Row>
 
@@ -279,6 +319,12 @@ const AlertConfig = () => {
             if (configType === TARGET_TYPES.BUILDING) openBldgConfigModel();
             if (configType === TARGET_TYPES.EQUIPMENT) openEquipConfigModel();
         }
+    };
+
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, alertObj);
+        obj[key] = value;
+        setAlertObj(obj);
     };
 
     const handleTargetChange = (key, value) => {
@@ -512,6 +558,7 @@ const AlertConfig = () => {
                         openBldgConfigModel={openBldgConfigModel}
                         openEquipConfigModel={openEquipConfigModel}
                         setAlertObj={setAlertObj}
+                        handleChange={handleChange}
                     />
                 )}
 

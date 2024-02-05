@@ -31,6 +31,8 @@ export const defaultNotificationObj = {
 
 // Main Alert Obj
 export const defaultAlertObj = {
+    alert_name: '',
+    alert_description: '',
     target: {
         type: '',
         lists: [],
