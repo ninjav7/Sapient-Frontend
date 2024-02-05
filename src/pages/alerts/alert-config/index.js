@@ -13,6 +13,8 @@ import AlertPreview from './AlertPreview';
 import BuildingConfig from './target-type-config/BuildingConfig';
 import EquipConfig from './target-type-config/EquipConfig';
 import NotificationMethod from './NotificationMethod';
+import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
+import Textarea from '../../../sharedComponents/form/textarea/Textarea';
 
 import { UserStore } from '../../../store/UserStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
@@ -22,18 +24,11 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as CheckMarkSVG } from '../../../assets/icon/check-mark.svg';
 
 import { createAlertServiceAPI, fetchConfiguredAlertById } from '../services';
-import { getEquipmentsList } from '../../settings/panels/services';
-import { fetchBuildingsList } from '../../../services/buildings';
-import { getEquipTypeData } from '../../settings/equipment-type/services';
-import { getAllBuildingTypes } from '../../settings/general-settings/services';
 
 import { TARGET_TYPES, defaultAlertObj, defaultConditionObj, defaultNotificationObj } from '../constants';
-import { capitalizeFirstLetter } from '../../../helpers/helpers';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
-import Textarea from '../../../sharedComponents/form/textarea/Textarea';
 
 const CreateAlertHeader = (props) => {
     const {

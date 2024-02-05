@@ -13,11 +13,11 @@ import { Checkbox } from '../../../../sharedComponents/form/checkbox';
 import { DataTableWidget } from '../../../../sharedComponents/dataTableWidget';
 import { FILTER_TYPES } from '../../../../sharedComponents/dataTableWidget/constants';
 
+import { pageListSizes } from '../../../../helpers/helpers';
 import { fetchBuildingList } from '../../../settings/buildings/services';
 import { getEqupmentDataRequest, getFiltersForEquipmentRequest } from '../../../../services/equipment';
 
 import '../styles.scss';
-import { pageListSizes } from '../../../../helpers/helpers';
 
 const EquipConfig = (props) => {
     const { isModalOpen = false, handleModalClose, alertObj = {}, handleTargetChange } = props;

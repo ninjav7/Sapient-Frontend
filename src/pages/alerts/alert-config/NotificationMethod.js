@@ -6,7 +6,6 @@ import Brick from '../../../sharedComponents/brick';
 import Select from '../../../sharedComponents/form/select';
 import Typography from '../../../sharedComponents/typography';
 import Inputs from '../../../sharedComponents/form/input/Input';
-import Radio from '../../../sharedComponents/form/radio/Radio';
 import { Checkbox } from '../../../sharedComponents/form/checkbox';
 import { Button } from '../../../sharedComponents/button';
 
