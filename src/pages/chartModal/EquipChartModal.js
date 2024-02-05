@@ -396,7 +396,7 @@ const EquipChartModal = ({
 
         if (originalEquipData?.location_id !== equipData?.location_id) obj.space_id = equipData?.location_id;
         if (originalEquipData?.location_served !== equipData?.location_served)
-            obj.location_served = equipData?.location_served;
+            obj.location_served = [`${equipData?.location_served}`];
 
         if (originalEquipData?.equipments_type_id !== equipData?.equipments_type_id) {
             obj.equipment_type = equipData?.equipments_type_id;
@@ -424,10 +424,6 @@ const EquipChartModal = ({
                         s.notificationType = 'success';
                     });
                     const arr = apiRequestBody(startDate, endDate, timeZone);
-                    setEquipData({});
-                    setOriginalEquipData({});
-                    setProcessing(false);
-                    handleChartClose();
                     fetchEquipmentData(arr);
                 } else {
                     UserStore.update((s) => {
@@ -439,11 +435,14 @@ const EquipChartModal = ({
                             : 'Unable to update Equipment due to Internal Server Error!.';
                         s.notificationType = 'error';
                     });
-                    setProcessing(false);
                 }
             })
-            .catch((error) => {
+            .catch((error) => {})
+            .finally(() => {
                 setProcessing(false);
+                handleChartClose();
+                setEquipData({});
+                setOriginalEquipData({});
             });
     };
 
@@ -623,6 +622,8 @@ const EquipChartModal = ({
             .then((res) => {
                 const { success: isSuccessful, data } = res?.data;
                 if (isSuccessful && data && data?.equipments_id) {
+                    if (data.location_served) data.location_served = [`${data.location_served[0]}`];
+
                     setOriginalEquipData(data);
                     setEquipData(data);
                     setEquipBreakerLink(data?.breaker_link);
