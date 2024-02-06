@@ -63,10 +63,10 @@ const NotificationMethod = (props) => {
     const renderUsers = (alert_obj) => {
         const notify = alert_obj?.notification;
 
-        if (notify?.selectedUserId.length === 0) return `No user selected`;
+        if (notify?.selectedUserId.length === 0) return `No user selected.`;
 
         if (notify?.selectedUserId.length > 3) {
-            return `${notify?.selectedUserId.length} users selected`;
+            return `${notify?.selectedUserId.length} users selected.`;
         } else {
             return getCommaSeparatedObjectLabels(notify?.selectedUserId);
         }
@@ -87,7 +87,7 @@ const NotificationMethod = (props) => {
 
     const renderTriggerNotification = (alert_obj) => {
         const obj = alert_obj?.recurrence;
-        return `Resend alert after ${obj?.resendAt} min`;
+        return `Resend alert after ${obj?.resendAt} min.`;
     };
 
     useEffect(() => {
@@ -151,16 +151,20 @@ const NotificationMethod = (props) => {
                                         </div>
                                     </div>
 
-                                    <Brick sizeInRem={1} />
+                                    {alertObj?.recurrence?.resendAlert && (
+                                        <>
+                                            <Brick sizeInRem={1} />
 
-                                    <div>
-                                        <Typography.Subheader
-                                            size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
-                                        <Brick sizeInRem={0.25} />
-                                        <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                            {renderTriggerNotification(alertObj)}
-                                        </Typography.Body>
-                                    </div>
+                                            <div>
+                                                <Typography.Subheader
+                                                    size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
+                                                <Brick sizeInRem={0.25} />
+                                                <Typography.Body size={Typography.Sizes.md} className="text-muted">
+                                                    {renderTriggerNotification(alertObj)}
+                                                </Typography.Body>
+                                            </div>
+                                        </>
+                                    )}
                                 </>
                             ) : (
                                 <>
