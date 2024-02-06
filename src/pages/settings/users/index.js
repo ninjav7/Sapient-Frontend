@@ -142,6 +142,7 @@ const Users = () => {
                                 }
                             },
                             onDelete: () => {
+                                setPageNo(1);
                                 setPermissionRoleIds([]);
                             },
                         },

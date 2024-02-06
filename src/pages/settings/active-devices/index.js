@@ -135,6 +135,7 @@ const ActiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setDeviceIdFilterString([]);
                     },
                 },
@@ -158,6 +159,7 @@ const ActiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setDeviceModelString([]);
                     },
                 },
@@ -181,6 +183,7 @@ const ActiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setFloorString([]);
                     },
                 },
@@ -204,6 +207,7 @@ const ActiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSpaceString([]);
                     },
                 },
@@ -227,6 +231,7 @@ const ActiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSensorString([]);
                     },
                 },
@@ -250,6 +255,7 @@ const ActiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setFirmWareString([]);
                     },
                 },
@@ -273,6 +279,7 @@ const ActiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setHardWareString([]);
                     },
                 },
@@ -560,7 +567,7 @@ const ActiveDevices = () => {
                 <Col lg={12}>
                     <DataTableWidget
                         isLoading={isDeviceProcessing}
-                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length} noOfRows={15} />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={15} />}
                         isFilterLoading={isFilterFetching}
                         id="active_devices_list"
                         onSearch={(query) => {

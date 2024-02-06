@@ -1,6 +1,6 @@
 export const BaseUrl = 'https://sapient-dev-service.stacksapien.com';
-
 export const SingularityBaseUrl = 'https://api.singularity.energy/v2/';
+
 // Auth
 export const signin = '/api/user_role/user/signin';
 export const signup = '/api/user_role/user/signup';
@@ -70,6 +70,10 @@ export const singleUserPermissionDetail = '/api/user_role/user-permission-role/u
 // Search
 export const serachUser = '/api/user_role/user-permission-role/all-member-users';
 
+// spaces
+export const energyConsumptionBySpaceV2 = '/api/v2/metrics/space';
+export const getAllSpaces = '/api/v2/metrics/space/list';
+
 // end-uses
 export const energyEndUseInfo = '/api/energy/portfolio/end-uses-info';
 export const endUsesChart = '/api/energy/end_use/chart/end-uses';
@@ -91,6 +95,7 @@ export const searchEquipment = '/api/config/equipments_details/search_by_equipme
 export const getEndUseId = '/api/config/get_end_use';
 export const linkActiveSensorToEquip = '/api/config/sensor/active/lnk_act_snr_to_eqt';
 export const deleteEquipment = '/api/config/equipments_details/delete-equipment';
+export const getEquipmentKPIs = '/api/v2/metrics/equipment/kpi';
 
 // active
 export const generalActiveDevices = '/api/config/devices/active';

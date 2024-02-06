@@ -179,6 +179,7 @@ const PassiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setDeviceIdFilterString([]);
                     },
                 },
@@ -202,6 +203,7 @@ const PassiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setDeviceModelString([]);
                     },
                 },
@@ -225,6 +227,7 @@ const PassiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSensorString([]);
                     },
                 },
@@ -248,6 +251,7 @@ const PassiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setFloorString([]);
                     },
                 },
@@ -271,6 +275,7 @@ const PassiveDevices = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSpaceString([]);
                     },
                 },

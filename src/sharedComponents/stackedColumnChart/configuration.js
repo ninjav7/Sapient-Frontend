@@ -1,12 +1,16 @@
+import React from 'react';
 import moment from 'moment';
 import _ from 'lodash';
 import { chartsBaseConfig } from '../configs/chartsBaseConfig';
 import { PLOT_BANDS_TYPE } from '../common/charts/modules/contants';
+import Typography from '../typography';
+import { renderComponents } from '../columnChart/helper';
+import { formatConsumptionValue } from '../helpers/helper';
 
 import colors from '../../assets/scss/_colors.scss';
 
 const options = (props) => {
-    const { plotBands } = props;
+    const { plotBands, tooltipUnit, ownTooltip } = props;
     const plotBandsData = plotBands
         ?.map(({ background, from, to, borderBottomColor, type }) => {
             switch (type) {
@@ -98,6 +102,7 @@ const options = (props) => {
             ...baseConfig,
             plotOptions: {
                 column: {
+                    borderRadius: props?.borderRadius ?? 0,
                     stacking: 'normal',
                 },
             },
@@ -125,6 +130,25 @@ const options = (props) => {
 
                     return tooltip.defaultFormatter.call(_this, tooltip);
                 },
+                ...(ownTooltip && {
+                    pointFormatter: function () {
+                        const formattedValue = formatConsumptionValue(this.y, 2);
+
+                        return `<tr> <td style="color:${this.series.color};padding:0">
+                        ${renderComponents(
+                            <Typography.Header className="gray-900" size={Typography.Sizes.xxs}>
+                                content
+                            </Typography.Header>
+                        ).replace('content', `<span style="color:${this.series.color};">${this.series.name}:</span>`)}
+                        </td><td class="d-flex align-items-center justify-content-end" style="padding:0; gap: 0.25rem;">${renderComponents(
+                            <Typography.Header size={Typography.Sizes.xxs}>{formattedValue}</Typography.Header>
+                        )}${renderComponents(
+                            <Typography.Subheader className="gray-550 mt-1" size={Typography.Sizes.xxs}>
+                                {tooltipUnit}
+                            </Typography.Subheader>
+                        )}</td></tr>`;
+                    },
+                }),
             },
 
             xAxis: {

@@ -268,6 +268,7 @@ const ExploreByEquipmentV2 = () => {
                         setEquipmentFilter({
                             equipment_id: row?.equipment_id,
                             equipment_name: row?.equipment_name,
+                            device_type: row?.device_type,
                         });
                         localStorage.setItem('exploreEquipName', row?.equipment_name);
                         handleChartOpen();
@@ -819,6 +820,7 @@ const ExploreByEquipmentV2 = () => {
                         setConAPIFlag(options[0] + options[1]);
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         set_minConValue(bottomConsumption);
                         set_maxConValue(topConsumption);
                         setConAPIFlag('');
@@ -891,6 +893,7 @@ const ExploreByEquipmentV2 = () => {
                         setPerAPIFlag(options[0] + options[1]);
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         set_minPerValue(bottomPerChange);
                         set_maxPerValue(topPerChange);
                         setPerAPIFlag('');
@@ -918,6 +921,7 @@ const ExploreByEquipmentV2 = () => {
                         }
                     },
                     onDelete: (options) => {
+                        setPageNo(1);
                         setSelectedEquipType([]);
                     },
                 },
@@ -942,6 +946,7 @@ const ExploreByEquipmentV2 = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedEndUse([]);
                     },
                 },
@@ -966,6 +971,7 @@ const ExploreByEquipmentV2 = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedSpaceType([]);
                     },
                 },
@@ -989,6 +995,7 @@ const ExploreByEquipmentV2 = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedTags([]);
                     },
                 },
@@ -1012,6 +1019,7 @@ const ExploreByEquipmentV2 = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedPanels([]);
                     },
                 },
@@ -1035,6 +1043,7 @@ const ExploreByEquipmentV2 = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedBreakers([]);
                     },
                 },
@@ -1058,6 +1067,7 @@ const ExploreByEquipmentV2 = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedNotes([]);
                     },
                 },
@@ -1332,7 +1342,7 @@ const ExploreByEquipmentV2 = () => {
             <EquipChartModal
                 showEquipmentChart={showEquipmentChart}
                 handleChartClose={handleChartClose}
-                equipmentFilter={equipmentFilter}
+                selectedEquipObj={equipmentFilter}
                 fetchEquipmentData={fetchEquipDataList}
                 selectedTab={selectedModalTab}
                 setSelectedTab={setSelectedModalTab}

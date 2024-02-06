@@ -46,6 +46,8 @@ import colorPalette from '../../assets/scss/_colors.scss';
 import './style.css';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { getEnergyConsumptionCSVExport } from '../../utils/tablesExport';
+import EnergyConsumptionBySpaceChart from '../../components/energyConsumptionBySpace';
+import { fetchEnergyConsumptionBySpaceDataHelper } from '../../components/energyConsumptionBySpace/helpers';
 
 const BuildingOverview = () => {
     const { download } = useCSVDownload();
@@ -134,6 +136,13 @@ const BuildingOverview = () => {
     const [showEquipmentChart, setShowEquipmentChart] = useState(false);
     const handleChartOpen = () => setShowEquipmentChart(true);
     const handleChartClose = () => setShowEquipmentChart(false);
+
+    // Consumption by Space Chart
+    const [chartLoading, setChartLoading] = useState(false);
+    const [spacesData, setSpacesData] = useState([]);
+    const [spacesDataCategories, setSpacesDataCategories] = useState([]);
+    const [spacesColumnCategories, setSpacesColumnCategories] = useState([]);
+    const [spacesColumnChartData, setSpacesColumnChartData] = useState([]);
 
     const checkWhetherShowAfterHours = () => {
         const fDayHour = moment(energyConsumptionsCategories[0]);
@@ -285,12 +294,13 @@ const BuildingOverview = () => {
     };
 
     const handleClick = (row) => {
-        let arr = topEnergyConsumptionData.filter((item) => item.label === row);
+        const selectedEquipObj = topEnergyConsumptionData.find((el) => el?.label === row);
         setEquipmentFilter({
-            equipment_id: arr[0]?.id,
-            equipment_name: arr[0]?.label,
+            equipment_id: selectedEquipObj?.id,
+            equipment_name: selectedEquipObj?.label,
+            device_type: selectedEquipObj?.device_type,
         });
-        localStorage.setItem('exploreEquipName', arr[0]?.label);
+        localStorage.setItem('exploreEquipName', selectedEquipObj?.label);
         handleChartOpen();
     };
 
@@ -300,27 +310,31 @@ const BuildingOverview = () => {
 
         await fetchBuildingEquipments(bldgId, payload)
             .then((res) => {
-                let response = res.data[0].top_contributors;
+                let response = res?.data[0]?.top_contributors;
                 let topEnergyData = [];
                 response.forEach((record) => {
-                    let obj = {
+                    const obj = {
                         link: '#',
                         id: record?.equipment_id,
                         label: record?.equipment_name ? record?.equipment_name : `-`,
-                        value: Math.round(record?.energy_consumption.now / 1000),
+                        value: Math.round(record?.energy_consumption?.now / 1000),
                         unit: UNITS.KWH,
                         badgePercentage: percentageHandler(
-                            record?.energy_consumption.now,
-                            record?.energy_consumption.old
+                            record?.energy_consumption?.now,
+                            record?.energy_consumption?.old
                         ),
-                        badgeType: fetchTrendBadgeType(record?.energy_consumption.now, record?.energy_consumption.old),
+                        badgeType: fetchTrendBadgeType(
+                            record?.energy_consumption?.now,
+                            record?.energy_consumption?.old
+                        ),
+                        device_type: record?.device_type,
                     };
                     topEnergyData.push(obj);
                 });
                 setTopEnergyConsumptionData(topEnergyData);
-                setTopEnergyDataFetching(false);
             })
-            .catch((error) => {
+            .catch((error) => {})
+            .finally(() => {
                 setTopEnergyDataFetching(false);
             });
     };
@@ -688,6 +702,28 @@ const BuildingOverview = () => {
             });
     };
 
+    // const fetchEnergyConsumptionBySpaceData = async (tzInfo) => {
+    //     setChartLoading(true);
+
+    //     const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo };
+
+    //     try {
+    //         const data = await fetchEnergyConsumptionBySpaceDataHelper({ query, spacesDataCategories });
+
+    //         if (data?.newSpacesColumnCategories?.length > 0) setSpacesColumnCategories(data.newSpacesColumnCategories);
+    //         if (data?.newSpacesData?.length > 0) setSpacesData(data.newSpacesData);
+    //         if (data?.newSpacesColumnChartData?.length > 0) setSpacesColumnChartData(data.newSpacesColumnChartData);
+    //         if (data?.newSpacesDataCategories?.length > 0) setSpacesDataCategories(data.newSpacesDataCategories);
+    //     } catch {
+    //         setSpacesColumnCategories([]);
+    //         setSpacesData([]);
+    //         setSpacesColumnChartData([]);
+    //         setSpacesDataCategories([]);
+    //     }
+
+    //     setChartLoading(false);
+    // };
+
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
@@ -761,6 +797,7 @@ const BuildingOverview = () => {
         getEnergyConsumptionByEquipType(time_zone);
         getEnergyConsumptionBySpaceType(time_zone);
         getEnergyConsumptionByFloor(time_zone);
+        // fetchEnergyConsumptionBySpaceData(time_zone);
     }, [startDate, endDate, bldgId, userPrefUnits]);
 
     useEffect(() => {
@@ -784,7 +821,7 @@ const BuildingOverview = () => {
 
     return (
         <React.Fragment>
-            <Header title="Building Overview" type="page" />
+            <Header title="Building Overview" type="page" showExplore={true} />
 
             <Brick sizeInRem={1.5} />
 
@@ -807,6 +844,23 @@ const BuildingOverview = () => {
 
             <div className="bldg-page-grid-style">
                 <div>
+                    {/* <EnergyConsumptionBySpaceChart
+                        propTitle="Energy Consumption by Space (kWh)"
+                        propSubTitle="Top 15 Energy Consumers"
+                        spacesData={spacesData}
+                        stackedColumnChartData={spacesColumnChartData}
+                        stackedColumnChartCategories={spacesColumnCategories}
+                        spaceCategories={spacesDataCategories}
+                        xAxisObj={xAxisObj}
+                        timeZone={timeZone}
+                        dateFormat={dateFormat}
+                        daysCount={daysCount}
+                        isChartLoading={chartLoading}
+                        onMoreDetail={() => handleRouteChange('/energy/spaces')}
+                    />
+                     */}
+                    <Brick sizeInRem={1.5} />
+
                     {!isPlugOnly && (
                         <EnergyConsumptionByEndUse
                             title="Energy Consumption by End Use"
@@ -953,7 +1007,7 @@ const BuildingOverview = () => {
                 <EquipChartModal
                     showEquipmentChart={showEquipmentChart}
                     handleChartClose={handleChartClose}
-                    equipmentFilter={equipmentFilter}
+                    selectedEquipObj={equipmentFilter}
                     fetchEquipmentData={builidingEquipmentsData}
                     selectedTab={selectedModalTab}
                     setSelectedTab={setSelectedModalTab}

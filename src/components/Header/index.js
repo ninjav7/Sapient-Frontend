@@ -7,8 +7,10 @@ import 'bootstrap-daterangepicker/daterangepicker.css';
 import '../../pages/portfolio/style.scss';
 import TimeFrameSelector from '../../sharedComponents/timeFrameSelector/TimeFrameSelector';
 import { convertToUserLocalTime } from '../../helpers/helpers';
+import Button from '../../sharedComponents/button/Button';
+import { ReactComponent as TelescopeSVG } from '../../assets/icon/telescope-purple.svg';
 
-const Header = ({ type, title }) => {
+const Header = ({ type, title, showExplore = false }) => {
     const filterPeriod = DateRangeStore.useState((s) => s.filterPeriod);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -84,6 +86,15 @@ const Header = ({ type, title }) => {
                                 defaultValue={filterPeriod}
                             />
                         </div>
+                        {showExplore && (
+                            <Button
+                                size={Button.Sizes.md}
+                                type="secondary"
+                                icon={<TelescopeSVG />}
+                                label="Explore"
+                                className="ml-2"
+                            />
+                        )}
                     </div>
                 </div>
             )}

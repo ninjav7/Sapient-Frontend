@@ -38,16 +38,22 @@ const AlertSettings = (props) => {
 
     const renderAlertType = (row) => {
         return (
-            <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                {row?.target_type === TARGET_TYPES.BUILDING ? (
-                    <BuildingTypeSVG className="p-0 square" />
-                ) : (
-                    <EquipmentTypeSVG className="p-0 square" />
-                )}
-                <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
-                    {`${row?.target_type === TARGET_TYPES.BUILDING ? 'Building' : 'Equipment'} of any type`}
-                </Typography.Body>
-            </div>
+            <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
+                {row?.target_description ?? '-'}
+            </Typography.Body>
+        );
+    };
+
+    const renderTargetCount = (row) => {
+        let totalCount = 0;
+
+        if (row?.target_type === TARGET_TYPES.BUILDING) totalCount = row?.building_ids.length ?? 0;
+        if (row?.target_type === TARGET_TYPES.EQUIPMENT) totalCount = row?.equipment_ids.length ?? 0;
+
+        return (
+            <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
+                {totalCount}
+            </Typography.Body>
         );
     };
 
@@ -56,9 +62,16 @@ const AlertSettings = (props) => {
         const formattedText = `${target_type?.charAt(0).toUpperCase()}${target_type?.slice(1)}`;
 
         return (
-            <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
-                {formattedText ? formattedText : '-'}
-            </Typography.Body>
+            <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
+                {row?.target_type === TARGET_TYPES.BUILDING ? (
+                    <BuildingTypeSVG className="p-0 square" />
+                ) : (
+                    <EquipmentTypeSVG className="p-0 square" />
+                )}
+                <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
+                    {formattedText ? formattedText : '-'}
+                </Typography.Body>
+            </div>
         );
     };
 
@@ -172,9 +185,14 @@ const AlertSettings = (props) => {
                 searchResultRows={currentRow()}
                 headers={[
                     {
-                        name: 'Target',
-                        accessor: 'target_type',
+                        name: 'Alert Name',
+                        accessor: 'alert_name',
                         callbackValue: renderAlertType,
+                    },
+                    {
+                        name: 'Target Count',
+                        accessor: 'target_count',
+                        callbackValue: renderTargetCount,
                     },
                     {
                         name: 'Target Type',

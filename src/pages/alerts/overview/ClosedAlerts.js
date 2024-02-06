@@ -10,6 +10,7 @@ import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/ass
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 
 import { TARGET_TYPES } from '../constants';
+
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 

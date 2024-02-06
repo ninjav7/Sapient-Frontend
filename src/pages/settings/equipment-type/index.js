@@ -150,6 +150,7 @@ const EquipmentType = () => {
                                 }
                             },
                             onDelete: () => {
+                                setPageNo(1);
                                 SetEndUseString([]);
                             },
                         },
@@ -173,6 +174,7 @@ const EquipmentType = () => {
                                 setEquipCountAPIFlag(options[0] + options[1]);
                             },
                             onDelete: () => {
+                                setPageNo(1);
                                 setMinEquipCount(0);
                                 setMaxEquipCount(maxVal);
                                 setEquipCountAPIFlag('');

@@ -33,4 +33,9 @@ export const isPathInSettingsRoutes = (path, routes) => {
 
 export const portfolioRoutes = ['/energy/portfolio/overview'];
 
-export const buildingRoutes = ['/energy/building/overview', '/energy/end-uses', '/energy/time-of-day'];
+export const buildingRoutes = [
+    '/energy/building/overview',
+    '/energy/spaces',
+    '/energy/end-uses',
+    '/energy/time-of-day',
+];

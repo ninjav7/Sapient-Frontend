@@ -19,6 +19,7 @@ import {
     conditionLevelsList,
     equipAlertConditions,
     filtersForEnergyConsumption,
+    timeIntervalsList,
 } from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
@@ -88,7 +89,12 @@ const Condition = (props) => {
             </CardHeader>
             <CardBody>
                 <div>
-                    <Typography.Subheader size={Typography.Sizes.md}>{`Select a Condition`}</Typography.Subheader>
+                    <Typography.Subheader size={Typography.Sizes.md}>
+                        {`Select a Condition`}{' '}
+                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                            *
+                        </span>
+                    </Typography.Subheader>
 
                     <Brick sizeInRem={1.25} />
 
@@ -110,6 +116,20 @@ const Condition = (props) => {
                         {/* Building conditions fields */}
                         {targetType === TARGET_TYPES.BUILDING && conditionType !== '' && (
                             <>
+                                <Select
+                                    id="condition_lvl"
+                                    name="select"
+                                    options={timeIntervalsList}
+                                    className="w-100"
+                                    onChange={(e) => {
+                                        handleConditionChange('timeInterval', e.value);
+                                    }}
+                                    currentValue={timeIntervalsList.filter(
+                                        (option) => option.value === alertObj?.condition?.timeInterval
+                                    )}
+                                    menuPlacement="auto"
+                                />
+
                                 <Select
                                     id="condition_lvl"
                                     name="select"
@@ -236,7 +256,7 @@ const Condition = (props) => {
 
                     <Brick sizeInRem={targetType === TARGET_TYPES.BUILDING ? 1 : 0.5} />
 
-                    {targetType === TARGET_TYPES.BUILDING && conditionType === 'energy_consumption_month' && (
+                    {targetType === TARGET_TYPES.BUILDING && conditionType === 'energy_consumption' && (
                         <div className="d-flex" style={{ gap: '1rem' }}>
                             <Checkbox
                                 label="Alert at 50%"
@@ -270,7 +290,7 @@ const Condition = (props) => {
                         </div>
                     )}
 
-                    {targetType === TARGET_TYPES.BUILDING && conditionType === 'peak_demand_month' && (
+                    {targetType === TARGET_TYPES.BUILDING && conditionType === 'peak_demand' && (
                         <Checkbox
                             label="Alert at 90%"
                             type="checkbox"

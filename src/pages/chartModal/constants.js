@@ -13,6 +13,13 @@ export const metricForActiveDevice = [
     { value: 'starts', label: 'Starts', unit: '', Consumption: 'Starts' },
 ];
 
+export const metricForActiveDeviceOld = [
+    { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
+    { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
+    { value: 'mAh', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
+    { value: 'mV', label: 'Voltage (V)', unit: 'V', Consumption: 'Voltage' },
+];
+
 export const metricForPassiveWithOneBreaker = [
     { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
     { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
@@ -65,3 +72,8 @@ export const metricForPassiveWithMultipleBreaker = [
 ];
 
 export const metricsWithMultipleSensors = ['sensor_rms_current', 'sensor_max_current', 'sensor_min_current'];
+
+export const rulesAlert = [
+    { value: 'desktop-pc', label: 'Desktop PC' },
+    { value: 'refigerator', label: 'Refigerator' },
+];

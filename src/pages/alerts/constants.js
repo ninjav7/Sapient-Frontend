@@ -5,15 +5,18 @@ export const TARGET_TYPES = Object.freeze({
 
 export const defaultConditionObj = {
     type: '',
+    timeInterval: 'month',
     level: 'above',
     filterType: 'number',
     thresholdValue: '',
     threshold50: true,
     threshold75: true,
     threshold90: true,
+    threshold100: true,
     thresholdName: '',
     shortcyclingMinutes: '0',
     thresholdPercentage: '0',
+    conditionDescription: '',
 };
 
 export const defaultRecurrenceObj = {
@@ -31,12 +34,12 @@ export const defaultNotificationObj = {
 
 // Main Alert Obj
 export const defaultAlertObj = {
+    alert_name: '',
+    alert_description: '',
     target: {
         type: '',
-        typesList: [],
         lists: [],
-        buildingIDs: [],
-        submitted: false,
+        buildingIDs: '',
     },
     recurrence: defaultRecurrenceObj,
     condition: {
@@ -52,12 +55,12 @@ export const defaultAlertObj = {
 // Building Alert Conditions
 export const bldgAlertConditions = [
     {
-        label: 'Energy consumption for the month is',
-        value: 'energy_consumption_month',
+        label: 'Energy consumption for',
+        value: 'energy_consumption',
     },
     {
-        label: 'Peak demand for the month is',
-        value: 'peak_demand_month',
+        label: 'Peak demand for',
+        value: 'peak_demand',
     },
 ];
 
@@ -94,6 +97,13 @@ export const equipAlertConditions = [
     {
         label: 'Shortcycling',
         value: 'shortcycling',
+    },
+];
+
+export const timeIntervalsList = [
+    {
+        label: 'Month is',
+        value: 'month',
     },
 ];
 

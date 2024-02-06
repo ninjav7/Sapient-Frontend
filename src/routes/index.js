@@ -41,6 +41,9 @@ const ExploreBuildingPeak = React.lazy(() => import('../pages/peakDemand/Explore
 // Energy-Buildings Components
 const Building = React.lazy(() => import('../pages/buildings'));
 
+// Energy-Spaces Components
+const Spaces = React.lazy(() => import('../pages/spaces'));
+
 // Energy-End-uses Components
 const EndUses = React.lazy(() => import('../pages/endUses'));
 const EndUseType = React.lazy(() => import('../pages/endUses/EndUseType'));
@@ -127,6 +130,14 @@ const portfolioRoutes = {
             path: '/energy/building/overview/:bldgId',
             name: 'Building Overview',
             component: Building,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'buildings',
+        },
+        {
+            path: '/energy/spaces/:bldgId',
+            name: 'Spaces',
+            component: Spaces,
             route: PrivateRoute,
             visibility: true,
             parent: 'buildings',

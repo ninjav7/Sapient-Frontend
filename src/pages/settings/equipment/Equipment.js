@@ -401,6 +401,7 @@ const Equipment = () => {
         setEquipmentFilter({
             equipment_id: row?.equipments_id,
             equipment_name: row?.equipments_name,
+            device_type: row?.device_type,
         });
         handleChartOpen();
     };
@@ -503,6 +504,7 @@ const Equipment = () => {
                     })),
                     onClose: (options) => filterHandler(setEquipmentTypeFilterString, options),
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedOption([]);
                         setEquipmentTypeFilterString('');
                     },
@@ -518,6 +520,7 @@ const Equipment = () => {
                     })),
                     onClose: (options) => filterHandler(setEndUseFilterString, options),
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedOption([]);
                         setEndUseFilterString('');
                     },
@@ -536,6 +539,7 @@ const Equipment = () => {
                         filterLabelHandler(setDeviceMacAddress, options);
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedOption([]);
                         setDeviceIdFilterString('');
                         setDeviceMacAddress('');
@@ -551,7 +555,10 @@ const Equipment = () => {
                         label: filterItem,
                     })),
                     onClose: (options) => filterHandler(setTagsTypeFilterString, options),
-                    onDelete: () => setTagsTypeFilterString(''),
+                    onDelete: () => {
+                        setPageNo(1);
+                        setTagsTypeFilterString('');
+                    },
                 },
                 {
                     label: 'Floors',
@@ -573,6 +580,7 @@ const Equipment = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setFloorString([]);
                     },
                 },
@@ -596,6 +604,7 @@ const Equipment = () => {
                         }
                     },
                     onDelete: () => {
+                        setPageNo(1);
                         setSpaceString([]);
                     },
                 },
@@ -610,6 +619,7 @@ const Equipment = () => {
                     })),
                     onClose: (options) => filterHandler(setPanelNameFilterString, options),
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedOption([]);
                         setPanelNameFilterString('');
                     },
@@ -625,6 +635,7 @@ const Equipment = () => {
                     })),
                     onClose: (options) => filterHandler(setCdModelInstalledNameString, options),
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedOption([]);
                         setCdModelInstalledNameString('');
                     },
@@ -640,6 +651,7 @@ const Equipment = () => {
                     })),
                     onClose: (options) => filterHandler(setBreakerNumberString, options),
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedOption([]);
                         setBreakerNumberString('');
                     },
@@ -655,6 +667,7 @@ const Equipment = () => {
                     })),
                     onClose: (options) => filterHandler(setBreakerRatedAmpsString, options),
                     onDelete: () => {
+                        setPageNo(1);
                         setSelectedOption([]);
                         setBreakerRatedAmpsString('');
                     },
@@ -963,7 +976,7 @@ const Equipment = () => {
             <EquipChartModal
                 showEquipmentChart={showEquipmentChart}
                 handleChartClose={handleChartClose}
-                equipmentFilter={equipmentFilter}
+                selectedEquipObj={equipmentFilter}
                 fetchEquipmentData={fetchEquipmentData}
                 selectedTab={selectedModalTab}
                 setSelectedTab={setSelectedModalTab}

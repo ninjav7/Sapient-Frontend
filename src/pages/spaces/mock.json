@@ -1,0 +1,130 @@
+[
+    {
+        "space_id": "6453b5134985181ae91e0c72",
+        "space_name": "IT Room",
+        "space_type_id": "62d925f4a117463fdff93e59",
+        "space_type_name": "Mechanical Room",
+        "square_footage": 0,
+        "tag": ["sd"],
+        "floor_id": "6453b4f74985181ae91e0c70",
+        "floor_name": "Interior",
+        "equipment_count": 12,
+        "total_building_usage": 0,
+        "consumption": {
+            "new": 0,
+            "old": 0
+        }
+    },
+    {
+        "space_id": "6453b5314691ce3a1a8f1336",
+        "space_name": "Wall Mount",
+        "space_type_id": "62d92644a117463fdff93e67",
+        "space_type_name": "Building Exterior",
+        "square_footage": 0,
+        "tag": ["sds", "sd11s"],
+        "floor_id": "6453b4fc4985181ae91e0c71",
+        "floor_name": "Exterior",
+        "equipment_count": 0,
+        "total_building_usage": 0,
+        "consumption": {
+            "new": 0,
+            "old": 0
+        }
+    },
+    {
+        "space_id": "6453b55fadda2eb25d22ddcb",
+        "space_name": "Central & West",
+        "space_type_id": "62deb35093d7b708844f3593",
+        "space_type_name": "Area",
+        "square_footage": 0,
+        "tag": [],
+        "floor_id": "6453b4f74985181ae91e0c70",
+        "floor_name": "Interior",
+        "equipment_count": 0,
+        "total_building_usage": 0,
+        "consumption": {
+            "new": 0,
+            "old": 0
+        }
+    },
+    {
+        "space_id": "6453b56685a3e175760482a4",
+        "space_name": "Central & North",
+        "space_type_id": "62deb35093d7b708844f3593",
+        "space_type_name": "Area",
+        "square_footage": 0,
+        "tag": [],
+        "floor_id": "6453b4f74985181ae91e0c70",
+        "floor_name": "Interior",
+        "equipment_count": 0,
+        "total_building_usage": 0,
+        "consumption": {
+            "new": 0,
+            "old": 0
+        }
+    },
+    {
+        "space_id": "6453b56d85a3e175760482a5",
+        "space_name": "North East",
+        "space_type_id": "62deb35093d7b708844f3593",
+        "space_type_name": "Area",
+        "square_footage": 0,
+        "tag": [],
+        "floor_id": "6453b4f74985181ae91e0c70",
+        "floor_name": "Interior",
+        "equipment_count": 0,
+        "total_building_usage": 0,
+        "consumption": {
+            "new": 0,
+            "old": 0
+        }
+    },
+    {
+        "space_id": "6453b574ed644de823e6a32a",
+        "space_name": "North West",
+        "space_type_id": "62deb35093d7b708844f3593",
+        "space_type_name": "Area",
+        "square_footage": 0,
+        "tag": [],
+        "floor_id": "6453b4f74985181ae91e0c70",
+        "floor_name": "Interior",
+        "equipment_count": 0,
+        "total_building_usage": 0,
+        "consumption": {
+            "new": 0,
+            "old": 0
+        }
+    },
+    {
+        "space_id": "6453b5794691ce3a1a8f1337",
+        "space_name": "South East",
+        "space_type_id": "62deb35093d7b708844f3593",
+        "space_type_name": "Area",
+        "square_footage": 0,
+        "tag": [],
+        "floor_id": "6453b4f74985181ae91e0c70",
+        "floor_name": "Interior",
+        "equipment_count": 0,
+        "total_building_usage": 0,
+        "consumption": {
+            "new": 0,
+            "old": 0
+        }
+    },
+    {
+        "space_id": "6453b57f4691ce3a1a8f1338",
+        "space_name": "South West",
+        "space_type_id": "62deb35093d7b708844f3593",
+        "space_type_name": "Area",
+        "square_footage": 0,
+        "tag": [],
+        "floor_id": "6453b4f74985181ae91e0c70",
+        "floor_name": "Interior",
+        "equipment_count": 0,
+        "total_building_usage": 0,
+        "consumption": {
+            "new": 0,
+            "old": 0
+        }
+    }
+]
