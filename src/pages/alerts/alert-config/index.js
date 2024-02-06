@@ -422,7 +422,7 @@ const AlertConfig = () => {
     const handleCreateAlert = async (alert_obj) => {
         if (!alert_obj) return;
 
-        // setCreating(true);
+        setCreating(true);
 
         const { target, recurrence, condition, notification } = alert_obj;
 
