@@ -16,6 +16,7 @@ export const defaultConditionObj = {
     thresholdName: '',
     shortcyclingMinutes: '0',
     thresholdPercentage: '0',
+    conditionDescription: '',
 };
 
 export const defaultRecurrenceObj = {

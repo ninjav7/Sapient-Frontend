@@ -23,7 +23,9 @@ const AlertPreview = (props) => {
 
         if (alert_obj?.target?.type === TARGET_TYPES.BUILDING) {
             let alertType = bldgAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
-            if (alertType) text += alertType?.label;
+            if (alertType) text += `${alertType?.label} the`;
+
+            if (alert_obj?.condition?.timeInterval) text += ` ${alert_obj?.condition?.timeInterval} is`;
 
             if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
 
