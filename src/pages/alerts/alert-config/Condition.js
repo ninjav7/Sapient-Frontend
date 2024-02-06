@@ -19,7 +19,7 @@ import {
     conditionLevelsList,
     equipAlertConditions,
     filtersForEnergyConsumption,
-    timeIntervalList,
+    timeIntervalsList,
 } from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
@@ -114,14 +114,14 @@ const Condition = (props) => {
                                 <Select
                                     id="condition_lvl"
                                     name="select"
-                                    options={timeIntervalList}
+                                    options={timeIntervalsList}
                                     className="w-100"
-                                    // onChange={(e) => {
-                                    //     handleConditionChange('level', e.value);
-                                    // }}
-                                    // currentValue={conditionLevelsList.filter(
-                                    //     (option) => option.value === alertObj?.condition?.level
-                                    // )}
+                                    onChange={(e) => {
+                                        handleConditionChange('timeInterval', e.value);
+                                    }}
+                                    currentValue={timeIntervalsList.filter(
+                                        (option) => option.value === alertObj?.condition?.timeInterval
+                                    )}
                                     menuPlacement="auto"
                                 />
 

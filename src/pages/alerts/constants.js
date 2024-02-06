@@ -5,12 +5,14 @@ export const TARGET_TYPES = Object.freeze({
 
 export const defaultConditionObj = {
     type: '',
+    timeInterval: 'month',
     level: 'above',
     filterType: 'number',
     thresholdValue: '',
     threshold50: true,
     threshold75: true,
     threshold90: true,
+    threshold100: true,
     thresholdName: '',
     shortcyclingMinutes: '0',
     thresholdPercentage: '0',
@@ -52,11 +54,11 @@ export const defaultAlertObj = {
 // Building Alert Conditions
 export const bldgAlertConditions = [
     {
-        label: 'Energy consumption for the',
+        label: 'Energy consumption for',
         value: 'energy_consumption',
     },
     {
-        label: 'Peak demand for the',
+        label: 'Peak demand for',
         value: 'peak_demand',
     },
 ];
@@ -97,7 +99,7 @@ export const equipAlertConditions = [
     },
 ];
 
-export const timeIntervalList = [
+export const timeIntervalsList = [
     {
         label: 'Month is',
         value: 'month',
