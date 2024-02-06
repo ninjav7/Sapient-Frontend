@@ -251,7 +251,7 @@ const Condition = (props) => {
 
                     <Brick sizeInRem={targetType === TARGET_TYPES.BUILDING ? 1 : 0.5} />
 
-                    {targetType === TARGET_TYPES.BUILDING && conditionType === 'energy_consumption_month' && (
+                    {targetType === TARGET_TYPES.BUILDING && conditionType === 'energy_consumption' && (
                         <div className="d-flex" style={{ gap: '1rem' }}>
                             <Checkbox
                                 label="Alert at 50%"
@@ -285,7 +285,7 @@ const Condition = (props) => {
                         </div>
                     )}
 
-                    {targetType === TARGET_TYPES.BUILDING && conditionType === 'peak_demand_month' && (
+                    {targetType === TARGET_TYPES.BUILDING && conditionType === 'peak_demand' && (
                         <Checkbox
                             label="Alert at 90%"
                             type="checkbox"
