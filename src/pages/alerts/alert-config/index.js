@@ -410,7 +410,7 @@ const AlertConfig = () => {
             if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
 
             if (alert_obj?.condition?.type === 'shortcycling') {
-                text += ` ${alert_obj?.condition?.shortcyclingMinutes} min`;
+                text += ` ${alert_obj?.condition?.shortcyclingMinutes} min.`;
             } else {
                 text += ` ${alert_obj?.condition?.thresholdPercentage}%`;
             }
