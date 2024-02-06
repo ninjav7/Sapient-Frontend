@@ -105,7 +105,12 @@ const Target = (props) => {
                     </div>
                 ) : (
                     <div>
-                        <Typography.Subheader size={Typography.Sizes.md}>{`Select a Target Type`}</Typography.Subheader>
+                        <Typography.Subheader size={Typography.Sizes.md}>
+                            {`Select a Target Type`}
+                            <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                                *
+                            </span>
+                        </Typography.Subheader>
                         <Brick sizeInRem={1.25} />
 
                         <div className="d-flex" style={{ gap: '0.75rem' }}>

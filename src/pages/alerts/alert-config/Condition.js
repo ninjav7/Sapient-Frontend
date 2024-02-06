@@ -89,7 +89,12 @@ const Condition = (props) => {
             </CardHeader>
             <CardBody>
                 <div>
-                    <Typography.Subheader size={Typography.Sizes.md}>{`Select a Condition`}</Typography.Subheader>
+                    <Typography.Subheader size={Typography.Sizes.md}>
+                        {`Select a Condition`}{' '}
+                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                            *
+                        </span>
+                    </Typography.Subheader>
 
                     <Brick sizeInRem={1.25} />
 

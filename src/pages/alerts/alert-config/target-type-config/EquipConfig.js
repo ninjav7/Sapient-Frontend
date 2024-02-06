@@ -17,6 +17,7 @@ import { pageListSizes } from '../../../../helpers/helpers';
 import { fetchBuildingList } from '../../../settings/buildings/services';
 import { getEqupmentDataRequest, getFiltersForEquipmentRequest } from '../../../../services/equipment';
 
+import colorPalette from '../../../../assets/scss/_colors.scss';
 import '../styles.scss';
 
 const EquipConfig = (props) => {
@@ -680,7 +681,12 @@ const EquipConfig = (props) => {
                     {/* Modal Body */}
                     <div style={{ padding: '2rem' }}>
                         <div style={{ width: '25%' }}>
-                            <Typography.Body size={Typography.Sizes.md}>Select Building</Typography.Body>
+                            <Typography.Body size={Typography.Sizes.md}>
+                                Select Building
+                                <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                                    *
+                                </span>
+                            </Typography.Body>
                             <Brick sizeInRem={0.25} />
                             {isBldgFetching ? (
                                 <Skeleton count={1} height={35} />
