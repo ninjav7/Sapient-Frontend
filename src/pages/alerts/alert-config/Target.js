@@ -10,7 +10,7 @@ import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/ass
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 
-import { TARGET_TYPES, defaultAlertObj } from '../constants';
+import { TARGET_TYPES } from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
@@ -105,7 +105,12 @@ const Target = (props) => {
                     </div>
                 ) : (
                     <div>
-                        <Typography.Subheader size={Typography.Sizes.md}>{`Select a Target Type`}</Typography.Subheader>
+                        <Typography.Subheader size={Typography.Sizes.md}>
+                            {`Select a Target Type`}
+                            <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                                *
+                            </span>
+                        </Typography.Subheader>
                         <Brick sizeInRem={1.25} />
 
                         <div className="d-flex" style={{ gap: '0.75rem' }}>

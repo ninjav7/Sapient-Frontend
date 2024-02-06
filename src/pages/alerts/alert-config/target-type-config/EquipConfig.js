@@ -13,11 +13,12 @@ import { Checkbox } from '../../../../sharedComponents/form/checkbox';
 import { DataTableWidget } from '../../../../sharedComponents/dataTableWidget';
 import { FILTER_TYPES } from '../../../../sharedComponents/dataTableWidget/constants';
 
+import { pageListSizes } from '../../../../helpers/helpers';
 import { fetchBuildingList } from '../../../settings/buildings/services';
 import { getEqupmentDataRequest, getFiltersForEquipmentRequest } from '../../../../services/equipment';
 
+import colorPalette from '../../../../assets/scss/_colors.scss';
 import '../styles.scss';
-import { pageListSizes } from '../../../../helpers/helpers';
 
 const EquipConfig = (props) => {
     const { isModalOpen = false, handleModalClose, alertObj = {}, handleTargetChange } = props;
@@ -680,7 +681,12 @@ const EquipConfig = (props) => {
                     {/* Modal Body */}
                     <div style={{ padding: '2rem' }}>
                         <div style={{ width: '25%' }}>
-                            <Typography.Body size={Typography.Sizes.md}>Select Building</Typography.Body>
+                            <Typography.Body size={Typography.Sizes.md}>
+                                Select Building
+                                <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                                    *
+                                </span>
+                            </Typography.Body>
                             <Brick sizeInRem={0.25} />
                             {isBldgFetching ? (
                                 <Skeleton count={1} height={35} />
