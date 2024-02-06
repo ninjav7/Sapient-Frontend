@@ -263,6 +263,7 @@ const AlertConfig = () => {
     const [activeTab, setActiveTab] = useState(0);
 
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
+    console.log('SSR alertObj => ', alertObj);
 
     const [originalBldgsList, setOriginalBldgsList] = useState([]);
     const [originalEquipsList, setOriginalEquipsList] = useState([]);

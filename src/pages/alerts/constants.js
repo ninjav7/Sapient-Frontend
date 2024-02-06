@@ -52,12 +52,12 @@ export const defaultAlertObj = {
 // Building Alert Conditions
 export const bldgAlertConditions = [
     {
-        label: 'Energy consumption for the month is',
-        value: 'energy_consumption_month',
+        label: 'Energy consumption for the',
+        value: 'energy_consumption',
     },
     {
-        label: 'Peak demand for the month is',
-        value: 'peak_demand_month',
+        label: 'Peak demand for the',
+        value: 'peak_demand',
     },
 ];
 
@@ -94,6 +94,13 @@ export const equipAlertConditions = [
     {
         label: 'Shortcycling',
         value: 'shortcycling',
+    },
+];
+
+export const timeIntervalList = [
+    {
+        label: 'Month is',
+        value: 'month',
     },
 ];
 

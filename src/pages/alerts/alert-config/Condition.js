@@ -19,6 +19,7 @@ import {
     conditionLevelsList,
     equipAlertConditions,
     filtersForEnergyConsumption,
+    timeIntervalList,
 } from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
@@ -110,6 +111,20 @@ const Condition = (props) => {
                         {/* Building conditions fields */}
                         {targetType === TARGET_TYPES.BUILDING && conditionType !== '' && (
                             <>
+                                <Select
+                                    id="condition_lvl"
+                                    name="select"
+                                    options={timeIntervalList}
+                                    className="w-100"
+                                    // onChange={(e) => {
+                                    //     handleConditionChange('level', e.value);
+                                    // }}
+                                    // currentValue={conditionLevelsList.filter(
+                                    //     (option) => option.value === alertObj?.condition?.level
+                                    // )}
+                                    menuPlacement="auto"
+                                />
+
                                 <Select
                                     id="condition_lvl"
                                     name="select"
