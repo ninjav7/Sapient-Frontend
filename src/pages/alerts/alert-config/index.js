@@ -422,30 +422,36 @@ const AlertConfig = () => {
     const handleCreateAlert = async (alert_obj) => {
         if (!alert_obj) return;
 
-        setCreating(true);
+        // setCreating(true);
 
         const { target, recurrence, condition, notification } = alert_obj;
 
-        // Alert Payload to be send to Backend
+        // Alert Payload
         let payload = {
             target_type: target?.type,
+            target_description: alert_obj?.alert_name,
+            description: alert_obj?.alert_description,
+            alert_condition_description: condition?.conditionDescription,
         };
 
         // When Target type is 'Building'
         if (target?.type === TARGET_TYPES.BUILDING) {
             let bldgObj = {
                 building_ids: target?.lists.map((el) => el?.value),
-                building_filter_condition: condition?.type,
-                building_condition_operator: condition?.level,
-                building_condition_type: condition?.filterType,
-                building_condition_alert_50: condition?.threshold50,
-                building_condition_alert_75: condition?.threshold75,
-                building_condition_alert_90: condition?.threshold90,
+                condition_metric: condition?.type,
+                condition_timespan: condition?.timeInterval,
+                condition_operator: condition?.level,
+                condition_threshold_type: condition?.filterType,
+                condition_alert_at: [],
             };
 
             if (condition?.filterType === 'number') {
-                bldgObj.building_condition_value = +condition?.thresholdValue;
+                bldgObj.condition_threshold_value = +condition?.thresholdValue;
             }
+
+            if (condition?.threshold50) bldgObj.condition_alert_at.push(50);
+            if (condition?.threshold75) bldgObj.condition_alert_at.push(75);
+            if (condition?.threshold100) bldgObj.condition_alert_at.push(100);
 
             payload = { ...payload, ...bldgObj };
         }
@@ -453,17 +459,28 @@ const AlertConfig = () => {
         // When Target type is 'Equipment'
         if (target?.type === TARGET_TYPES.EQUIPMENT) {
             let equipObj = {
+                building_ids: [target?.buildingIDs],
                 equipment_ids: target?.lists.map((el) => el?.value),
-                equipment_building_ids: [target?.buildingIDs],
-                equipment_filter_condition: condition?.type,
-                equipment_condition_operator: condition?.level,
-                equipment_condition_threshold_value: +condition?.thresholdPercentage,
-                equipment_condition_reccurence: recurrence?.triggerAlert,
-                equipment_condition_reccurence_minutes: +recurrence?.triggerAt,
+                condition_metric: condition?.type,
+                condition_operator: condition?.level,
+                condition_threshold_value: +condition?.thresholdPercentage,
             };
 
             if (condition?.type === 'rms_current') {
-                equipObj.equipment_condition_threshold_type = condition?.thresholdName;
+                equipObj.custom_threshold_type = condition?.thresholdName;
+            }
+
+            if (condition?.type !== 'shortcycling') {
+                equipObj.condition_threshold_type = 'percentage';
+            }
+
+            if (condition?.type === 'shortcycling') {
+                equipObj.condition_threshold_value = +condition?.shortcyclingMinutes;
+            }
+
+            if (recurrence?.triggerAlert) {
+                equipObj.equipment_condition_recurrence = recurrence?.triggerAlert;
+                equipObj.equipment_condition_recurrence_minutes = +recurrence?.triggerAt;
             }
 
             payload = { ...payload, ...equipObj };
@@ -475,9 +492,9 @@ const AlertConfig = () => {
         if (method === 'email') payload.alert_emails = notification?.selectedUserEmailId;
         if (method === 'user') payload.alert_user_ids = notification?.selectedUserId.map((el) => el?.value);
 
-        if (method === 'email' || method === 'user') {
-            payload.alert_reccurence = recurrence?.resendAlert;
-            payload.alert_reccurence_minutes = +recurrence?.resendAt;
+        if ((method === 'email' || method === 'user') && recurrence?.resendAlert) {
+            payload.alert_recurrence = recurrence?.resendAlert;
+            payload.alert_recurrence_minutes = +recurrence?.resendAt;
         }
 
         await createAlertServiceAPI(payload)
