@@ -6,10 +6,6 @@ import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
-import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
-
-import { TARGET_TYPES, bldgAlertConditions, equipAlertConditions, filtersForEnergyConsumption } from '../constants';
-
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
@@ -17,44 +13,6 @@ const AlertPreview = (props) => {
     const { alertObj = {}, typeSelectedLabel = '', handleConditionChange } = props;
 
     const targetType = alertObj?.target?.type === `building` ? `Building` : `Equipment`;
-
-    const renderAlertCondition = (alert_obj) => {
-        let text = '';
-
-        if (alert_obj?.target?.type === TARGET_TYPES.BUILDING) {
-            let alertType = bldgAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
-            if (alertType) text += `${alertType?.label} the`;
-
-            if (alert_obj?.condition?.timeInterval) text += ` ${alert_obj?.condition?.timeInterval} is`;
-
-            if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
-
-            if (alertObj?.condition?.filterType === 'number' && alert_obj?.condition?.thresholdValue)
-                text += ` ${formatConsumptionValue(+alert_obj?.condition?.thresholdValue, 2)} kWh`;
-
-            if (alertObj?.condition?.filterType !== 'number') {
-                let alertFilter = filtersForEnergyConsumption.find(
-                    (el) => el?.value === alertObj?.condition?.filterType
-                );
-                if (alertFilter) text += ` ${alertFilter?.label}`;
-            }
-        }
-
-        if (alert_obj?.target?.type === TARGET_TYPES.EQUIPMENT) {
-            let alertType = equipAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
-            if (alertType) text += alertType?.label;
-
-            if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
-
-            if (alert_obj?.condition?.type === 'shortcycling') {
-                text += ` ${alert_obj?.condition?.shortcyclingMinutes} min`;
-            } else {
-                text += ` ${alert_obj?.condition?.thresholdPercentage}%`;
-            }
-        }
-
-        return `${text}.`;
-    };
 
     const renderTriggerNotification = (alert_obj) => {
         const obj = alert_obj?.recurrence;
@@ -95,7 +53,7 @@ const AlertPreview = (props) => {
                             <Typography.Subheader size={Typography.Sizes.md}>{`Condition`}</Typography.Subheader>
                             <Brick sizeInRem={0.25} />
                             <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                {renderAlertCondition(alertObj)}
+                                {alertObj?.condition?.conditionDescription ?? ''}
                             </Typography.Body>
                         </div>
 

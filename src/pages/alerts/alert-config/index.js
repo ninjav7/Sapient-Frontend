@@ -25,7 +25,16 @@ import { ReactComponent as CheckMarkSVG } from '../../../assets/icon/check-mark.
 
 import { createAlertServiceAPI, fetchConfiguredAlertById } from '../services';
 
-import { TARGET_TYPES, defaultAlertObj, defaultConditionObj, defaultNotificationObj } from '../constants';
+import {
+    TARGET_TYPES,
+    bldgAlertConditions,
+    defaultAlertObj,
+    defaultConditionObj,
+    defaultNotificationObj,
+    equipAlertConditions,
+    filtersForEnergyConsumption,
+} from '../constants';
+import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
@@ -38,6 +47,8 @@ const CreateAlertHeader = (props) => {
         onAlertCreate,
         reqType,
         isCreatingAlert = false,
+        renderAlertCondition,
+        alertObj,
     } = props;
 
     const history = useHistory();
@@ -75,7 +86,10 @@ const CreateAlertHeader = (props) => {
                             label={'Next'}
                             size={Button.Sizes.md}
                             type={Button.Type.primary}
-                            onClick={() => setActiveTab(1)}
+                            onClick={() => {
+                                renderAlertCondition(alertObj);
+                                setActiveTab(1);
+                            }}
                             disabled={!isAlertConfigured}
                         />
                     ) : (
@@ -263,7 +277,6 @@ const AlertConfig = () => {
     const [activeTab, setActiveTab] = useState(0);
 
     const [alertObj, setAlertObj] = useState(defaultAlertObj);
-    console.log('SSR alertObj => ', alertObj);
 
     const [originalBldgsList, setOriginalBldgsList] = useState([]);
     const [originalEquipsList, setOriginalEquipsList] = useState([]);
@@ -366,6 +379,44 @@ const AlertConfig = () => {
 
         obj.notification[key] = value;
         setAlertObj(obj);
+    };
+
+    const renderAlertCondition = (alert_obj) => {
+        let text = '';
+
+        if (alert_obj?.target?.type === TARGET_TYPES.BUILDING) {
+            let alertType = bldgAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
+            if (alertType) text += `${alertType?.label} the`;
+
+            if (alert_obj?.condition?.timeInterval) text += ` ${alert_obj?.condition?.timeInterval} is`;
+
+            if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
+
+            if (alertObj?.condition?.filterType === 'number' && alert_obj?.condition?.thresholdValue)
+                text += ` ${formatConsumptionValue(+alert_obj?.condition?.thresholdValue, 2)} kWh`;
+
+            if (alertObj?.condition?.filterType !== 'number') {
+                let alertFilter = filtersForEnergyConsumption.find(
+                    (el) => el?.value === alertObj?.condition?.filterType
+                );
+                if (alertFilter) text += ` ${alertFilter?.label}`;
+            }
+        }
+
+        if (alert_obj?.target?.type === TARGET_TYPES.EQUIPMENT) {
+            let alertType = equipAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
+            if (alertType) text += alertType?.label;
+
+            if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
+
+            if (alert_obj?.condition?.type === 'shortcycling') {
+                text += ` ${alert_obj?.condition?.shortcyclingMinutes} min`;
+            } else {
+                text += ` ${alert_obj?.condition?.thresholdPercentage}%`;
+            }
+        }
+
+        handleConditionChange('conditionDescription', `${text}.`);
     };
 
     const handleCreateAlert = async (alert_obj) => {
@@ -537,6 +588,8 @@ const AlertConfig = () => {
                         }}
                         reqType={reqType}
                         isCreatingAlert={isCreatingAlert}
+                        renderAlertCondition={renderAlertCondition}
+                        alertObj={alertObj}
                     />
                 </Col>
             </Row>
