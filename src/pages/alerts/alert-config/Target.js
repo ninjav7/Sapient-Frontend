@@ -10,7 +10,7 @@ import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/ass
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 
-import { TARGET_TYPES } from '../constants';
+import { TARGET_TYPES, defaultAlertObj } from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
@@ -61,14 +61,19 @@ const Target = (props) => {
                         </Typography.Subheader>
                         <TargetToolTip />
                     </div>
-                    {/* <Typography.Subheader
+                    <Typography.Subheader
                         size={Typography.Sizes.lg}
                         className="reset-target-style"
                         onClick={() => {
-                            setAlertObj(defaultAlertObj);
+                            const deepCloneNewAlertObj = _.cloneDeep(defaultAlertObj);
+                            setAlertObj({
+                                ...deepCloneNewAlertObj,
+                                alert_name: alertObj?.alert_name,
+                                alert_description: alertObj?.alert_description,
+                            });
                         }}>
                         {`Reset Target Type`}
-                    </Typography.Subheader> */}
+                    </Typography.Subheader>
                 </div>
             </CardHeader>
             <CardBody>

@@ -275,8 +275,8 @@ const AlertConfig = () => {
     const history = useHistory();
 
     const [activeTab, setActiveTab] = useState(0);
-
-    const [alertObj, setAlertObj] = useState(defaultAlertObj);
+    const defaultAlertObjCloned = _.cloneDeep(defaultAlertObj);
+    const [alertObj, setAlertObj] = useState(defaultAlertObjCloned);
 
     const [originalBldgsList, setOriginalBldgsList] = useState([]);
     const [originalEquipsList, setOriginalEquipsList] = useState([]);
