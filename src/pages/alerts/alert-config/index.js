@@ -307,6 +307,7 @@ const AlertConfig = () => {
                 alertObj?.condition?.type !== 'shortcycling' &&
                 alertObj?.condition?.thresholdPercentage !== ''));
 
+    const isAlertNameSet = alertObj?.alert_name !== '';
     const isTargetConfigured = isBuildingConfigured || isEquipmentConfigured;
     const isConditionConfigured = isConditionSet && (isBuildingConditionsSet || isEquipmentConditionsSet);
 
@@ -530,7 +531,7 @@ const AlertConfig = () => {
                     <CreateAlertHeader
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
-                        isAlertConfigured={isTargetConfigured && isConditionConfigured}
+                        isAlertConfigured={isTargetConfigured && isConditionConfigured && isAlertNameSet}
                         onAlertCreate={() => {
                             handleCreateAlert(alertObj);
                         }}
