@@ -25,11 +25,11 @@ import {
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
-const ConditionToolTip = () => {
+const ConditionToolTip = ({ alertObj }) => {
     return (
         <div>
             <UncontrolledTooltip placement="bottom" target={'tooltip-for-condition'}>
-                {`Condition Tooltip.`}
+                {`Select a Condition to setup ${alertObj?.target?.type} alert.`}
             </UncontrolledTooltip>
 
             <button type="button" className="tooltip-button" id={'tooltip-for-condition'}>
@@ -84,7 +84,7 @@ const Condition = (props) => {
                     <Typography.Subheader size={Typography.Sizes.md} style={{ color: colorPalette.primaryGray550 }}>
                         {`Condition`}
                     </Typography.Subheader>
-                    <ConditionToolTip />
+                    <ConditionToolTip alertObj={alertObj} />
                 </div>
             </CardHeader>
             <CardBody>

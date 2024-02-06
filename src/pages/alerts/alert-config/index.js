@@ -538,8 +538,8 @@ const AlertConfig = () => {
             .then((res) => {
                 const response = res?.data;
                 const { success: isSuccessful, data } = response;
-                if (isSuccessful && data) {
-                    // To set response as alertObj;
+                if (isSuccessful && data && data?.id) {
+                    console.log('SSR selected alert obj => ', data);
                 }
             })
             .catch(() => {})
