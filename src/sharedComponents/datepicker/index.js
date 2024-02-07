@@ -3,7 +3,9 @@ import { SingleDatePicker, DateRangePicker } from 'react-dates';
 import moment from 'moment';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
+
 import { TimePicker } from 'antd';
+import dayjs from 'dayjs';
 
 import Typography from '../typography';
 import { Button } from '../button';
@@ -36,18 +38,19 @@ const Datepicker = ({
 }) => {
     const [startDate, setStartDate] = useState(rangeDate[0]);
     const [endDate, setEndDate] = useState(rangeDate[1]);
-    const [focusedInput, setFocusedInput] = useState(null);
+
+    const [startTime, setStartTime] = useState(dayjs().startOf('day'));
+    const [endTime, setEndTime] = useState(dayjs().endOf('day'));
+
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+    const [isTimeSelectionEnabled, setTimeSelectionEnabled] = useState(false);
+
     const [isOpen, setIsOpen] = useState(false);
+    const [focusedInput, setFocusedInput] = useState(null);
 
     const refApi = useRef(null);
 
-    const [startTime, setStartTime] = useState(moment('00:00', 'HH:mm'));
-    const [endTime, setEndTime] = useState(moment('23:59', 'HH:mm'));
-    const [isTimeSelectionEnabled, setTimeSelectionEnabled] = useState(false);
-    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
-
     const handleStartTimeChange = (time, timeString) => {
-        console.log('SSR timeString => ', timeString);
         setStartTime(time);
     };
 
@@ -195,14 +198,14 @@ const Datepicker = ({
                                             </Typography.Body>
 
                                             <TimePicker
-                                                format={userPrefTimeFormat === '12h' ? 'hh:mm A' : 'HH:mm'}
-                                                minuteStep={1}
-                                                use12Hours={userPrefTimeFormat === '12h' ? true : false}
                                                 showNow={false}
-                                                value={startTime}
+                                                minuteStep={1}
                                                 placeholder="Start time"
+                                                value={startTime}
                                                 onChange={handleStartTimeChange}
                                                 disabled={!isTimeSelectionEnabled}
+                                                use12Hours={userPrefTimeFormat === '12h' ? true : false}
+                                                format={userPrefTimeFormat === '12h' ? 'hh:mm A' : 'HH:mm'}
                                             />
                                         </div>
 
@@ -212,13 +215,13 @@ const Datepicker = ({
                                             </Typography.Body>
 
                                             <TimePicker
-                                                format={userPrefTimeFormat === '12h' ? 'hh:mm A' : 'HH:mm'}
-                                                minuteStep={1}
-                                                use12Hours={userPrefTimeFormat === '12h' ? true : false}
                                                 showNow={false}
-                                                value={endTime}
+                                                minuteStep={1}
                                                 placeholder="End time"
+                                                value={endTime}
                                                 onChange={handleEndTimeChange}
+                                                use12Hours={userPrefTimeFormat === '12h' ? true : false}
+                                                format={userPrefTimeFormat === '12h' ? 'hh:mm A' : 'HH:mm'}
                                                 disabled={!isTimeSelectionEnabled}
                                             />
                                         </div>
