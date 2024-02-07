@@ -148,8 +148,16 @@ const BuildingOverview = () => {
         const fDayHour = moment(energyConsumptionsCategories[0]);
         const sDayHour = moment(energyConsumptionsCategories[1]);
 
-        if (sDayHour.diff(fDayHour, 'hours') <= 1) {
-            return getPlotBands();
+        const diffInHours = sDayHour.diff(fDayHour, 'hours');
+
+        const isHourly = diffInHours <= 1;
+
+        const isDaily = diffInHours <= 24;
+
+        if (isHourly) {
+            return getAfterHoursHourly();
+        } else if (isDaily) {
+            return getAfterHoursDaily();
         } else {
             return null;
         }
@@ -165,7 +173,7 @@ const BuildingOverview = () => {
         }
     };
 
-    const getPlotBands = () => {
+    const getAfterHoursHourly = () => {
         const bldgIdObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
 
         if (!bldgIdObj) return;
@@ -260,6 +268,36 @@ const BuildingOverview = () => {
             });
         }
 
+        return operHoursToShow;
+    };
+
+    const getAfterHoursDaily = () => {
+        const bldgIdObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+
+        if (!bldgIdObj) return;
+
+        const weekOperHours = bldgIdObj?.operating_hours;
+        const numberOfSelectedDays = moment(endDate).diff(startDate, 'days');
+        const operHoursToShow = [];
+
+        for (let numberOfDay = 0; numberOfDay <= numberOfSelectedDays; numberOfDay++) {
+            const day = moment(startDate).add(numberOfDay, 'days');
+            const dayInWeek = moment(day).format('ddd').toLowerCase();
+
+            const dayOperHours = weekOperHours[dayInWeek];
+
+            const dayPosition = numberOfDay;
+
+            if (!dayOperHours.stat) {
+                operHoursToShow.push({
+                    type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                    from: dayPosition,
+                    to: dayPosition,
+                });
+            }
+        }
+
+        console.log(operHoursToShow);
         return operHoursToShow;
     };
 
