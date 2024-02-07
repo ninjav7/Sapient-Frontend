@@ -62,21 +62,25 @@ export const bldgAlertConditions = [
         label: 'Peak demand for',
         value: 'peak_demand',
     },
+    // {
+    //     label: 'Carbon for',
+    //     value: 'carbon',
+    // },
 ];
 
 // Equipment Alert Conditions
 export const equipAlertConditions = [
     {
         label: 'RMS Current is',
-        value: 'rms_current',
+        value: 'sensor_rms_current',
     },
     {
         label: 'Min Current is',
-        value: 'min_current',
+        value: 'sensor_min_current',
     },
     {
         label: 'Max Current is',
-        value: 'max_current',
+        value: 'sensor_max_current',
     },
     {
         label: 'Peak Power is',
