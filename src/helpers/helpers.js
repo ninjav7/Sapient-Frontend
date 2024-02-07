@@ -1,4 +1,5 @@
 import moment from 'moment';
+import dayjs from 'dayjs';
 
 export const formatConsumptionValue = (value, fixed) =>
     value.toLocaleString(undefined, { maximumFractionDigits: fixed });
@@ -46,6 +47,20 @@ export const handleDateFormat = (customDate, dateType) => {
 
     let dt = new Date(customDate).toISOString();
     return dt;
+};
+
+export const handleTimeFormat = (customTime, dateType) => {
+    if (dateType === 'startTime' && customTime === null) {
+        const startTime = dayjs().startOf('day');
+        const startTimeString = startTime.format('HH:mm');
+        return startTimeString;
+    }
+
+    if (dateType === 'endTime' && customTime === null) {
+        const endTime = dayjs().endOf('day');
+        const endTimeString = endTime.format('HH:mm');
+        return endTimeString;
+    }
 };
 
 export const xaxisFilters = (daysCount, timezone) => {
