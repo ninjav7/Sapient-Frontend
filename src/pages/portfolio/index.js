@@ -19,7 +19,7 @@ import Typography from '../../sharedComponents/typography';
 import CompareBuildings from '../compareBuildings';
 import { useAtom } from 'jotai';
 import { buildingData, userPermissionData } from '../../store/globalState';
-import { apiRequestBody } from '../../helpers/helpers';
+import { apiRequestBody, handleDateTimeFormat } from '../../helpers/helpers';
 import Brick from '../../sharedComponents/brick';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import { UNITS } from '../../constants/units';
@@ -44,6 +44,8 @@ const PortfolioOverview = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefUnits = UserStore.useState((s) => s.unit);
@@ -119,10 +121,13 @@ const PortfolioOverview = () => {
         if (startDate === null || endDate === null) return;
 
         const portfolioOverallData = async () => {
+            const { dateFrom, dateTo } = handleDateTimeFormat(startDate, endDate, startTime, endTime);
+
             setFetchingKPIsData(true);
+
             const payload = {
-                date_from: encodeURIComponent(startDate),
-                date_to: encodeURIComponent(endDate),
+                date_from: encodeURIComponent(dateFrom),
+                date_to: encodeURIComponent(dateTo),
                 tz_info: encodeURIComponent(timeZone),
                 metric: 'energy',
             };
@@ -141,8 +146,10 @@ const PortfolioOverview = () => {
 
         const portfolioEndUsesData = async () => {
             setIsEnergyConsumptionChartLoading(true);
+
             const params = `?off_hours=false`;
-            const payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, timeZone, startTime, endTime);
+
             await fetchPortfolioEndUse(params, payload)
                 .then((res) => {
                     const response = res?.data?.data;
@@ -159,7 +166,7 @@ const PortfolioOverview = () => {
         };
 
         const energyConsumptionData = async () => {
-            const payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, timeZone, startTime, endTime);
             setEnergyChartLoading(true);
 
             await fetchPortfolioEnergyConsumption(payload)
@@ -185,7 +192,8 @@ const PortfolioOverview = () => {
         };
 
         const portfolioBuilidingsData = async () => {
-            let payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, timeZone, startTime, endTime);
+
             await fetchPortfolioBuilidings(payload)
                 .then((res) => {
                     let data = res.data;
@@ -212,7 +220,7 @@ const PortfolioOverview = () => {
         portfolioOverallData();
         portfolioEndUsesData();
         energyConsumptionData();
-    }, [startDate, endDate, userPrefUnits]);
+    }, [startDate, endDate, startTime, endTime, userPrefUnits]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
