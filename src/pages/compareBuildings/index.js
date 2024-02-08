@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Row, Col } from 'reactstrap';
-import { formatConsumptionValue, handleDateTimeFormat } from '../../helpers/helpers';
+import { formatConsumptionValue, handleAPIRequestParams } from '../../helpers/helpers';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { useHistory } from 'react-router-dom';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -187,7 +187,7 @@ const CompareBuildings = () => {
     const fetchCompareBuildingsData = async (search, ordered_by = 'total_consumption', sort_by, userPrefUnits) => {
         setIsLoadingBuildingData(true);
 
-        const { dateFrom, dateTo } = handleDateTimeFormat(startDate, endDate, startTime, endTime);
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
 
         let params = `?date_from=${dateFrom}&date_to=${dateTo}&tz_info=${timeZone}&metric=energy&ordered_by=${ordered_by}`;
 

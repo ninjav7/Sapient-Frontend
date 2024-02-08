@@ -339,16 +339,21 @@ export const apiRequestBody = (start_date, end_date, time_zone, start_time, end_
     };
 };
 
-export const handleDateTimeFormat = (start_date, end_date, start_time, end_time) => {
-    if (!start_time) {
+const getTimeInString = (type) => {
+    if (type === 'startTime') {
         const newStartTime = dayjs().startOf('day');
-        start_time = newStartTime.format('HH:mm');
+        return newStartTime.format('HH:mm');
     }
 
-    if (!end_time) {
+    if (type === 'endTime') {
         const newEndTime = dayjs().endOf('day');
-        end_time = newEndTime.format('HH:mm');
+        return newEndTime.format('HH:mm');
     }
+};
+
+export const handleAPIRequestParams = (start_date, end_date, start_time, end_time) => {
+    if (!start_time) start_time = getTimeInString('startTime');
+    if (!end_time) end_time = getTimeInString('endTime');
 
     const dateFrom = start_date.split('T')[0].concat(`T${start_time}`);
     const dateTo = end_date.split('T')[0].concat(`T${end_time}`);

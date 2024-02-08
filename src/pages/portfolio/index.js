@@ -19,7 +19,7 @@ import Typography from '../../sharedComponents/typography';
 import CompareBuildings from '../compareBuildings';
 import { useAtom } from 'jotai';
 import { buildingData, userPermissionData } from '../../store/globalState';
-import { apiRequestBody, handleDateTimeFormat } from '../../helpers/helpers';
+import { apiRequestBody, handleAPIRequestParams } from '../../helpers/helpers';
 import Brick from '../../sharedComponents/brick';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import { UNITS } from '../../constants/units';
@@ -121,7 +121,7 @@ const PortfolioOverview = () => {
         if (startDate === null || endDate === null) return;
 
         const portfolioOverallData = async () => {
-            const { dateFrom, dateTo } = handleDateTimeFormat(startDate, endDate, startTime, endTime);
+            const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
 
             setFetchingKPIsData(true);
 
