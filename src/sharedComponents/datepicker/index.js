@@ -43,18 +43,18 @@ const Datepicker = ({
     const [endTime, setEndTime] = useState(dayjs().endOf('day'));
 
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
-    const [isTimeSelectionEnabled, setTimeSelectionEnabled] = useState(false);
+    const [isTimePickerEnabled, setTimePickerEnabled] = useState(false);
 
     const [isOpen, setIsOpen] = useState(false);
     const [focusedInput, setFocusedInput] = useState(null);
 
     const refApi = useRef(null);
 
-    const handleStartTimeChange = (time, timeString) => {
+    const handleStartTimeChange = (time) => {
         setStartTime(time);
     };
 
-    const handleEndTimeChange = (time, timeString) => {
+    const handleEndTimeChange = (time) => {
         setEndTime(time);
     };
 
@@ -82,6 +82,13 @@ const Datepicker = ({
             handleClose();
         }
     }, [isClosed]);
+
+    useEffect(() => {
+        if (!isTimePickerEnabled) {
+            setStartTime(dayjs().startOf('day'));
+            setEndTime(dayjs().endOf('day'));
+        }
+    }, [isTimePickerEnabled]);
 
     function onDateChange({ startDate, endDate }) {
         props.onChange && props.onChange(props.isSingleDay ? { startDate } : { startDate, endDate });
@@ -141,7 +148,8 @@ const Datepicker = ({
 
         props.onApply && props.onApply({ startDate, endDate: endDateOrStartDate, event });
         onDateChange({ startDate, endDate: endDateOrStartDate });
-        props.onCustomDateChange && props.onCustomDateChange({ startDate, endDate: endDateOrStartDate });
+        props.onCustomDateChange &&
+            props.onCustomDateChange({ startDate, endDate: endDateOrStartDate, startTime, endTime });
     };
 
     const formattedStartDate = rangeDate[0]?.format('MMM D') || '';
@@ -203,7 +211,7 @@ const Datepicker = ({
                                                 placeholder="Start time"
                                                 value={startTime}
                                                 onChange={handleStartTimeChange}
-                                                disabled={!isTimeSelectionEnabled}
+                                                disabled={!isTimePickerEnabled}
                                                 use12Hours={userPrefTimeFormat === '12h' ? true : false}
                                                 format={userPrefTimeFormat === '12h' ? 'hh:mm A' : 'HH:mm'}
                                             />
@@ -222,7 +230,7 @@ const Datepicker = ({
                                                 onChange={handleEndTimeChange}
                                                 use12Hours={userPrefTimeFormat === '12h' ? true : false}
                                                 format={userPrefTimeFormat === '12h' ? 'hh:mm A' : 'HH:mm'}
-                                                disabled={!isTimeSelectionEnabled}
+                                                disabled={!isTimePickerEnabled}
                                             />
                                         </div>
                                     </div>
@@ -232,10 +240,10 @@ const Datepicker = ({
                                         id="select-time"
                                         name="select-time"
                                         size="sm"
-                                        checked={isTimeSelectionEnabled}
-                                        value={isTimeSelectionEnabled}
+                                        checked={isTimePickerEnabled}
+                                        value={isTimePickerEnabled}
                                         onClick={(e) => {
-                                            setTimeSelectionEnabled(e.target.value === 'false' ? true : false);
+                                            setTimePickerEnabled(e.target.value === 'false' ? true : false);
                                         }}
                                     />
                                 </div>
