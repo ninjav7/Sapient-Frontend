@@ -58,7 +58,6 @@ export const options = (props) => {
                                     [1, 'rgba(240, 68, 56, 0.08)'],
                                 ],
                             },
-                            className: 'plot-bands',
                         },
                         {
                             from,
@@ -70,7 +69,6 @@ export const options = (props) => {
                                     [0.007, 'rgba(0, 0, 0, 0)'],
                                 ],
                             },
-                            className: 'plot-bands',
                         },
                     ];
                 }

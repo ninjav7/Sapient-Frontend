@@ -279,25 +279,33 @@ const BuildingOverview = () => {
         const weekOperHours = bldgIdObj?.operating_hours;
         const numberOfSelectedDays = moment(endDate).diff(startDate, 'days');
         const operHoursToShow = [];
+        let dayFirst;
 
         for (let numberOfDay = 0; numberOfDay <= numberOfSelectedDays; numberOfDay++) {
             const day = moment(startDate).add(numberOfDay, 'days');
             const dayInWeek = moment(day).format('ddd').toLowerCase();
+            const nextDay = moment(startDate).add(numberOfDay + 1, 'days');
+            const nextDayInWeek = moment(nextDay).format('ddd').toLowerCase();
 
             const dayOperHours = weekOperHours[dayInWeek];
+            const nextDayOperHours = weekOperHours[nextDayInWeek];
 
-            const dayPosition = numberOfDay;
+            const lastDay = numberOfDay;
 
             if (!dayOperHours.stat) {
-                operHoursToShow.push({
-                    type: LineChart.PLOT_BANDS_TYPE.after_hours,
-                    from: dayPosition,
-                    to: dayPosition,
-                });
+                if (!nextDayOperHours.stat) {
+                    if (!dayFirst) dayFirst = numberOfDay;
+                } else {
+                    operHoursToShow.push({
+                        type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                        from: dayFirst ? dayFirst : lastDay,
+                        to: lastDay,
+                    });
+                    dayFirst = null;
+                }
             }
         }
 
-        console.log(operHoursToShow);
         return operHoursToShow;
     };
 
