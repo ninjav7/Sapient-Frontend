@@ -23,7 +23,7 @@ import moment from 'moment';
 import 'moment-timezone';
 import './style.css';
 import '../../sharedComponents/lineChartWidget/style.scss';
-import { apiRequestBody, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { handleAPIRequestBody, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 
 const TopBuildingPeaks = ({ peakData, setEquipTypeToFetch }) => {
     return (
@@ -393,7 +393,9 @@ const PeakDemand = () => {
                 setIsTopPeakContributersLoading(true);
                 let params = `?building_id=${bldgId}&consumption=power`;
                 await axios
-                    .post(`${BaseUrl}${peakDemand}${params}`, apiRequestBody(startDate, endDate, timeZone), { headers })
+                    .post(`${BaseUrl}${peakDemand}${params}`, handleAPIRequestBody(startDate, endDate, timeZone), {
+                        headers,
+                    })
                     .then((res) => {
                         let responseData = res?.data;
                         setEquipTypeToFetch(responseData[0]?.timestamp);
@@ -410,9 +412,13 @@ const PeakDemand = () => {
                 setIsPeakTrendChartLoading(true);
                 let params = `?building_id=${bldgId}&consumption=power`;
                 await axios
-                    .post(`${BaseUrl}${peakDemandTrendChart}${params}`, apiRequestBody(startDate, endDate, timeZone), {
-                        headers,
-                    })
+                    .post(
+                        `${BaseUrl}${peakDemandTrendChart}${params}`,
+                        handleAPIRequestBody(startDate, endDate, timeZone),
+                        {
+                            headers,
+                        }
+                    )
                     .then((res) => {
                         let responseData = res?.data;
                         let newArray = [
@@ -440,9 +446,13 @@ const PeakDemand = () => {
                 setIsPeakContentLoading(true);
                 let params = `?building_id=${bldgId}`;
                 await axios
-                    .post(`${BaseUrl}${peakDemandYearlyPeak}${params}`, apiRequestBody(startDate, endDate, timeZone), {
-                        headers,
-                    })
+                    .post(
+                        `${BaseUrl}${peakDemandYearlyPeak}${params}`,
+                        handleAPIRequestBody(startDate, endDate, timeZone),
+                        {
+                            headers,
+                        }
+                    )
                     .then((res) => {
                         let responseData = res.data;
                         setYearlyPeakData(responseData);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
-import { apiRequestBody } from '../../helpers/helpers';
+import { handleAPIRequestBody } from '../../helpers/helpers';
 import { useAtom } from 'jotai';
 import moment from 'moment';
 import 'moment-timezone';
@@ -305,7 +305,7 @@ const BuildingOverview = () => {
     };
 
     const builidingEquipmentsData = async (timeZone) => {
-        const payload = apiRequestBody(startDate, endDate, timeZone);
+        const payload = handleAPIRequestBody(startDate, endDate, timeZone);
         setTopEnergyDataFetching(true);
 
         await fetchBuildingEquipments(bldgId, payload)
@@ -363,7 +363,7 @@ const BuildingOverview = () => {
 
     const buildingEndUserData = async (time_zone) => {
         const params = `?building_id=${bldgId}&off_hours=false`;
-        const payload = apiRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone);
         setEndUseDataFetching(true);
 
         await fetchEndUseByBuilding(params, payload)

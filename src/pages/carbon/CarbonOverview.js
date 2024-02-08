@@ -6,7 +6,7 @@ import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { Badge } from '../../sharedComponents/badge';
 import { fetchCompareBuildingsV2, getCarbonBuildingChartData } from '../compareBuildings/services';
 import { getCarbonCompareBuildingsTableCSVExport } from '../../utils/tablesExport';
-import { apiRequestBody } from '../../helpers/helpers';
+import { handleAPIRequestBody } from '../../helpers/helpers';
 import {
     fetchPortfolioBuilidings,
     fetchPortfolioOverall,
@@ -126,7 +126,7 @@ const CarbonOverview = () => {
 
         portfolioOverallData();
         const portfolioBuilidingsData = async () => {
-            let payload = apiRequestBody(startDate, endDate, timeZone);
+            let payload = handleAPIRequestBody(startDate, endDate, timeZone);
             await fetchPortfolioBuilidings(payload)
                 .then((res) => {
                     let data = res.data;

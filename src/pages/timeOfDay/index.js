@@ -12,7 +12,7 @@ import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import EndUseTotals from './EndUseTotals';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
-import { apiRequestBody } from '../../helpers/helpers';
+import { handleAPIRequestBody } from '../../helpers/helpers';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import Brick from '../../sharedComponents/brick';
 import { separateAndCalculateEnergyData } from './utils';
@@ -100,7 +100,7 @@ const TimeOfDay = () => {
             setEnergyDataFetching(true);
 
             const params = `?building_id=${bldgId}${is_plug_only === 'true' ? '' : `&off_hours=true`}`;
-            const payload = apiRequestBody(startDate, endDate, time_zone);
+            const payload = handleAPIRequestBody(startDate, endDate, time_zone);
 
             await fetchBuildingAfterHours(params, payload)
                 .then((res) => {
@@ -215,7 +215,7 @@ const TimeOfDay = () => {
 
         const averageUsageByHourFetch = async () => {
             setAvgConsumptionDataLoading(true);
-            const payload = apiRequestBody(startDate, endDate, time_zone);
+            const payload = handleAPIRequestBody(startDate, endDate, time_zone);
 
             await fetchAvgDailyUsageByHour(bldgId, payload)
                 .then((res) => {

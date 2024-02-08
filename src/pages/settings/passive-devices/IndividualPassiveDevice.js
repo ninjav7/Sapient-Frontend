@@ -12,7 +12,7 @@ import AddSensorPanelModel from './AddSensorPanelModel';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import './style.css';
 import { useAtom } from 'jotai';
-import { apiRequestBody } from '../../../helpers/helpers';
+import { handleAPIRequestBody } from '../../../helpers/helpers';
 import DeleteDevice from './DeleteDevice';
 import Brick from '../../../sharedComponents/brick';
 import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
@@ -157,7 +157,7 @@ const IndividualPassiveDevice = () => {
             id === sensorId ? sensorId : id
         }&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
 
-        const payload = apiRequestBody(startDate, endDate, timeZone);
+        const payload = handleAPIRequestBody(startDate, endDate, timeZone);
 
         await getSensorGraphData(params, payload)
             .then((res) => {

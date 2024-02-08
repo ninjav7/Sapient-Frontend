@@ -22,7 +22,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { userPermissionData } from '../../store/globalState';
 
 import {
-    apiRequestBody,
+    handleAPIRequestBody,
     compareObjData,
     dateTimeFormatForHighChart,
     formatXaxisForHighCharts,
@@ -423,7 +423,7 @@ const EquipChartModal = ({
                         s.notificationMessage = 'Equipment updated successfully!';
                         s.notificationType = 'success';
                     });
-                    const arr = apiRequestBody(startDate, endDate, timeZone);
+                    const arr = handleAPIRequestBody(startDate, endDate, timeZone);
                     fetchEquipmentData(arr);
                 } else {
                     UserStore.update((s) => {
@@ -473,7 +473,7 @@ const EquipChartModal = ({
         setIsEquipDataFetched(true);
         setDeviceData([]);
 
-        const payload = apiRequestBody(startDate, endDate, timeZone);
+        const payload = handleAPIRequestBody(startDate, endDate, timeZone);
 
         const params = `?building_id=${bldgId}&consumption=${selectedConsumption}&equipment_id=${equipId}&divisible_by=1000`;
 
@@ -643,7 +643,7 @@ const EquipChartModal = ({
         setEquipMetaData({});
 
         const params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
-        const payload = apiRequestBody(startDate, endDate, timeZone);
+        const payload = handleAPIRequestBody(startDate, endDate, timeZone);
 
         await updateExploreEquipmentYTDUsage(payload, params)
             .then((res) => {

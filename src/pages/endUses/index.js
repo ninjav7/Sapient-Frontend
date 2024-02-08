@@ -11,7 +11,7 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { UserStore } from '../../store/UserStore';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-import { apiRequestBody } from '../../helpers/helpers';
+import { handleAPIRequestBody } from '../../helpers/helpers';
 import { TopEndUsesWidget } from '../../sharedComponents/topEndUsesWidget';
 import { UNITS } from '../../constants/units';
 import { useHistory, useParams } from 'react-router-dom';
@@ -211,7 +211,7 @@ const EndUsesPage = () => {
         setFetchingEndUseData(true);
 
         const params = `?building_id=${bldgId}`;
-        const payload = apiRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone);
 
         await fetchEndUses(params, payload)
             .then((res) => {
@@ -291,7 +291,7 @@ const EndUsesPage = () => {
     const endUsesChartDataFetch = async (time_zone) => {
         setStackedColumnChartData([]);
         setChartLoading(true);
-        const payload = apiRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone);
 
         await fetchEndUsesChart(bldgId, payload)
             .then((res) => {

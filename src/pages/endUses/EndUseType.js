@@ -11,7 +11,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { UserStore } from '../../store/UserStore';
-import { apiRequestBody, formatConsumptionValue } from '../../helpers/helpers';
+import { handleAPIRequestBody, formatConsumptionValue } from '../../helpers/helpers';
 import { UNITS } from '../../constants/units';
 import EndUsesKPIs from '../../sharedComponents/endUsesKPIs/EndUsesKPIs';
 import { fetchTrendType } from './utils';
@@ -91,7 +91,7 @@ const EndUseType = () => {
 
     const plugUsageDataFetch = async (endUseTypeRequest, time_zone) => {
         setEnergyChartLoading(true);
-        const payload = apiRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone);
         await fetchEndUsesUsageChart(bldgId, endUseTypeRequest, payload)
             .then((res) => {
                 const response = res?.data?.data;
@@ -117,7 +117,7 @@ const EndUseType = () => {
 
     const endUsesDataFetch = async (endUseTypeRequest, time_zone) => {
         setFetchingEndUseData(true);
-        const payload = apiRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone);
 
         await fetchEndUsesType(bldgId, endUseTypeRequest, payload)
             .then((res) => {
@@ -355,7 +355,7 @@ const EndUseType = () => {
         // Planned for Future Enable of this integration
         // const equipmentUsageDataFetch = async () => {
         //     setIsEquipTypeChartLoading(true);
-        //     let payload = apiRequestBody(startDate, endDate, timeZone);
+        //     let payload = handleAPIRequestBody(startDate, endDate, timeZone);
         //     await fetchEndUsesEquipmentUsage(bldgId, endUseTypeRequest, payload)
         //         .then((res) => {
         //             let data = res.data;

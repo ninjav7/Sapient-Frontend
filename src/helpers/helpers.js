@@ -304,7 +304,7 @@ export const convertDateTime = (timestamp, timeZone) => {
     return moment.utc(timestamp).clone().tz(timeZone);
 };
 
-export const apiRequestBody = (start_date, end_date, time_zone, start_time, end_time) => {
+export const handleAPIRequestBody = (start_date, end_date, time_zone, start_time, end_time) => {
     if (!start_time) {
         const newStartTime = dayjs().startOf('day');
         start_time = newStartTime.format('HH:mm');

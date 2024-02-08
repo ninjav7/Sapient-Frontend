@@ -19,7 +19,7 @@ import Typography from '../../sharedComponents/typography';
 import CompareBuildings from '../compareBuildings';
 import { useAtom } from 'jotai';
 import { buildingData, userPermissionData } from '../../store/globalState';
-import { apiRequestBody, handleAPIRequestParams } from '../../helpers/helpers';
+import { handleAPIRequestBody, handleAPIRequestParams } from '../../helpers/helpers';
 import Brick from '../../sharedComponents/brick';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import { UNITS } from '../../constants/units';
@@ -148,7 +148,7 @@ const PortfolioOverview = () => {
             setIsEnergyConsumptionChartLoading(true);
 
             const params = `?off_hours=false`;
-            const payload = apiRequestBody(startDate, endDate, timeZone, startTime, endTime);
+            const payload = handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime);
 
             await fetchPortfolioEndUse(params, payload)
                 .then((res) => {
@@ -166,7 +166,7 @@ const PortfolioOverview = () => {
         };
 
         const energyConsumptionData = async () => {
-            const payload = apiRequestBody(startDate, endDate, timeZone, startTime, endTime);
+            const payload = handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime);
             setEnergyChartLoading(true);
 
             await fetchPortfolioEnergyConsumption(payload)
@@ -192,7 +192,7 @@ const PortfolioOverview = () => {
         };
 
         const portfolioBuilidingsData = async () => {
-            const payload = apiRequestBody(startDate, endDate, timeZone, startTime, endTime);
+            const payload = handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime);
 
             await fetchPortfolioBuilidings(payload)
                 .then((res) => {

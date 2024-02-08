@@ -7,7 +7,7 @@ import { Cookies } from 'react-cookie';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import Header from '../../components/Header';
-import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
+import { handleAPIRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
@@ -118,7 +118,7 @@ const DeviceChartModel = ({
                 };
                 let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}&building_id=${bldgId}`;
                 await axios
-                    .post(`${BaseUrl}${sensorGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
+                    .post(`${BaseUrl}${sensorGraphData}${params}`, handleAPIRequestBody(startDate, endDate, timeZone), {
                         headers,
                     })
                     .then((res) => {
