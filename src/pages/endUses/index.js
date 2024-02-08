@@ -86,8 +86,16 @@ const EndUsesPage = () => {
         const fDayHour = moment(stackedColumnChartCategories[0]);
         const sDayHour = moment(stackedColumnChartCategories[1]);
 
-        if (sDayHour.diff(fDayHour, 'hours') <= 1) {
-            return getPlotBands();
+        const diffInHours = sDayHour.diff(fDayHour, 'hours');
+
+        const isHourly = diffInHours <= 1;
+
+        const isDaily = diffInHours <= 24;
+
+        if (isHourly) {
+            return getAfterHoursHourly();
+        } else if (isDaily) {
+            return getAfterHoursDaily();
         } else {
             return null;
         }
@@ -103,7 +111,7 @@ const EndUsesPage = () => {
         }
     };
 
-    const getPlotBands = () => {
+    const getAfterHoursHourly = () => {
         const bldgIdObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
 
         if (!bldgIdObj) return;
@@ -196,6 +204,44 @@ const EndUsesPage = () => {
                 from: formattedFromUnworkedNumber + dayPosition,
                 to: 24 + dayPosition,
             });
+        }
+
+        return operHoursToShow;
+    };
+
+    const getAfterHoursDaily = () => {
+        const bldgIdObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+
+        if (!bldgIdObj) return;
+
+        const weekOperHours = bldgIdObj?.operating_hours;
+        const numberOfSelectedDays = moment(endDate).diff(startDate, 'days');
+        const operHoursToShow = [];
+        let dayFirst;
+
+        for (let numberOfDay = 0; numberOfDay <= numberOfSelectedDays; numberOfDay++) {
+            const day = moment(startDate).add(numberOfDay, 'days');
+            const dayInWeek = moment(day).format('ddd').toLowerCase();
+            const nextDay = moment(startDate).add(numberOfDay + 1, 'days');
+            const nextDayInWeek = moment(nextDay).format('ddd').toLowerCase();
+
+            const dayOperHours = weekOperHours[dayInWeek];
+            const nextDayOperHours = weekOperHours[nextDayInWeek];
+
+            const lastDay = numberOfDay;
+
+            if (!dayOperHours.stat) {
+                if (!nextDayOperHours.stat) {
+                    if (!dayFirst) dayFirst = numberOfDay;
+                } else {
+                    operHoursToShow.push({
+                        type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                        from: dayFirst ? dayFirst : lastDay,
+                        to: lastDay,
+                    });
+                    dayFirst = null;
+                }
+            }
         }
 
         return operHoursToShow;

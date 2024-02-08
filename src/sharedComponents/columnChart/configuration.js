@@ -164,6 +164,7 @@ export const options = (props) => {
                             return this.axis.defaultLabelFormatter.call(value ? { ...this, value } : this);
                         },
                     },
+
                     plotBands: plotBandsData,
                 },
                 yAxis: [
