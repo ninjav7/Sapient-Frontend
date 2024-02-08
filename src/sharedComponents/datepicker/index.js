@@ -26,6 +26,14 @@ moment.updateLocale('en', {
     },
 });
 
+function handleTimeSelector(value) {
+    if (typeof value === 'boolean') {
+        return value;
+    }
+
+    return value === 'true';
+}
+
 const Datepicker = ({
     rangeDate = [moment(), moment().add(7, 'd')],
     className = '',
@@ -34,6 +42,7 @@ const Datepicker = ({
     withApplyButton = true,
     withTimeSelect = true,
     isClosed = true,
+    isTimeSelectionEnabled,
     ...props
 }) => {
     const [startDate, setStartDate] = useState(rangeDate[0]);
@@ -43,7 +52,7 @@ const Datepicker = ({
     const [endTime, setEndTime] = useState(dayjs().endOf('day'));
 
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
-    const [isTimePickerEnabled, setTimePickerEnabled] = useState(false);
+    const [isTimePickerEnabled, setTimePickerEnabled] = useState(handleTimeSelector(isTimeSelectionEnabled));
 
     const [isOpen, setIsOpen] = useState(false);
     const [focusedInput, setFocusedInput] = useState(null);
@@ -149,7 +158,13 @@ const Datepicker = ({
         props.onApply && props.onApply({ startDate, endDate: endDateOrStartDate, event });
         onDateChange({ startDate, endDate: endDateOrStartDate });
         props.onCustomDateChange &&
-            props.onCustomDateChange({ startDate, endDate: endDateOrStartDate, startTime, endTime });
+            props.onCustomDateChange({
+                startDate,
+                endDate: endDateOrStartDate,
+                startTime,
+                endTime,
+                isTimePickerEnabled,
+            });
     };
 
     const formattedStartDate = rangeDate[0]?.format('MMM D') || '';

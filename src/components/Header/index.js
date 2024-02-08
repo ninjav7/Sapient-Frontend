@@ -14,10 +14,11 @@ const Header = ({ type, title, showExplore = false }) => {
     const filterPeriod = DateRangeStore.useState((s) => s.filterPeriod);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const isTimeSelectionEnabled = DateRangeStore.useState((s) => s.isTimePickerEnabled);
     const [rangeDate, setRangeDate] = useState([moment(startDate), moment(endDate)]);
 
     // On Custom Date Change from Calender
-    const onCustomDateChange = ({ startDate, endDate, startTime, endTime }) => {
+    const onCustomDateChange = ({ startDate, endDate, startTime, endTime, isTimePickerEnabled }) => {
         if (startDate === null || endDate === null) return;
 
         // Start & End date
@@ -33,6 +34,7 @@ const Header = ({ type, title, showExplore = false }) => {
         localStorage.setItem('endDate', end_date);
         localStorage.setItem('startTime', start_time);
         localStorage.setItem('endTime', end_time);
+        localStorage.setItem('isTimePickerEnabled', isTimePickerEnabled);
 
         DateRangeStore.update((s) => {
             s.filterPeriod = 'Custom';
@@ -40,6 +42,7 @@ const Header = ({ type, title, showExplore = false }) => {
             s.endDate = end_date;
             s.startTime = start_time;
             s.endTime = end_time;
+            s.isTimePickerEnabled = isTimePickerEnabled;
         });
     };
 
@@ -93,6 +96,7 @@ const Header = ({ type, title, showExplore = false }) => {
                                 rangeDate={rangeDate}
                                 timeOptions={customOptions}
                                 defaultValue={filterPeriod}
+                                isTimeSelectionEnabled={isTimeSelectionEnabled}
                             />
                         </div>
                         {showExplore && (
@@ -120,6 +124,7 @@ const Header = ({ type, title, showExplore = false }) => {
                             rangeDate={rangeDate}
                             timeOptions={customOptions}
                             defaultValue={filterPeriod}
+                            isTimeSelectionEnabled={isTimeSelectionEnabled}
                         />
                     </div>
                 </div>

@@ -9,4 +9,5 @@ export const DateRangeStore = new Store({
     daysCount: localStorage.getItem('daysCount'),
     startTime: handleTimeFormat(localStorage.getItem('startTime'), 'startTime'),
     endTime: handleTimeFormat(localStorage.getItem('endDate'), 'endTime'),
+    isTimePickerEnabled: localStorage.getItem('isTimePickerEnabled') ?? false,
 });
