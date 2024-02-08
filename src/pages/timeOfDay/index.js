@@ -25,6 +25,8 @@ const TimeOfDay = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const isPlugOnly = BuildingStore.useState((s) => s.isPlugOnly);
 
@@ -100,7 +102,7 @@ const TimeOfDay = () => {
             setEnergyDataFetching(true);
 
             const params = `?building_id=${bldgId}${is_plug_only === 'true' ? '' : `&off_hours=true`}`;
-            const payload = handleAPIRequestBody(startDate, endDate, time_zone);
+            const payload = handleAPIRequestBody(startDate, endDate, time_zone, startTime, endTime);
 
             await fetchBuildingAfterHours(params, payload)
                 .then((res) => {
@@ -215,7 +217,7 @@ const TimeOfDay = () => {
 
         const averageUsageByHourFetch = async () => {
             setAvgConsumptionDataLoading(true);
-            const payload = handleAPIRequestBody(startDate, endDate, time_zone);
+            const payload = handleAPIRequestBody(startDate, endDate, time_zone, startTime, endTime);
 
             await fetchAvgDailyUsageByHour(bldgId, payload)
                 .then((res) => {
@@ -735,7 +737,7 @@ const TimeOfDay = () => {
         endUsesByOfHour(isPlugOnly);
         dailyUsageByHour();
         averageUsageByHourFetch();
-    }, [startDate, endDate, bldgId, isPlugOnly]);
+    }, [startDate, endDate, startTime, endTime, bldgId, isPlugOnly]);
 
     return (
         <React.Fragment>

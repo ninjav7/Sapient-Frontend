@@ -328,6 +328,8 @@ const EquipChartModal = ({
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
@@ -423,7 +425,7 @@ const EquipChartModal = ({
                         s.notificationMessage = 'Equipment updated successfully!';
                         s.notificationType = 'success';
                     });
-                    const arr = handleAPIRequestBody(startDate, endDate, timeZone);
+                    const arr = handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime);
                     fetchEquipmentData(arr);
                 } else {
                     UserStore.update((s) => {
@@ -473,7 +475,7 @@ const EquipChartModal = ({
         setIsEquipDataFetched(true);
         setDeviceData([]);
 
-        const payload = handleAPIRequestBody(startDate, endDate, timeZone);
+        const payload = handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime);
 
         const params = `?building_id=${bldgId}&consumption=${selectedConsumption}&equipment_id=${equipId}&divisible_by=1000`;
 
@@ -643,7 +645,7 @@ const EquipChartModal = ({
         setEquipMetaData({});
 
         const params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
-        const payload = handleAPIRequestBody(startDate, endDate, timeZone);
+        const payload = handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime);
 
         await updateExploreEquipmentYTDUsage(payload, params)
             .then((res) => {
@@ -746,7 +748,7 @@ const EquipChartModal = ({
             fetchEquipmentChartV2(equipment_id, equipment_name);
             fetchEquipmentKPIDataV2(equipment_id);
         }
-    }, [selectedEquipObj, startDate, endDate, selectedConsumption, bldgId]);
+    }, [selectedEquipObj, startDate, endDate, startTime, endTime, selectedConsumption, bldgId]);
 
     return (
         <div>

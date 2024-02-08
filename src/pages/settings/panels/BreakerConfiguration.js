@@ -72,6 +72,8 @@ const BreakerConfiguration = ({
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
@@ -901,7 +903,7 @@ const BreakerConfiguration = ({
         if (sensors_list.length === 0) return;
         setFetchingSensorData(true);
         const promisesList = [];
-        const payload = handleAPIRequestBody(start_date, end_date, timeZone);
+        const payload = handleAPIRequestBody(start_date, end_date, timeZone, startTime, endTime);
 
         if (sensors_list.length >= 1) {
             const params = `?sensor_id=${sensors_list[0]?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
@@ -1171,7 +1173,7 @@ const BreakerConfiguration = ({
 
     useEffect(() => {
         fetchSensorsChartData(sensorsList, selectedConsumption, startDate, endDate);
-    }, [sensorsList, startDate, endDate, selectedConsumption]);
+    }, [sensorsList, startDate, endDate, startTime, endTime, selectedConsumption]);
 
     return (
         <React.Fragment>

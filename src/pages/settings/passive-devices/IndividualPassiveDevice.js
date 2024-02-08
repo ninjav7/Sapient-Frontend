@@ -47,6 +47,8 @@ const IndividualPassiveDevice = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     let history = useHistory();
@@ -157,7 +159,7 @@ const IndividualPassiveDevice = () => {
             id === sensorId ? sensorId : id
         }&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
 
-        const payload = handleAPIRequestBody(startDate, endDate, timeZone);
+        const payload = handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime);
 
         await getSensorGraphData(params, payload)
             .then((res) => {

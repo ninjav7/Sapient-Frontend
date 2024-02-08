@@ -92,6 +92,8 @@ const CarbonOverview = () => {
     let top = '';
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [overalldata, setOveralldata] = useState({
@@ -126,7 +128,7 @@ const CarbonOverview = () => {
 
         portfolioOverallData();
         const portfolioBuilidingsData = async () => {
-            let payload = handleAPIRequestBody(startDate, endDate, timeZone);
+            let payload = handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime);
             await fetchPortfolioBuilidings(payload)
                 .then((res) => {
                     let data = res.data;
@@ -136,7 +138,7 @@ const CarbonOverview = () => {
         };
 
         portfolioBuilidingsData();
-    }, [startDate, endDate, userPrefUnits]);
+    }, [startDate, endDate, startTime, endTime, userPrefUnits]);
 
     const [isKPIsLoading, setIsKPIsLoading] = useState(false);
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');

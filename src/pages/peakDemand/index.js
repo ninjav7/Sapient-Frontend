@@ -255,6 +255,8 @@ const PeakDemand = () => {
     const userdata = cookies.get('user');
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const headers = {
@@ -393,9 +395,13 @@ const PeakDemand = () => {
                 setIsTopPeakContributersLoading(true);
                 let params = `?building_id=${bldgId}&consumption=power`;
                 await axios
-                    .post(`${BaseUrl}${peakDemand}${params}`, handleAPIRequestBody(startDate, endDate, timeZone), {
-                        headers,
-                    })
+                    .post(
+                        `${BaseUrl}${peakDemand}${params}`,
+                        handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime),
+                        {
+                            headers,
+                        }
+                    )
                     .then((res) => {
                         let responseData = res?.data;
                         setEquipTypeToFetch(responseData[0]?.timestamp);
@@ -414,7 +420,7 @@ const PeakDemand = () => {
                 await axios
                     .post(
                         `${BaseUrl}${peakDemandTrendChart}${params}`,
-                        handleAPIRequestBody(startDate, endDate, timeZone),
+                        handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime),
                         {
                             headers,
                         }
@@ -448,7 +454,7 @@ const PeakDemand = () => {
                 await axios
                     .post(
                         `${BaseUrl}${peakDemandYearlyPeak}${params}`,
-                        handleAPIRequestBody(startDate, endDate, timeZone),
+                        handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime),
                         {
                             headers,
                         }
@@ -466,7 +472,7 @@ const PeakDemand = () => {
         fetchPeakDemandData();
         peakDemandYearlyData();
         peakDemandTrendFetch();
-    }, [startDate, endDate, bldgId]);
+    }, [startDate, endDate, startTime, endTime, bldgId]);
 
     useEffect(() => {
         const fetchEquipTypeData = async (filterDate) => {

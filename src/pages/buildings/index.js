@@ -60,6 +60,8 @@ const BuildingOverview = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefUnits = UserStore.useState((s) => s.unit);
@@ -305,7 +307,7 @@ const BuildingOverview = () => {
     };
 
     const builidingEquipmentsData = async (timeZone) => {
-        const payload = handleAPIRequestBody(startDate, endDate, timeZone);
+        const payload = handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime);
         setTopEnergyDataFetching(true);
 
         await fetchBuildingEquipments(bldgId, payload)
@@ -363,7 +365,7 @@ const BuildingOverview = () => {
 
     const buildingEndUserData = async (time_zone) => {
         const params = `?building_id=${bldgId}&off_hours=false`;
-        const payload = handleAPIRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone, startTime, endTime);
         setEndUseDataFetching(true);
 
         await fetchEndUseByBuilding(params, payload)
@@ -798,7 +800,7 @@ const BuildingOverview = () => {
         getEnergyConsumptionBySpaceType(time_zone);
         getEnergyConsumptionByFloor(time_zone);
         // fetchEnergyConsumptionBySpaceData(time_zone);
-    }, [startDate, endDate, bldgId, userPrefUnits]);
+    }, [startDate, endDate, startTime, endTime, bldgId, userPrefUnits]);
 
     useEffect(() => {
         if (isWeatherChartVisible && bldgId) {

@@ -34,6 +34,8 @@ const EndUseType = () => {
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
@@ -91,7 +93,7 @@ const EndUseType = () => {
 
     const plugUsageDataFetch = async (endUseTypeRequest, time_zone) => {
         setEnergyChartLoading(true);
-        const payload = handleAPIRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone, startTime, endTime);
         await fetchEndUsesUsageChart(bldgId, endUseTypeRequest, payload)
             .then((res) => {
                 const response = res?.data?.data;
@@ -117,7 +119,7 @@ const EndUseType = () => {
 
     const endUsesDataFetch = async (endUseTypeRequest, time_zone) => {
         setFetchingEndUseData(true);
-        const payload = handleAPIRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone, startTime, endTime);
 
         await fetchEndUsesType(bldgId, endUseTypeRequest, payload)
             .then((res) => {
@@ -389,7 +391,7 @@ const EndUseType = () => {
         endUsesDataFetch(endUseTypeRequest, time_zone);
         // equipmentUsageDataFetch(); // Planned for Future Enable of this integration
         plugUsageDataFetch(endUseTypeRequest, time_zone);
-    }, [startDate, endDate, endUseType, bldgId, userPrefUnits]);
+    }, [startDate, endDate, startTime, endTime, endUseType, bldgId, userPrefUnits]);
 
     useEffect(() => {
         if (isWeatherChartVisible && bldgId) {

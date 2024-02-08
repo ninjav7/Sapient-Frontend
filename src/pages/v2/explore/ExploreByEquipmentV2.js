@@ -56,6 +56,8 @@ const ExploreByEquipmentV2 = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
@@ -388,12 +390,18 @@ const ExploreByEquipmentV2 = () => {
     };
 
     const fetchSingleEquipChartData = async (equipId, device_type, isComparisionOn = false) => {
-        const payload = handleAPIRequestBody(startDate, endDate, timeZone);
+        const payload = handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime);
         let previousDataPayload = {};
 
         if (isComparisionOn) {
             const pastDateObj = getPastDateRange(startDate, daysCount);
-            previousDataPayload = handleAPIRequestBody(pastDateObj?.startDate, pastDateObj?.endDate, timeZone);
+            previousDataPayload = handleAPIRequestBody(
+                pastDateObj?.startDate,
+                pastDateObj?.endDate,
+                timeZone,
+                startTime,
+                endTime
+            );
         }
 
         const params = `?building_id=${bldgId}&consumption=${
@@ -495,7 +503,7 @@ const ExploreByEquipmentV2 = () => {
 
         requestType === 'currentData' ? setFetchingChartData(true) : setFetchingPastChartData(true);
 
-        const payload = handleAPIRequestBody(start_date, end_date, timeZone);
+        const payload = handleAPIRequestBody(start_date, end_date, timeZone, startTime, endTime);
 
         const promisesList = [];
 
@@ -761,6 +769,8 @@ const ExploreByEquipmentV2 = () => {
     }, [
         startDate,
         endDate,
+        startTime,
+        endTime,
         bldgId,
         search,
         sortBy,
@@ -784,6 +794,8 @@ const ExploreByEquipmentV2 = () => {
     }, [
         startDate,
         endDate,
+        startTime,
+        endTime,
         bldgId,
         selectedEquipType,
         selectedEndUse,
@@ -1091,7 +1103,7 @@ const ExploreByEquipmentV2 = () => {
                 );
             }
         }
-    }, [startDate, endDate, selectedConsumption]);
+    }, [startDate, endDate, startTime, endTime, selectedConsumption]);
 
     useEffect(() => {
         if (checkedAll) {
