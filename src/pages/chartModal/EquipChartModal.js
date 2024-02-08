@@ -26,6 +26,7 @@ import {
     compareObjData,
     dateTimeFormatForHighChart,
     formatXaxisForHighCharts,
+    handleAPIRequestParams,
 } from '../../helpers/helpers';
 import { metricsWithMultipleSensors, rulesAlert } from './constants';
 import { handleDataConversion, renderEquipChartMetrics } from './helper';
@@ -515,10 +516,10 @@ const EquipChartModal = ({
 
         setIsEquipDataFetched(true);
         setDeviceData([]);
-
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: encodeURIComponent(timeZone),
         };
 
@@ -674,9 +675,9 @@ const EquipChartModal = ({
 
         setFetchingMetaData(true);
         setEquipMetaData({});
-
-        const params = `?building_id=${bldgId}&date_from=${encodeURIComponent(startDate)}&date_to=${encodeURIComponent(
-            endDate
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+        const params = `?building_id=${bldgId}&date_from=${encodeURIComponent(dateFrom)}&date_to=${encodeURIComponent(
+            dateTo
         )}&tz_info=${encodeURIComponent(timeZone)}`;
 
         await fetchEquipmentKPIs(params, equip_id)

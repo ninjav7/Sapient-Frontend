@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
-import { handleAPIRequestBody } from '../../helpers/helpers';
+import { handleAPIRequestBody, handleAPIRequestParams } from '../../helpers/helpers';
 import { useAtom } from 'jotai';
 import moment from 'moment';
 import 'moment-timezone';
@@ -343,10 +343,13 @@ const BuildingOverview = () => {
 
     const buildingOverallData = async (time_zone) => {
         setFetchingKPIsData(true);
+
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+
         const payload = {
             bldg_id: bldgId,
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: encodeURIComponent(time_zone),
             metric: 'energy',
         };
@@ -382,10 +385,11 @@ const BuildingOverview = () => {
 
     const buildingHourlyData = async (time_zone) => {
         setIsAvgConsumptionDataLoading(true);
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
             bldg_id: bldgId,
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
         };
         await fetchBuilidingHourly(payload)
@@ -497,9 +501,10 @@ const BuildingOverview = () => {
 
     const buildingConsumptionChart = async (time_zone) => {
         setEnergyChartLoading(true);
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
             bldg_id: bldgId,
         };
@@ -543,10 +548,10 @@ const BuildingOverview = () => {
         setIsWeatherLoading(true);
 
         const range = checkWhetherHourly() ? 'hour' : 'day';
-
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
             bldg_id: bldgId,
             range,
@@ -631,11 +636,11 @@ const BuildingOverview = () => {
 
     const getEnergyConsumptionByEquipType = async (time_zone) => {
         setFetchingEquipType(true);
-
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
             bldg_id: bldgId,
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
         };
 
@@ -656,11 +661,11 @@ const BuildingOverview = () => {
 
     const getEnergyConsumptionBySpaceType = async (time_zone) => {
         setFetchingSpaceType(true);
-
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
             bldg_id: bldgId,
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
         };
 
@@ -681,11 +686,11 @@ const BuildingOverview = () => {
 
     const getEnergyConsumptionByFloor = async (time_zone) => {
         setFetchingFloor(true);
-
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
             bldg_id: bldgId,
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
         };
 

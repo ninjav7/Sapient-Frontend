@@ -6,7 +6,7 @@ import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { Badge } from '../../sharedComponents/badge';
 import { fetchCompareBuildingsV2, getCarbonBuildingChartData } from '../compareBuildings/services';
 import { getCarbonCompareBuildingsTableCSVExport } from '../../utils/tablesExport';
-import { handleAPIRequestBody } from '../../helpers/helpers';
+import { handleAPIRequestBody, handleAPIRequestParams } from '../../helpers/helpers';
 import {
     fetchPortfolioBuilidings,
     fetchPortfolioOverall,
@@ -106,9 +106,10 @@ const CarbonOverview = () => {
     });
     const portfolioOverallData = async () => {
         setIsKPIsLoading(true);
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         let payload = {
-            date_from: startDate,
-            date_to: endDate,
+            date_from: dateFrom,
+            date_to: dateTo,
             tz_info: timeZone,
             metric: 'carbon',
         };
@@ -190,7 +191,8 @@ const CarbonOverview = () => {
 
     const fetchcompareBuildingsData = async (search, ordered_by = 'building_name', sort_by, userPrefUnits) => {
         setIsLoadingBuildingData(true);
-        let params = `?date_from=${startDate}&date_to=${endDate}&tz_info=${timeZone}&metric=carbon&ordered_by=${ordered_by}`;
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+        let params = `?date_from=${dateFrom}&date_to=${dateTo}&tz_info=${timeZone}&metric=carbon&ordered_by=${ordered_by}`;
         if (search) params = params.concat(`&building_search=${encodeURIComponent(search)}`);
         if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
         await fetchCompareBuildingsV2(params)

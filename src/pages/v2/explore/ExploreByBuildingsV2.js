@@ -28,7 +28,7 @@ import ExploreAlert from './ExploreAlert';
 
 import { timeZone } from '../../../utils/helper';
 import { getAverageValue } from '../../../helpers/AveragePercent';
-import { formatXaxisForHighCharts, getPastDateRange } from '../../../helpers/helpers';
+import { formatXaxisForHighCharts, getPastDateRange, handleAPIRequestParams } from '../../../helpers/helpers';
 
 import { handleUnitConverstion } from '../../settings/general-settings/utils';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
@@ -47,6 +47,8 @@ const ExploreByBuildingsV2 = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefUnits = UserStore.useState((s) => s.unit);
@@ -242,8 +244,10 @@ const ExploreByBuildingsV2 = () => {
         setDownloadingCSVData(true);
         const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'total_consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
-        const start_date = encodeURIComponent(startDate);
-        const end_date = encodeURIComponent(endDate);
+
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+        const start_date = encodeURIComponent(dateFrom);
+        const end_date = encodeURIComponent(dateTo);
 
         let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&metric=energy`;
 
@@ -286,8 +290,10 @@ const ExploreByBuildingsV2 = () => {
 
         const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'total_consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
-        const start_date = encodeURIComponent(startDate);
-        const end_date = encodeURIComponent(endDate);
+
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+        const start_date = encodeURIComponent(dateFrom);
+        const end_date = encodeURIComponent(dateTo);
 
         let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&metric=energy`;
 
@@ -414,9 +420,9 @@ const ExploreByBuildingsV2 = () => {
         selected_metrics = []
     ) => {
         if (metrics.length === 0) return;
-
-        const start_date = encodeURIComponent(startDate);
-        const end_date = encodeURIComponent(endDate);
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+        const start_date = encodeURIComponent(dateFrom);
+        const end_date = encodeURIComponent(dateTo);
         const time_zone = encodeURIComponent(timeZone);
         const currentChartData = requestType === 'currentData' ? synchronizedChartData : pastSynchronizedChartData;
         const selectedRecordCount = currentChartData?.datasets[0]?.data.length ?? 0;
@@ -548,10 +554,13 @@ const ExploreByBuildingsV2 = () => {
         let formattedMetrics = [];
         let apiRequestListToTrack = [];
 
+        const { dateFrom, dateTo } = handleAPIRequestParams(start_date, end_date, startTime, endTime);
         const time_zone = encodeURIComponent(timeZone);
 
         selected_metrics.forEach((metric) => {
-            const params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${time_zone}&metric=${metric?.value}`;
+            const params = `?date_from=${encodeURIComponent(dateFrom)}&date_to=${encodeURIComponent(
+                dateTo
+            )}&tz_info=${time_zone}&metric=${metric?.value}`;
 
             let newMetricObj = {
                 name: metric?.label,
@@ -580,8 +589,8 @@ const ExploreByBuildingsV2 = () => {
                 if (metric?.value === 'weather') {
                     promisesList.push(
                         getWeatherData({
-                            date_from: start_date,
-                            date_to: end_date,
+                            date_from: encodeURIComponent(dateFrom),
+                            date_to: encodeURIComponent(dateTo),
                             tz_info: time_zone,
                             bldg_id,
                             range: 'hour',

@@ -11,7 +11,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { UserStore } from '../../store/UserStore';
-import { handleAPIRequestBody, formatConsumptionValue } from '../../helpers/helpers';
+import { handleAPIRequestBody, formatConsumptionValue, handleAPIRequestParams } from '../../helpers/helpers';
 import { UNITS } from '../../constants/units';
 import EndUsesKPIs from '../../sharedComponents/endUsesKPIs/EndUsesKPIs';
 import { fetchTrendType } from './utils';
@@ -191,10 +191,10 @@ const EndUseType = () => {
         setIsWeatherLoading(true);
 
         const range = checkWhetherHourly() ? 'hour' : 'day';
-
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
             bldg_id: bldgId,
             range,

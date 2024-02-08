@@ -12,7 +12,7 @@ import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import EndUseTotals from './EndUseTotals';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
-import { handleAPIRequestBody } from '../../helpers/helpers';
+import { handleAPIRequestBody, handleAPIRequestParams } from '../../helpers/helpers';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import Brick from '../../sharedComponents/brick';
 import { separateAndCalculateEnergyData } from './utils';
@@ -139,11 +139,11 @@ const TimeOfDay = () => {
         const dailyUsageByHour = async () => {
             setFetchingData(true);
             setLineChartData([]);
-
+            const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
             const payload = {
                 bldg_id: bldgId,
-                date_from: encodeURIComponent(startDate),
-                date_to: encodeURIComponent(endDate),
+                date_from: encodeURIComponent(dateFrom),
+                date_to: encodeURIComponent(dateTo),
                 tz_info: time_zone,
             };
 
