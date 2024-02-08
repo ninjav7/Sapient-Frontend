@@ -49,20 +49,6 @@ export const handleDateFormat = (customDate, dateType) => {
     return dt;
 };
 
-export const handleTimeFormat = (customTime, dateType) => {
-    if (dateType === 'startTime' && customTime === null) {
-        const startTime = dayjs().startOf('day');
-        const startTimeString = startTime.format('HH:mm');
-        return startTimeString;
-    }
-
-    if (dateType === 'endTime' && customTime === null) {
-        const endTime = dayjs().endOf('day');
-        const endTimeString = endTime.format('HH:mm');
-        return endTimeString;
-    }
-};
-
 export const xaxisFilters = (daysCount, timezone) => {
     // Up to and including 1 day
     if (daysCount === 1) {

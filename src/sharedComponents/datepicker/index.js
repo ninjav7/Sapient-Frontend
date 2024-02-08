@@ -15,6 +15,7 @@ import { ReactComponent as CalendarIcon } from '../assets/icons/calendar.svg';
 import { ReactComponent as ArrowSVG } from '../../assets/icon/arrow.svg';
 
 import { UserStore } from '../../store/UserStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
 
 import 'react-dates/initialize';
 import 'react-dates/lib/css/_datepicker.css';
@@ -26,13 +27,42 @@ moment.updateLocale('en', {
     },
 });
 
-function handleTimeSelector(value) {
+const handleTimeSelector = (value) => {
     if (typeof value === 'boolean') {
         return value;
     }
 
     return value === 'true';
-}
+};
+
+const getTimeWithDefault = (type, time) => {
+    if (type === 'startTime') {
+        if (time) {
+            const defaultTime = time ? time.split(':') : [0, 0];
+            const [hour, minute] = defaultTime;
+
+            return dayjs()
+                .startOf('day')
+                .set('hour', +hour)
+                .set('minute', +minute);
+        } else {
+            return dayjs().startOf('day');
+        }
+    }
+    if (type === 'endTime') {
+        if (time) {
+            const defaultTime = time ? time.split(':') : [0, 0];
+            const [hour, minute] = defaultTime;
+
+            return dayjs()
+                .startOf('day')
+                .set('hour', +hour)
+                .set('minute', +minute);
+        } else {
+            return dayjs().endOf('day');
+        }
+    }
+};
 
 const Datepicker = ({
     rangeDate = [moment(), moment().add(7, 'd')],
@@ -48,8 +78,11 @@ const Datepicker = ({
     const [startDate, setStartDate] = useState(rangeDate[0]);
     const [endDate, setEndDate] = useState(rangeDate[1]);
 
-    const [startTime, setStartTime] = useState(dayjs().startOf('day'));
-    const [endTime, setEndTime] = useState(dayjs().endOf('day'));
+    const globalStartTime = DateRangeStore.useState((s) => s.startTime);
+    const globalEndTime = DateRangeStore.useState((s) => s.endTime);
+
+    const [startTime, setStartTime] = useState(getTimeWithDefault('startTime', globalStartTime));
+    const [endTime, setEndTime] = useState(getTimeWithDefault('endTime', globalEndTime));
 
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
     const [isTimePickerEnabled, setTimePickerEnabled] = useState(handleTimeSelector(isTimeSelectionEnabled));
@@ -91,13 +124,6 @@ const Datepicker = ({
             handleClose();
         }
     }, [isClosed]);
-
-    useEffect(() => {
-        if (!isTimePickerEnabled) {
-            setStartTime(dayjs().startOf('day'));
-            setEndTime(dayjs().endOf('day'));
-        }
-    }, [isTimePickerEnabled]);
 
     function onDateChange({ startDate, endDate }) {
         props.onChange && props.onChange(props.isSingleDay ? { startDate } : { startDate, endDate });
