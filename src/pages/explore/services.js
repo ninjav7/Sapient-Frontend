@@ -9,6 +9,7 @@ import {
     compareBuildingsV2,
     getEnergyConsumptionV2,
 } from '../../services/Network';
+import { handleAPIRequestParams } from '../../helpers/helpers';
 
 export function fetchExploreByBuildingListV2(params) {
     return axiosInstance.get(`${compareBuildingsV2}${params}`).then((res) => {
@@ -26,6 +27,8 @@ export function fetchExploreBuildingChart(params, bldgId) {
 export function fetchExploreEquipmentList(
     startDate,
     endDate,
+    startTime,
+    endTime,
     timeZone,
     bldgId,
     ordered_by,
@@ -52,10 +55,10 @@ export function fetchExploreEquipmentList(
     if (ordered_by && sort_by) params = params.concat(`&ordered_by=${ordered_by}&sort_by=${sort_by}`);
     if (search) params = params.concat(`&search_by_name=${encodeURIComponent(search)}`);
     if (pageSize && pageNo) params = params.concat(`&page_size=${pageSize}&page_no=${pageNo}`);
-
+    const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
     let payload = {
-        date_from: startDate,
-        date_to: endDate,
+        date_from: dateFrom,
+        date_to: dateTo,
         tz_info: timeZone,
     };
 
@@ -97,6 +100,8 @@ export function fetchEquipmentChartDataV2(params) {
 export function fetchExploreFilter(
     startDate,
     endDate,
+    startTime,
+    endTime,
     timeZone,
     bldgId,
     selectedEquipType,
@@ -114,10 +119,10 @@ export function fetchExploreFilter(
     maxPerValue
 ) {
     const params = `?building_id=${bldgId}&consumption=energy`;
-
+    const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
     let payload = {
-        date_from: startDate,
-        date_to: endDate,
+        date_from: dateFrom,
+        date_to: dateTo,
         tz_info: timeZone,
     };
 

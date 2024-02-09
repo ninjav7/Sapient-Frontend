@@ -11,7 +11,7 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { UserStore } from '../../store/UserStore';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-import { apiRequestBody } from '../../helpers/helpers';
+import { handleAPIRequestBody } from '../../helpers/helpers';
 import { TopEndUsesWidget } from '../../sharedComponents/topEndUsesWidget';
 import { UNITS } from '../../constants/units';
 import { useHistory, useParams } from 'react-router-dom';
@@ -38,6 +38,8 @@ const EndUsesPage = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
@@ -84,8 +86,16 @@ const EndUsesPage = () => {
         const fDayHour = moment(stackedColumnChartCategories[0]);
         const sDayHour = moment(stackedColumnChartCategories[1]);
 
-        if (sDayHour.diff(fDayHour, 'hours') <= 1) {
-            return getPlotBands();
+        const diffInHours = sDayHour.diff(fDayHour, 'hours');
+
+        const isHourly = diffInHours <= 1;
+
+        const isDaily = diffInHours <= 24;
+
+        if (isHourly) {
+            return getAfterHoursHourly();
+        } else if (isDaily) {
+            return getAfterHoursDaily();
         } else {
             return null;
         }
@@ -101,7 +111,7 @@ const EndUsesPage = () => {
         }
     };
 
-    const getPlotBands = () => {
+    const getAfterHoursHourly = () => {
         const bldgIdObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
 
         if (!bldgIdObj) return;
@@ -199,6 +209,44 @@ const EndUsesPage = () => {
         return operHoursToShow;
     };
 
+    const getAfterHoursDaily = () => {
+        const bldgIdObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+
+        if (!bldgIdObj) return;
+
+        const weekOperHours = bldgIdObj?.operating_hours;
+        const numberOfSelectedDays = moment(endDate).diff(startDate, 'days');
+        const operHoursToShow = [];
+        let dayFirst;
+
+        for (let numberOfDay = 0; numberOfDay <= numberOfSelectedDays; numberOfDay++) {
+            const day = moment(startDate).add(numberOfDay, 'days');
+            const dayInWeek = moment(day).format('ddd').toLowerCase();
+            const nextDay = moment(startDate).add(numberOfDay + 1, 'days');
+            const nextDayInWeek = moment(nextDay).format('ddd').toLowerCase();
+
+            const dayOperHours = weekOperHours[dayInWeek];
+            const nextDayOperHours = weekOperHours[nextDayInWeek];
+
+            const lastDay = numberOfDay;
+
+            if (!dayOperHours.stat) {
+                if (!nextDayOperHours.stat) {
+                    if (!dayFirst) dayFirst = numberOfDay;
+                } else {
+                    operHoursToShow.push({
+                        type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                        from: dayFirst ? dayFirst : lastDay,
+                        to: lastDay,
+                    });
+                    dayFirst = null;
+                }
+            }
+        }
+
+        return operHoursToShow;
+    };
+
     const redirectToEndUse = (endUseType) => {
         let endUse = endUseType.toLowerCase();
         history.push({
@@ -211,7 +259,7 @@ const EndUsesPage = () => {
         setFetchingEndUseData(true);
 
         const params = `?building_id=${bldgId}`;
-        const payload = apiRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone, startTime, endTime);
 
         await fetchEndUses(params, payload)
             .then((res) => {
@@ -291,7 +339,7 @@ const EndUsesPage = () => {
     const endUsesChartDataFetch = async (time_zone) => {
         setStackedColumnChartData([]);
         setChartLoading(true);
-        const payload = apiRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone, startTime, endTime);
 
         await fetchEndUsesChart(bldgId, payload)
             .then((res) => {
@@ -367,7 +415,7 @@ const EndUsesPage = () => {
 
         endUsesDataFetch(time_zone);
         endUsesChartDataFetch(time_zone);
-    }, [startDate, endDate, bldgId]);
+    }, [startDate, endDate, startTime, endTime, bldgId]);
 
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {

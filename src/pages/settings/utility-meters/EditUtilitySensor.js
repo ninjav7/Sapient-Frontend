@@ -23,6 +23,7 @@ import {
     dateTimeFormatForHighChart,
     formatConsumptionValue,
     formatXaxisForHighCharts,
+    handleAPIRequestParams,
 } from '../../../helpers/helpers';
 import { getSensorGraphDataForUtilityMonitors, getSensorMetricYtdData, updateUtilitySensorServices } from './services';
 import { UserStore } from '../../../store/UserStore';
@@ -37,6 +38,9 @@ const MetricsTab = (props) => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
+
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
@@ -74,11 +78,13 @@ const MetricsTab = (props) => {
         setFetchingChartData(true);
         setSensorChartData([]);
 
+        const { dateFrom, dateTo } = handleAPIRequestParams(start_date, end_date, startTime, endTime);
+
         const payload = {
             sensor_id: sensor_obj?.id,
             bldg_id: bldgId,
-            date_from: encodeURIComponent(start_date),
-            date_to: encodeURIComponent(end_date),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: timeZone,
             selected_metric: encodeURIComponent(selected_consmption),
         };
@@ -193,12 +199,12 @@ const MetricsTab = (props) => {
 
     const fetchSensorsYtdData = async (start_date, end_date, sensor_obj) => {
         if (!sensor_obj?.id) return;
-
+        const { dateFrom, dateTo } = handleAPIRequestParams(start_date, end_date, startTime, endTime);
         const payload = {
             sensor_id: sensor_obj?.id,
             bldg_id: bldgId,
-            date_from: encodeURIComponent(start_date),
-            date_to: encodeURIComponent(end_date),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: timeZone,
             metric: `energy`,
         };

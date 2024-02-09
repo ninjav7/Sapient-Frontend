@@ -4,11 +4,18 @@ import moment from 'moment';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 
+import { TimePicker } from 'antd';
+import dayjs from 'dayjs';
+
 import Typography from '../typography';
 import { Button } from '../button';
+import { Checkbox } from '../form/checkbox';
 
 import { ReactComponent as CalendarIcon } from '../assets/icons/calendar.svg';
 import { ReactComponent as ArrowSVG } from '../../assets/icon/arrow.svg';
+
+import { UserStore } from '../../store/UserStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
 
 import 'react-dates/initialize';
 import 'react-dates/lib/css/_datepicker.css';
@@ -20,21 +27,78 @@ moment.updateLocale('en', {
     },
 });
 
+const handleTimeSelector = (value) => {
+    if (typeof value === 'boolean') {
+        return value;
+    }
+
+    return value === 'true';
+};
+
+const getTimeWithDefault = (type, time) => {
+    if (type === 'startTime') {
+        if (time) {
+            const defaultTime = time ? time.split(':') : [0, 0];
+            const [hour, minute] = defaultTime;
+
+            return dayjs()
+                .startOf('day')
+                .set('hour', +hour)
+                .set('minute', +minute);
+        } else {
+            return dayjs().startOf('day');
+        }
+    }
+    if (type === 'endTime') {
+        if (time) {
+            const defaultTime = time ? time.split(':') : [0, 0];
+            const [hour, minute] = defaultTime;
+
+            return dayjs()
+                .startOf('day')
+                .set('hour', +hour)
+                .set('minute', +minute);
+        } else {
+            return dayjs().endOf('day');
+        }
+    }
+};
+
 const Datepicker = ({
     rangeDate = [moment(), moment().add(7, 'd')],
     className = '',
     datepickerClassName = '',
     iconBtnClassName = '',
     withApplyButton = true,
+    withTimeSelect = true,
     isClosed = true,
+    isTimeSelectionEnabled,
     ...props
 }) => {
     const [startDate, setStartDate] = useState(rangeDate[0]);
     const [endDate, setEndDate] = useState(rangeDate[1]);
-    const [focusedInput, setFocusedInput] = useState(null);
+
+    const globalStartTime = DateRangeStore.useState((s) => s.startTime);
+    const globalEndTime = DateRangeStore.useState((s) => s.endTime);
+
+    const [startTime, setStartTime] = useState(getTimeWithDefault('startTime', globalStartTime));
+    const [endTime, setEndTime] = useState(getTimeWithDefault('endTime', globalEndTime));
+
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+    const [isTimePickerEnabled, setTimePickerEnabled] = useState(handleTimeSelector(isTimeSelectionEnabled));
+
     const [isOpen, setIsOpen] = useState(false);
+    const [focusedInput, setFocusedInput] = useState(null);
 
     const refApi = useRef(null);
+
+    const handleStartTimeChange = (time) => {
+        setStartTime(time);
+    };
+
+    const handleEndTimeChange = (time) => {
+        setEndTime(time);
+    };
 
     const onDateChangeSingle = (startDate) => {
         setStartDate(startDate);
@@ -119,7 +183,14 @@ const Datepicker = ({
 
         props.onApply && props.onApply({ startDate, endDate: endDateOrStartDate, event });
         onDateChange({ startDate, endDate: endDateOrStartDate });
-        props.onCustomDateChange && props.onCustomDateChange({ startDate, endDate: endDateOrStartDate });
+        props.onCustomDateChange &&
+            props.onCustomDateChange({
+                startDate,
+                endDate: endDateOrStartDate,
+                startTime,
+                endTime,
+                isTimePickerEnabled,
+            });
     };
 
     const formattedStartDate = rangeDate[0]?.format('MMM D') || '';
@@ -163,23 +234,79 @@ const Datepicker = ({
                 {...props}
                 renderCalendarInfo={() =>
                     withApplyButton && (
-                        <div className="datepicker-calendar-bottom d-flex justify-content-end">
-                            <Button
-                                size={Button.Sizes.md}
-                                type={Button.Type.secondaryGrey}
-                                label="Cancel"
-                                onClick={handleCancelClick}
-                            />
-                            <Button
-                                size={Button.Sizes.md}
-                                type={Button.Type.primary}
-                                label="Apply"
-                                onClick={(event) => {
-                                    applyDate(event);
-                                    setFocusedInput(null);
-                                    handleClose();
-                                }}
-                            />
+                        <div
+                            className={`datepicker-calendar-bottom d-flex align-items-center justify-content-${
+                                withTimeSelect ? `between` : `end`
+                            }`}>
+                            {withTimeSelect && (
+                                <div className="d-flex flex-column" style={{ gap: '0.5rem' }}>
+                                    <div className="d-flex" style={{ gap: '0.5rem' }}>
+                                        <div>
+                                            <Typography.Body size={Typography.Sizes.sm} className="gray-550">
+                                                {`Start Time`}
+                                            </Typography.Body>
+
+                                            <TimePicker
+                                                showNow={false}
+                                                minuteStep={1}
+                                                placeholder="Start time"
+                                                value={startTime}
+                                                onChange={handleStartTimeChange}
+                                                disabled={!isTimePickerEnabled}
+                                                use12Hours={userPrefTimeFormat === '12h' ? true : false}
+                                                format={userPrefTimeFormat === '12h' ? 'hh:mm A' : 'HH:mm'}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <Typography.Body size={Typography.Sizes.sm} className="gray-550">
+                                                {`End Time`}
+                                            </Typography.Body>
+
+                                            <TimePicker
+                                                showNow={false}
+                                                minuteStep={1}
+                                                placeholder="End time"
+                                                value={endTime}
+                                                onChange={handleEndTimeChange}
+                                                use12Hours={userPrefTimeFormat === '12h' ? true : false}
+                                                format={userPrefTimeFormat === '12h' ? 'hh:mm A' : 'HH:mm'}
+                                                disabled={!isTimePickerEnabled}
+                                            />
+                                        </div>
+                                    </div>
+                                    <Checkbox
+                                        label="Custom Time Select"
+                                        type="checkbox"
+                                        id="select-time"
+                                        name="select-time"
+                                        size="sm"
+                                        checked={isTimePickerEnabled}
+                                        value={isTimePickerEnabled}
+                                        onClick={(e) => {
+                                            setTimePickerEnabled(e.target.value === 'false' ? true : false);
+                                        }}
+                                    />
+                                </div>
+                            )}
+                            <div className="d-flex" style={{ gap: '0.5rem', height: 'fit-content' }}>
+                                <Button
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryGrey}
+                                    label="Cancel"
+                                    onClick={handleCancelClick}
+                                />
+                                <Button
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.primary}
+                                    label="Apply"
+                                    onClick={(event) => {
+                                        applyDate(event);
+                                        setFocusedInput(null);
+                                        handleClose();
+                                    }}
+                                />
+                            </div>
                         </div>
                     )
                 }
@@ -247,6 +374,7 @@ Datepicker.propTypes = {
     onChange: PropTypes.func,
     isSingleDay: PropTypes.bool,
     withApplyButton: PropTypes.bool,
+    withTimeSelect: PropTypes.bool,
     onCancel: PropTypes.func,
     onApply: PropTypes.func,
     onCustomDateChange: PropTypes.func,

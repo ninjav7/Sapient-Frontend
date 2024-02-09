@@ -30,7 +30,7 @@ import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
 import ExploreCompareChart from '../../sharedComponents/exploreCompareChart/ExploreCompareChart';
 
 import {
-    apiRequestBody,
+    handleAPIRequestBody,
     dateTimeFormatForHighChart,
     formatConsumptionValue,
     formatXaxisForHighCharts,
@@ -57,6 +57,8 @@ const ExploreByEquipment = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
@@ -302,7 +304,7 @@ const ExploreByEquipment = () => {
         const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
 
-        await fetchExploreEquipmentList(startDate, endDate, timeZone, bldgId, ordered_by, sort_by)
+        await fetchExploreEquipmentList(startDate, endDate, startTime, endTime, timeZone, bldgId, ordered_by, sort_by)
             .then((res) => {
                 const { data } = res?.data;
                 if (data.length !== 0) {
@@ -339,6 +341,8 @@ const ExploreByEquipment = () => {
         await fetchExploreEquipmentList(
             startDate,
             endDate,
+            startTime,
+            endTime,
             timeZone,
             bldgId,
             ordered_by,
@@ -389,12 +393,18 @@ const ExploreByEquipment = () => {
     };
 
     const fetchSingleEquipChartData = async (equipId, device_type, isComparisionOn = false) => {
-        const payload = apiRequestBody(startDate, endDate, timeZone);
+        const payload = handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime);
         let previousDataPayload = {};
 
         if (isComparisionOn) {
             const pastDateObj = getPastDateRange(startDate, daysCount);
-            previousDataPayload = apiRequestBody(pastDateObj?.startDate, pastDateObj?.endDate, timeZone);
+            previousDataPayload = handleAPIRequestBody(
+                pastDateObj?.startDate,
+                pastDateObj?.endDate,
+                timeZone,
+                startTime,
+                endTime
+            );
         }
 
         const params = `?building_id=${bldgId}&consumption=${
@@ -496,7 +506,7 @@ const ExploreByEquipment = () => {
 
         requestType === 'currentData' ? setFetchingChartData(true) : setFetchingPastChartData(true);
 
-        const payload = apiRequestBody(start_date, end_date, timeZone);
+        const payload = handleAPIRequestBody(start_date, end_date, timeZone, startTime, endTime);
 
         const promisesList = [];
 
@@ -581,6 +591,8 @@ const ExploreByEquipment = () => {
         await fetchExploreFilter(
             startDate,
             endDate,
+            startTime,
+            endTime,
             timeZone,
             bldgId,
             selectedEquipType,
@@ -762,6 +774,8 @@ const ExploreByEquipment = () => {
     }, [
         startDate,
         endDate,
+        startTime,
+        endTime,
         bldgId,
         search,
         sortBy,
@@ -785,6 +799,8 @@ const ExploreByEquipment = () => {
     }, [
         startDate,
         endDate,
+        startTime,
+        endTime,
         bldgId,
         selectedEquipType,
         selectedEndUse,
@@ -1092,7 +1108,7 @@ const ExploreByEquipment = () => {
                 );
             }
         }
-    }, [startDate, endDate, selectedConsumption]);
+    }, [startDate, endDate, startTime, endTime, selectedConsumption]);
 
     useEffect(() => {
         if (checkedAll) {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
-import { apiRequestBody } from '../../helpers/helpers';
+import { handleAPIRequestBody, handleAPIRequestParams } from '../../helpers/helpers';
 import { useAtom } from 'jotai';
 import moment from 'moment';
 import 'moment-timezone';
@@ -60,6 +60,8 @@ const BuildingOverview = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefUnits = UserStore.useState((s) => s.unit);
@@ -148,8 +150,16 @@ const BuildingOverview = () => {
         const fDayHour = moment(energyConsumptionsCategories[0]);
         const sDayHour = moment(energyConsumptionsCategories[1]);
 
-        if (sDayHour.diff(fDayHour, 'hours') <= 1) {
-            return getPlotBands();
+        const diffInHours = sDayHour.diff(fDayHour, 'hours');
+
+        const isHourly = diffInHours <= 1;
+
+        const isDaily = diffInHours <= 24;
+
+        if (isHourly) {
+            return getAfterHoursHourly();
+        } else if (isDaily) {
+            return getAfterHoursDaily();
         } else {
             return null;
         }
@@ -165,7 +175,7 @@ const BuildingOverview = () => {
         }
     };
 
-    const getPlotBands = () => {
+    const getAfterHoursHourly = () => {
         const bldgIdObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
 
         if (!bldgIdObj) return;
@@ -263,6 +273,44 @@ const BuildingOverview = () => {
         return operHoursToShow;
     };
 
+    const getAfterHoursDaily = () => {
+        const bldgIdObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+
+        if (!bldgIdObj) return;
+
+        const weekOperHours = bldgIdObj?.operating_hours;
+        const numberOfSelectedDays = moment(endDate).diff(startDate, 'days');
+        const operHoursToShow = [];
+        let dayFirst;
+
+        for (let numberOfDay = 0; numberOfDay <= numberOfSelectedDays; numberOfDay++) {
+            const day = moment(startDate).add(numberOfDay, 'days');
+            const dayInWeek = moment(day).format('ddd').toLowerCase();
+            const nextDay = moment(startDate).add(numberOfDay + 1, 'days');
+            const nextDayInWeek = moment(nextDay).format('ddd').toLowerCase();
+
+            const dayOperHours = weekOperHours[dayInWeek];
+            const nextDayOperHours = weekOperHours[nextDayInWeek];
+
+            const lastDay = numberOfDay;
+
+            if (!dayOperHours.stat) {
+                if (!nextDayOperHours.stat) {
+                    if (!dayFirst) dayFirst = numberOfDay;
+                } else {
+                    operHoursToShow.push({
+                        type: LineChart.PLOT_BANDS_TYPE.after_hours,
+                        from: dayFirst ? dayFirst : lastDay,
+                        to: lastDay,
+                    });
+                    dayFirst = null;
+                }
+            }
+        }
+
+        return operHoursToShow;
+    };
+
     const formatXaxis = ({ value }) => {
         return moment.utc(value).format(`${dateFormat}`);
     };
@@ -305,7 +353,7 @@ const BuildingOverview = () => {
     };
 
     const builidingEquipmentsData = async (timeZone) => {
-        const payload = apiRequestBody(startDate, endDate, timeZone);
+        const payload = handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime);
         setTopEnergyDataFetching(true);
 
         await fetchBuildingEquipments(bldgId, payload)
@@ -341,10 +389,13 @@ const BuildingOverview = () => {
 
     const buildingOverallData = async (time_zone) => {
         setFetchingKPIsData(true);
+
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+
         const payload = {
             bldg_id: bldgId,
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: encodeURIComponent(time_zone),
             metric: 'energy',
         };
@@ -363,7 +414,7 @@ const BuildingOverview = () => {
 
     const buildingEndUserData = async (time_zone) => {
         const params = `?building_id=${bldgId}&off_hours=false`;
-        const payload = apiRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone, startTime, endTime);
         setEndUseDataFetching(true);
 
         await fetchEndUseByBuilding(params, payload)
@@ -380,10 +431,11 @@ const BuildingOverview = () => {
 
     const buildingHourlyData = async (time_zone) => {
         setIsAvgConsumptionDataLoading(true);
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
             bldg_id: bldgId,
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
         };
         await fetchBuilidingHourly(payload)
@@ -495,9 +547,10 @@ const BuildingOverview = () => {
 
     const buildingConsumptionChart = async (time_zone) => {
         setEnergyChartLoading(true);
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
             bldg_id: bldgId,
         };
@@ -541,10 +594,10 @@ const BuildingOverview = () => {
         setIsWeatherLoading(true);
 
         const range = checkWhetherHourly() ? 'hour' : 'day';
-
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
             bldg_id: bldgId,
             range,
@@ -629,11 +682,11 @@ const BuildingOverview = () => {
 
     const getEnergyConsumptionByEquipType = async (time_zone) => {
         setFetchingEquipType(true);
-
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
             bldg_id: bldgId,
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
         };
 
@@ -654,11 +707,11 @@ const BuildingOverview = () => {
 
     const getEnergyConsumptionBySpaceType = async (time_zone) => {
         setFetchingSpaceType(true);
-
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
             bldg_id: bldgId,
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
         };
 
@@ -679,11 +732,11 @@ const BuildingOverview = () => {
 
     const getEnergyConsumptionByFloor = async (time_zone) => {
         setFetchingFloor(true);
-
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
             bldg_id: bldgId,
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
         };
 
@@ -798,7 +851,7 @@ const BuildingOverview = () => {
         getEnergyConsumptionBySpaceType(time_zone);
         getEnergyConsumptionByFloor(time_zone);
         // fetchEnergyConsumptionBySpaceData(time_zone);
-    }, [startDate, endDate, bldgId, userPrefUnits]);
+    }, [startDate, endDate, startTime, endTime, bldgId, userPrefUnits]);
 
     useEffect(() => {
         if (isWeatherChartVisible && bldgId) {

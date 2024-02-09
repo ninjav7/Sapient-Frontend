@@ -30,8 +30,7 @@ export const handleDataConversion = (value, metricType = 'energy') => {
     }
 
     const noConversionRequired = ['runtime', 'starts'];
-    const multiplyBy100 = ['phase_imbalance_percent'];
-    const divideBy100 = ['phase_imbalance_percent', 'min_phase_imbalance_percent'];
+    const multiplyBy100 = ['phase_imbalance_percent', 'min_phase_imbalance_percent', 'max_phase_imbalance_percent'];
 
     if (noConversionRequired.includes(metricType)) {
         return value;
@@ -41,6 +40,5 @@ export const handleDataConversion = (value, metricType = 'energy') => {
         return value * 100;
     }
 
-    const conversionFactor = divideBy100.includes(metricType) ? 100 : 1000;
-    return value / conversionFactor;
+    return value / 1000;
 };

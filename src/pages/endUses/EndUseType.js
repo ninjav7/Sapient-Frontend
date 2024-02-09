@@ -11,7 +11,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { UserStore } from '../../store/UserStore';
-import { apiRequestBody, formatConsumptionValue } from '../../helpers/helpers';
+import { handleAPIRequestBody, formatConsumptionValue, handleAPIRequestParams } from '../../helpers/helpers';
 import { UNITS } from '../../constants/units';
 import EndUsesKPIs from '../../sharedComponents/endUsesKPIs/EndUsesKPIs';
 import { fetchTrendType } from './utils';
@@ -34,6 +34,8 @@ const EndUseType = () => {
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
@@ -91,7 +93,7 @@ const EndUseType = () => {
 
     const plugUsageDataFetch = async (endUseTypeRequest, time_zone) => {
         setEnergyChartLoading(true);
-        const payload = apiRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone, startTime, endTime);
         await fetchEndUsesUsageChart(bldgId, endUseTypeRequest, payload)
             .then((res) => {
                 const response = res?.data?.data;
@@ -117,7 +119,7 @@ const EndUseType = () => {
 
     const endUsesDataFetch = async (endUseTypeRequest, time_zone) => {
         setFetchingEndUseData(true);
-        const payload = apiRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone, startTime, endTime);
 
         await fetchEndUsesType(bldgId, endUseTypeRequest, payload)
             .then((res) => {
@@ -189,10 +191,10 @@ const EndUseType = () => {
         setIsWeatherLoading(true);
 
         const range = checkWhetherHourly() ? 'hour' : 'day';
-
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
             bldg_id: bldgId,
             range,
@@ -355,7 +357,7 @@ const EndUseType = () => {
         // Planned for Future Enable of this integration
         // const equipmentUsageDataFetch = async () => {
         //     setIsEquipTypeChartLoading(true);
-        //     let payload = apiRequestBody(startDate, endDate, timeZone);
+        //     let payload = handleAPIRequestBody(startDate, endDate, timeZone);
         //     await fetchEndUsesEquipmentUsage(bldgId, endUseTypeRequest, payload)
         //         .then((res) => {
         //             let data = res.data;
@@ -389,7 +391,7 @@ const EndUseType = () => {
         endUsesDataFetch(endUseTypeRequest, time_zone);
         // equipmentUsageDataFetch(); // Planned for Future Enable of this integration
         plugUsageDataFetch(endUseTypeRequest, time_zone);
-    }, [startDate, endDate, endUseType, bldgId, userPrefUnits]);
+    }, [startDate, endDate, startTime, endTime, endUseType, bldgId, userPrefUnits]);
 
     useEffect(() => {
         if (isWeatherChartVisible && bldgId) {

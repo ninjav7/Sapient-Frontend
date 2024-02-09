@@ -1,4 +1,5 @@
 import moment from 'moment';
+import dayjs from 'dayjs';
 
 export const formatConsumptionValue = (value, fixed) =>
     value.toLocaleString(undefined, { maximumFractionDigits: fixed });
@@ -303,12 +304,47 @@ export const convertDateTime = (timestamp, timeZone) => {
     return moment.utc(timestamp).clone().tz(timeZone);
 };
 
-export const apiRequestBody = (start_date, end_date, time_zone) => {
+export const handleAPIRequestBody = (start_date, end_date, time_zone, start_time, end_time) => {
+    if (!start_time) {
+        const newStartTime = dayjs().startOf('day');
+        start_time = newStartTime.format('HH:mm');
+    }
+
+    if (!end_time) {
+        const newEndTime = dayjs().endOf('day');
+        end_time = newEndTime.format('HH:mm');
+    }
+
+    const dateFrom = start_date.split('T')[0].concat(`T${start_time}`);
+    const dateTo = end_date.split('T')[0].concat(`T${end_time}`);
+
     return {
-        date_from: start_date,
-        date_to: end_date,
+        date_from: dateFrom,
+        date_to: dateTo,
         tz_info: time_zone ? time_zone : undefined,
     };
+};
+
+const getTimeInString = (type) => {
+    if (type === 'startTime') {
+        const newStartTime = dayjs().startOf('day');
+        return newStartTime.format('HH:mm');
+    }
+
+    if (type === 'endTime') {
+        const newEndTime = dayjs().endOf('day');
+        return newEndTime.format('HH:mm');
+    }
+};
+
+export const handleAPIRequestParams = (start_date, end_date, start_time, end_time) => {
+    if (!start_time) start_time = getTimeInString('startTime');
+    if (!end_time) end_time = getTimeInString('endTime');
+
+    const dateFrom = start_date.split('T')[0].concat(`T${start_time}`);
+    const dateTo = end_date.split('T')[0].concat(`T${end_time}`);
+
+    return { dateFrom, dateTo };
 };
 
 export const isInputLetterOrNumber = (inputtxt) => {

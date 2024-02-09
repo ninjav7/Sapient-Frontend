@@ -44,7 +44,7 @@ import Header from '../../../components/Header';
 import { fetchDateRange } from '../../../helpers/formattedChartData';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import { getSensorGraphData } from '../passive-devices/services';
-import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../../helpers/helpers';
+import { handleAPIRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../../helpers/helpers';
 import { Spinner, Modal } from 'reactstrap';
 import './breaker-config-styles.scss';
 import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
@@ -72,6 +72,8 @@ const BreakerConfiguration = ({
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
@@ -901,7 +903,8 @@ const BreakerConfiguration = ({
         if (sensors_list.length === 0) return;
         setFetchingSensorData(true);
         const promisesList = [];
-        const payload = apiRequestBody(start_date, end_date, timeZone);
+        const payload = handleAPIRequestBody(start_date, end_date, timeZone, startTime, endTime);
+        console.log('SSR payload => ', payload);
 
         if (sensors_list.length >= 1) {
             const params = `?sensor_id=${sensors_list[0]?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
@@ -1171,7 +1174,7 @@ const BreakerConfiguration = ({
 
     useEffect(() => {
         fetchSensorsChartData(sensorsList, selectedConsumption, startDate, endDate);
-    }, [sensorsList, startDate, endDate, selectedConsumption]);
+    }, [sensorsList, startDate, endDate, startTime, endTime, selectedConsumption]);
 
     return (
         <React.Fragment>

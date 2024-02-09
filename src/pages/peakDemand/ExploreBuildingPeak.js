@@ -17,8 +17,8 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { BaseUrl, builidingAlerts } from '../../services/Network';
 import { Cookies } from 'react-cookie';
 import { BuildingStore } from '../../store/BuildingStore';
+import { handleAPIRequestBody } from '../../helpers/helpers';
 import './style.css';
-import { apiRequestBody } from '../../helpers/helpers';
 
 const BuildingPeakTable = () => {
     const records = [
@@ -292,9 +292,13 @@ const SelectPeakTable = () => {
     let userdata = cookies.get('user');
 
     const { bldgId = localStorage.getItem('buildingId') } = useParams();
+
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
+
     const [modal, setModal] = useState(false);
     const Toggle = () => setModal(!modal);
     const [equipData, setEquipData] = useState(null);
@@ -391,16 +395,20 @@ const SelectPeakTable = () => {
                 };
                 let params = `?building_id=${1}`;
                 await axios
-                    .post(`${BaseUrl}${builidingAlerts}${params}`, apiRequestBody(startDate, endDate, timeZone), {
-                        headers,
-                    })
+                    .post(
+                        `${BaseUrl}${builidingAlerts}${params}`,
+                        handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime),
+                        {
+                            headers,
+                        }
+                    )
                     .then((res) => {
                         setBuildingAlerts(res.data);
                     });
             } catch (error) {}
         };
         buildingAlertsData();
-    }, [startDate, endDate, bldgId]);
+    }, [startDate, endDate, startTime, endTime, bldgId]);
 
     return (
         <>

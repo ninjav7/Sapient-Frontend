@@ -6,7 +6,7 @@ import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { Badge } from '../../sharedComponents/badge';
 import { fetchCompareBuildingsV2, getCarbonBuildingChartData } from '../compareBuildings/services';
 import { getCarbonCompareBuildingsTableCSVExport } from '../../utils/tablesExport';
-import { apiRequestBody } from '../../helpers/helpers';
+import { handleAPIRequestBody, handleAPIRequestParams } from '../../helpers/helpers';
 import {
     fetchPortfolioBuilidings,
     fetchPortfolioOverall,
@@ -92,6 +92,8 @@ const CarbonOverview = () => {
     let top = '';
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [overalldata, setOveralldata] = useState({
@@ -104,9 +106,10 @@ const CarbonOverview = () => {
     });
     const portfolioOverallData = async () => {
         setIsKPIsLoading(true);
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         let payload = {
-            date_from: startDate,
-            date_to: endDate,
+            date_from: dateFrom,
+            date_to: dateTo,
             tz_info: timeZone,
             metric: 'carbon',
         };
@@ -126,7 +129,7 @@ const CarbonOverview = () => {
 
         portfolioOverallData();
         const portfolioBuilidingsData = async () => {
-            let payload = apiRequestBody(startDate, endDate, timeZone);
+            let payload = handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime);
             await fetchPortfolioBuilidings(payload)
                 .then((res) => {
                     let data = res.data;
@@ -136,7 +139,7 @@ const CarbonOverview = () => {
         };
 
         portfolioBuilidingsData();
-    }, [startDate, endDate, userPrefUnits]);
+    }, [startDate, endDate, startTime, endTime, userPrefUnits]);
 
     const [isKPIsLoading, setIsKPIsLoading] = useState(false);
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
@@ -188,7 +191,8 @@ const CarbonOverview = () => {
 
     const fetchcompareBuildingsData = async (search, ordered_by = 'building_name', sort_by, userPrefUnits) => {
         setIsLoadingBuildingData(true);
-        let params = `?date_from=${startDate}&date_to=${endDate}&tz_info=${timeZone}&metric=carbon&ordered_by=${ordered_by}`;
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+        let params = `?date_from=${dateFrom}&date_to=${dateTo}&tz_info=${timeZone}&metric=carbon&ordered_by=${ordered_by}`;
         if (search) params = params.concat(`&building_search=${encodeURIComponent(search)}`);
         if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
         await fetchCompareBuildingsV2(params)

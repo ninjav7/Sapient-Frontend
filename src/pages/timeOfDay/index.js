@@ -12,7 +12,7 @@ import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import EndUseTotals from './EndUseTotals';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
-import { apiRequestBody } from '../../helpers/helpers';
+import { handleAPIRequestBody, handleAPIRequestParams } from '../../helpers/helpers';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import Brick from '../../sharedComponents/brick';
 import { separateAndCalculateEnergyData } from './utils';
@@ -25,6 +25,8 @@ const TimeOfDay = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const isPlugOnly = BuildingStore.useState((s) => s.isPlugOnly);
 
@@ -100,7 +102,7 @@ const TimeOfDay = () => {
             setEnergyDataFetching(true);
 
             const params = `?building_id=${bldgId}${is_plug_only === 'true' ? '' : `&off_hours=true`}`;
-            const payload = apiRequestBody(startDate, endDate, time_zone);
+            const payload = handleAPIRequestBody(startDate, endDate, time_zone, startTime, endTime);
 
             await fetchBuildingAfterHours(params, payload)
                 .then((res) => {
@@ -137,11 +139,11 @@ const TimeOfDay = () => {
         const dailyUsageByHour = async () => {
             setFetchingData(true);
             setLineChartData([]);
-
+            const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
             const payload = {
                 bldg_id: bldgId,
-                date_from: encodeURIComponent(startDate),
-                date_to: encodeURIComponent(endDate),
+                date_from: encodeURIComponent(dateFrom),
+                date_to: encodeURIComponent(dateTo),
                 tz_info: time_zone,
             };
 
@@ -215,7 +217,7 @@ const TimeOfDay = () => {
 
         const averageUsageByHourFetch = async () => {
             setAvgConsumptionDataLoading(true);
-            const payload = apiRequestBody(startDate, endDate, time_zone);
+            const payload = handleAPIRequestBody(startDate, endDate, time_zone, startTime, endTime);
 
             await fetchAvgDailyUsageByHour(bldgId, payload)
                 .then((res) => {
@@ -735,7 +737,7 @@ const TimeOfDay = () => {
         endUsesByOfHour(isPlugOnly);
         dailyUsageByHour();
         averageUsageByHourFetch();
-    }, [startDate, endDate, bldgId, isPlugOnly]);
+    }, [startDate, endDate, startTime, endTime, bldgId, isPlugOnly]);
 
     return (
         <React.Fragment>
