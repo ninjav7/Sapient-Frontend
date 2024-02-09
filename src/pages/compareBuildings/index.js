@@ -247,7 +247,7 @@ const CompareBuildings = () => {
         const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
 
         fetchCompareBuildingsData(search, ordered_by, sort_by, userPrefUnits);
-    }, [search, sortBy, daysCount, userPrefUnits]);
+    }, [search, sortBy, daysCount, userPrefUnits, startTime, endTime]);
 
     return (
         <React.Fragment>

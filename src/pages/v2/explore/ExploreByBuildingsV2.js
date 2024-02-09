@@ -779,6 +779,8 @@ const ExploreByBuildingsV2 = () => {
         search,
         startDate,
         endDate,
+        startTime,
+        endTime,
         sortBy.method,
         sortBy.name,
         conAPIFlag,
@@ -961,7 +963,17 @@ const ExploreByBuildingsV2 = () => {
                 );
             }
         }
-    }, [startDate, endDate, metrics, userPrefDateFormat, userPrefTimeFormat, userPrefUnits, isInComparisonMode]);
+    }, [
+        startDate,
+        endDate,
+        startTime,
+        endTime,
+        metrics,
+        userPrefDateFormat,
+        userPrefTimeFormat,
+        userPrefUnits,
+        isInComparisonMode,
+    ]);
 
     useEffect(() => {
         if (checkedAll) {

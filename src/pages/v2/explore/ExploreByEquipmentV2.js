@@ -340,6 +340,8 @@ const ExploreByEquipmentV2 = () => {
         await fetchExploreEquipmentList(
             startDate,
             endDate,
+            startTime,
+            endTime,
             timeZone,
             bldgId,
             ordered_by,
@@ -588,6 +590,8 @@ const ExploreByEquipmentV2 = () => {
         await fetchExploreFilter(
             startDate,
             endDate,
+            startTime,
+            endTime,
             timeZone,
             bldgId,
             selectedEquipType,

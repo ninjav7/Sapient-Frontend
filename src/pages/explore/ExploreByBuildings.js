@@ -763,6 +763,8 @@ const ExploreByBuildings = () => {
         search,
         startDate,
         endDate,
+        startTime,
+        endTime,
         sortBy.method,
         sortBy.name,
         conAPIFlag,
@@ -945,7 +947,7 @@ const ExploreByBuildings = () => {
                 );
             }
         }
-    }, [startDate, endDate, selectedConsumption, userPrefUnits]);
+    }, [startDate, endDate, startTime, endTime, selectedConsumption, userPrefUnits]);
 
     useEffect(() => {
         if (checkedAll) {

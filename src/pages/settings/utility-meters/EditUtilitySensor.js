@@ -78,7 +78,7 @@ const MetricsTab = (props) => {
         setFetchingChartData(true);
         setSensorChartData([]);
 
-        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, start_date, end_date);
+        const { dateFrom, dateTo } = handleAPIRequestParams(start_date, end_date, startTime, endTime);
 
         const payload = {
             sensor_id: sensor_obj?.id,

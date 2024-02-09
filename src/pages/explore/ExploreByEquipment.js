@@ -304,7 +304,7 @@ const ExploreByEquipment = () => {
         const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
 
-        await fetchExploreEquipmentList(startDate, endDate, timeZone, bldgId, ordered_by, sort_by)
+        await fetchExploreEquipmentList(startDate, endDate, startTime, endTime, timeZone, bldgId, ordered_by, sort_by)
             .then((res) => {
                 const { data } = res?.data;
                 if (data.length !== 0) {
@@ -341,6 +341,8 @@ const ExploreByEquipment = () => {
         await fetchExploreEquipmentList(
             startDate,
             endDate,
+            startTime,
+            endTime,
             timeZone,
             bldgId,
             ordered_by,
@@ -589,6 +591,8 @@ const ExploreByEquipment = () => {
         await fetchExploreFilter(
             startDate,
             endDate,
+            startTime,
+            endTime,
             timeZone,
             bldgId,
             selectedEquipType,
