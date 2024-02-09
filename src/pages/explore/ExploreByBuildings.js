@@ -25,7 +25,12 @@ import { exploreBldgMetrics, calculateDataConvertion, validateSeriesDataForBuild
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-import { dateTimeFormatForHighChart, formatXaxisForHighCharts, getPastDateRange } from '../../helpers/helpers';
+import {
+    dateTimeFormatForHighChart,
+    formatXaxisForHighCharts,
+    getPastDateRange,
+    handleAPIRequestParams,
+} from '../../helpers/helpers';
 import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../explore/services';
 import { handleUnitConverstion } from '../settings/general-settings/utils';
 import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
@@ -40,6 +45,8 @@ const ExploreByBuildings = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefUnits = UserStore.useState((s) => s.unit);
@@ -205,8 +212,10 @@ const ExploreByBuildings = () => {
         setDownloadingCSVData(true);
         const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'total_consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
-        const start_date = encodeURIComponent(startDate);
-        const end_date = encodeURIComponent(endDate);
+
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+        const start_date = encodeURIComponent(dateFrom);
+        const end_date = encodeURIComponent(dateTo);
 
         let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&metric=energy`;
 
@@ -249,8 +258,10 @@ const ExploreByBuildings = () => {
 
         const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'total_consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
-        const start_date = encodeURIComponent(startDate);
-        const end_date = encodeURIComponent(endDate);
+
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+        const start_date = encodeURIComponent(dateFrom);
+        const end_date = encodeURIComponent(dateTo);
 
         let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&metric=energy`;
 
@@ -370,17 +381,25 @@ const ExploreByBuildings = () => {
     };
 
     const fetchSingleBldgChartData = async (bldg_id, isComparisionOn = false) => {
-        const start_date = encodeURIComponent(startDate);
-        const end_date = encodeURIComponent(endDate);
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+        const start_date = encodeURIComponent(dateFrom);
+        const end_date = encodeURIComponent(dateTo);
         const time_zone = encodeURIComponent(timeZone);
+
         const params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${time_zone}&metric=${selectedConsumption}`;
 
         let paramsForPastData = `?tz_info=${time_zone}&metric=${selectedConsumption}`;
+
         if (isComparisionOn) {
             const pastDateObj = getPastDateRange(startDate, daysCount);
-            paramsForPastData += `&date_from=${encodeURIComponent(pastDateObj?.startDate)}&date_to=${encodeURIComponent(
-                pastDateObj?.endDate
-            )}`;
+            const { dateFrom, dateTo } = handleAPIRequestParams(
+                pastDateObj?.startDate,
+                pastDateObj?.endDate,
+                startTime,
+                endTime
+            );
+
+            paramsForPastData += `&date_from=${encodeURIComponent(dateFrom)}&date_to=${encodeURIComponent(dateTo)}`;
         }
 
         let promisesList = [];
@@ -537,7 +556,10 @@ const ExploreByBuildings = () => {
         requestType === 'currentData' ? setFetchingChartData(true) : setFetchingPastChartData(true);
 
         const time_zone = encodeURIComponent(timeZone);
-        const params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${time_zone}&metric=${data_type}`;
+        const { dateFrom, dateTo } = handleAPIRequestParams(start_date, end_date, startTime, endTime);
+        const params = `?date_from=${encodeURIComponent(dateFrom)}&date_to=${encodeURIComponent(
+            dateTo
+        )}&tz_info=${time_zone}&metric=${data_type}`;
 
         const promisesList = [];
 
@@ -741,6 +763,8 @@ const ExploreByBuildings = () => {
         search,
         startDate,
         endDate,
+        startTime,
+        endTime,
         sortBy.method,
         sortBy.name,
         conAPIFlag,
@@ -923,7 +947,7 @@ const ExploreByBuildings = () => {
                 );
             }
         }
-    }, [startDate, endDate, selectedConsumption, userPrefUnits]);
+    }, [startDate, endDate, startTime, endTime, selectedConsumption, userPrefUnits]);
 
     useEffect(() => {
         if (checkedAll) {

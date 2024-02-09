@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Row, Col } from 'reactstrap';
-import { formatConsumptionValue } from '../../helpers/helpers';
+import { formatConsumptionValue, handleAPIRequestParams } from '../../helpers/helpers';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { useHistory } from 'react-router-dom';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -62,6 +62,8 @@ const CompareBuildings = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const userPrefUnits = UserStore.useState((s) => s.unit);
 
@@ -185,10 +187,9 @@ const CompareBuildings = () => {
     const fetchCompareBuildingsData = async (search, ordered_by = 'total_consumption', sort_by, userPrefUnits) => {
         setIsLoadingBuildingData(true);
 
-        const start_date = encodeURIComponent(startDate);
-        const end_date = encodeURIComponent(endDate);
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
 
-        let params = `?date_from=${start_date}&date_to=${end_date}&tz_info=${timeZone}&metric=energy&ordered_by=${ordered_by}`;
+        let params = `?date_from=${dateFrom}&date_to=${dateTo}&tz_info=${timeZone}&metric=energy&ordered_by=${ordered_by}`;
 
         if (search) params = params.concat(`&building_search=${encodeURIComponent(search)}`);
         if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
@@ -246,7 +247,7 @@ const CompareBuildings = () => {
         const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
 
         fetchCompareBuildingsData(search, ordered_by, sort_by, userPrefUnits);
-    }, [search, sortBy, daysCount, userPrefUnits]);
+    }, [search, sortBy, daysCount, userPrefUnits, startTime, endTime]);
 
     return (
         <React.Fragment>

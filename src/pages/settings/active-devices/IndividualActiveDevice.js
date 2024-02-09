@@ -8,7 +8,7 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import DeviceChartModel from '../../../pages/chartModal/DeviceChartModel';
-import { apiRequestBody } from '../../../helpers/helpers';
+import { handleAPIRequestBody } from '../../../helpers/helpers';
 import { useAtom } from 'jotai';
 import { buildingData, userPermissionData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
@@ -44,6 +44,8 @@ const IndividualActiveDevice = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     // Chart states
@@ -204,7 +206,7 @@ const IndividualActiveDevice = () => {
     const fetchSensorChartData = async (id) => {
         setIsSensorChartLoading(true);
         const params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy&building_id=${bldgId}`;
-        await getSensorData(params, apiRequestBody(startDate, endDate, timeZone))
+        await getSensorData(params, handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime))
             .then((res) => {
                 setDeviceData([]);
                 setSeriesData([]);

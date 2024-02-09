@@ -3,7 +3,7 @@ import Brick from '../../sharedComponents/brick';
 import { Col, UncontrolledTooltip, Progress } from 'reactstrap';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import SkeletonLoader from '../../components/SkeletonLoader';
-import { formatConsumptionValue, pageListSizes } from '../../helpers/helpers';
+import { formatConsumptionValue, handleAPIRequestParams, pageListSizes } from '../../helpers/helpers';
 import Typography from '../../sharedComponents/typography';
 import { UNITS } from '../../constants/units';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
@@ -20,6 +20,8 @@ const SpacesListTable = ({ colorfulSpaces }) => {
     const { download } = useCSVDownload();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const { bldgId } = useParams();
@@ -39,7 +41,8 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         setSpacesLoading(true);
         // const orderedBy = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
         // const sortedBy = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo: timeZone };
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+        const query = { bldgId, dateFrom: dateFrom, dateTo, tzInfo: encodeURIComponent(timeZone) };
 
         try {
             const data = await fetchAllSpacesV2(query);
@@ -71,7 +74,7 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         if (!bldgId || startDate === null || endDate === null) return;
 
         fetchEquipDataList();
-    }, [startDate, endDate, bldgId, search, sortBy, pageSize, pageNo, colorfulSpaces]);
+    }, [startDate, endDate, startTime, endTime, bldgId, search, sortBy, pageSize, pageNo, colorfulSpaces]);
 
     const handleDownloadCSV = async () => {
         setDownloadingCSVData(true);

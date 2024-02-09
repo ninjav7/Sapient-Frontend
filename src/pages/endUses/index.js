@@ -11,7 +11,7 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { UserStore } from '../../store/UserStore';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-import { apiRequestBody } from '../../helpers/helpers';
+import { handleAPIRequestBody } from '../../helpers/helpers';
 import { TopEndUsesWidget } from '../../sharedComponents/topEndUsesWidget';
 import { UNITS } from '../../constants/units';
 import { useHistory, useParams } from 'react-router-dom';
@@ -38,6 +38,8 @@ const EndUsesPage = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
@@ -257,7 +259,7 @@ const EndUsesPage = () => {
         setFetchingEndUseData(true);
 
         const params = `?building_id=${bldgId}`;
-        const payload = apiRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone, startTime, endTime);
 
         await fetchEndUses(params, payload)
             .then((res) => {
@@ -337,7 +339,7 @@ const EndUsesPage = () => {
     const endUsesChartDataFetch = async (time_zone) => {
         setStackedColumnChartData([]);
         setChartLoading(true);
-        const payload = apiRequestBody(startDate, endDate, time_zone);
+        const payload = handleAPIRequestBody(startDate, endDate, time_zone, startTime, endTime);
 
         await fetchEndUsesChart(bldgId, payload)
             .then((res) => {
@@ -413,7 +415,7 @@ const EndUsesPage = () => {
 
         endUsesDataFetch(time_zone);
         endUsesChartDataFetch(time_zone);
-    }, [startDate, endDate, bldgId]);
+    }, [startDate, endDate, startTime, endTime, bldgId]);
 
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {

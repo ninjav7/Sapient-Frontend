@@ -7,4 +7,7 @@ export const DateRangeStore = new Store({
     endDate: handleDateFormat(localStorage.getItem('endDate'), 'endDate'),
     filterPeriod: localStorage.getItem('filterPeriod') === null ? 'Last 7 Days' : localStorage.getItem('filterPeriod'),
     daysCount: localStorage.getItem('daysCount'),
+    startTime: localStorage.getItem('startTime'),
+    endTime: localStorage.getItem('endTime'),
+    isTimePickerEnabled: localStorage.getItem('isTimePickerEnabled') ?? false,
 });

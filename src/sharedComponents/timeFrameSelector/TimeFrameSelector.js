@@ -60,6 +60,7 @@ const TimeFrameSelector = (props) => {
                     onCancel={props.onCancel}
                     onApply={props.onApply}
                     withApplyButton={props.withApplyButton}
+                    withTimeSelect={props.withTimeSelect}
                     {...props}
                 />
             </div>

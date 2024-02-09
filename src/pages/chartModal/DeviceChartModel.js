@@ -7,7 +7,7 @@ import { Cookies } from 'react-cookie';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import Header from '../../components/Header';
-import { apiRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
+import { handleAPIRequestBody, dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
@@ -48,6 +48,8 @@ const DeviceChartModel = ({
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -118,9 +120,13 @@ const DeviceChartModel = ({
                 };
                 let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}&building_id=${bldgId}`;
                 await axios
-                    .post(`${BaseUrl}${sensorGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
-                        headers,
-                    })
+                    .post(
+                        `${BaseUrl}${sensorGraphData}${params}`,
+                        handleAPIRequestBody(startDate, endDate, timeZone, startTime, endTime),
+                        {
+                            headers,
+                        }
+                    )
                     .then((res) => {
                         setDeviceData([]);
                         setSeriesData([]);
@@ -158,7 +164,7 @@ const DeviceChartModel = ({
             }
         };
         exploreDataFetch();
-    }, [startDate, endDate, selectedConsumption]);
+    }, [startDate, endDate, startTime, endTime, selectedConsumption]);
 
     return (
         <Modal isOpen={showChart} className="modal-fullscreen">

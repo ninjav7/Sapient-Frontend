@@ -20,6 +20,7 @@ import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/help
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import './style.css';
 import { fetchMetricsKpiBuildingPage } from './services';
+import { handleAPIRequestParams } from '../../helpers/helpers';
 
 const CarbonBuilding = () => {
     const { bldgId } = useParams();
@@ -37,6 +38,8 @@ const CarbonBuilding = () => {
     });
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefUnits = UserStore.useState((s) => s.unit);
@@ -175,11 +178,12 @@ const CarbonBuilding = () => {
             if (bldgObj?.building_id) {
                 if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
             }
+            const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
             const payload = {
                 building_id: bldgId,
                 metric: 'carbon',
-                date_from: startDate,
-                date_to: endDate,
+                date_from: encodeURIComponent(dateFrom),
+                date_to: encodeURIComponent(dateTo),
                 tz_info: time_zone,
             };
             await fetchMetricsKpiBuildingPage(payload).then((res) => {
@@ -196,9 +200,10 @@ const CarbonBuilding = () => {
     }, [buildingListData, bldgId]);
 
     const buildingConsumptionChartEnergy = async (time_zone) => {
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
             bldg_id: bldgId,
         };
@@ -231,9 +236,10 @@ const CarbonBuilding = () => {
     };
 
     const buildingEnergyConsumptionChartCarbon = async (time_zone) => {
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
         const payload = {
-            date_from: encodeURIComponent(startDate),
-            date_to: encodeURIComponent(endDate),
+            date_from: encodeURIComponent(dateFrom),
+            date_to: encodeURIComponent(dateTo),
             tz_info: time_zone,
             bldg_id: bldgId,
         };
