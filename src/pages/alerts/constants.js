@@ -62,14 +62,22 @@ export const bldgAlertConditions = [
         label: 'Peak demand for',
         value: 'peak_demand',
     },
-    // {
-    //     label: 'Carbon for',
-    //     value: 'carbon',
-    // },
+    {
+        label: 'Carbon for',
+        value: 'carbon',
+    },
 ];
 
 // Equipment Alert Conditions
 export const equipAlertConditions = [
+    {
+        label: 'Energy consumption is',
+        value: 'energy_consumption',
+    },
+    {
+        label: 'Power is',
+        value: 'power',
+    },
     {
         label: 'RMS Current is',
         value: 'sensor_rms_current',
@@ -83,24 +91,28 @@ export const equipAlertConditions = [
         value: 'sensor_max_current',
     },
     {
-        label: 'Peak Power is',
-        value: 'peak_power',
+        label: 'Average Equipment Current is',
+        value: 'average_equipment_current',
     },
     {
-        label: 'Average Power is',
-        value: 'average_power',
+        label: 'Phase Imbalance Current is',
+        value: 'phase_imbalance_current',
     },
     {
-        label: 'Energy consumption is',
-        value: 'energy_consumption',
+        label: 'Phase Imbalance Percent is',
+        value: 'phase_imbalance_percent',
     },
     {
-        label: 'Phase Imbalance',
-        value: 'phase_imbalance',
+        label: 'Runtime',
+        value: 'runtime',
     },
     {
-        label: 'Shortcycling',
-        value: 'shortcycling',
+        label: 'Starts',
+        value: 'starts',
+    },
+    {
+        label: 'Stops',
+        value: 'stops',
     },
 ];
 
