@@ -17,14 +17,11 @@ import {
     TARGET_TYPES,
     aggregationList,
     bldgAlertConditions,
-    conditionLevelsList,
     equipAlertConditions,
-    filtersForEnergyConsumption,
     operatorsList,
     thresholdConditionTimespanList,
     thresholdReferenceList,
     thresholdTypeList,
-    timeIntervalsList,
     timespanList,
 } from '../constants';
 
@@ -62,26 +59,6 @@ const Condition = (props) => {
         default:
             conditionsList = [];
     }
-
-    const fetchConditionStyle = (alert_obj) => {
-        let label = `condition-grid-default`;
-
-        if (alert_obj?.target?.type === TARGET_TYPES.BUILDING) {
-            label = `condition-grid-for-bldg`;
-            if (alert_obj?.condition?.filterType === `number`) label += `-with-value`;
-        }
-
-        if (alert_obj?.target?.type === TARGET_TYPES.EQUIPMENT) {
-            label = `condition-grid-for-equip`;
-            if (alert_obj?.condition?.type === 'shortcycling') {
-                label += `-with-shortcycling`;
-            } else {
-                if (alert_obj?.condition?.type !== 'rms_current') label += `-without-threshold`;
-            }
-        }
-
-        return label;
-    };
 
     return (
         <div className="custom-card">
@@ -128,26 +105,6 @@ const Condition = (props) => {
                         {targetType !== '' && (
                             <>
                                 <div className="w-100">
-                                    <Typography.Body size={Typography.Sizes.md}>Aggregation</Typography.Body>
-                                    <Brick sizeInRem={0.25} />
-                                    <Select
-                                        id="aggregationSelect"
-                                        placeholder="Select an Aggregation"
-                                        name="select"
-                                        options={aggregationList}
-                                        className="w-100"
-                                        onChange={(e) => {
-                                            handleConditionChange('condition_metric_aggregate', e.value);
-                                        }}
-                                        currentValue={aggregationList.filter(
-                                            (option) => option.value === condition?.condition_metric_aggregate
-                                        )}
-                                        isDisabled={targetType === ''}
-                                        menuPlacement="auto"
-                                    />
-                                </div>
-
-                                <div className="w-100">
                                     <Typography.Body size={Typography.Sizes.md}>Timespan</Typography.Body>
                                     <Brick sizeInRem={0.25} />
                                     <Select
@@ -181,6 +138,26 @@ const Condition = (props) => {
                                         }}
                                         currentValue={operatorsList.filter(
                                             (option) => option.value === condition?.condition_operator
+                                        )}
+                                        isDisabled={targetType === ''}
+                                        menuPlacement="auto"
+                                    />
+                                </div>
+
+                                <div className="w-100">
+                                    <Typography.Body size={Typography.Sizes.md}>Aggregation</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
+                                    <Select
+                                        id="aggregationSelect"
+                                        placeholder="Select an Aggregation"
+                                        name="select"
+                                        options={aggregationList}
+                                        className="w-100"
+                                        onChange={(e) => {
+                                            handleConditionChange('condition_metric_aggregate', e.value);
+                                        }}
+                                        currentValue={aggregationList.filter(
+                                            (option) => option.value === condition?.condition_metric_aggregate
                                         )}
                                         isDisabled={targetType === ''}
                                         menuPlacement="auto"
