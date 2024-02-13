@@ -73,7 +73,7 @@ const Target = (props) => {
                                     alert_description: alertObj?.alert_description,
                                 });
                             }}>
-                            {`Reset Target Type`}
+                            {`Reset Target`}
                         </Typography.Subheader>
                     )}
                 </div>

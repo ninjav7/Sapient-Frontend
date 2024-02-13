@@ -5,13 +5,14 @@ export const TARGET_TYPES = Object.freeze({
 
 export const defaultConditionObj = {
     condition_metric: '',
-    condition_metric_aggregate: '',
-    condition_timespan: '',
-    condition_operator: '',
-    condition_threshold_type: '',
+    condition_metric_aggregate: 'sum',
+    condition_timespan: 'month',
+    condition_operator: 'above',
+    condition_threshold_type: 'static_threshold_value',
     condition_threshold_value: '',
     condition_threshold_reference: '',
     condition_threshold_calculated: '',
+    condition_threshold_timespan: '',
     threshold50: true,
     threshold75: true,
     threshold90: true,

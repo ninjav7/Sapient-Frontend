@@ -277,6 +277,7 @@ const AlertConfig = () => {
     const [activeTab, setActiveTab] = useState(0);
     const defaultAlertObjCloned = _.cloneDeep(defaultAlertObj);
     const [alertObj, setAlertObj] = useState(defaultAlertObjCloned);
+    console.log('SSR alertObj => ', alertObj);
 
     const [originalBldgsList, setOriginalBldgsList] = useState([]);
     const [originalEquipsList, setOriginalEquipsList] = useState([]);
@@ -353,16 +354,14 @@ const AlertConfig = () => {
         let obj = Object.assign({}, alertObj);
 
         // When Condition Type change
-        if (key === 'type') {
+        if (key === 'condition_metric') {
             obj.condition = _.cloneDeep(defaultConditionObj);
         }
 
-        // When Condition filter-type change
-        if (key === 'filterType') {
-            obj.condition.threshold50 = true;
-            obj.condition.threshold75 = true;
-            obj.condition.threshold90 = true;
-            obj.condition.thresholdValue = '';
+        if (key === 'condition_threshold_type') {
+            obj.condition.condition_threshold_value = '';
+            obj.condition.condition_threshold_calculated = '';
+            obj.condition.condition_threshold_timespan = '';
         }
 
         obj.condition[key] = value;
