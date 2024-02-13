@@ -430,30 +430,21 @@ const AlertConfig = () => {
         // Alert Payload
         let payload = {
             target_type: target?.type,
-            target_description: alert_obj?.alert_name,
+            name: alert_obj?.alert_name,
             description: alert_obj?.alert_description,
-            alert_condition_description: condition?.conditionDescription,
+            alert_condition_description: condition?.conditionDescription ?? '',
+            condition_metric: condition?.condition_metric,
+            condition_metric_aggregate: condition?.condition_metric_aggregate,
+            condition_timespan: condition?.condition_timespan,
+            condition_operator: condition?.condition_operator,
+            condition_threshold_type: condition?.condition_threshold_type,
+            condition_alert_at: [],
         };
 
-        // When Target type is 'Building'
         if (target?.type === TARGET_TYPES.BUILDING) {
             let bldgObj = {
                 building_ids: target?.lists.map((el) => el?.value),
-                condition_metric: condition?.type,
-                condition_timespan: condition?.timeInterval,
-                condition_operator: condition?.level,
-                condition_threshold_type: condition?.filterType,
-                condition_alert_at: [],
             };
-
-            if (condition?.filterType === 'number') {
-                bldgObj.condition_threshold_value = +condition?.thresholdValue;
-            }
-
-            if (condition?.threshold50) bldgObj.condition_alert_at.push(50);
-            if (condition?.threshold75) bldgObj.condition_alert_at.push(75);
-            if (condition?.threshold100) bldgObj.condition_alert_at.push(100);
-
             payload = { ...payload, ...bldgObj };
         }
 
@@ -462,29 +453,33 @@ const AlertConfig = () => {
             let equipObj = {
                 building_ids: [target?.buildingIDs],
                 equipment_ids: target?.lists.map((el) => el?.value),
-                condition_metric: condition?.type,
-                condition_operator: condition?.level,
-                condition_threshold_value: +condition?.thresholdPercentage,
             };
 
-            if (condition?.type === 'rms_current') {
-                equipObj.custom_threshold_type = condition?.thresholdName;
-            }
-
-            if (condition?.type !== 'shortcycling') {
-                equipObj.condition_threshold_type = 'percentage';
-            }
-
-            if (condition?.type === 'shortcycling') {
-                equipObj.condition_threshold_value = +condition?.shortcyclingMinutes;
-            }
-
-            if (recurrence?.triggerAlert) {
-                equipObj.equipment_condition_recurrence = recurrence?.triggerAlert;
-                equipObj.equipment_condition_recurrence_minutes = +recurrence?.triggerAt;
-            }
-
             payload = { ...payload, ...equipObj };
+        }
+
+        if (target?.type === TARGET_TYPES.BUILDING) {
+            if (condition?.condition_metric === 'peak_demand') {
+                if (condition?.threshold90) payload.condition_alert_at.push(90);
+                if (condition?.threshold100) payload.condition_alert_at.push(100);
+            } else {
+                if (condition?.threshold50) payload.condition_alert_at.push(50);
+                if (condition?.threshold75) payload.condition_alert_at.push(75);
+                if (condition?.threshold100) payload.condition_alert_at.push(100);
+            }
+        }
+
+        if (condition?.condition_threshold_type === 'static_threshold_value') {
+            payload.condition_threshold_value = +condition?.condition_threshold_value;
+        }
+
+        if (condition?.condition_threshold_type === 'calculated') {
+            payload.condition_threshold_calculated = condition?.condition_threshold_calculated;
+            payload.condition_threshold_timespan = condition?.condition_threshold_timespan;
+        }
+
+        if (condition?.condition_threshold_type === 'reference') {
+            payload.condition_threshold_reference = condition?.condition_threshold_reference;
         }
 
         // Notification and its recurrence setup
