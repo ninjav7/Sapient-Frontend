@@ -105,6 +105,26 @@ const Condition = (props) => {
                         {targetType !== '' && condition?.condition_metric !== '' && (
                             <>
                                 <div className="w-100">
+                                    <Typography.Body size={Typography.Sizes.md}>Aggregation</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
+                                    <Select
+                                        id="aggregationSelect"
+                                        placeholder="Select an Aggregation"
+                                        name="select"
+                                        options={aggregationList}
+                                        className="w-100"
+                                        onChange={(e) => {
+                                            handleConditionChange('condition_metric_aggregate', e.value);
+                                        }}
+                                        currentValue={aggregationList.filter(
+                                            (option) => option.value === condition?.condition_metric_aggregate
+                                        )}
+                                        isDisabled={targetType === ''}
+                                        menuPlacement="auto"
+                                    />
+                                </div>
+
+                                <div className="w-100">
                                     <Typography.Body size={Typography.Sizes.md}>Timespan</Typography.Body>
                                     <Brick sizeInRem={0.25} />
                                     <Select
@@ -138,26 +158,6 @@ const Condition = (props) => {
                                         }}
                                         currentValue={operatorsList.filter(
                                             (option) => option.value === condition?.condition_operator
-                                        )}
-                                        isDisabled={targetType === ''}
-                                        menuPlacement="auto"
-                                    />
-                                </div>
-
-                                <div className="w-100">
-                                    <Typography.Body size={Typography.Sizes.md}>Aggregation</Typography.Body>
-                                    <Brick sizeInRem={0.25} />
-                                    <Select
-                                        id="aggregationSelect"
-                                        placeholder="Select an Aggregation"
-                                        name="select"
-                                        options={aggregationList}
-                                        className="w-100"
-                                        onChange={(e) => {
-                                            handleConditionChange('condition_metric_aggregate', e.value);
-                                        }}
-                                        currentValue={aggregationList.filter(
-                                            (option) => option.value === condition?.condition_metric_aggregate
                                         )}
                                         isDisabled={targetType === ''}
                                         menuPlacement="auto"
