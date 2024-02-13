@@ -47,15 +47,20 @@ const AlertPreview = (props) => {
                             </Typography.Body>
                         </div>
 
-                        <Brick sizeInRem={1} />
+                        {alertObj?.condition?.conditionDescription && (
+                            <>
+                                <Brick sizeInRem={1} />
 
-                        <div>
-                            <Typography.Subheader size={Typography.Sizes.md}>{`Condition`}</Typography.Subheader>
-                            <Brick sizeInRem={0.25} />
-                            <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                {alertObj?.condition?.conditionDescription ?? ''}
-                            </Typography.Body>
-                        </div>
+                                <div>
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}>{`Condition`}</Typography.Subheader>
+                                    <Brick sizeInRem={0.25} />
+                                    <Typography.Body size={Typography.Sizes.md} className="text-muted">
+                                        {alertObj?.condition?.conditionDescription ?? ''}
+                                    </Typography.Body>
+                                </div>
+                            </>
+                        )}
 
                         {(alertObj?.condition?.type === 'energy_consumption' ||
                             alertObj?.condition?.type === 'peak_demand') && <Brick sizeInRem={0.5} />}

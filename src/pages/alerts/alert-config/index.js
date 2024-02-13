@@ -307,23 +307,25 @@ const AlertConfig = () => {
 
     const isConditionSet = alertObj?.condition?.type !== '';
 
-    const isBuildingConditionsSet =
-        alertObj?.target?.type === TARGET_TYPES.BUILDING &&
-        (alertObj?.condition?.filterType === 'previous_month' ||
-            alertObj?.condition?.filterType === 'previous_year' ||
-            (alertObj?.condition?.filterType === 'number' && alertObj?.condition?.thresholdValue !== ''));
+    const isBasicConditionConfigured =
+        alertObj?.condition?.condition_metric !== '' &&
+        alertObj?.condition?.condition_metric_aggregate !== '' &&
+        alertObj?.condition?.condition_timespan !== '' &&
+        alertObj?.condition?.condition_operator !== '' &&
+        alertObj?.condition?.condition_threshold_type !== '';
 
-    const isEquipmentConditionsSet =
-        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
-        ((alertObj?.condition?.type === 'rms_current' && alertObj?.condition?.thresholdPercentage !== '') ||
-            (alertObj?.condition?.type === 'shortcycling' && alertObj?.condition?.shortcyclingMinutes !== '') ||
-            (alertObj?.condition?.type !== 'rms_current' &&
-                alertObj?.condition?.type !== 'shortcycling' &&
-                alertObj?.condition?.thresholdPercentage !== ''));
+    const isConditionsConfigured =
+        (alertObj?.condition?.condition_threshold_type === 'static_threshold_value' &&
+            alertObj?.condition?.condition_threshold_value !== '') ||
+        (alertObj?.condition?.condition_threshold_type === 'reference' &&
+            alertObj?.condition?.condition_threshold_reference !== '') ||
+        (alertObj?.condition?.condition_threshold_type === 'calculated' &&
+            alertObj?.condition?.condition_threshold_calculated !== '' &&
+            alertObj?.condition?.condition_threshold_timespan !== '');
 
     const isAlertNameSet = alertObj?.alert_name !== '';
     const isTargetConfigured = isBuildingConfigured || isEquipmentConfigured;
-    const isConditionConfigured = isConditionSet && (isBuildingConditionsSet || isEquipmentConditionsSet);
+    const isConditionConfigured = isConditionSet && isBasicConditionConfigured && isConditionsConfigured;
 
     const handleModalClick = (configType) => {
         if (configType) {
