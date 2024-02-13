@@ -15,11 +15,17 @@ import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/
 
 import {
     TARGET_TYPES,
+    aggregationList,
     bldgAlertConditions,
     conditionLevelsList,
     equipAlertConditions,
     filtersForEnergyConsumption,
+    operatorsList,
+    thresholdConditionTimespanList,
+    thresholdReferenceList,
+    thresholdTypeList,
     timeIntervalsList,
+    timespanList,
 } from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
@@ -43,7 +49,7 @@ const Condition = (props) => {
     const { alertObj = {}, handleConditionChange, handleRecurrenceChange } = props;
 
     const targetType = alertObj?.target?.type;
-    const conditionType = alertObj?.condition?.type;
+    const { condition } = alertObj;
 
     let conditionsList = [];
     switch (targetType) {
@@ -90,7 +96,7 @@ const Condition = (props) => {
             <CardBody>
                 <div>
                     <Typography.Subheader size={Typography.Sizes.md}>
-                        {`Select a Condition`}{' '}
+                        {`Add a Condition`}
                         <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
                             *
                         </span>
@@ -98,165 +104,208 @@ const Condition = (props) => {
 
                     <Brick sizeInRem={1.25} />
 
-                    <div className={fetchConditionStyle(alertObj)}>
-                        <Select
-                            id="endUseSelect"
-                            placeholder="Select a Condition"
-                            name="select"
-                            options={conditionsList}
-                            className="w-100"
-                            onChange={(e) => {
-                                handleConditionChange('type', e.value);
-                            }}
-                            currentValue={conditionsList.filter((option) => option.value === conditionType)}
-                            isDisabled={targetType === ''}
-                            menuPlacement="auto"
-                        />
-
-                        {/* Building conditions fields */}
-                        {targetType === TARGET_TYPES.BUILDING && conditionType !== '' && (
-                            <>
-                                <Select
-                                    id="condition_lvl"
-                                    name="select"
-                                    options={timeIntervalsList}
-                                    className="w-100"
-                                    onChange={(e) => {
-                                        handleConditionChange('timeInterval', e.value);
-                                    }}
-                                    currentValue={timeIntervalsList.filter(
-                                        (option) => option.value === alertObj?.condition?.timeInterval
-                                    )}
-                                    menuPlacement="auto"
-                                />
-
-                                <Select
-                                    id="condition_lvl"
-                                    name="select"
-                                    options={conditionLevelsList}
-                                    className="w-100"
-                                    onChange={(e) => {
-                                        handleConditionChange('level', e.value);
-                                    }}
-                                    currentValue={conditionLevelsList.filter(
-                                        (option) => option.value === alertObj?.condition?.level
-                                    )}
-                                    menuPlacement="auto"
-                                />
-                                <Select
-                                    id="filter_type"
-                                    name="select"
-                                    options={filtersForEnergyConsumption}
-                                    className="w-100"
-                                    onChange={(e) => {
-                                        handleConditionChange('filterType', e.value);
-                                    }}
-                                    currentValue={filtersForEnergyConsumption.filter(
-                                        (option) => option.value === alertObj?.condition?.filterType
-                                    )}
-                                    menuPlacement="auto"
-                                />
-                                {alertObj?.condition?.filterType === 'number' && (
-                                    <Inputs
-                                        type="number"
-                                        placeholder="Enter value"
-                                        className="custom-input-width w-100"
-                                        inputClassName="custom-input-field"
-                                        value={alertObj?.condition?.thresholdValue}
-                                        onChange={(e) => {
-                                            handleConditionChange('thresholdValue', e.target.value);
-                                        }}
-                                        elementEnd={<KWH_SVG />}
-                                    />
+                    <div className="d-flex" style={{ gap: '0.5rem' }}>
+                        <div className={targetType === '' ? `w-25` : `w-100`}>
+                            <Typography.Body size={Typography.Sizes.md}>Metric</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            <Select
+                                id="metricSelect"
+                                placeholder="Select a Metric"
+                                name="select"
+                                options={conditionsList}
+                                className="w-100"
+                                onChange={(e) => {
+                                    handleConditionChange('condition_metric', e.value);
+                                }}
+                                currentValue={conditionsList.filter(
+                                    (option) => option.value === condition?.condition_metric
                                 )}
-                            </>
-                        )}
+                                isDisabled={targetType === ''}
+                                menuPlacement="auto"
+                            />
+                        </div>
 
-                        {/* Equipment conditions fields */}
-                        {targetType === TARGET_TYPES.EQUIPMENT && conditionType !== '' && (
+                        {targetType !== '' && (
                             <>
-                                {conditionType === 'rms_current' && (
+                                <div className="w-100">
+                                    <Typography.Body size={Typography.Sizes.md}>Aggregation</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
                                     <Select
-                                        id="condition_lvl"
+                                        id="aggregationSelect"
+                                        placeholder="Select an Aggregation"
                                         name="select"
-                                        isSearchable={false}
-                                        options={conditionLevelsList}
+                                        options={aggregationList}
                                         className="w-100"
                                         onChange={(e) => {
-                                            handleConditionChange('level', e.value);
+                                            handleConditionChange('condition_metric_aggregate', e.value);
                                         }}
-                                        currentValue={conditionLevelsList.filter(
-                                            (option) => option.value === alertObj?.condition?.level
+                                        currentValue={aggregationList.filter(
+                                            (option) => option.value === condition?.condition_metric_aggregate
                                         )}
+                                        isDisabled={targetType === ''}
                                         menuPlacement="auto"
                                     />
-                                )}
+                                </div>
 
-                                {conditionType === 'shortcycling' && (
-                                    <div className="d-flex align-items-center">
-                                        <Typography.Subheader
-                                            size={Typography.Sizes.md}
-                                            style={{ color: colorPalette.primaryGray550 }}>
-                                            {`Turn On/Turn Off`}
-                                        </Typography.Subheader>
+                                <div className="w-100">
+                                    <Typography.Body size={Typography.Sizes.md}>Timespan</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
+                                    <Select
+                                        id="timeSpanSelect"
+                                        placeholder="Select a Timespan"
+                                        name="select"
+                                        options={timespanList}
+                                        className="w-100"
+                                        onChange={(e) => {
+                                            handleConditionChange('condition_timespan', e.value);
+                                        }}
+                                        currentValue={timespanList.filter(
+                                            (option) => option.value === condition?.condition_timespan
+                                        )}
+                                        isDisabled={targetType === ''}
+                                        menuPlacement="auto"
+                                    />
+                                </div>
+
+                                <div className="w-100">
+                                    <Typography.Body size={Typography.Sizes.md}>Operator</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
+                                    <Select
+                                        id="operatorSelect"
+                                        placeholder="Select an Operator"
+                                        name="select"
+                                        options={operatorsList}
+                                        className="w-100"
+                                        onChange={(e) => {
+                                            handleConditionChange('condition_operator', e.value);
+                                        }}
+                                        currentValue={operatorsList.filter(
+                                            (option) => option.value === condition?.condition_operator
+                                        )}
+                                        isDisabled={targetType === ''}
+                                        menuPlacement="auto"
+                                    />
+                                </div>
+
+                                <div className="w-100">
+                                    <Typography.Body size={Typography.Sizes.md}>Threshold Type</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
+                                    <Select
+                                        id="thresholdTypeSelect"
+                                        placeholder="Select Threshold Type"
+                                        name="select"
+                                        options={thresholdTypeList}
+                                        className="w-100"
+                                        onChange={(e) => {
+                                            handleConditionChange('condition_threshold_type', e.value);
+                                        }}
+                                        currentValue={thresholdTypeList.filter(
+                                            (option) => option.value === condition?.condition_threshold_type
+                                        )}
+                                        isDisabled={targetType === ''}
+                                        menuPlacement="auto"
+                                    />
+                                </div>
+
+                                {condition?.condition_threshold_type === 'static_threshold_value' && (
+                                    <div className="w-100">
+                                        <Typography.Body size={Typography.Sizes.md}>Threshold Value</Typography.Body>
+                                        <Brick sizeInRem={0.25} />
+                                        <Inputs
+                                            type="number"
+                                            placeholder="Enter value"
+                                            className="custom-input-width w-100"
+                                            inputClassName="custom-input-field"
+                                            value={alertObj?.condition?.condition_threshold_value}
+                                            onChange={(e) => {
+                                                handleConditionChange('condition_threshold_value', e.target.value);
+                                            }}
+                                            elementEnd={<KWH_SVG />}
+                                        />
                                     </div>
                                 )}
 
-                                {conditionType !== 'rms_current' && conditionType !== 'shortcycling' && (
-                                    <div className="d-flex align-items-center">
-                                        <Typography.Subheader
-                                            size={Typography.Sizes.md}
-                                            style={{ color: colorPalette.primaryGray550 }}>
-                                            {`Above`}
-                                        </Typography.Subheader>
+                                {condition?.condition_threshold_type === 'reference' && (
+                                    <div className="w-100">
+                                        <Typography.Body size={Typography.Sizes.md}>
+                                            Threshold Reference
+                                        </Typography.Body>
+                                        <Brick sizeInRem={0.25} />
+                                        <Select
+                                            id="thresholdTypeSelect"
+                                            placeholder="Select Threshold Type"
+                                            name="select"
+                                            options={thresholdReferenceList}
+                                            className="w-100"
+                                            onChange={(e) => {
+                                                handleConditionChange('condition_threshold_reference', e.value);
+                                            }}
+                                            currentValue={thresholdReferenceList.filter(
+                                                (option) => option.value === condition?.condition_threshold_reference
+                                            )}
+                                            isDisabled={targetType === ''}
+                                            menuPlacement="auto"
+                                        />
                                     </div>
-                                )}
-
-                                {conditionType === 'rms_current' && (
-                                    <Inputs
-                                        type="text"
-                                        placeholder="Enter Threshold"
-                                        className="custom-input-width w-100"
-                                        inputClassName="custom-input-field"
-                                        value={alertObj?.condition?.thresholdName}
-                                        onChange={(e) => {
-                                            handleConditionChange('thresholdName', e.target.value);
-                                        }}
-                                    />
-                                )}
-
-                                {conditionType !== 'shortcycling' && (
-                                    <Inputs
-                                        type="number"
-                                        className="custom-input-width w-100"
-                                        inputClassName="custom-input-field"
-                                        value={alertObj?.condition?.thresholdPercentage}
-                                        onChange={(e) => {
-                                            handleConditionChange('thresholdPercentage', e.target.value);
-                                        }}
-                                        elementEnd={<PERCENT_SVG />}
-                                    />
-                                )}
-
-                                {conditionType === 'shortcycling' && (
-                                    <Inputs
-                                        type="number"
-                                        className="custom-input-width w-100"
-                                        inputClassName="custom-input-field"
-                                        value={alertObj?.condition?.shortcyclingMinutes}
-                                        onChange={(e) => {
-                                            handleConditionChange('shortcyclingMinutes', e.target.value);
-                                        }}
-                                        elementEnd={<MinutesSVG />}
-                                    />
                                 )}
                             </>
                         )}
                     </div>
 
+                    {condition?.condition_threshold_type === 'calculated' && (
+                        <>
+                            <Brick sizeInRem={1.5} />
+                            <div className="d-flex w-50" style={{ gap: '0.5rem' }}>
+                                <div className="w-100">
+                                    <Typography.Body size={Typography.Sizes.md}>Threshold Calculated</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
+                                    <Select
+                                        id="thresholdTypeSelect"
+                                        placeholder="Select Threshold Type"
+                                        name="select"
+                                        options={aggregationList}
+                                        className="w-100"
+                                        onChange={(e) => {
+                                            handleConditionChange('condition_threshold_calculated', e.value);
+                                        }}
+                                        currentValue={aggregationList.filter(
+                                            (option) => option.value === condition?.condition_threshold_calculated
+                                        )}
+                                        isDisabled={targetType === ''}
+                                        menuPlacement="auto"
+                                    />
+                                </div>
+
+                                <div className="w-100">
+                                    <Typography.Body size={Typography.Sizes.md}>Threshold Timespan</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
+                                    <Select
+                                        id="thresholdTypeSelect"
+                                        placeholder="Select Threshold Type"
+                                        name="select"
+                                        options={thresholdConditionTimespanList.filter(
+                                            (el) =>
+                                                el?.timespan === condition?.condition_timespan &&
+                                                el?.operationType === condition?.condition_threshold_calculated
+                                        )}
+                                        className="w-100"
+                                        onChange={(e) => {
+                                            handleConditionChange('condition_threshold_timespan', e.value);
+                                        }}
+                                        currentValue={thresholdConditionTimespanList.filter(
+                                            (option) => option.value === condition?.condition_threshold_timespan
+                                        )}
+                                        isDisabled={targetType === ''}
+                                        menuPlacement="auto"
+                                    />
+                                </div>
+                            </div>
+                        </>
+                    )}
+
                     <Brick sizeInRem={targetType === TARGET_TYPES.BUILDING ? 1 : 0.5} />
 
-                    {targetType === TARGET_TYPES.BUILDING && conditionType === 'energy_consumption' && (
+                    {targetType === TARGET_TYPES.BUILDING && condition?.condition_metric === 'energy_consumption' && (
                         <div className="d-flex" style={{ gap: '1rem' }}>
                             <Checkbox
                                 label="Alert at 50%"
@@ -269,7 +318,6 @@ const Condition = (props) => {
                                 onClick={(e) => {
                                     const value = e.target.value;
                                     if (value === 'false') handleConditionChange('threshold50', true);
-
                                     if (value === 'true') handleConditionChange('threshold50', false);
                                 }}
                             />
@@ -290,7 +338,7 @@ const Condition = (props) => {
                         </div>
                     )}
 
-                    {targetType === TARGET_TYPES.BUILDING && conditionType === 'peak_demand' && (
+                    {targetType === TARGET_TYPES.BUILDING && condition?.condition_metric === 'peak_demand' && (
                         <Checkbox
                             label="Alert at 90%"
                             type="checkbox"
@@ -307,14 +355,14 @@ const Condition = (props) => {
                         />
                     )}
 
-                    {alertObj?.target?.type !== TARGET_TYPES.BUILDING && alertObj?.condition?.type && (
+                    {alertObj?.target?.type !== TARGET_TYPES.BUILDING && alertObj?.condition?.condition_metric && (
                         <>
                             <hr />
                             <Brick sizeInRem={0.5} />
                         </>
                     )}
 
-                    {alertObj?.target?.type !== TARGET_TYPES.BUILDING && alertObj?.condition?.type && (
+                    {alertObj?.target?.type !== TARGET_TYPES.BUILDING && alertObj?.condition?.condition_metric && (
                         <>
                             <Typography.Subheader size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
 

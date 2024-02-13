@@ -4,19 +4,18 @@ export const TARGET_TYPES = Object.freeze({
 });
 
 export const defaultConditionObj = {
-    type: '',
-    timeInterval: 'month',
-    level: 'above',
-    filterType: 'number',
-    thresholdValue: '',
+    condition_metric: '',
+    condition_metric_aggregate: '',
+    condition_timespan: '',
+    condition_operator: '',
+    condition_threshold_type: '',
+    condition_threshold_value: '',
+    condition_threshold_reference: '',
+    condition_threshold_calculated: '',
     threshold50: true,
     threshold75: true,
     threshold90: true,
     threshold100: true,
-    thresholdName: '',
-    shortcyclingMinutes: '0',
-    thresholdPercentage: '0',
-    conditionDescription: '',
 };
 
 export const defaultRecurrenceObj = {
@@ -116,6 +115,40 @@ export const equipAlertConditions = [
     },
 ];
 
+export const aggregationList = [
+    {
+        label: 'Sum',
+        value: 'sum',
+    },
+    {
+        label: 'Average',
+        value: 'average',
+    },
+];
+
+export const timespanList = [
+    {
+        label: 'Year',
+        value: 'year',
+    },
+    {
+        label: 'Month',
+        value: 'month',
+    },
+    {
+        label: 'Week',
+        value: 'week',
+    },
+    {
+        label: 'Day',
+        value: 'day',
+    },
+    {
+        label: 'Hour',
+        value: 'hour',
+    },
+];
+
 export const timeIntervalsList = [
     {
         label: 'Month is',
@@ -123,7 +156,7 @@ export const timeIntervalsList = [
     },
 ];
 
-export const conditionLevelsList = [
+export const operatorsList = [
     {
         label: 'Above',
         value: 'above',
@@ -131,6 +164,171 @@ export const conditionLevelsList = [
     {
         label: 'Below',
         value: 'below',
+    },
+    {
+        label: 'Equal',
+        value: 'equal',
+    },
+];
+
+export const thresholdTypeList = [
+    {
+        label: 'Static Threshold Value',
+        value: 'static_threshold_value',
+    },
+    {
+        label: 'Calculated',
+        value: 'calculated',
+    },
+    {
+        label: 'Reference',
+        value: 'reference',
+    },
+];
+
+export const thresholdReferenceList = [
+    {
+        label: 'RLA',
+        value: 'rla',
+    },
+    {
+        label: 'FLA',
+        value: 'fla',
+    },
+];
+
+export const thresholdConditionTimespanList = [
+    {
+        label: 'Previous Month',
+        value: 'previous_month',
+        operationType: 'sum',
+        timespan: 'month',
+    },
+    {
+        label: 'Same Month of Previous Year',
+        value: 'same_month_previous_year',
+        operationType: 'sum',
+        timespan: 'month',
+    },
+    {
+        label: 'Previous Year',
+        value: 'previous_year',
+        operationType: 'sum',
+        timespan: 'year',
+    },
+    {
+        label: 'Previous Week',
+        value: 'previous_week',
+        operationType: 'sum',
+        timespan: 'week',
+    },
+    {
+        label: 'Same Week of Previous Month',
+        value: 'same_week_previous_month',
+        operationType: 'sum',
+        timespan: 'week',
+    },
+    {
+        label: 'Same Week of Previous Year',
+        value: 'same_week_previous_year',
+        operationType: 'sum',
+        timespan: 'week',
+    },
+    {
+        label: 'Previous Day',
+        value: 'previous_day',
+        operationType: 'sum',
+        timespan: 'day',
+    },
+    {
+        label: 'Same Day of Previous Week',
+        value: 'same_day_previous_week',
+        operationType: 'sum',
+        timespan: 'day',
+    },
+    {
+        label: 'Same Date of Previous Month',
+        value: 'same_date_previous_month',
+        operationType: 'sum',
+        timespan: 'day',
+    },
+    {
+        label: 'Previous Hour',
+        value: 'previous_hour',
+        operationType: 'sum',
+        timespan: 'hour',
+    },
+    {
+        label: 'Same Hour of Previous Day',
+        value: 'same_hour_previous_day',
+        operationType: 'sum',
+        timespan: 'hour',
+    },
+    {
+        label: 'Same Hour of Previous Week',
+        value: 'same_hour_previous_week',
+        operationType: 'sum',
+        timespan: 'hour',
+    },
+    {
+        label: 'Previous Year Monthly',
+        value: 'previous_year_monthly',
+        operationType: 'average',
+        timespan: 'month',
+    },
+    {
+        label: 'Previous Year',
+        value: 'previous_year',
+        operationType: 'average',
+        timespan: 'year',
+    },
+    {
+        label: 'Previous Month Weekly',
+        value: 'previous_month_weekly',
+        operationType: 'average',
+        timespan: 'week',
+    },
+    {
+        label: 'Previous Year of same Month Weekly',
+        value: 'previous_year_same_month_weekly',
+        operationType: 'average',
+        timespan: 'week',
+    },
+    {
+        label: 'Previous Week Daily',
+        value: 'previous_week_daily',
+        operationType: 'average',
+        timespan: 'day',
+    },
+    {
+        label: 'Previous Month Daily',
+        value: 'previous_month_daily',
+        operationType: 'average',
+        timespan: 'day',
+    },
+    {
+        label: 'Previous Year of same Week Daily',
+        value: 'previous_year_same_week_daily',
+        operationType: 'average',
+        timespan: 'day',
+    },
+    {
+        label: 'Previous Year of same Month Daily',
+        value: 'previous_year_same_month_daily',
+        operationType: 'average',
+        timespan: 'day',
+    },
+    {
+        label: 'Previous Day Hourly',
+        value: 'previous_day_hourly',
+        operationType: 'average',
+        timespan: 'hour',
+    },
+    {
+        label: 'Previous Week of same Day Hourly',
+        value: 'previous_week_same_day_hourly',
+        operationType: 'average',
+        timespan: 'hour',
     },
 ];
 
