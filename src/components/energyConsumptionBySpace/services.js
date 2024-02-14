@@ -3,6 +3,8 @@ import { getTopEnergyConsumptionBySpaceV2 } from '../../services/Network';
 // import mockData from './mock.json';
 
 export function fetchTopEnergyConsumptionBySpace(query) {
+    // return new Promise((res) => res(mockData));
+
     const { spaceId = [], bldgId = '', dateFrom = '', dateTo = '', tzInfo = 'US/Eastern' } = query;
 
     let params = '?';
