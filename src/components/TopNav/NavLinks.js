@@ -15,6 +15,7 @@ import { ReactComponent as User } from '../../assets/icon/user.svg';
 import { ReactComponent as Toggleon } from '../../assets/icon/toggleon.svg';
 import { ReactComponent as Telescope } from '../../assets/icon/telescope.svg';
 import { ReactComponent as Circlebolt } from '../../assets/icon/circle-bolt.svg';
+import { ReactComponent as Spaces } from '../../assets/icon/spaces-page.svg';
 
 import './styles.scss';
 
@@ -39,6 +40,7 @@ const NavLinks = () => {
     const CONTROL_TAB = '/control/plug-rules';
     const EXPLORE_TAB = '/explore-page/by-buildings';
     const SUPER_USER_ROUTE = '/super-user/accounts';
+    const SPACES_TAB = '/spaces';
 
     const configRoutes = [
         '/settings/general',
@@ -223,10 +225,28 @@ const NavLinks = () => {
         }
     };
 
+    const handleSpacesClick = () => {
+        const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+
+        if (bldgObj?.active) {
+            history.push({
+                pathname: `/spaces/${bldgObj.building_id}`,
+            });
+        } else {
+            updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
+            redirectToPortfolioPage();
+        }
+    };
+
     const handleSideNavChange = (componentName) => {
         if (componentName === 'Energy') {
             ComponentStore.update((s) => {
                 s.parent = 'portfolio';
+            });
+        }
+        if (componentName === 'Spaces') {
+            ComponentStore.update((s) => {
+                s.parent = 'spaces';
             });
         }
         if (componentName === 'Carbon') {
@@ -263,6 +283,9 @@ const NavLinks = () => {
             case ENERGY_TAB:
                 handleEnergyClick();
                 break;
+            case SPACES_TAB:
+                handleSpacesClick();
+                break;
             case CARBON_TAB:
                 handleCarbonClick();
                 break;
@@ -285,6 +308,7 @@ const NavLinks = () => {
 
         const tabVisibilityMap = {
             Energy: isEnergyTabVisible || isSuperUser,
+            Spaces: isEnergyTabVisible || isSuperUser,
             Carbon: isCarbonTabVisible || isSuperUser,
             Control: isControlTabVisible || isSuperUser,
             Explore: isExploreTabVisible || isSuperUser,
@@ -336,6 +360,7 @@ const NavLinks = () => {
                         }}>
                         <div className="d-flex align-items-center">
                             {item.name === 'Energy' && <Circlebolt className={`navbar-icons-style ${className}`} />}
+                            {item.name === 'Spaces' && <Spaces className={`navbar-icons-style ${className}`} />}
                             {item.name === 'Control' && <Toggleon className={`navbar-icons-style ${className}`} />}
                             {item.name === 'Carbon' && <CarbonCo2 className={`navbar-icons-style ${className}`} />}
                             {item.name === 'Explore' && <Telescope className={`navbar-icons-style ${className}`} />}

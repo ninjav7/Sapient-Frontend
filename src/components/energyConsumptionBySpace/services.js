@@ -5,7 +5,7 @@ import { getTopEnergyConsumptionBySpaceV2 } from '../../services/Network';
 export function fetchTopEnergyConsumptionBySpace(query) {
     // return new Promise((res) => res(mockData));
 
-    const { spaceId = [], bldgId = '', dateFrom = '', dateTo = '', tzInfo = 'US/Eastern' } = query;
+  const { spaceId = [], bldgId = '', dateFrom = '', dateTo = '', tzInfo = 'US/Eastern' } = query;
 
     let params = '?';
 
