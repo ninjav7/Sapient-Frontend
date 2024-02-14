@@ -904,7 +904,6 @@ const BreakerConfiguration = ({
         setFetchingSensorData(true);
         const promisesList = [];
         const payload = handleAPIRequestBody(start_date, end_date, timeZone, startTime, endTime);
-        console.log('SSR payload => ', payload);
 
         if (sensors_list.length >= 1) {
             const params = `?sensor_id=${sensors_list[0]?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;

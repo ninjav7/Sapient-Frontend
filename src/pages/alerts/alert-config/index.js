@@ -277,7 +277,6 @@ const AlertConfig = () => {
     const [activeTab, setActiveTab] = useState(0);
     const defaultAlertObjCloned = _.cloneDeep(defaultAlertObj);
     const [alertObj, setAlertObj] = useState(defaultAlertObjCloned);
-    console.log('SSR alertObj => ', alertObj);
 
     const [originalBldgsList, setOriginalBldgsList] = useState([]);
     const [originalEquipsList, setOriginalEquipsList] = useState([]);
