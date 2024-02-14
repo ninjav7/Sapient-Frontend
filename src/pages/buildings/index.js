@@ -897,23 +897,6 @@ const BuildingOverview = () => {
 
             <div className="bldg-page-grid-style">
                 <div>
-                    {/* <EnergyConsumptionBySpaceChart
-                        propTitle="Energy Consumption by Space (kWh)"
-                        propSubTitle="Top 15 Energy Consumers"
-                        spacesData={spacesData}
-                        stackedColumnChartData={spacesColumnChartData}
-                        stackedColumnChartCategories={spacesColumnCategories}
-                        spaceCategories={spacesDataCategories}
-                        xAxisObj={xAxisObj}
-                        timeZone={timeZone}
-                        dateFormat={dateFormat}
-                        daysCount={daysCount}
-                        isChartLoading={chartLoading}
-                        onMoreDetail={() => handleRouteChange('/energy/spaces')}
-                    />
-                     */}
-                    <Brick sizeInRem={1.5} />
-
                     {!isPlugOnly && (
                         <EnergyConsumptionByEndUse
                             title="Energy Consumption by End Use"
@@ -1014,6 +997,23 @@ const BuildingOverview = () => {
                             </div>
                         </>
                     )}
+
+                    <Brick sizeInRem={1.5} />
+
+                    <EnergyConsumptionBySpaceChart
+                        propTitle="Energy Consumption by Space (kWh)"
+                        propSubTitle="Top 15 Energy Consumers"
+                        spacesData={spacesData}
+                        stackedColumnChartData={spacesColumnChartData}
+                        stackedColumnChartCategories={spacesColumnCategories}
+                        spaceCategories={spacesDataCategories}
+                        xAxisObj={xAxisObj}
+                        timeZone={timeZone}
+                        dateFormat={dateFormat}
+                        daysCount={daysCount}
+                        isChartLoading={chartLoading}
+                        onMoreDetail={() => handleRouteChange('/energy/spaces')}
+                    />
                 </div>
 
                 <div className="w-100">
