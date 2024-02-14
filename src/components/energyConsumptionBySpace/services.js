@@ -2,10 +2,10 @@ import axiosInstance from '../../services/axiosInstance';
 import { getTopEnergyConsumptionBySpaceV2 } from '../../services/Network';
 // import mockData from './mock.json';
 
-export function fetchTopEnergyConsumptionBySpace(query) {
+export function fetchTopEnergyConsumptionBySpaceV2(query) {
     // return new Promise((res) => res(mockData));
 
-  const { spaceId = [], bldgId = '', dateFrom = '', dateTo = '', tzInfo = 'US/Eastern' } = query;
+    const { spaceId = [], bldgId = '', dateFrom = '', dateTo = '', tzInfo = 'US/Eastern' } = query;
 
     let params = '?';
 
