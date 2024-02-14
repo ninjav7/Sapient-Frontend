@@ -39,7 +39,7 @@ const AlertSettings = (props) => {
     const renderAlertType = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
-                {row?.target_description ?? '-'}
+                {row?.name ?? '-'}
             </Typography.Body>
         );
     };
@@ -188,7 +188,7 @@ const AlertSettings = (props) => {
                 headers={[
                     {
                         name: 'Alert Name',
-                        accessor: 'alert_name',
+                        accessor: 'name',
                         callbackValue: renderAlertType,
                     },
                     {
