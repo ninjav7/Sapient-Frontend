@@ -14,7 +14,6 @@ import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/help
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { fetchEnergyConsumptionBySpaceDataHelper } from '../../components/energyConsumptionBySpace/helpers';
 import SpacesListTable from './SpacesListTable';
-import SpaceDetailsPage from './spaceDetailsPage';
 
 const Spaces = () => {
     const { bldgId } = useParams();
@@ -155,8 +154,6 @@ const Spaces = () => {
             <Brick sizeInRem={1.5} /> */}
 
             <SpacesListTable colorfulSpaces={spacesData} />
-
-            {/* <SpaceDetailsPage /> */}
         </>
     );
 };
