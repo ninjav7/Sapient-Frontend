@@ -12,7 +12,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { UserStore } from '../../store/UserStore';
 import { useParams } from 'react-router-dom';
-import { fetchAllSpacesV2 } from './services';
+import { fetchSpaceListV2 } from './services';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 
@@ -45,7 +45,7 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         const query = { bldgId, dateFrom: dateFrom, dateTo, tzInfo: encodeURIComponent(timeZone) };
 
         try {
-            const data = await fetchAllSpacesV2(query);
+            const data = await fetchSpaceListV2(query);
 
             if (data && Array.isArray(data) && data.length !== 0) {
                 const updatedData = data.map((space) => {

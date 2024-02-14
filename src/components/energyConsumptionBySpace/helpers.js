@@ -1,8 +1,8 @@
-import { fetchTopEnergyConsumptionBySpace } from './services';
+import { fetchTopEnergyConsumptionBySpaceV2 } from './services';
 import { DATAVIZ_COLORS } from '../../constants/colors';
 
-export const fetchEnergyConsumptionBySpaceDataHelper = async ({ query }) => {
-    const spaces = await fetchTopEnergyConsumptionBySpace(query);
+export const fetchTopEnergyConsumptionBySpaceDataHelper = async ({ query }) => {
+    const spaces = await fetchTopEnergyConsumptionBySpaceV2(query);
 
     if (!(Array.isArray(spaces) && spaces.length > 0)) throw new Error();
 

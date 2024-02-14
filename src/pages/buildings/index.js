@@ -47,7 +47,7 @@ import './style.css';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { getEnergyConsumptionCSVExport } from '../../utils/tablesExport';
 import EnergyConsumptionBySpaceChart from '../../components/energyConsumptionBySpace';
-import { fetchEnergyConsumptionBySpaceDataHelper } from '../../components/energyConsumptionBySpace/helpers';
+import { fetchTopEnergyConsumptionBySpaceDataHelper } from '../../components/energyConsumptionBySpace/helpers';
 
 const BuildingOverview = () => {
     const { download } = useCSVDownload();
@@ -761,7 +761,7 @@ const BuildingOverview = () => {
         const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo };
 
         try {
-            const data = await fetchEnergyConsumptionBySpaceDataHelper({ query });
+            const data = await fetchTopEnergyConsumptionBySpaceDataHelper({ query });
 
             if (data?.newSpacesColumnCategories?.length > 0) setSpacesColumnCategories(data.newSpacesColumnCategories);
             if (data?.newSpacesData?.length > 0) setSpacesData(data.newSpacesData);
