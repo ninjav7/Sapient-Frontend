@@ -1,8 +1,8 @@
 import axiosInstance from '../../services/axiosInstance';
-import { getAllSpaces } from '../../services/Network';
+import { getSpaceListV2 } from '../../services/Network';
 // import mockData from './mock.json';
 
-export const fetchAllSpacesV2 = async (query) => {
+export const fetchSpaceListV2 = async (query) => {
     // return new Promise((res) => {
     //     setTimeout(() => res(mockData), 1000);
     // });
@@ -11,5 +11,5 @@ export const fetchAllSpacesV2 = async (query) => {
 
     const params = `?building_id=${bldgId}&date_from=${dateFrom}&date_to=${dateTo}&tz_info=${tzInfo}`;
 
-    return axiosInstance.get(`${getAllSpaces}${params}`).then((res) => res?.data);
+    return axiosInstance.get(`${getSpaceListV2}${params}`).then((res) => res?.data);
 };
