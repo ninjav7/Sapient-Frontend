@@ -366,6 +366,10 @@ const AlertConfig = () => {
             obj.condition.condition_threshold_timespan = '';
         }
 
+        if (key === 'condition_timespan' || key === 'condition_threshold_calculated') {
+            obj.condition.condition_threshold_timespan = '';
+        }
+
         obj.condition[key] = value;
         setAlertObj(obj);
     };

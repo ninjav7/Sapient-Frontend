@@ -31,12 +31,26 @@ import './styles.scss';
 const ConditionToolTip = ({ alertObj }) => {
     return (
         <div>
-            <UncontrolledTooltip placement="bottom" target={'tooltip-for-condition'}>
+            <UncontrolledTooltip placement="top" target={'tooltip-for-condition'}>
                 {`Select a Condition to setup ${alertObj?.target?.type} alert.`}
             </UncontrolledTooltip>
 
             <button type="button" className="tooltip-button" id={'tooltip-for-condition'}>
                 <TooltipIcon className="tooltip-icon" />
+            </button>
+        </div>
+    );
+};
+
+const TrigerAlertToolTip = () => {
+    return (
+        <div>
+            <UncontrolledTooltip placement="top" target={'tooltip-for-alert-trigger'}>
+                {`This alert will trigger if any of the thresholds are reached.`}
+            </UncontrolledTooltip>
+
+            <button type="button" className="tooltip-button" id={'tooltip-for-alert-trigger'}>
+                <TooltipIcon className="tooltip-icon mb-1" />
             </button>
         </div>
     );
@@ -149,29 +163,55 @@ const Condition = (props) => {
 
                     {targetType !== '' && condition?.condition_metric !== '' && (
                         <>
-                            <Brick sizeInRem={1} />
+                            <Brick sizeInRem={1.15} />
 
-                            <div className="w-25">
-                                <Typography.Body size={Typography.Sizes.md}>Operator</Typography.Body>
-                                <Brick sizeInRem={0.25} />
-                                <Select
-                                    id="operatorSelect"
-                                    placeholder="Select an Operator"
-                                    name="select"
-                                    options={operatorsList}
-                                    className="w-100"
-                                    onChange={(e) => {
-                                        handleConditionChange('condition_operator', e.value);
-                                    }}
-                                    currentValue={operatorsList.filter(
-                                        (option) => option.value === condition?.condition_operator
-                                    )}
-                                    isDisabled={targetType === ''}
-                                    menuPlacement="auto"
-                                />
+                            <div className="d-flex w-100" style={{ gap: '0.5rem' }}>
+                                <div className="w-100" style={{ marginTop: '.3125rem' }}>
+                                    <Typography.Body size={Typography.Sizes.md}>Operator</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
+                                    <Select
+                                        id="operatorSelect"
+                                        placeholder="Select an Operator"
+                                        name="select"
+                                        options={operatorsList}
+                                        className="w-100"
+                                        onChange={(e) => {
+                                            handleConditionChange('condition_operator', e.value);
+                                        }}
+                                        currentValue={operatorsList.filter(
+                                            (option) => option.value === condition?.condition_operator
+                                        )}
+                                        isDisabled={targetType === ''}
+                                        menuPlacement="auto"
+                                    />
+                                </div>
+
+                                <div className="w-100">
+                                    <div className="d-flex align-items-center">
+                                        <Typography.Body size={Typography.Sizes.md}>Trigger Alert at</Typography.Body>
+                                        <TrigerAlertToolTip />
+                                    </div>
+                                    <Brick sizeInRem={0.25} />
+                                    <Inputs
+                                        type="text"
+                                        placeholder="Enter trigger value"
+                                        className="custom-input-width w-100"
+                                        inputClassName="custom-input-field"
+                                        value={alertObj?.condition?.condition_trigger_alert}
+                                        onChange={(e) => {
+                                            const inputValue = e.target.value;
+                                            const sanitizedValue = inputValue.replace(/[^0-9,]/g, ''); // Remove any characters that are not numbers or commas
+                                            handleConditionChange('condition_trigger_alert', sanitizedValue);
+                                        }}
+                                    />
+                                    <Brick sizeInRem={0.25} />
+                                    <Typography.Body size={Typography.Sizes.sm}>
+                                        {`Enter a number or numbers (between 1 to 100), separated by a comma.`}
+                                    </Typography.Body>
+                                </div>
                             </div>
 
-                            <Brick sizeInRem={1} />
+                            <Brick sizeInRem={1.15} />
 
                             <div
                                 className={`d-flex ${
@@ -297,41 +337,6 @@ const Condition = (props) => {
                     )}
 
                     <Brick sizeInRem={targetType === TARGET_TYPES.BUILDING ? 1 : 0.5} />
-
-                    {targetType === TARGET_TYPES.BUILDING &&
-                        condition?.condition_metric &&
-                        condition?.condition_metric !== 'peak_demand' && (
-                            <div className="d-flex" style={{ gap: '1rem' }}>
-                                <Checkbox
-                                    label="Alert at 50%"
-                                    type="checkbox"
-                                    id="50-percent-alert"
-                                    name="50-percent-alert"
-                                    size="md"
-                                    checked={alertObj?.condition?.threshold50}
-                                    value={alertObj?.condition?.threshold50}
-                                    onClick={(e) => {
-                                        const value = e.target.value;
-                                        if (value === 'false') handleConditionChange('threshold50', true);
-                                        if (value === 'true') handleConditionChange('threshold50', false);
-                                    }}
-                                />
-                                <Checkbox
-                                    label="Alert at 75%"
-                                    type="checkbox"
-                                    id="75-percent-alert"
-                                    name="75-percent-alert"
-                                    size="md"
-                                    checked={alertObj?.condition?.threshold75}
-                                    value={alertObj?.condition?.threshold75}
-                                    onClick={(e) => {
-                                        const value = e.target.value;
-                                        if (value === 'false') handleConditionChange('threshold75', true);
-                                        if (value === 'true') handleConditionChange('threshold75', false);
-                                    }}
-                                />
-                            </div>
-                        )}
 
                     {alertObj?.target?.type !== TARGET_TYPES.BUILDING && alertObj?.condition?.condition_metric && (
                         <>

@@ -13,6 +13,7 @@ export const defaultConditionObj = {
     condition_threshold_reference: '',
     condition_threshold_calculated: '',
     condition_threshold_timespan: '',
+    condition_trigger_alert: '',
 };
 
 export const defaultRecurrenceObj = {
