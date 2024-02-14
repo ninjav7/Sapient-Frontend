@@ -39,7 +39,7 @@ const AlertSettings = (props) => {
     const renderAlertType = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.lg} style={{ color: colorPalette.primaryGray700 }}>
-                {row?.target_description ?? '-'}
+                {row?.name ?? '-'}
             </Typography.Body>
         );
     };
@@ -155,16 +155,18 @@ const AlertSettings = (props) => {
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = response?.message
-                            ? response?.message
-                            : res
-                            ? 'Unable to delete Alert.'
-                            : 'Unable to delete Alert due to Internal Server Error.';
+                        s.notificationMessage = 'Unable to delete Alert due to Internal Server Error.';
                         s.notificationType = 'error';
                     });
                 }
             })
-            .catch(() => {})
+            .catch(() => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to delete Alert due to Internal Server Error.';
+                    s.notificationType = 'error';
+                });
+            })
             .finally(() => {
                 setIsDeleting(false);
                 closeDeleteAlertModal();
@@ -186,7 +188,7 @@ const AlertSettings = (props) => {
                 headers={[
                     {
                         name: 'Alert Name',
-                        accessor: 'alert_name',
+                        accessor: 'name',
                         callbackValue: renderAlertType,
                     },
                     {

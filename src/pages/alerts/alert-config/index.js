@@ -36,6 +36,8 @@ import {
 } from '../constants';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
+import { convertStringToUniqueNumbers } from '../helpers';
+
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
@@ -69,7 +71,7 @@ const CreateAlertHeader = (props) => {
                             size={Button.Sizes.md}
                             type={Button.Type.secondaryGrey}
                             onClick={() => {
-                                history.push({ pathname: '/alerts/overview/open-alerts' });
+                                history.push({ pathname: '/alerts/overview/alert-settings' });
                             }}
                         />
                     ) : (
@@ -275,8 +277,8 @@ const AlertConfig = () => {
     const history = useHistory();
 
     const [activeTab, setActiveTab] = useState(0);
-
-    const [alertObj, setAlertObj] = useState(defaultAlertObj);
+    const defaultAlertObjCloned = _.cloneDeep(defaultAlertObj);
+    const [alertObj, setAlertObj] = useState(defaultAlertObjCloned);
 
     const [originalBldgsList, setOriginalBldgsList] = useState([]);
     const [originalEquipsList, setOriginalEquipsList] = useState([]);
@@ -306,23 +308,25 @@ const AlertConfig = () => {
 
     const isConditionSet = alertObj?.condition?.type !== '';
 
-    const isBuildingConditionsSet =
-        alertObj?.target?.type === TARGET_TYPES.BUILDING &&
-        (alertObj?.condition?.filterType === 'previous_month' ||
-            alertObj?.condition?.filterType === 'previous_year' ||
-            (alertObj?.condition?.filterType === 'number' && alertObj?.condition?.thresholdValue !== ''));
+    const isBasicConditionConfigured =
+        alertObj?.condition?.condition_metric !== '' &&
+        alertObj?.condition?.condition_metric_aggregate !== '' &&
+        alertObj?.condition?.condition_timespan !== '' &&
+        alertObj?.condition?.condition_operator !== '' &&
+        alertObj?.condition?.condition_threshold_type !== '';
 
-    const isEquipmentConditionsSet =
-        alertObj?.target?.type === TARGET_TYPES.EQUIPMENT &&
-        ((alertObj?.condition?.type === 'rms_current' && alertObj?.condition?.thresholdPercentage !== '') ||
-            (alertObj?.condition?.type === 'shortcycling' && alertObj?.condition?.shortcyclingMinutes !== '') ||
-            (alertObj?.condition?.type !== 'rms_current' &&
-                alertObj?.condition?.type !== 'shortcycling' &&
-                alertObj?.condition?.thresholdPercentage !== ''));
+    const isConditionsConfigured =
+        (alertObj?.condition?.condition_threshold_type === 'static_threshold_value' &&
+            alertObj?.condition?.condition_threshold_value !== '') ||
+        (alertObj?.condition?.condition_threshold_type === 'reference' &&
+            alertObj?.condition?.condition_threshold_reference !== '') ||
+        (alertObj?.condition?.condition_threshold_type === 'calculated' &&
+            alertObj?.condition?.condition_threshold_calculated !== '' &&
+            alertObj?.condition?.condition_threshold_timespan !== '');
 
     const isAlertNameSet = alertObj?.alert_name !== '';
     const isTargetConfigured = isBuildingConfigured || isEquipmentConfigured;
-    const isConditionConfigured = isConditionSet && (isBuildingConditionsSet || isEquipmentConditionsSet);
+    const isConditionConfigured = isConditionSet && isBasicConditionConfigured && isConditionsConfigured;
 
     const handleModalClick = (configType) => {
         if (configType) {
@@ -353,16 +357,18 @@ const AlertConfig = () => {
         let obj = Object.assign({}, alertObj);
 
         // When Condition Type change
-        if (key === 'type') {
+        if (key === 'condition_metric') {
             obj.condition = _.cloneDeep(defaultConditionObj);
         }
 
-        // When Condition filter-type change
-        if (key === 'filterType') {
-            obj.condition.threshold50 = true;
-            obj.condition.threshold75 = true;
-            obj.condition.threshold90 = true;
-            obj.condition.thresholdValue = '';
+        if (key === 'condition_threshold_type') {
+            obj.condition.condition_threshold_value = '';
+            obj.condition.condition_threshold_calculated = '';
+            obj.condition.condition_threshold_timespan = '';
+        }
+
+        if (key === 'condition_timespan' || key === 'condition_threshold_calculated') {
+            obj.condition.condition_threshold_timespan = '';
         }
 
         obj.condition[key] = value;
@@ -410,13 +416,13 @@ const AlertConfig = () => {
             if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
 
             if (alert_obj?.condition?.type === 'shortcycling') {
-                text += ` ${alert_obj?.condition?.shortcyclingMinutes} min.`;
+                text += ` ${alert_obj?.condition?.shortcyclingMinutes} min`;
             } else {
                 text += ` ${alert_obj?.condition?.thresholdPercentage}%`;
             }
         }
 
-        handleConditionChange('conditionDescription', `${text}.`);
+        handleConditionChange('conditionDescription', `${text}`);
     };
 
     const handleCreateAlert = async (alert_obj) => {
@@ -428,62 +434,51 @@ const AlertConfig = () => {
 
         // Alert Payload
         let payload = {
-            target_type: target?.type,
-            target_description: alert_obj?.alert_name,
+            name: alert_obj?.alert_name,
             description: alert_obj?.alert_description,
-            alert_condition_description: condition?.conditionDescription,
+            target_type: target?.type,
+            alert_condition_description: condition?.conditionDescription ?? '',
+            condition_metric: condition?.condition_metric,
+            condition_metric_aggregate: condition?.condition_metric_aggregate,
+            condition_timespan: condition?.condition_timespan,
+            condition_operator: condition?.condition_operator,
+            condition_threshold_type: condition?.condition_threshold_type,
         };
 
         // When Target type is 'Building'
         if (target?.type === TARGET_TYPES.BUILDING) {
-            let bldgObj = {
-                building_ids: target?.lists.map((el) => el?.value),
-                condition_metric: condition?.type,
-                condition_timespan: condition?.timeInterval,
-                condition_operator: condition?.level,
-                condition_threshold_type: condition?.filterType,
-                condition_alert_at: [],
-            };
+            payload.building_ids = target?.lists.map((el) => el?.value);
 
-            if (condition?.filterType === 'number') {
-                bldgObj.condition_threshold_value = +condition?.thresholdValue;
+            if (condition?.condition_metric === 'energy_consumption') {
+                if (condition?.threshold50) payload.condition_alert_at.push(50);
+                if (condition?.threshold75) payload.condition_alert_at.push(75);
+                if (condition?.threshold100) payload.condition_alert_at.push(100);
             }
-
-            if (condition?.threshold50) bldgObj.condition_alert_at.push(50);
-            if (condition?.threshold75) bldgObj.condition_alert_at.push(75);
-            if (condition?.threshold100) bldgObj.condition_alert_at.push(100);
-
-            payload = { ...payload, ...bldgObj };
         }
 
         // When Target type is 'Equipment'
         if (target?.type === TARGET_TYPES.EQUIPMENT) {
-            let equipObj = {
-                building_ids: [target?.buildingIDs],
-                equipment_ids: target?.lists.map((el) => el?.value),
-                condition_metric: condition?.type,
-                condition_operator: condition?.level,
-                condition_threshold_value: +condition?.thresholdPercentage,
-            };
+            payload.building_ids = [target?.buildingIDs];
+            payload.equipment_ids = target?.lists.map((el) => el?.value);
+        }
 
-            if (condition?.type === 'rms_current') {
-                equipObj.custom_threshold_type = condition?.thresholdName;
-            }
+        if (condition?.condition_threshold_type === 'static_threshold_value') {
+            payload.condition_threshold_value = +condition?.condition_threshold_value;
+        }
 
-            if (condition?.type !== 'shortcycling') {
-                equipObj.condition_threshold_type = 'percentage';
-            }
+        if (condition?.condition_threshold_type === 'calculated') {
+            payload.condition_threshold_calculated = condition?.condition_threshold_calculated;
+            payload.condition_threshold_timespan = condition?.condition_threshold_timespan;
+        }
 
-            if (condition?.type === 'shortcycling') {
-                equipObj.condition_threshold_value = +condition?.shortcyclingMinutes;
-            }
+        if (condition?.condition_threshold_type === 'reference') {
+            payload.condition_threshold_reference = condition?.condition_threshold_reference;
+        }
 
-            if (recurrence?.triggerAlert) {
-                equipObj.equipment_condition_recurrence = recurrence?.triggerAlert;
-                equipObj.equipment_condition_recurrence_minutes = +recurrence?.triggerAt;
-            }
-
-            payload = { ...payload, ...equipObj };
+        if (condition?.condition_trigger_alert) {
+            const uniqueNumbersArray = convertStringToUniqueNumbers(condition?.condition_trigger_alert);
+            if (uniqueNumbersArray) payload.condition_alert_at = uniqueNumbersArray.filter((number) => number <= 100);
+            if (!uniqueNumbersArray.includes(100)) payload.condition_alert_at.push(100);
         }
 
         // Notification and its recurrence setup
@@ -538,8 +533,8 @@ const AlertConfig = () => {
             .then((res) => {
                 const response = res?.data;
                 const { success: isSuccessful, data } = response;
-                if (isSuccessful && data) {
-                    // To set response as alertObj;
+                if (isSuccessful && data && data?.id) {
+                    console.log('SSR selected alert obj => ', data);
                 }
             })
             .catch(() => {})
@@ -553,7 +548,7 @@ const AlertConfig = () => {
             let newList = [
                 {
                     label: 'Alerts',
-                    path: '/alerts/overview/open-alerts',
+                    path: '/alerts/overview/alert-settings',
                     active: false,
                 },
                 {

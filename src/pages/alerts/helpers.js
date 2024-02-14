@@ -30,3 +30,22 @@ export const separateEmails = (inputString = '') => {
     const emailArray = inputString.split(',').map((email) => email.trim());
     return emailArray;
 };
+
+export function convertStringToUniqueNumbers(inputString) {
+    // Split the input string by commas
+    const stringArray = inputString.split(',');
+
+    // Convert string elements to numbers, remove duplicates, and filter non-numeric values
+    const uniqueNumbersArray = Array.from(
+        new Set(
+            stringArray
+                .map((str) => {
+                    const number = parseFloat(str.trim());
+                    return !isNaN(number) ? number : null; // Filter out non-numeric values
+                })
+                .filter((num) => num !== null)
+        )
+    ); // Remove null values (non-numeric)
+
+    return uniqueNumbersArray;
+}
