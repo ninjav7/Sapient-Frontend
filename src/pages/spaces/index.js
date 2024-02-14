@@ -77,7 +77,7 @@ const Spaces = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'Spaces',
+                    label: 'Building Overview',
                     path: '/energy/spaces',
                     active: true,
                 },
@@ -134,7 +134,7 @@ const Spaces = () => {
 
     return (
         <>
-            <Header title="Spaces" type="page" showExplore={true} />
+            <Header title="Building Overview" type="page" showExplore={true} />
             <Brick sizeInRem={1.5} />
 
             <EnergyConsumptionBySpaceChart
