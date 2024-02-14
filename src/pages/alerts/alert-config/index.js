@@ -36,6 +36,8 @@ import {
 } from '../constants';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
+import { convertStringToUniqueNumbers } from '../helpers';
+
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
@@ -441,7 +443,6 @@ const AlertConfig = () => {
             condition_timespan: condition?.condition_timespan,
             condition_operator: condition?.condition_operator,
             condition_threshold_type: condition?.condition_threshold_type,
-            condition_alert_at: [],
         };
 
         // When Target type is 'Building'
@@ -472,6 +473,12 @@ const AlertConfig = () => {
 
         if (condition?.condition_threshold_type === 'reference') {
             payload.condition_threshold_reference = condition?.condition_threshold_reference;
+        }
+
+        if (condition?.condition_trigger_alert) {
+            const uniqueNumbersArray = convertStringToUniqueNumbers(condition?.condition_trigger_alert);
+            if (uniqueNumbersArray) payload.condition_alert_at = uniqueNumbersArray.filter((number) => number <= 100);
+            if (!uniqueNumbersArray.includes(100)) payload.condition_alert_at.push(100);
         }
 
         // Notification and its recurrence setup
