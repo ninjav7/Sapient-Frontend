@@ -198,8 +198,8 @@ const ConfigureAlerts = (props) => {
     return (
         <>
             <Row>
-                <Col lg={12}>
-                    <div className="w-25">
+                <Col lg={9}>
+                    <div className="w-50">
                         <Typography.Body size={Typography.Sizes.md}>
                             Alert Name
                             <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
@@ -231,7 +231,7 @@ const ConfigureAlerts = (props) => {
             <Brick sizeInRem={2} />
 
             <Row>
-                <Col lg={12}>
+                <Col lg={9}>
                     <Condition {...props} />
 
                     <Brick sizeInRem={2} />
@@ -429,9 +429,9 @@ const AlertConfig = () => {
 
         // Alert Payload
         let payload = {
-            target_type: target?.type,
             name: alert_obj?.alert_name,
             description: alert_obj?.alert_description,
+            target_type: target?.type,
             alert_condition_description: condition?.conditionDescription ?? '',
             condition_metric: condition?.condition_metric,
             condition_metric_aggregate: condition?.condition_metric_aggregate,
@@ -441,32 +441,21 @@ const AlertConfig = () => {
             condition_alert_at: [],
         };
 
+        // When Target type is 'Building'
         if (target?.type === TARGET_TYPES.BUILDING) {
-            let bldgObj = {
-                building_ids: target?.lists.map((el) => el?.value),
-            };
-            payload = { ...payload, ...bldgObj };
-        }
+            payload.building_ids = target?.lists.map((el) => el?.value);
 
-        // When Target type is 'Equipment'
-        if (target?.type === TARGET_TYPES.EQUIPMENT) {
-            let equipObj = {
-                building_ids: [target?.buildingIDs],
-                equipment_ids: target?.lists.map((el) => el?.value),
-            };
-
-            payload = { ...payload, ...equipObj };
-        }
-
-        if (target?.type === TARGET_TYPES.BUILDING) {
-            if (condition?.condition_metric === 'peak_demand') {
-                if (condition?.threshold90) payload.condition_alert_at.push(90);
-                if (condition?.threshold100) payload.condition_alert_at.push(100);
-            } else {
+            if (condition?.condition_metric === 'energy_consumption') {
                 if (condition?.threshold50) payload.condition_alert_at.push(50);
                 if (condition?.threshold75) payload.condition_alert_at.push(75);
                 if (condition?.threshold100) payload.condition_alert_at.push(100);
             }
+        }
+
+        // When Target type is 'Equipment'
+        if (target?.type === TARGET_TYPES.EQUIPMENT) {
+            payload.building_ids = [target?.buildingIDs];
+            payload.equipment_ids = target?.lists.map((el) => el?.value);
         }
 
         if (condition?.condition_threshold_type === 'static_threshold_value') {

@@ -143,27 +143,41 @@ const Condition = (props) => {
                                         menuPlacement="auto"
                                     />
                                 </div>
+                            </>
+                        )}
+                    </div>
 
-                                <div className="w-100">
-                                    <Typography.Body size={Typography.Sizes.md}>Operator</Typography.Body>
-                                    <Brick sizeInRem={0.25} />
-                                    <Select
-                                        id="operatorSelect"
-                                        placeholder="Select an Operator"
-                                        name="select"
-                                        options={operatorsList}
-                                        className="w-100"
-                                        onChange={(e) => {
-                                            handleConditionChange('condition_operator', e.value);
-                                        }}
-                                        currentValue={operatorsList.filter(
-                                            (option) => option.value === condition?.condition_operator
-                                        )}
-                                        isDisabled={targetType === ''}
-                                        menuPlacement="auto"
-                                    />
-                                </div>
+                    {targetType !== '' && condition?.condition_metric !== '' && (
+                        <>
+                            <Brick sizeInRem={1} />
 
+                            <div className="w-25">
+                                <Typography.Body size={Typography.Sizes.md}>Operator</Typography.Body>
+                                <Brick sizeInRem={0.25} />
+                                <Select
+                                    id="operatorSelect"
+                                    placeholder="Select an Operator"
+                                    name="select"
+                                    options={operatorsList}
+                                    className="w-100"
+                                    onChange={(e) => {
+                                        handleConditionChange('condition_operator', e.value);
+                                    }}
+                                    currentValue={operatorsList.filter(
+                                        (option) => option.value === condition?.condition_operator
+                                    )}
+                                    isDisabled={targetType === ''}
+                                    menuPlacement="auto"
+                                />
+                            </div>
+
+                            <Brick sizeInRem={1} />
+
+                            <div
+                                className={`d-flex ${
+                                    condition?.condition_threshold_type === 'calculated' ? 'w-100' : 'w-75'
+                                }`}
+                                style={{ gap: '0.5rem' }}>
                                 <div className="w-100">
                                     <Typography.Body size={Typography.Sizes.md}>Threshold Type</Typography.Body>
                                     <Brick sizeInRem={0.25} />
@@ -225,57 +239,59 @@ const Condition = (props) => {
                                         />
                                     </div>
                                 )}
-                            </>
-                        )}
-                    </div>
 
-                    {condition?.condition_threshold_type === 'calculated' && (
-                        <>
-                            <Brick sizeInRem={1.5} />
-                            <div className="d-flex w-50" style={{ gap: '0.5rem' }}>
-                                <div className="w-100">
-                                    <Typography.Body size={Typography.Sizes.md}>Threshold Calculated</Typography.Body>
-                                    <Brick sizeInRem={0.25} />
-                                    <Select
-                                        id="thresholdTypeSelect"
-                                        placeholder="Select Threshold Type"
-                                        name="select"
-                                        options={aggregationList}
-                                        className="w-100"
-                                        onChange={(e) => {
-                                            handleConditionChange('condition_threshold_calculated', e.value);
-                                        }}
-                                        currentValue={aggregationList.filter(
-                                            (option) => option.value === condition?.condition_threshold_calculated
-                                        )}
-                                        isDisabled={targetType === ''}
-                                        menuPlacement="auto"
-                                    />
-                                </div>
+                                {condition?.condition_threshold_type === 'calculated' && (
+                                    <>
+                                        <div className="w-100">
+                                            <Typography.Body size={Typography.Sizes.md}>
+                                                Threshold Calculated
+                                            </Typography.Body>
+                                            <Brick sizeInRem={0.25} />
+                                            <Select
+                                                id="thresholdTypeSelect"
+                                                placeholder="Select Threshold Type"
+                                                name="select"
+                                                options={aggregationList}
+                                                className="w-100"
+                                                onChange={(e) => {
+                                                    handleConditionChange('condition_threshold_calculated', e.value);
+                                                }}
+                                                currentValue={aggregationList.filter(
+                                                    (option) =>
+                                                        option.value === condition?.condition_threshold_calculated
+                                                )}
+                                                isDisabled={targetType === ''}
+                                                menuPlacement="auto"
+                                            />
+                                        </div>
 
-                                <div className="w-100">
-                                    <Typography.Body size={Typography.Sizes.md}>Threshold Timespan</Typography.Body>
-                                    <Brick sizeInRem={0.25} />
-                                    <Select
-                                        id="thresholdTypeSelect"
-                                        placeholder="Select Threshold Type"
-                                        name="select"
-                                        options={thresholdConditionTimespanList.filter(
-                                            (el) =>
-                                                el?.timespan === condition?.condition_timespan &&
-                                                el?.operationType === condition?.condition_threshold_calculated
-                                        )}
-                                        className="w-100"
-                                        onChange={(e) => {
-                                            handleConditionChange('condition_threshold_timespan', e.value);
-                                        }}
-                                        currentValue={thresholdConditionTimespanList.filter(
-                                            (option) => option.value === condition?.condition_threshold_timespan
-                                        )}
-                                        isDisabled={targetType === ''}
-                                        menuPlacement="auto"
-                                    />
-                                </div>
+                                        <div className="w-100">
+                                            <Typography.Body size={Typography.Sizes.md}>
+                                                Threshold Timespan
+                                            </Typography.Body>
+                                            <Brick sizeInRem={0.25} />
+                                            <Select
+                                                id="thresholdTypeSelect"
+                                                placeholder="Select Threshold Type"
+                                                name="select"
+                                                options={thresholdConditionTimespanList.filter(
+                                                    (el) =>
+                                                        el?.timespan === condition?.condition_timespan &&
+                                                        el?.operationType === condition?.condition_threshold_calculated
+                                                )}
+                                                className="w-100"
+                                                onChange={(e) => {
+                                                    handleConditionChange('condition_threshold_timespan', e.value);
+                                                }}
+                                                currentValue={thresholdConditionTimespanList.filter(
+                                                    (option) => option.value === condition?.condition_threshold_timespan
+                                                )}
+                                                isDisabled={targetType === ''}
+                                                menuPlacement="auto"
+                                            />
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </>
                     )}
@@ -316,23 +332,6 @@ const Condition = (props) => {
                                 />
                             </div>
                         )}
-
-                    {targetType === TARGET_TYPES.BUILDING && condition?.condition_metric === 'peak_demand' && (
-                        <Checkbox
-                            label="Alert at 90%"
-                            type="checkbox"
-                            id="90-percent-alert"
-                            name="90-percent-alert"
-                            size="md"
-                            checked={alertObj?.condition?.threshold90}
-                            value={alertObj?.condition?.threshold90}
-                            onClick={(e) => {
-                                const value = e.target.value;
-                                if (value === 'false') handleConditionChange('threshold90', true);
-                                if (value === 'true') handleConditionChange('threshold90', false);
-                            }}
-                        />
-                    )}
 
                     {alertObj?.target?.type !== TARGET_TYPES.BUILDING && alertObj?.condition?.condition_metric && (
                         <>

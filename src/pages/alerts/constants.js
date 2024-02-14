@@ -13,10 +13,6 @@ export const defaultConditionObj = {
     condition_threshold_reference: '',
     condition_threshold_calculated: '',
     condition_threshold_timespan: '',
-    threshold50: true,
-    threshold75: true,
-    threshold90: true,
-    threshold100: true,
 };
 
 export const defaultRecurrenceObj = {
@@ -44,7 +40,6 @@ export const defaultAlertObj = {
     recurrence: defaultRecurrenceObj,
     condition: {
         ...defaultConditionObj,
-        submitted: false,
     },
     notification: {
         ...defaultNotificationObj,
@@ -55,15 +50,15 @@ export const defaultAlertObj = {
 // Building Alert Conditions
 export const bldgAlertConditions = [
     {
-        label: 'Energy consumption for',
+        label: 'Energy consumption',
         value: 'energy_consumption',
     },
     {
-        label: 'Peak demand for',
+        label: 'Peak demand',
         value: 'peak_demand',
     },
     {
-        label: 'Carbon for',
+        label: 'Carbon',
         value: 'carbon',
     },
 ];
@@ -152,7 +147,7 @@ export const timespanList = [
 
 export const timeIntervalsList = [
     {
-        label: 'Month is',
+        label: 'Month',
         value: 'month',
     },
 ];
@@ -181,10 +176,11 @@ export const thresholdTypeList = [
         label: 'Calculated',
         value: 'calculated',
     },
-    {
-        label: 'Reference',
-        value: 'reference',
-    },
+    // Commented for Alert V1 release
+    // {
+    //     label: 'Reference',
+    //     value: 'reference',
+    // },
 ];
 
 export const thresholdReferenceList = [
