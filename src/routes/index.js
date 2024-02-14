@@ -135,14 +135,6 @@ const portfolioRoutes = {
             parent: 'buildings',
         },
         {
-            path: '/energy/spaces/:bldgId',
-            name: 'Spaces',
-            component: Spaces,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'buildings',
-        },
-        {
             path: '/energy/end-uses/:endUseType/:bldgId',
             name: 'EndUseType',
             component: EndUseType,
@@ -172,6 +164,34 @@ const portfolioRoutes = {
             route: PrivateRoute,
             visibility: false,
         },
+    ],
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+};
+
+// Spaces Routes
+const spacesRoutes = {
+    path: '/spaces',
+    name: 'Spaces',
+    component: Spaces,
+    visibility: true,
+    children: [
+        {
+            path: '/spaces/:bldgId',
+            name: 'Spaces',
+            component: Spaces,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'spaces',
+        },
+        // {
+        //     path: '/carbon/building/overview/:bldgId',
+        //     name: 'Building Overview',
+        //     component: CarbonBuilding,
+        //     route: PrivateRoute,
+        //     visibility: true,
+        //     parent: 'carbon-buildings',
+        // },
     ],
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
@@ -606,6 +626,7 @@ const flattenRoutes = (routes) => {
 const allRoutes = [
     rootRoute,
     portfolioRoutes,
+    spacesRoutes,
     settingsRoutes,
     alertsRoutes,
     controlRoutes,
@@ -618,6 +639,7 @@ const allRoutes = [
 
 const authProtectedRoutes = [
     portfolioRoutes,
+    spacesRoutes,
     settingsRoutes,
     alertsRoutes,
     carbonRoutes,
