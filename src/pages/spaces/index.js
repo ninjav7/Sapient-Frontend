@@ -156,7 +156,7 @@ const Spaces = () => {
 
             <SpacesListTable colorfulSpaces={spacesData} />
 
-            <SpaceDetailsPage />
+            {/* <SpaceDetailsPage /> */}
         </>
     );
 };
