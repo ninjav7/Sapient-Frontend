@@ -40,6 +40,7 @@ import { convertStringToUniqueNumbers } from '../helpers';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
+import ResetTargetTypeAlert from './ResetTargetTypeAlert';
 
 const CreateAlertHeader = (props) => {
     const {
@@ -297,6 +298,11 @@ const AlertConfig = () => {
     const [showEquipConfigModal, setEquipConfigModalStatus] = useState(false);
     const closeEquipConfigModel = () => setEquipConfigModalStatus(false);
     const openEquipConfigModel = () => setEquipConfigModalStatus(true);
+
+    // Reset Target Type Modal
+    const [showResetTargetModal, setResetTargetModalStatus] = useState(false);
+    const closeResetTargetModel = () => setResetTargetModalStatus(false);
+    const openResetTargetModel = () => setResetTargetModalStatus(true);
 
     const isBuildingConfigured =
         alertObj?.target?.type === TARGET_TYPES.BUILDING && alertObj?.target?.lists.length !== 0;
@@ -621,6 +627,8 @@ const AlertConfig = () => {
                         openEquipConfigModel={openEquipConfigModel}
                         setAlertObj={setAlertObj}
                         handleChange={handleChange}
+                        showResetTargetModal={showResetTargetModal}
+                        openResetTargetModel={openResetTargetModel}
                     />
                 )}
 
@@ -642,11 +650,19 @@ const AlertConfig = () => {
                 handleTargetChange={handleTargetChange}
                 setOriginalBldgsList={setOriginalBldgsList}
             />
+
             <EquipConfig
                 isModalOpen={showEquipConfigModal}
                 handleModalClose={closeEquipConfigModel}
                 alertObj={alertObj}
                 handleTargetChange={handleTargetChange}
+            />
+
+            <ResetTargetTypeAlert
+                isModalOpen={showResetTargetModal}
+                handleModalClose={closeResetTargetModel}
+                alertObj={alertObj}
+                setAlertObj={setAlertObj}
             />
         </React.Fragment>
     );
