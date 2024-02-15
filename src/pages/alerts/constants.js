@@ -67,35 +67,35 @@ export const bldgAlertConditions = [
 // Equipment Alert Conditions
 export const equipAlertConditions = [
     {
-        label: 'Energy consumption is',
+        label: 'Energy consumption',
         value: 'energy_consumption',
     },
     {
-        label: 'Power is',
+        label: 'Power',
         value: 'power',
     },
     {
-        label: 'RMS Current is',
+        label: 'RMS Current',
         value: 'sensor_rms_current',
     },
     {
-        label: 'Min Current is',
+        label: 'Min Current',
         value: 'sensor_min_current',
     },
     {
-        label: 'Max Current is',
+        label: 'Max Current',
         value: 'sensor_max_current',
     },
     {
-        label: 'Average Equipment Current is',
+        label: 'Average Equipment Current',
         value: 'average_equipment_current',
     },
     {
-        label: 'Phase Imbalance Current is',
+        label: 'Phase Imbalance Current',
         value: 'phase_imbalance_current',
     },
     {
-        label: 'Phase Imbalance Percent is',
+        label: 'Phase Imbalance Percent',
         value: 'phase_imbalance_percent',
     },
     {

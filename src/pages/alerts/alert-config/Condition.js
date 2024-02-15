@@ -42,7 +42,7 @@ const ConditionToolTip = ({ alertObj }) => {
     );
 };
 
-const TrigerAlertToolTip = () => {
+const TriggerAlertToolTip = () => {
     return (
         <div>
             <UncontrolledTooltip placement="top" target={'tooltip-for-alert-trigger'}>
@@ -96,7 +96,8 @@ const Condition = (props) => {
                     <Brick sizeInRem={1.25} />
 
                     <div className="d-flex" style={{ gap: '0.5rem' }}>
-                        <div className={targetType === '' || condition?.condition_metric === '' ? `w-25` : `w-100`}>
+                        <div
+                            style={{ width: targetType === '' || condition?.condition_metric === '' ? `33%` : `100%` }}>
                             <Typography.Body size={Typography.Sizes.md}>Metric</Typography.Body>
                             <Brick sizeInRem={0.25} />
                             <Select
@@ -165,50 +166,24 @@ const Condition = (props) => {
                         <>
                             <Brick sizeInRem={1.15} />
 
-                            <div className="d-flex w-100" style={{ gap: '0.5rem' }}>
-                                <div className="w-100" style={{ marginTop: '.3125rem' }}>
-                                    <Typography.Body size={Typography.Sizes.md}>Operator</Typography.Body>
-                                    <Brick sizeInRem={0.25} />
-                                    <Select
-                                        id="operatorSelect"
-                                        placeholder="Select an Operator"
-                                        name="select"
-                                        options={operatorsList}
-                                        className="w-100"
-                                        onChange={(e) => {
-                                            handleConditionChange('condition_operator', e.value);
-                                        }}
-                                        currentValue={operatorsList.filter(
-                                            (option) => option.value === condition?.condition_operator
-                                        )}
-                                        isDisabled={targetType === ''}
-                                        menuPlacement="auto"
-                                    />
-                                </div>
-
-                                <div className="w-100">
-                                    <div className="d-flex align-items-center">
-                                        <Typography.Body size={Typography.Sizes.md}>Trigger Alert at</Typography.Body>
-                                        <TrigerAlertToolTip />
-                                    </div>
-                                    <Brick sizeInRem={0.25} />
-                                    <Inputs
-                                        type="text"
-                                        placeholder="Enter trigger value"
-                                        className="custom-input-width w-100"
-                                        inputClassName="custom-input-field"
-                                        value={alertObj?.condition?.condition_trigger_alert}
-                                        onChange={(e) => {
-                                            const inputValue = e.target.value;
-                                            const sanitizedValue = inputValue.replace(/[^0-9,]/g, ''); // Remove any characters that are not numbers or commas
-                                            handleConditionChange('condition_trigger_alert', sanitizedValue);
-                                        }}
-                                    />
-                                    <Brick sizeInRem={0.25} />
-                                    <Typography.Body size={Typography.Sizes.sm}>
-                                        {`Enter a number or numbers (between 1 to 100), separated by a comma.`}
-                                    </Typography.Body>
-                                </div>
+                            <div style={{ width: '33%' }}>
+                                <Typography.Body size={Typography.Sizes.md}>Operator</Typography.Body>
+                                <Brick sizeInRem={0.25} />
+                                <Select
+                                    id="operatorSelect"
+                                    placeholder="Select an Operator"
+                                    name="select"
+                                    options={operatorsList}
+                                    className="w-100"
+                                    onChange={(e) => {
+                                        handleConditionChange('condition_operator', e.value);
+                                    }}
+                                    currentValue={operatorsList.filter(
+                                        (option) => option.value === condition?.condition_operator
+                                    )}
+                                    isDisabled={targetType === ''}
+                                    menuPlacement="auto"
+                                />
                             </div>
 
                             <Brick sizeInRem={1.15} />
@@ -244,7 +219,7 @@ const Condition = (props) => {
                                         <Brick sizeInRem={0.25} />
                                         <Inputs
                                             type="number"
-                                            placeholder="Enter value"
+                                            placeholder="Enter Threshold value"
                                             className="custom-input-width w-100"
                                             inputClassName="custom-input-field"
                                             value={alertObj?.condition?.condition_threshold_value}
@@ -284,12 +259,12 @@ const Condition = (props) => {
                                     <>
                                         <div className="w-100">
                                             <Typography.Body size={Typography.Sizes.md}>
-                                                Threshold Calculated
+                                                Threshold Aggregation
                                             </Typography.Body>
                                             <Brick sizeInRem={0.25} />
                                             <Select
                                                 id="thresholdTypeSelect"
-                                                placeholder="Select Threshold Type"
+                                                placeholder="Select Threshold Aggregation"
                                                 name="select"
                                                 options={aggregationList}
                                                 className="w-100"
@@ -307,12 +282,12 @@ const Condition = (props) => {
 
                                         <div className="w-100">
                                             <Typography.Body size={Typography.Sizes.md}>
-                                                Threshold Timespan
+                                                Threshold Calculation
                                             </Typography.Body>
                                             <Brick sizeInRem={0.25} />
                                             <Select
                                                 id="thresholdTypeSelect"
-                                                placeholder="Select Threshold Type"
+                                                placeholder="Select Threshold Calculation"
                                                 name="select"
                                                 options={thresholdConditionTimespanList.filter(
                                                     (el) =>
@@ -333,10 +308,37 @@ const Condition = (props) => {
                                     </>
                                 )}
                             </div>
+
+                            <Brick sizeInRem={1.15} />
+
+                            <div className="w-50">
+                                <div className="d-flex align-items-center">
+                                    <Typography.Body size={Typography.Sizes.md}>Trigger Alert %</Typography.Body>
+                                    <TriggerAlertToolTip />
+                                </div>
+                                <Brick sizeInRem={0.25} />
+                                <Inputs
+                                    type="text"
+                                    placeholder="Enter Trigger Alert value"
+                                    className="custom-input-width w-100"
+                                    inputClassName="custom-input-field"
+                                    value={alertObj?.condition?.condition_trigger_alert}
+                                    onChange={(e) => {
+                                        const inputValue = e.target.value;
+                                        const sanitizedValue = inputValue.replace(/[^0-9,]/g, ''); // Remove any characters that are not numbers or commas
+                                        handleConditionChange('condition_trigger_alert', sanitizedValue);
+                                    }}
+                                    elementEnd={<MinutesSVG />}
+                                />
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Body size={Typography.Sizes.sm}>
+                                    {`Enter a number or numbers (between 1 to 100), separated by a comma.`}
+                                </Typography.Body>
+                            </div>
                         </>
                     )}
 
-                    <Brick sizeInRem={targetType === TARGET_TYPES.BUILDING ? 1 : 0.5} />
+                    {/* <Brick sizeInRem={targetType === TARGET_TYPES.BUILDING ? 1 : 0.5} />
 
                     {alertObj?.target?.type !== TARGET_TYPES.BUILDING && alertObj?.condition?.condition_metric && (
                         <>
@@ -387,7 +389,7 @@ const Condition = (props) => {
 
                             <Brick sizeInRem={0.25} />
                         </>
-                    )}
+                    )} */}
                 </div>
             </CardBody>
         </div>
