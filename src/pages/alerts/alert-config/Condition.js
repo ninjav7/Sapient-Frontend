@@ -166,7 +166,7 @@ const Condition = (props) => {
                         <>
                             <Brick sizeInRem={1.15} />
 
-                            <div className="w-50">
+                            <div style={{ width: '33%' }}>
                                 <Typography.Body size={Typography.Sizes.md}>Operator</Typography.Body>
                                 <Brick sizeInRem={0.25} />
                                 <Select
