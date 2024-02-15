@@ -11,7 +11,7 @@ import { Button } from '../../../sharedComponents/button';
 
 import { ReactComponent as BanSVG } from '../../../assets/icon/ban.svg';
 import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
-import { ReactComponent as MinutesSVG } from '../../../assets/icon/minutes.svg';
+import { ReactComponent as MINUTE_SVG } from '../../../assets/icon/minutes.svg';
 import { ReactComponent as UserProfileSVG } from '../../../assets/icon/user-profile.svg';
 import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
@@ -303,7 +303,7 @@ const NotificationMethod = (props) => {
                                                             onChange={(e) => {
                                                                 handleRecurrenceChange('resendAt', e.target.value);
                                                             }}
-                                                            elementEnd={<MinutesSVG />}
+                                                            elementEnd={<MINUTE_SVG />}
                                                             disabled={!alertObj?.recurrence?.resendAlert}
                                                         />
                                                     </div>
