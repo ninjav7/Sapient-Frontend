@@ -40,7 +40,7 @@ const Target = (props) => {
         openEquipConfigModel,
         originalBldgsList,
         originalEquipsList,
-        setAlertObj,
+        openResetTargetModel,
     } = props;
 
     const [selectedBldgsForEquip, setSelectedBldgsForEquip] = useState([]);
@@ -65,15 +65,8 @@ const Target = (props) => {
                         <Typography.Subheader
                             size={Typography.Sizes.lg}
                             className="reset-target-style"
-                            onClick={() => {
-                                const deepCloneNewAlertObj = _.cloneDeep(defaultAlertObj);
-                                setAlertObj({
-                                    ...deepCloneNewAlertObj,
-                                    alert_name: alertObj?.alert_name,
-                                    alert_description: alertObj?.alert_description,
-                                });
-                            }}>
-                            {`Reset Target`}
+                            onClick={openResetTargetModel}>
+                            {`Reset Target Type`}
                         </Typography.Subheader>
                     )}
                 </div>
