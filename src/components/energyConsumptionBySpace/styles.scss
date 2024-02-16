@@ -3,6 +3,12 @@
 .spacedata-type-widget-wrapper {
     border: 0.0625rem solid $primary-gray-200;
     border-radius: 0.5rem;
+
+    &--half {
+        flex: 0 0 48%;
+        max-width: 48%;
+        margin: 0 12px;
+    }
 }
 
 .spacedata-type {

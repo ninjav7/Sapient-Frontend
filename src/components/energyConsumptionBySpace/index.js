@@ -41,6 +41,7 @@ const EnergyConsumptionBySpaceChart = (props) => {
         plotBands: plotBandsProp,
         upperLegendsProps = {},
         onMoreDetail,
+        half = false,
     } = props;
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
@@ -77,8 +78,10 @@ const EnergyConsumptionBySpaceChart = (props) => {
         }
     };
 
+    const classes = `spacedata-type-widget-wrapper ${half && 'spacedata-type-widget-wrapper--half'}`;
+
     return (
-        <div className="spacedata-type-widget-wrapper">
+        <div className={classes}>
             <div className="pr-3 pt-3 pl-3">
                 <div className="d-flex justify-content-between mb-4">
                     <div>
@@ -163,6 +166,7 @@ EnergyConsumptionBySpaceChart.propTypes = {
     isChartLoading: PropTypes.bool.isRequired,
     propTitle: PropTypes.string.isRequired,
     propSubTitle: PropTypes.string.isRequired,
+    half: PropTypes.bool.isRequired,
 };
 
 EnergyConsumptionBySpaceCategories.propTypes = {

@@ -3,7 +3,7 @@ import Brick from '../../sharedComponents/brick';
 import { Col, UncontrolledTooltip, Progress } from 'reactstrap';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import SkeletonLoader from '../../components/SkeletonLoader';
-import { formatConsumptionValue, handleAPIRequestParams, pageListSizes } from '../../helpers/helpers';
+import { formatConsumptionValue, pageListSizes } from '../../helpers/helpers';
 import Typography from '../../sharedComponents/typography';
 import { UNITS } from '../../constants/units';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
@@ -15,13 +15,12 @@ import { useParams } from 'react-router-dom';
 import { fetchSpaceListV2 } from './services';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
+import { Link } from 'react-router-dom';
 
 const SpacesListTable = ({ colorfulSpaces }) => {
     const { download } = useCSVDownload();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
-    const startTime = DateRangeStore.useState((s) => s.startTime);
-    const endTime = DateRangeStore.useState((s) => s.endTime);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const { bldgId } = useParams();
@@ -41,8 +40,7 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         setSpacesLoading(true);
         // const orderedBy = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
         // const sortedBy = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
-        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
-        const query = { bldgId, dateFrom: dateFrom, dateTo, tzInfo: encodeURIComponent(timeZone) };
+        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo: timeZone };
 
         try {
             const data = await fetchSpaceListV2(query);
@@ -74,7 +72,7 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         if (!bldgId || startDate === null || endDate === null) return;
 
         fetchEquipDataList();
-    }, [startDate, endDate, startTime, endTime, bldgId, search, sortBy, pageSize, pageNo, colorfulSpaces]);
+    }, [startDate, endDate, bldgId, search, sortBy, pageSize, pageNo, colorfulSpaces]);
 
     const handleDownloadCSV = async () => {
         setDownloadingCSVData(true);
@@ -103,20 +101,11 @@ const SpacesListTable = ({ colorfulSpaces }) => {
 
     const renderSpaceName = useCallback((row) => {
         return (
-            <div style={{ fontSize: 0 }}>
-                <a
-                    className="typography-wrapper link mouse-pointer"
-                    onClick={() => {
-                        setEquipmentFilter({
-                            equipment_id: row?.equipment_id,
-                            equipment_name: row?.equipment_name,
-                            device_type: row?.device_type,
-                        });
-                    }}>
-                    {row?.equipment_name !== '' ? row?.equipment_name : '-'}
-                </a>
-                <Brick sizeInPixels={3} />
-            </div>
+            <Link to={`/spaces/${bldgId}/details/${row?.space_id}`}>
+                <p className="m-0">
+                    <u>{row?.space_name !== '' ? row?.space_name : '-'}</u>
+                </p>
+            </Link>
         );
     });
 
@@ -141,11 +130,10 @@ const SpacesListTable = ({ colorfulSpaces }) => {
     });
 
     const renderPerChange = useCallback((row) => {
-        const change = row?.consumption?.change;
+        const change = row?.consumption?.changes;
 
         return (
-            change &&
-            Number.isInteger(change) && (
+            Number.isFinite(change) && (
                 <TrendsBadge
                     value={Math.abs(Math.round(change))}
                     type={
@@ -161,7 +149,11 @@ const SpacesListTable = ({ colorfulSpaces }) => {
     });
 
     const renderSquareFootage = useCallback((row) => {
-        return <Typography.Body size={Typography.Sizes.md}>{row?.square_footage + ' ' + 'm^2'}</Typography.Body>;
+        return (
+            <Typography.Body size={Typography.Sizes.md}>
+                {row?.square_footage ? row?.square_footage.toLocaleString() + ' ' + 'm^2' : '0' + ' ' + 'm^2'}
+            </Typography.Body>
+        );
     });
 
     const renderTags = useCallback((row) => {
@@ -197,6 +189,7 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         {
             name: 'Name',
             accessor: 'space_name',
+            callbackValue: renderSpaceName,
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
@@ -207,7 +200,7 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         },
         {
             name: '% Change',
-            accessor: 'change',
+            accessor: 'changes',
             callbackValue: renderPerChange,
             onSort: (method, name) => setSortBy({ method, name }),
         },

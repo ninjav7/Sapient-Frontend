@@ -137,21 +137,39 @@ const Spaces = () => {
     return (
         <>
             <Header title="Building Overview" type="page" showExplore={true} />
-            <Brick sizeInRem={1.5} />
+            <Brick sizeInRem={3} />
 
-            <EnergyConsumptionBySpaceChart
-                propTitle="Energy Consumption (kWh)"
-                propSubTitle="Top Energy Consumers"
-                spacesData={spacesData}
-                stackedColumnChartData={spacesColumnChartData}
-                stackedColumnChartCategories={spacesColumnCategories}
-                spaceCategories={spacesDataCategories}
-                xAxisObj={xAxisObj}
-                timeZone={timeZone}
-                dateFormat={dateFormat}
-                daysCount={daysCount}
-                isChartLoading={chartLoading}
-            />
+            <div className="row">
+                <EnergyConsumptionBySpaceChart
+                    propTitle="Energy Consumption (kWh)"
+                    propSubTitle="Top 15 Energy Consumers"
+                    spacesData={spacesData}
+                    stackedColumnChartData={spacesColumnChartData}
+                    stackedColumnChartCategories={spacesColumnCategories}
+                    spaceCategories={spacesDataCategories}
+                    xAxisObj={xAxisObj}
+                    timeZone={timeZone}
+                    dateFormat={dateFormat}
+                    daysCount={daysCount}
+                    isChartLoading={chartLoading}
+                    half={true}
+                />
+
+                <EnergyConsumptionBySpaceChart
+                    propTitle="Energy Consumption (kWh)"
+                    propSubTitle="Top 15 Energy Consumers"
+                    spacesData={spacesData}
+                    stackedColumnChartData={spacesColumnChartData}
+                    stackedColumnChartCategories={spacesColumnCategories}
+                    spaceCategories={spacesDataCategories}
+                    xAxisObj={xAxisObj}
+                    timeZone={timeZone}
+                    dateFormat={dateFormat}
+                    daysCount={daysCount}
+                    isChartLoading={chartLoading}
+                    half={true}
+                />
+            </div>
 
             <Brick sizeInRem={1.5} />
 

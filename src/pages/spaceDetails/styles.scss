@@ -1,0 +1,36 @@
+@import '../../assets/scss/colors';
+
+.upper-content-container {
+    padding: 0;
+    background: none;
+}
+
+.lower-content-container {
+    padding: 2rem 0;
+}
+
+.select-by {
+    padding-bottom: 15px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: stretch;
+    align-content: stretch;
+}
+
+.metadata-container {
+    gap: 1rem;
+    padding: 1.25rem;
+    background: $base-white;
+    border: 0.0625rem solid $primary-gray-200;
+    box-shadow: 0rem 0.0625rem 0.1875rem rgba(16, 24, 40, 0.01), 0rem 0.0625rem 0.125rem rgba(16, 24, 40, 0.06);
+    border-radius: 0.5rem;
+}
+
+.line-chart-loader {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

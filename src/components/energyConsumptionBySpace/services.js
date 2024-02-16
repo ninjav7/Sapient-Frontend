@@ -1,10 +1,10 @@
 import { handleAPIRequestParams } from '../../helpers/helpers';
 import axiosInstance from '../../services/axiosInstance';
 import { getTopEnergyConsumptionBySpaceV2 } from '../../services/Network';
-// import mockData from './mock.json';
+import mockData from './mock.json';
 
 export function fetchTopEnergyConsumptionBySpaceV2(query) {
-    // return new Promise((res) => res(mockData));
+    return new Promise((res) => res(mockData));
 
     const {
         spaceId = [],
