@@ -15,6 +15,7 @@ import { addSpaceService, updateSpaceService, deleteSpaceService, getAllSpaceTyp
 
 import DeleteLayout from './DeleteLayout';
 import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
+import { TagsInput } from 'react-tag-input-component';
 
 const SpaceLayout = (props) => {
     const {
@@ -67,7 +68,7 @@ const SpaceLayout = (props) => {
 
         setErrorObj(alertObj);
 
-        if (!alertObj.name && !alertObj.type_id) {
+        if (!alertObj.name && !alertObj.type_id && !alertObj.square_footage) {
             setProcessing(true);
 
             const params = `?building_id=${bldg_id}`;
@@ -113,6 +114,8 @@ const SpaceLayout = (props) => {
             building_id: bldgId,
             name: spaceObj?.name,
             type_id: spaceObj?.type_id,
+            square_footage: spaceObj?.square_footage ?? null,
+            tags: spaceObj?.tags ?? [],
             parents: spaceObj?.new_parents ? spaceObj?.new_parents : spaceObj?.parents,
             parent_space:
                 spaceObj?.new_parent_space || spaceObj?.new_parent_space === null
@@ -309,6 +312,43 @@ const SpaceLayout = (props) => {
                         />
                     </div>
                     <Brick sizeInRem={1.25} />
+                    {operationType === 'ADD' && (
+                        <>
+                            <div>
+                                <Typography.Body size={Typography.Sizes.md}>{`Square Footage`}</Typography.Body>
+                                <Brick sizeInRem={0.25} />
+                                <InputTooltip
+                                    placeholder="Enter Square Footage"
+                                    labelSize={Typography.Sizes.md}
+                                    value={spaceObj?.square_footage}
+                                    error={errorObj?.square_footage}
+                                    onChange={(e) => {
+                                        handleChange('square_footage', e.target.value);
+                                        if (!Number.isInteger(+e.target.value)) {
+                                            setErrorObj((errObj) => ({
+                                                ...errObj,
+                                                square_footage: 'Value should be a number',
+                                            }));
+                                        }
+                                    }}
+                                />
+                            </div>
+                            <Brick sizeInRem={1.25} />
+                            <div>
+                                <Typography.Body size={Typography.Sizes.md}>{`Tags`}</Typography.Body>
+                                <Brick sizeInRem={0.25} />
+                                <TagsInput
+                                    placeholder="Tags"
+                                    value={spaceObj?.tags ? spaceObj.tags : []}
+                                    onChange={(value) => {
+                                        handleChange('tags', value);
+                                    }}
+                                    placeHolder="Add Tag"
+                                />
+                            </div>
+                            <Brick sizeInRem={1.25} />
+                        </>
+                    )}
                     {operationType === 'EDIT' && (
                         <>
                             <Typography.Body size={Typography.Sizes.md}>{`Parent`}</Typography.Body>
