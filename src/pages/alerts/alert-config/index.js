@@ -280,6 +280,7 @@ const AlertConfig = () => {
     const [activeTab, setActiveTab] = useState(0);
     const defaultAlertObjCloned = _.cloneDeep(defaultAlertObj);
     const [alertObj, setAlertObj] = useState(defaultAlertObjCloned);
+    console.log('SSR alertObj => ', alertObj);
 
     const [originalBldgsList, setOriginalBldgsList] = useState([]);
     const [originalEquipsList, setOriginalEquipsList] = useState([]);
@@ -540,6 +541,13 @@ const AlertConfig = () => {
                 const response = res?.data;
                 const { success: isSuccessful, data } = response;
                 if (isSuccessful && data && data?.id) {
+                    let alert_obj = _.cloneDeep(defaultAlertObj);
+                    alert_obj.alert_name = data?.name ?? '';
+                    alert_obj.alert_description = data?.description ?? '';
+                    alert_obj.target.type = data?.target_type;
+
+                    // if(data?.target_type === t)
+
                     console.log('SSR selected alert obj => ', data);
                 }
             })
@@ -629,6 +637,7 @@ const AlertConfig = () => {
                         handleChange={handleChange}
                         showResetTargetModal={showResetTargetModal}
                         openResetTargetModel={openResetTargetModel}
+                        reqType={reqType}
                     />
                 )}
 

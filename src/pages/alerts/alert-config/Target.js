@@ -10,7 +10,7 @@ import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/ass
 import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/assets/icons/equipment-icon.svg';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 
-import { TARGET_TYPES, defaultAlertObj } from '../constants';
+import { TARGET_TYPES } from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
@@ -41,6 +41,7 @@ const Target = (props) => {
         originalBldgsList,
         originalEquipsList,
         openResetTargetModel,
+        reqType,
     } = props;
 
     const [selectedBldgsForEquip, setSelectedBldgsForEquip] = useState([]);
@@ -106,7 +107,8 @@ const Target = (props) => {
                 ) : (
                     <div>
                         <Typography.Subheader size={Typography.Sizes.md}>
-                            {`Select a Target Type`}
+                            {reqType === 'create' && `Select a Target Type`}
+                            {reqType === 'edit' && `Selected Target Type`}
                             <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
                                 *
                             </span>
