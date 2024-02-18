@@ -47,7 +47,7 @@ const AlertPreview = (props) => {
                             </Typography.Body>
                         </div>
 
-                        {alertObj?.condition?.conditionDescription && (
+                        {alertObj?.condition?.alert_condition_description && (
                             <>
                                 <Brick sizeInRem={1} />
 
@@ -56,7 +56,7 @@ const AlertPreview = (props) => {
                                         size={Typography.Sizes.md}>{`Condition`}</Typography.Subheader>
                                     <Brick sizeInRem={0.25} />
                                     <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                        {alertObj?.condition?.conditionDescription ?? ''}
+                                        {alertObj?.condition?.alert_condition_description ?? ''}
                                     </Typography.Body>
                                 </div>
                             </>

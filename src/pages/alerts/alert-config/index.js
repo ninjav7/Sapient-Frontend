@@ -280,7 +280,6 @@ const AlertConfig = () => {
     const [activeTab, setActiveTab] = useState(0);
     const defaultAlertObjCloned = _.cloneDeep(defaultAlertObj);
     const [alertObj, setAlertObj] = useState(defaultAlertObjCloned);
-    console.log('SSR alertObj => ', alertObj);
 
     const [originalBldgsList, setOriginalBldgsList] = useState([]);
     const [originalEquipsList, setOriginalEquipsList] = useState([]);
@@ -429,7 +428,7 @@ const AlertConfig = () => {
             }
         }
 
-        handleConditionChange('conditionDescription', `${text}`);
+        handleConditionChange('alert_condition_description', `${text}`);
     };
 
     const handleCreateAlert = async (alert_obj) => {
@@ -444,7 +443,7 @@ const AlertConfig = () => {
             name: alert_obj?.alert_name,
             description: alert_obj?.alert_description,
             target_type: target?.type,
-            alert_condition_description: condition?.conditionDescription ?? '',
+            alert_condition_description: condition?.alert_condition_description ?? '',
             condition_metric: condition?.condition_metric,
             condition_metric_aggregate: condition?.condition_metric_aggregate,
             condition_timespan: condition?.condition_timespan,
@@ -485,14 +484,13 @@ const AlertConfig = () => {
         if (condition?.condition_trigger_alert) {
             const uniqueNumbersArray = convertStringToUniqueNumbers(condition?.condition_trigger_alert);
             if (uniqueNumbersArray) payload.condition_alert_at = uniqueNumbersArray.filter((number) => number <= 100);
-            if (!uniqueNumbersArray.includes(100)) payload.condition_alert_at.push(100);
         }
 
         // Notification and its recurrence setup
         const method = notification?.method[0];
 
-        if (method === 'email') payload.alert_emails = notification?.selectedUserEmailId;
-        if (method === 'user') payload.alert_user_ids = notification?.selectedUserId.map((el) => el?.value);
+        if (method === 'email') payload.alert_emails = notification?.selectedUserEmailIds;
+        if (method === 'user') payload.alert_user_ids = notification?.selectedUserIds.map((el) => el?.value);
 
         if ((method === 'email' || method === 'user') && recurrence?.resendAlert) {
             payload.alert_recurrence = recurrence?.resendAlert;
@@ -542,13 +540,63 @@ const AlertConfig = () => {
                 const { success: isSuccessful, data } = response;
                 if (isSuccessful && data && data?.id) {
                     let alert_obj = _.cloneDeep(defaultAlertObj);
+
+                    // name & desc integration
                     alert_obj.alert_name = data?.name ?? '';
                     alert_obj.alert_description = data?.description ?? '';
+
+                    // target type and target integration
                     alert_obj.target.type = data?.target_type;
 
-                    // if(data?.target_type === t)
+                    if (data?.target_type === TARGET_TYPES.BUILDING) {
+                        alert_obj.target.lists = data?.building_ids;
+                    }
 
-                    console.log('SSR selected alert obj => ', data);
+                    if (data?.target_type === TARGET_TYPES.EQUIPMENT) {
+                        alert_obj.target.lists = data?.equipment_ids;
+                        alert_obj.target.buildingIDs = data?.building_ids[0]?.value;
+                    }
+
+                    // condition-metrics integration
+                    alert_obj.condition.condition_metric = data?.condition_metric;
+                    alert_obj.condition.condition_metric_aggregate = data?.condition_metric_aggregate;
+                    alert_obj.condition.condition_timespan = data?.condition_timespan;
+                    alert_obj.condition.condition_operator = data?.condition_operator;
+                    alert_obj.condition.condition_threshold_type = data?.condition_threshold_type;
+
+                    if (data?.condition_threshold_type === 'static_threshold_value') {
+                        alert_obj.condition.condition_threshold_value = data?.condition_threshold_value?.toString();
+                    }
+
+                    if (data?.condition_threshold_type === 'calculated') {
+                        alert_obj.condition.condition_threshold_reference = data?.condition_threshold_reference;
+                        alert_obj.condition.condition_threshold_calculated = data?.condition_threshold_calculated;
+                        alert_obj.condition.condition_threshold_timespan = data?.condition_threshold_timespan;
+                    }
+
+                    alert_obj.condition.condition_trigger_alert = data?.condition_alert_at.toString();
+                    alert_obj.condition.alert_condition_description = data?.alert_condition_description ?? '';
+
+                    // notification integration
+                    if (data?.alert_recurrence) {
+                        alert_obj.recurrence.resendAlert = data?.alert_recurrence;
+                        alert_obj.recurrence.resendAt = data?.alert_recurrence_minutes.toString();
+                    }
+
+                    if (data?.alert_user_ids && data?.alert_user_ids.length !== 0) {
+                        alert_obj.notification.method = ['user'];
+                        alert_obj.notification.selectedUserIds = data.alert_user_ids.map((userId, index) => ({
+                            label: `Custom User ${index + 1}`,
+                            value: userId,
+                        }));
+                    }
+
+                    if (data?.alert_emails) {
+                        alert_obj.notification.method = ['email'];
+                        alert_obj.notification.selectedUserEmailIds = data?.alert_emails;
+                    }
+
+                    setAlertObj(alert_obj);
                 }
             })
             .catch(() => {})

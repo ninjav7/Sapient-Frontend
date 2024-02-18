@@ -52,10 +52,10 @@ const NotificationMethod = (props) => {
     const validateNotification = (alert_obj) => {
         let value = false;
         if (alert_obj?.notification?.method.includes('user')) {
-            value = alert_obj?.notification?.selectedUserId?.length !== 0;
+            value = alert_obj?.notification?.selectedUserIds?.length !== 0;
         }
         if (alert_obj?.notification?.method.includes('email')) {
-            value = alert_obj?.notification?.selectedUserEmailId !== '';
+            value = alert_obj?.notification?.selectedUserEmailIds !== '';
         }
         return value;
     };
@@ -63,18 +63,18 @@ const NotificationMethod = (props) => {
     const renderUsers = (alert_obj) => {
         const notify = alert_obj?.notification;
 
-        if (notify?.selectedUserId.length === 0) return `No user selected.`;
+        if (notify?.selectedUserIds.length === 0) return `No user selected.`;
 
-        if (notify?.selectedUserId.length > 3) {
-            return `${notify?.selectedUserId.length} users selected.`;
+        if (notify?.selectedUserIds.length > 3) {
+            return `${notify?.selectedUserIds.length} users selected.`;
         } else {
-            return getCommaSeparatedObjectLabels(notify?.selectedUserId);
+            return getCommaSeparatedObjectLabels(notify?.selectedUserIds);
         }
     };
 
     const renderEmailAddress = (alert_obj) => {
         const notify = alert_obj?.notification;
-        const emailsList = fetchCommaSeperatedEmailAddresses(notify?.selectedUserEmailId);
+        const emailsList = fetchCommaSeperatedEmailAddresses(notify?.selectedUserEmailIds);
 
         if (emailsList.length === 0) return `No email address added`;
 
@@ -238,9 +238,9 @@ const NotificationMethod = (props) => {
                                                         isSelectAll={usersList && usersList.length !== 0}
                                                         onChange={(selectedUsersList) => {
                                                             const values = filterOutSelectAllOption(selectedUsersList);
-                                                            handleNotificationChange('selectedUserId', values);
+                                                            handleNotificationChange('selectedUserIds', values);
                                                         }}
-                                                        value={alertObj?.notification?.selectedUserId ?? []}
+                                                        value={alertObj?.notification?.selectedUserIds ?? []}
                                                         menuPlacement="auto"
                                                     />
                                                 </div>
@@ -254,11 +254,11 @@ const NotificationMethod = (props) => {
                                                         placeholder="Enter email address"
                                                         onChange={(e) => {
                                                             handleNotificationChange(
-                                                                'selectedUserEmailId',
+                                                                'selectedUserEmailIds',
                                                                 e.target.value
                                                             );
                                                         }}
-                                                        value={alertObj?.notification?.selectedUserEmailId}
+                                                        value={alertObj?.notification?.selectedUserEmailIds}
                                                     />
                                                     <Brick sizeInRem={0.25} />
                                                     <Typography.Body size={Typography.Sizes.sm}>
