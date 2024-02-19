@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import _ from 'lodash';
 import Modal from 'react-bootstrap/Modal';
 
 import Typography from '../../../../sharedComponents/typography';
@@ -22,11 +21,6 @@ import '../styles.scss';
 const BuildingConfig = (props) => {
     const { isModalOpen = false, handleModalClose, alertObj = {}, handleTargetChange, setOriginalBldgsList } = props;
 
-    const userPrefUnits = UserStore.useState((s) => s.unit);
-
-    const [targetObj, setTargetObj] = useState({});
-    const [originalTargetObj, setOriginalTargetObj] = useState({});
-
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
 
@@ -41,6 +35,8 @@ const BuildingConfig = (props) => {
     const [isFetchingFilterData, setFetchingFilterData] = useState(false);
 
     const [filterOptions, setFilterOptions] = useState([]);
+
+    const userPrefUnits = UserStore.useState((s) => s.unit);
 
     const customModalStyle = {
         modalContent: {
@@ -149,7 +145,7 @@ const BuildingConfig = (props) => {
     };
 
     const handleCancelClick = () => {
-        if (originalTargetObj?.lists.length === 0) {
+        if (alertObj?.target?.lists.length === 0) {
             handleTargetChange('type', '');
         }
         handleModalClose();
@@ -270,10 +266,6 @@ const BuildingConfig = (props) => {
             const { target } = alertObj || {};
             const { lists } = target || {};
 
-            const copyTargetObj = _.cloneDeep(target);
-            setTargetObj(copyTargetObj);
-            setOriginalTargetObj(copyTargetObj);
-
             if (lists && lists.length !== 0) {
                 setUserSelectedBldgs([...lists]);
             }
@@ -312,7 +304,7 @@ const BuildingConfig = (props) => {
                                     type={Button.Type.primary}
                                     onClick={() => handleAddTarget(userSelectedBldgs)}
                                     className="ml-2"
-                                    disabled={userSelectedBldgs.length === 0}
+                                    disabled={userSelectedBldgs && userSelectedBldgs.length === 0}
                                 />
                             </div>
                         </div>
