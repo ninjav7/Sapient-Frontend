@@ -10,7 +10,7 @@ import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
 import { ReactComponent as KWH_SVG } from '../../../assets/icon/kwh.svg';
 import { ReactComponent as PERCENT_SVG } from '../../../assets/icon/percent.svg';
-import { ReactComponent as MinutesSVG } from '../../../assets/icon/minutes.svg';
+// import { ReactComponent as MINUTE_SVG } from '../../../assets/icon/minutes.svg';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 
 import {
@@ -328,7 +328,7 @@ const Condition = (props) => {
                                         const sanitizedValue = inputValue.replace(/[^0-9,]/g, ''); // Remove any characters that are not numbers or commas
                                         handleConditionChange('condition_trigger_alert', sanitizedValue);
                                     }}
-                                    elementEnd={<MinutesSVG />}
+                                    elementEnd={<PERCENT_SVG />}
                                 />
                                 <Brick sizeInRem={0.25} />
                                 <Typography.Body size={Typography.Sizes.sm}>
@@ -380,7 +380,7 @@ const Condition = (props) => {
                                             onChange={(e) => {
                                                 handleRecurrenceChange('triggerAt', e.target.value);
                                             }}
-                                            elementEnd={<MinutesSVG />}
+                                            elementEnd={<MINUTE_SVG />}
                                             disabled={!alertObj?.recurrence?.triggerAlert}
                                         />
                                     </div>

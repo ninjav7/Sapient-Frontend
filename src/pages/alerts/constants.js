@@ -13,7 +13,7 @@ export const defaultConditionObj = {
     condition_threshold_reference: '',
     condition_threshold_calculated: '',
     condition_threshold_timespan: '',
-    condition_trigger_alert: '',
+    condition_trigger_alert: '100',
 };
 
 export const defaultRecurrenceObj = {
@@ -25,8 +25,8 @@ export const defaultRecurrenceObj = {
 
 export const defaultNotificationObj = {
     method: ['none'],
-    selectedUserId: [],
-    selectedUserEmailId: '',
+    selectedUserIds: [],
+    selectedUserEmailIds: '',
 };
 
 // Main Alert Obj

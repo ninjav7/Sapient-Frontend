@@ -72,11 +72,12 @@ const EquipConfig = (props) => {
         setPageNo(1);
     };
 
-    const handleCancelClick = (selected_bldg = '', selected_equips = []) => {
-        if (selected_bldg === '' || selected_equips.length === 0) {
+    const handleCancelClick = () => {
+        if (alertObj?.target?.lists.length === 0) {
             handleTargetChange('type', '');
         }
         handleModalClose();
+        closeModalAction();
     };
 
     const handleAddTarget = (selected_bldg_id, selected_equips) => {
@@ -85,6 +86,7 @@ const EquipConfig = (props) => {
             handleTargetChange('lists', selected_equips);
         }
         handleModalClose();
+        closeModalAction();
     };
 
     const handleCheckAllClick = (is_checked, equipments_list) => {
@@ -578,6 +580,34 @@ const EquipConfig = (props) => {
             onSort: (method, name) => setSortBy({ method, name }),
         },
     ];
+
+    const closeModalAction = () => {
+        setSearch('');
+        setSortBy({});
+        setBldgFetching(false);
+        setEquipFetching(false);
+        setFetchingFilters(false);
+        setBuildingsList([]);
+        setEquipmentsList([]);
+        setFilterOptions([]);
+        setUserSelectedBldgId('');
+        setUserSelectedEquips([]);
+        setCheckedAll(false);
+        setPageNo(1);
+        setPageSize(20);
+        setTotalItems(0);
+        setFloorString([]);
+        setSpaceString([]);
+        setDeviceMacAddress('');
+        setDeviceIdFilterString('');
+        setEquipmentTypeFilterString('');
+        setPanelNameFilterString('');
+        setCdModelInstalledNameString('');
+        setBreakerNumberString('');
+        setBreakerRatedAmpsString('');
+        setEndUseFilterString('');
+        setTagsTypeFilterString('');
+    };
 
     const currentRow = () => {
         return equipmentsList;
