@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import _ from 'lodash';
 import Modal from 'react-bootstrap/Modal';
 
 import Typography from '../../../../sharedComponents/typography';
@@ -22,6 +23,9 @@ const BuildingConfig = (props) => {
     const { isModalOpen = false, handleModalClose, alertObj = {}, handleTargetChange, setOriginalBldgsList } = props;
 
     const userPrefUnits = UserStore.useState((s) => s.unit);
+
+    const [targetObj, setTargetObj] = useState({});
+    const [originalTargetObj, setOriginalTargetObj] = useState({});
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
@@ -104,6 +108,19 @@ const BuildingConfig = (props) => {
         },
     ];
 
+    const closeModalAction = () => {
+        setSearch('');
+        setSortBy({});
+        setCheckedAll(false);
+        setUserSelectedBldgs([]);
+        setBuildingsList([]);
+        setBuildingTypes([]);
+        setSelectedBuildingType([]);
+        setDataFetching(false);
+        setFetchingFilterData(false);
+        setFilterOptions([]);
+    };
+
     const currentRow = () => {
         return buildingsList;
     };
@@ -128,13 +145,15 @@ const BuildingConfig = (props) => {
             handleTargetChange('lists', selected_bldgs);
         }
         handleModalClose();
+        closeModalAction();
     };
 
-    const handleCancelClick = (selected_bldgs) => {
-        if (selected_bldgs.length === 0) {
+    const handleCancelClick = () => {
+        if (originalTargetObj?.lists.length === 0) {
             handleTargetChange('type', '');
         }
         handleModalClose();
+        closeModalAction();
     };
 
     const handleCheckAllClick = (is_checked, buildings_list) => {
@@ -247,17 +266,17 @@ const BuildingConfig = (props) => {
     }, [buildingTypes]);
 
     useEffect(() => {
-        if (isModalOpen && alertObj?.target?.lists && alertObj?.target?.lists.length !== 0) {
-            setUserSelectedBldgs([...alertObj?.target?.lists]);
-        }
-    }, [alertObj]);
+        if (isModalOpen) {
+            const { target } = alertObj || {};
+            const { lists } = target || {};
 
-    useEffect(() => {
-        const { target } = alertObj || {};
-        const { lists } = target || {};
+            const copyTargetObj = _.cloneDeep(target);
+            setTargetObj(copyTargetObj);
+            setOriginalTargetObj(copyTargetObj);
 
-        if (isModalOpen && lists && lists.length !== 0) {
-            setUserSelectedBldgs([...lists]);
+            if (lists && lists.length !== 0) {
+                setUserSelectedBldgs([...lists]);
+            }
         }
     }, [alertObj, isModalOpen]);
 
@@ -283,7 +302,7 @@ const BuildingConfig = (props) => {
                                     label="Cancel"
                                     size={Button.Sizes.md}
                                     type={Button.Type.secondaryGrey}
-                                    onClick={() => handleCancelClick(userSelectedBldgs)}
+                                    onClick={() => handleCancelClick()}
                                 />
                             </div>
                             <div>
@@ -293,7 +312,7 @@ const BuildingConfig = (props) => {
                                     type={Button.Type.primary}
                                     onClick={() => handleAddTarget(userSelectedBldgs)}
                                     className="ml-2"
-                                    disabled={userSelectedBldgs && userSelectedBldgs.length === 0}
+                                    disabled={userSelectedBldgs.length === 0}
                                 />
                             </div>
                         </div>
