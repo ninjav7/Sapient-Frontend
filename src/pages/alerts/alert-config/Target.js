@@ -62,15 +62,14 @@ const Target = (props) => {
                         </Typography.Subheader>
                         <TargetToolTip />
                     </div>
-                    {alertObj?.target.type !== '' ||
-                        (reqType !== 'create' && (
-                            <Typography.Subheader
-                                size={Typography.Sizes.lg}
-                                className="reset-target-style"
-                                onClick={openResetTargetModel}>
-                                {`Reset Target Type`}
-                            </Typography.Subheader>
-                        ))}
+                    {alertObj?.target.type !== '' && reqType === 'create' && (
+                        <Typography.Subheader
+                            size={Typography.Sizes.lg}
+                            className="reset-target-style"
+                            onClick={openResetTargetModel}>
+                            {`Reset Target Type`}
+                        </Typography.Subheader>
+                    )}
                 </div>
             </CardHeader>
             <CardBody>
