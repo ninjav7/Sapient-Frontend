@@ -172,26 +172,34 @@ const portfolioRoutes = {
 
 // Spaces Routes
 const spacesRoutes = {
-    path: '/spaces',
+    path: '/spaces/portfolio/overview',
     name: 'Spaces',
     component: Spaces,
     visibility: true,
     children: [
         {
-            path: '/spaces/:bldgId/details/:spaceId',
+            path: '/spaces/portfolio/overview',
+            name: 'Portfolio Overview',
+            component: Spaces,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'spaces-portfolio',
+        },
+        {
+            path: '/spaces/building/overview/:bldgId',
+            name: 'Building Overview',
+            component: Spaces,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'spaces-building',
+        },
+        {
+            path: '/spaces/space/overview/:bldgId/:spaceId',
             name: 'Space Details',
             component: SpaceDetails,
             route: PrivateRoute,
-            visibility: true,
-            parent: 'spaces',
-        },
-        {
-            path: '/spaces/:bldgId',
-            name: 'Spaces',
-            component: Spaces,
-            route: PrivateRoute,
             visibility: false,
-            parent: 'spaces',
+            parent: 'spaces-building',
         },
     ],
     icon: FeatherIcon.PieChart,

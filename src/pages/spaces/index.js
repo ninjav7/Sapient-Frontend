@@ -17,6 +17,7 @@ import SpacesListTable from './SpacesListTable';
 
 const Spaces = () => {
     const { bldgId } = useParams();
+
     const [buildingListData] = useAtom(buildingData);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
@@ -34,6 +35,11 @@ const Spaces = () => {
     const [spacesDataCategories, setSpacesDataCategories] = useState([]);
     const [spacesColumnCategories, setSpacesColumnCategories] = useState([]);
     const [spacesColumnChartData, setSpacesColumnChartData] = useState([]);
+    const [yearlyChartLoading, setYearlyChartLoading] = useState(false);
+    const [yearlySpacesData, setYearlySpacesData] = useState([]);
+    const [yearlySpacesDataCategories, setYearlySpacesDataCategories] = useState([]);
+    const [yearlySpacesColumnCategories, setYearlySpacesColumnCategories] = useState([]);
+    const [yearlySpacesColumnChartData, setYearlySpacesColumnChartData] = useState([]);
 
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
 
@@ -56,7 +62,7 @@ const Spaces = () => {
     const fetchEnergyConsumptionBySpaceData = async (tzInfo) => {
         setChartLoading(true);
 
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, startTime, endTime, tzInfo };
+        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo, yearly: false };
 
         try {
             const data = await fetchTopEnergyConsumptionBySpaceDataHelper({ query });
@@ -75,26 +81,46 @@ const Spaces = () => {
         setChartLoading(false);
     };
 
+    const fetchEnergyConsumptionBySpaceDataYearly = async (tzInfo) => {
+        setYearlyChartLoading(true);
+
+        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo, yearly: true };
+
+        try {
+            const data = await fetchTopEnergyConsumptionBySpaceDataHelper({ query });
+
+            if (data?.newSpacesColumnCategories?.length > 0)
+                setYearlySpacesColumnCategories(data.newSpacesColumnCategories);
+            if (data?.newSpacesData?.length > 0) setYearlySpacesData(data.newSpacesData);
+            if (data?.newSpacesColumnChartData?.length > 0)
+                setYearlySpacesColumnChartData(data.newSpacesColumnChartData);
+            if (data?.newSpacesDataCategories?.length > 0) setYearlySpacesDataCategories(data.newSpacesDataCategories);
+        } catch {
+            setYearlySpacesColumnCategories([]);
+            setYearlySpacesData([]);
+            setYearlySpacesColumnChartData([]);
+            setYearlySpacesDataCategories([]);
+        }
+
+        setYearlyChartLoading(false);
+    };
+
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'Building Overview',
-                    path: '/energy/spaces',
+                    label: bldgId ? 'Building Overview' : 'Portfolio Overview',
+                    path: bldgId ? '/spaces/building/overview' : '/spaces/portfolio/overview',
                     active: true,
                 },
             ];
             bs.items = newList;
         });
+
         ComponentStore.update((s) => {
-            s.parent = 'buildings';
+            s.parent = bldgId ? 'spaces-building' : 'spaces-portfolio';
         });
     };
-
-    useEffect(() => {
-        window.scrollTo(0, 0);
-        updateBreadcrumbStore();
-    }, []);
 
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
@@ -111,6 +137,11 @@ const Spaces = () => {
         getXaxisForDaysSelected(daysCount);
         getFormattedChartDates(daysCount, userPrefTimeFormat, userPrefDateFormat);
     }, [daysCount, userPrefTimeFormat, userPrefDateFormat]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        updateBreadcrumbStore();
+    }, []);
 
     useEffect(() => {
         if (startDate === null || endDate === null) return;
@@ -131,32 +162,34 @@ const Spaces = () => {
             }
         }
 
+        fetchEnergyConsumptionBySpaceDataYearly(time_zone);
         fetchEnergyConsumptionBySpaceData(time_zone);
     }, [startDate, endDate, bldgId]);
 
-    return (
+    return bldgId ? (
         <>
-            <Header title="Building Overview" type="page" showExplore={true} />
-            <Brick sizeInRem={3} />
+            <Header title={bldgId ? 'Building Overview' : 'Portfolio Overview'} type="page" showExplore={true} />
+
+            <Brick sizeInRem={2} />
 
             <div className="row">
                 <EnergyConsumptionBySpaceChart
-                    propTitle="Energy Consumption (kWh)"
-                    propSubTitle="Top 15 Energy Consumers"
-                    spacesData={spacesData}
-                    stackedColumnChartData={spacesColumnChartData}
-                    stackedColumnChartCategories={spacesColumnCategories}
-                    spaceCategories={spacesDataCategories}
+                    propTitle="Top 15 Energy Consuming Spaces (kWh)"
+                    propSubTitle="Over past 12 months"
+                    spacesData={yearlySpacesData}
+                    stackedColumnChartData={yearlySpacesColumnChartData}
+                    stackedColumnChartCategories={yearlySpacesColumnCategories}
+                    spaceCategories={yearlySpacesDataCategories}
                     xAxisObj={xAxisObj}
                     timeZone={timeZone}
                     dateFormat={dateFormat}
                     daysCount={daysCount}
-                    isChartLoading={chartLoading}
+                    isChartLoading={yearlyChartLoading}
                     half={true}
                 />
 
                 <EnergyConsumptionBySpaceChart
-                    propTitle="Energy Consumption (kWh)"
+                    propTitle="Energy Consumption by Space (kWh)"
                     propSubTitle="Top 15 Energy Consumers"
                     spacesData={spacesData}
                     stackedColumnChartData={spacesColumnChartData}
@@ -171,10 +204,12 @@ const Spaces = () => {
                 />
             </div>
 
-            <Brick sizeInRem={1.5} />
+            <Brick sizeInRem={4} />
 
             <SpacesListTable colorfulSpaces={spacesData} />
         </>
+    ) : (
+        <></>
     );
 };
 

@@ -6,11 +6,11 @@ import { UserStore } from '../../store/UserStore';
 import Skeleton from 'react-loading-skeleton';
 import StackedColumnChart from '../../sharedComponents/stackedColumnChart/StackedColumnChart';
 import colorPalette from '../../assets/scss/_colors.scss';
-import './styles.scss';
 import Typography from '../../sharedComponents/typography';
 import { DOWNLOAD_TYPES } from '../../sharedComponents/constants';
 import DropDownIcon from '../../sharedComponents/dropDowns/dropDownButton/DropDownIcon';
 import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
+import './styles.scss';
 
 const EnergyConsumptionBySpaceCategories = ({ spacesData }) => {
     return (
@@ -78,74 +78,78 @@ const EnergyConsumptionBySpaceChart = (props) => {
         }
     };
 
-    const classes = `spacedata-type-widget-wrapper ${half && 'spacedata-type-widget-wrapper--half'}`;
+    const classes = `${half && 'spacedata-type-widget-wrapper--half col-xl-6 '}`;
 
     return (
         <div className={classes}>
-            <div className="pr-3 pt-3 pl-3">
-                <div className="d-flex justify-content-between mb-4">
-                    <div>
-                        <Typography.Subheader size={Typography.Sizes.md}>{propTitle}</Typography.Subheader>
-                        <Typography.Body size={Typography.Sizes.xs}>{propSubTitle}</Typography.Body>
+            <div className="spacedata-type-widget-wrapper">
+                <div className="pr-3 pt-3 pl-3">
+                    <div className="d-flex justify-content-between mb-4">
+                        <div>
+                            <div className="mb-1">
+                                <Typography.Subheader size={Typography.Sizes.md}>{propTitle}</Typography.Subheader>
+                            </div>
+                            <Typography.Body size={Typography.Sizes.xs}>{propSubTitle}</Typography.Body>
+                        </div>
+                        <DropDownIcon
+                            classNameButton="stacked-column-chart-download-button"
+                            options={[
+                                {
+                                    name: DOWNLOAD_TYPES.downloadSVG,
+                                    label: 'Download SVG',
+                                },
+                                {
+                                    name: DOWNLOAD_TYPES.downloadPNG,
+                                    label: 'Download PNG',
+                                },
+                                {
+                                    name: DOWNLOAD_TYPES.downloadCSV,
+                                    label: 'Download CSV',
+                                },
+                            ]}
+                            label={''}
+                            triggerButtonIcon={<BurgerIcon />}
+                            handleClick={handleDropDownOptionClicked}
+                        />
                     </div>
-                    <DropDownIcon
-                        classNameButton="stacked-column-chart-download-button"
-                        options={[
-                            {
-                                name: DOWNLOAD_TYPES.downloadSVG,
-                                label: 'Download SVG',
-                            },
-                            {
-                                name: DOWNLOAD_TYPES.downloadPNG,
-                                label: 'Download PNG',
-                            },
-                            {
-                                name: DOWNLOAD_TYPES.downloadCSV,
-                                label: 'Download CSV',
-                            },
-                        ]}
-                        label={''}
-                        triggerButtonIcon={<BurgerIcon />}
-                        handleClick={handleDropDownOptionClicked}
+                    {isChartLoading ? (
+                        <Skeleton
+                            baseColor={colorPalette.primaryGray150}
+                            highlightColor={colorPalette.baseBackground}
+                            count={1}
+                            height={50}
+                            width="100%"
+                            borderRadius={10}
+                            className="ml-2"
+                        />
+                    ) : (
+                        <EnergyConsumptionBySpaceCategories spacesData={spacesData} />
+                    )}
+                </div>
+
+                <div>
+                    <StackedColumnChart
+                        style={{ width: 'auto', border: '0rem' }}
+                        colors={spaceCategories}
+                        categories={stackedColumnChartCategories}
+                        tooltipUnit={UNITS.KWH}
+                        series={stackedColumnChartData}
+                        isLegendsEnabled={false}
+                        timeZone={timeZone}
+                        xAxisCallBackValue={formatXaxis}
+                        restChartProps={xAxisObj}
+                        tooltipCallBackValue={toolTipFormatter}
+                        plotBandsProp={plotBandsProp}
+                        upperLegendsProps={upperLegendsProps}
+                        onMoreDetail={onMoreDetail}
+                        isChartLoading={isChartLoading}
+                        parentChartComponentRef={chartComponentRef}
+                        showExport={false}
+                        borderRadius={2}
+                        ownTooltip={true}
+                        {...props}
                     />
                 </div>
-                {isChartLoading ? (
-                    <Skeleton
-                        baseColor={colorPalette.primaryGray150}
-                        highlightColor={colorPalette.baseBackground}
-                        count={1}
-                        height={50}
-                        width="100%"
-                        borderRadius={10}
-                        className="ml-2"
-                    />
-                ) : (
-                    <EnergyConsumptionBySpaceCategories spacesData={spacesData} />
-                )}
-            </div>
-
-            <div>
-                <StackedColumnChart
-                    style={{ width: 'auto', border: '0rem' }}
-                    colors={spaceCategories}
-                    categories={stackedColumnChartCategories}
-                    tooltipUnit={UNITS.KWH}
-                    series={stackedColumnChartData}
-                    isLegendsEnabled={false}
-                    timeZone={timeZone}
-                    xAxisCallBackValue={formatXaxis}
-                    restChartProps={xAxisObj}
-                    tooltipCallBackValue={toolTipFormatter}
-                    plotBandsProp={plotBandsProp}
-                    upperLegendsProps={upperLegendsProps}
-                    onMoreDetail={onMoreDetail}
-                    isChartLoading={isChartLoading}
-                    parentChartComponentRef={chartComponentRef}
-                    showExport={false}
-                    borderRadius={2}
-                    ownTooltip={true}
-                    {...props}
-                />
             </div>
         </div>
     );

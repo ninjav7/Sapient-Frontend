@@ -1,20 +1,12 @@
 import { handleAPIRequestParams } from '../../helpers/helpers';
 import axiosInstance from '../../services/axiosInstance';
 import { getTopEnergyConsumptionBySpaceV2 } from '../../services/Network';
-import mockData from './mock.json';
+// import mockData from './mock.json';
 
 export function fetchTopEnergyConsumptionBySpaceV2(query) {
-    return new Promise((res) => res(mockData));
+    // return new Promise((res) => res(mockData));
 
-    const {
-        spaceId = [],
-        bldgId = '',
-        dateFrom = '',
-        dateTo = '',
-        startTime = '',
-        endTime = '',
-        tzInfo = 'US/Eastern',
-    } = query;
+    const { spaceId = [], bldgId = '', dateFrom = '', dateTo = '', tzInfo = 'US/Eastern', yearly = false } = query;
 
     let params = '?';
 
@@ -24,9 +16,7 @@ export function fetchTopEnergyConsumptionBySpaceV2(query) {
         params += stringSpaceId + '&';
     }
 
-    const { dateFrom: date_from, dateTo: date_to } = handleAPIRequestParams(dateFrom, dateTo, startTime, endTime);
-
-    params += `building_id=${bldgId}&date_from=${date_from}&date_to=${date_to}&tz_info=${tzInfo}`;
+    params += `building_id=${bldgId}&date_from=${dateFrom}&date_to=${dateTo}&tz_info=${tzInfo}&by_year=${yearly}`;
 
     return axiosInstance.get(`${getTopEnergyConsumptionBySpaceV2}${params}`).then((res) => res.data);
 }

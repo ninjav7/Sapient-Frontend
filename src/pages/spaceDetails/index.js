@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import 'moment-timezone';
 import { useHistory } from 'react-router-dom';
 import { Row, Col, Spinner } from 'reactstrap';
+import { useParams } from 'react-router-dom';
+import { useAtom } from 'jotai';
 
 import Header from '../../components/Header';
 import Button from '../../sharedComponents/button/Button';
@@ -13,7 +15,11 @@ import Brick from '../../sharedComponents/brick';
 import { BuildingStore } from '../../store/BuildingStore';
 import { UserStore } from '../../store/UserStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { ComponentStore } from '../../store/ComponentStore';
+import { buildingData } from '../../store/globalState';
 
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
 import { defaultMetrics } from './constants';
 import { handleDataConversion } from './helper';
@@ -22,6 +28,7 @@ import { fetchEnergyConsumptionBySpace, fetchSpaceMetadata } from './services';
 
 import MetadataContainer from './MetadataContainer/index';
 import EnergyMetadataContainer from './EnergyMetadataContainer/index';
+import { ReactComponent as RightArrow } from '../../assets/icon/arrow-space-details.svg';
 
 import '../../sharedComponents/typography/style.scss';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -29,15 +36,15 @@ import '../settings/passive-devices/styles.scss';
 import './styles.scss';
 
 // make styles according to Figma
-// refactor code
 
 const SpaceDetails = () => {
     const history = useHistory();
+    const { spaceId, bldgId } = useParams();
 
-    const spaceId = 1; // get `spaceId` from params
+    const [buildingListData] = useAtom(buildingData);
+
     const metric = defaultMetrics;
 
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -106,12 +113,54 @@ const SpaceDetails = () => {
         setMetadataFetching(false);
     };
 
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Building Overview',
+                    path: '/spaces/space/overview',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+
+        ComponentStore.update((s) => {
+            s.parent = 'spaces-building';
+        });
+    };
+
     useEffect(() => {
         if (!spaceId || !selectedConsumption || !bldgId || !startDate || !endDate) return;
 
         fetchChartData();
         fetchMetadata();
     }, [spaceId, startDate, endDate, selectedConsumption, bldgId]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        updateBreadcrumbStore();
+    }, []);
+
+    useEffect(() => {
+        if (startDate === null || endDate === null) return;
+
+        let time_zone = 'US/Eastern';
+
+        if (bldgId) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+
+            if (bldgObj?.building_id) {
+                if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
+                updateBuildingStore(
+                    bldgObj?.building_id,
+                    bldgObj?.building_name,
+                    bldgObj?.timezone,
+                    bldgObj?.plug_only
+                );
+            }
+        }
+    }, [startDate, endDate, bldgId]);
 
     const chartProps = {
         tooltip: {
@@ -135,7 +184,6 @@ const SpaceDetails = () => {
     const dynamicActiveClassTab = (selectedIdTab) => (selectedTab === selectedIdTab ? 'active-tab-style' : '');
     const handleSelect = (e) => setConsumption(e.value);
     const spaceName = metadata?.space_name && metadata.space_name;
-    const floorName = metadata?.floor_name && metadata.floor_name;
 
     return (
         <div>
@@ -144,9 +192,11 @@ const SpaceDetails = () => {
                     <Col lg={12}>
                         <div className="passive-header-wrapper d-flex justify-content-between upper-content-container">
                             <div className="d-flex flex-column justify-content-between">
-                                <Typography.Subheader size={Typography.Sizes.sm}>
-                                    {floorName} {` > `} {spaceName}
-                                </Typography.Subheader>
+                                <div className="space-tree-info">
+                                    <Typography.Subheader size={Typography.Sizes.sm}>Spaces</Typography.Subheader>
+                                    <RightArrow className="ml-2 mr-2 w-16 h-16" />
+                                    <Typography.Subheader size={Typography.Sizes.sm}>{spaceName}</Typography.Subheader>
+                                </div>
                                 <Typography.Header size={Typography.Sizes.md}>{spaceName}</Typography.Header>
                                 <div className="d-flex justify-content-start mouse-pointer ">
                                     <Typography.Subheader
@@ -169,7 +219,7 @@ const SpaceDetails = () => {
                                         label="Close"
                                         size={Button.Sizes.md}
                                         type={Button.Type.secondaryGrey}
-                                        onClick={() => history.push(`/spaces/${bldgId}`)}
+                                        onClick={() => history.push(`/spaces/building/overview/${bldgId}`)}
                                     />
                                 </div>
                             </div>
@@ -185,6 +235,8 @@ const SpaceDetails = () => {
                             <Brick sizeInRem={1} />
 
                             <MetadataContainer metadata={metadata} isFetching={metadataFetching} />
+
+                            <Brick sizeInRem={1} />
                         </Col>
 
                         <Col xl={9}>

@@ -101,7 +101,7 @@ const SpacesListTable = ({ colorfulSpaces }) => {
 
     const renderSpaceName = useCallback((row) => {
         return (
-            <Link to={`/spaces/${bldgId}/details/${row?.space_id}`}>
+            <Link to={`/spaces/space/overview/${bldgId}/${row?.space_id}`}>
                 <p className="m-0">
                     <u>{row?.space_name !== '' ? row?.space_name : '-'}</u>
                 </p>
@@ -161,7 +161,7 @@ const SpacesListTable = ({ colorfulSpaces }) => {
 
         return (
             <div className="tag-row-content">
-                <Badge text={<span className="gray-950">{row?.tag[0] ? row?.tag[0] : 'none'}</span>} />
+                <Badge text={<span className="gray-950">{row?.tag[0] ? row.tag[0] : 'none'}</span>} />
                 {slicedArr?.length > 0 ? (
                     <>
                         <Badge
