@@ -248,7 +248,7 @@ const Datepicker = ({
 
                                             <TimePicker
                                                 showNow={false}
-                                                minuteStep={15}
+                                                minuteStep={1}
                                                 placeholder="Start time"
                                                 value={startTime}
                                                 onChange={handleStartTimeChange}
@@ -265,7 +265,7 @@ const Datepicker = ({
 
                                             <TimePicker
                                                 showNow={false}
-                                                minuteStep={15}
+                                                minuteStep={1}
                                                 placeholder="End time"
                                                 value={endTime}
                                                 onChange={handleEndTimeChange}
