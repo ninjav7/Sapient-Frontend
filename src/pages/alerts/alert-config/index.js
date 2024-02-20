@@ -600,11 +600,10 @@ const AlertConfig = () => {
         await updateAlertServiceAPI(alert_id, payload)
             .then((res) => {
                 const response = res?.data;
-                console.log('SSR response => ', response);
                 if (response?.success) {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = 'Alert created successfully.';
+                        s.notificationMessage = 'Alert updated successfully.';
                         s.notificationType = 'success';
                     });
                     history.push({
@@ -613,7 +612,7 @@ const AlertConfig = () => {
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = 'Failed to create Alert.';
+                        s.notificationMessage = 'Failed to update Alert.';
                         s.notificationType = 'error';
                     });
                 }
@@ -621,7 +620,7 @@ const AlertConfig = () => {
             .catch(() => {
                 UserStore.update((s) => {
                     s.showNotification = true;
-                    s.notificationMessage = 'Failed to create Alert status due to Internal Server Error.';
+                    s.notificationMessage = 'Failed to update Alert status due to Internal Server Error.';
                     s.notificationType = 'error';
                 });
             })
