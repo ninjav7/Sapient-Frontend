@@ -32,7 +32,8 @@ import {
     defaultConditionObj,
     defaultNotificationObj,
     equipAlertConditions,
-    filtersForEnergyConsumption,
+    thresholdConditionTimespanList,
+    thresholdTypeList,
 } from '../constants';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
@@ -397,36 +398,36 @@ const AlertConfig = () => {
     const renderAlertCondition = (alert_obj) => {
         let text = '';
 
+        let alertType = '';
+
         if (alert_obj?.target?.type === TARGET_TYPES.BUILDING) {
-            let alertType = bldgAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
-            if (alertType) text += `${alertType?.label} the`;
-
-            if (alert_obj?.condition?.timeInterval) text += ` ${alert_obj?.condition?.timeInterval} is`;
-
-            if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
-
-            if (alertObj?.condition?.filterType === 'number' && alert_obj?.condition?.thresholdValue)
-                text += ` ${formatConsumptionValue(+alert_obj?.condition?.thresholdValue, 2)} kWh`;
-
-            if (alertObj?.condition?.filterType !== 'number') {
-                let alertFilter = filtersForEnergyConsumption.find(
-                    (el) => el?.value === alertObj?.condition?.filterType
-                );
-                if (alertFilter) text += ` ${alertFilter?.label}`;
-            }
+            alertType = bldgAlertConditions.find((el) => el?.value === alert_obj?.condition?.condition_metric);
         }
 
         if (alert_obj?.target?.type === TARGET_TYPES.EQUIPMENT) {
-            let alertType = equipAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
-            if (alertType) text += alertType?.label;
+            alertType = equipAlertConditions.find((el) => el?.value === alert_obj?.condition?.condition_metric);
+        }
 
-            if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
+        if (alertType) text += `${alertType?.label} for the`;
 
-            if (alert_obj?.condition?.type === 'shortcycling') {
-                text += ` ${alert_obj?.condition?.shortcyclingMinutes} min`;
-            } else {
-                text += ` ${alert_obj?.condition?.thresholdPercentage}%`;
-            }
+        if (alert_obj?.condition?.condition_metric_aggregate)
+            text += ` aggregation of the ${alert_obj?.condition?.condition_metric_aggregate}`;
+
+        if (alert_obj?.condition?.condition_timespan) text += ` for the ${alert_obj?.condition?.condition_timespan}`;
+
+        if (alert_obj?.condition?.condition_operator) text += ` is ${alert_obj?.condition?.condition_operator}`;
+
+        if (alertObj?.condition?.condition_threshold_type === 'static_threshold_value') {
+            const conditionType = thresholdTypeList.find(
+                (el) => el?.value === alert_obj?.condition?.condition_threshold_type
+            );
+            const value = +alert_obj?.condition?.condition_threshold_value ?? 0;
+            text += ` the ${conditionType?.label} of ${formatConsumptionValue(value, 2)} kWh.`;
+        } else if (alertObj?.condition?.condition_threshold_type === 'calculated') {
+            const thresholdTimespan = thresholdConditionTimespanList.find(
+                (el) => el?.value === alert_obj?.condition?.condition_threshold_timespan
+            );
+            text += ` ${alertObj?.condition?.condition_threshold_type} Threshold based on ${thresholdTimespan?.label}.`;
         }
 
         handleConditionChange('alert_condition_description', `${text}`);
