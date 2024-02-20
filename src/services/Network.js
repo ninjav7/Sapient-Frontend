@@ -241,9 +241,10 @@ export const getRawDeviceData = '/api/v2/metrics/raw/devices';
 export const updateSpaceV2 = '/api/v2/layout/update-space';
 
 // Alerts API's
-export const listAlerts = '/api/v2/alerts/list';
+export const listAlertsConfig = '/api/v2/alerts/list';
 export const alertAcknowledgement = '/api/v2/alerts/mark-acknowledgement';
 export const getConfiguredAlerts = '/api/v2/alerts/configs/list';
 export const getConfiguredAlertsById = '/api/v2/alerts/configs';
-export const createAlert = '/api/v2/alerts/create-config';
-export const deleteAlert = '/api/v2/alerts/delete-config';
+export const createAlertConfig = '/api/v2/alerts/create-config';
+export const updateAlertConfig = '/api/v2/alerts/update-config';
+export const deleteAlertConfig = '/api/v2/alerts/delete-config';

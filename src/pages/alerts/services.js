@@ -1,15 +1,16 @@
 import axiosInstance from '../../services/axiosInstance';
 import {
-    listAlerts,
+    listAlertsConfig,
     alertAcknowledgement,
-    createAlert,
+    createAlertConfig,
     getConfiguredAlerts,
-    deleteAlert,
+    deleteAlertConfig,
     getConfiguredAlertsById,
+    updateAlertConfig,
 } from '../../services/Network';
 
 export function fetchAlertsList(alertType = 'unacknowledged') {
-    return axiosInstance.get(`${listAlerts}?action=${alertType}`).then((res) => res);
+    return axiosInstance.get(`${listAlertsConfig}?action=${alertType}`).then((res) => res);
 }
 
 export function updateAlertAcknowledgement(params, payload) {
@@ -17,7 +18,11 @@ export function updateAlertAcknowledgement(params, payload) {
 }
 
 export function createAlertServiceAPI(payload = {}) {
-    return axiosInstance.post(`${createAlert}`, payload).then((res) => res);
+    return axiosInstance.post(`${createAlertConfig}`, payload).then((res) => res);
+}
+
+export function updateAlertServiceAPI(alertId, payload = {}) {
+    return axiosInstance.patch(`${updateAlertConfig}/${alertId}`, payload).then((res) => res);
 }
 
 export function fetchAllConfiguredAlerts() {
@@ -29,5 +34,5 @@ export function fetchConfiguredAlertById(alert_id) {
 }
 
 export function deleteConfiguredAlert(params) {
-    return axiosInstance.delete(`${deleteAlert}${params}`).then((res) => res);
+    return axiosInstance.delete(`${deleteAlertConfig}${params}`).then((res) => res);
 }

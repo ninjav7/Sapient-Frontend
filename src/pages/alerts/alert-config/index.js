@@ -23,7 +23,7 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as CheckMarkSVG } from '../../../assets/icon/check-mark.svg';
 
-import { createAlertServiceAPI, fetchConfiguredAlertById } from '../services';
+import { createAlertServiceAPI, fetchConfiguredAlertById, updateAlertServiceAPI } from '../services';
 
 import {
     TARGET_TYPES,
@@ -97,7 +97,7 @@ const CreateAlertHeader = (props) => {
                         />
                     ) : (
                         <Button
-                            label={'Save'}
+                            label={reqType === 'create' ? 'Save' : 'Update'}
                             size={Button.Sizes.md}
                             type={Button.Type.primary}
                             onClick={onAlertCreate}
@@ -275,6 +275,7 @@ const NotificationSettings = (props) => {
 
 const AlertConfig = () => {
     const { reqType, alertId } = useParams();
+
     const history = useHistory();
 
     const [activeTab, setActiveTab] = useState(0);
@@ -529,6 +530,105 @@ const AlertConfig = () => {
             });
     };
 
+    const handleEditAlert = async (alert_id, alert_obj) => {
+        if (!alert_id || !alert_obj) return;
+
+        setCreating(true);
+
+        const { target, recurrence, condition, notification } = alert_obj;
+
+        // Alert Payload
+        let payload = {
+            name: alert_obj?.alert_name,
+            description: alert_obj?.alert_description,
+            target_type: target?.type,
+            alert_condition_description: condition?.alert_condition_description ?? '',
+            condition_metric: condition?.condition_metric,
+            condition_metric_aggregate: condition?.condition_metric_aggregate,
+            condition_timespan: condition?.condition_timespan,
+            condition_operator: condition?.condition_operator,
+            condition_threshold_type: condition?.condition_threshold_type,
+        };
+
+        // When Target type is 'Building'
+        if (target?.type === TARGET_TYPES.BUILDING) {
+            payload.building_ids = target?.lists.map((el) => el?.value);
+
+            if (condition?.condition_metric === 'energy_consumption') {
+                if (condition?.threshold50) payload.condition_alert_at.push(50);
+                if (condition?.threshold75) payload.condition_alert_at.push(75);
+                if (condition?.threshold100) payload.condition_alert_at.push(100);
+            }
+        }
+
+        // When Target type is 'Equipment'
+        if (target?.type === TARGET_TYPES.EQUIPMENT) {
+            payload.building_ids = [target?.buildingIDs];
+            payload.equipment_ids = target?.lists.map((el) => el?.value);
+        }
+
+        if (condition?.condition_threshold_type === 'static_threshold_value') {
+            payload.condition_threshold_value = +condition?.condition_threshold_value;
+        }
+
+        if (condition?.condition_threshold_type === 'calculated') {
+            payload.condition_threshold_calculated = condition?.condition_threshold_calculated;
+            payload.condition_threshold_timespan = condition?.condition_threshold_timespan;
+        }
+
+        if (condition?.condition_threshold_type === 'reference') {
+            payload.condition_threshold_reference = condition?.condition_threshold_reference;
+        }
+
+        if (condition?.condition_trigger_alert) {
+            const uniqueNumbersArray = convertStringToUniqueNumbers(condition?.condition_trigger_alert);
+            if (uniqueNumbersArray) payload.condition_alert_at = uniqueNumbersArray.filter((number) => number <= 100);
+        }
+
+        // Notification and its recurrence setup
+        const method = notification?.method[0];
+
+        if (method === 'email') payload.alert_emails = notification?.selectedUserEmailIds;
+        if (method === 'user') payload.alert_user_ids = notification?.selectedUserIds.map((el) => el?.value);
+
+        if ((method === 'email' || method === 'user') && recurrence?.resendAlert) {
+            payload.alert_recurrence = recurrence?.resendAlert;
+            payload.alert_recurrence_minutes = +recurrence?.resendAt;
+        }
+
+        await updateAlertServiceAPI(alert_id, payload)
+            .then((res) => {
+                const response = res?.data;
+                console.log('SSR response => ', response);
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Alert created successfully.';
+                        s.notificationType = 'success';
+                    });
+                    history.push({
+                        pathname: '/alerts/overview/alert-settings',
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Failed to create Alert.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch(() => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Failed to create Alert status due to Internal Server Error.';
+                    s.notificationType = 'error';
+                });
+            })
+            .finally(() => {
+                setCreating(false);
+            });
+    };
+
     const getConfiguredAlertById = async (alert_id) => {
         if (!alert_id) return;
 
@@ -658,7 +758,8 @@ const AlertConfig = () => {
                         setActiveTab={setActiveTab}
                         isAlertConfigured={isTargetConfigured && isConditionConfigured && isAlertNameSet}
                         onAlertCreate={() => {
-                            handleCreateAlert(alertObj);
+                            reqType === 'create' && handleCreateAlert(alertObj);
+                            reqType === 'edit' && handleEditAlert(alertId, alertObj);
                         }}
                         reqType={reqType}
                         isCreatingAlert={isCreatingAlert}
