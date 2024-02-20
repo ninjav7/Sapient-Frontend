@@ -23,7 +23,7 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as CheckMarkSVG } from '../../../assets/icon/check-mark.svg';
 
-import { createAlertServiceAPI, fetchConfiguredAlertById } from '../services';
+import { createAlertServiceAPI, fetchConfiguredAlertById, updateAlertServiceAPI } from '../services';
 
 import {
     TARGET_TYPES,
@@ -32,7 +32,8 @@ import {
     defaultConditionObj,
     defaultNotificationObj,
     equipAlertConditions,
-    filtersForEnergyConsumption,
+    thresholdConditionTimespanList,
+    thresholdTypeList,
 } from '../constants';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
@@ -97,7 +98,7 @@ const CreateAlertHeader = (props) => {
                         />
                     ) : (
                         <Button
-                            label={'Save'}
+                            label={reqType === 'create' ? 'Save' : 'Update'}
                             size={Button.Sizes.md}
                             type={Button.Type.primary}
                             onClick={onAlertCreate}
@@ -275,6 +276,7 @@ const NotificationSettings = (props) => {
 
 const AlertConfig = () => {
     const { reqType, alertId } = useParams();
+
     const history = useHistory();
 
     const [activeTab, setActiveTab] = useState(0);
@@ -396,36 +398,36 @@ const AlertConfig = () => {
     const renderAlertCondition = (alert_obj) => {
         let text = '';
 
+        let alertType = '';
+
         if (alert_obj?.target?.type === TARGET_TYPES.BUILDING) {
-            let alertType = bldgAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
-            if (alertType) text += `${alertType?.label} the`;
-
-            if (alert_obj?.condition?.timeInterval) text += ` ${alert_obj?.condition?.timeInterval} is`;
-
-            if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
-
-            if (alertObj?.condition?.filterType === 'number' && alert_obj?.condition?.thresholdValue)
-                text += ` ${formatConsumptionValue(+alert_obj?.condition?.thresholdValue, 2)} kWh`;
-
-            if (alertObj?.condition?.filterType !== 'number') {
-                let alertFilter = filtersForEnergyConsumption.find(
-                    (el) => el?.value === alertObj?.condition?.filterType
-                );
-                if (alertFilter) text += ` ${alertFilter?.label}`;
-            }
+            alertType = bldgAlertConditions.find((el) => el?.value === alert_obj?.condition?.condition_metric);
         }
 
         if (alert_obj?.target?.type === TARGET_TYPES.EQUIPMENT) {
-            let alertType = equipAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
-            if (alertType) text += alertType?.label;
+            alertType = equipAlertConditions.find((el) => el?.value === alert_obj?.condition?.condition_metric);
+        }
 
-            if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
+        if (alertType) text += `${alertType?.label} for the`;
 
-            if (alert_obj?.condition?.type === 'shortcycling') {
-                text += ` ${alert_obj?.condition?.shortcyclingMinutes} min`;
-            } else {
-                text += ` ${alert_obj?.condition?.thresholdPercentage}%`;
-            }
+        if (alert_obj?.condition?.condition_metric_aggregate)
+            text += ` aggregation of the ${alert_obj?.condition?.condition_metric_aggregate}`;
+
+        if (alert_obj?.condition?.condition_timespan) text += ` for the ${alert_obj?.condition?.condition_timespan}`;
+
+        if (alert_obj?.condition?.condition_operator) text += ` is ${alert_obj?.condition?.condition_operator}`;
+
+        if (alertObj?.condition?.condition_threshold_type === 'static_threshold_value') {
+            const conditionType = thresholdTypeList.find(
+                (el) => el?.value === alert_obj?.condition?.condition_threshold_type
+            );
+            const value = +alert_obj?.condition?.condition_threshold_value ?? 0;
+            text += ` the ${conditionType?.label} of ${formatConsumptionValue(value, 2)} kWh.`;
+        } else if (alertObj?.condition?.condition_threshold_type === 'calculated') {
+            const thresholdTimespan = thresholdConditionTimespanList.find(
+                (el) => el?.value === alert_obj?.condition?.condition_threshold_timespan
+            );
+            text += ` ${alertObj?.condition?.condition_threshold_type} Threshold based on ${thresholdTimespan?.label}.`;
         }
 
         handleConditionChange('alert_condition_description', `${text}`);
@@ -521,6 +523,104 @@ const AlertConfig = () => {
                 UserStore.update((s) => {
                     s.showNotification = true;
                     s.notificationMessage = 'Failed to create Alert status due to Internal Server Error.';
+                    s.notificationType = 'error';
+                });
+            })
+            .finally(() => {
+                setCreating(false);
+            });
+    };
+
+    const handleEditAlert = async (alert_id, alert_obj) => {
+        if (!alert_id || !alert_obj) return;
+
+        setCreating(true);
+
+        const { target, recurrence, condition, notification } = alert_obj;
+
+        // Alert Payload
+        let payload = {
+            name: alert_obj?.alert_name,
+            description: alert_obj?.alert_description,
+            target_type: target?.type,
+            alert_condition_description: condition?.alert_condition_description ?? '',
+            condition_metric: condition?.condition_metric,
+            condition_metric_aggregate: condition?.condition_metric_aggregate,
+            condition_timespan: condition?.condition_timespan,
+            condition_operator: condition?.condition_operator,
+            condition_threshold_type: condition?.condition_threshold_type,
+        };
+
+        // When Target type is 'Building'
+        if (target?.type === TARGET_TYPES.BUILDING) {
+            payload.building_ids = target?.lists.map((el) => el?.value);
+
+            if (condition?.condition_metric === 'energy_consumption') {
+                if (condition?.threshold50) payload.condition_alert_at.push(50);
+                if (condition?.threshold75) payload.condition_alert_at.push(75);
+                if (condition?.threshold100) payload.condition_alert_at.push(100);
+            }
+        }
+
+        // When Target type is 'Equipment'
+        if (target?.type === TARGET_TYPES.EQUIPMENT) {
+            payload.building_ids = [target?.buildingIDs];
+            payload.equipment_ids = target?.lists.map((el) => el?.value);
+        }
+
+        if (condition?.condition_threshold_type === 'static_threshold_value') {
+            payload.condition_threshold_value = +condition?.condition_threshold_value;
+        }
+
+        if (condition?.condition_threshold_type === 'calculated') {
+            payload.condition_threshold_calculated = condition?.condition_threshold_calculated;
+            payload.condition_threshold_timespan = condition?.condition_threshold_timespan;
+        }
+
+        if (condition?.condition_threshold_type === 'reference') {
+            payload.condition_threshold_reference = condition?.condition_threshold_reference;
+        }
+
+        if (condition?.condition_trigger_alert) {
+            const uniqueNumbersArray = convertStringToUniqueNumbers(condition?.condition_trigger_alert);
+            if (uniqueNumbersArray) payload.condition_alert_at = uniqueNumbersArray.filter((number) => number <= 100);
+        }
+
+        // Notification and its recurrence setup
+        const method = notification?.method[0];
+
+        if (method === 'email') payload.alert_emails = notification?.selectedUserEmailIds;
+        if (method === 'user') payload.alert_user_ids = notification?.selectedUserIds.map((el) => el?.value);
+
+        if ((method === 'email' || method === 'user') && recurrence?.resendAlert) {
+            payload.alert_recurrence = recurrence?.resendAlert;
+            payload.alert_recurrence_minutes = +recurrence?.resendAt;
+        }
+
+        await updateAlertServiceAPI(alert_id, payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Alert updated successfully.';
+                        s.notificationType = 'success';
+                    });
+                    history.push({
+                        pathname: '/alerts/overview/alert-settings',
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Failed to update Alert.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch(() => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Failed to update Alert status due to Internal Server Error.';
                     s.notificationType = 'error';
                 });
             })
@@ -658,7 +758,8 @@ const AlertConfig = () => {
                         setActiveTab={setActiveTab}
                         isAlertConfigured={isTargetConfigured && isConditionConfigured && isAlertNameSet}
                         onAlertCreate={() => {
-                            handleCreateAlert(alertObj);
+                            reqType === 'create' && handleCreateAlert(alertObj);
+                            reqType === 'edit' && handleEditAlert(alertId, alertObj);
                         }}
                         reqType={reqType}
                         isCreatingAlert={isCreatingAlert}
