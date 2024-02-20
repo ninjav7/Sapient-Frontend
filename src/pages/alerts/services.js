@@ -21,7 +21,7 @@ export function createAlertServiceAPI(payload = {}) {
 }
 
 export function fetchAllConfiguredAlerts() {
-    return axiosInstance.get(getConfiguredAlerts).then((res) => res);
+    return axiosInstance.post(getConfiguredAlerts).then((res) => res);
 }
 
 export function fetchConfiguredAlertById(alert_id) {
