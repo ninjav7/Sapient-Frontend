@@ -360,8 +360,18 @@ const Datepicker = ({
                 ) : (
                     <>
                         {startDate && startDate.format(`MMM D ${!isTheSameYear ? 'YYYY' : ''}`)}
+                        {isTimePickerEnabled
+                            ? userPrefTimeFormat === '24h'
+                                ? startTime.format('HH:mm')
+                                : startTime.format('hh:mm A')
+                            : null}
                         <span> - </span>
                         {endDate && endDate.format(`MMM D ${!isTheSameYear ? 'YYYY' : ''}`)}
+                        {isTimePickerEnabled
+                            ? userPrefTimeFormat === '24h'
+                                ? endTime.format('HH:mm')
+                                : endTime.format('hh:mm A')
+                            : null}
                     </>
                 )}
             </Typography.Body>
