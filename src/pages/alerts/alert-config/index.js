@@ -10,6 +10,7 @@ import Brick from '../../../sharedComponents/brick';
 import Target from './Target';
 import Condition from './Condition';
 import AlertPreview from './AlertPreview';
+import ResetTargetTypeAlert from './ResetTargetTypeAlert';
 import BuildingConfig from './target-type-config/BuildingConfig';
 import EquipConfig from './target-type-config/EquipConfig';
 import NotificationMethod from './NotificationMethod';
@@ -41,7 +42,6 @@ import { convertStringToUniqueNumbers } from '../helpers';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-import ResetTargetTypeAlert from './ResetTargetTypeAlert';
 
 const CreateAlertHeader = (props) => {
     const {
@@ -175,7 +175,7 @@ const ConfigureAlerts = (props) => {
         let label = '';
 
         if (count === 0) label = `No ${targetType} selected.`;
-        else if (count === 1) label = alertObj.target.lists[0].label;
+        else if (count === 1) label = alertObj?.target?.lists[0]?.label;
         else if (count > 1) label = `${count} ${targetType}s selected.`;
 
         return label;
