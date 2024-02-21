@@ -8,9 +8,12 @@ import Select from '../../../sharedComponents/form/select';
 import Inputs from '../../../sharedComponents/form/input/Input';
 import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
-import { ReactComponent as KWH_SVG } from '../../../assets/icon/kwh.svg';
-import { ReactComponent as PERCENT_SVG } from '../../../assets/icon/percent.svg';
-// import { ReactComponent as MINUTE_SVG } from '../../../assets/icon/minutes.svg';
+import { ReactComponent as KWH_SVG } from '../../../assets/icon/units/kwh.svg';
+import { ReactComponent as KW_SVG } from '../../../assets/icon/units/kW.svg';
+import { ReactComponent as AMP_SVG } from '../../../assets/icon/units/amp.svg';
+import { ReactComponent as KG_SVG } from '../../../assets/icon/units/kg.svg';
+import { ReactComponent as WATT_SVG } from '../../../assets/icon/units/watt.svg';
+import { ReactComponent as PERCENT_SVG } from '../../../assets/icon/units/percent.svg';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 
 import {
@@ -73,6 +76,19 @@ const Condition = (props) => {
         default:
             conditionsList = [];
     }
+
+    const handleSVGRender = (metricType) => {
+        console.log('SSR metricType => ', metricType);
+
+        if (metricType === 'energy_consumption') return <KWH_SVG width={25} height={25} />;
+        if (metricType === 'peak_demand') return <KW_SVG width={15} height={15} />;
+        if (metricType === 'carbon') return <KG_SVG width={15} height={15} />;
+        if (metricType === 'power') return <WATT_SVG width={12} height={12} />;
+        if (metricType.includes('current')) return <AMP_SVG width={12} height={12} />;
+        if (metricType.includes('percent')) return <PERCENT_SVG />;
+
+        return null;
+    };
 
     return (
         <div className="custom-card">
@@ -226,7 +242,7 @@ const Condition = (props) => {
                                             onChange={(e) => {
                                                 handleConditionChange('condition_threshold_value', e.target.value);
                                             }}
-                                            elementEnd={<KWH_SVG />}
+                                            elementEnd={handleSVGRender(condition?.condition_metric)}
                                         />
                                     </div>
                                 )}
@@ -313,7 +329,7 @@ const Condition = (props) => {
 
                             <div className="w-50">
                                 <div className="d-flex align-items-center">
-                                    <Typography.Body size={Typography.Sizes.md}>Trigger Alert %</Typography.Body>
+                                    <Typography.Body size={Typography.Sizes.md}>Trigger Alert (%)</Typography.Body>
                                     <TriggerAlertToolTip />
                                 </div>
                                 <Brick sizeInRem={0.25} />
@@ -325,7 +341,7 @@ const Condition = (props) => {
                                     value={alertObj?.condition?.condition_trigger_alert}
                                     onChange={(e) => {
                                         const inputValue = e.target.value;
-                                        const sanitizedValue = inputValue.replace(/[^0-9,]/g, ''); // Remove any characters that are not numbers or commas
+                                        const sanitizedValue = inputValue.replace(/[^0-9,]/g, '');
                                         handleConditionChange('condition_trigger_alert', sanitizedValue);
                                     }}
                                     elementEnd={<PERCENT_SVG />}
@@ -337,59 +353,6 @@ const Condition = (props) => {
                             </div>
                         </>
                     )}
-
-                    {/* <Brick sizeInRem={targetType === TARGET_TYPES.BUILDING ? 1 : 0.5} />
-
-                    {alertObj?.target?.type !== TARGET_TYPES.BUILDING && alertObj?.condition?.condition_metric && (
-                        <>
-                            <hr />
-                            <Brick sizeInRem={0.5} />
-                        </>
-                    )}
-
-                    {alertObj?.target?.type !== TARGET_TYPES.BUILDING && alertObj?.condition?.condition_metric && (
-                        <>
-                            <Typography.Subheader size={Typography.Sizes.md}>{`Recurrence`}</Typography.Subheader>
-
-                            <Brick sizeInRem={0.5} />
-
-                            <div className="d-flex justify-content-between align-items-center">
-                                <div className="d-flex align-items-center w-100" style={{ gap: '1rem' }}>
-                                    <Checkbox
-                                        label="Trigger if condition lasts at least"
-                                        type="checkbox"
-                                        id="trigger-alert"
-                                        name="trigger-alert"
-                                        size="md"
-                                        checked={alertObj?.recurrence?.triggerAlert}
-                                        value={alertObj?.recurrence?.triggerAlert}
-                                        onClick={(e) => {
-                                            handleRecurrenceChange(
-                                                'triggerAlert',
-                                                e.target.value === 'false' ? true : false
-                                            );
-                                        }}
-                                    />
-                                    <div style={{ width: '40%' }}>
-                                        <Inputs
-                                            type="number"
-                                            className="w-50"
-                                            inputClassName="custom-input-field"
-                                            min={0}
-                                            value={alertObj?.recurrence?.triggerAt}
-                                            onChange={(e) => {
-                                                handleRecurrenceChange('triggerAt', e.target.value);
-                                            }}
-                                            elementEnd={<MINUTE_SVG />}
-                                            disabled={!alertObj?.recurrence?.triggerAlert}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <Brick sizeInRem={0.25} />
-                        </>
-                    )} */}
                 </div>
             </CardBody>
         </div>

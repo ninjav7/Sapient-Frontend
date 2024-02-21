@@ -10,6 +10,7 @@ import Brick from '../../../sharedComponents/brick';
 import Target from './Target';
 import Condition from './Condition';
 import AlertPreview from './AlertPreview';
+import ResetTargetTypeAlert from './ResetTargetTypeAlert';
 import BuildingConfig from './target-type-config/BuildingConfig';
 import EquipConfig from './target-type-config/EquipConfig';
 import NotificationMethod from './NotificationMethod';
@@ -41,7 +42,6 @@ import { convertStringToUniqueNumbers } from '../helpers';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-import ResetTargetTypeAlert from './ResetTargetTypeAlert';
 
 const CreateAlertHeader = (props) => {
     const {
@@ -175,7 +175,7 @@ const ConfigureAlerts = (props) => {
         let label = '';
 
         if (count === 0) label = `No ${targetType} selected.`;
-        else if (count === 1) label = alertObj.target.lists[0].label;
+        else if (count === 1) label = alertObj?.target?.lists[0]?.label;
         else if (count > 1) label = `${count} ${targetType}s selected.`;
 
         return label;
@@ -408,12 +408,12 @@ const AlertConfig = () => {
             alertType = equipAlertConditions.find((el) => el?.value === alert_obj?.condition?.condition_metric);
         }
 
-        if (alertType) text += `${alertType?.label} for the`;
+        if (alertType) text += `${alertType?.label} `;
 
         if (alert_obj?.condition?.condition_metric_aggregate)
-            text += ` aggregation of the ${alert_obj?.condition?.condition_metric_aggregate}`;
+            text += ` ${alert_obj?.condition?.condition_metric_aggregate}`;
 
-        if (alert_obj?.condition?.condition_timespan) text += ` for the ${alert_obj?.condition?.condition_timespan}`;
+        if (alert_obj?.condition?.condition_timespan) text += ` for ${alert_obj?.condition?.condition_timespan}`;
 
         if (alert_obj?.condition?.condition_operator) text += ` is ${alert_obj?.condition?.condition_operator}`;
 
@@ -422,12 +422,12 @@ const AlertConfig = () => {
                 (el) => el?.value === alert_obj?.condition?.condition_threshold_type
             );
             const value = +alert_obj?.condition?.condition_threshold_value ?? 0;
-            text += ` the ${conditionType?.label} of ${formatConsumptionValue(value, 2)} kWh.`;
+            text += ` ${formatConsumptionValue(value, 2)} kWh.`;
         } else if (alertObj?.condition?.condition_threshold_type === 'calculated') {
             const thresholdTimespan = thresholdConditionTimespanList.find(
                 (el) => el?.value === alert_obj?.condition?.condition_threshold_timespan
             );
-            text += ` ${alertObj?.condition?.condition_threshold_type} Threshold based on ${thresholdTimespan?.label}.`;
+            text += ` ${thresholdTimespan?.label}.`;
         }
 
         handleConditionChange('alert_condition_description', `${text}`);
