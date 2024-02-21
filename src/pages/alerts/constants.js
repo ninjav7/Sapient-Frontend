@@ -121,6 +121,14 @@ export const aggregationList = [
         label: 'Average',
         value: 'average',
     },
+    {
+        label: 'Max',
+        value: 'max',
+    },
+    {
+        label: 'Min',
+        value: 'min',
+    },
 ];
 
 export const timespanList = [
