@@ -48,6 +48,7 @@ const CreateAlertHeader = (props) => {
         activeTab,
         setActiveTab,
         isAlertConfigured = false,
+        isNotificationConfigured = false,
         onAlertCreate,
         reqType,
         isCreatingAlert = false,
@@ -98,11 +99,19 @@ const CreateAlertHeader = (props) => {
                         />
                     ) : (
                         <Button
-                            label={reqType === 'create' ? 'Save' : 'Update'}
+                            label={
+                                reqType === 'create'
+                                    ? isCreatingAlert
+                                        ? 'Saving...'
+                                        : 'Save'
+                                    : isCreatingAlert
+                                    ? 'Updating...'
+                                    : 'Update'
+                            }
                             size={Button.Sizes.md}
                             type={Button.Type.primary}
                             onClick={onAlertCreate}
-                            disabled={isCreatingAlert}
+                            disabled={isCreatingAlert || !isNotificationConfigured}
                         />
                     )}
                 </div>
@@ -335,6 +344,15 @@ const AlertConfig = () => {
     const isAlertNameSet = alertObj?.alert_name !== '';
     const isTargetConfigured = isBuildingConfigured || isEquipmentConfigured;
     const isConditionConfigured = isConditionSet && isBasicConditionConfigured && isConditionsConfigured;
+
+    const isNotificationConfigured =
+        alertObj?.notification?.method.includes('none') ||
+        (alertObj?.notification?.method.includes('user') &&
+            alertObj?.notification?.selectedUserIds.length !== 0 &&
+            alertObj?.notification?.submitted) ||
+        (alertObj?.notification?.method.includes('email') &&
+            alertObj?.notification?.selectedUserEmailIds !== '' &&
+            alertObj?.notification?.submitted);
 
     const handleModalClick = (configType) => {
         if (configType) {
@@ -757,6 +775,7 @@ const AlertConfig = () => {
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
                         isAlertConfigured={isTargetConfigured && isConditionConfigured && isAlertNameSet}
+                        isNotificationConfigured={isNotificationConfigured}
                         onAlertCreate={() => {
                             reqType === 'create' && handleCreateAlert(alertObj);
                             reqType === 'edit' && handleEditAlert(alertId, alertObj);

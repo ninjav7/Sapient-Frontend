@@ -1,8 +1,9 @@
+import moment from 'moment';
 import { percentageHandler } from '../utils/helper';
 import { getBuildingName } from '../helpers/helpers';
 import { handleUnitConverstion } from '../pages/settings/general-settings/utils';
 import { UNITS } from '../constants/units';
-import moment from 'moment';
+import { TARGET_TYPES } from '../pages/alerts/constants';
 
 export const getTableHeadersList = (record) => {
     let arr = [];
@@ -296,6 +297,7 @@ export const getUsersTableCSVExport = (tableData, columns, handleLastActiveDate)
     });
     return csv;
 };
+
 export const getCarbonCompareBuildingsTableCSVExport = (tableData, columns) => {
     let dataToExport = [];
     tableData.forEach((tableRow, index) => {
@@ -808,4 +810,70 @@ export const getEnergyConsumptionCSVExport = (originalCSV, operatingHours) => {
     const modifiedCSV = csvRows.map((row) => row.join(',')).join('\n');
 
     return modifiedCSV;
+};
+
+export const getAlertSettingsCSVExport = (tableData, columns, handleLastActiveDate) => {
+    let dataToExport = [];
+
+    tableData.forEach((tableRow) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'target_count':
+                    const alertObj = tableRow;
+
+                    let totalCount = 0;
+
+                    if (alertObj?.target_type === TARGET_TYPES.BUILDING)
+                        totalCount = alertObj?.building_ids.length ?? 0;
+                    if (alertObj?.target_type === TARGET_TYPES.EQUIPMENT)
+                        totalCount = alertObj?.equipment_ids.length ?? 0;
+
+                    arr.push(totalCount);
+                    break;
+
+                case 'target_type':
+                    const targetType = tableRow['target_type'];
+                    let formattedText = '-';
+                    if (targetType) formattedText = `${targetType?.charAt(0).toUpperCase()}${targetType?.slice(1)}`;
+                    arr.push(formattedText);
+                    break;
+
+                case 'alert_condition_description':
+                    const conditionDesc = tableRow['alert_condition_description'];
+                    let newFormattedText = '-';
+                    if (conditionDesc) newFormattedText = conditionDesc.replace(/,/g, '');
+                    arr.push(newFormattedText);
+                    break;
+
+                case 'sent_to':
+                    const emailIds = tableRow['alert_emails'];
+                    let sentToList = '-';
+                    if (emailIds) sentToList = emailIds.replace(/,/g, ';');
+                    arr.push(sentToList);
+                    break;
+
+                case 'created_at':
+                    const createdAt = tableRow['created_at'];
+                    let formattedDate = '-';
+                    if (createdAt) formattedDate = handleLastActiveDate(createdAt);
+                    arr.push(formattedDate);
+                    break;
+
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
 };
