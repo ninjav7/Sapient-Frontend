@@ -107,7 +107,7 @@ const AlertSettings = (props) => {
     };
 
     const renderAlertTimestamp = (row) => {
-        const data = moment(row?.created_at).fromNow();
+        const data = moment.utc(row?.created_at).fromNow();
         return <Typography.Body size={Typography.Sizes.lg}>{data}</Typography.Body>;
     };
 
