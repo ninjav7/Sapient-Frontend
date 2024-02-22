@@ -78,8 +78,6 @@ const Condition = (props) => {
     }
 
     const handleSVGRender = (metricType) => {
-        console.log('SSR metricType => ', metricType);
-
         if (metricType === 'energy_consumption') return <KWH_SVG width={25} height={25} />;
         if (metricType === 'peak_demand') return <KW_SVG width={15} height={15} />;
         if (metricType === 'carbon') return <KG_SVG width={15} height={15} />;
