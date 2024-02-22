@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 
@@ -24,6 +24,8 @@ const AlertSettings = (props) => {
     const { getAllConfiguredAlerts, configuredAlertsList = [] } = props;
 
     const history = useHistory();
+
+    const [search, setSearch] = useState('');
 
     const [isDeleting, setIsDeleting] = useState(false);
     const [selectedAlertObj, setSelectedAlertObj] = useState({});
@@ -173,13 +175,20 @@ const AlertSettings = (props) => {
             });
     };
 
+    useEffect(() => {
+        getAllConfiguredAlerts({ search });
+    }, [search]);
+
     return (
         <div className="custom-padding">
             <DataTableWidget
                 id="alert_settings_list"
-                onSearch={(query) => {}}
                 onStatus={(value) => {}}
                 buttonGroupFilterOptions={[]}
+                onSearch={(query) => {
+                    setPageNo(1);
+                    setSearch(query);
+                }}
                 isCSVDownloading={false}
                 onDownload={() => alert('Download CSV')}
                 rows={currentRow()}
