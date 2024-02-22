@@ -122,12 +122,12 @@ export const aggregationList = [
         value: 'average',
     },
     {
-        label: 'Max',
-        value: 'max',
+        label: 'Maximum',
+        value: 'maximum',
     },
     {
-        label: 'Min',
-        value: 'min',
+        label: 'Minimum',
+        value: 'minimum',
     },
 ];
 

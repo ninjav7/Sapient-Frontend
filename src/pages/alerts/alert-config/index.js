@@ -503,7 +503,7 @@ const AlertConfig = () => {
 
         if (condition?.condition_trigger_alert) {
             const uniqueNumbersArray = convertStringToUniqueNumbers(condition?.condition_trigger_alert);
-            if (uniqueNumbersArray) payload.condition_alert_at = uniqueNumbersArray.filter((number) => number <= 100);
+            if (uniqueNumbersArray) payload.condition_alert_at = uniqueNumbersArray;
         }
 
         // Notification and its recurrence setup
