@@ -327,7 +327,7 @@ const Condition = (props) => {
 
                             <div className="w-50">
                                 <div className="d-flex align-items-center">
-                                    <Typography.Body size={Typography.Sizes.md}>Trigger Alert (%)</Typography.Body>
+                                    <Typography.Body size={Typography.Sizes.md}>Trigger Alert %</Typography.Body>
                                     <TriggerAlertToolTip />
                                 </div>
                                 <Brick sizeInRem={0.25} />

@@ -53,6 +53,7 @@ const CreateAlertHeader = (props) => {
         reqType,
         isCreatingAlert = false,
         renderAlertCondition,
+        validateTriggerAlertInputs,
         alertObj,
     } = props;
 
@@ -93,6 +94,7 @@ const CreateAlertHeader = (props) => {
                             type={Button.Type.primary}
                             onClick={() => {
                                 renderAlertCondition(alertObj);
+                                validateTriggerAlertInputs(alertObj);
                                 setActiveTab(1);
                             }}
                             disabled={!isAlertConfigured}
@@ -451,6 +453,15 @@ const AlertConfig = () => {
         handleConditionChange('alert_condition_description', `${text}`);
     };
 
+    const validateTriggerAlertInputs = (alert_obj) => {
+        const triggerAlertList = alert_obj?.condition?.condition_trigger_alert;
+
+        if (triggerAlertList) {
+            const filteredList = triggerAlertList.replace(/^,*(.*?),*$/, '$1');
+            handleConditionChange('condition_trigger_alert', filteredList);
+        }
+    };
+
     const handleCreateAlert = async (alert_obj) => {
         if (!alert_obj) return;
 
@@ -783,6 +794,7 @@ const AlertConfig = () => {
                         reqType={reqType}
                         isCreatingAlert={isCreatingAlert}
                         renderAlertCondition={renderAlertCondition}
+                        validateTriggerAlertInputs={validateTriggerAlertInputs}
                         alertObj={alertObj}
                     />
                 </Col>
