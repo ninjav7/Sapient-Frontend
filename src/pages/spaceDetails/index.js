@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import 'moment-timezone';
 import { useHistory } from 'react-router-dom';
 import { Row, Col, Spinner } from 'reactstrap';
@@ -34,8 +34,10 @@ import '../../sharedComponents/typography/style.scss';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../settings/passive-devices/styles.scss';
 import './styles.scss';
-
-// make styles according to Figma
+import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
+import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
+import { getAllSpaceTypes, updateSpaceService } from '../settings/layout/services';
+import { TagsInput } from 'react-tag-input-component';
 
 const SpaceDetails = () => {
     const history = useHistory();
@@ -54,14 +56,52 @@ const SpaceDetails = () => {
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
+    const notifyUser = (notifyType, notifyMessage) => {
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = notifyMessage;
+            s.notificationType = notifyType;
+        });
+    };
+
     const [chartDataFetching, setChartDataFetching] = useState(false);
     const [chartData, setChartData] = useState([]);
 
     const [metadataFetching, setMetadataFetching] = useState(false);
     const [metadata, setMetadata] = useState({});
+    const [metadataToUpdate, setMetadataToUpdate] = useState({});
+    const [metadataUpdating, setMetadataUpdating] = useState(false);
 
-    const [selectedTab, setSelectedTab] = useState(0);
+    const [selectedTab, setSelectedTab] = useState(1);
     const [selectedConsumption, setConsumption] = useState(metric[0]?.value);
+    const [spaceTypes, setSpaceTypes] = useState([]);
+
+    const [errorObj, setErrorObj] = useState({});
+
+    const fetchSpaceTypes = async () => {
+        const params = `?ordered_by=name&sort_by=ace`;
+
+        try {
+            await getAllSpaceTypes(params).then((res) => {
+                const response = res?.data;
+
+                if (response?.success) {
+                    if (response?.data.length !== 0) {
+                        const mappedSpaceTypes = response?.data.map((el) => {
+                            return {
+                                label: el?.name,
+                                value: el?.id,
+                            };
+                        });
+
+                        setSpaceTypes(mappedSpaceTypes);
+                    }
+                }
+            });
+        } catch {
+            setSpaceTypes([]);
+        }
+    };
 
     const fetchChartData = async () => {
         setChartDataFetching(true);
@@ -99,15 +139,20 @@ const SpaceDetails = () => {
     const fetchMetadata = async () => {
         setMetadataFetching(true);
         setMetadata({});
+        setMetadataToUpdate({});
 
         try {
             const query = { bldgId, dateFrom: startDate, dateTo: endDate, timeZone };
 
             const res = await fetchSpaceMetadata(query, spaceId);
 
-            if (res) setMetadata(res);
+            if (res) {
+                setMetadata(res);
+                setMetadataToUpdate(res);
+            }
         } catch {
             setMetadata({});
+            setMetadataToUpdate({});
         }
 
         setMetadataFetching(false);
@@ -133,6 +178,7 @@ const SpaceDetails = () => {
     useEffect(() => {
         if (!spaceId || !selectedConsumption || !bldgId || !startDate || !endDate) return;
 
+        fetchSpaceTypes();
         fetchChartData();
         fetchMetadata();
     }, [spaceId, startDate, endDate, selectedConsumption, bldgId]);
@@ -185,6 +231,55 @@ const SpaceDetails = () => {
     const handleSelect = (e) => setConsumption(e.value);
     const spaceName = metadata?.space_name && metadata.space_name;
 
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, metadataToUpdate);
+        obj[key] = value;
+        setMetadataToUpdate(obj);
+    };
+
+    const fetchEditSpace = async () => {
+        setMetadataUpdating(true);
+
+        const params = `?space_id=${metadataToUpdate?.space_id}`;
+
+        const payload = {
+            building_id: bldgId,
+            name: metadataToUpdate?.space_name,
+            type_id: metadataToUpdate?.space_type_id,
+            parents: metadataToUpdate?.parents, // does not exist
+            parent_space: metadataToUpdate?.parent_space, // does not exist
+        };
+
+        try {
+            const res = await updateSpaceService(params, payload);
+            const response = res?.data;
+            if (response?.success) {
+                notifyUser(Notification.Types.success, `Space updated successfully.`);
+            } else {
+                notifyUser(Notification.Types.error, response?.message);
+            }
+        } catch {
+            notifyUser(Notification.Types.error, `Failed to update Space.`);
+        }
+
+        setMetadataUpdating(false);
+    };
+
+    const handleEditSpace = () => {
+        if (!bldgId || !metadataToUpdate?.space_id) return;
+
+        let alertObj = Object.assign({}, errorObj);
+
+        if (!metadataToUpdate?.space_name || metadataToUpdate?.space_name === '')
+            alertObj.space_name = `Please enter Space name. It cannot be empty.`;
+        if (!metadataToUpdate?.space_type_id || metadataToUpdate?.space_type_id === '')
+            alertObj.space_type_id = { text: `Please select Type.` };
+
+        setErrorObj(alertObj);
+
+        if (!alertObj.space_name && !alertObj.space_type_id) fetchEditSpace();
+    };
+
     return (
         <div>
             <div>
@@ -227,51 +322,155 @@ const SpaceDetails = () => {
                     </Col>
                 </Row>
 
-                <div className="lower-content-container">
-                    <Row>
-                        <Col xl={3}>
-                            <EnergyMetadataContainer metadata={metadata} isFetching={metadataFetching} />
+                {selectedTab === 0 && (
+                    <div className="lower-content-container">
+                        <Row>
+                            <Col xl={3}>
+                                <EnergyMetadataContainer metadata={metadata} isFetching={metadataFetching} />
 
-                            <Brick sizeInRem={1} />
+                                <Brick sizeInRem={1} />
 
-                            <MetadataContainer metadata={metadata} isFetching={metadataFetching} />
+                                <MetadataContainer metadata={metadata} isFetching={metadataFetching} />
 
-                            <Brick sizeInRem={1} />
-                        </Col>
+                                <Brick sizeInRem={1} />
+                            </Col>
 
-                        <Col xl={9}>
-                            <div className="select-by">
-                                <div className="d-flex">
-                                    <div className="mr-2 mw-100">
-                                        <Select
-                                            defaultValue={selectedConsumption}
-                                            options={metric}
-                                            onChange={handleSelect}
+                            <Col xl={9}>
+                                <div className="select-by">
+                                    <div className="d-flex">
+                                        <div className="mr-2 mw-100">
+                                            <Select
+                                                defaultValue={selectedConsumption}
+                                                options={metric}
+                                                onChange={handleSelect}
+                                            />
+                                        </div>
+                                        <Header type="page" />
+                                    </div>
+                                </div>
+
+                                {chartDataFetching ? (
+                                    <div className="line-chart-wrapper">
+                                        <div className="line-chart-loader">
+                                            <Spinner color="primary" />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <LineChart
+                                        title={''}
+                                        subTitle={''}
+                                        tooltipUnit={metric[0]?.unit}
+                                        tooltipLabel={metric[0]?.consumption}
+                                        data={chartData}
+                                        chartProps={chartProps}
+                                    />
+                                )}
+                            </Col>
+                        </Row>
+                    </div>
+                )}
+
+                {selectedTab === 1 && (
+                    <div>
+                        <Brick sizeInRem={1.25} />
+
+                        <Typography.Header size={Typography.Sizes.md} Type={Typography.Types.Regular}>
+                            Space Details
+                        </Typography.Header>
+
+                        <Brick sizeInRem={1.25} />
+
+                        <Row>
+                            <Col xl={8}>
+                                <div className="d-flex justify-content-between">
+                                    <div className="w-100">
+                                        <Typography.Body size={Typography.Sizes.md}>Space Name</Typography.Body>
+                                        <Brick sizeInRem={0.25} />
+                                        <InputTooltip
+                                            placeholder="Enter Name"
+                                            labelSize={Typography.Sizes.md}
+                                            value={metadataToUpdate?.space_name ?? ''}
+                                            onChange={(e) => {
+                                                handleChange('space_name', e.target.value);
+                                            }}
                                         />
                                     </div>
-                                    <Header type="page" />
-                                </div>
-                            </div>
 
-                            {chartDataFetching ? (
-                                <div className="line-chart-wrapper">
-                                    <div className="line-chart-loader">
-                                        <Spinner color="primary" />
+                                    <div className="w-100 ml-3">
+                                        <Typography.Body size={Typography.Sizes.md}>Space Type</Typography.Body>
+                                        <Brick sizeInRem={0.25} />
+                                        <Select
+                                            name="select"
+                                            placeholder="Select Type"
+                                            options={spaceTypes}
+                                            currentValue={spaceTypes.filter(
+                                                (option) => option.value === metadataToUpdate?.space_type_id
+                                            )}
+                                            isSearchable={true}
+                                            onChange={(e) => {
+                                                handleChange('space_type_id', e.value);
+                                            }}
+                                            customSearchCallback={({ data, query }) =>
+                                                defaultDropdownSearch(data, query?.value)
+                                            }
+                                            menuPlacement="bottom"
+                                        />
                                     </div>
                                 </div>
-                            ) : (
-                                <LineChart
-                                    title={''}
-                                    subTitle={''}
-                                    tooltipUnit={metric[0]?.unit}
-                                    tooltipLabel={metric[0]?.consumption}
-                                    data={chartData}
-                                    chartProps={chartProps}
-                                />
-                            )}
-                        </Col>
-                    </Row>
-                </div>
+
+                                <Brick sizeInRem={1.25} />
+
+                                <div className="d-flex justify-content-between">
+                                    <div className="w-100">
+                                        <Typography.Body size={Typography.Sizes.md}>{`Square Footage`}</Typography.Body>
+                                        <Brick sizeInRem={0.25} />
+                                        <InputTooltip
+                                            placeholder="Enter Square Footage"
+                                            labelSize={Typography.Sizes.md}
+                                            value={metadata?.square_footage ?? ''}
+                                            onChange={(e) => {
+                                                handleChange('square_footage', e.target.value);
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="w-100 ml-3">
+                                        <div>
+                                            <Typography.Body size={Typography.Sizes.md}>{`Tags`}</Typography.Body>
+                                            <Brick sizeInRem={0.25} />
+                                            <TagsInput
+                                                classNames="h-5"
+                                                placeholder="Tags"
+                                                value={metadataToUpdate?.tag ?? []}
+                                                onChange={(value) => {
+                                                    handleChange('tag', value);
+                                                }}
+                                                placeHolder="Add Tag"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </Col>
+
+                            <Col xl={4}>
+                                <div className="w-100 box-parent">
+                                    <div className="box-parent-header">
+                                        <Typography.Header size={Typography.Sizes.sm}>Parent</Typography.Header>
+                                    </div>
+
+                                    <div className="box-parent-buttons">
+                                        <Button
+                                            label={metadataUpdating ? 'Updating' : 'Update'}
+                                            size={Button.Sizes.md}
+                                            type={Button.Type.primary}
+                                            onClick={handleEditSpace}
+                                        />
+                                    </div>
+                                </div>
+                            </Col>
+                        </Row>
+                    </div>
+                )}
             </div>
         </div>
     );
