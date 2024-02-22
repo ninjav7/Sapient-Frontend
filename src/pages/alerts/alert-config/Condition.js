@@ -348,7 +348,7 @@ const Condition = (props) => {
                                 />
                                 <Brick sizeInRem={0.25} />
                                 <Typography.Body size={Typography.Sizes.sm}>
-                                    {`Enter a number or numbers (between 1 to 100), separated by a comma.`}
+                                    {`Enter a number or numbers, separated by a comma.`}
                                 </Typography.Body>
                             </div>
                         </>
