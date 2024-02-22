@@ -78,8 +78,6 @@ const Condition = (props) => {
     }
 
     const handleSVGRender = (metricType) => {
-        console.log('SSR metricType => ', metricType);
-
         if (metricType === 'energy_consumption') return <KWH_SVG width={25} height={25} />;
         if (metricType === 'peak_demand') return <KW_SVG width={15} height={15} />;
         if (metricType === 'carbon') return <KG_SVG width={15} height={15} />;
@@ -329,7 +327,7 @@ const Condition = (props) => {
 
                             <div className="w-50">
                                 <div className="d-flex align-items-center">
-                                    <Typography.Body size={Typography.Sizes.md}>Trigger Alert (%)</Typography.Body>
+                                    <Typography.Body size={Typography.Sizes.md}>Trigger Alert %</Typography.Body>
                                     <TriggerAlertToolTip />
                                 </div>
                                 <Brick sizeInRem={0.25} />
@@ -348,7 +346,7 @@ const Condition = (props) => {
                                 />
                                 <Brick sizeInRem={0.25} />
                                 <Typography.Body size={Typography.Sizes.sm}>
-                                    {`Enter a number or numbers (between 1 to 100), separated by a comma.`}
+                                    {`Enter a number or numbers, separated by a comma.`}
                                 </Typography.Body>
                             </div>
                         </>
