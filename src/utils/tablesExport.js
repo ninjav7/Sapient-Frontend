@@ -297,6 +297,7 @@ export const getUsersTableCSVExport = (tableData, columns, handleLastActiveDate)
     });
     return csv;
 };
+
 export const getCarbonCompareBuildingsTableCSVExport = (tableData, columns) => {
     let dataToExport = [];
     tableData.forEach((tableRow, index) => {
@@ -811,7 +812,7 @@ export const getEnergyConsumptionCSVExport = (originalCSV, operatingHours) => {
     return modifiedCSV;
 };
 
-export const getAlertSettingsCSVExport = (tableData, columns) => {
+export const getAlertSettingsCSVExport = (tableData, columns, handleLastActiveDate) => {
     let dataToExport = [];
 
     tableData.forEach((tableRow) => {
@@ -855,8 +856,9 @@ export const getAlertSettingsCSVExport = (tableData, columns) => {
 
                 case 'created_at':
                     const createdAt = tableRow['created_at'];
-                    const data = moment.utc(createdAt);
-                    arr.push(data ?? '-');
+                    let formattedDate = '-';
+                    if (createdAt) formattedDate = handleLastActiveDate(createdAt);
+                    arr.push(formattedDate);
                     break;
 
                 default:

@@ -29,6 +29,8 @@ const AlertSettings = (props) => {
     const { download } = useCSVDownload();
 
     const [search, setSearch] = useState('');
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [isDeleting, setIsDeleting] = useState(false);
     const [selectedAlertObj, setSelectedAlertObj] = useState({});
@@ -174,6 +176,23 @@ const AlertSettings = (props) => {
         },
     ];
 
+    function isValidDate(d) {
+        return d instanceof Date && !isNaN(d);
+    }
+
+    const handleLastActiveDate = (last_login) => {
+        let dt = '';
+        if (isValidDate(new Date(last_login)) && last_login != null) {
+            const last_dt = new Date(last_login);
+            const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
+            const timeFormat = userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`;
+            dt = moment.utc(last_dt).format(`${dateFormat} 'YY @ ${timeFormat}`);
+        } else {
+            dt = '-';
+        }
+        return dt;
+    };
+
     const handleDownloadCsv = async () => {
         setDownloadingCSVData(true);
 
@@ -182,7 +201,7 @@ const AlertSettings = (props) => {
                 const response = res?.data;
                 const { success: isSuccessful, data } = response;
                 if (isSuccessful && data) {
-                    let csvData = getAlertSettingsCSVExport(data, headerProps);
+                    let csvData = getAlertSettingsCSVExport(data, headerProps, handleLastActiveDate);
                     download(`Alerts_Portfolio_${new Date().toISOString().split('T')[0]}`, csvData);
                 }
             })
