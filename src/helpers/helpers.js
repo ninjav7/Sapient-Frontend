@@ -315,6 +315,12 @@ export const handleAPIRequestBody = (start_date, end_date, time_zone, start_time
         end_time = newEndTime.format('HH:mm');
     }
 
+    if (end_time.includes(':00')) {
+        const endTime = moment(end_time, 'HH:mm');
+        endTime.subtract(1, 'minute');
+        end_time = endTime.format('HH:mm');
+    }
+
     const dateFrom = start_date.split('T')[0].concat(`T${start_time}`);
     const dateTo = end_date.split('T')[0].concat(`T${end_time}`);
 
@@ -340,6 +346,12 @@ const getTimeInString = (type) => {
 export const handleAPIRequestParams = (start_date, end_date, start_time, end_time) => {
     if (!start_time) start_time = getTimeInString('startTime');
     if (!end_time) end_time = getTimeInString('endTime');
+
+    if (end_time.includes(':00')) {
+        const endTime = moment(end_time, 'HH:mm');
+        endTime.subtract(1, 'minute');
+        end_time = endTime.format('HH:mm');
+    }
 
     const dateFrom = start_date.split('T')[0].concat(`T${start_time}`);
     const dateTo = end_date.split('T')[0].concat(`T${end_time}`);

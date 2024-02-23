@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 
@@ -13,7 +13,10 @@ import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/ass
 
 import { separateEmails } from '../helpers';
 import { TARGET_TYPES } from '../constants';
-import { deleteConfiguredAlert } from '../services';
+import { getAlertSettingsCSVExport } from '../../../utils/tablesExport';
+import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
+import { deleteConfiguredAlert, fetchAllConfiguredAlerts } from '../services';
+import { timeZone } from '../../../utils/helper';
 
 import DeleteAlert from './DeleteAlert';
 
@@ -24,9 +27,16 @@ const AlertSettings = (props) => {
     const { getAllConfiguredAlerts, configuredAlertsList = [] } = props;
 
     const history = useHistory();
+    const { download } = useCSVDownload();
+
+    const [search, setSearch] = useState('');
+    const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [isDeleting, setIsDeleting] = useState(false);
     const [selectedAlertObj, setSelectedAlertObj] = useState({});
+
+    const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
     // Delete Device Modal states
     const [isDeleteAlertModalOpen, setDeleteAlertModalStatus] = useState(false);
@@ -107,7 +117,7 @@ const AlertSettings = (props) => {
     };
 
     const renderAlertTimestamp = (row) => {
-        const data = moment(row?.created_at).fromNow();
+        const data = moment.utc(row?.created_at).fromNow();
         return <Typography.Body size={Typography.Sizes.lg}>{data}</Typography.Body>;
     };
 
@@ -132,6 +142,76 @@ const AlertSettings = (props) => {
 
     const currentRow = () => {
         return configuredAlertsList;
+    };
+
+    const headerProps = [
+        {
+            name: 'Alert Name',
+            accessor: 'name',
+            callbackValue: renderAlertType,
+        },
+        {
+            name: 'Target Count',
+            accessor: 'target_count',
+            callbackValue: renderTargetCount,
+        },
+        {
+            name: 'Target Type',
+            accessor: 'target_type',
+            callbackValue: renderTargetType,
+        },
+        {
+            name: 'Condition',
+            accessor: 'alert_condition_description',
+            callbackValue: renderConditions,
+        },
+        {
+            name: 'Sent To',
+            accessor: 'sent_to',
+            callbackValue: renderSentAddress,
+        },
+        {
+            name: 'Created',
+            accessor: 'created_at',
+            callbackValue: renderAlertTimestamp,
+        },
+    ];
+
+    function isValidDate(d) {
+        return d instanceof Date && !isNaN(d);
+    }
+
+    const handleLastActiveDate = (createdAt) => {
+        let dt = '-';
+
+        if (createdAt) {
+            const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
+            const timeFormat = userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`;
+            dt = moment.utc(createdAt).tz(timeZone).format(`${dateFormat} 'YY @ ${timeFormat}`);
+        }
+
+        return dt;
+    };
+
+    const handleDownloadCsv = async () => {
+        setDownloadingCSVData(true);
+
+        await fetchAllConfiguredAlerts()
+            .then((res) => {
+                const response = res?.data;
+                const { success: isSuccessful, data } = response;
+                if (isSuccessful && data) {
+                    data.forEach((el) => {
+                        el.created_at_formatted = handleLastActiveDate(el?.created_at);
+                    });
+                    let csvData = getAlertSettingsCSVExport(data, headerProps);
+                    download(`Alerts_Portfolio_${new Date().toISOString().split('T')[0]}`, csvData);
+                }
+            })
+            .catch(() => {})
+            .finally(() => {
+                setDownloadingCSVData(false);
+            });
     };
 
     const handleAlertDeletion = async (alert_id) => {
@@ -173,50 +253,26 @@ const AlertSettings = (props) => {
             });
     };
 
+    useEffect(() => {
+        getAllConfiguredAlerts({ search });
+    }, [search]);
+
     return (
         <div className="custom-padding">
             <DataTableWidget
                 id="alert_settings_list"
-                onSearch={(query) => {}}
                 onStatus={(value) => {}}
                 buttonGroupFilterOptions={[]}
-                isCSVDownloading={false}
-                onDownload={() => alert('Download CSV')}
+                onSearch={(query) => {
+                    setPageNo(1);
+                    setSearch(query);
+                }}
+                isCSVDownloading={isCSVDownloading}
+                onDownload={handleDownloadCsv}
                 rows={currentRow()}
                 disableColumnDragging={true}
                 searchResultRows={currentRow()}
-                headers={[
-                    {
-                        name: 'Alert Name',
-                        accessor: 'name',
-                        callbackValue: renderAlertType,
-                    },
-                    {
-                        name: 'Target Count',
-                        accessor: 'target_count',
-                        callbackValue: renderTargetCount,
-                    },
-                    {
-                        name: 'Target Type',
-                        accessor: 'target_type',
-                        callbackValue: renderTargetType,
-                    },
-                    {
-                        name: 'Condition',
-                        accessor: 'condition',
-                        callbackValue: renderConditions,
-                    },
-                    {
-                        name: 'Sent To',
-                        accessor: 'sent_to',
-                        callbackValue: renderSentAddress,
-                    },
-                    {
-                        name: 'Created',
-                        accessor: 'created_at',
-                        callbackValue: renderAlertTimestamp,
-                    },
-                ]}
+                headers={headerProps}
                 filterOptions={[]}
                 currentPage={pageNo}
                 onChangePage={setPageNo}

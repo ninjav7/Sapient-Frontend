@@ -14,10 +14,12 @@ const AlertPreview = (props) => {
 
     const targetType = alertObj?.target?.type === `building` ? `Building` : `Equipment`;
 
-    const renderTriggerNotification = (alert_obj) => {
-        const obj = alert_obj?.recurrence;
-        return `Trigger if conditions lasts at least ${obj?.triggerAt} min`;
-    };
+    // const renderTriggerNotification = (alert_obj) => {
+    //     const obj = alert_obj?.recurrence;
+    //     return `Trigger if conditions lasts at least ${obj?.triggerAt} min`;
+    // };
+
+    const conditionTriggerAlertsList = alertObj?.condition?.condition_trigger_alert.split(',');
 
     return (
         <Row>
@@ -47,25 +49,33 @@ const AlertPreview = (props) => {
                             </Typography.Body>
                         </div>
 
-                        {alertObj?.condition?.conditionDescription && (
-                            <>
-                                <Brick sizeInRem={1} />
+                        <Brick sizeInRem={1} />
 
-                                <div>
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}>{`Condition`}</Typography.Subheader>
-                                    <Brick sizeInRem={0.25} />
-                                    <Typography.Body size={Typography.Sizes.md} className="text-muted">
-                                        {alertObj?.condition?.conditionDescription ?? ''}
-                                    </Typography.Body>
-                                </div>
-                            </>
+                        {alertObj?.condition?.alert_condition_description && (
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.md}>{`Condition`}</Typography.Subheader>
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Body size={Typography.Sizes.md} className="text-muted">
+                                    {alertObj?.condition?.alert_condition_description ?? ''}
+                                </Typography.Body>
+                            </div>
                         )}
 
-                        {(alertObj?.condition?.type === 'energy_consumption' ||
-                            alertObj?.condition?.type === 'peak_demand') && <Brick sizeInRem={0.5} />}
+                        <Brick sizeInRem={1} />
 
-                        {alertObj?.recurrence?.triggerAlert && (
+                        {alertObj?.condition?.condition_trigger_alert && (
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.md}>{`Alert`}</Typography.Subheader>
+                                <Brick sizeInRem={0.25} />
+                                {conditionTriggerAlertsList.map((alertValue) => (
+                                    <Typography.Body size={Typography.Sizes.md} className="text-muted">
+                                        {`Reaches ${alertValue}%`}
+                                    </Typography.Body>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* {alertObj?.recurrence?.triggerAlert && (
                             <>
                                 <Brick sizeInRem={1.25} />
                                 <div>
@@ -77,7 +87,7 @@ const AlertPreview = (props) => {
                                     </Typography.Body>
                                 </div>
                             </>
-                        )}
+                        )} */}
                     </CardBody>
                 </div>
             </Col>

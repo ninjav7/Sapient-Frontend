@@ -22,6 +22,8 @@ const Spaces = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
@@ -54,7 +56,7 @@ const Spaces = () => {
     const fetchEnergyConsumptionBySpaceData = async (tzInfo) => {
         setChartLoading(true);
 
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo };
+        const query = { bldgId, dateFrom: startDate, dateTo: endDate, startTime, endTime, tzInfo };
 
         try {
             const data = await fetchTopEnergyConsumptionBySpaceDataHelper({ query });
