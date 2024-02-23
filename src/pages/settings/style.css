@@ -774,3 +774,8 @@
 .disable-delete-btn-style {
     color: #ad716c;
 }
+
+.multi-select-tags > div {
+    border-radius: 0.375rem !important;
+    border-color: #7c879c !important;
+}

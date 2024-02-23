@@ -1,5 +1,6 @@
 import axiosInstance from '../../../services/axiosInstance';
 import {
+    allTags,
     createFloors,
     createSpace,
     deleteFloor,
@@ -45,4 +46,8 @@ export function updateSpaceService(params, payload) {
 
 export function deleteSpaceService(params) {
     return axiosInstance.delete(`${deleteSpace}${params}`).then((res) => res);
+}
+
+export function getAllTags() {
+    return axiosInstance.get(allTags).then((res) => res.data);
 }
