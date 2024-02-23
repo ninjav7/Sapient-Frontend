@@ -124,7 +124,8 @@ const CreateAlertHeader = (props) => {
                     size={Typography.Sizes.lg}
                     style={{
                         color: activeTab === 0 ? colorPalette.baseBlack : colorPalette.primaryGray500,
-                    }}>
+                    }}
+                    onClick={() => setActiveTab(0)}>
                     {isAlertConfigured ? (
                         <>
                             <CheckMarkSVG className="mouse-pointer mr-2" width={15} height={15} />
@@ -718,11 +719,13 @@ const AlertConfig = () => {
                             label: `Custom User ${index + 1}`,
                             value: userId,
                         }));
+                        alert_obj.notification.submitted = true;
                     }
 
                     if (data?.alert_emails) {
                         alert_obj.notification.method = ['email'];
                         alert_obj.notification.selectedUserEmailIds = data?.alert_emails;
+                        alert_obj.notification.submitted = true;
                     }
 
                     setAlertObj(alert_obj);
