@@ -9,7 +9,7 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import Typography from '../../../sharedComponents/typography';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 import { buildingData, userPermissionData } from '../../../store/globalState';
-import { getAllFloorsList, getAllSpacesList } from './services';
+import { getAllFloorsList, getAllSpacesList, getAllTags } from './services';
 import { Notification } from '../../../sharedComponents/notification';
 import { UserStore } from '../../../store/UserStore';
 import Brick from '../../../sharedComponents/brick';
@@ -71,6 +71,7 @@ const LayoutPage = () => {
     const [selectedSpaceObjParent, setSelectedSpaceObjParent] = useState({});
     const [defaultObjVal, setDefaultObjVal] = useState({});
     const allParentSpaces = useRef([]);
+    const [tagOptions, setTagOptions] = useState([]);
 
     const notifyUser = (notifyType, notifyMessage) => {
         UserStore.update((s) => {
@@ -189,10 +190,23 @@ const LayoutPage = () => {
         }
     };
 
+    const fetchAllTags = async () => {
+        try {
+            const tags = await getAllTags();
+
+            const mappedTags = tags.data.map((tag) => ({ label: tag.name, value: tag.id }));
+
+            setTagOptions(mappedTags);
+        } catch {
+            setTagOptions([]);
+        }
+    };
+
     useEffect(() => {
         if (bldgId) {
             setSelectedFloorId(null);
             fetchAllFloorData(bldgId);
+            fetchAllTags();
             setRootObj((prevStateObj) => {
                 return { ...prevStateObj, bldg_id: bldgId };
             });
@@ -361,6 +375,8 @@ const LayoutPage = () => {
                 setSpaceObjParent={setSelectedSpaceObjParent}
                 setNewStack={setNewStack}
                 allParentSpaces={allParentSpaces}
+                tagOptions={tagOptions}
+                fetchAllTags={fetchAllTags}
             />
 
             {/* Edit Space */}
