@@ -124,7 +124,8 @@ const CreateAlertHeader = (props) => {
                     size={Typography.Sizes.lg}
                     style={{
                         color: activeTab === 0 ? colorPalette.baseBlack : colorPalette.primaryGray500,
-                    }}>
+                    }}
+                    onClick={() => setActiveTab(0)}>
                     {isAlertConfigured ? (
                         <>
                             <CheckMarkSVG className="mouse-pointer mr-2" width={15} height={15} />
@@ -140,7 +141,8 @@ const CreateAlertHeader = (props) => {
                 <Typography.Body
                     className={`mouse-pointer ${activeTab === 1 ? `` : `text-muted`}`}
                     size={Typography.Sizes.lg}
-                    style={{ color: activeTab === 1 ? colorPalette.primaryGray900 : colorPalette.primaryGray500 }}>
+                    style={{ color: activeTab === 1 ? colorPalette.primaryGray900 : colorPalette.primaryGray500 }}
+                    onClick={() => isAlertConfigured && setActiveTab(1)}>
                     {`Add Notification Methods`}
                 </Typography.Body>
             </div>
@@ -714,15 +716,14 @@ const AlertConfig = () => {
 
                     if (data?.alert_user_ids && data?.alert_user_ids.length !== 0) {
                         alert_obj.notification.method = ['user'];
-                        alert_obj.notification.selectedUserIds = data.alert_user_ids.map((userId, index) => ({
-                            label: `Custom User ${index + 1}`,
-                            value: userId,
-                        }));
+                        alert_obj.notification.selectedUserIds = data.alert_user_ids;
+                        alert_obj.notification.submitted = true;
                     }
 
                     if (data?.alert_emails) {
                         alert_obj.notification.method = ['email'];
                         alert_obj.notification.selectedUserEmailIds = data?.alert_emails;
+                        alert_obj.notification.submitted = true;
                     }
 
                     setAlertObj(alert_obj);
