@@ -855,10 +855,8 @@ export const getAlertSettingsCSVExport = (tableData, columns, handleLastActiveDa
                     break;
 
                 case 'created_at':
-                    const createdAt = tableRow['created_at'];
-                    let formattedDate = '-';
-                    if (createdAt) formattedDate = handleLastActiveDate(createdAt);
-                    arr.push(formattedDate);
+                    const createdAt = tableRow['created_at_formatted'];
+                    arr.push(createdAt);
                     break;
 
                 default:

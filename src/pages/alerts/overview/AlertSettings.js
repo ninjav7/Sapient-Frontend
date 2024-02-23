@@ -16,6 +16,7 @@ import { TARGET_TYPES } from '../constants';
 import { getAlertSettingsCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { deleteConfiguredAlert, fetchAllConfiguredAlerts } from '../services';
+import { timeZone } from '../../../utils/helper';
 
 import DeleteAlert from './DeleteAlert';
 
@@ -180,16 +181,15 @@ const AlertSettings = (props) => {
         return d instanceof Date && !isNaN(d);
     }
 
-    const handleLastActiveDate = (last_login) => {
-        let dt = '';
-        if (isValidDate(new Date(last_login)) && last_login != null) {
-            const last_dt = new Date(last_login);
+    const handleLastActiveDate = (createdAt) => {
+        let dt = '-';
+
+        if (createdAt) {
             const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
             const timeFormat = userPrefTimeFormat === `12h` ? `hh:mm A` : `HH:mm`;
-            dt = moment.utc(last_dt).format(`${dateFormat} 'YY @ ${timeFormat}`);
-        } else {
-            dt = '-';
+            dt = moment.utc(createdAt).tz(timeZone).format(`${dateFormat} 'YY @ ${timeFormat}`);
         }
+
         return dt;
     };
 
@@ -201,7 +201,10 @@ const AlertSettings = (props) => {
                 const response = res?.data;
                 const { success: isSuccessful, data } = response;
                 if (isSuccessful && data) {
-                    let csvData = getAlertSettingsCSVExport(data, headerProps, handleLastActiveDate);
+                    data.forEach((el) => {
+                        el.created_at_formatted = handleLastActiveDate(el?.created_at);
+                    });
+                    let csvData = getAlertSettingsCSVExport(data, headerProps);
                     download(`Alerts_Portfolio_${new Date().toISOString().split('T')[0]}`, csvData);
                 }
             })
