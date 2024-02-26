@@ -76,7 +76,6 @@ const Datepicker = ({
     ...props
 }) => {
     const [isCalenderOpen, setCalenderStatus] = useState(false);
-    console.log('SSR isCalenderOpen => ', isCalenderOpen);
 
     const [startDate, setStartDate] = useState(rangeDate[0]);
     const [endDate, setEndDate] = useState(rangeDate[1]);
