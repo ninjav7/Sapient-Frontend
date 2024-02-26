@@ -189,7 +189,7 @@ const ConfigureAlerts = (props) => {
 
         if (count === 0) label = `No ${targetType} selected.`;
         else if (count === 1) label = alertObj?.target?.lists[0]?.label;
-        else if (count > 1) label = `${count} ${targetType}s selected.`;
+        else if (count > 1) label = `${count} ${targetType} selected.`;
 
         return label;
     };
