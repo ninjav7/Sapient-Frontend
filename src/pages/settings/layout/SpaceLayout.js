@@ -15,7 +15,7 @@ import { addSpaceService, updateSpaceService, deleteSpaceService, getAllSpaceTyp
 
 import DeleteLayout from './DeleteLayout';
 import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
-import { TagsInput } from 'react-tag-input-component';
+import { MultiSelect } from 'react-multi-select-component';
 
 const SpaceLayout = (props) => {
     const {
@@ -40,6 +40,8 @@ const SpaceLayout = (props) => {
         setNewStack,
         setSpaceObjParent,
         allParentSpaces,
+        tagOptions = [],
+        fetchAllTags = () => {},
     } = props;
 
     const defaultErrorObj = {
@@ -69,6 +71,10 @@ const SpaceLayout = (props) => {
         setErrorObj(alertObj);
 
         if (!alertObj.name && !alertObj.type_id && !alertObj.square_footage) {
+            if (Array.isArray(space_obj?.tags)) {
+                space_obj.tags = space_obj.tags.map((tag) => tag?.label ?? '');
+            }
+
             setProcessing(true);
 
             const params = `?building_id=${bldg_id}`;
@@ -88,6 +94,7 @@ const SpaceLayout = (props) => {
                     notifyUser(Notification.Types.error, `Failed to add Space.`);
                 })
                 .finally(() => {
+                    fetchAllTags();
                     setProcessing(false);
                     closeModal();
                     setSpaceObj({});
@@ -337,13 +344,14 @@ const SpaceLayout = (props) => {
                             <div>
                                 <Typography.Body size={Typography.Sizes.md}>{`Tags`}</Typography.Body>
                                 <Brick sizeInRem={0.25} />
-                                <TagsInput
-                                    placeholder="Tags"
+                                <MultiSelect
+                                    className="multi-select-tags"
+                                    options={tagOptions}
                                     value={spaceObj?.tags ? spaceObj.tags : []}
-                                    onChange={(value) => {
-                                        handleChange('tags', value);
+                                    onChange={(tag) => {
+                                        handleChange('tags', tag);
                                     }}
-                                    placeHolder="Add Tag"
+                                    isCreatable
                                 />
                             </div>
                             <Brick sizeInRem={1.25} />
