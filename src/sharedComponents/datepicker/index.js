@@ -75,8 +75,6 @@ const Datepicker = ({
     isTimeSelectionEnabled,
     ...props
 }) => {
-    const [isCalenderOpen, setCalenderStatus] = useState(false);
-
     const [startDate, setStartDate] = useState(rangeDate[0]);
     const [endDate, setEndDate] = useState(rangeDate[1]);
 
@@ -149,7 +147,6 @@ const Datepicker = ({
         if (!withApplyButton) {
             applyDate(event);
         }
-        setCalenderStatus(false);
     };
 
     const handleClickDay = (moment) => {
@@ -175,7 +172,6 @@ const Datepicker = ({
 
         refApi.current = !refApi.current;
         setFocusedInput('startDate');
-        setCalenderStatus(true);
     };
 
     const applyDate = (event) => {
@@ -225,6 +221,15 @@ const Datepicker = ({
           };
 
     const DatePickerComponent = props.isSingleDay ? SingleDatePicker : DateRangePicker;
+
+    useEffect(() => {
+        if (!isTimePickerEnabled) {
+            const defaultStartTime = getTimeWithDefault('startTime');
+            const defaultEndTime = getTimeWithDefault('endTime');
+            setStartTime(defaultStartTime);
+            setEndTime(defaultEndTime);
+        }
+    }, [isTimePickerEnabled]);
 
     return (
         <div
@@ -308,7 +313,6 @@ const Datepicker = ({
                                         applyDate(event);
                                         setFocusedInput(null);
                                         handleClose();
-                                        setCalenderStatus(false);
                                     }}
                                 />
                             </div>
