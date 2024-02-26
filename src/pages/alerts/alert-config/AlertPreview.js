@@ -4,7 +4,6 @@ import { Row, Col, CardBody, CardHeader } from 'reactstrap';
 
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
-import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
