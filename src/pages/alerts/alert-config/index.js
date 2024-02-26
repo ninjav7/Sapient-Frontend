@@ -34,7 +34,6 @@ import {
     defaultNotificationObj,
     equipAlertConditions,
     thresholdConditionTimespanList,
-    thresholdTypeList,
 } from '../constants';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
@@ -215,8 +214,8 @@ const ConfigureAlerts = (props) => {
     return (
         <>
             <Row>
-                <Col lg={9}>
-                    <div className="w-50">
+                <Col lg={12}>
+                    <div style={{ width: '35%' }}>
                         <Typography.Body size={Typography.Sizes.md}>
                             Alert Name
                             <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
@@ -248,7 +247,7 @@ const ConfigureAlerts = (props) => {
             <Brick sizeInRem={2} />
 
             <Row>
-                <Col lg={9}>
+                <Col lg={12}>
                     <Condition {...props} />
 
                     <Brick sizeInRem={2} />
