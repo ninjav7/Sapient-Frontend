@@ -440,12 +440,12 @@ const AlertConfig = () => {
         if (alert_obj?.condition?.condition_operator) text += ` is ${alert_obj?.condition?.condition_operator}`;
 
         if (alertObj?.condition?.condition_threshold_type === 'static_threshold_value') {
-            const conditionType = thresholdTypeList.find(
-                (el) => el?.value === alert_obj?.condition?.condition_threshold_type
-            );
             const value = +alert_obj?.condition?.condition_threshold_value ?? 0;
             text += ` ${formatConsumptionValue(value, 2)} kWh.`;
         } else if (alertObj?.condition?.condition_threshold_type === 'calculated') {
+            if (alert_obj?.condition?.condition_threshold_calculated)
+                text += ` ${alert_obj?.condition?.condition_threshold_calculated} of`;
+
             const thresholdTimespan = thresholdConditionTimespanList.find(
                 (el) => el?.value === alert_obj?.condition?.condition_threshold_timespan
             );
