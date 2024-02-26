@@ -34,6 +34,7 @@ import {
     defaultNotificationObj,
     equipAlertConditions,
     thresholdConditionTimespanList,
+    timespanList,
 } from '../constants';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
@@ -434,7 +435,10 @@ const AlertConfig = () => {
         if (alert_obj?.condition?.condition_metric_aggregate)
             text += ` ${alert_obj?.condition?.condition_metric_aggregate}`;
 
-        if (alert_obj?.condition?.condition_timespan) text += ` for ${alert_obj?.condition?.condition_timespan}`;
+        if (alert_obj?.condition?.condition_timespan) {
+            const conditionTimespan = timespanList.find((el) => el?.value === alert_obj?.condition?.condition_timespan);
+            text += ` for ${conditionTimespan?.label ? conditionTimespan?.label.toLowerCase() : ''}`;
+        }
 
         if (alert_obj?.condition?.condition_operator) text += ` is ${alert_obj?.condition?.condition_operator}`;
 
