@@ -163,6 +163,7 @@ const Alerts = () => {
                     {alertType === 'alert-settings' && (
                         <AlertSettings
                             getAllConfiguredAlerts={getAllConfiguredAlerts}
+                            isProcessing={isFetchingData}
                             configuredAlertsList={configuredAlertsList}
                         />
                     )}

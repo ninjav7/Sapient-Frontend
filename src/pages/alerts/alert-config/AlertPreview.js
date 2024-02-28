@@ -4,7 +4,6 @@ import { Row, Col, CardBody, CardHeader } from 'reactstrap';
 
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
-import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
@@ -23,7 +22,7 @@ const AlertPreview = (props) => {
 
     return (
         <Row>
-            <Col lg={9}>
+            <Col lg={10}>
                 <div className="custom-card">
                     <CardHeader>
                         <Typography.Subheader size={Typography.Sizes.md} style={{ color: colorPalette.primaryGray550 }}>

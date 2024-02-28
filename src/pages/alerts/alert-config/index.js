@@ -34,7 +34,7 @@ import {
     defaultNotificationObj,
     equipAlertConditions,
     thresholdConditionTimespanList,
-    thresholdTypeList,
+    timespanList,
 } from '../constants';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
@@ -153,7 +153,7 @@ const CreateAlertHeader = (props) => {
 const RemoveAlert = () => {
     return (
         <Row>
-            <Col lg={9}>
+            <Col lg={10}>
                 <div className="custom-card">
                     <CardHeader>
                         <Typography.Subheader size={Typography.Sizes.md} style={{ color: colorPalette.primaryGray550 }}>
@@ -189,7 +189,7 @@ const ConfigureAlerts = (props) => {
 
         if (count === 0) label = `No ${targetType} selected.`;
         else if (count === 1) label = alertObj?.target?.lists[0]?.label;
-        else if (count > 1) label = `${count} ${targetType}s selected.`;
+        else if (count > 1) label = `${count} ${targetType} selected.`;
 
         return label;
     };
@@ -215,8 +215,8 @@ const ConfigureAlerts = (props) => {
     return (
         <>
             <Row>
-                <Col lg={9}>
-                    <div className="w-50">
+                <Col lg={10}>
+                    <div style={{ width: '35%' }}>
                         <Typography.Body size={Typography.Sizes.md}>
                             Alert Name
                             <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
@@ -248,7 +248,7 @@ const ConfigureAlerts = (props) => {
             <Brick sizeInRem={2} />
 
             <Row>
-                <Col lg={9}>
+                <Col lg={10}>
                     <Condition {...props} />
 
                     <Brick sizeInRem={2} />
@@ -435,7 +435,10 @@ const AlertConfig = () => {
         if (alert_obj?.condition?.condition_metric_aggregate)
             text += ` ${alert_obj?.condition?.condition_metric_aggregate}`;
 
-        if (alert_obj?.condition?.condition_timespan) text += ` for ${alert_obj?.condition?.condition_timespan}`;
+        if (alert_obj?.condition?.condition_timespan) {
+            const conditionTimespan = timespanList.find((el) => el?.value === alert_obj?.condition?.condition_timespan);
+            text += ` for ${conditionTimespan?.label ? conditionTimespan?.label.toLowerCase() : ''}`;
+        }
 
         if (alert_obj?.condition?.condition_operator) text += ` is ${alert_obj?.condition?.condition_operator}`;
 

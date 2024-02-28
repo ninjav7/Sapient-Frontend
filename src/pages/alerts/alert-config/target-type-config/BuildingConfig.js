@@ -316,7 +316,7 @@ const BuildingConfig = (props) => {
                             id="building_target_type"
                             isLoading={isFetchingData}
                             isFilterLoading={isFetchingFilterData}
-                            isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={12} />}
+                            isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length + 1} noOfRows={12} />}
                             customCheckAll={() => (
                                 <Checkbox
                                     label=""

@@ -133,23 +133,23 @@ export const aggregationList = [
 
 export const timespanList = [
     {
-        label: 'Year',
+        label: 'Current Year',
         value: 'year',
     },
     {
-        label: 'Month',
+        label: 'Current Month',
         value: 'month',
     },
     {
-        label: 'Week',
+        label: 'Current Week',
         value: 'week',
     },
     {
-        label: 'Day',
+        label: 'Current Day',
         value: 'day',
     },
     {
-        label: 'Hour',
+        label: 'Current Hour',
         value: 'hour',
     },
 ];

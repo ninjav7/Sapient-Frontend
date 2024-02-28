@@ -97,7 +97,7 @@ const NotificationMethod = (props) => {
     return (
         <>
             <Row>
-                <Col lg={9}>
+                <Col lg={10}>
                     <Typography.Header
                         size={Typography.Sizes.xs}>{`Add Notification Method (optional)`}</Typography.Header>
                     <Brick sizeInRem={0.25} />
@@ -110,7 +110,7 @@ const NotificationMethod = (props) => {
             <Brick sizeInRem={2} />
 
             <Row>
-                <Col lg={9}>
+                <Col lg={10}>
                     <div className="custom-card">
                         <CardHeader>
                             <Typography.Subheader
