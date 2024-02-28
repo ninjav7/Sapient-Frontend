@@ -141,13 +141,13 @@ const ConditionMetrics = (props) => {
     );
 };
 
-const MetricsComparision = (props) => {
+const MetricsComparison = (props) => {
     const { targetType, condition, handleConditionChange } = props;
 
     return (
         <div className="condition-metric w-100">
             <Typography.Subheader size={Typography.Sizes.md}>
-                {`Comparision`}
+                {`Comparison`}
                 <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
                     *
                 </span>
@@ -182,7 +182,7 @@ const ThresholdConfigure = (props) => {
     return (
         <div className="condition-metric w-100">
             <Typography.Subheader size={Typography.Sizes.md}>
-                {`Threshould`}
+                {`Threshold`}
                 <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
                     *
                 </span>
@@ -354,7 +354,7 @@ const Condition = (props) => {
                     />
 
                     {targetType !== '' && condition?.condition_metric !== '' && (
-                        <MetricsComparision
+                        <MetricsComparison
                             targetType={targetType}
                             condition={condition}
                             handleConditionChange={handleConditionChange}
