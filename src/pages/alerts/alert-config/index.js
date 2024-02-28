@@ -153,7 +153,7 @@ const CreateAlertHeader = (props) => {
 const RemoveAlert = () => {
     return (
         <Row>
-            <Col lg={9}>
+            <Col lg={10}>
                 <div className="custom-card">
                     <CardHeader>
                         <Typography.Subheader size={Typography.Sizes.md} style={{ color: colorPalette.primaryGray550 }}>
@@ -215,7 +215,7 @@ const ConfigureAlerts = (props) => {
     return (
         <>
             <Row>
-                <Col lg={12}>
+                <Col lg={10}>
                     <div style={{ width: '35%' }}>
                         <Typography.Body size={Typography.Sizes.md}>
                             Alert Name
@@ -248,7 +248,7 @@ const ConfigureAlerts = (props) => {
             <Brick sizeInRem={2} />
 
             <Row>
-                <Col lg={12}>
+                <Col lg={10}>
                     <Condition {...props} />
 
                     <Brick sizeInRem={2} />

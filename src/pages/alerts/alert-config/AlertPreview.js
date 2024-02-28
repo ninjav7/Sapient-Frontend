@@ -22,7 +22,7 @@ const AlertPreview = (props) => {
 
     return (
         <Row>
-            <Col lg={9}>
+            <Col lg={10}>
                 <div className="custom-card">
                     <CardHeader>
                         <Typography.Subheader size={Typography.Sizes.md} style={{ color: colorPalette.primaryGray550 }}>
