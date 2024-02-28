@@ -28,6 +28,7 @@ import { createAlertServiceAPI, fetchConfiguredAlertById, updateAlertServiceAPI 
 
 import {
     TARGET_TYPES,
+    aggregationList,
     bldgAlertConditions,
     defaultAlertObj,
     defaultConditionObj,
@@ -446,8 +447,12 @@ const AlertConfig = () => {
             const value = +alert_obj?.condition?.condition_threshold_value ?? 0;
             text += ` ${formatConsumptionValue(value, 2)} kWh.`;
         } else if (alertObj?.condition?.condition_threshold_type === 'calculated') {
-            if (alert_obj?.condition?.condition_threshold_calculated)
-                text += ` ${alert_obj?.condition?.condition_threshold_calculated} of`;
+            if (alert_obj?.condition?.condition_threshold_calculated) {
+                const thresholdAggregationType = aggregationList.find(
+                    (el) => el?.value === alert_obj?.condition?.condition_threshold_calculated
+                );
+                text += ` ${thresholdAggregationType?.renderTxt} of`;
+            }
 
             const thresholdTimespan = thresholdConditionTimespanList.find(
                 (el) => el?.value === alert_obj?.condition?.condition_threshold_timespan
