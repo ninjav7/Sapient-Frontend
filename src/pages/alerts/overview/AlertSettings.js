@@ -4,6 +4,7 @@ import { useHistory } from 'react-router-dom';
 
 import Typography from '../../../sharedComponents/typography';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
 import { UserStore } from '../../../store/UserStore';
 
@@ -24,7 +25,7 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const AlertSettings = (props) => {
-    const { getAllConfiguredAlerts, configuredAlertsList = [] } = props;
+    const { getAllConfiguredAlerts, isProcessing = false, configuredAlertsList = [] } = props;
 
     const history = useHistory();
     const { download } = useCSVDownload();
@@ -261,6 +262,8 @@ const AlertSettings = (props) => {
         <div className="custom-padding">
             <DataTableWidget
                 id="alert_settings_list"
+                isLoading={isProcessing}
+                isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={10} />}
                 onStatus={(value) => {}}
                 buttonGroupFilterOptions={[]}
                 onSearch={(query) => {
