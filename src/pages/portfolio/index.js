@@ -26,6 +26,7 @@ import { UNITS } from '../../constants/units';
 import { validateIntervals } from '../../sharedComponents/helpers/helper';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { UserStore } from '../../store/UserStore';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -34,6 +35,8 @@ import colorPalette from '../../assets/scss/_colors.scss';
 import './style.scss';
 
 const PortfolioOverview = () => {
+    const { download } = useCSVDownload();
+
     const [userPermission] = useAtom(userPermissionData);
     const [buildingListData] = useAtom(buildingData);
 
@@ -87,6 +90,10 @@ const PortfolioOverview = () => {
     });
 
     const consumptionType = validateIntervals(daysCount);
+
+    const cbCustomCSV = (originalCSV) => {
+        download(`Total Energy Consumption_Portfolio_${moment().format('YYYY-MM-DD')}.csv`, originalCSV);
+    };
 
     const formatXaxis = ({ value }) => {
         return moment.utc(value).format(`${dateFormat}`);
@@ -305,6 +312,8 @@ const PortfolioOverview = () => {
                                 restChartProps={xAxisObj}
                                 tooltipCallBackValue={toolTipFormatter}
                                 isChartLoading={isEnergyChartLoading}
+                                cbCustomCSV={cbCustomCSV}
+                                categoryName="Timestamp"
                             />
                         </Col>
                     </Row>
