@@ -353,7 +353,7 @@ const ThresholdConfigure = (props) => {
                             name="select"
                             options={thresholdConditionTimespanList.filter(
                                 (el) =>
-                                    el?.timespan === condition?.condition_timespan &&
+                                    el?.timespan === condition?.condition_timespan_type &&
                                     el?.operationType === condition?.condition_threshold_calculated
                             )}
                             className="w-100"
