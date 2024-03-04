@@ -438,28 +438,35 @@ const AlertConfig = () => {
 
         if (alertType) text += `${alertType?.label} `;
 
-        if (alert_obj?.condition?.condition_metric_aggregate)
+        if (alert_obj?.condition?.condition_metric_aggregate) {
             text += ` ${alert_obj?.condition?.condition_metric_aggregate}`;
+        }
 
         if (alert_obj?.condition?.condition_timespan) {
             const conditionTimespan = timespanOptions.find(
                 (el) => el?.value === alert_obj?.condition?.condition_timespan
             );
+
             const conditionTimespanType = timespanList.find(
                 (el) => el?.value === alert_obj?.condition?.condition_timespan_type
             );
-            if (alert_obj?.condition?.condition_timespan === 'current') {
-                text += ` for ${conditionTimespan?.value} ${conditionTimespanType?.value}`;
-            }
-            if (alert_obj?.condition?.condition_timespan === 'past') {
-                const isValueAbove1 = +alert_obj?.condition?.condition_timespan_value > 1;
-                text += ` for ${conditionTimespan?.value} ${alert_obj?.condition?.condition_timespan_value} ${
-                    conditionTimespanType?.value
-                }${isValueAbove1 ? `s` : ''}`;
+
+            const timespanValue = alert_obj?.condition?.condition_timespan_value;
+            const isPastTimespan = alert_obj?.condition?.condition_timespan === 'past';
+            const isValueAbove1 = +timespanValue > 1;
+
+            if (conditionTimespan) {
+                const timespanText = isPastTimespan
+                    ? `${timespanValue} ${conditionTimespanType?.value}${isValueAbove1 ? 's' : ''}`
+                    : `${conditionTimespan?.value} ${conditionTimespanType?.value}`;
+
+                text += ` for ${timespanText}`;
             }
         }
 
-        if (alert_obj?.condition?.condition_operator) text += ` is ${alert_obj?.condition?.condition_operator}`;
+        if (alert_obj?.condition?.condition_operator) {
+            text += ` is ${alert_obj?.condition?.condition_operator}`;
+        }
 
         if (alertObj?.condition?.condition_threshold_type === 'static_threshold_value') {
             const value = +alert_obj?.condition?.condition_threshold_value ?? 0;
