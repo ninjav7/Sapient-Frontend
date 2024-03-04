@@ -405,10 +405,6 @@ const AlertConfig = () => {
             obj.condition.condition_threshold_timespan = '';
         }
 
-        if (key === 'condition_timespan_type') {
-            obj.condition.condition_timespan_value = '1';
-        }
-
         obj.condition[key] = value;
         setAlertObj(obj);
     };

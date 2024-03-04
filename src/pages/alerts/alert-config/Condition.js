@@ -124,11 +124,11 @@ const ConditionMetrics = (props) => {
                     <Brick sizeInRem={1.5} />
 
                     <div>
-                        <Typography.Body size={Typography.Sizes.md}>Timespan</Typography.Body>
+                        <Typography.Body size={Typography.Sizes.md}>Timespan Type</Typography.Body>
                         <Brick sizeInRem={0.25} />
                         <Select
                             id="timeSpanSelect"
-                            placeholder="Select a Timespan"
+                            placeholder="Select a Timespan Type"
                             name="select"
                             options={timespanOptions}
                             className="w-100"
@@ -147,11 +147,11 @@ const ConditionMetrics = (props) => {
 
                     {condition?.condition_timespan === TIMESPAN_TYPES.CURRENT && (
                         <div>
-                            <Typography.Body size={Typography.Sizes.md}>Timespan Type</Typography.Body>
+                            <Typography.Body size={Typography.Sizes.md}>Interval</Typography.Body>
                             <Brick sizeInRem={0.25} />
                             <Select
                                 id="timeSpanSelect"
-                                placeholder="Select a Timespan Type"
+                                placeholder="Select a Interval"
                                 name="select"
                                 options={timespanList}
                                 className="w-100"
@@ -185,11 +185,11 @@ const ConditionMetrics = (props) => {
                                 />
                             </div>
                             <div style={{ width: '70%' }}>
-                                <Typography.Body size={Typography.Sizes.md}>Timespan Type</Typography.Body>
+                                <Typography.Body size={Typography.Sizes.md}>Interval</Typography.Body>
                                 <Brick sizeInRem={0.25} />
                                 <Select
                                     id="timeSpanSelect"
-                                    placeholder="Select a Timespan Type"
+                                    placeholder="Select a Interval"
                                     name="select"
                                     options={timespanList}
                                     className="w-100"
