@@ -17,6 +17,8 @@ import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/
 
 import {
     TARGET_TYPES,
+    THRESHOLD_TYPES,
+    TIMESPAN_TYPES,
     aggregationList,
     bldgAlertConditions,
     equipAlertConditions,
@@ -143,7 +145,7 @@ const ConditionMetrics = (props) => {
 
                     <Brick sizeInRem={1.5} />
 
-                    {condition?.condition_timespan === 'current' && (
+                    {condition?.condition_timespan === TIMESPAN_TYPES.CURRENT && (
                         <div>
                             <Typography.Body size={Typography.Sizes.md}>Timespan Type</Typography.Body>
                             <Brick sizeInRem={0.25} />
@@ -165,7 +167,7 @@ const ConditionMetrics = (props) => {
                         </div>
                     )}
 
-                    {condition?.condition_timespan === 'past' && (
+                    {condition?.condition_timespan === TIMESPAN_TYPES.PAST && (
                         <div className="d-flex w-100" style={{ gap: '0.75rem' }}>
                             <div style={{ width: '30%' }}>
                                 <Typography.Body size={Typography.Sizes.md}>{formattedLabel}</Typography.Body>
@@ -280,7 +282,7 @@ const ThresholdConfigure = (props) => {
 
             <Brick sizeInRem={1.5} />
 
-            {condition?.condition_threshold_type === 'static_threshold_value' && (
+            {condition?.condition_threshold_type === THRESHOLD_TYPES.STATIC_VALUE && (
                 <div className="w-100">
                     <Typography.Body size={Typography.Sizes.md}>Threshold Value</Typography.Body>
                     <Brick sizeInRem={0.25} />
@@ -320,7 +322,7 @@ const ThresholdConfigure = (props) => {
                 </div>
             )}
 
-            {condition?.condition_threshold_type === 'calculated' && (
+            {condition?.condition_threshold_type === THRESHOLD_TYPES.CALCULATED && (
                 <>
                     <div className="w-100">
                         <Typography.Body size={Typography.Sizes.md}>Threshold Aggregation</Typography.Body>
