@@ -14,18 +14,18 @@ import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/as
 import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
 import { separateEmails } from '../helpers';
-import { TARGET_TYPES, bldgAlertConditions } from '../constants';
+import { timeZone } from '../../../utils/helper';
+import { TARGET_TYPES } from '../constants';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { getAlertSettingsCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
-import { deleteConfiguredAlert, fetchAllConfiguredAlerts } from '../services';
-import { timeZone } from '../../../utils/helper';
+import { fetchBuildingList } from '../../settings/buildings/services';
+import { deleteConfiguredAlert, fetchAllConfiguredAlerts, fetchConfiguredEmailsList } from '../services';
 
 import DeleteAlert from './DeleteAlert';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-import { fetchBuildingList } from '../../settings/buildings/services';
 
 const AlertSettings = (props) => {
     const { getAllConfiguredAlerts, isProcessing = false, configuredAlertsList = [] } = props;
@@ -52,6 +52,7 @@ const AlertSettings = (props) => {
         },
     ];
     const [buildingsList, setBuildingsList] = useState([]);
+    const [configuredEmailsList, setConfiguredEmailsList] = useState([]);
 
     const [selectedTargetType, setSelectedTargetType] = useState([]);
     const [selectedBuildingsList, setSelectedBuildingsList] = useState([]);
@@ -110,31 +111,20 @@ const AlertSettings = (props) => {
                 setSelectedBuildingsList([]);
             },
         },
-        // {
-        //     label: 'Condition',
-        //     value: 'condition',
-        //     placeholder: 'All Conditions',
-        //     filterType: FILTER_TYPES.MULTISELECT,
-        //     filterOptions: bldgAlertConditions,
-        //     onClose: () => {},
-        //     onDelete: () => {
-        //         setPageNo(1);
-        //     },
-        // },
-        // {
-        //     label: 'Send To',
-        //     value: 'Send To',
-        //     placeholder: 'All Email IDs',
-        //     filterType: FILTER_TYPES.MULTISELECT,
-        //     filterOptions: [].map((el) => ({
-        //         value: el?.id,
-        //         label: el?.name,
-        //     })),
-        //     onClose: () => {},
-        //     onDelete: () => {
-        //         setPageNo(1);
-        //     },
-        // },
+        {
+            label: 'Send To',
+            value: 'send_to',
+            placeholder: 'All Email IDs',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: [].map((el) => ({
+                value: el?.id,
+                label: el?.name,
+            })),
+            onClose: () => {},
+            onDelete: () => {
+                setPageNo(1);
+            },
+        },
     ]);
 
     const renderAlertType = (row) => {
@@ -352,8 +342,22 @@ const AlertSettings = (props) => {
             .finally(() => {});
     };
 
+    const getConfiguredEmailsList = async (alertType) => {
+        await fetchConfiguredEmailsList()
+            .then((res) => {
+                const response = res?.data;
+                const { success: isSuccessful, data } = response;
+                if (isSuccessful && data) {
+                    const seperatedEmailIds = data.map((item) => item.split(',')).flat();
+                    if (seperatedEmailIds && seperatedEmailIds.length !== 0) setConfiguredEmailsList(seperatedEmailIds);
+                }
+            })
+            .catch(() => {});
+    };
+
     useEffect(() => {
         getBuildingsList();
+        getConfiguredEmailsList();
     }, []);
 
     useEffect(() => {
@@ -373,6 +377,24 @@ const AlertSettings = (props) => {
             setFilterOptions(updatedFilterOptions);
         }
     }, [buildingsList]);
+
+    useEffect(() => {
+        if (configuredEmailsList && configuredEmailsList.length !== 0) {
+            const updatedFilterOptions = filterOptions.map((option) => {
+                if (option.value === 'send_to') {
+                    return {
+                        ...option,
+                        filterOptions: configuredEmailsList.map((emailId) => ({
+                            value: emailId,
+                            label: emailId,
+                        })),
+                    };
+                }
+                return option;
+            });
+            setFilterOptions(updatedFilterOptions);
+        }
+    }, [configuredEmailsList]);
 
     useEffect(() => {
         getAllConfiguredAlerts({ search, selectedTargetType, selectedBuildingsList });

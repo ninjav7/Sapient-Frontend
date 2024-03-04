@@ -7,10 +7,15 @@ import {
     deleteAlertConfig,
     getConfiguredAlertsById,
     updateAlertConfig,
+    configuredEmailsList,
 } from '../../services/Network';
 
 export function fetchAlertsList(alertType = 'unacknowledged') {
     return axiosInstance.get(`${listAlertsConfig}?action=${alertType}`).then((res) => res);
+}
+
+export function fetchConfiguredEmailsList() {
+    return axiosInstance.get(configuredEmailsList).then((res) => res);
 }
 
 export function updateAlertAcknowledgement(params, payload) {
