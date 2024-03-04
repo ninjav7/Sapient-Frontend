@@ -758,7 +758,7 @@ const BuildingOverview = () => {
     const fetchEnergyConsumptionBySpaceData = async (tzInfo) => {
         setChartLoading(true);
 
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo };
+        const query = { bldgId, dateFrom: startDate, dateTo: endDate, startTime, endTime, tzInfo };
 
         try {
             const data = await fetchTopEnergyConsumptionBySpaceDataHelper({ query });

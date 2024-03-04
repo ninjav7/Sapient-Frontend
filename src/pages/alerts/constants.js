@@ -13,7 +13,7 @@ export const defaultConditionObj = {
     condition_threshold_reference: '',
     condition_threshold_calculated: '',
     condition_threshold_timespan: '',
-    condition_trigger_alert: '',
+    condition_trigger_alert: '100',
 };
 
 export const defaultRecurrenceObj = {
@@ -25,8 +25,8 @@ export const defaultRecurrenceObj = {
 
 export const defaultNotificationObj = {
     method: ['none'],
-    selectedUserId: [],
-    selectedUserEmailId: '',
+    selectedUserIds: [],
+    selectedUserEmailIds: '',
 };
 
 // Main Alert Obj
@@ -116,32 +116,44 @@ export const aggregationList = [
     {
         label: 'Sum',
         value: 'sum',
+        renderTxt: 'sum',
     },
     {
         label: 'Average',
         value: 'average',
+        renderTxt: 'average',
+    },
+    {
+        label: 'Maximum',
+        value: 'max',
+        renderTxt: 'maximum',
+    },
+    {
+        label: 'Minimum',
+        value: 'min',
+        renderTxt: 'minimum',
     },
 ];
 
 export const timespanList = [
     {
-        label: 'Year',
+        label: 'Current Year',
         value: 'year',
     },
     {
-        label: 'Month',
+        label: 'Current Month',
         value: 'month',
     },
     {
-        label: 'Week',
+        label: 'Current Week',
         value: 'week',
     },
     {
-        label: 'Day',
+        label: 'Current Day',
         value: 'day',
     },
     {
-        label: 'Hour',
+        label: 'Current Hour',
         value: 'hour',
     },
 ];
@@ -326,6 +338,150 @@ export const thresholdConditionTimespanList = [
         label: 'Previous Week of same Day Hourly',
         value: 'previous_week_same_day_hourly',
         operationType: 'average',
+        timespan: 'hour',
+    },
+    {
+        label: 'Previous Month',
+        value: 'previous_month',
+        operationType: 'max',
+        timespan: 'month',
+    },
+    {
+        label: 'Same Month of Previous Year',
+        value: 'same_month_previous_year',
+        operationType: 'max',
+        timespan: 'month',
+    },
+    {
+        label: 'Previous Year',
+        value: 'previous_year',
+        operationType: 'max',
+        timespan: 'year',
+    },
+    {
+        label: 'Previous Week',
+        value: 'previous_week',
+        operationType: 'max',
+        timespan: 'week',
+    },
+    {
+        label: 'Same Week of Previous Month',
+        value: 'same_week_previous_month',
+        operationType: 'max',
+        timespan: 'week',
+    },
+    {
+        label: 'Same Week of Previous Year',
+        value: 'same_week_previous_year',
+        operationType: 'max',
+        timespan: 'week',
+    },
+    {
+        label: 'Previous Day',
+        value: 'previous_day',
+        operationType: 'max',
+        timespan: 'day',
+    },
+    {
+        label: 'Same Day of Previous Week',
+        value: 'same_day_previous_week',
+        operationType: 'max',
+        timespan: 'day',
+    },
+    {
+        label: 'Same Date of Previous Month',
+        value: 'same_date_previous_month',
+        operationType: 'max',
+        timespan: 'day',
+    },
+    {
+        label: 'Previous Hour',
+        value: 'previous_hour',
+        operationType: 'max',
+        timespan: 'hour',
+    },
+    {
+        label: 'Same Hour of Previous Day',
+        value: 'same_hour_previous_day',
+        operationType: 'max',
+        timespan: 'hour',
+    },
+    {
+        label: 'Same Hour of Previous Week',
+        value: 'same_hour_previous_week',
+        operationType: 'max',
+        timespan: 'hour',
+    },
+    {
+        label: 'Previous Month',
+        value: 'previous_month',
+        operationType: 'min',
+        timespan: 'month',
+    },
+    {
+        label: 'Same Month of Previous Year',
+        value: 'same_month_previous_year',
+        operationType: 'min',
+        timespan: 'month',
+    },
+    {
+        label: 'Previous Year',
+        value: 'previous_year',
+        operationType: 'min',
+        timespan: 'year',
+    },
+    {
+        label: 'Previous Week',
+        value: 'previous_week',
+        operationType: 'min',
+        timespan: 'week',
+    },
+    {
+        label: 'Same Week of Previous Month',
+        value: 'same_week_previous_month',
+        operationType: 'min',
+        timespan: 'week',
+    },
+    {
+        label: 'Same Week of Previous Year',
+        value: 'same_week_previous_year',
+        operationType: 'min',
+        timespan: 'week',
+    },
+    {
+        label: 'Previous Day',
+        value: 'previous_day',
+        operationType: 'min',
+        timespan: 'day',
+    },
+    {
+        label: 'Same Day of Previous Week',
+        value: 'same_day_previous_week',
+        operationType: 'min',
+        timespan: 'day',
+    },
+    {
+        label: 'Same Date of Previous Month',
+        value: 'same_date_previous_month',
+        operationType: 'min',
+        timespan: 'day',
+    },
+    {
+        label: 'Previous Hour',
+        value: 'previous_hour',
+        operationType: 'min',
+        timespan: 'hour',
+    },
+    {
+        label: 'Same Hour of Previous Day',
+        value: 'same_hour_previous_day',
+        operationType: 'min',
+        timespan: 'hour',
+    },
+    {
+        label: 'Same Hour of Previous Week',
+        value: 'same_hour_previous_week',
+        operationType: 'min',
         timespan: 'hour',
     },
 ];

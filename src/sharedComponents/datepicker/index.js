@@ -222,6 +222,15 @@ const Datepicker = ({
 
     const DatePickerComponent = props.isSingleDay ? SingleDatePicker : DateRangePicker;
 
+    useEffect(() => {
+        if (!isTimePickerEnabled) {
+            const defaultStartTime = getTimeWithDefault('startTime');
+            const defaultEndTime = getTimeWithDefault('endTime');
+            setStartTime(defaultStartTime);
+            setEndTime(defaultEndTime);
+        }
+    }, [isTimePickerEnabled]);
+
     return (
         <div
             className={cx(
@@ -248,7 +257,7 @@ const Datepicker = ({
 
                                             <TimePicker
                                                 showNow={false}
-                                                minuteStep={1}
+                                                minuteStep={15}
                                                 placeholder="Start time"
                                                 value={startTime}
                                                 onChange={handleStartTimeChange}
@@ -265,7 +274,7 @@ const Datepicker = ({
 
                                             <TimePicker
                                                 showNow={false}
-                                                minuteStep={1}
+                                                minuteStep={15}
                                                 placeholder="End time"
                                                 value={endTime}
                                                 onChange={handleEndTimeChange}
@@ -360,8 +369,18 @@ const Datepicker = ({
                 ) : (
                     <>
                         {startDate && startDate.format(`MMM D ${!isTheSameYear ? 'YYYY' : ''}`)}
+                        {isTimePickerEnabled
+                            ? userPrefTimeFormat === '24h'
+                                ? startTime.format('HH:mm')
+                                : startTime.format('hh:mm A')
+                            : null}
                         <span> - </span>
                         {endDate && endDate.format(`MMM D ${!isTheSameYear ? 'YYYY' : ''}`)}
+                        {isTimePickerEnabled
+                            ? userPrefTimeFormat === '24h'
+                                ? endTime.format('HH:mm')
+                                : endTime.format('hh:mm A')
+                            : null}
                     </>
                 )}
             </Typography.Body>

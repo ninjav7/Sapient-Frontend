@@ -21,8 +21,6 @@ import '../styles.scss';
 const BuildingConfig = (props) => {
     const { isModalOpen = false, handleModalClose, alertObj = {}, handleTargetChange, setOriginalBldgsList } = props;
 
-    const userPrefUnits = UserStore.useState((s) => s.unit);
-
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
 
@@ -37,6 +35,8 @@ const BuildingConfig = (props) => {
     const [isFetchingFilterData, setFetchingFilterData] = useState(false);
 
     const [filterOptions, setFilterOptions] = useState([]);
+
+    const userPrefUnits = UserStore.useState((s) => s.unit);
 
     const customModalStyle = {
         modalContent: {
@@ -104,6 +104,19 @@ const BuildingConfig = (props) => {
         },
     ];
 
+    const closeModalAction = () => {
+        setSearch('');
+        setSortBy({});
+        setCheckedAll(false);
+        setUserSelectedBldgs([]);
+        setBuildingsList([]);
+        setBuildingTypes([]);
+        setSelectedBuildingType([]);
+        setDataFetching(false);
+        setFetchingFilterData(false);
+        setFilterOptions([]);
+    };
+
     const currentRow = () => {
         return buildingsList;
     };
@@ -128,13 +141,15 @@ const BuildingConfig = (props) => {
             handleTargetChange('lists', selected_bldgs);
         }
         handleModalClose();
+        closeModalAction();
     };
 
-    const handleCancelClick = (selected_bldgs) => {
-        if (selected_bldgs.length === 0) {
+    const handleCancelClick = () => {
+        if (alertObj?.target?.lists.length === 0) {
             handleTargetChange('type', '');
         }
         handleModalClose();
+        closeModalAction();
     };
 
     const handleCheckAllClick = (is_checked, buildings_list) => {
@@ -247,17 +262,13 @@ const BuildingConfig = (props) => {
     }, [buildingTypes]);
 
     useEffect(() => {
-        if (isModalOpen && alertObj?.target?.lists && alertObj?.target?.lists.length !== 0) {
-            setUserSelectedBldgs([...alertObj?.target?.lists]);
-        }
-    }, [alertObj]);
+        if (isModalOpen) {
+            const { target } = alertObj || {};
+            const { lists } = target || {};
 
-    useEffect(() => {
-        const { target } = alertObj || {};
-        const { lists } = target || {};
-
-        if (isModalOpen && lists && lists.length !== 0) {
-            setUserSelectedBldgs([...lists]);
+            if (lists && lists.length !== 0) {
+                setUserSelectedBldgs([...lists]);
+            }
         }
     }, [alertObj, isModalOpen]);
 
@@ -283,7 +294,7 @@ const BuildingConfig = (props) => {
                                     label="Cancel"
                                     size={Button.Sizes.md}
                                     type={Button.Type.secondaryGrey}
-                                    onClick={() => handleCancelClick(userSelectedBldgs)}
+                                    onClick={() => handleCancelClick()}
                                 />
                             </div>
                             <div>
@@ -305,7 +316,7 @@ const BuildingConfig = (props) => {
                             id="building_target_type"
                             isLoading={isFetchingData}
                             isFilterLoading={isFetchingFilterData}
-                            isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length} noOfRows={12} />}
+                            isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length + 1} noOfRows={12} />}
                             customCheckAll={() => (
                                 <Checkbox
                                     label=""

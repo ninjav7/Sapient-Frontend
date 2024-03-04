@@ -71,10 +71,15 @@ const Alerts = () => {
             });
     };
 
-    const getAllConfiguredAlerts = async () => {
+    const getAllConfiguredAlerts = async (requestParamsObj = {}) => {
+        const { search = '' } = requestParamsObj;
+
+        let params = '';
+        if (search) params += `?search_by_name=${search}`;
+
         setFetchingData(true);
 
-        await fetchAllConfiguredAlerts()
+        await fetchAllConfiguredAlerts(params)
             .then((res) => {
                 const response = res?.data;
                 const { success: isSuccessful, data } = response;
@@ -129,7 +134,6 @@ const Alerts = () => {
     useEffect(() => {
         if (alertType === 'open-alerts') getAllAlerts('unacknowledged');
         if (alertType === 'closed-alerts') getAllAlerts('acknowledged');
-        if (alertType === 'alert-settings') getAllConfiguredAlerts();
     }, [alertType]);
 
     return (
@@ -159,6 +163,7 @@ const Alerts = () => {
                     {alertType === 'alert-settings' && (
                         <AlertSettings
                             getAllConfiguredAlerts={getAllConfiguredAlerts}
+                            isProcessing={isFetchingData}
                             configuredAlertsList={configuredAlertsList}
                         />
                     )}

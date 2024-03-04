@@ -10,6 +10,7 @@ import Brick from '../../../sharedComponents/brick';
 import Target from './Target';
 import Condition from './Condition';
 import AlertPreview from './AlertPreview';
+import ResetTargetTypeAlert from './ResetTargetTypeAlert';
 import BuildingConfig from './target-type-config/BuildingConfig';
 import EquipConfig from './target-type-config/EquipConfig';
 import NotificationMethod from './NotificationMethod';
@@ -23,16 +24,18 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as CheckMarkSVG } from '../../../assets/icon/check-mark.svg';
 
-import { createAlertServiceAPI, fetchConfiguredAlertById } from '../services';
+import { createAlertServiceAPI, fetchConfiguredAlertById, updateAlertServiceAPI } from '../services';
 
 import {
     TARGET_TYPES,
+    aggregationList,
     bldgAlertConditions,
     defaultAlertObj,
     defaultConditionObj,
     defaultNotificationObj,
     equipAlertConditions,
-    filtersForEnergyConsumption,
+    thresholdConditionTimespanList,
+    timespanList,
 } from '../constants';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
@@ -40,17 +43,18 @@ import { convertStringToUniqueNumbers } from '../helpers';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-import ResetTargetTypeAlert from './ResetTargetTypeAlert';
 
 const CreateAlertHeader = (props) => {
     const {
         activeTab,
         setActiveTab,
         isAlertConfigured = false,
+        isNotificationConfigured = false,
         onAlertCreate,
         reqType,
         isCreatingAlert = false,
         renderAlertCondition,
+        validateTriggerAlertInputs,
         alertObj,
     } = props;
 
@@ -91,17 +95,26 @@ const CreateAlertHeader = (props) => {
                             type={Button.Type.primary}
                             onClick={() => {
                                 renderAlertCondition(alertObj);
+                                validateTriggerAlertInputs(alertObj);
                                 setActiveTab(1);
                             }}
                             disabled={!isAlertConfigured}
                         />
                     ) : (
                         <Button
-                            label={'Save'}
+                            label={
+                                reqType === 'create'
+                                    ? isCreatingAlert
+                                        ? 'Saving...'
+                                        : 'Save'
+                                    : isCreatingAlert
+                                    ? 'Updating...'
+                                    : 'Update'
+                            }
                             size={Button.Sizes.md}
                             type={Button.Type.primary}
                             onClick={onAlertCreate}
-                            disabled={isCreatingAlert}
+                            disabled={isCreatingAlert || !isNotificationConfigured}
                         />
                     )}
                 </div>
@@ -112,7 +125,8 @@ const CreateAlertHeader = (props) => {
                     size={Typography.Sizes.lg}
                     style={{
                         color: activeTab === 0 ? colorPalette.baseBlack : colorPalette.primaryGray500,
-                    }}>
+                    }}
+                    onClick={() => setActiveTab(0)}>
                     {isAlertConfigured ? (
                         <>
                             <CheckMarkSVG className="mouse-pointer mr-2" width={15} height={15} />
@@ -128,7 +142,8 @@ const CreateAlertHeader = (props) => {
                 <Typography.Body
                     className={`mouse-pointer ${activeTab === 1 ? `` : `text-muted`}`}
                     size={Typography.Sizes.lg}
-                    style={{ color: activeTab === 1 ? colorPalette.primaryGray900 : colorPalette.primaryGray500 }}>
+                    style={{ color: activeTab === 1 ? colorPalette.primaryGray900 : colorPalette.primaryGray500 }}
+                    onClick={() => isAlertConfigured && setActiveTab(1)}>
                     {`Add Notification Methods`}
                 </Typography.Body>
             </div>
@@ -139,7 +154,7 @@ const CreateAlertHeader = (props) => {
 const RemoveAlert = () => {
     return (
         <Row>
-            <Col lg={9}>
+            <Col lg={10}>
                 <div className="custom-card">
                     <CardHeader>
                         <Typography.Subheader size={Typography.Sizes.md} style={{ color: colorPalette.primaryGray550 }}>
@@ -174,8 +189,8 @@ const ConfigureAlerts = (props) => {
         let label = '';
 
         if (count === 0) label = `No ${targetType} selected.`;
-        else if (count === 1) label = alertObj.target.lists[0].label;
-        else if (count > 1) label = `${count} ${targetType}s selected.`;
+        else if (count === 1) label = alertObj?.target?.lists[0]?.label;
+        else if (count > 1) label = `${count} ${targetType} selected.`;
 
         return label;
     };
@@ -201,8 +216,8 @@ const ConfigureAlerts = (props) => {
     return (
         <>
             <Row>
-                <Col lg={9}>
-                    <div className="w-50">
+                <Col lg={10}>
+                    <div style={{ width: '35%' }}>
                         <Typography.Body size={Typography.Sizes.md}>
                             Alert Name
                             <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
@@ -234,7 +249,7 @@ const ConfigureAlerts = (props) => {
             <Brick sizeInRem={2} />
 
             <Row>
-                <Col lg={9}>
+                <Col lg={10}>
                     <Condition {...props} />
 
                     <Brick sizeInRem={2} />
@@ -275,6 +290,7 @@ const NotificationSettings = (props) => {
 
 const AlertConfig = () => {
     const { reqType, alertId } = useParams();
+
     const history = useHistory();
 
     const [activeTab, setActiveTab] = useState(0);
@@ -333,6 +349,15 @@ const AlertConfig = () => {
     const isAlertNameSet = alertObj?.alert_name !== '';
     const isTargetConfigured = isBuildingConfigured || isEquipmentConfigured;
     const isConditionConfigured = isConditionSet && isBasicConditionConfigured && isConditionsConfigured;
+
+    const isNotificationConfigured =
+        alertObj?.notification?.method.includes('none') ||
+        (alertObj?.notification?.method.includes('user') &&
+            alertObj?.notification?.selectedUserIds.length !== 0 &&
+            alertObj?.notification?.submitted) ||
+        (alertObj?.notification?.method.includes('email') &&
+            alertObj?.notification?.selectedUserEmailIds !== '' &&
+            alertObj?.notification?.submitted);
 
     const handleModalClick = (configType) => {
         if (configType) {
@@ -396,39 +421,55 @@ const AlertConfig = () => {
     const renderAlertCondition = (alert_obj) => {
         let text = '';
 
+        let alertType = '';
+
         if (alert_obj?.target?.type === TARGET_TYPES.BUILDING) {
-            let alertType = bldgAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
-            if (alertType) text += `${alertType?.label} the`;
-
-            if (alert_obj?.condition?.timeInterval) text += ` ${alert_obj?.condition?.timeInterval} is`;
-
-            if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
-
-            if (alertObj?.condition?.filterType === 'number' && alert_obj?.condition?.thresholdValue)
-                text += ` ${formatConsumptionValue(+alert_obj?.condition?.thresholdValue, 2)} kWh`;
-
-            if (alertObj?.condition?.filterType !== 'number') {
-                let alertFilter = filtersForEnergyConsumption.find(
-                    (el) => el?.value === alertObj?.condition?.filterType
-                );
-                if (alertFilter) text += ` ${alertFilter?.label}`;
-            }
+            alertType = bldgAlertConditions.find((el) => el?.value === alert_obj?.condition?.condition_metric);
         }
 
         if (alert_obj?.target?.type === TARGET_TYPES.EQUIPMENT) {
-            let alertType = equipAlertConditions.find((el) => el?.value === alert_obj?.condition?.type);
-            if (alertType) text += alertType?.label;
-
-            if (alert_obj?.condition?.level) text += ` ${alert_obj?.condition?.level}`;
-
-            if (alert_obj?.condition?.type === 'shortcycling') {
-                text += ` ${alert_obj?.condition?.shortcyclingMinutes} min`;
-            } else {
-                text += ` ${alert_obj?.condition?.thresholdPercentage}%`;
-            }
+            alertType = equipAlertConditions.find((el) => el?.value === alert_obj?.condition?.condition_metric);
         }
 
-        handleConditionChange('conditionDescription', `${text}`);
+        if (alertType) text += `${alertType?.label} `;
+
+        if (alert_obj?.condition?.condition_metric_aggregate)
+            text += ` ${alert_obj?.condition?.condition_metric_aggregate}`;
+
+        if (alert_obj?.condition?.condition_timespan) {
+            const conditionTimespan = timespanList.find((el) => el?.value === alert_obj?.condition?.condition_timespan);
+            text += ` for ${conditionTimespan?.label ? conditionTimespan?.label.toLowerCase() : ''}`;
+        }
+
+        if (alert_obj?.condition?.condition_operator) text += ` is ${alert_obj?.condition?.condition_operator}`;
+
+        if (alertObj?.condition?.condition_threshold_type === 'static_threshold_value') {
+            const value = +alert_obj?.condition?.condition_threshold_value ?? 0;
+            text += ` ${formatConsumptionValue(value, 2)} kWh.`;
+        } else if (alertObj?.condition?.condition_threshold_type === 'calculated') {
+            if (alert_obj?.condition?.condition_threshold_calculated) {
+                const thresholdAggregationType = aggregationList.find(
+                    (el) => el?.value === alert_obj?.condition?.condition_threshold_calculated
+                );
+                text += ` ${thresholdAggregationType?.renderTxt} of`;
+            }
+
+            const thresholdTimespan = thresholdConditionTimespanList.find(
+                (el) => el?.value === alert_obj?.condition?.condition_threshold_timespan
+            );
+            text += ` ${thresholdTimespan?.label}.`;
+        }
+
+        handleConditionChange('alert_condition_description', `${text}`);
+    };
+
+    const validateTriggerAlertInputs = (alert_obj) => {
+        const triggerAlertList = alert_obj?.condition?.condition_trigger_alert;
+
+        if (triggerAlertList) {
+            const filteredList = triggerAlertList.replace(/^,*(.*?),*$/, '$1');
+            handleConditionChange('condition_trigger_alert', filteredList);
+        }
     };
 
     const handleCreateAlert = async (alert_obj) => {
@@ -443,7 +484,105 @@ const AlertConfig = () => {
             name: alert_obj?.alert_name,
             description: alert_obj?.alert_description,
             target_type: target?.type,
-            alert_condition_description: condition?.conditionDescription ?? '',
+            alert_condition_description: condition?.alert_condition_description ?? '',
+            condition_metric: condition?.condition_metric,
+            condition_metric_aggregate: condition?.condition_metric_aggregate,
+            condition_timespan: condition?.condition_timespan,
+            condition_operator: condition?.condition_operator,
+            condition_threshold_type: condition?.condition_threshold_type,
+        };
+
+        // When Target type is 'Building'
+        if (target?.type === TARGET_TYPES.BUILDING) {
+            payload.building_ids = target?.lists.map((el) => el?.value);
+
+            if (condition?.condition_metric === 'energy_consumption') {
+                if (condition?.threshold50) payload.condition_alert_at.push(50);
+                if (condition?.threshold75) payload.condition_alert_at.push(75);
+                if (condition?.threshold100) payload.condition_alert_at.push(100);
+            }
+        }
+
+        // When Target type is 'Equipment'
+        if (target?.type === TARGET_TYPES.EQUIPMENT) {
+            payload.building_ids = [target?.buildingIDs];
+            payload.equipment_ids = target?.lists.map((el) => el?.value);
+        }
+
+        if (condition?.condition_threshold_type === 'static_threshold_value') {
+            payload.condition_threshold_value = +condition?.condition_threshold_value;
+        }
+
+        if (condition?.condition_threshold_type === 'calculated') {
+            payload.condition_threshold_calculated = condition?.condition_threshold_calculated;
+            payload.condition_threshold_timespan = condition?.condition_threshold_timespan;
+        }
+
+        if (condition?.condition_threshold_type === 'reference') {
+            payload.condition_threshold_reference = condition?.condition_threshold_reference;
+        }
+
+        if (condition?.condition_trigger_alert) {
+            const uniqueNumbersArray = convertStringToUniqueNumbers(condition?.condition_trigger_alert);
+            if (uniqueNumbersArray) payload.condition_alert_at = uniqueNumbersArray;
+        }
+
+        // Notification and its recurrence setup
+        const method = notification?.method[0];
+
+        if (method === 'email') payload.alert_emails = notification?.selectedUserEmailIds;
+        if (method === 'user') payload.alert_user_ids = notification?.selectedUserIds.map((el) => el?.value);
+
+        if ((method === 'email' || method === 'user') && recurrence?.resendAlert) {
+            payload.alert_recurrence = recurrence?.resendAlert;
+            payload.alert_recurrence_minutes = +recurrence?.resendAt;
+        }
+
+        await createAlertServiceAPI(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Alert created successfully.';
+                        s.notificationType = 'success';
+                    });
+                    history.push({
+                        pathname: '/alerts/overview/alert-settings',
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Failed to create Alert.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch(() => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Failed to create Alert status due to Internal Server Error.';
+                    s.notificationType = 'error';
+                });
+            })
+            .finally(() => {
+                setCreating(false);
+            });
+    };
+
+    const handleEditAlert = async (alert_id, alert_obj) => {
+        if (!alert_id || !alert_obj) return;
+
+        setCreating(true);
+
+        const { target, recurrence, condition, notification } = alert_obj;
+
+        // Alert Payload
+        let payload = {
+            name: alert_obj?.alert_name,
+            description: alert_obj?.alert_description,
+            target_type: target?.type,
+            alert_condition_description: condition?.alert_condition_description ?? '',
             condition_metric: condition?.condition_metric,
             condition_metric_aggregate: condition?.condition_metric_aggregate,
             condition_timespan: condition?.condition_timespan,
@@ -484,27 +623,26 @@ const AlertConfig = () => {
         if (condition?.condition_trigger_alert) {
             const uniqueNumbersArray = convertStringToUniqueNumbers(condition?.condition_trigger_alert);
             if (uniqueNumbersArray) payload.condition_alert_at = uniqueNumbersArray.filter((number) => number <= 100);
-            if (!uniqueNumbersArray.includes(100)) payload.condition_alert_at.push(100);
         }
 
         // Notification and its recurrence setup
         const method = notification?.method[0];
 
-        if (method === 'email') payload.alert_emails = notification?.selectedUserEmailId;
-        if (method === 'user') payload.alert_user_ids = notification?.selectedUserId.map((el) => el?.value);
+        if (method === 'email') payload.alert_emails = notification?.selectedUserEmailIds;
+        if (method === 'user') payload.alert_user_ids = notification?.selectedUserIds.map((el) => el?.value);
 
         if ((method === 'email' || method === 'user') && recurrence?.resendAlert) {
             payload.alert_recurrence = recurrence?.resendAlert;
             payload.alert_recurrence_minutes = +recurrence?.resendAt;
         }
 
-        await createAlertServiceAPI(payload)
+        await updateAlertServiceAPI(alert_id, payload)
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = 'Alert created successfully.';
+                        s.notificationMessage = 'Alert updated successfully.';
                         s.notificationType = 'success';
                     });
                     history.push({
@@ -513,7 +651,7 @@ const AlertConfig = () => {
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = 'Failed to create Alert.';
+                        s.notificationMessage = 'Failed to update Alert.';
                         s.notificationType = 'error';
                     });
                 }
@@ -521,7 +659,7 @@ const AlertConfig = () => {
             .catch(() => {
                 UserStore.update((s) => {
                     s.showNotification = true;
-                    s.notificationMessage = 'Failed to create Alert status due to Internal Server Error.';
+                    s.notificationMessage = 'Failed to update Alert status due to Internal Server Error.';
                     s.notificationType = 'error';
                 });
             })
@@ -540,7 +678,63 @@ const AlertConfig = () => {
                 const response = res?.data;
                 const { success: isSuccessful, data } = response;
                 if (isSuccessful && data && data?.id) {
-                    console.log('SSR selected alert obj => ', data);
+                    let alert_obj = _.cloneDeep(defaultAlertObj);
+
+                    // name & desc integration
+                    alert_obj.alert_name = data?.name ?? '';
+                    alert_obj.alert_description = data?.description ?? '';
+
+                    // target type and target integration
+                    alert_obj.target.type = data?.target_type;
+
+                    if (data?.target_type === TARGET_TYPES.BUILDING) {
+                        alert_obj.target.lists = data?.building_ids;
+                    }
+
+                    if (data?.target_type === TARGET_TYPES.EQUIPMENT) {
+                        alert_obj.target.lists = data?.equipment_ids;
+                        alert_obj.target.buildingIDs = data?.building_ids[0]?.value;
+                    }
+
+                    // condition-metrics integration
+                    alert_obj.condition.condition_metric = data?.condition_metric;
+                    alert_obj.condition.condition_metric_aggregate = data?.condition_metric_aggregate;
+                    alert_obj.condition.condition_timespan = data?.condition_timespan;
+                    alert_obj.condition.condition_operator = data?.condition_operator;
+                    alert_obj.condition.condition_threshold_type = data?.condition_threshold_type;
+
+                    if (data?.condition_threshold_type === 'static_threshold_value') {
+                        alert_obj.condition.condition_threshold_value = data?.condition_threshold_value?.toString();
+                    }
+
+                    if (data?.condition_threshold_type === 'calculated') {
+                        alert_obj.condition.condition_threshold_reference = data?.condition_threshold_reference;
+                        alert_obj.condition.condition_threshold_calculated = data?.condition_threshold_calculated;
+                        alert_obj.condition.condition_threshold_timespan = data?.condition_threshold_timespan;
+                    }
+
+                    alert_obj.condition.condition_trigger_alert = data?.condition_alert_at.toString();
+                    alert_obj.condition.alert_condition_description = data?.alert_condition_description ?? '';
+
+                    // notification integration
+                    if (data?.alert_recurrence) {
+                        alert_obj.recurrence.resendAlert = data?.alert_recurrence;
+                        alert_obj.recurrence.resendAt = data?.alert_recurrence_minutes.toString();
+                    }
+
+                    if (data?.alert_user_ids && data?.alert_user_ids.length !== 0) {
+                        alert_obj.notification.method = ['user'];
+                        alert_obj.notification.selectedUserIds = data.alert_user_ids;
+                        alert_obj.notification.submitted = true;
+                    }
+
+                    if (data?.alert_emails) {
+                        alert_obj.notification.method = ['email'];
+                        alert_obj.notification.selectedUserEmailIds = data?.alert_emails;
+                        alert_obj.notification.submitted = true;
+                    }
+
+                    setAlertObj(alert_obj);
                 }
             })
             .catch(() => {})
@@ -601,12 +795,15 @@ const AlertConfig = () => {
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
                         isAlertConfigured={isTargetConfigured && isConditionConfigured && isAlertNameSet}
+                        isNotificationConfigured={isNotificationConfigured}
                         onAlertCreate={() => {
-                            handleCreateAlert(alertObj);
+                            reqType === 'create' && handleCreateAlert(alertObj);
+                            reqType === 'edit' && handleEditAlert(alertId, alertObj);
                         }}
                         reqType={reqType}
                         isCreatingAlert={isCreatingAlert}
                         renderAlertCondition={renderAlertCondition}
+                        validateTriggerAlertInputs={validateTriggerAlertInputs}
                         alertObj={alertObj}
                     />
                 </Col>
@@ -629,6 +826,7 @@ const AlertConfig = () => {
                         handleChange={handleChange}
                         showResetTargetModal={showResetTargetModal}
                         openResetTargetModel={openResetTargetModel}
+                        reqType={reqType}
                     />
                 )}
 

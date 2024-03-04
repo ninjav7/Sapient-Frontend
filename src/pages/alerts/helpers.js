@@ -10,8 +10,8 @@ export const getCommaSeparatedObjectLabels = (objectArray) => {
     return objectArray.map((object) => object?.label).join(', ');
 };
 
-export const fetchCommaSeperatedEmailAddresses = (selectedUserEmailId) => {
-    const emailsList = selectedUserEmailId.split(',');
+export const fetchCommaSeperatedEmailAddresses = (selectedUserEmailIds) => {
+    const emailsList = selectedUserEmailIds.split(',');
     const trimmedEmailsList = emailsList.map((email) => email.trim());
     return trimmedEmailsList;
 };
