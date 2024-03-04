@@ -128,8 +128,17 @@ const Login = (props) => {
                 .post(`${BaseUrl}${signinV2}`, userObj)
                 .then((res) => {
                     const response = res?.data;
+
                     if (response?.success) {
-                        if (response?.data) setSession(response?.data, pathToPush);
+                        const { data } = response;
+                        if (data?.is_redirect) {
+                            const { link_type, account_linked, is_active, is_verified, session_id } = data;
+                            history.push(
+                                `/account/login/user_found=true/link_type=${link_type}/account_linked=${account_linked}/is_active=${is_active}/is_verified=${is_verified}/session_id=${session_id}`
+                            );
+                        } else {
+                            setSession(data, pathToPush);
+                        }
                     } else {
                         const errorMsg = response?.message ?? `Unable to Login.`;
                         setErrorMsg(errorMsg);
