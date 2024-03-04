@@ -402,6 +402,10 @@ const AlertConfig = () => {
             obj.condition.condition_threshold_timespan = '';
         }
 
+        if (key === 'condition_timespan_type') {
+            obj.condition.condition_timespan_value = '1';
+        }
+
         obj.condition[key] = value;
         setAlertObj(obj);
     };
@@ -586,6 +590,7 @@ const AlertConfig = () => {
             condition_metric: condition?.condition_metric,
             condition_metric_aggregate: condition?.condition_metric_aggregate,
             condition_timespan: condition?.condition_timespan,
+            condition_timespan_type: condition?.condition_timespan_type,
             condition_operator: condition?.condition_operator,
             condition_threshold_type: condition?.condition_threshold_type,
         };
@@ -605,6 +610,10 @@ const AlertConfig = () => {
         if (target?.type === TARGET_TYPES.EQUIPMENT) {
             payload.building_ids = [target?.buildingIDs];
             payload.equipment_ids = target?.lists.map((el) => el?.value);
+        }
+
+        if (condition?.condition_timespan === 'past') {
+            payload.condition_timespan_value = condition?.condition_timespan_value;
         }
 
         if (condition?.condition_threshold_type === 'static_threshold_value') {
