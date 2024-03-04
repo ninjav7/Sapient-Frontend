@@ -3,12 +3,24 @@ export const TARGET_TYPES = Object.freeze({
     EQUIPMENT: 'equipment',
 });
 
+export const TIMESPAN_TYPES = Object.freeze({
+    CURRENT: 'current',
+    PAST: 'past',
+});
+
+export const THRESHOLD_TYPES = Object.freeze({
+    STATIC_VALUE: 'static_threshold_value',
+    CALCULATED: 'calculated',
+});
+
 export const defaultConditionObj = {
     condition_metric: '',
     condition_metric_aggregate: 'sum',
-    condition_timespan: 'month',
+    condition_timespan: 'current',
+    condition_timespan_type: 'month',
+    condition_timespan_value: '1',
     condition_operator: 'above',
-    condition_threshold_type: 'static_threshold_value',
+    condition_threshold_type: THRESHOLD_TYPES.STATIC_VALUE,
     condition_threshold_value: '',
     condition_threshold_reference: '',
     condition_threshold_calculated: '',
@@ -135,25 +147,36 @@ export const aggregationList = [
     },
 ];
 
+export const timespanOptions = [
+    {
+        label: 'Current',
+        value: TIMESPAN_TYPES.CURRENT,
+    },
+    {
+        label: 'Past',
+        value: TIMESPAN_TYPES.PAST,
+    },
+];
+
 export const timespanList = [
     {
-        label: 'Current Year',
+        label: 'Year',
         value: 'year',
     },
     {
-        label: 'Current Month',
+        label: 'Month',
         value: 'month',
     },
     {
-        label: 'Current Week',
+        label: 'Week',
         value: 'week',
     },
     {
-        label: 'Current Day',
+        label: 'Day',
         value: 'day',
     },
     {
-        label: 'Current Hour',
+        label: 'Hour',
         value: 'hour',
     },
 ];
@@ -183,11 +206,11 @@ export const operatorsList = [
 export const thresholdTypeList = [
     {
         label: 'Static Threshold Value',
-        value: 'static_threshold_value',
+        value: THRESHOLD_TYPES.STATIC_VALUE,
     },
     {
         label: 'Calculated',
-        value: 'calculated',
+        value: THRESHOLD_TYPES.CALCULATED,
     },
     // Commented for Alert V1 release
     // {

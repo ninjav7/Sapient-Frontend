@@ -28,6 +28,8 @@ import { createAlertServiceAPI, fetchConfiguredAlertById, updateAlertServiceAPI 
 
 import {
     TARGET_TYPES,
+    THRESHOLD_TYPES,
+    TIMESPAN_TYPES,
     aggregationList,
     bldgAlertConditions,
     defaultAlertObj,
@@ -36,6 +38,7 @@ import {
     equipAlertConditions,
     thresholdConditionTimespanList,
     timespanList,
+    timespanOptions,
 } from '../constants';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
@@ -338,11 +341,11 @@ const AlertConfig = () => {
         alertObj?.condition?.condition_threshold_type !== '';
 
     const isConditionsConfigured =
-        (alertObj?.condition?.condition_threshold_type === 'static_threshold_value' &&
+        (alertObj?.condition?.condition_threshold_type === THRESHOLD_TYPES.STATIC_VALUE &&
             alertObj?.condition?.condition_threshold_value !== '') ||
         (alertObj?.condition?.condition_threshold_type === 'reference' &&
             alertObj?.condition?.condition_threshold_reference !== '') ||
-        (alertObj?.condition?.condition_threshold_type === 'calculated' &&
+        (alertObj?.condition?.condition_threshold_type === THRESHOLD_TYPES.CALCULATED &&
             alertObj?.condition?.condition_threshold_calculated !== '' &&
             alertObj?.condition?.condition_threshold_timespan !== '');
 
@@ -402,6 +405,10 @@ const AlertConfig = () => {
             obj.condition.condition_threshold_timespan = '';
         }
 
+        if (key === 'condition_timespan_type') {
+            obj.condition.condition_timespan_value = '1';
+        }
+
         obj.condition[key] = value;
         setAlertObj(obj);
     };
@@ -433,20 +440,40 @@ const AlertConfig = () => {
 
         if (alertType) text += `${alertType?.label} `;
 
-        if (alert_obj?.condition?.condition_metric_aggregate)
+        if (alert_obj?.condition?.condition_metric_aggregate) {
             text += ` ${alert_obj?.condition?.condition_metric_aggregate}`;
-
-        if (alert_obj?.condition?.condition_timespan) {
-            const conditionTimespan = timespanList.find((el) => el?.value === alert_obj?.condition?.condition_timespan);
-            text += ` for ${conditionTimespan?.label ? conditionTimespan?.label.toLowerCase() : ''}`;
         }
 
-        if (alert_obj?.condition?.condition_operator) text += ` is ${alert_obj?.condition?.condition_operator}`;
+        if (alert_obj?.condition?.condition_timespan) {
+            const conditionTimespan = timespanOptions.find(
+                (el) => el?.value === alert_obj?.condition?.condition_timespan
+            );
 
-        if (alertObj?.condition?.condition_threshold_type === 'static_threshold_value') {
+            const conditionTimespanType = timespanList.find(
+                (el) => el?.value === alert_obj?.condition?.condition_timespan_type
+            );
+
+            const timespanValue = alert_obj?.condition?.condition_timespan_value;
+            const isPastTimespan = alert_obj?.condition?.condition_timespan === TIMESPAN_TYPES.PAST;
+            const isValueAbove1 = +timespanValue > 1;
+
+            if (conditionTimespan) {
+                const timespanText = isPastTimespan
+                    ? `${timespanValue} ${conditionTimespanType?.value}${isValueAbove1 ? 's' : ''}`
+                    : `${conditionTimespan?.value} ${conditionTimespanType?.value}`;
+
+                text += ` for ${timespanText}`;
+            }
+        }
+
+        if (alert_obj?.condition?.condition_operator) {
+            text += ` is ${alert_obj?.condition?.condition_operator}`;
+        }
+
+        if (alertObj?.condition?.condition_threshold_type === THRESHOLD_TYPES.STATIC_VALUE) {
             const value = +alert_obj?.condition?.condition_threshold_value ?? 0;
             text += ` ${formatConsumptionValue(value, 2)} kWh.`;
-        } else if (alertObj?.condition?.condition_threshold_type === 'calculated') {
+        } else if (alertObj?.condition?.condition_threshold_type === THRESHOLD_TYPES.CALCULATED) {
             if (alert_obj?.condition?.condition_threshold_calculated) {
                 const thresholdAggregationType = aggregationList.find(
                     (el) => el?.value === alert_obj?.condition?.condition_threshold_calculated
@@ -488,6 +515,7 @@ const AlertConfig = () => {
             condition_metric: condition?.condition_metric,
             condition_metric_aggregate: condition?.condition_metric_aggregate,
             condition_timespan: condition?.condition_timespan,
+            condition_timespan_type: condition?.condition_timespan_type,
             condition_operator: condition?.condition_operator,
             condition_threshold_type: condition?.condition_threshold_type,
         };
@@ -509,11 +537,15 @@ const AlertConfig = () => {
             payload.equipment_ids = target?.lists.map((el) => el?.value);
         }
 
-        if (condition?.condition_threshold_type === 'static_threshold_value') {
+        if (condition?.condition_timespan === TIMESPAN_TYPES.PAST) {
+            payload.condition_timespan_value = +condition?.condition_timespan_value;
+        }
+
+        if (condition?.condition_threshold_type === THRESHOLD_TYPES.STATIC_VALUE) {
             payload.condition_threshold_value = +condition?.condition_threshold_value;
         }
 
-        if (condition?.condition_threshold_type === 'calculated') {
+        if (condition?.condition_threshold_type === THRESHOLD_TYPES.CALCULATED) {
             payload.condition_threshold_calculated = condition?.condition_threshold_calculated;
             payload.condition_threshold_timespan = condition?.condition_threshold_timespan;
         }
@@ -586,6 +618,7 @@ const AlertConfig = () => {
             condition_metric: condition?.condition_metric,
             condition_metric_aggregate: condition?.condition_metric_aggregate,
             condition_timespan: condition?.condition_timespan,
+            condition_timespan_type: condition?.condition_timespan_type,
             condition_operator: condition?.condition_operator,
             condition_threshold_type: condition?.condition_threshold_type,
         };
@@ -607,11 +640,15 @@ const AlertConfig = () => {
             payload.equipment_ids = target?.lists.map((el) => el?.value);
         }
 
-        if (condition?.condition_threshold_type === 'static_threshold_value') {
+        if (condition?.condition_timespan === TIMESPAN_TYPES.PAST) {
+            payload.condition_timespan_value = +condition?.condition_timespan_value;
+        }
+
+        if (condition?.condition_threshold_type === THRESHOLD_TYPES.STATIC_VALUE) {
             payload.condition_threshold_value = +condition?.condition_threshold_value;
         }
 
-        if (condition?.condition_threshold_type === 'calculated') {
+        if (condition?.condition_threshold_type === THRESHOLD_TYPES.CALCULATED) {
             payload.condition_threshold_calculated = condition?.condition_threshold_calculated;
             payload.condition_threshold_timespan = condition?.condition_threshold_timespan;
         }
@@ -703,11 +740,11 @@ const AlertConfig = () => {
                     alert_obj.condition.condition_operator = data?.condition_operator;
                     alert_obj.condition.condition_threshold_type = data?.condition_threshold_type;
 
-                    if (data?.condition_threshold_type === 'static_threshold_value') {
+                    if (data?.condition_threshold_type === THRESHOLD_TYPES.STATIC_VALUE) {
                         alert_obj.condition.condition_threshold_value = data?.condition_threshold_value?.toString();
                     }
 
-                    if (data?.condition_threshold_type === 'calculated') {
+                    if (data?.condition_threshold_type === THRESHOLD_TYPES.CALCULATED) {
                         alert_obj.condition.condition_threshold_reference = data?.condition_threshold_reference;
                         alert_obj.condition.condition_threshold_calculated = data?.condition_threshold_calculated;
                         alert_obj.condition.condition_threshold_timespan = data?.condition_threshold_timespan;
