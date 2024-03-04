@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import _ from 'lodash';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 
@@ -51,8 +52,9 @@ const AlertSettings = (props) => {
         },
     ];
     const [buildingsList, setBuildingsList] = useState([]);
-    console.log('SSR buildingsList => ', buildingsList);
-    const [equipmentsList, setEquipmentsList] = useState([]);
+
+    const [selectedTargetType, setSelectedTargetType] = useState([]);
+    const [selectedBuildingsList, setSelectedBuildingsList] = useState([]);
 
     // Delete Device Modal states
     const [isDeleteAlertModalOpen, setDeleteAlertModalStatus] = useState(false);
@@ -69,9 +71,19 @@ const AlertSettings = (props) => {
             placeholder: 'All Target Types',
             filterType: FILTER_TYPES.MULTISELECT,
             filterOptions: targetTypes,
-            onClose: () => {},
+            onClose: (options) => {
+                if (options && options.length !== 0) {
+                    let targets = [];
+                    for (let i = 0; i < options.length; i++) {
+                        targets.push(options[i].value);
+                    }
+                    setPageNo(1);
+                    setSelectedTargetType(targets);
+                }
+            },
             onDelete: () => {
                 setPageNo(1);
+                setSelectedTargetType([]);
             },
         },
         {
@@ -83,50 +95,46 @@ const AlertSettings = (props) => {
                 value: el?.building_id,
                 label: el?.building_name,
             })),
-            onClose: () => {},
+            onClose: (options) => {
+                if (options && options.length !== 0) {
+                    let bldgIds = [];
+                    for (let i = 0; i < options.length; i++) {
+                        bldgIds.push(options[i].value);
+                    }
+                    setPageNo(1);
+                    setSelectedBuildingsList(bldgIds);
+                }
+            },
             onDelete: () => {
                 setPageNo(1);
+                setSelectedBuildingsList([]);
             },
         },
-        {
-            label: 'Equipments',
-            value: 'equipment',
-            placeholder: 'All Equipments',
-            filterType: FILTER_TYPES.MULTISELECT,
-            filterOptions: equipmentsList.map((el) => ({
-                value: el?.id,
-                label: el?.name,
-            })),
-            onClose: () => {},
-            onDelete: () => {
-                setPageNo(1);
-            },
-        },
-        {
-            label: 'Condition',
-            value: 'condition',
-            placeholder: 'All Conditions',
-            filterType: FILTER_TYPES.MULTISELECT,
-            filterOptions: bldgAlertConditions,
-            onClose: () => {},
-            onDelete: () => {
-                setPageNo(1);
-            },
-        },
-        {
-            label: 'Send To',
-            value: 'Send To',
-            placeholder: 'All Email IDs',
-            filterType: FILTER_TYPES.MULTISELECT,
-            filterOptions: [].map((el) => ({
-                value: el?.id,
-                label: el?.name,
-            })),
-            onClose: () => {},
-            onDelete: () => {
-                setPageNo(1);
-            },
-        },
+        // {
+        //     label: 'Condition',
+        //     value: 'condition',
+        //     placeholder: 'All Conditions',
+        //     filterType: FILTER_TYPES.MULTISELECT,
+        //     filterOptions: bldgAlertConditions,
+        //     onClose: () => {},
+        //     onDelete: () => {
+        //         setPageNo(1);
+        //     },
+        // },
+        // {
+        //     label: 'Send To',
+        //     value: 'Send To',
+        //     placeholder: 'All Email IDs',
+        //     filterType: FILTER_TYPES.MULTISELECT,
+        //     filterOptions: [].map((el) => ({
+        //         value: el?.id,
+        //         label: el?.name,
+        //     })),
+        //     onClose: () => {},
+        //     onDelete: () => {
+        //         setPageNo(1);
+        //     },
+        // },
     ]);
 
     const renderAlertType = (row) => {
@@ -349,8 +357,26 @@ const AlertSettings = (props) => {
     }, []);
 
     useEffect(() => {
-        getAllConfiguredAlerts({ search });
-    }, [search]);
+        if (buildingsList && buildingsList.length !== 0) {
+            const updatedFilterOptions = filterOptions.map((option) => {
+                if (option.value === 'building') {
+                    return {
+                        ...option,
+                        filterOptions: buildingsList.map((el) => ({
+                            value: el?.building_id,
+                            label: el?.building_name,
+                        })),
+                    };
+                }
+                return option;
+            });
+            setFilterOptions(updatedFilterOptions);
+        }
+    }, [buildingsList]);
+
+    useEffect(() => {
+        getAllConfiguredAlerts({ search, selectedTargetType, selectedBuildingsList });
+    }, [search, selectedTargetType, selectedBuildingsList]);
 
     return (
         <div className="custom-padding">

@@ -25,8 +25,8 @@ export function updateAlertServiceAPI(alertId, payload = {}) {
     return axiosInstance.patch(`${updateAlertConfig}/${alertId}`, payload).then((res) => res);
 }
 
-export function fetchAllConfiguredAlerts(params = '') {
-    return axiosInstance.post(`${getConfiguredAlerts}${params}`).then((res) => res);
+export function fetchAllConfiguredAlerts(params = '', payload = {}) {
+    return axiosInstance.post(`${getConfiguredAlerts}${params}`, payload).then((res) => res);
 }
 
 export function fetchConfiguredAlertById(alert_id) {
