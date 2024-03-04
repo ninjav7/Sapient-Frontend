@@ -13,7 +13,8 @@ import { ReactComponent as EquipmentTypeSVG } from '../../../sharedComponents/as
 import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
 import { separateEmails } from '../helpers';
-import { TARGET_TYPES } from '../constants';
+import { TARGET_TYPES, bldgAlertConditions } from '../constants';
+import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { getAlertSettingsCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { deleteConfiguredAlert, fetchAllConfiguredAlerts } from '../services';
@@ -23,6 +24,7 @@ import DeleteAlert from './DeleteAlert';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
+import { fetchBuildingList } from '../../settings/buildings/services';
 
 const AlertSettings = (props) => {
     const { getAllConfiguredAlerts, isProcessing = false, configuredAlertsList = [] } = props;
@@ -36,8 +38,21 @@ const AlertSettings = (props) => {
 
     const [isDeleting, setIsDeleting] = useState(false);
     const [selectedAlertObj, setSelectedAlertObj] = useState({});
-
     const [isCSVDownloading, setDownloadingCSVData] = useState(false);
+
+    const targetTypes = [
+        {
+            label: 'Building',
+            value: 'building',
+        },
+        {
+            label: 'Equipment',
+            value: 'equipment',
+        },
+    ];
+    const [buildingsList, setBuildingsList] = useState([]);
+    console.log('SSR buildingsList => ', buildingsList);
+    const [equipmentsList, setEquipmentsList] = useState([]);
 
     // Delete Device Modal states
     const [isDeleteAlertModalOpen, setDeleteAlertModalStatus] = useState(false);
@@ -46,6 +61,73 @@ const AlertSettings = (props) => {
 
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
+
+    const [filterOptions, setFilterOptions] = useState([
+        {
+            label: 'Target Type',
+            value: 'target_type',
+            placeholder: 'All Target Types',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: targetTypes,
+            onClose: () => {},
+            onDelete: () => {
+                setPageNo(1);
+            },
+        },
+        {
+            label: 'Buildings',
+            value: 'building',
+            placeholder: 'All Buildings',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: buildingsList.map((el) => ({
+                value: el?.building_id,
+                label: el?.building_name,
+            })),
+            onClose: () => {},
+            onDelete: () => {
+                setPageNo(1);
+            },
+        },
+        {
+            label: 'Equipments',
+            value: 'equipment',
+            placeholder: 'All Equipments',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: equipmentsList.map((el) => ({
+                value: el?.id,
+                label: el?.name,
+            })),
+            onClose: () => {},
+            onDelete: () => {
+                setPageNo(1);
+            },
+        },
+        {
+            label: 'Condition',
+            value: 'condition',
+            placeholder: 'All Conditions',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: bldgAlertConditions,
+            onClose: () => {},
+            onDelete: () => {
+                setPageNo(1);
+            },
+        },
+        {
+            label: 'Send To',
+            value: 'Send To',
+            placeholder: 'All Email IDs',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: [].map((el) => ({
+                value: el?.id,
+                label: el?.name,
+            })),
+            onClose: () => {},
+            onDelete: () => {
+                setPageNo(1);
+            },
+        },
+    ]);
 
     const renderAlertType = (row) => {
         return (
@@ -178,10 +260,6 @@ const AlertSettings = (props) => {
         },
     ];
 
-    function isValidDate(d) {
-        return d instanceof Date && !isNaN(d);
-    }
-
     const handleLastActiveDate = (createdAt) => {
         let dt = '-';
 
@@ -254,6 +332,22 @@ const AlertSettings = (props) => {
             });
     };
 
+    const getBuildingsList = async () => {
+        await fetchBuildingList()
+            .then((res) => {
+                const data = res?.data;
+                if (data && data.length !== 0) {
+                    setBuildingsList(data);
+                }
+            })
+            .catch(() => {})
+            .finally(() => {});
+    };
+
+    useEffect(() => {
+        getBuildingsList();
+    }, []);
+
     useEffect(() => {
         getAllConfiguredAlerts({ search });
     }, [search]);
@@ -276,7 +370,7 @@ const AlertSettings = (props) => {
                 disableColumnDragging={true}
                 searchResultRows={currentRow()}
                 headers={headerProps}
-                filterOptions={[]}
+                filterOptions={filterOptions}
                 currentPage={pageNo}
                 onChangePage={setPageNo}
                 pageSize={pageSize}
