@@ -25,6 +25,7 @@ import {
     thresholdReferenceList,
     thresholdTypeList,
     timespanList,
+    timespanOptions,
 } from '../constants';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
@@ -60,6 +61,10 @@ const TriggerAlertToolTip = () => {
 
 const ConditionMetrics = (props) => {
     const { targetType, condition, conditionsList, handleConditionChange } = props;
+
+    const formattedLabel = `${condition?.condition_timespan_type
+        ?.charAt(0)
+        .toUpperCase()}${condition?.condition_timespan_type?.slice(1)}`;
 
     return (
         <div className="condition-metric" style={{ width: condition?.condition_metric !== '' ? '100%' : '33%' }}>
@@ -123,18 +128,81 @@ const ConditionMetrics = (props) => {
                             id="timeSpanSelect"
                             placeholder="Select a Timespan"
                             name="select"
-                            options={timespanList}
+                            options={timespanOptions}
                             className="w-100"
                             onChange={(e) => {
                                 handleConditionChange('condition_timespan', e.value);
                             }}
-                            currentValue={timespanList.filter(
+                            currentValue={timespanOptions.filter(
                                 (option) => option.value === condition?.condition_timespan
                             )}
                             isDisabled={targetType === ''}
                             menuPlacement="auto"
                         />
                     </div>
+
+                    <Brick sizeInRem={1.5} />
+
+                    {condition?.condition_timespan === 'current' && (
+                        <div>
+                            <Typography.Body size={Typography.Sizes.md}>Timespan Type</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            <Select
+                                id="timeSpanSelect"
+                                placeholder="Select a Timespan Type"
+                                name="select"
+                                options={timespanList}
+                                className="w-100"
+                                onChange={(e) => {
+                                    handleConditionChange('condition_timespan_type', e.value);
+                                }}
+                                currentValue={timespanList.filter(
+                                    (option) => option.value === condition?.condition_timespan_type
+                                )}
+                                isDisabled={targetType === ''}
+                                menuPlacement="auto"
+                            />
+                        </div>
+                    )}
+
+                    {condition?.condition_timespan === 'past' && (
+                        <div className="d-flex w-100" style={{ gap: '0.75rem' }}>
+                            <div style={{ width: '30%' }}>
+                                <Typography.Body size={Typography.Sizes.md}>{formattedLabel}</Typography.Body>
+                                <Brick sizeInRem={0.25} />
+                                <Inputs
+                                    type="number"
+                                    className="custom-input-width w-100"
+                                    inputClassName="custom-input-field"
+                                    value={condition?.condition_timespan_value}
+                                    onChange={(e) => {
+                                        if (e.target.value > 0) {
+                                            handleConditionChange('condition_timespan_value', e.target.value);
+                                        }
+                                    }}
+                                />
+                            </div>
+                            <div style={{ width: '70%' }}>
+                                <Typography.Body size={Typography.Sizes.md}>Timespan Type</Typography.Body>
+                                <Brick sizeInRem={0.25} />
+                                <Select
+                                    id="timeSpanSelect"
+                                    placeholder="Select a Timespan Type"
+                                    name="select"
+                                    options={timespanList}
+                                    className="w-100"
+                                    onChange={(e) => {
+                                        handleConditionChange('condition_timespan_type', e.value);
+                                    }}
+                                    currentValue={timespanList.filter(
+                                        (option) => option.value === condition?.condition_timespan_type
+                                    )}
+                                    isDisabled={targetType === ''}
+                                    menuPlacement="auto"
+                                />
+                            </div>
+                        </div>
+                    )}
                 </>
             )}
         </div>
