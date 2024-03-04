@@ -36,6 +36,7 @@ import {
     equipAlertConditions,
     thresholdConditionTimespanList,
     timespanList,
+    timespanOptions,
 } from '../constants';
 import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
@@ -441,8 +442,25 @@ const AlertConfig = () => {
             text += ` ${alert_obj?.condition?.condition_metric_aggregate}`;
 
         if (alert_obj?.condition?.condition_timespan) {
-            const conditionTimespan = timespanList.find((el) => el?.value === alert_obj?.condition?.condition_timespan);
-            text += ` for ${conditionTimespan?.label ? conditionTimespan?.label.toLowerCase() : ''}`;
+            const conditionTimespan = timespanOptions.find(
+                (el) => el?.value === alert_obj?.condition?.condition_timespan
+            );
+            const conditionTimespanType = timespanList.find(
+                (el) => el?.value === alert_obj?.condition?.condition_timespan_type
+            );
+            if (alert_obj?.condition?.condition_timespan === 'current') {
+                text += ` for ${conditionTimespan?.value} ${conditionTimespanType?.value}`;
+            }
+            if (alert_obj?.condition?.condition_timespan === 'past') {
+                console.log(
+                    'SSRai alert_obj?.condition?.condition_timespan_value => ',
+                    alert_obj?.condition?.condition_timespan_value
+                );
+                const isValueAbove1 = +alert_obj?.condition?.condition_timespan_value > 1;
+                text += ` for ${conditionTimespan?.value} ${alert_obj?.condition?.condition_timespan_value} ${
+                    conditionTimespanType?.value
+                }${isValueAbove1 ? `s` : ''}`;
+            }
         }
 
         if (alert_obj?.condition?.condition_operator) text += ` is ${alert_obj?.condition?.condition_operator}`;

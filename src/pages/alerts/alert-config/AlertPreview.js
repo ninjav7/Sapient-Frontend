@@ -9,7 +9,7 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 
 const AlertPreview = (props) => {
-    const { alertObj = {}, typeSelectedLabel = '', handleConditionChange } = props;
+    const { alertObj = {}, typeSelectedLabel = '' } = props;
 
     const targetType = alertObj?.target?.type === `building` ? `Building` : `Equipment`;
 
