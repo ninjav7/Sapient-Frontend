@@ -42,7 +42,7 @@ const MetadataContainer = ({ metadata = {}, isFetching = false }) => {
                             <div className="d-flex" style={{ gap: '0.5rem' }}>
                                 <Typography.Subheader size={Typography.Sizes.md}>Tags:</Typography.Subheader>
                                 <Typography.Subheader size={Typography.Sizes.lg}>
-                                    {Array.isArray(metadata?.tag)
+                                    {Array.isArray(metadata?.tag) && metadata.tag.length > 0
                                         ? formatConsumptionValue(metadata.tag.join(', '))
                                         : 'None'}
                                 </Typography.Subheader>

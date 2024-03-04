@@ -23,6 +23,8 @@ const SpacesListTable = ({ colorfulSpaces }) => {
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
+    const userPrefUnits = UserStore.useState((s) => s.unit);
+
     const { bldgId } = useParams();
 
     const [search, setSearch] = useState('');
@@ -72,7 +74,7 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         if (!bldgId || startDate === null || endDate === null) return;
 
         fetchEquipDataList();
-    }, [startDate, endDate, bldgId, search, sortBy, pageSize, pageNo, colorfulSpaces]);
+    }, [startDate, endDate, bldgId, search, sortBy, pageSize, pageNo, colorfulSpaces, userPrefUnits]);
 
     const handleDownloadCSV = async () => {
         setDownloadingCSVData(true);
@@ -148,13 +150,20 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         );
     });
 
-    const renderSquareFootage = useCallback((row) => {
-        return (
-            <Typography.Body size={Typography.Sizes.md}>
-                {row?.square_footage ? row?.square_footage.toLocaleString() + ' ' + 'm^2' : '0' + ' ' + 'm^2'}
-            </Typography.Body>
-        );
-    });
+    const renderSquareUnits = useCallback(
+        (row) => {
+            const formatSquareString = (string) => `${string} ${userPrefUnits === 'si' ? UNITS.SQ_M : UNITS.SQ_FT}`;
+
+            return (
+                <Typography.Body size={Typography.Sizes.md}>
+                    {row?.square_footage
+                        ? formatSquareString(row?.square_footage.toLocaleString())
+                        : formatSquareString('0')}
+                </Typography.Body>
+            );
+        },
+        [userPrefUnits]
+    );
 
     const renderTags = useCallback((row) => {
         const slicedArr = row?.tag.slice(1);
@@ -220,9 +229,9 @@ const SpacesListTable = ({ colorfulSpaces }) => {
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: 'Square Footage',
+            name: userPrefUnits === 'si' ? `Square Meters` : `Square Footage`,
             accessor: 'square_footage',
-            callbackValue: renderSquareFootage,
+            callbackValue: renderSquareUnits,
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {

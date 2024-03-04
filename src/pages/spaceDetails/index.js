@@ -36,8 +36,9 @@ import '../settings/passive-devices/styles.scss';
 import './styles.scss';
 import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
-import { getAllSpaceTypes, updateSpaceService } from '../settings/layout/services';
+import { getAllFloorsList, getAllSpaceTypes, getAllSpacesList, updateSpaceService } from '../settings/layout/services';
 import { TagsInput } from 'react-tag-input-component';
+import _ from 'lodash';
 
 const SpaceDetails = () => {
     const history = useHistory();
@@ -77,6 +78,83 @@ const SpaceDetails = () => {
     const [spaceTypes, setSpaceTypes] = useState([]);
 
     const [errorObj, setErrorObj] = useState({});
+
+    const [modal, setModal] = useState(false);
+    const [moveSpacePopup, setMoveSpacePopup] = useState(false);
+    const [currentParent, setCurrentParent] = useState('');
+
+    const openModal = () => setModal(true);
+    const closeModal = () => setModal(false);
+    const openMoveSpacePopup = () => setMoveSpacePopup(true);
+    const closeMoveSpacePopup = () => setMoveSpacePopup(false);
+    const [floorsList, setFloorsList] = useState([]);
+    const [spacesList, setSpacesList] = useState([]);
+    const [selectedFloorId, setSelectedFloorId] = useState(null);
+    const [spaceObj, setSpaceObj] = useState({});
+
+    const sortedLayoutData = (dataList) => {
+        const sortedList = _.sortBy(dataList, (obj) => {
+            const name = obj?.name.toLowerCase();
+            const match = name.match(/(\D+)(\d+)/);
+
+            if (match) {
+                const [, prefix, number] = match;
+                return [prefix, _.padStart(number, 5, '0')];
+            }
+            return name;
+        });
+
+        return sortedList;
+    };
+
+    const fetchAllFloorData = async () => {
+        setFloorsList([]);
+        setSpacesList([]);
+
+        const params = `?building_id=${bldgId}`;
+
+        try {
+            const res = await getAllFloorsList(params);
+
+            const response = res?.data;
+            if (response?.success) {
+                if (response?.data.length !== 0) setFloorsList(sortedLayoutData(response?.data));
+            } else {
+                notifyUser(Notification.Types.success, 'Failed to fetch Floors.');
+            }
+        } catch (error) {
+            notifyUser(Notification.Types.success, 'Failed to fetch Floors.');
+        }
+    };
+
+    const fetchAllSpaceData = async () => {
+        setSpacesList([]);
+
+        const params = `?floor_id=${selectedFloorId}&building_id=${bldgId}`;
+
+        try {
+            const res = await getAllSpacesList(params);
+            const response = res?.data;
+
+            if (response?.success) {
+                const spaces = response?.data;
+
+                if (Array.isArray(spaces) && spaces.length === 0)
+                    throw new Error('zero elements in response.data array');
+
+                setSpacesList(sortedLayoutData(spaces));
+
+                const spaceObjFound = spaces.find((space) => space._id === metadata.space_id);
+
+                console.log(spaceObjFound);
+                setSpaceObj(spaceObjFound);
+            } else {
+                notifyUser(Notification.Types.error, 'Failed to fetch Spaces.');
+            }
+        } catch (error) {
+            notifyUser(Notification.Types.error, 'Failed to fetch Spaces.');
+        }
+    };
 
     const fetchSpaceTypes = async () => {
         const params = `?ordered_by=name&sort_by=ace`;
@@ -149,6 +227,7 @@ const SpaceDetails = () => {
             if (res) {
                 setMetadata(res);
                 setMetadataToUpdate(res);
+                setSelectedFloorId(res.floor_id);
             }
         } catch {
             setMetadata({});
@@ -181,7 +260,14 @@ const SpaceDetails = () => {
         fetchSpaceTypes();
         fetchChartData();
         fetchMetadata();
+        fetchAllFloorData();
     }, [spaceId, startDate, endDate, selectedConsumption, bldgId]);
+
+    useEffect(() => {
+        if (!selectedFloorId) return;
+
+        fetchAllSpaceData();
+    }, [selectedFloorId]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -279,6 +365,35 @@ const SpaceDetails = () => {
 
         if (!alertObj.space_name && !alertObj.space_type_id) fetchEditSpace();
     };
+
+    const getCurrentParent = () => {
+        console.log(spaceObj);
+
+        if (spaceObj?.parent_space) {
+            const parent = spacesList.find((space) => space._id === spaceObj.parent_space);
+            setCurrentParent(parent?.name);
+            return;
+        } else if (spaceObj?.parents) {
+            const parent = floorsList.find((space) => space.floor_id === spaceObj.parents);
+            setCurrentParent(parent?.name);
+            return;
+        }
+
+        setCurrentParent('');
+    };
+
+    useEffect(() => {
+        if (
+            !metadata ||
+            !spacesList.length > 0 ||
+            !floorsList > 0 ||
+            !Object.keys(spaceObj).length > 0 ||
+            !selectedFloorId
+        )
+            return;
+
+        getCurrentParent();
+    }, [metadata, spacesList, floorsList, spaceObj, selectedFloorId]);
 
     return (
         <div>
@@ -456,6 +571,25 @@ const SpaceDetails = () => {
                                 <div className="w-100 box-parent">
                                     <div className="box-parent-header">
                                         <Typography.Header size={Typography.Sizes.sm}>Parent</Typography.Header>
+                                    </div>
+
+                                    <div className="box-parent-input">
+                                        <InputTooltip
+                                            labelSize={Typography.Sizes.md}
+                                            value={currentParent}
+                                            disabled={true}
+                                            className="w-100"
+                                        />
+                                        <Button
+                                            label={'Move'}
+                                            size={Button.Sizes.md}
+                                            type={Button.Type.primary}
+                                            onClick={() => {
+                                                closeModal();
+                                                openMoveSpacePopup();
+                                            }}
+                                            className="ml-2"
+                                        />
                                     </div>
 
                                     <div className="box-parent-buttons">
