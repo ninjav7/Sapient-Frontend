@@ -73,15 +73,12 @@ const Alerts = () => {
 
     const getAllConfiguredAlerts = async (requestParamsObj = {}) => {
         const { search = '', selectedTargetType = [], selectedBuildingsList = [] } = requestParamsObj;
-        console.log('SSR requestParamsObj => ', requestParamsObj);
 
         let params = `?search_by_name=${search}`;
         let payload = {};
 
         if (selectedTargetType.length === 1) params += `&target_type=${selectedTargetType[0]}`;
         if (selectedBuildingsList.length !== 0) payload.building_ids = selectedBuildingsList;
-        // if (selectedBuildingsList.length !== 0) payload.users_selected = selectedBuildingsList;
-        // if (selectedBuildingsList.length !== 0) payload.emails_selected = selectedBuildingsList;
 
         setFetchingData(true);
 
