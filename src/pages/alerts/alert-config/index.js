@@ -452,10 +452,6 @@ const AlertConfig = () => {
                 text += ` for ${conditionTimespan?.value} ${conditionTimespanType?.value}`;
             }
             if (alert_obj?.condition?.condition_timespan === 'past') {
-                console.log(
-                    'SSRai alert_obj?.condition?.condition_timespan_value => ',
-                    alert_obj?.condition?.condition_timespan_value
-                );
                 const isValueAbove1 = +alert_obj?.condition?.condition_timespan_value > 1;
                 text += ` for ${conditionTimespan?.value} ${alert_obj?.condition?.condition_timespan_value} ${
                     conditionTimespanType?.value
