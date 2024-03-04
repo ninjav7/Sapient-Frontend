@@ -21,8 +21,8 @@ const PortfolioKPIs = ({ totalBuilding = 0, overallData = {}, daysCount = 0, use
                     unit={KPI_UNITS.KWH}
                     tooltipText={
                         daysCount > 1
-                            ? `Total energy consumption across all your buildings for the past ${daysCount} days.`
-                            : `Total energy consumption across all your buildings for the past ${daysCount} day.`
+                            ? `Total energy consumption across all your buildings over the selected ${daysCount} day period.`
+                            : `Total energy consumption across all your buildings for the selected ${daysCount} day.`
                     }
                     tooltipId="total-eng-cnsmp"
                     type={

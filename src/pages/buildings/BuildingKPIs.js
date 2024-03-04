@@ -18,8 +18,8 @@ const BuildingKPIs = ({ overallData = {}, daysCount = 0, userPrefUnits }) => {
                 unit={KPI_UNITS.KWH}
                 tooltipText={
                     daysCount > 1
-                        ? `Total energy consumption across the selected building for the past ${daysCount} days.`
-                        : `Total energy consumption across the selected building for the past ${daysCount} day.`
+                        ? `Total energy consumption across the selected building over the selected ${daysCount} day period.`
+                        : `Total energy consumption across the selected building for the selected ${daysCount} day.`
                 }
                 tooltipId="total-bld-cnsmp"
                 type={
