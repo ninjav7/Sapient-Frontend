@@ -72,14 +72,17 @@ const Alerts = () => {
     };
 
     const getAllConfiguredAlerts = async (requestParamsObj = {}) => {
-        const { search = '' } = requestParamsObj;
+        const { search = '', selectedTargetType = [], selectedBuildingsList = [] } = requestParamsObj;
 
-        let params = '';
-        if (search) params += `?search_by_name=${search}`;
+        let params = `?search_by_name=${search}`;
+        let payload = {};
+
+        if (selectedTargetType.length === 1) params += `&target_type=${selectedTargetType[0]}`;
+        if (selectedBuildingsList.length !== 0) payload.building_ids = selectedBuildingsList;
 
         setFetchingData(true);
 
-        await fetchAllConfiguredAlerts(params)
+        await fetchAllConfiguredAlerts(params, payload)
             .then((res) => {
                 const response = res?.data;
                 const { success: isSuccessful, data } = response;

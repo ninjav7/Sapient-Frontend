@@ -247,6 +247,7 @@ export const getConfiguredAlerts = '/api/v2/alerts/configs/list';
 export const getConfiguredAlertsById = '/api/v2/alerts/configs';
 export const createAlert = '/api/v2/alerts/create-config';
 export const deleteAlert = '/api/v2/alerts/delete-config';
+export const configuredEmailsList = '/api/v2/alerts/configs/emails';
 
 // Tags
 export const allTags = '/api/config/general/tags';
