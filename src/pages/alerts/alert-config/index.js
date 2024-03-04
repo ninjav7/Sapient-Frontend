@@ -536,7 +536,7 @@ const AlertConfig = () => {
         }
 
         if (condition?.condition_timespan === 'past') {
-            payload.condition_timespan_value = condition?.condition_timespan_value;
+            payload.condition_timespan_value = +condition?.condition_timespan_value;
         }
 
         if (condition?.condition_threshold_type === 'static_threshold_value') {
@@ -639,7 +639,7 @@ const AlertConfig = () => {
         }
 
         if (condition?.condition_timespan === 'past') {
-            payload.condition_timespan_value = condition?.condition_timespan_value;
+            payload.condition_timespan_value = +condition?.condition_timespan_value;
         }
 
         if (condition?.condition_threshold_type === 'static_threshold_value') {
