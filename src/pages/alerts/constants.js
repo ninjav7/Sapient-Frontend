@@ -6,7 +6,9 @@ export const TARGET_TYPES = Object.freeze({
 export const defaultConditionObj = {
     condition_metric: '',
     condition_metric_aggregate: 'sum',
-    condition_timespan: 'month',
+    condition_timespan: 'current',
+    condition_timespan_type: 'month',
+    condition_timespan_value: '1',
     condition_operator: 'above',
     condition_threshold_type: 'static_threshold_value',
     condition_threshold_value: '',
@@ -135,25 +137,36 @@ export const aggregationList = [
     },
 ];
 
+export const timespanOptions = [
+    {
+        label: 'Current',
+        value: 'current',
+    },
+    {
+        label: 'Past',
+        value: 'past',
+    },
+];
+
 export const timespanList = [
     {
-        label: 'Current Year',
+        label: 'Year',
         value: 'year',
     },
     {
-        label: 'Current Month',
+        label: 'Month',
         value: 'month',
     },
     {
-        label: 'Current Week',
+        label: 'Week',
         value: 'week',
     },
     {
-        label: 'Current Day',
+        label: 'Day',
         value: 'day',
     },
     {
-        label: 'Current Hour',
+        label: 'Hour',
         value: 'hour',
     },
 ];
