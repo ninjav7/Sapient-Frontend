@@ -72,13 +72,19 @@ const Alerts = () => {
     };
 
     const getAllConfiguredAlerts = async (requestParamsObj = {}) => {
-        const { search = '', selectedTargetType = [], selectedBuildingsList = [] } = requestParamsObj;
+        const {
+            search = '',
+            selectedTargetType = [],
+            selectedBuildingsList = [],
+            selectedEmailsList = [],
+        } = requestParamsObj;
 
         let params = `?search_by_name=${search}`;
         let payload = {};
 
         if (selectedTargetType.length === 1) params += `&target_type=${selectedTargetType[0]}`;
         if (selectedBuildingsList.length !== 0) payload.building_ids = selectedBuildingsList;
+        if (selectedEmailsList.length !== 0) payload.emails_selected = selectedEmailsList;
 
         setFetchingData(true);
 

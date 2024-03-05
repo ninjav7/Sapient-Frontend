@@ -56,6 +56,7 @@ const AlertSettings = (props) => {
 
     const [selectedTargetType, setSelectedTargetType] = useState([]);
     const [selectedBuildingsList, setSelectedBuildingsList] = useState([]);
+    const [selectedEmailsList, setSelectedEmailsList] = useState([]);
 
     // Delete Device Modal states
     const [isDeleteAlertModalOpen, setDeleteAlertModalStatus] = useState(false);
@@ -120,9 +121,19 @@ const AlertSettings = (props) => {
                 value: el?.id,
                 label: el?.name,
             })),
-            onClose: () => {},
+            onClose: (options) => {
+                if (options && options.length !== 0) {
+                    let emailIds = [];
+                    for (let i = 0; i < options.length; i++) {
+                        emailIds.push(options[i].value);
+                    }
+                    setPageNo(1);
+                    setSelectedEmailsList(emailIds);
+                }
+            },
             onDelete: () => {
                 setPageNo(1);
+                setSelectedEmailsList([]);
             },
         },
     ]);
@@ -397,8 +408,8 @@ const AlertSettings = (props) => {
     }, [configuredEmailsList]);
 
     useEffect(() => {
-        getAllConfiguredAlerts({ search, selectedTargetType, selectedBuildingsList });
-    }, [search, selectedTargetType, selectedBuildingsList]);
+        getAllConfiguredAlerts({ search, selectedTargetType, selectedBuildingsList, selectedEmailsList });
+    }, [search, selectedTargetType, selectedBuildingsList, selectedEmailsList]);
 
     return (
         <div className="custom-padding">
