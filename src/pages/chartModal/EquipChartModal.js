@@ -1116,7 +1116,7 @@ const EquipChartModal = ({
                                                         <Typography.Body
                                                             size={Typography.Sizes.xs}
                                                             className="input-error-label text-primary font-bold float-right mouse-pointer"
-                                                            onClick={() => handleDataChange('location_id', null)}>
+                                                            onClick={() => handleDataChange('location_id', '')}>
                                                             {`Reset Equipment Location`}
                                                         </Typography.Body>
                                                     </>
