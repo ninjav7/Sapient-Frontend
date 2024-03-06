@@ -87,6 +87,7 @@ const DonutChartWidget = ({
     const series = items.map(({ value }) => Math.round(value));
 
     const totalValue = convertData ? computedTotal : series.reduce((acc, item) => acc + item, 0);
+    const formattedTotalValue = totalValue.toLocaleString('en-US');
 
     useEffect(() => {
         renderCenteredItemContent(totalValue, items[0]?.unit);
@@ -155,7 +156,7 @@ const DonutChartWidget = ({
                 highcharts={Highcharts}
                 options={configDonutChartWidget({
                     changeItemsState,
-                    totalValue,
+                    totalValue: formattedTotalValue,
                     items,
                     renderCenteredItemContent,
                     centeredItemContent,
