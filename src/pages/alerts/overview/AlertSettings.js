@@ -23,6 +23,7 @@ import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { fetchBuildingList } from '../../settings/buildings/services';
 import { deleteConfiguredAlert, fetchAllConfiguredAlerts, fetchConfiguredEmailsList } from '../services';
 import { fetchMemberUserList } from '../../settings/users/service';
+import { getEquipmentsListV2 } from '../../settings/panels/services';
 
 import DeleteAlert from './DeleteAlert';
 
@@ -55,11 +56,13 @@ const AlertSettings = (props) => {
         },
     ];
     const [buildingsList, setBuildingsList] = useState([]);
+    const [equipmentsList, setEquipmentsList] = useState([]);
     const [configuredEmailsList, setConfiguredEmailsList] = useState([]);
     const [configuredUsersList, setConfiguredUsersList] = useState([]);
 
     const [selectedTargetType, setSelectedTargetType] = useState([]);
     const [selectedBuildingsList, setSelectedBuildingsList] = useState([]);
+    const [selectedEquipmentsList, setSelectedEquipmentsList] = useState([]);
     const [selectedEmailsList, setSelectedEmailsList] = useState([]);
     const [selectedUsersList, setSelectedUsersList] = useState([]);
 
@@ -154,6 +157,27 @@ const AlertSettings = (props) => {
             onDelete: () => {
                 setPageNo(1);
                 setSelectedUsersList([]);
+            },
+        },
+        {
+            label: 'Equipments',
+            value: 'equipment',
+            placeholder: 'All Equipments',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: [],
+            onClose: (options) => {
+                if (options && options.length !== 0) {
+                    let equipIds = [];
+                    for (let i = 0; i < options.length; i++) {
+                        equipIds.push(options[i].value);
+                    }
+                    setPageNo(1);
+                    setSelectedEquipmentsList(equipIds);
+                }
+            },
+            onDelete: () => {
+                setPageNo(1);
+                setSelectedEquipmentsList([]);
             },
         },
     ]);
@@ -362,6 +386,8 @@ const AlertSettings = (props) => {
     };
 
     const getBuildingsList = async () => {
+        setBuildingsList([]);
+
         await fetchBuildingList()
             .then((res) => {
                 const data = res?.data;
@@ -373,7 +399,23 @@ const AlertSettings = (props) => {
             .finally(() => {});
     };
 
+    const getEquipmentsList = async (bldg_id) => {
+        setEquipmentsList([]);
+        setSelectedEquipmentsList([]);
+
+        const params = `?building_id=${bldg_id}`;
+
+        await getEquipmentsListV2(params)
+            .then((res) => {
+                const responseData = res?.data || [];
+                setEquipmentsList(responseData);
+            })
+            .catch(() => {});
+    };
+
     const getConfiguredEmailsList = async () => {
+        setConfiguredEmailsList([]);
+
         await fetchConfiguredEmailsList()
             .then((res) => {
                 const response = res?.data;
@@ -387,6 +429,8 @@ const AlertSettings = (props) => {
     };
 
     const getConfiguredUsersList = async () => {
+        setConfiguredUsersList([]);
+
         await fetchMemberUserList()
             .then((res) => {
                 const response = res?.data;
@@ -421,6 +465,24 @@ const AlertSettings = (props) => {
             setFilterOptions(updatedFilterOptions);
         }
     }, [buildingsList]);
+
+    useEffect(() => {
+        if (equipmentsList && equipmentsList.length !== 0) {
+            const updatedFilterOptions = filterOptions.map((option) => {
+                if (option.value === 'equipment') {
+                    return {
+                        ...option,
+                        filterOptions: equipmentsList.map((el) => ({
+                            value: el?.equipments_id,
+                            label: el?.equipments_name,
+                        })),
+                    };
+                }
+                return option;
+            });
+            setFilterOptions(updatedFilterOptions);
+        }
+    }, [equipmentsList]);
 
     useEffect(() => {
         if (configuredEmailsList && configuredEmailsList.length !== 0) {
@@ -462,6 +524,7 @@ const AlertSettings = (props) => {
         const isSelectedBuilding = bldgId && bldgId !== 'portfolio';
         if (isSelectedBuilding) {
             setSelectedBuildingsList(isSelectedBuilding ? [bldgId] : []);
+            getEquipmentsList(bldgId);
         }
     }, [bldgId]);
 
@@ -472,8 +535,16 @@ const AlertSettings = (props) => {
             selectedBuildingsList,
             selectedEmailsList,
             selectedUsersList,
+            selectedEquipmentsList,
         });
-    }, [search, selectedTargetType, selectedBuildingsList, selectedEmailsList, selectedUsersList]);
+    }, [
+        search,
+        selectedTargetType,
+        selectedBuildingsList,
+        selectedEmailsList,
+        selectedUsersList,
+        selectedEquipmentsList,
+    ]);
 
     return (
         <div className="custom-padding">
