@@ -77,6 +77,8 @@ const Alerts = () => {
             selectedTargetType = [],
             selectedBuildingsList = [],
             selectedEmailsList = [],
+            selectedUsersList = [],
+            selectedEquipmentsList = [],
         } = requestParamsObj;
 
         let params = `?search_by_name=${search}`;
@@ -85,6 +87,8 @@ const Alerts = () => {
         if (selectedTargetType.length === 1) params += `&target_type=${selectedTargetType[0]}`;
         if (selectedBuildingsList.length !== 0) payload.building_ids = selectedBuildingsList;
         if (selectedEmailsList.length !== 0) payload.emails_selected = selectedEmailsList;
+        if (selectedUsersList.length !== 0) payload.users_selected = selectedUsersList;
+        if (selectedEquipmentsList.length !== 0) payload.equipment_ids = selectedEquipmentsList;
 
         setFetchingData(true);
 
