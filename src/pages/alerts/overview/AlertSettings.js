@@ -7,6 +7,7 @@ import Typography from '../../../sharedComponents/typography';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import SkeletonLoader from '../../../components/SkeletonLoader';
 
+import { BuildingStore } from '../../../store/BuildingStore';
 import { UserStore } from '../../../store/UserStore';
 
 import { ReactComponent as BuildingTypeSVG } from '../../../sharedComponents/assets/icons/building-type.svg';
@@ -35,6 +36,7 @@ const AlertSettings = (props) => {
     const { download } = useCSVDownload();
 
     const [search, setSearch] = useState('');
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
@@ -455,6 +457,13 @@ const AlertSettings = (props) => {
             setFilterOptions(updatedFilterOptions);
         }
     }, [configuredUsersList]);
+
+    useEffect(() => {
+        const isSelectedBuilding = bldgId && bldgId !== 'portfolio';
+        if (isSelectedBuilding) {
+            setSelectedBuildingsList(isSelectedBuilding ? [bldgId] : []);
+        }
+    }, [bldgId]);
 
     useEffect(() => {
         getAllConfiguredAlerts({
