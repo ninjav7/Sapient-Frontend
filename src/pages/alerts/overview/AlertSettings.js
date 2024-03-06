@@ -55,6 +55,29 @@ const AlertSettings = (props) => {
             value: 'equipment',
         },
     ];
+
+    const equipFilterObj = {
+        label: 'Equipments',
+        value: 'equipment',
+        placeholder: 'All Equipments',
+        filterType: FILTER_TYPES.MULTISELECT,
+        filterOptions: [],
+        onClose: (options) => {
+            if (options && options.length !== 0) {
+                let equipIds = [];
+                for (let i = 0; i < options.length; i++) {
+                    equipIds.push(options[i].value);
+                }
+                setPageNo(1);
+                setSelectedEquipmentsList(equipIds);
+            }
+        },
+        onDelete: () => {
+            setPageNo(1);
+            setSelectedEquipmentsList([]);
+        },
+    };
+
     const [buildingsList, setBuildingsList] = useState([]);
     const [equipmentsList, setEquipmentsList] = useState([]);
     const [configuredEmailsList, setConfiguredEmailsList] = useState([]);
@@ -157,27 +180,6 @@ const AlertSettings = (props) => {
             onDelete: () => {
                 setPageNo(1);
                 setSelectedUsersList([]);
-            },
-        },
-        {
-            label: 'Equipments',
-            value: 'equipment',
-            placeholder: 'All Equipments',
-            filterType: FILTER_TYPES.MULTISELECT,
-            filterOptions: [],
-            onClose: (options) => {
-                if (options && options.length !== 0) {
-                    let equipIds = [];
-                    for (let i = 0; i < options.length; i++) {
-                        equipIds.push(options[i].value);
-                    }
-                    setPageNo(1);
-                    setSelectedEquipmentsList(equipIds);
-                }
-            },
-            onDelete: () => {
-                setPageNo(1);
-                setSelectedEquipmentsList([]);
             },
         },
     ]);
@@ -524,7 +526,12 @@ const AlertSettings = (props) => {
         const isSelectedBuilding = bldgId && bldgId !== 'portfolio';
         if (isSelectedBuilding) {
             setSelectedBuildingsList(isSelectedBuilding ? [bldgId] : []);
+            setFilterOptions((prevFilterOptions) => [...prevFilterOptions, equipFilterObj]);
+
             getEquipmentsList(bldgId);
+        }
+        if (bldgId === 'portfolio') {
+            setFilterOptions(filterOptions.filter((el) => el?.value !== 'equipment'));
         }
     }, [bldgId]);
 
