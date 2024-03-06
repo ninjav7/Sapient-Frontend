@@ -21,6 +21,7 @@ import { getAlertSettingsCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { fetchBuildingList } from '../../settings/buildings/services';
 import { deleteConfiguredAlert, fetchAllConfiguredAlerts, fetchConfiguredEmailsList } from '../services';
+import { fetchMemberUserList } from '../../settings/users/service';
 
 import DeleteAlert from './DeleteAlert';
 
@@ -53,10 +54,12 @@ const AlertSettings = (props) => {
     ];
     const [buildingsList, setBuildingsList] = useState([]);
     const [configuredEmailsList, setConfiguredEmailsList] = useState([]);
+    const [configuredUsersList, setConfiguredUsersList] = useState([]);
 
     const [selectedTargetType, setSelectedTargetType] = useState([]);
     const [selectedBuildingsList, setSelectedBuildingsList] = useState([]);
     const [selectedEmailsList, setSelectedEmailsList] = useState([]);
+    const [selectedUsersList, setSelectedUsersList] = useState([]);
 
     // Delete Device Modal states
     const [isDeleteAlertModalOpen, setDeleteAlertModalStatus] = useState(false);
@@ -93,10 +96,7 @@ const AlertSettings = (props) => {
             value: 'building',
             placeholder: 'All Buildings',
             filterType: FILTER_TYPES.MULTISELECT,
-            filterOptions: buildingsList.map((el) => ({
-                value: el?.building_id,
-                label: el?.building_name,
-            })),
+            filterOptions: [],
             onClose: (options) => {
                 if (options && options.length !== 0) {
                     let bldgIds = [];
@@ -117,10 +117,7 @@ const AlertSettings = (props) => {
             value: 'send_to',
             placeholder: 'All Email IDs',
             filterType: FILTER_TYPES.MULTISELECT,
-            filterOptions: [].map((el) => ({
-                value: el?.id,
-                label: el?.name,
-            })),
+            filterOptions: [],
             onClose: (options) => {
                 if (options && options.length !== 0) {
                     let emailIds = [];
@@ -134,6 +131,27 @@ const AlertSettings = (props) => {
             onDelete: () => {
                 setPageNo(1);
                 setSelectedEmailsList([]);
+            },
+        },
+        {
+            label: 'Users',
+            value: 'users',
+            placeholder: 'All Users',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: [],
+            onClose: (options) => {
+                if (options && options.length !== 0) {
+                    let userIds = [];
+                    for (let i = 0; i < options.length; i++) {
+                        userIds.push(options[i].value);
+                    }
+                    setPageNo(1);
+                    setSelectedUsersList(userIds);
+                }
+            },
+            onDelete: () => {
+                setPageNo(1);
+                setSelectedUsersList([]);
             },
         },
     ]);
@@ -353,7 +371,7 @@ const AlertSettings = (props) => {
             .finally(() => {});
     };
 
-    const getConfiguredEmailsList = async (alertType) => {
+    const getConfiguredEmailsList = async () => {
         await fetchConfiguredEmailsList()
             .then((res) => {
                 const response = res?.data;
@@ -366,9 +384,22 @@ const AlertSettings = (props) => {
             .catch(() => {});
     };
 
+    const getConfiguredUsersList = async () => {
+        await fetchMemberUserList()
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success && response?.data?.data) {
+                    const data = response?.data?.data;
+                    setConfiguredUsersList(data);
+                }
+            })
+            .catch(() => {});
+    };
+
     useEffect(() => {
         getBuildingsList();
         getConfiguredEmailsList();
+        getConfiguredUsersList();
     }, []);
 
     useEffect(() => {
@@ -408,8 +439,32 @@ const AlertSettings = (props) => {
     }, [configuredEmailsList]);
 
     useEffect(() => {
-        getAllConfiguredAlerts({ search, selectedTargetType, selectedBuildingsList, selectedEmailsList });
-    }, [search, selectedTargetType, selectedBuildingsList, selectedEmailsList]);
+        if (configuredUsersList && configuredUsersList.length !== 0) {
+            const updatedFilterOptions = filterOptions.map((option) => {
+                if (option.value === 'users') {
+                    return {
+                        ...option,
+                        filterOptions: configuredUsersList.map((el) => ({
+                            value: el?._id,
+                            label: el?.name,
+                        })),
+                    };
+                }
+                return option;
+            });
+            setFilterOptions(updatedFilterOptions);
+        }
+    }, [configuredUsersList]);
+
+    useEffect(() => {
+        getAllConfiguredAlerts({
+            search,
+            selectedTargetType,
+            selectedBuildingsList,
+            selectedEmailsList,
+            selectedUsersList,
+        });
+    }, [search, selectedTargetType, selectedBuildingsList, selectedEmailsList, selectedUsersList]);
 
     return (
         <div className="custom-padding">
