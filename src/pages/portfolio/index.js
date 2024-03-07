@@ -296,6 +296,7 @@ const PortfolioOverview = () => {
                                 isChartLoading={isEnergyConsumptionChartLoading}
                                 pageType="portfolio"
                                 className="h-100"
+                                exportName={`Energy Consumption by End Use_Portfolio_${moment().format('YYYY-MM-DD')}`}
                             />
                         </Col>
                         <Col xl={6}>

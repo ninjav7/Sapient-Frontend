@@ -25,6 +25,7 @@ import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
 
 import './style.scss';
 import { onHoverHandler, onUnHoverHandler } from './helper';
+import { downloadImage } from '../../helpers/helpers';
 
 HighchartsMore(Highcharts);
 HighchartsSolidGauge(Highcharts);
@@ -67,10 +68,12 @@ const DonutChartWidget = ({
     isChartLoading = false,
     convertData = false,
     computedTotal = 0,
+    exportName = '',
     ...props
 }) => {
     const chartComponentRef = useRef(null);
     const centeredItemRef = useRef(null);
+    const chartsContainer = useRef(null);
 
     const [items, setItems] = useState(itemsProp);
 
@@ -92,13 +95,21 @@ const DonutChartWidget = ({
         renderCenteredItemContent(totalValue, items[0]?.unit);
     }, [totalValue]);
 
-    const handleDropDownOptionClicked = (name) => {
+    const handleDropDownOptionClicked = async (name) => {
         switch (name) {
             case DOWNLOAD_TYPES.downloadSVG:
-                chartComponentRef.current.chart.exportChart({ type: 'image/svg+xml' });
+                try {
+                    await downloadImage(chartsContainer.current, exportName, 'svg');
+                } catch (error) {
+                    console.log(error);
+                }
                 break;
             case DOWNLOAD_TYPES.downloadPNG:
-                chartComponentRef.current.chart.exportChart({ type: 'image/png' });
+                try {
+                    await downloadImage(chartsContainer.current, exportName, 'png');
+                } catch (error) {
+                    console.log(error);
+                }
                 break;
             case DOWNLOAD_TYPES.downloadCSV:
                 getDonutChartCSVExport(labels, series, pageType);
@@ -200,7 +211,9 @@ const DonutChartWidget = ({
                         <Spinner />
                     </div>
                 ) : (
-                    <div className={`donut-chart-widget-wrapper w-100 justify-content-center ${className} ${type}`}>
+                    <div
+                        ref={chartsContainer}
+                        className={`donut-chart-widget-wrapper w-100 justify-content-center ${className} ${type}`}>
                         <div className={`chart-wrapper ${type}`}>{renderChart()}</div>
 
                         <div className="chart-labels">
@@ -254,6 +267,7 @@ DonutChartWidget.propTypes = {
         }).isRequired
     ).isRequired,
     pageType: PropTypes.string,
+    exportName: PropTypes.string,
 };
 
 export default DonutChartWidget;
