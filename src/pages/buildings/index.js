@@ -907,6 +907,7 @@ const BuildingOverview = () => {
                             handleRouteChange={() => handleRouteChange('/energy/end-uses')}
                             showRouteBtn={true}
                             isChartLoading={isEndUseDataFetching}
+                            exportName={`Energy Consumption by End Use_${bldgName}_${moment().format('YYYY-MM-DD')}`}
                         />
                     )}
 
