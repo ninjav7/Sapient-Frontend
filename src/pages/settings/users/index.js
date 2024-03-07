@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import _ from 'lodash';
 import { Row, Col } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import { fetchMemberUserList, fetchUserFilters } from './service';
@@ -127,10 +128,13 @@ const Users = () => {
                             value: 'role',
                             placeholder: 'All Roles',
                             filterType: FILTER_TYPES.MULTISELECT,
-                            filterOptions: filterOptions.permission_roles.map((filterItem) => ({
-                                value: filterItem?.permission_id,
-                                label: filterItem?.permission_name,
-                            })),
+                            filterOptions: _.chain(filterOptions?.permission_roles)
+                                .sortBy('permission_name')
+                                .map((filterItem) => ({
+                                    value: filterItem?.permission_id,
+                                    label: filterItem?.permission_name,
+                                }))
+                                .value(),
                             onClose: (options) => {
                                 let opt = options;
                                 if (opt.length !== 0) {

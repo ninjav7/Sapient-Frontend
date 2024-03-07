@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import _ from 'lodash';
 import { Row, Col } from 'reactstrap';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
@@ -135,10 +136,13 @@ const EquipmentType = () => {
                             value: 'identifier',
                             placeholder: 'All End Uses',
                             filterType: FILTER_TYPES.MULTISELECT,
-                            filterOptions: filterOptions.end_use.map((filterItem) => ({
-                                value: filterItem?.end_use_id,
-                                label: filterItem?.end_use_name,
-                            })),
+                            filterOptions: _.chain(filterOptions?.end_use)
+                                .sortBy('end_use_name')
+                                .map((filterItem) => ({
+                                    value: filterItem?.end_use_id,
+                                    label: filterItem?.end_use_name,
+                                }))
+                                .value(),
                             onClose: (options) => {
                                 let opt = options;
                                 if (opt.length !== 0) {

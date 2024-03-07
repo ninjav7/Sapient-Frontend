@@ -498,10 +498,13 @@ const Equipment = () => {
                     value: 'equipmentType',
                     placeholder: 'All Equipment Types',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.equipment_type.map((filterItem) => ({
-                        value: filterItem.equipment_type_id,
-                        label: filterItem.equipment_type_name,
-                    })),
+                    filterOptions: _.chain(filterOptions?.equipment_type)
+                        .sortBy('equipment_type_name')
+                        .map((filterItem) => ({
+                            value: filterItem?.equipment_type_id,
+                            label: filterItem?.equipment_type_name,
+                        }))
+                        .value(),
                     onClose: (options) => filterHandler(setEquipmentTypeFilterString, options),
                     onDelete: () => {
                         setPageNo(1);
@@ -514,10 +517,13 @@ const Equipment = () => {
                     value: 'end_use',
                     placeholder: 'All End use',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.end_use.map((filterItem) => ({
-                        value: filterItem.end_use_id,
-                        label: filterItem.end_use_name,
-                    })),
+                    filterOptions: _.chain(filterOptions?.end_use)
+                        .sortBy('end_use_name')
+                        .map((filterItem) => ({
+                            value: filterItem?.end_use_id,
+                            label: filterItem?.end_use_name,
+                        }))
+                        .value(),
                     onClose: (options) => filterHandler(setEndUseFilterString, options),
                     onDelete: () => {
                         setPageNo(1);
@@ -528,12 +534,15 @@ const Equipment = () => {
                 {
                     label: 'Device ID',
                     value: 'mac_address',
-                    placeholder: 'Select device ID',
+                    placeholder: 'Select Device ID',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.mac_address.map((filterItem) => ({
-                        value: filterItem.device_id,
-                        label: filterItem.device_mac_address,
-                    })),
+                    filterOptions: _.chain(filterOptions?.mac_address)
+                        .sortBy('device_mac_address')
+                        .map((filterItem) => ({
+                            value: filterItem?.device_id,
+                            label: filterItem?.device_mac_address,
+                        }))
+                        .value(),
                     onClose: (options) => {
                         filterHandler(setDeviceIdFilterString, options);
                         filterLabelHandler(setDeviceMacAddress, options);
@@ -550,10 +559,13 @@ const Equipment = () => {
                     value: 'tag',
                     placeholder: 'All tags',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.tags.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
+                    filterOptions: _.chain(filterOptions?.tags)
+                        .map((filterItem) => ({
+                            value: filterItem,
+                            label: filterItem,
+                        }))
+                        .sortBy('label')
+                        .value(),
                     onClose: (options) => filterHandler(setTagsTypeFilterString, options),
                     onDelete: () => {
                         setPageNo(1);
@@ -565,10 +577,13 @@ const Equipment = () => {
                     value: 'floor',
                     placeholder: 'All Floors',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: sortedFloors.map((filterItem) => ({
-                        value: filterItem.floor_id,
-                        label: filterItem.floor_name,
-                    })),
+                    filterOptions: _.chain(sortedFloors)
+                        .sortBy('floor_name')
+                        .map((filterItem) => ({
+                            value: filterItem?.floor_id,
+                            label: filterItem?.floor_name,
+                        }))
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
@@ -589,10 +604,13 @@ const Equipment = () => {
                     value: 'space',
                     placeholder: 'All Spaces',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: sortedSpaces.map((filterItem) => ({
-                        value: filterItem.space_id,
-                        label: filterItem.space_name,
-                    })),
+                    filterOptions: _.chain(sortedSpaces)
+                        .sortBy('space_name')
+                        .map((filterItem) => ({
+                            value: filterItem?.space_id,
+                            label: filterItem?.space_name,
+                        }))
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
@@ -613,10 +631,13 @@ const Equipment = () => {
                     value: 'panel_name',
                     placeholder: 'All Panels',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.panel_name.map((panel) => ({
-                        value: panel.panel_id,
-                        label: panel.panel_name,
-                    })),
+                    filterOptions: _.chain(filterOptions?.panel_name)
+                        .sortBy('panel_name')
+                        .map((filterItem) => ({
+                            value: filterItem?.panel_id,
+                            label: filterItem?.panel_name,
+                        }))
+                        .value(),
                     onClose: (options) => filterHandler(setPanelNameFilterString, options),
                     onDelete: () => {
                         setPageNo(1);
@@ -629,10 +650,13 @@ const Equipment = () => {
                     value: 'ct_model_installed_name',
                     placeholder: 'All CT Amp Ratings',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.ct_model_installed_name.map((ct_model_installed_name) => ({
-                        value: ct_model_installed_name.ct_model_installed_id,
-                        label: ct_model_installed_name.ct_model_installed_name,
-                    })),
+                    filterOptions: _.chain(filterOptions?.ct_model_installed_name)
+                        .sortBy('ct_model_installed_name')
+                        .map((el) => ({
+                            value: el?.ct_model_installed_id,
+                            label: el?.ct_model_installed_name,
+                        }))
+                        .value(),
                     onClose: (options) => filterHandler(setCdModelInstalledNameString, options),
                     onDelete: () => {
                         setPageNo(1);
@@ -645,10 +669,13 @@ const Equipment = () => {
                     value: 'breaker_number',
                     placeholder: 'All Breaker #s',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.breaker_number.map((breaker_number) => ({
-                        value: breaker_number,
-                        label: breaker_number,
-                    })),
+                    filterOptions: _.chain(filterOptions?.breaker_number)
+                        .map((filterItem) => ({
+                            value: filterItem,
+                            label: filterItem,
+                        }))
+                        .sortBy('label')
+                        .value(),
                     onClose: (options) => filterHandler(setBreakerNumberString, options),
                     onDelete: () => {
                         setPageNo(1);
@@ -661,10 +688,13 @@ const Equipment = () => {
                     value: 'breaker_rated_amps',
                     placeholder: 'All Rated Amps',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.breaker_rated_amps.map((breaker_rated_amps) => ({
-                        value: breaker_rated_amps,
-                        label: breaker_rated_amps,
-                    })),
+                    filterOptions: _.chain(filterOptions?.breaker_rated_amps)
+                        .map((filterItem) => ({
+                            value: filterItem,
+                            label: filterItem,
+                        }))
+                        .sortBy('label')
+                        .value(),
                     onClose: (options) => filterHandler(setBreakerRatedAmpsString, options),
                     onDelete: () => {
                         setPageNo(1);

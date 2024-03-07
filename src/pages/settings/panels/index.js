@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import _ from 'lodash';
 import { Row, Col } from 'reactstrap';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
@@ -309,10 +310,13 @@ const Panels = () => {
                     value: 'location',
                     placeholder: 'All Locations',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.location.map((filterItem) => ({
-                        value: filterItem?.location_id,
-                        label: filterItem?.location_name,
-                    })),
+                    filterOptions: _.chain(filterOptions?.location)
+                        .sortBy('location_name')
+                        .map((filterItem) => ({
+                            value: filterItem?.location_id,
+                            label: filterItem?.location_name,
+                        }))
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
@@ -333,10 +337,13 @@ const Panels = () => {
                     value: 'parent',
                     placeholder: 'All Parent Panels',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.parent_panel.map((filterItem) => ({
-                        value: filterItem?.parent_panel_id,
-                        label: filterItem?.parent_panel_name,
-                    })),
+                    filterOptions: _.chain(filterOptions?.parent_panel)
+                        .sortBy('parent_panel_name')
+                        .map((filterItem) => ({
+                            value: filterItem?.parent_panel_id,
+                            label: filterItem?.parent_panel_name,
+                        }))
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
@@ -357,10 +364,13 @@ const Panels = () => {
                     value: 'breakers_linked',
                     placeholder: 'All Breakers',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.breakers_linked.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
+                    filterOptions: _.chain(filterOptions?.breakers_linked)
+                        .map((filterItem) => ({
+                            value: filterItem,
+                            label: filterItem,
+                        }))
+                        .sortBy('label')
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
@@ -381,10 +391,13 @@ const Panels = () => {
                     value: 'voltage',
                     placeholder: 'All Voltages',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.voltage.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
+                    filterOptions: _.chain(filterOptions?.voltage)
+                        .map((filterItem) => ({
+                            value: filterItem,
+                            label: filterItem,
+                        }))
+                        .sortBy('label')
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {

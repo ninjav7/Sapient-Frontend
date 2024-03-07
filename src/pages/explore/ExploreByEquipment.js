@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import _ from 'lodash';
 import { useAtom } from 'jotai';
 import { useParams } from 'react-router-dom';
 import { Row, Col, UncontrolledTooltip, Progress, Spinner } from 'reactstrap';
@@ -921,10 +922,13 @@ const ExploreByEquipment = () => {
                     value: 'equipments_type',
                     placeholder: 'All Equipment Types',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterObj?.equipments_type.map((filterItem) => ({
-                        value: filterItem?.equipment_type_id,
-                        label: filterItem?.equipment_type_name,
-                    })),
+                    filterOptions: _.chain(filterObj?.equipments_type)
+                        .sortBy('equipment_type_name')
+                        .map((filterItem) => ({
+                            value: filterItem.equipment_type_id,
+                            label: filterItem.equipment_type_name,
+                        }))
+                        .value(),
                     onChange: function onChange(options) {},
                     onClose: (options) => {
                         let opt = options;
@@ -947,10 +951,13 @@ const ExploreByEquipment = () => {
                     value: 'end_users',
                     placeholder: 'All End Uses',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterObj?.end_users.map((filterItem) => ({
-                        value: filterItem?.end_use_id,
-                        label: filterItem?.end_use_name,
-                    })),
+                    filterOptions: _.chain(filterObj?.end_users)
+                        .sortBy('end_use_name')
+                        .map((filterItem) => ({
+                            value: filterItem?.end_use_id,
+                            label: filterItem?.end_use_name,
+                        }))
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
@@ -972,10 +979,13 @@ const ExploreByEquipment = () => {
                     value: 'location_types',
                     placeholder: 'All Space Types',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterObj?.location_types.map((filterItem) => ({
-                        value: filterItem?.location_type_id,
-                        label: filterItem?.location_types_name,
-                    })),
+                    filterOptions: _.chain(filterObj?.location_types)
+                        .sortBy('location_types_name')
+                        .map((filterItem) => ({
+                            value: filterItem?.location_type_id,
+                            label: filterItem?.location_types_name,
+                        }))
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
@@ -997,10 +1007,13 @@ const ExploreByEquipment = () => {
                     value: 'tags',
                     placeholder: 'All tags',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterObj?.tags.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
+                    filterOptions: _.chain(filterObj?.tags)
+                        .map((filterItem) => ({
+                            value: filterItem,
+                            label: filterItem,
+                        }))
+                        .sortBy('label')
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
@@ -1021,10 +1034,13 @@ const ExploreByEquipment = () => {
                     value: 'panel',
                     placeholder: 'All Panels',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterObj?.panel.map((filterItem) => ({
-                        value: filterItem?.panel_id,
-                        label: filterItem?.panel_name,
-                    })),
+                    filterOptions: _.chain(filterObj?.panel)
+                        .sortBy('panel_name')
+                        .map((filterItem) => ({
+                            value: filterItem?.panel_id,
+                            label: filterItem?.panel_name,
+                        }))
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
@@ -1045,10 +1061,13 @@ const ExploreByEquipment = () => {
                     value: 'breaker_number',
                     placeholder: 'All Breakers',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterObj?.breaker_number.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
+                    filterOptions: _.chain(filterObj?.breaker_number)
+                        .map((filterItem) => ({
+                            value: filterItem,
+                            label: filterItem,
+                        }))
+                        .sortBy('label')
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
