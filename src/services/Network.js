@@ -1,4 +1,4 @@
-export const BaseUrl = 'https://sapient-energy-service-stage.azurewebsites.net/';
+export const BaseUrl = 'https://api-dev.app.sapient.industries';
 export const SingularityBaseUrl = 'https://api.singularity.energy/v2/';
 
 // Auth

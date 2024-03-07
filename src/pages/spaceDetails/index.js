@@ -73,8 +73,9 @@ const SpaceDetails = () => {
     const [metadataToUpdate, setMetadataToUpdate] = useState({});
     const [metadataUpdating, setMetadataUpdating] = useState(false);
 
-    const [selectedTab, setSelectedTab] = useState(1);
-    const [selectedConsumption, setConsumption] = useState(metric[0]?.value);
+    const [selectedTab, setSelectedTab] = useState(0);
+
+    const [selectedConsumption, setSelectedConsumption] = useState(metric[0]?.value);
     const [spaceTypes, setSpaceTypes] = useState([]);
 
     const [errorObj, setErrorObj] = useState({});
@@ -146,7 +147,6 @@ const SpaceDetails = () => {
 
                 const spaceObjFound = spaces.find((space) => space._id === metadata.space_id);
 
-                console.log(spaceObjFound);
                 setSpaceObj(spaceObjFound);
             } else {
                 notifyUser(Notification.Types.error, 'Failed to fetch Spaces.');
@@ -188,6 +188,10 @@ const SpaceDetails = () => {
         try {
             const query = { spaceId, bldgId, dateFrom: startDate, dateTo: endDate, timeZone };
 
+            const isEquipment = selectedConsumption === metric[1].value;
+
+            if (isEquipment) query.equipment = true;
+
             const resSpace = await fetchEnergyConsumptionBySpace(query);
 
             if (!Array.isArray(resSpace)) return;
@@ -206,7 +210,29 @@ const SpaceDetails = () => {
                 data: mappedSpaceData,
             };
 
-            setChartData([spaceRecord]);
+            if (!isEquipment) {
+                setChartData([spaceRecord]);
+            } else {
+                const mappedEquipmentData = spaceObj.equipment_data.map((equipmentData) => {
+                    const mappedConsumptionData = equipmentData.consumption.map((equipmentConsumptionData) => ({
+                        x: new Date(equipmentConsumptionData?.time_stamp).getTime(),
+                        y: handleDataConversion(equipmentConsumptionData?.consumption, selectedConsumption),
+                    }));
+
+                    const equipmentRecord = {
+                        name: equipmentData.equipment_name,
+                        data: mappedConsumptionData,
+                    };
+
+                    return equipmentRecord;
+                });
+
+                spaceRecord.name = 'Total';
+
+                mappedEquipmentData.unshift(spaceRecord);
+
+                setChartData(mappedEquipmentData);
+            }
         } catch (e) {
             setChartData([]);
         }
@@ -314,7 +340,7 @@ const SpaceDetails = () => {
     const selectedMetricsTab = () => setSelectedTab(0);
     const selectedConfiguresTab = () => setSelectedTab(1);
     const dynamicActiveClassTab = (selectedIdTab) => (selectedTab === selectedIdTab ? 'active-tab-style' : '');
-    const handleSelect = (e) => setConsumption(e.value);
+    const handleSelect = (e) => setSelectedConsumption(e.value);
     const spaceName = metadata?.space_name && metadata.space_name;
 
     const handleChange = (key, value) => {
@@ -367,8 +393,6 @@ const SpaceDetails = () => {
     };
 
     const getCurrentParent = () => {
-        console.log(spaceObj);
-
         if (spaceObj?.parent_space) {
             const parent = spacesList.find((space) => space._id === spaceObj.parent_space);
             setCurrentParent(parent?.name);
@@ -453,7 +477,7 @@ const SpaceDetails = () => {
                             <Col xl={9}>
                                 <div className="select-by">
                                     <div className="d-flex">
-                                        <div className="mr-2 mw-100">
+                                        <div className="mr-2 select-by-type">
                                             <Select
                                                 defaultValue={selectedConsumption}
                                                 options={metric}
