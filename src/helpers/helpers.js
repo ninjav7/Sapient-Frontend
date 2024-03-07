@@ -1,5 +1,7 @@
 import moment from 'moment';
 import dayjs from 'dayjs';
+import { toPng, toSvg } from 'html-to-image';
+import colorPalette from '../assets/scss/_colors.scss';
 
 export const formatConsumptionValue = (value, fixed) =>
     value.toLocaleString(undefined, { maximumFractionDigits: fixed });
@@ -472,4 +474,20 @@ export const getPastDateRange = (startDate, daysCount) => {
         startDate: startDatePast.toISOString(),
         endDate: endDatePast.toISOString(),
     };
+};
+
+export const downloadImage = async (node, exportName, exportExt) => {
+    const downloadAs = exportExt === 'svg' ? toSvg : toPng;
+
+    const image = await downloadAs(node, { backgroundColor: colorPalette.baseWhite });
+
+    const link = document.createElement('a');
+
+    link.download = exportName ? `${exportName}.${exportExt}` : `chart.${exportExt}`;
+
+    link.href = image;
+
+    link.click();
+
+    link.remove();
 };

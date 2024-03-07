@@ -20,6 +20,7 @@
         "draftjs-to-html": "^0.8.4",
         "highcharts": "^10.2.1",
         "highcharts-react-official": "^3.1.0",
+        "html-to-image": "^1.11.11",
         "jotai": "^1.7.5",
         "jwt-decode": "^2.2.0",
         "linq": "^4.0.0",
