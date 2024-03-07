@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import _ from 'lodash';
 import { Row, Col } from 'reactstrap';
 import { useAtom } from 'jotai';
 import { useHistory, Link, useParams } from 'react-router-dom';
@@ -164,10 +165,13 @@ const PassiveDevices = () => {
                     value: 'identifier',
                     placeholder: 'All Device IDs',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.deviceIdentifier.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
+                    filterOptions: _.chain(filterOptions?.deviceIdentifier)
+                        .map((filterItem) => ({
+                            value: filterItem,
+                            label: filterItem,
+                        }))
+                        .sortBy('label')
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
@@ -188,10 +192,13 @@ const PassiveDevices = () => {
                     value: 'model',
                     placeholder: 'All Models',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.model.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
+                    filterOptions: _.chain(filterOptions?.model)
+                        .map((filterItem) => ({
+                            value: filterItem,
+                            label: filterItem,
+                        }))
+                        .sortBy('label')
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
@@ -212,10 +219,13 @@ const PassiveDevices = () => {
                     value: 'sensor_number',
                     placeholder: 'ALL Sensors',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.sensor_number.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
+                    filterOptions: _.chain(filterOptions?.sensor_number)
+                        .map((filterItem) => ({
+                            value: filterItem,
+                            label: filterItem,
+                        }))
+                        .sortBy('label')
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
@@ -236,10 +246,13 @@ const PassiveDevices = () => {
                     value: 'floor',
                     placeholder: 'All Floors',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: sortedFloors.map((filterItem) => ({
-                        value: filterItem.floor_id,
-                        label: filterItem.floor_name,
-                    })),
+                    filterOptions: _.chain(sortedFloors)
+                        .sortBy('floor_name')
+                        .map((filterItem) => ({
+                            value: filterItem?.floor_id,
+                            label: filterItem?.floor_name,
+                        }))
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
@@ -260,10 +273,13 @@ const PassiveDevices = () => {
                     value: 'space',
                     placeholder: 'All Spaces',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: sortedSpaces.map((filterItem) => ({
-                        value: filterItem.space_id,
-                        label: filterItem.space_name,
-                    })),
+                    filterOptions: _.chain(sortedSpaces)
+                        .sortBy('space_name')
+                        .map((filterItem) => ({
+                            value: filterItem?.space_id,
+                            label: filterItem?.space_name,
+                        }))
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import _ from 'lodash';
 import { Row, Col } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import { useAtom } from 'jotai';
@@ -355,6 +356,13 @@ const Buildings = () => {
                         value: filterItem.building_type_id,
                         label: filterItem.building_type,
                     })),
+                    filterOptions: _.chain(buildingTypeList)
+                        .sortBy('building_type')
+                        .map((filterItem) => ({
+                            value: filterItem?.building_type_id,
+                            label: filterItem?.building_type,
+                        }))
+                        .value(),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {
