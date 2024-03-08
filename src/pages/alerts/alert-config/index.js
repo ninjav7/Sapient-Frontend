@@ -510,8 +510,8 @@ const AlertConfig = () => {
             alert_condition_description: condition?.alert_condition_description ?? '',
             condition_metric: condition?.condition_metric,
             condition_metric_aggregate: condition?.condition_metric_aggregate,
-            condition_timespan: condition?.condition_timespan,
-            condition_timespan_type: condition?.condition_timespan_type,
+            condition_timespan: condition?.condition_timespan_type, // backend accept timespan as timespan_type
+            condition_timespan_type: condition?.condition_timespan, // backend accept timespan_type as timespan
             condition_operator: condition?.condition_operator,
             condition_threshold_type: condition?.condition_threshold_type,
         };
@@ -613,8 +613,8 @@ const AlertConfig = () => {
             alert_condition_description: condition?.alert_condition_description ?? '',
             condition_metric: condition?.condition_metric,
             condition_metric_aggregate: condition?.condition_metric_aggregate,
-            condition_timespan: condition?.condition_timespan,
-            condition_timespan_type: condition?.condition_timespan_type,
+            condition_timespan: condition?.condition_timespan_type, // backend accept timespan as timespan_type
+            condition_timespan_type: condition?.condition_timespan, // backend accept timespan_type as timespan
             condition_operator: condition?.condition_operator,
             condition_threshold_type: condition?.condition_threshold_type,
         };
@@ -732,7 +732,14 @@ const AlertConfig = () => {
                     // condition-metrics integration
                     alert_obj.condition.condition_metric = data?.condition_metric;
                     alert_obj.condition.condition_metric_aggregate = data?.condition_metric_aggregate;
-                    alert_obj.condition.condition_timespan = data?.condition_timespan;
+
+                    alert_obj.condition.condition_timespan = data?.condition_timespan_type; // backend accept timespan as timespan_type
+                    alert_obj.condition.condition_timespan_type = data?.condition_timespan; // backend accept timespan_type as timespan
+
+                    if (data?.condition_timespan_type === 'past') {
+                        alert_obj.condition.condition_timespan_value = data?.condition_timespan_value;
+                    }
+
                     alert_obj.condition.condition_operator = data?.condition_operator;
                     alert_obj.condition.condition_threshold_type = data?.condition_threshold_type;
 

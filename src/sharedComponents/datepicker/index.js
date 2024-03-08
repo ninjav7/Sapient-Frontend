@@ -92,12 +92,13 @@ const Datepicker = ({
 
     const refApi = useRef(null);
 
-    const handleStartTimeChange = (time) => {
-        setStartTime(time);
-    };
+    const handleTimeRangeChange = (timeRange) => {
+        const [newStartTime, newEndTime] = timeRange;
 
-    const handleEndTimeChange = (time) => {
-        setEndTime(time);
+        if (newStartTime && newEndTime) {
+            setStartTime(newStartTime);
+            setEndTime(newEndTime);
+        }
     };
 
     const onDateChangeSingle = (startDate) => {
@@ -249,41 +250,18 @@ const Datepicker = ({
                             }`}>
                             {withTimeSelect && (
                                 <div className="d-flex flex-column" style={{ gap: '0.5rem' }}>
-                                    <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                        <div>
-                                            <Typography.Body size={Typography.Sizes.sm} className="gray-550">
-                                                {`Start Time`}
-                                            </Typography.Body>
-
-                                            <TimePicker
-                                                showNow={false}
-                                                minuteStep={15}
-                                                placeholder="Start time"
-                                                value={startTime}
-                                                onChange={handleStartTimeChange}
-                                                disabled={!isTimePickerEnabled}
-                                                use12Hours={userPrefTimeFormat === '12h' ? true : false}
-                                                format={userPrefTimeFormat === '12h' ? 'hh:mm A' : 'HH:mm'}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <Typography.Body size={Typography.Sizes.sm} className="gray-550">
-                                                {`End Time`}
-                                            </Typography.Body>
-
-                                            <TimePicker
-                                                showNow={false}
-                                                minuteStep={15}
-                                                placeholder="End time"
-                                                value={endTime}
-                                                onChange={handleEndTimeChange}
-                                                use12Hours={userPrefTimeFormat === '12h' ? true : false}
-                                                format={userPrefTimeFormat === '12h' ? 'hh:mm A' : 'HH:mm'}
-                                                disabled={!isTimePickerEnabled}
-                                            />
-                                        </div>
-                                    </div>
+                                    <TimePicker.RangePicker
+                                        showNow={false}
+                                        size="medium"
+                                        minuteStep={15}
+                                        allowClear={false}
+                                        placeholder={['Start Time', 'End Time']}
+                                        value={[startTime, endTime]}
+                                        onChange={handleTimeRangeChange}
+                                        use12Hours={userPrefTimeFormat === '12h' ? true : false}
+                                        format={userPrefTimeFormat === '12h' ? 'hh:mm A' : 'HH:mm'}
+                                        disabled={!isTimePickerEnabled}
+                                    />
                                     <Checkbox
                                         label="Custom Time Select"
                                         type="checkbox"

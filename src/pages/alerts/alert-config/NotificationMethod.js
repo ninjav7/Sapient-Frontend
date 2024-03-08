@@ -16,7 +16,7 @@ import { ReactComponent as UserProfileSVG } from '../../../assets/icon/user-prof
 import { ReactComponent as EmailAddressSVG } from '../../../sharedComponents/assets/icons/email-address-icon.svg';
 
 import { filterOutSelectAllOption } from '../../../sharedComponents/form/select/helpers';
-import { fetchCommaSeperatedEmailAddresses, getCommaSeparatedObjectLabels } from '../helpers';
+import { fetchCommaSeperatedEmailAddresses } from '../helpers';
 import { fetchMemberUserList } from '../../settings/users/service';
 
 import colorPalette from '../../../assets/scss/_colors.scss';
@@ -61,15 +61,16 @@ const NotificationMethod = (props) => {
     };
 
     const renderUsers = (alert_obj) => {
-        const notify = alert_obj?.notification;
+        const notifyObj = alert_obj?.notification;
+        const usersCount = notifyObj?.selectedUserIds?.length ?? 0;
 
-        if (notify?.selectedUserIds.length === 0) return `No user selected.`;
+        let label = '';
 
-        if (notify?.selectedUserIds.length > 3) {
-            return `${notify?.selectedUserIds.length} users selected.`;
-        } else {
-            return getCommaSeparatedObjectLabels(notify?.selectedUserIds);
-        }
+        if (usersCount === 0) label = `No user selected.`;
+        else if (usersCount === 1) label = notifyObj?.selectedUserIds[0]?.label;
+        else if (usersCount > 1) label = `${usersCount} user selected.`;
+
+        return label;
     };
 
     const renderEmailAddress = (alert_obj) => {
