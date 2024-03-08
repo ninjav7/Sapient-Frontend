@@ -6,10 +6,6 @@ export function splitEmailsByComma(inputString) {
     return inputString.split(',').map((str) => str.trim());
 }
 
-export const getCommaSeparatedObjectLabels = (objectArray) => {
-    return objectArray.map((object) => object?.label).join(', ');
-};
-
 export const fetchCommaSeperatedEmailAddresses = (selectedUserEmailIds) => {
     const emailsList = selectedUserEmailIds.split(',');
     const trimmedEmailsList = emailsList.map((email) => email.trim());
