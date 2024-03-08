@@ -1130,7 +1130,7 @@ const EquipChartModal = ({
                                                     </Typography.Body>
                                                     <CustomToolTip
                                                         id="location-serverd"
-                                                        message="Location that this equipment serves."
+                                                        message="The location this equipment serves. This equipment's energy usage will be associated with the selected space."
                                                     />
                                                 </div>
                                                 <Brick sizeInRem={0.25} />
