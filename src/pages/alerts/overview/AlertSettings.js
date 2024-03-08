@@ -57,7 +57,7 @@ const AlertSettings = (props) => {
     ];
 
     const equipFilterObj = {
-        label: 'Equipments',
+        label: 'Equipment',
         value: 'equipment',
         placeholder: 'All Equipments',
         filterType: FILTER_TYPES.MULTISELECT,
@@ -120,7 +120,7 @@ const AlertSettings = (props) => {
             },
         },
         {
-            label: 'Buildings',
+            label: 'Building',
             value: 'building',
             placeholder: 'All Buildings',
             filterType: FILTER_TYPES.MULTISELECT,
@@ -456,10 +456,13 @@ const AlertSettings = (props) => {
                 if (option.value === 'building') {
                     return {
                         ...option,
-                        filterOptions: buildingsList.map((el) => ({
-                            value: el?.building_id,
-                            label: el?.building_name,
-                        })),
+                        filterOptions: _.chain(buildingsList)
+                            .sortBy('building_name')
+                            .map((el) => ({
+                                value: el?.building_id,
+                                label: el?.building_name,
+                            }))
+                            .value(),
                     };
                 }
                 return option;
@@ -474,10 +477,13 @@ const AlertSettings = (props) => {
                 if (option.value === 'equipment') {
                     return {
                         ...option,
-                        filterOptions: equipmentsList.map((el) => ({
-                            value: el?.equipments_id,
-                            label: el?.equipments_name,
-                        })),
+                        filterOptions: _.chain(equipmentsList)
+                            .sortBy('equipments_name')
+                            .map((el) => ({
+                                value: el?.equipments_id,
+                                label: el?.equipments_name,
+                            }))
+                            .value(),
                     };
                 }
                 return option;
@@ -492,10 +498,13 @@ const AlertSettings = (props) => {
                 if (option.value === 'send_to') {
                     return {
                         ...option,
-                        filterOptions: configuredEmailsList.map((emailId) => ({
-                            value: emailId,
-                            label: emailId,
-                        })),
+                        filterOptions: _.chain(configuredEmailsList)
+                            .map((emailId) => ({
+                                value: emailId,
+                                label: emailId,
+                            }))
+                            .sortBy('label')
+                            .value(),
                     };
                 }
                 return option;
@@ -510,10 +519,13 @@ const AlertSettings = (props) => {
                 if (option.value === 'users') {
                     return {
                         ...option,
-                        filterOptions: configuredUsersList.map((el) => ({
-                            value: el?._id,
-                            label: el?.name,
-                        })),
+                        filterOptions: _.chain(configuredUsersList)
+                            .sortBy('name')
+                            .map((el) => ({
+                                value: el?._id,
+                                label: el?.name,
+                            }))
+                            .value(),
                     };
                 }
                 return option;
@@ -526,7 +538,14 @@ const AlertSettings = (props) => {
         const isSelectedBuilding = bldgId && bldgId !== 'portfolio';
         if (isSelectedBuilding) {
             setSelectedBuildingsList(isSelectedBuilding ? [bldgId] : []);
-            setFilterOptions((prevFilterOptions) => [...prevFilterOptions, equipFilterObj]);
+
+            setFilterOptions((prevFilterOptions) => {
+                const hasEquipment = prevFilterOptions.some((option) => option.value === 'equipment');
+                if (!hasEquipment) {
+                    return [...prevFilterOptions, equipFilterObj];
+                }
+                return prevFilterOptions;
+            });
 
             getEquipmentsList(bldgId);
         }
