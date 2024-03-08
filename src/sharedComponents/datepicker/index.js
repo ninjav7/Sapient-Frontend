@@ -252,7 +252,9 @@ const Datepicker = ({
                                 <div className="d-flex flex-column" style={{ gap: '0.5rem' }}>
                                     <TimePicker.RangePicker
                                         showNow={false}
+                                        size="medium"
                                         minuteStep={15}
+                                        allowClear={false}
                                         placeholder={['Start Time', 'End Time']}
                                         value={[startTime, endTime]}
                                         onChange={handleTimeRangeChange}
