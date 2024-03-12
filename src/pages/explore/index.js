@@ -4,6 +4,7 @@ import { DownOutlined } from '@ant-design/icons';
 import { Dropdown, Menu } from 'antd';
 
 import Header from '../../components/Header';
+import Brick from '../../sharedComponents/brick';
 import { Button } from '../../sharedComponents/button';
 import Select from '../../sharedComponents/form/select';
 import Toggles from '../../sharedComponents/toggles/Toggles';
@@ -15,10 +16,9 @@ import { UserStore } from '../../store/UserStore';
 import { ExploreStore } from '../../store/ExploreStore';
 
 import { exploreBldgMetrics } from './utils';
-import { exploreFiltersList } from './constants';
+import { EXPLORE_FILTER_TYPE, exploreFiltersList } from './constants';
 
 import './styles.scss';
-import Brick from '../../sharedComponents/brick';
 
 const ExploreFilters = (props) => {
     const { selectedFilter, handleMenuItemClick } = props;
@@ -44,7 +44,7 @@ const ExploreFilters = (props) => {
 
 const ExplorePage = () => {
     const history = useHistory();
-    const { filterType = 'no-grouping' } = useParams();
+    const { filterType = EXPLORE_FILTER_TYPE.NO_GROUPING } = useParams();
 
     const selectedFilter = ExploreStore.useState((s) => s.selectedFilter);
 
@@ -125,7 +125,7 @@ const ExplorePage = () => {
             <Brick sizeInRem={0.25} />
 
             {/* Explore Page Body based on filter selected  */}
-            {selectedFilter === 'by-building' && (
+            {selectedFilter === EXPLORE_FILTER_TYPE.BY_BUILDING && (
                 <ExploreByBuildings
                     selectedUnit={selectedUnit}
                     selectedConsumption={selectedConsumption}
