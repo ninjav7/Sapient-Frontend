@@ -675,7 +675,14 @@ const BreakerConfiguration = ({
 
         // Purpose for parentBreakerObj?.type !== 'equipment => When No change done with Equipment
         // Equip TO No-Equip attached
-        if (currentEquipObj?.id && !newEquipObj?.id && parentBreakerObj?.type !== 'equipment') equipLink = [];
+        if (
+            currentEquipObj?.id &&
+            !newEquipObj?.id &&
+            parentBreakerObj?.type !== 'equipment' &&
+            parentBreakerObj?.type !== 'unlabeled'
+        ) {
+            equipLink = [];
+        }
 
         // No-Equip TO Equip attached
         if (!currentEquipObj?.id && newEquipObj?.id) equipLink = [newEquipObj?.id];
