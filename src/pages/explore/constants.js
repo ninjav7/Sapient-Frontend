@@ -15,7 +15,7 @@ export const exploreFiltersList = [
     },
     {
         label: `By End Use`,
-        value: EXPLORE_FILTER_TYPE.NO_GROUPING,
+        value: EXPLORE_FILTER_TYPE.BY_ENDUSE,
     },
     {
         label: `By Building`,

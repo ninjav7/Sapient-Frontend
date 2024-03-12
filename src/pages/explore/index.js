@@ -10,7 +10,7 @@ import Select from '../../sharedComponents/form/select';
 import Toggles from '../../sharedComponents/toggles/Toggles';
 import Typography from '../../sharedComponents/typography';
 
-import ExploreByBuildings from './ExploreByBuildings';
+import ExploreByBuildings from './by-building';
 
 import { UserStore } from '../../store/UserStore';
 import { ExploreStore } from '../../store/ExploreStore';

@@ -64,10 +64,6 @@ const AlertConfig = React.lazy(() => import('../pages/alerts/alert-config'));
 const PlugRule = React.lazy(() => import('../pages/controls/PlugRule'));
 const PlugRules = React.lazy(() => import('../pages/controls/PlugRules'));
 
-// Explore Module V!
-const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
-const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
-
 // Explore Module V2
 const ExploreByEquipmentV2 = React.lazy(() => import('../pages/v2/explore/ExploreByEquipmentV2'));
 const ExploreByBuildingsV2 = React.lazy(() => import('../pages/v2/explore/ExploreByBuildingsV2'));
@@ -419,33 +415,6 @@ const settingsRoutes = {
             route: PrivateRoute,
             visibility: true,
             parent: 'account',
-        },
-    ],
-    icon: FeatherIcon.PieChart,
-    roles: ['Admin'],
-};
-
-// Explore Routes V1
-const exploreRoutes = {
-    path: '/explore-page/by-buildings',
-    name: 'Explore',
-    visibility: true,
-    children: [
-        {
-            path: '/explore-page/by-buildings',
-            name: 'Explore by Building',
-            component: ExploreByBuildings,
-            route: PrivateRoute,
-            parent: 'explore',
-            visibility: true,
-        },
-        {
-            path: '/explore-page/by-equipment/:bldgId',
-            name: 'Explore by Equipment',
-            component: ExploreByEquipment,
-            route: PrivateRoute,
-            parent: 'explore',
-            visibility: true,
         },
     ],
     icon: FeatherIcon.PieChart,
