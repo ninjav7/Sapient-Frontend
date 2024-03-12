@@ -38,7 +38,7 @@ const NavLinks = () => {
     const ENERGY_TAB = '/energy/portfolio/overview';
     const CARBON_TAB = '/carbon/portfolio/overview';
     const CONTROL_TAB = '/control/plug-rules';
-    const EXPLORE_TAB = '/explore-page/by-buildings';
+    const EXPLORE_TAB = '/explore/overview';
     const SUPER_USER_ROUTE = '/super-user/accounts';
     const SPACES_TAB = '/spaces';
 
@@ -177,52 +177,10 @@ const NavLinks = () => {
     };
 
     const handleExploreClick = () => {
-        const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
-        if (!bldgObj?.active) {
-            history.push({
-                pathname: `/explore-page/by-buildings`,
-            });
-            updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
-            return;
-        }
-
-        if (
-            location.pathname.includes('/energy/building/overview') ||
-            location.pathname.includes('/energy/spaces') ||
-            location.pathname.includes('/energy/end-uses') ||
-            location.pathname.includes('/energy/time-of-day') ||
-            location.pathname.includes('/control/plug-rules') ||
-            location.pathname.includes('/carbon/building/overview')
-        ) {
-            history.push({
-                pathname: `/explore-page/by-equipment/${bldgId}`,
-            });
-            return;
-        }
-
-        if (location.pathname.includes('/settings')) {
-            configRoutes.forEach((record) => {
-                if (location.pathname.includes(record)) {
-                    history.push({
-                        pathname: `/explore-page/by-equipment/${bldgId}`,
-                    });
-                    return;
-                }
-            });
-
-            configChildRoutes.forEach((record) => {
-                if (location.pathname.includes(record)) {
-                    history.push({
-                        pathname: `/explore-page/by-equipment/${bldgId}`,
-                    });
-                    return;
-                }
-            });
-        } else {
-            history.push({
-                pathname: `/explore-page/by-buildings`,
-            });
-        }
+        history.push({
+            pathname: `/explore/overview`,
+        });
+        return;
     };
 
     const handleSpacesClick = () => {
@@ -356,7 +314,7 @@ const NavLinks = () => {
                         className={`d-flex align-items-center mouse-pointer navbar-head-container ${className}`}
                         onClick={() => {
                             handleSideNavChange(item?.name);
-                            handlePathChange(item?.path);
+                            handlePathChange(item?.path.split('/:')[0]); // Split done to remove dynamic parameters
                         }}>
                         <div className="d-flex align-items-center">
                             {item.name === 'Energy' && <Circlebolt className={`navbar-icons-style ${className}`} />}

@@ -26,6 +26,7 @@ import UserProfile from '../pages/settings/users/UserProfile';
 import SingleRole from '../pages/settings/roles/SingleRole';
 import SingleRoleNew from '../pages/settings/roles/SingleRoleNew';
 import IndividualUtilityMeter from '../pages/settings/utility-meters/IndividualUtilityMeter';
+import ExplorePage from '../pages/explore';
 
 // Auth Components
 const Login = React.lazy(() => import('../pages/auth/Login'));
@@ -424,7 +425,7 @@ const settingsRoutes = {
     roles: ['Admin'],
 };
 
-// Explore Routes
+// Explore Routes V1
 const exploreRoutes = {
     path: '/explore-page/by-buildings',
     name: 'Explore',
@@ -451,7 +452,7 @@ const exploreRoutes = {
     roles: ['Admin'],
 };
 
-// Explore Routes
+// Explore Routes V2
 const exploreRoutesV2 = {
     path: '/v2/explore-page/v2/by-buildings',
     name: 'Explore',
@@ -472,6 +473,26 @@ const exploreRoutesV2 = {
             route: PrivateRoute,
             parent: 'explore',
             visibility: false,
+        },
+    ],
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+};
+
+// Explore Routes V3
+const exploreRoutesV3 = {
+    path: '/explore/overview/:filterType?',
+    name: 'Explore',
+    component: ExplorePage,
+    visibility: true,
+    children: [
+        {
+            path: '/explore/overview/:filterType?',
+            name: 'Explore',
+            component: ExplorePage,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'explore',
         },
     ],
     icon: FeatherIcon.PieChart,
@@ -631,8 +652,8 @@ const allRoutes = [
     alertsRoutes,
     controlRoutes,
     carbonRoutes,
-    exploreRoutesV2,
-    exploreRoutes,
+    exploreRoutesV3,
+    // exploreRoutes,
     adminRoutes,
     authRoutes,
 ];
@@ -644,7 +665,8 @@ const authProtectedRoutes = [
     alertsRoutes,
     carbonRoutes,
     controlRoutes,
-    exploreRoutes,
+    exploreRoutesV3,
+    // exploreRoutes,
     adminRoutes,
 ];
 
