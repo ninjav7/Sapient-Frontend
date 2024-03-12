@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import 'moment-timezone';
 import { useHistory } from 'react-router-dom';
 import { Row, Col, Spinner } from 'reactstrap';
@@ -38,7 +38,9 @@ import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
 import { getAllFloorsList, getAllSpaceTypes, getAllSpacesList, updateSpaceService } from '../settings/layout/services';
 import { TagsInput } from 'react-tag-input-component';
+import { Notification } from '../../sharedComponents/notification';
 import _ from 'lodash';
+import MoveSpaceLayout from './MoveSpaceLayout';
 
 const SpaceDetails = () => {
     const history = useHistory();
@@ -70,10 +72,9 @@ const SpaceDetails = () => {
 
     const [metadataFetching, setMetadataFetching] = useState(false);
     const [metadata, setMetadata] = useState({});
-    const [metadataToUpdate, setMetadataToUpdate] = useState({});
     const [metadataUpdating, setMetadataUpdating] = useState(false);
 
-    const [selectedTab, setSelectedTab] = useState(0);
+    const [selectedTab, setSelectedTab] = useState(1);
 
     const [selectedConsumption, setSelectedConsumption] = useState(metric[0]?.value);
     const [spaceTypes, setSpaceTypes] = useState([]);
@@ -82,7 +83,7 @@ const SpaceDetails = () => {
 
     const [modal, setModal] = useState(false);
     const [moveSpacePopup, setMoveSpacePopup] = useState(false);
-    const [currentParent, setCurrentParent] = useState('');
+    const [spaceObjParent, setSpaceObjParent] = useState('');
 
     const openModal = () => setModal(true);
     const closeModal = () => setModal(false);
@@ -92,6 +93,10 @@ const SpaceDetails = () => {
     const [spacesList, setSpacesList] = useState([]);
     const [selectedFloorId, setSelectedFloorId] = useState(null);
     const [spaceObj, setSpaceObj] = useState({});
+
+    const [oldStack, setOldStack] = useState({});
+    const [newStack, setNewStack] = useState({});
+    const allParentSpaces = useRef([]);
 
     const sortedLayoutData = (dataList) => {
         const sortedList = _.sortBy(dataList, (obj) => {
@@ -196,24 +201,24 @@ const SpaceDetails = () => {
 
             if (!Array.isArray(resSpace)) return;
 
-            const spaceObj = resSpace[0];
+            const space = resSpace[0];
 
-            if (!Array.isArray(spaceObj?.total_data)) return;
+            if (!Array.isArray(space?.total_data)) return;
 
-            const mappedSpaceData = spaceObj.total_data.map((consumptionData) => ({
+            const mappedSpaceData = space.total_data.map((consumptionData) => ({
                 x: new Date(consumptionData?.time_stamp).getTime(),
                 y: handleDataConversion(consumptionData?.consumption, selectedConsumption),
             }));
 
             const spaceRecord = {
-                name: spaceObj.space_name,
+                name: space.space_name,
                 data: mappedSpaceData,
             };
 
             if (!isEquipment) {
                 setChartData([spaceRecord]);
             } else {
-                const mappedEquipmentData = spaceObj.equipment_data.map((equipmentData) => {
+                const mappedEquipmentData = space.equipment_data.map((equipmentData) => {
                     const mappedConsumptionData = equipmentData.consumption.map((equipmentConsumptionData) => ({
                         x: new Date(equipmentConsumptionData?.time_stamp).getTime(),
                         y: handleDataConversion(equipmentConsumptionData?.consumption, selectedConsumption),
@@ -243,7 +248,6 @@ const SpaceDetails = () => {
     const fetchMetadata = async () => {
         setMetadataFetching(true);
         setMetadata({});
-        setMetadataToUpdate({});
 
         try {
             const query = { bldgId, dateFrom: startDate, dateTo: endDate, timeZone };
@@ -252,12 +256,10 @@ const SpaceDetails = () => {
 
             if (res) {
                 setMetadata(res);
-                setMetadataToUpdate(res);
                 setSelectedFloorId(res.floor_id);
             }
         } catch {
             setMetadata({});
-            setMetadataToUpdate({});
         }
 
         setMetadataFetching(false);
@@ -344,33 +346,38 @@ const SpaceDetails = () => {
     const spaceName = metadata?.space_name && metadata.space_name;
 
     const handleChange = (key, value) => {
-        let obj = Object.assign({}, metadataToUpdate);
+        let obj = Object.assign({}, spaceObj);
         obj[key] = value;
-        setMetadataToUpdate(obj);
+        setSpaceObj(obj);
     };
 
     const fetchEditSpace = async () => {
         setMetadataUpdating(true);
 
-        const params = `?space_id=${metadataToUpdate?.space_id}`;
+        const params = `?space_id=${spaceObj?._id}`;
 
         const payload = {
             building_id: bldgId,
-            name: metadataToUpdate?.space_name,
-            type_id: metadataToUpdate?.space_type_id,
-            parents: metadataToUpdate?.parents, // does not exist
-            parent_space: metadataToUpdate?.parent_space, // does not exist
+            name: spaceObj?.name,
+            type_id: spaceObj?.type_id,
+            parents: spaceObj?.parents,
+            parent_space: spaceObj?.parent_space,
+            square_footage:
+                typeof spaceObj?.square_footage === 'string' ? spaceObj.square_footage : metadata.square_footage ?? '0',
         };
 
         try {
-            const res = await updateSpaceService(params, payload);
-            const response = res?.data;
+            const axiosResponse = await updateSpaceService(params, payload);
+            const response = axiosResponse?.data;
+
+            console.log(response?.success);
+
             if (response?.success) {
                 notifyUser(Notification.Types.success, `Space updated successfully.`);
             } else {
                 notifyUser(Notification.Types.error, response?.message);
             }
-        } catch {
+        } catch (error) {
             notifyUser(Notification.Types.error, `Failed to update Space.`);
         }
 
@@ -378,32 +385,50 @@ const SpaceDetails = () => {
     };
 
     const handleEditSpace = () => {
-        if (!bldgId || !metadataToUpdate?.space_id) return;
+        if (!bldgId || !spaceObj?._id) return;
 
         let alertObj = Object.assign({}, errorObj);
 
-        if (!metadataToUpdate?.space_name || metadataToUpdate?.space_name === '')
-            alertObj.space_name = `Please enter Space name. It cannot be empty.`;
-        if (!metadataToUpdate?.space_type_id || metadataToUpdate?.space_type_id === '')
-            alertObj.space_type_id = { text: `Please select Type.` };
+        if (!spaceObj?.name || spaceObj?.name === '') alertObj.name = `Please enter Space name. It cannot be empty.`;
+        if (!spaceObj?.type_id || spaceObj?.type_id === '') alertObj.type_id = { text: `Please select Type.` };
 
         setErrorObj(alertObj);
 
-        if (!alertObj.space_name && !alertObj.space_type_id) fetchEditSpace();
+        if (!alertObj.name && !alertObj.type_id) fetchEditSpace();
     };
 
     const getCurrentParent = () => {
-        if (spaceObj?.parent_space) {
-            const parent = spacesList.find((space) => space._id === spaceObj.parent_space);
-            setCurrentParent(parent?.name);
-            return;
-        } else if (spaceObj?.parents) {
+        if (spaceObj?.parents) {
             const parent = floorsList.find((space) => space.floor_id === spaceObj.parents);
-            setCurrentParent(parent?.name);
-            return;
+            setSpaceObjParent(parent);
+        } else if (spaceObj?.parent_space) {
+            const parent = spacesList.find((space) => space._id === spaceObj.parent_space);
+            setSpaceObjParent(parent);
         }
+    };
 
-        setCurrentParent('');
+    const createNewOldStack = (spaces, floors, currSpace) => {
+        const newStack = [];
+
+        const stackToSelectedSpaceObj = (currSpace) => {
+            newStack.push(currSpace);
+
+            if (currSpace?.parent_space) {
+                const nextParentSpace = spaces.find((space) => space?._id === currSpace?.parent_space);
+                stackToSelectedSpaceObj(nextParentSpace);
+            } else if (currSpace?.parents) {
+                const nextParentSpace = floors.find((floor) => floor?.floor_id === currSpace?.parents);
+                stackToSelectedSpaceObj(nextParentSpace);
+            }
+
+            return;
+        };
+
+        if (spaces && Object.values(spaces).length > 0 && currSpace) {
+            stackToSelectedSpaceObj(currSpace);
+            newStack.reverse();
+            setOldStack(newStack);
+        }
     };
 
     useEffect(() => {
@@ -528,9 +553,9 @@ const SpaceDetails = () => {
                                         <InputTooltip
                                             placeholder="Enter Name"
                                             labelSize={Typography.Sizes.md}
-                                            value={metadataToUpdate?.space_name ?? ''}
+                                            value={spaceObj?.name ?? ''}
                                             onChange={(e) => {
-                                                handleChange('space_name', e.target.value);
+                                                handleChange('name', e.target.value);
                                             }}
                                         />
                                     </div>
@@ -543,11 +568,11 @@ const SpaceDetails = () => {
                                             placeholder="Select Type"
                                             options={spaceTypes}
                                             currentValue={spaceTypes.filter(
-                                                (option) => option.value === metadataToUpdate?.space_type_id
+                                                (option) => option.value === spaceObj?.type_id
                                             )}
                                             isSearchable={true}
                                             onChange={(e) => {
-                                                handleChange('space_type_id', e.value);
+                                                handleChange('type_id', e.value);
                                             }}
                                             customSearchCallback={({ data, query }) =>
                                                 defaultDropdownSearch(data, query?.value)
@@ -566,7 +591,11 @@ const SpaceDetails = () => {
                                         <InputTooltip
                                             placeholder="Enter Square Footage"
                                             labelSize={Typography.Sizes.md}
-                                            value={metadata?.square_footage ?? ''}
+                                            value={
+                                                typeof spaceObj?.square_footage === 'string'
+                                                    ? spaceObj.square_footage
+                                                    : metadata?.square_footage ?? ''
+                                            }
                                             onChange={(e) => {
                                                 handleChange('square_footage', e.target.value);
                                             }}
@@ -580,7 +609,7 @@ const SpaceDetails = () => {
                                             <TagsInput
                                                 classNames="h-5"
                                                 placeholder="Tags"
-                                                value={metadataToUpdate?.tag ?? []}
+                                                value={spaceObj?.tag ?? []}
                                                 onChange={(value) => {
                                                     handleChange('tag', value);
                                                 }}
@@ -592,6 +621,7 @@ const SpaceDetails = () => {
                             </Col>
 
                             <Col xl={4}>
+                                <Brick sizeInRem={1.25} />
                                 <div className="w-100 box-parent">
                                     <div className="box-parent-header">
                                         <Typography.Header size={Typography.Sizes.sm}>Parent</Typography.Header>
@@ -600,7 +630,7 @@ const SpaceDetails = () => {
                                     <div className="box-parent-input">
                                         <InputTooltip
                                             labelSize={Typography.Sizes.md}
-                                            value={currentParent}
+                                            value={''} // spaceObjParent.name
                                             disabled={true}
                                             className="w-100"
                                         />
@@ -609,8 +639,7 @@ const SpaceDetails = () => {
                                             size={Button.Sizes.md}
                                             type={Button.Type.primary}
                                             onClick={() => {
-                                                closeModal();
-                                                openMoveSpacePopup();
+                                                openModal();
                                             }}
                                             className="ml-2"
                                         />
@@ -630,6 +659,25 @@ const SpaceDetails = () => {
                     </div>
                 )}
             </div>
+
+            <MoveSpaceLayout
+                allParentSpaces={allParentSpaces}
+                sortedLayoutData={sortedLayoutData}
+                openEditSpacePopup={openMoveSpacePopup}
+                isModalOpen={modal}
+                openModal={openModal}
+                closeModal={closeModal}
+                bldgId={bldgId}
+                notifyUser={notifyUser}
+                spaceObj={spaceObj}
+                setSpaceObj={setSpaceObj}
+                floorsList={floorsList}
+                oldStack={oldStack}
+                newStack={newStack}
+                setNewStack={setNewStack}
+                spaceObjParent={spaceObjParent}
+                setSpaceObjParent={setSpaceObjParent}
+            />
         </div>
     );
 };
