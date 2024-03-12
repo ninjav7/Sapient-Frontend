@@ -9,6 +9,8 @@ import Select from '../../sharedComponents/form/select';
 import Toggles from '../../sharedComponents/toggles/Toggles';
 import Typography from '../../sharedComponents/typography';
 
+import ExploreByBuildings from './ExploreByBuildings';
+
 import { UserStore } from '../../store/UserStore';
 import { ExploreStore } from '../../store/ExploreStore';
 
@@ -16,6 +18,7 @@ import { exploreBldgMetrics } from './utils';
 import { exploreFiltersList } from './constants';
 
 import './styles.scss';
+import Brick from '../../sharedComponents/brick';
 
 const ExploreFilters = (props) => {
     const { selectedFilter, handleMenuItemClick } = props;
@@ -46,6 +49,8 @@ const ExplorePage = () => {
     const selectedFilter = ExploreStore.useState((s) => s.selectedFilter);
 
     const [isInComparisonMode, setComparisonMode] = useState(false);
+    const [selectedUnit, setSelectedUnit] = useState(exploreBldgMetrics[0].unit);
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(exploreBldgMetrics[0]?.Consumption);
     const [selectedConsumption, setConsumption] = useState(exploreBldgMetrics[0]?.value);
 
     const toggleComparision = () => {
@@ -63,6 +68,16 @@ const ExplorePage = () => {
         });
     };
 
+    const handleUnitChange = (value) => {
+        const obj = exploreBldgMetrics.find((record) => record?.value === value);
+        setSelectedUnit(obj?.unit);
+    };
+
+    const handleConsumptionChange = (value) => {
+        const obj = exploreBldgMetrics.find((record) => record?.value === value);
+        setSelectedConsumptionLabel(obj?.Consumption);
+    };
+
     useEffect(() => {
         if (filterType) {
             localStorage.setItem('selectedFilter', filterType);
@@ -75,6 +90,7 @@ const ExplorePage = () => {
 
     return (
         <React.Fragment>
+            {/* Explore Page Header  */}
             <div className="d-flex justify-content-between align-items-center">
                 <ExploreFilters selectedFilter={selectedFilter} handleMenuItemClick={handleMenuItemClick} />
 
@@ -96,15 +112,27 @@ const ExplorePage = () => {
                             defaultValue={selectedConsumption}
                             options={exploreBldgMetrics}
                             onChange={(e) => {
-                                // setConsumption(e.value);
-                                // handleUnitChange(e.value);
-                                // handleConsumptionChange(e.value);
+                                setConsumption(e.value);
+                                handleUnitChange(e.value);
+                                handleConsumptionChange(e.value);
                             }}
                         />
                         <Header title="" type="page" />
                     </div>
                 </div>
             </div>
+
+            <Brick sizeInRem={0.25} />
+
+            {/* Explore Page Body based on filter selected  */}
+            {selectedFilter === 'by-building' && (
+                <ExploreByBuildings
+                    selectedUnit={selectedUnit}
+                    selectedConsumption={selectedConsumption}
+                    selectedConsumptionLabel={selectedConsumptionLabel}
+                    isInComparisonMode={isInComparisonMode}
+                />
+            )}
         </React.Fragment>
     );
 };

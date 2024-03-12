@@ -7,21 +7,17 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
-import Header from '../../components/Header';
 import Brick from '../../sharedComponents/brick';
-import Select from '../../sharedComponents/form/select';
 import Typography from '../../sharedComponents/typography';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
 import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
-import Toggles from '../../sharedComponents/toggles/Toggles';
-import { Button } from '../../sharedComponents/button';
 import ExploreCompareChart from '../../sharedComponents/exploreCompareChart/ExploreCompareChart';
 
 import { timeZone } from '../../utils/helper';
-import { exploreBldgMetrics, calculateDataConvertion, validateSeriesDataForBuildings } from './utils';
+import { calculateDataConvertion, validateSeriesDataForBuildings } from './utils';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
@@ -40,7 +36,9 @@ import SkeletonLoader from '../../components/SkeletonLoader';
 import './style.css';
 import './styles.scss';
 
-const ExploreByBuildings = () => {
+const ExploreByBuildings = (props) => {
+    const { selectedUnit, selectedConsumption, selectedConsumptionLabel, isInComparisonMode } = props;
+
     const { download } = useCSVDownload();
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -98,31 +96,6 @@ const ExploreByBuildings = () => {
     const [topVal, setTopVal] = useState(0);
     const [bottomVal, setBottomVal] = useState(0);
     const [shouldRender, setShouldRender] = useState(true);
-
-    const [selectedUnit, setSelectedUnit] = useState(exploreBldgMetrics[0].unit);
-    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(exploreBldgMetrics[0]?.Consumption);
-    const [selectedConsumption, setConsumption] = useState(exploreBldgMetrics[0]?.value);
-
-    const [isInComparisonMode, setComparisonMode] = useState(false);
-
-    const toggleComparision = () => {
-        setComparisonMode(!isInComparisonMode);
-        UserStore.update((s) => {
-            s.showNotification = true;
-            s.notificationMessage = isInComparisonMode ? 'Comparison Mode turned OFF' : 'Comparison Mode turned ON';
-            s.notificationType = 'success';
-        });
-    };
-
-    const handleUnitChange = (value) => {
-        const obj = exploreBldgMetrics.find((record) => record?.value === value);
-        setSelectedUnit(obj?.unit);
-    };
-
-    const handleConsumptionChange = (value) => {
-        const obj = exploreBldgMetrics.find((record) => record?.value === value);
-        setSelectedConsumptionLabel(obj?.Consumption);
-    };
 
     const currentRow = () => {
         return exploreBuildingsList;
@@ -999,134 +972,99 @@ const ExploreByBuildings = () => {
     }
 
     return (
-        <>
-            <Row className="d-flex justify-content-end">
-                <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
-                    <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                        <Button
-                            size={Button.Sizes.lg}
-                            type={isInComparisonMode ? Button.Type.secondary : Button.Type.secondaryGrey}>
-                            <Toggles
-                                size={Toggles.Sizes.sm}
-                                isChecked={isInComparisonMode}
-                                onChange={toggleComparision}
-                            />
-                            <Typography.Subheader size={Typography.Sizes.lg} onClick={toggleComparision}>
-                                Compare
-                            </Typography.Subheader>
-                        </Button>
-                        <Select
-                            defaultValue={selectedConsumption}
-                            options={exploreBldgMetrics}
-                            onChange={(e) => {
-                                setConsumption(e.value);
-                                handleUnitChange(e.value);
-                                handleConsumptionChange(e.value);
-                            }}
-                        />
-                        <Header title="" type="page" />
-                    </div>
-                </div>
-            </Row>
-
-            <Row>
-                <div className="explore-data-table-style p-2">
-                    {isFetchingChartData || isFetchingPastChartData ? (
-                        <div className="explore-chart-wrapper">
-                            <div className="explore-chart-loader">
-                                <Spinner color="primary" />
-                            </div>
+        <React.Fragment>
+            <div className="explore-data-table-style p-2">
+                {isFetchingChartData || isFetchingPastChartData ? (
+                    <div className="explore-chart-wrapper">
+                        <div className="explore-chart-loader">
+                            <Spinner color="primary" />
                         </div>
-                    ) : (
-                        <>
-                            {isInComparisonMode ? (
-                                <ExploreCompareChart
-                                    title={''}
-                                    subTitle={''}
-                                    data={dataToRenderOnChart}
-                                    pastData={pastDataToRenderOnChart}
-                                    tooltipUnit={selectedUnit}
-                                    tooltipLabel={selectedConsumptionLabel}
-                                    timeIntervalObj={{
-                                        startDate,
-                                        endDate,
-                                        daysCount,
-                                    }}
-                                    chartProps={{
-                                        tooltip: {
-                                            xDateFormat: dateTimeFormatForHighChart(
-                                                userPrefDateFormat,
-                                                userPrefTimeFormat
-                                            ),
-                                        },
-                                    }}
-                                />
-                            ) : (
-                                <ExploreChart
-                                    title={''}
-                                    subTitle={''}
-                                    tooltipUnit={tooltipUnitVal}
-                                    tooltipLabel={selectedConsumptionLabel}
-                                    disableDefaultPlotBands={true}
-                                    data={dataToRenderOnChart}
-                                    pastData={pastDataToRenderOnChart}
-                                    chartProps={{
-                                        navigator: {
-                                            outlineWidth: 0,
-                                            adaptToUpdatedData: false,
-                                            stickToMax: true,
-                                        },
-                                        plotOptions: {
-                                            series: {
-                                                states: {
-                                                    inactive: {
-                                                        opacity: 1,
-                                                    },
+                    </div>
+                ) : (
+                    <>
+                        {isInComparisonMode ? (
+                            <ExploreCompareChart
+                                title={''}
+                                subTitle={''}
+                                data={dataToRenderOnChart}
+                                pastData={pastDataToRenderOnChart}
+                                tooltipUnit={selectedUnit}
+                                tooltipLabel={selectedConsumptionLabel}
+                                timeIntervalObj={{
+                                    startDate,
+                                    endDate,
+                                    daysCount,
+                                }}
+                                chartProps={{
+                                    tooltip: {
+                                        xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
+                                    },
+                                }}
+                            />
+                        ) : (
+                            <ExploreChart
+                                title={''}
+                                subTitle={''}
+                                tooltipUnit={tooltipUnitVal}
+                                tooltipLabel={selectedConsumptionLabel}
+                                disableDefaultPlotBands={true}
+                                data={dataToRenderOnChart}
+                                pastData={pastDataToRenderOnChart}
+                                chartProps={{
+                                    navigator: {
+                                        outlineWidth: 0,
+                                        adaptToUpdatedData: false,
+                                        stickToMax: true,
+                                    },
+                                    plotOptions: {
+                                        series: {
+                                            states: {
+                                                inactive: {
+                                                    opacity: 1,
                                                 },
                                             },
                                         },
-                                        xAxis: {
-                                            gridLineWidth: 0,
-                                            type: 'datetime',
-                                            labels: {
-                                                format: formatXaxisForHighCharts(
-                                                    daysCount,
-                                                    userPrefDateFormat,
-                                                    userPrefTimeFormat,
-                                                    selectedConsumption
-                                                ),
-                                            },
-                                        },
-                                        yAxis: [
-                                            {
-                                                gridLineWidth: 1,
-                                                lineWidth: 1,
-                                                opposite: false,
-                                                lineColor: null,
-                                            },
-                                            {
-                                                opposite: true,
-                                                title: false,
-                                                max: 120,
-                                                postFix: '23',
-                                                gridLineWidth: 0,
-                                            },
-                                        ],
-                                        tooltip: {
-                                            xDateFormat: dateTimeFormatForHighChart(
+                                    },
+                                    xAxis: {
+                                        gridLineWidth: 0,
+                                        type: 'datetime',
+                                        labels: {
+                                            format: formatXaxisForHighCharts(
+                                                daysCount,
                                                 userPrefDateFormat,
-                                                userPrefTimeFormat
+                                                userPrefTimeFormat,
+                                                selectedConsumption
                                             ),
                                         },
-                                    }}
-                                />
-                            )}
-                        </>
-                    )}
-                </div>
-            </Row>
+                                    },
+                                    yAxis: [
+                                        {
+                                            gridLineWidth: 1,
+                                            lineWidth: 1,
+                                            opposite: false,
+                                            lineColor: null,
+                                        },
+                                        {
+                                            opposite: true,
+                                            title: false,
+                                            max: 120,
+                                            postFix: '23',
+                                            gridLineWidth: 0,
+                                        },
+                                    ],
+                                    tooltip: {
+                                        xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
+                                    },
+                                }}
+                            />
+                        )}
+                    </>
+                )}
+            </div>
+
             <Brick sizeInRem={0.75} />
-            <Row>
+
+            <Row className="m-0">
                 <div className="explore-data-table-style">
                     <Col lg={12}>
                         <DataTableWidget
@@ -1178,7 +1116,7 @@ const ExploreByBuildings = () => {
                     </Col>
                 </div>
             </Row>
-        </>
+        </React.Fragment>
     );
 };
 
