@@ -11,6 +11,12 @@ import Toggles from '../../sharedComponents/toggles/Toggles';
 import Typography from '../../sharedComponents/typography';
 
 import ExploreByBuildings from './by-building';
+import ExploreByNoGrouping from './no-grouping';
+import ExploreByEndUse from './by-enduse';
+import ExploreBySpace from './by-space';
+import ExploreBySpaceType from './by-spaceType';
+import ExploreByFloor from './by-floor';
+import ExploreByEquipmentType from './by-equipment-type';
 
 import { UserStore } from '../../store/UserStore';
 import { ExploreStore } from '../../store/ExploreStore';
@@ -125,8 +131,62 @@ const ExplorePage = () => {
             <Brick sizeInRem={0.25} />
 
             {/* Explore Page Body based on filter selected  */}
+            {selectedFilter === EXPLORE_FILTER_TYPE.NO_GROUPING && (
+                <ExploreByNoGrouping
+                    selectedUnit={selectedUnit}
+                    selectedConsumption={selectedConsumption}
+                    selectedConsumptionLabel={selectedConsumptionLabel}
+                    isInComparisonMode={isInComparisonMode}
+                />
+            )}
+
+            {selectedFilter === EXPLORE_FILTER_TYPE.BY_ENDUSE && (
+                <ExploreByEndUse
+                    selectedUnit={selectedUnit}
+                    selectedConsumption={selectedConsumption}
+                    selectedConsumptionLabel={selectedConsumptionLabel}
+                    isInComparisonMode={isInComparisonMode}
+                />
+            )}
+
             {selectedFilter === EXPLORE_FILTER_TYPE.BY_BUILDING && (
                 <ExploreByBuildings
+                    selectedUnit={selectedUnit}
+                    selectedConsumption={selectedConsumption}
+                    selectedConsumptionLabel={selectedConsumptionLabel}
+                    isInComparisonMode={isInComparisonMode}
+                />
+            )}
+
+            {selectedFilter === EXPLORE_FILTER_TYPE.BY_SPACE && (
+                <ExploreBySpace
+                    selectedUnit={selectedUnit}
+                    selectedConsumption={selectedConsumption}
+                    selectedConsumptionLabel={selectedConsumptionLabel}
+                    isInComparisonMode={isInComparisonMode}
+                />
+            )}
+
+            {selectedFilter === EXPLORE_FILTER_TYPE.BY_SPACE_TYPE && (
+                <ExploreBySpaceType
+                    selectedUnit={selectedUnit}
+                    selectedConsumption={selectedConsumption}
+                    selectedConsumptionLabel={selectedConsumptionLabel}
+                    isInComparisonMode={isInComparisonMode}
+                />
+            )}
+
+            {selectedFilter === EXPLORE_FILTER_TYPE.BY_FLOOR && (
+                <ExploreByFloor
+                    selectedUnit={selectedUnit}
+                    selectedConsumption={selectedConsumption}
+                    selectedConsumptionLabel={selectedConsumptionLabel}
+                    isInComparisonMode={isInComparisonMode}
+                />
+            )}
+
+            {selectedFilter === EXPLORE_FILTER_TYPE.BY_EQUIPMENT_TYPE && (
+                <ExploreByEquipmentType
                     selectedUnit={selectedUnit}
                     selectedConsumption={selectedConsumption}
                     selectedConsumptionLabel={selectedConsumptionLabel}
