@@ -42,6 +42,7 @@ import { Notification } from '../../sharedComponents/notification';
 import _ from 'lodash';
 import MoveSpaceLayout from './MoveSpaceLayout';
 import Skeleton from 'react-loading-skeleton';
+import SpacesEquipmentTable from './SpacesEquipmentTable';
 
 const SpaceDetails = () => {
     const history = useHistory();
@@ -75,7 +76,7 @@ const SpaceDetails = () => {
     const [metadata, setMetadata] = useState({});
     const [metadataUpdating, setMetadataUpdating] = useState(false);
 
-    const [selectedTab, setSelectedTab] = useState(1);
+    const [selectedTab, setSelectedTab] = useState(0);
 
     const [selectedConsumption, setSelectedConsumption] = useState(metric[0]?.value);
     const [spaceTypes, setSpaceTypes] = useState([]);
@@ -552,6 +553,10 @@ const SpaceDetails = () => {
                                 )}
                             </Col>
                         </Row>
+
+                        <Brick sizeInRem={2} />
+
+                        <SpacesEquipmentTable />
                     </div>
                 )}
 
