@@ -82,6 +82,7 @@ const MoveSpaceLayout = (props) => {
 
     useEffect(() => {
         if (oldStack.length > 0) setFormattedOldValue(formatStack(oldStack, false));
+
         if (
             newStack &&
             Object.values(newStack).length > 0 &&
@@ -186,7 +187,11 @@ const MoveSpaceLayout = (props) => {
         }
 
         // if it is any descendant of current element
-        if (allParentSpaces.current.find((parentSpace) => parentSpace?._id === space?.parent_space)) {
+        if (
+            allParentSpaces.current.find(
+                (parentSpace) => space?.parent_space && parentSpace?._id && parentSpace?._id === space?.parent_space
+            )
+        ) {
             allParentSpaces.current.push(space);
             return false;
         }

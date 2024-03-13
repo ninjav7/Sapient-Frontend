@@ -41,6 +41,7 @@ import { TagsInput } from 'react-tag-input-component';
 import { Notification } from '../../sharedComponents/notification';
 import _ from 'lodash';
 import MoveSpaceLayout from './MoveSpaceLayout';
+import Skeleton from 'react-loading-skeleton';
 
 const SpaceDetails = () => {
     const history = useHistory();
@@ -83,7 +84,7 @@ const SpaceDetails = () => {
 
     const [modal, setModal] = useState(false);
     const [moveSpacePopup, setMoveSpacePopup] = useState(false);
-    const [spaceObjParent, setSpaceObjParent] = useState('');
+    const [spaceObjParent, setSpaceObjParent] = useState(null);
 
     const openModal = () => setModal(true);
     const closeModal = () => setModal(false);
@@ -96,6 +97,7 @@ const SpaceDetails = () => {
 
     const [oldStack, setOldStack] = useState({});
     const [newStack, setNewStack] = useState({});
+    const [spaceFetching, setSpaceFetching] = useState(false);
     const allParentSpaces = useRef([]);
 
     const sortedLayoutData = (dataList) => {
@@ -116,6 +118,7 @@ const SpaceDetails = () => {
     const fetchAllFloorData = async () => {
         setFloorsList([]);
         setSpacesList([]);
+        setSpaceFetching(true);
 
         const params = `?building_id=${bldgId}`;
 
@@ -129,12 +132,15 @@ const SpaceDetails = () => {
                 notifyUser(Notification.Types.success, 'Failed to fetch Floors.');
             }
         } catch (error) {
+            setFloorsList([]);
+            setSpacesList([]);
             notifyUser(Notification.Types.success, 'Failed to fetch Floors.');
         }
     };
 
     const fetchAllSpaceData = async () => {
         setSpacesList([]);
+        setSpaceFetching(true);
 
         const params = `?floor_id=${selectedFloorId}&building_id=${bldgId}`;
 
@@ -154,14 +160,21 @@ const SpaceDetails = () => {
 
                 setSpaceObj(spaceObjFound);
             } else {
+                setSpacesList([]);
                 notifyUser(Notification.Types.error, 'Failed to fetch Spaces.');
             }
         } catch (error) {
+            setSpacesList([]);
             notifyUser(Notification.Types.error, 'Failed to fetch Spaces.');
         }
+
+        setSpaceFetching(false);
     };
 
     const fetchSpaceTypes = async () => {
+        setSpaceTypes([]);
+        setSpaceFetching(true);
+
         const params = `?ordered_by=name&sort_by=ace`;
 
         try {
@@ -352,25 +365,24 @@ const SpaceDetails = () => {
     };
 
     const fetchEditSpace = async () => {
-        setMetadataUpdating(true);
-
         const params = `?space_id=${spaceObj?._id}`;
 
         const payload = {
             building_id: bldgId,
             name: spaceObj?.name,
             type_id: spaceObj?.type_id,
-            parents: spaceObj?.parents,
-            parent_space: spaceObj?.parent_space,
-            square_footage:
-                typeof spaceObj?.square_footage === 'string' ? spaceObj.square_footage : metadata.square_footage ?? '0',
+            square_footage: spaceObj?.square_footage ?? null,
+            tags: spaceObj?.tags ?? [],
+            parents: spaceObj?.new_parents ? spaceObj?.new_parents : spaceObj?.parents,
+            parent_space:
+                spaceObj?.new_parent_space || spaceObj?.new_parent_space === null
+                    ? spaceObj?.new_parent_space
+                    : spaceObj?.parent_space,
         };
 
         try {
             const axiosResponse = await updateSpaceService(params, payload);
             const response = axiosResponse?.data;
-
-            console.log(response?.success);
 
             if (response?.success) {
                 notifyUser(Notification.Types.success, `Space updated successfully.`);
@@ -381,7 +393,7 @@ const SpaceDetails = () => {
             notifyUser(Notification.Types.error, `Failed to update Space.`);
         }
 
-        setMetadataUpdating(false);
+        allParentSpaces.current = [];
     };
 
     const handleEditSpace = () => {
@@ -398,30 +410,30 @@ const SpaceDetails = () => {
     };
 
     const getCurrentParent = () => {
-        if (spaceObj?.parents) {
-            const parent = floorsList.find((space) => space.floor_id === spaceObj.parents);
-            setSpaceObjParent(parent);
-        } else if (spaceObj?.parent_space) {
+        if (spaceObjParent) return;
+
+        if (spaceObj?.parent_space) {
             const parent = spacesList.find((space) => space._id === spaceObj.parent_space);
+            setSpaceObjParent(parent);
+        } else if (spaceObj?.parents) {
+            const parent = floorsList.find((space) => space.floor_id === spaceObj.parents);
             setSpaceObjParent(parent);
         }
     };
 
     const createNewOldStack = (spaces, floors, currSpace) => {
-        const newStack = [];
+        const newStack = [currSpace];
 
         const stackToSelectedSpaceObj = (currSpace) => {
-            newStack.push(currSpace);
-
             if (currSpace?.parent_space) {
                 const nextParentSpace = spaces.find((space) => space?._id === currSpace?.parent_space);
-                stackToSelectedSpaceObj(nextParentSpace);
+                newStack.push(nextParentSpace);
+                return stackToSelectedSpaceObj(nextParentSpace);
             } else if (currSpace?.parents) {
                 const nextParentSpace = floors.find((floor) => floor?.floor_id === currSpace?.parents);
-                stackToSelectedSpaceObj(nextParentSpace);
+                newStack.push(nextParentSpace);
+                return stackToSelectedSpaceObj(nextParentSpace);
             }
-
-            return;
         };
 
         if (spaces && Object.values(spaces).length > 0 && currSpace) {
@@ -436,12 +448,13 @@ const SpaceDetails = () => {
             !metadata ||
             !spacesList.length > 0 ||
             !floorsList > 0 ||
-            !Object.keys(spaceObj).length > 0 ||
+            (spaceObj && !Object.keys(spaceObj).length > 0) ||
             !selectedFloorId
         )
             return;
 
         getCurrentParent();
+        createNewOldStack(spacesList, floorsList, spaceObj);
     }, [metadata, spacesList, floorsList, spaceObj, selectedFloorId]);
 
     return (
@@ -473,14 +486,19 @@ const SpaceDetails = () => {
                                 </div>
                             </div>
                             <div className="d-flex align-items-center">
-                                <div>
-                                    <Button
-                                        label="Close"
-                                        size={Button.Sizes.md}
-                                        type={Button.Type.secondaryGrey}
-                                        onClick={() => history.push(`/spaces/building/overview/${bldgId}`)}
-                                    />
-                                </div>
+                                <Button
+                                    label={metadataUpdating ? 'Updating' : 'Update'}
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.primary}
+                                    onClick={handleEditSpace}
+                                    className="mr-2"
+                                />
+                                <Button
+                                    label="Close"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryGrey}
+                                    onClick={() => history.push(`/spaces/building/overview/${bldgId}`)}
+                                />
                             </div>
                         </div>
                     </Col>
@@ -490,11 +508,14 @@ const SpaceDetails = () => {
                     <div className="lower-content-container">
                         <Row>
                             <Col xl={3}>
-                                <EnergyMetadataContainer metadata={metadata} isFetching={metadataFetching} />
+                                <EnergyMetadataContainer
+                                    metadata={metadata}
+                                    isFetching={metadataFetching || spaceFetching}
+                                />
 
                                 <Brick sizeInRem={1} />
 
-                                <MetadataContainer metadata={metadata} isFetching={metadataFetching} />
+                                <MetadataContainer metadata={metadata} isFetching={metadataFetching || spaceFetching} />
 
                                 <Brick sizeInRem={1} />
                             </Col>
@@ -538,9 +559,13 @@ const SpaceDetails = () => {
                     <div>
                         <Brick sizeInRem={1.25} />
 
-                        <Typography.Header size={Typography.Sizes.md} Type={Typography.Types.Regular}>
-                            Space Details
-                        </Typography.Header>
+                        {spaceFetching ? (
+                            <Skeleton count={1} style={{ minHeight: '20px' }} />
+                        ) : (
+                            <Typography.Header size={Typography.Sizes.md} Type={Typography.Types.Regular}>
+                                Space Details
+                            </Typography.Header>
+                        )}
 
                         <Brick sizeInRem={1.25} />
 
@@ -550,35 +575,43 @@ const SpaceDetails = () => {
                                     <div className="w-100">
                                         <Typography.Body size={Typography.Sizes.md}>Space Name</Typography.Body>
                                         <Brick sizeInRem={0.25} />
-                                        <InputTooltip
-                                            placeholder="Enter Name"
-                                            labelSize={Typography.Sizes.md}
-                                            value={spaceObj?.name ?? ''}
-                                            onChange={(e) => {
-                                                handleChange('name', e.target.value);
-                                            }}
-                                        />
+                                        {spaceFetching ? (
+                                            <Skeleton count={1} style={{ minHeight: '30px' }} />
+                                        ) : (
+                                            <InputTooltip
+                                                placeholder="Enter Name"
+                                                labelSize={Typography.Sizes.md}
+                                                value={spaceObj?.name ?? ''}
+                                                onChange={(e) => {
+                                                    handleChange('name', e.target.value);
+                                                }}
+                                            />
+                                        )}
                                     </div>
 
                                     <div className="w-100 ml-3">
                                         <Typography.Body size={Typography.Sizes.md}>Space Type</Typography.Body>
                                         <Brick sizeInRem={0.25} />
-                                        <Select
-                                            name="select"
-                                            placeholder="Select Type"
-                                            options={spaceTypes}
-                                            currentValue={spaceTypes.filter(
-                                                (option) => option.value === spaceObj?.type_id
-                                            )}
-                                            isSearchable={true}
-                                            onChange={(e) => {
-                                                handleChange('type_id', e.value);
-                                            }}
-                                            customSearchCallback={({ data, query }) =>
-                                                defaultDropdownSearch(data, query?.value)
-                                            }
-                                            menuPlacement="bottom"
-                                        />
+                                        {spaceFetching ? (
+                                            <Skeleton count={1} style={{ minHeight: '30px' }} />
+                                        ) : (
+                                            <Select
+                                                name="select"
+                                                placeholder="Select Type"
+                                                options={spaceTypes}
+                                                currentValue={spaceTypes.filter(
+                                                    (option) => option.value === spaceObj?.type_id
+                                                )}
+                                                isSearchable={true}
+                                                onChange={(e) => {
+                                                    handleChange('type_id', e.value);
+                                                }}
+                                                customSearchCallback={({ data, query }) =>
+                                                    defaultDropdownSearch(data, query?.value)
+                                                }
+                                                menuPlacement="bottom"
+                                            />
+                                        )}
                                     </div>
                                 </div>
 
@@ -588,33 +621,41 @@ const SpaceDetails = () => {
                                     <div className="w-100">
                                         <Typography.Body size={Typography.Sizes.md}>{`Square Footage`}</Typography.Body>
                                         <Brick sizeInRem={0.25} />
-                                        <InputTooltip
-                                            placeholder="Enter Square Footage"
-                                            labelSize={Typography.Sizes.md}
-                                            value={
-                                                typeof spaceObj?.square_footage === 'string'
-                                                    ? spaceObj.square_footage
-                                                    : metadata?.square_footage ?? ''
-                                            }
-                                            onChange={(e) => {
-                                                handleChange('square_footage', e.target.value);
-                                            }}
-                                        />
+                                        {spaceFetching ? (
+                                            <Skeleton count={1} style={{ minHeight: '30px' }} />
+                                        ) : (
+                                            <InputTooltip
+                                                placeholder="Enter Square Footage"
+                                                labelSize={Typography.Sizes.md}
+                                                value={
+                                                    typeof spaceObj?.square_footage === 'string'
+                                                        ? spaceObj.square_footage
+                                                        : metadata?.square_footage ?? ''
+                                                }
+                                                onChange={(e) => {
+                                                    handleChange('square_footage', e.target.value);
+                                                }}
+                                            />
+                                        )}
                                     </div>
 
                                     <div className="w-100 ml-3">
                                         <div>
                                             <Typography.Body size={Typography.Sizes.md}>{`Tags`}</Typography.Body>
                                             <Brick sizeInRem={0.25} />
-                                            <TagsInput
-                                                classNames="h-5"
-                                                placeholder="Tags"
-                                                value={spaceObj?.tag ?? []}
-                                                onChange={(value) => {
-                                                    handleChange('tag', value);
-                                                }}
-                                                placeHolder="Add Tag"
-                                            />
+                                            {spaceFetching ? (
+                                                <Skeleton count={1} style={{ minHeight: '30px' }} />
+                                            ) : (
+                                                <TagsInput
+                                                    classNames="h-5"
+                                                    placeholder="Tags"
+                                                    value={spaceObj?.tag ?? []}
+                                                    onChange={(value) => {
+                                                        handleChange('tag', value);
+                                                    }}
+                                                    placeHolder="Add Tag"
+                                                />
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -627,32 +668,27 @@ const SpaceDetails = () => {
                                         <Typography.Header size={Typography.Sizes.sm}>Parent</Typography.Header>
                                     </div>
 
-                                    <div className="box-parent-input">
-                                        <InputTooltip
-                                            labelSize={Typography.Sizes.md}
-                                            value={''} // spaceObjParent.name
-                                            disabled={true}
-                                            className="w-100"
-                                        />
-                                        <Button
-                                            label={'Move'}
-                                            size={Button.Sizes.md}
-                                            type={Button.Type.primary}
-                                            onClick={() => {
-                                                openModal();
-                                            }}
-                                            className="ml-2"
-                                        />
-                                    </div>
-
-                                    <div className="box-parent-buttons">
-                                        <Button
-                                            label={metadataUpdating ? 'Updating' : 'Update'}
-                                            size={Button.Sizes.md}
-                                            type={Button.Type.primary}
-                                            onClick={handleEditSpace}
-                                        />
-                                    </div>
+                                    {spaceFetching ? (
+                                        <Skeleton count={1} style={{ minHeight: '50px' }} />
+                                    ) : (
+                                        <div className="box-parent-input">
+                                            <InputTooltip
+                                                labelSize={Typography.Sizes.md}
+                                                value={(spaceObjParent && spaceObjParent.name) || ''}
+                                                disabled={true}
+                                                className="w-100"
+                                            />
+                                            <Button
+                                                label={'Move'}
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.primary}
+                                                onClick={() => {
+                                                    openModal();
+                                                }}
+                                                className="ml-2"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </Col>
                         </Row>
