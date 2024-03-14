@@ -1,34 +1,28 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import _ from 'lodash';
 import { useAtom } from 'jotai';
-import { useParams } from 'react-router-dom';
-import { Row, Col, UncontrolledTooltip, Progress, Spinner } from 'reactstrap';
+import { Row, UncontrolledTooltip, Progress, Spinner } from 'reactstrap';
 
-import { UserStore } from '../../store/UserStore';
-import { buildingData } from '../../store/globalState';
-import { DateRangeStore } from '../../store/DateRangeStore';
-import { BuildingStore } from '../../store/BuildingStore';
-import { ComponentStore } from '../../store/ComponentStore';
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+import { UserStore } from '../../../../store/UserStore';
+import { buildingData } from '../../../../store/globalState';
+import { DateRangeStore } from '../../../../store/DateRangeStore';
+import { BuildingStore } from '../../../../store/BuildingStore';
+import { ComponentStore } from '../../../../store/ComponentStore';
+import { BreadcrumbStore } from '../../../../store/BreadcrumbStore';
+import { updateBuildingStore } from '../../../../helpers/updateBuildingStore';
+import useCSVDownload from '../../../../sharedComponents/hooks/useCSVDownload';
 
-import Header from '../../components/Header';
-import SkeletonLoader from '../../components/SkeletonLoader';
-import EquipChartModal from '../chartModal/EquipChartModal';
-import Brick from '../../sharedComponents/brick';
-import Select from '../../sharedComponents/form/select';
-import { Badge } from '../../sharedComponents/badge';
-import { Checkbox } from '../../sharedComponents/form/checkbox';
-import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
-import { TrendsBadge } from '../../sharedComponents/trendsBadge';
-import Typography from '../../sharedComponents/typography';
-import { Button } from '../../sharedComponents/button';
-import Toggles from '../../sharedComponents/toggles/Toggles';
-import { TimeFrameSelector } from '../../sharedComponents/timeFrameSelector';
+import SkeletonLoader from '../../../../components/SkeletonLoader';
+import EquipChartModal from '../../../chartModal/EquipChartModal';
+import Brick from '../../../../sharedComponents/brick';
+import { Badge } from '../../../../sharedComponents/badge';
+import { Checkbox } from '../../../../sharedComponents/form/checkbox';
+import { DataTableWidget } from '../../../../sharedComponents/dataTableWidget';
+import { TrendsBadge } from '../../../../sharedComponents/trendsBadge';
+import Typography from '../../../../sharedComponents/typography';
 
-import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
-import ExploreCompareChart from '../../sharedComponents/exploreCompareChart/ExploreCompareChart';
+import ExploreChart from '../../../../sharedComponents/exploreChart/ExploreChart';
+import ExploreCompareChart from '../../../../sharedComponents/exploreCompareChart/ExploreCompareChart';
 
 import {
     handleAPIRequestBody,
@@ -37,19 +31,27 @@ import {
     formatXaxisForHighCharts,
     getPastDateRange,
     pageListSizes,
-} from '../../helpers/helpers';
-import { UNITS } from '../../constants/units';
-import { isEmptyObject, truncateString, validateSeriesDataForEquipments } from './utils';
-import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
-import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
+} from '../../../../helpers/helpers';
+import { UNITS } from '../../../../constants/units';
+import { isEmptyObject, truncateString, validateSeriesDataForEquipments } from '../../utils';
+import { getExploreByEquipmentTableCSVExport } from '../../../../utils/tablesExport';
+import { FILTER_TYPES } from '../../../../sharedComponents/dataTableWidget/constants';
 
-import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../explore/services';
+import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../../../explore/services';
 
-import './style.css';
-import './styles.scss';
+import '../../style.css';
+import '../../styles.scss';
 
-const ExploreByEquipment = () => {
-    const { bldgId } = useParams();
+const ExploreByNoGrouping = (props) => {
+    const {
+        bldgId,
+        selectedUnit,
+        selectedConsumption,
+        selectedConsumptionLabel,
+        isInComparisonMode = false,
+        setComparisonMode,
+    } = props;
+
     const { download } = useCSVDownload();
 
     const [buildingListData] = useAtom(buildingData);
@@ -124,37 +126,6 @@ const ExploreByEquipment = () => {
 
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
-
-    const [isInComparisonMode, setComparisonMode] = useState(false);
-
-    // Chart metric
-    const metric = [
-        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy Consumption' },
-        { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power Consumption' },
-        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A', Consumption: 'Current Consumption' },
-    ];
-    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
-    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0]?.Consumption);
-    const [selectedConsumption, setConsumption] = useState(metric[0]?.value);
-
-    const toggleComparision = () => {
-        setComparisonMode(!isInComparisonMode);
-        UserStore.update((s) => {
-            s.showNotification = true;
-            s.notificationMessage = isInComparisonMode ? 'Comparison Mode turned OFF' : 'Comparison Mode turned ON';
-            s.notificationType = 'success';
-        });
-    };
-
-    const handleUnitChange = (value) => {
-        const obj = metric.find((record) => record?.value === value);
-        setSelectedUnit(obj?.unit);
-    };
-
-    const handleConsumptionChange = (value) => {
-        const obj = metric.find((record) => record?.value === value);
-        setSelectedConsumptionLabel(obj?.Consumption);
-    };
 
     const currentRow = () => {
         return equipDataList;
@@ -288,8 +259,8 @@ const ExploreByEquipment = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'Building View',
-                    path: '/explore-page/by-equipment',
+                    label: 'Building Overview',
+                    path: '/explore/building/overview',
                     active: true,
                 },
             ];
@@ -1175,48 +1146,9 @@ const ExploreByEquipment = () => {
     const pastDataToRenderOnChart = validateSeriesDataForEquipments(selectedEquipIds, equipDataList, pastSeriesData);
 
     return (
-        <>
-            <Row className="d-flex justify-content-end">
-                <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
-                    <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                        {/* PLT-1785: Functionality to be enabled with Custom Period selector
-                        {isInComparisonMode && (
-                            <TimeFrameSelector
-                            // onCustomDateChange={onCustomDateChange}
-                            // onDateFilterChange={onDateFilterChange}
-                            // rangeDate={rangeDate}
-                            // timeOptions={customOptions}
-                            // defaultValue={filterPeriod}
-                            />
-                        )} */}
-                        <Button
-                            size={Button.Sizes.lg}
-                            type={isInComparisonMode ? Button.Type.secondary : Button.Type.secondaryGrey}>
-                            <Toggles
-                                size={Toggles.Sizes.sm}
-                                isChecked={isInComparisonMode}
-                                onChange={toggleComparision}
-                            />
-                            <Typography.Subheader size={Typography.Sizes.lg} onClick={toggleComparision}>
-                                Compare
-                            </Typography.Subheader>
-                        </Button>
-                        <Select
-                            defaultValue={selectedConsumption}
-                            options={metric}
-                            onChange={(e) => {
-                                setConsumption(e.value);
-                                handleUnitChange(e.value);
-                                handleConsumptionChange(e.value);
-                            }}
-                        />
-                        <Header title="" type="page" />
-                    </div>
-                </div>
-            </Row>
-
-            <Row>
-                <div className="explore-data-table-style p-2">
+        <React.Fragment>
+            <Row className="m-0">
+                <div className="explore-data-table-style">
                     {isFetchingChartData || isFetchingPastChartData ? (
                         <div className="explore-chart-wrapper">
                             <div className="explore-chart-loader">
@@ -1314,64 +1246,62 @@ const ExploreByEquipment = () => {
                 </div>
             </Row>
 
-            <Brick sizeInRem={0.75} />
+            <Brick sizeInRem={1} />
 
-            <Row>
-                <div className="explore-data-table-style">
-                    <Col lg={12}>
-                        <DataTableWidget
-                            id="explore-by-equipment"
-                            isLoading={isEquipDataFetching}
-                            isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={20} />}
-                            isFilterLoading={isFiltersFetching}
-                            onSearch={(e) => {
-                                setSearch(e);
-                                setCheckedAll(false);
-                            }}
-                            buttonGroupFilterOptions={[]}
-                            rows={currentRow()}
-                            searchResultRows={currentRow()}
-                            filterOptions={filterOptions}
-                            onDownload={() => handleDownloadCsv()}
-                            isCSVDownloading={isCSVDownloading}
-                            headers={headerProps}
-                            customExcludedHeaders={['Panel Name', 'Breakers', 'Notes']}
-                            customCheckAll={() => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="equipment1"
-                                    name="equipment1"
-                                    checked={checkedAll}
-                                    onChange={() => {
-                                        setCheckedAll(!checkedAll);
-                                    }}
-                                    disabled={!equipDataList || equipDataList.length > 20 || isInComparisonMode}
-                                />
-                            )}
-                            customCheckboxForCell={(record) => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="equip"
-                                    name="equip"
-                                    checked={selectedEquipIds.includes(record?.equipment_id)}
-                                    value={selectedEquipIds.includes(record?.equipment_id)}
-                                    onChange={(e) => {
-                                        handleEquipStateChange(e.target.value, record, isInComparisonMode);
-                                    }}
-                                />
-                            )}
-                            pageSize={pageSize}
-                            currentPage={pageNo}
-                            onPageSize={setPageSize}
-                            onChangePage={setPageNo}
-                            pageListSizes={pageListSizes}
-                            totalCount={(() => {
-                                return totalItems;
-                            })()}
-                        />
-                    </Col>
+            <Row className="m-0">
+                <div className="w-100">
+                    <DataTableWidget
+                        id="explore-by-equipment"
+                        isLoading={isEquipDataFetching}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={20} />}
+                        isFilterLoading={isFiltersFetching}
+                        onSearch={(e) => {
+                            setSearch(e);
+                            setCheckedAll(false);
+                        }}
+                        buttonGroupFilterOptions={[]}
+                        rows={currentRow()}
+                        searchResultRows={currentRow()}
+                        filterOptions={filterOptions}
+                        onDownload={() => handleDownloadCsv()}
+                        isCSVDownloading={isCSVDownloading}
+                        headers={headerProps}
+                        customExcludedHeaders={['Panel Name', 'Breakers', 'Notes']}
+                        customCheckAll={() => (
+                            <Checkbox
+                                label=""
+                                type="checkbox"
+                                id="equipment1"
+                                name="equipment1"
+                                checked={checkedAll}
+                                onChange={() => {
+                                    setCheckedAll(!checkedAll);
+                                }}
+                                disabled={!equipDataList || equipDataList.length > 20 || isInComparisonMode}
+                            />
+                        )}
+                        customCheckboxForCell={(record) => (
+                            <Checkbox
+                                label=""
+                                type="checkbox"
+                                id="equip"
+                                name="equip"
+                                checked={selectedEquipIds.includes(record?.equipment_id)}
+                                value={selectedEquipIds.includes(record?.equipment_id)}
+                                onChange={(e) => {
+                                    handleEquipStateChange(e.target.value, record, isInComparisonMode);
+                                }}
+                            />
+                        )}
+                        pageSize={pageSize}
+                        currentPage={pageNo}
+                        onPageSize={setPageSize}
+                        onChangePage={setPageNo}
+                        pageListSizes={pageListSizes}
+                        totalCount={(() => {
+                            return totalItems;
+                        })()}
+                    />
                 </div>
             </Row>
 
@@ -1384,8 +1314,8 @@ const ExploreByEquipment = () => {
                 setSelectedTab={setSelectedModalTab}
                 activePage="explore"
             />
-        </>
+        </React.Fragment>
     );
 };
 
-export default ExploreByEquipment;
+export default ExploreByNoGrouping;

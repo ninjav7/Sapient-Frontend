@@ -5,13 +5,6 @@
     display: inline-block;
 }
 
-.explore-data-table-style {
-    background: #ffffff;
-    box-sizing: border-box;
-    padding: 0rem;
-    width: 100%;
-}
-
 .explore-filters-style {
     display: flex;
     flex-direction: row;

@@ -10,6 +10,7 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { userPermissionData, buildingData } from '../../store/globalState';
+import { EXPLORE_FILTER_TYPE } from '../../pages/explore/constants';
 
 import { ReactComponent as User } from '../../assets/icon/user.svg';
 import { ReactComponent as Toggleon } from '../../assets/icon/toggleon.svg';
@@ -38,7 +39,7 @@ const NavLinks = () => {
     const ENERGY_TAB = '/energy/portfolio/overview';
     const CARBON_TAB = '/carbon/portfolio/overview';
     const CONTROL_TAB = '/control/plug-rules';
-    const EXPLORE_TAB = '/explore-page/by-buildings';
+    const EXPLORE_TAB = '/explore/portfolio/overview';
     const SUPER_USER_ROUTE = '/super-user/accounts';
     const SPACES_TAB = '/spaces/portfolio/overview';
 
@@ -86,7 +87,7 @@ const NavLinks = () => {
         }
 
         if (
-            location.pathname.includes('/explore-page/by-equipment') ||
+            location.pathname.includes('/explore/building/overview') ||
             location.pathname.includes('/control/plug-rules') ||
             location.pathname.includes('/spaces/building/overview') ||
             location.pathname.includes('/carbon/building/overview')
@@ -135,7 +136,7 @@ const NavLinks = () => {
             location.pathname.includes('/energy/end-uses') ||
             location.pathname.includes('/energy/time-of-day') ||
             location.pathname.includes('/control/plug-rules') ||
-            location.pathname.includes('/explore-page/by-equipment')
+            location.pathname.includes('/explore/building/overview')
         ) {
             history.push({
                 pathname: `/carbon/building/overview/${bldgId}`,
@@ -187,7 +188,7 @@ const NavLinks = () => {
         const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
         if (!bldgObj?.active) {
             history.push({
-                pathname: `/explore-page/by-buildings`,
+                pathname: `/explore/portfolio/overview`,
             });
             updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
             return;
@@ -202,7 +203,7 @@ const NavLinks = () => {
             location.pathname.includes('/carbon/building/overview')
         ) {
             history.push({
-                pathname: `/explore-page/by-equipment/${bldgId}`,
+                pathname: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
             });
             return;
         }
@@ -211,7 +212,7 @@ const NavLinks = () => {
             configRoutes.forEach((record) => {
                 if (location.pathname.includes(record)) {
                     history.push({
-                        pathname: `/explore-page/by-equipment/${bldgId}`,
+                        pathname: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
                     });
                     return;
                 }
@@ -220,14 +221,14 @@ const NavLinks = () => {
             configChildRoutes.forEach((record) => {
                 if (location.pathname.includes(record)) {
                     history.push({
-                        pathname: `/explore-page/by-equipment/${bldgId}`,
+                        pathname: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
                     });
                     return;
                 }
             });
         } else {
             history.push({
-                pathname: `/explore-page/by-buildings`,
+                pathname: '/explore/portfolio/overview',
             });
         }
     };

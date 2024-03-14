@@ -1,46 +1,47 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Spinner } from 'reactstrap';
+import { Row, Spinner } from 'reactstrap';
 import { Link } from 'react-router-dom';
 
-import { UserStore } from '../../store/UserStore';
-import { DateRangeStore } from '../../store/DateRangeStore';
-import { ComponentStore } from '../../store/ComponentStore';
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { UserStore } from '../../../store/UserStore';
+import { DateRangeStore } from '../../../store/DateRangeStore';
+import { ComponentStore } from '../../../store/ComponentStore';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 
-import Header from '../../components/Header';
-import Brick from '../../sharedComponents/brick';
-import Select from '../../sharedComponents/form/select';
-import Typography from '../../sharedComponents/typography';
-import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
-import { Checkbox } from '../../sharedComponents/form/checkbox';
-import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
-import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
-import { TrendsBadge } from '../../sharedComponents/trendsBadge';
-import Toggles from '../../sharedComponents/toggles/Toggles';
-import { Button } from '../../sharedComponents/button';
-import ExploreCompareChart from '../../sharedComponents/exploreCompareChart/ExploreCompareChart';
+import Header from '../../../components/Header';
+import Brick from '../../../sharedComponents/brick';
+import Select from '../../../sharedComponents/form/select';
+import Typography from '../../../sharedComponents/typography';
+import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
+import { Checkbox } from '../../../sharedComponents/form/checkbox';
+import ExploreChart from '../../../sharedComponents/exploreChart/ExploreChart';
+import { TinyBarChart } from '../../../sharedComponents/tinyBarChart';
+import { TrendsBadge } from '../../../sharedComponents/trendsBadge';
+import Toggles from '../../../sharedComponents/toggles/Toggles';
+import { Button } from '../../../sharedComponents/button';
+import ExploreCompareChart from '../../../sharedComponents/exploreCompareChart/ExploreCompareChart';
 
-import { timeZone } from '../../utils/helper';
-import { exploreBldgMetrics, calculateDataConvertion, validateSeriesDataForBuildings } from './utils';
-import { getAverageValue } from '../../helpers/AveragePercent';
-import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
-import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import { timeZone } from '../../../utils/helper';
+import { exploreBldgMetrics, calculateDataConvertion, validateSeriesDataForBuildings } from '../utils';
+import { getAverageValue } from '../../../helpers/AveragePercent';
+import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 import {
     dateTimeFormatForHighChart,
     formatXaxisForHighCharts,
     getPastDateRange,
     handleAPIRequestParams,
-} from '../../helpers/helpers';
-import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../explore/services';
-import { handleUnitConverstion } from '../settings/general-settings/utils';
-import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
-import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
-import SkeletonLoader from '../../components/SkeletonLoader';
+} from '../../../helpers/helpers';
+import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../../explore/services';
+import { handleUnitConverstion } from '../../settings/general-settings/utils';
+import { getExploreByBuildingTableCSVExport } from '../../../utils/tablesExport';
+import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
+import { EXPLORE_FILTER_TYPE } from '../constants';
+import SkeletonLoader from '../../../components/SkeletonLoader';
 
-import './style.css';
-import './styles.scss';
+import '../style.css';
+import '../styles.scss';
 
-const ExploreByBuildings = () => {
+const ExplorePortfolioOverview = () => {
     const { download } = useCSVDownload();
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -132,7 +133,7 @@ const ExploreByBuildings = () => {
         return (
             <div style={{ fontSize: 0 }}>
                 <Link
-                    to={`/explore-page/by-equipment/${row?.building_id}`}
+                    to={`/explore/building/overview/${row?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`}
                     className="typography-wrapper link mouse-pointer"
                     onClick={() => {
                         updateBuildingStore(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);
@@ -723,8 +724,8 @@ const ExploreByBuildings = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'Portfolio Level',
-                    path: '/explore-page/by-buildings',
+                    label: 'Portfolio Overview',
+                    path: '/explore/portfolio/overview',
                     active: true,
                 },
             ];
@@ -1000,8 +1001,8 @@ const ExploreByBuildings = () => {
 
     return (
         <>
-            <Row className="d-flex justify-content-end">
-                <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
+            <Row className="d-flex justify-content-end m-0">
+                <div className="d-flex flex-column" style={{ gap: '0.75rem' }}>
                     <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
                         <Button
                             size={Button.Sizes.lg}
@@ -1029,8 +1030,10 @@ const ExploreByBuildings = () => {
                 </div>
             </Row>
 
-            <Row>
-                <div className="explore-data-table-style p-2">
+            <Brick sizeInRem={1} />
+
+            <Row className="m-0">
+                <div className="explore-data-table-style">
                     {isFetchingChartData || isFetchingPastChartData ? (
                         <div className="explore-chart-wrapper">
                             <div className="explore-chart-loader">
@@ -1125,61 +1128,61 @@ const ExploreByBuildings = () => {
                     )}
                 </div>
             </Row>
-            <Brick sizeInRem={0.75} />
-            <Row>
-                <div className="explore-data-table-style">
-                    <Col lg={12}>
-                        <DataTableWidget
-                            id="explore-by-building"
-                            isLoading={isExploreDataLoading}
-                            isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length + 1} noOfRows={10} />}
-                            isFilterLoading={isFilterFetching}
-                            onSearch={(e) => {
-                                setSearch(e);
-                                setCheckedAll(false);
-                            }}
-                            buttonGroupFilterOptions={[]}
-                            rows={currentRow()}
-                            searchResultRows={currentRow()}
-                            filterOptions={filterOptions}
-                            onDownload={() => handleDownloadCsv()}
-                            isCSVDownloading={isCSVDownloading}
-                            headers={tableHeader}
-                            customCheckAll={() => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="building1"
-                                    name="building1"
-                                    checked={checkedAll}
-                                    onChange={() => {
-                                        setCheckedAll(!checkedAll);
-                                    }}
-                                    disabled={!exploreBuildingsList || exploreBuildingsList.length > 20}
-                                />
-                            )}
-                            customCheckboxForCell={(record) => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="building_check"
-                                    name="building_check"
-                                    checked={selectedBldgIds.includes(record?.building_id)}
-                                    value={selectedBldgIds.includes(record?.building_id)}
-                                    onChange={(e) => {
-                                        handleBuildingStateChange(e.target.value, record, isInComparisonMode);
-                                    }}
-                                />
-                            )}
-                            totalCount={(() => {
-                                return totalItems;
-                            })()}
-                        />
-                    </Col>
+
+            <Brick sizeInRem={1} />
+
+            <Row className="m-0">
+                <div className="w-100">
+                    <DataTableWidget
+                        id="explore-by-building"
+                        isLoading={isExploreDataLoading}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length + 1} noOfRows={10} />}
+                        isFilterLoading={isFilterFetching}
+                        onSearch={(e) => {
+                            setSearch(e);
+                            setCheckedAll(false);
+                        }}
+                        buttonGroupFilterOptions={[]}
+                        rows={currentRow()}
+                        searchResultRows={currentRow()}
+                        filterOptions={filterOptions}
+                        onDownload={() => handleDownloadCsv()}
+                        isCSVDownloading={isCSVDownloading}
+                        headers={tableHeader}
+                        customCheckAll={() => (
+                            <Checkbox
+                                label=""
+                                type="checkbox"
+                                id="building1"
+                                name="building1"
+                                checked={checkedAll}
+                                onChange={() => {
+                                    setCheckedAll(!checkedAll);
+                                }}
+                                disabled={!exploreBuildingsList || exploreBuildingsList.length > 20}
+                            />
+                        )}
+                        customCheckboxForCell={(record) => (
+                            <Checkbox
+                                label=""
+                                type="checkbox"
+                                id="building_check"
+                                name="building_check"
+                                checked={selectedBldgIds.includes(record?.building_id)}
+                                value={selectedBldgIds.includes(record?.building_id)}
+                                onChange={(e) => {
+                                    handleBuildingStateChange(e.target.value, record, isInComparisonMode);
+                                }}
+                            />
+                        )}
+                        totalCount={(() => {
+                            return totalItems;
+                        })()}
+                    />
                 </div>
             </Row>
         </>
     );
 };
 
-export default ExploreByBuildings;
+export default ExplorePortfolioOverview;

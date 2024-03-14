@@ -27,6 +27,10 @@ import SingleRole from '../pages/settings/roles/SingleRole';
 import SingleRoleNew from '../pages/settings/roles/SingleRoleNew';
 import IndividualUtilityMeter from '../pages/settings/utility-meters/IndividualUtilityMeter';
 
+// Explore Component
+const ExploreOverview = React.lazy(() => import('../pages/explore/portfolio-overview'));
+const ExploreBuildingOverview = React.lazy(() => import('../pages/explore/building-overview'));
+
 // Auth Components
 const Login = React.lazy(() => import('../pages/auth/Login'));
 const Logout = React.lazy(() => import('../pages/auth/Logout'));
@@ -63,14 +67,6 @@ const AlertConfig = React.lazy(() => import('../pages/alerts/alert-config'));
 // Control Components
 const PlugRule = React.lazy(() => import('../pages/controls/PlugRule'));
 const PlugRules = React.lazy(() => import('../pages/controls/PlugRules'));
-
-// Explore Module V!
-const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
-const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
-
-// Explore Module V2
-const ExploreByEquipmentV2 = React.lazy(() => import('../pages/v2/explore/ExploreByEquipmentV2'));
-const ExploreByBuildingsV2 = React.lazy(() => import('../pages/v2/explore/ExploreByBuildingsV2'));
 
 // Super-user Components
 const Accounts = React.lazy(() => import('../pages/superUser/accounts'));
@@ -435,52 +431,26 @@ const settingsRoutes = {
 
 // Explore Routes
 const exploreRoutes = {
-    path: '/explore-page/by-buildings',
+    path: '/explore/portfolio/overview',
     name: 'Explore',
+    component: ExploreOverview,
     visibility: true,
     children: [
         {
-            path: '/explore-page/by-buildings',
-            name: 'Explore by Building',
-            component: ExploreByBuildings,
+            path: '/explore/portfolio/overview',
+            name: 'Explore',
+            component: ExploreOverview,
             route: PrivateRoute,
-            parent: 'explore',
-            visibility: true,
-        },
-        {
-            path: '/explore-page/by-equipment/:bldgId',
-            name: 'Explore by Equipment',
-            component: ExploreByEquipment,
-            route: PrivateRoute,
-            parent: 'explore',
-            visibility: true,
-        },
-    ],
-    icon: FeatherIcon.PieChart,
-    roles: ['Admin'],
-};
-
-// Explore Routes
-const exploreRoutesV2 = {
-    path: '/v2/explore-page/v2/by-buildings',
-    name: 'Explore',
-    visibility: true,
-    children: [
-        {
-            path: '/v2/explore-page/by-buildings',
-            name: 'Explore by Building',
-            component: ExploreByBuildingsV2,
-            route: PrivateRoute,
-            parent: 'explore',
             visibility: false,
+            parent: 'explore',
         },
         {
-            path: '/v2/explore-page/by-equipment/:bldgId',
-            name: 'Explore by Equipment',
-            component: ExploreByEquipmentV2,
+            path: '/explore/building/overview/:bldgId/:filterType?',
+            name: 'Explore',
+            component: ExploreBuildingOverview,
             route: PrivateRoute,
-            parent: 'explore',
             visibility: false,
+            parent: 'explore',
         },
     ],
     icon: FeatherIcon.PieChart,
@@ -640,7 +610,6 @@ const allRoutes = [
     alertsRoutes,
     controlRoutes,
     carbonRoutes,
-    exploreRoutesV2,
     exploreRoutes,
     adminRoutes,
     authRoutes,

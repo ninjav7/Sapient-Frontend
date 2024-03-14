@@ -14,9 +14,25 @@
     background-color: $dataviz-background-2;
 }
 
+.explore-data-table-style {
+    background: $base-white;
+    box-sizing: border-box;
+    padding: 0rem;
+    width: 100%;
+}
+
 .explore-chart-loader {
     min-height: 50vh;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.ant-dropdown-link {
+    color: $primary-gray-800;
+    font-weight: 500;
+}
+
+.ant-dropdown-link:hover {
+    color: $primary-gray-800;
 }
