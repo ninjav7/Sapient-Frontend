@@ -7,7 +7,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import Typography from '../../sharedComponents/typography';
 
 const EnergyMetadataContainer = ({ metadata = {}, isFetching = false }) => {
-    const { total_energy_consumption, peak_power = {} } = metadata;
+    const { total_energy_consumption, peak_power = {}, square_footage = 0 } = metadata;
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -67,6 +67,25 @@ const EnergyMetadataContainer = ({ metadata = {}, isFetching = false }) => {
                             ) : (
                                 <span className="ytd-unit">kW</span>
                             )}
+                        </div>
+                    )}
+                </div>
+
+                <div>
+                    <Typography.Subheader size={Typography.Sizes.lg}>
+                        {`Average Energy Per Square Foot (${moment(startDate).format(dateFormat)} to ${moment(
+                            endDate
+                        ).format(dateFormat)})`}
+                    </Typography.Subheader>
+
+                    {isFetching ? (
+                        <Skeleton count={1} />
+                    ) : (
+                        <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
+                            <span className="ytd-value">
+                                {Number(totalConsumptionValue) / Number(square_footage ? square_footage : 1)}
+                            </span>
+                            <span className="ytd-unit">kWh</span>
                         </div>
                     )}
                 </div>

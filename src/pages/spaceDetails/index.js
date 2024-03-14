@@ -377,6 +377,10 @@ const SpaceDetails = () => {
                                 )}
                                 <Brick sizeInRem={2} />
 
+                                <Header title="Equipments" type="page" showExplore={false} showCalendar={false} />
+
+                                <Brick sizeInRem={1} />
+
                                 <SpacesEquipmentTable />
                             </Col>
                         </Row>
