@@ -10,6 +10,7 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { userPermissionData, buildingData } from '../../store/globalState';
+import { EXPLORE_FILTER_TYPE } from '../../pages/explore/constants';
 
 import { ReactComponent as User } from '../../assets/icon/user.svg';
 import { ReactComponent as Toggleon } from '../../assets/icon/toggleon.svg';
@@ -38,7 +39,7 @@ const NavLinks = () => {
     const ENERGY_TAB = '/energy/portfolio/overview';
     const CARBON_TAB = '/carbon/portfolio/overview';
     const CONTROL_TAB = '/control/plug-rules';
-    const EXPLORE_TAB = '/explore/overview';
+    const EXPLORE_TAB = '/explore/portfolio/overview';
     const SUPER_USER_ROUTE = '/super-user/accounts';
     const SPACES_TAB = '/spaces';
 
@@ -177,10 +178,52 @@ const NavLinks = () => {
     };
 
     const handleExploreClick = () => {
-        history.push({
-            pathname: `/explore/overview`,
-        });
-        return;
+        const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+        if (!bldgObj?.active) {
+            history.push({
+                pathname: `/explore/portfolio/overview`,
+            });
+            updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
+            return;
+        }
+
+        if (
+            location.pathname.includes('/energy/building/overview') ||
+            location.pathname.includes('/energy/spaces') ||
+            location.pathname.includes('/energy/end-uses') ||
+            location.pathname.includes('/energy/time-of-day') ||
+            location.pathname.includes('/control/plug-rules') ||
+            location.pathname.includes('/carbon/building/overview')
+        ) {
+            history.push({
+                pathname: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
+            });
+            return;
+        }
+
+        if (location.pathname.includes('/settings')) {
+            configRoutes.forEach((record) => {
+                if (location.pathname.includes(record)) {
+                    history.push({
+                        pathname: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
+                    });
+                    return;
+                }
+            });
+
+            configChildRoutes.forEach((record) => {
+                if (location.pathname.includes(record)) {
+                    history.push({
+                        pathname: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
+                    });
+                    return;
+                }
+            });
+        } else {
+            history.push({
+                pathname: '/explore/portfolio/overview',
+            });
+        }
     };
 
     const handleSpacesClick = () => {
@@ -314,7 +357,7 @@ const NavLinks = () => {
                         className={`d-flex align-items-center mouse-pointer navbar-head-container ${className}`}
                         onClick={() => {
                             handleSideNavChange(item?.name);
-                            handlePathChange(item?.path.split('/:')[0]); // Split done to remove dynamic parameters
+                            handlePathChange(item?.path);
                         }}>
                         <div className="d-flex align-items-center">
                             {item.name === 'Energy' && <Circlebolt className={`navbar-icons-style ${className}`} />}
