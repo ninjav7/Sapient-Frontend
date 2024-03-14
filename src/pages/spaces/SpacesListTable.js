@@ -16,6 +16,7 @@ import { fetchSpaceListV2 } from './services';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { Link } from 'react-router-dom';
+import Header from '../../components/Header';
 
 const SpacesListTable = () => {
     const { download } = useCSVDownload();
@@ -235,7 +236,11 @@ const SpacesListTable = () => {
     };
 
     return (
-        <Col lg={12}>
+        <>
+            <Header title="Spaces" type="page" showExplore={false} showCalendar={false} />
+
+            <Brick sizeInRem={1} />
+
             <DataTableWidget
                 id="explore-by-equipment"
                 isLoading={spacesLoading}
@@ -255,7 +260,7 @@ const SpacesListTable = () => {
                 isCSVDownloading={isCSVDownloading}
                 onDownload={handleDownloadCSV}
             />
-        </Col>
+        </>
     );
 };
 

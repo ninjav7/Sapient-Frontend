@@ -15,6 +15,7 @@ import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { fetchTopEnergyConsumptionBySpaceDataHelper } from '../../components/energyConsumptionBySpace/helpers';
 import SpacesListTable from './SpacesListTable';
 import { useHistory } from 'react-router-dom';
+import { Col } from 'reactstrap';
 
 const Spaces = () => {
     const { bldgId } = useParams();
@@ -181,8 +182,8 @@ const Spaces = () => {
     }, [startDate, endDate, bldgId]);
 
     return bldgId ? (
-        <>
-            <Header title={bldgId ? 'Building Overview' : 'Portfolio Overview'} type="page" showExplore={true} />
+        <Col lg={12}>
+            <Header title="Building Overview" type="page" showExplore={true} />
 
             <Brick sizeInRem={2} />
 
@@ -221,7 +222,7 @@ const Spaces = () => {
             <Brick sizeInRem={4} />
 
             <SpacesListTable />
-        </>
+        </Col>
     ) : (
         <></>
     );
