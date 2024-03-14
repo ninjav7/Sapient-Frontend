@@ -144,7 +144,7 @@ const Spaces = () => {
     }, []);
 
     useEffect(() => {
-        if (startDate === null || endDate === null) return;
+        if (!startDate || !endDate) return;
 
         let time_zone = 'US/Eastern';
 

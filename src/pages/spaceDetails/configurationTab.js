@@ -16,7 +16,6 @@ import { Notification } from '../../sharedComponents/notification';
 const ConfigurationTab = ({
     bldgId,
     spaceId,
-    metadata,
     selectedFloorId,
     spaceObj,
     setSpaceObj,
@@ -121,7 +120,7 @@ const ConfigurationTab = ({
 
                 setSpacesList(sortedLayoutData(spaces));
 
-                const spaceObjFound = spaces.find((space) => space._id === metadata.space_id);
+                const spaceObjFound = spaces.find((space) => space._id === spaceId);
 
                 setSpaceObj(spaceObjFound);
             } else {
@@ -191,7 +190,7 @@ const ConfigurationTab = ({
 
     useEffect(() => {
         if (
-            !metadata ||
+            !spaceId ||
             !spacesList.length > 0 ||
             !floorsList > 0 ||
             (spaceObj && !Object.keys(spaceObj).length > 0) ||
@@ -201,7 +200,7 @@ const ConfigurationTab = ({
 
         getCurrentParent();
         createNewOldStack(spacesList, floorsList, spaceObj);
-    }, [metadata, spacesList, floorsList, spaceObj, selectedFloorId]);
+    }, [spaceId, spacesList, floorsList, spaceObj, selectedFloorId]);
 
     return (
         <>
@@ -276,11 +275,7 @@ const ConfigurationTab = ({
                                     placeholder="Enter Square Footage"
                                     labelSize={Typography.Sizes.md}
                                     error={errorObj?.square_footage?.text}
-                                    value={
-                                        typeof spaceObj?.square_footage === 'string'
-                                            ? spaceObj.square_footage
-                                            : metadata?.square_footage ?? ''
-                                    }
+                                    value={spaceObj?.square_footage}
                                     onChange={(e) => {
                                         handleChange('square_footage', e.target.value);
                                     }}
