@@ -17,7 +17,7 @@ import { TrendsBadge } from '../../../../sharedComponents/trendsBadge';
 import ExploreCompareChart from '../../../../sharedComponents/exploreCompareChart/ExploreCompareChart';
 
 import { getAverageValue } from '../../../../helpers/AveragePercent';
-import useCSVDownload from '../../../../sharedComponents/hooks/useCSVDownload';
+import { EXPLORE_FILTER_TYPE } from '../../constants';
 import { updateBuildingStore } from '../../../../helpers/updateBuildingStore';
 import { dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../../../helpers/helpers';
 import { handleUnitConverstion } from '../../../settings/general-settings/utils';
@@ -64,7 +64,7 @@ const ExploreByEquipmentType = (props) => {
         return (
             <div style={{ fontSize: 0 }}>
                 <Link
-                    to={`/explore-page/by-equipment/${row?.building_id}`}
+                    to={`/explore/building/overview/${row?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`}
                     className="typography-wrapper link mouse-pointer"
                     onClick={() => {
                         updateBuildingStore(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);

@@ -3,27 +3,27 @@ import { useHistory, useParams } from 'react-router-dom';
 import { DownOutlined } from '@ant-design/icons';
 import { Dropdown, Menu } from 'antd';
 
-import Header from '../../components/Header';
-import Brick from '../../sharedComponents/brick';
-import { Button } from '../../sharedComponents/button';
-import Select from '../../sharedComponents/form/select';
-import Toggles from '../../sharedComponents/toggles/Toggles';
-import Typography from '../../sharedComponents/typography';
+import Header from '../../../components/Header';
+import Brick from '../../../sharedComponents/brick';
+import { Button } from '../../../sharedComponents/button';
+import Select from '../../../sharedComponents/form/select';
+import Toggles from '../../../sharedComponents/toggles/Toggles';
+import Typography from '../../../sharedComponents/typography';
 
-import ExploreByNoGrouping from './building-overview/no-grouping';
-import ExploreByEndUse from './building-overview/by-enduse';
-import ExploreBySpace from './building-overview/by-space';
-import ExploreBySpaceType from './building-overview/by-spaceType';
-import ExploreByFloor from './building-overview/by-floor';
-import ExploreByEquipmentType from './building-overview/by-equipment-type';
+import ExploreByNoGrouping from './no-grouping';
+import ExploreByEndUse from './by-enduse';
+import ExploreBySpace from './by-space';
+import ExploreBySpaceType from './by-spaceType';
+import ExploreByFloor from './by-floor';
+import ExploreByEquipmentType from './by-equipment-type';
 
-import { UserStore } from '../../store/UserStore';
-import { ExploreStore } from '../../store/ExploreStore';
+import { UserStore } from '../../../store/UserStore';
+import { ExploreStore } from '../../../store/ExploreStore';
 
-import { exploreBldgMetrics } from './utils';
-import { EXPLORE_FILTER_TYPE, exploreFiltersList } from './constants';
+import { exploreBldgMetrics } from '../utils';
+import { EXPLORE_FILTER_TYPE, exploreFiltersList } from '../constants';
 
-import './styles.scss';
+import '../styles.scss';
 
 const ExploreFilters = (props) => {
     const { selectedFilter, handleMenuItemClick } = props;

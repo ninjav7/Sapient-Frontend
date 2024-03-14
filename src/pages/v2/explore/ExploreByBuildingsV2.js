@@ -164,7 +164,7 @@ const ExploreByBuildingsV2 = () => {
         return (
             <div style={{ fontSize: 0 }}>
                 <Link
-                    to={`/v2/explore-page/by-equipment/${row?.building_id}`}
+                    to={`/explore/building/overview/${row?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`}
                     className="typography-wrapper link mouse-pointer"
                     onClick={() => {
                         updateBuildingStore(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);
@@ -740,7 +740,7 @@ const ExploreByBuildingsV2 = () => {
             let newList = [
                 {
                     label: 'Portfolio Level',
-                    path: '/explore-page/by-buildings',
+                    path: '/explore/portfolio/overview',
                     active: true,
                 },
             ];

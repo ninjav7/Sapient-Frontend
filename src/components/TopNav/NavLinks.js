@@ -80,7 +80,7 @@ const NavLinks = () => {
         }
 
         if (
-            location.pathname.includes('/explore-page/by-equipment') ||
+            location.pathname.includes('/explore/building/overview') ||
             location.pathname.includes('/control/plug-rules') ||
             location.pathname.includes('/carbon/building/overview')
         ) {
@@ -128,7 +128,7 @@ const NavLinks = () => {
             location.pathname.includes('/energy/end-uses') ||
             location.pathname.includes('/energy/time-of-day') ||
             location.pathname.includes('/control/plug-rules') ||
-            location.pathname.includes('/explore-page/by-equipment')
+            location.pathname.includes('/explore/building/overview')
         ) {
             history.push({
                 pathname: `/carbon/building/overview/${bldgId}`,

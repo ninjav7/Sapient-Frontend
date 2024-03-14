@@ -7,8 +7,10 @@ import { buildingData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-
 import SecondaryNavBar from '../../sharedComponents/secondaryNavBar/SecondaryNavBar';
+
+import { EXPLORE_FILTER_TYPE } from '../../pages/explore/constants';
+
 import { ReactComponent as BuildingSVG } from '../../sharedComponents/assets/icons/building-icon.svg';
 import { ReactComponent as PortfolioSVG } from '../../sharedComponents/assets/icons/portfolio-icon.svg';
 
@@ -62,8 +64,8 @@ const SecondaryTopNavBar = () => {
             return;
         }
 
-        if (path.includes('/explore-page/by-equipment')) {
-            redirectToEndpoint(`/explore-page/by-buildings`);
+        if (path.includes('/explore/building/overview')) {
+            redirectToEndpoint(`/explore/portfolio/overview`);
             return;
         }
         if (path.includes('/carbon')) {
@@ -103,13 +105,13 @@ const SecondaryTopNavBar = () => {
             return;
         }
 
-        if (path === '/explore-page/by-buildings') {
-            redirectToEndpoint(`/explore-page/by-equipment/${record?.value}`);
+        if (path === '/explore/portfolio/overview') {
+            redirectToEndpoint(`/explore/building/overview/${record?.value}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`);
             return;
         }
 
-        if (path.includes('/explore-page/by-equipment')) {
-            redirectToEndpoint(`/explore-page/by-equipment/${record?.value}`);
+        if (path.includes('/explore/building/overview')) {
+            redirectToEndpoint(`/explore/building/overview/${record?.value}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`);
             return;
         }
 

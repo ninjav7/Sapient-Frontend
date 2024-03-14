@@ -289,7 +289,7 @@ const ExploreByEquipment = () => {
             let newList = [
                 {
                     label: 'Building View',
-                    path: '/explore-page/by-equipment',
+                    path: '/explore/building/overview',
                     active: true,
                 },
             ];

@@ -35,6 +35,7 @@ import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../../e
 import { handleUnitConverstion } from '../../settings/general-settings/utils';
 import { getExploreByBuildingTableCSVExport } from '../../../utils/tablesExport';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
+import { EXPLORE_FILTER_TYPE } from '../constants';
 import SkeletonLoader from '../../../components/SkeletonLoader';
 
 import '../style.css';
@@ -132,7 +133,7 @@ const ExplorePortfolioOverview = () => {
         return (
             <div style={{ fontSize: 0 }}>
                 <Link
-                    to={`/explore-page/by-equipment/${row?.building_id}`}
+                    to={`/explore/building/overview/${row?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`}
                     className="typography-wrapper link mouse-pointer"
                     onClick={() => {
                         updateBuildingStore(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);
@@ -724,7 +725,7 @@ const ExplorePortfolioOverview = () => {
             let newList = [
                 {
                     label: 'Portfolio Level',
-                    path: '/explore-page/by-buildings',
+                    path: '/explore/portfolio/overview',
                     active: true,
                 },
             ];

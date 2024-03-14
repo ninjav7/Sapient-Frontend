@@ -29,7 +29,7 @@ import IndividualUtilityMeter from '../pages/settings/utility-meters/IndividualU
 
 // Explore Component
 const ExploreOverview = React.lazy(() => import('../pages/explore/portfolio-overview'));
-const ExplorePage = React.lazy(() => import('../pages/explore'));
+const ExploreBuildingOverview = React.lazy(() => import('../pages/explore/building-overview'));
 
 // Auth Components
 const Login = React.lazy(() => import('../pages/auth/Login'));
@@ -436,9 +436,9 @@ const exploreRoutesV3 = {
             parent: 'explore',
         },
         {
-            path: '/explore/building/overview/:filterType?',
+            path: '/explore/building/overview/:bldgId/:filterType?',
             name: 'Explore',
-            component: ExplorePage,
+            component: ExploreBuildingOverview,
             route: PrivateRoute,
             visibility: false,
             parent: 'explore',

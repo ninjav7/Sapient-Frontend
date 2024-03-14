@@ -20,6 +20,7 @@ import { getAverageValue } from '../../../../helpers/AveragePercent';
 import { updateBuildingStore } from '../../../../helpers/updateBuildingStore';
 import { dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../../../helpers/helpers';
 import { handleUnitConverstion } from '../../../settings/general-settings/utils';
+import { EXPLORE_FILTER_TYPE } from '../../constants';
 import SkeletonLoader from '../../../../components/SkeletonLoader';
 
 import '../../style.css';
@@ -63,7 +64,7 @@ const ExploreBySpace = (props) => {
         return (
             <div style={{ fontSize: 0 }}>
                 <Link
-                    to={`/explore-page/by-equipment/${row?.building_id}`}
+                    to={`/explore/building/overview/${row?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`}
                     className="typography-wrapper link mouse-pointer"
                     onClick={() => {
                         updateBuildingStore(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);
