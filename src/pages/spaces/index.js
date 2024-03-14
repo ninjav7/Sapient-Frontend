@@ -14,17 +14,17 @@ import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/help
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { fetchTopEnergyConsumptionBySpaceDataHelper } from '../../components/energyConsumptionBySpace/helpers';
 import SpacesListTable from './SpacesListTable';
+import { useHistory } from 'react-router-dom';
 
 const Spaces = () => {
     const { bldgId } = useParams();
+    const history = useHistory();
 
     const [buildingListData] = useAtom(buildingData);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
-    const startTime = DateRangeStore.useState((s) => s.startTime);
-    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
@@ -109,8 +109,8 @@ const Spaces = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: bldgId ? 'Building Overview' : 'Portfolio Overview',
-                    path: bldgId ? '/spaces/building/overview' : '/spaces/portfolio/overview',
+                    label: 'Building Overview',
+                    path: '/spaces/building/overview',
                     active: true,
                 },
             ];
@@ -118,7 +118,7 @@ const Spaces = () => {
         });
 
         ComponentStore.update((s) => {
-            s.parent = bldgId ? 'spaces-building' : 'spaces-portfolio';
+            s.parent = 'spaces-building';
         });
     };
 
@@ -159,6 +159,20 @@ const Spaces = () => {
                     bldgObj?.timezone,
                     bldgObj?.plug_only
                 );
+            }
+        } else {
+            const bldgObj = buildingListData[0];
+
+            if (bldgObj?.building_id) {
+                if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
+                updateBuildingStore(
+                    bldgObj?.building_id,
+                    bldgObj?.building_name,
+                    bldgObj?.timezone,
+                    bldgObj?.plug_only
+                );
+
+                history.push(`/spaces/building/overview/${bldgObj?.building_id}`);
             }
         }
 
