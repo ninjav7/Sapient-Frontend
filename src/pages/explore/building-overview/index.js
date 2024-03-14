@@ -145,6 +145,7 @@ const ExploreBuildingOverview = () => {
                     selectedConsumption={selectedConsumption}
                     selectedConsumptionLabel={selectedConsumptionLabel}
                     isInComparisonMode={isInComparisonMode}
+                    setComparisonMode={setComparisonMode}
                 />
             )}
 
@@ -155,6 +156,18 @@ const ExploreBuildingOverview = () => {
                     selectedConsumption={selectedConsumption}
                     selectedConsumptionLabel={selectedConsumptionLabel}
                     isInComparisonMode={isInComparisonMode}
+                    setComparisonMode={setComparisonMode}
+                />
+            )}
+
+            {selectedFilter === EXPLORE_FILTER_TYPE.BY_EQUIPMENT_TYPE && (
+                <ExploreBySpaceType
+                    bldgId={bldgId}
+                    selectedUnit={selectedUnit}
+                    selectedConsumption={selectedConsumption}
+                    selectedConsumptionLabel={selectedConsumptionLabel}
+                    isInComparisonMode={isInComparisonMode}
+                    setComparisonMode={setComparisonMode}
                 />
             )}
         </React.Fragment>

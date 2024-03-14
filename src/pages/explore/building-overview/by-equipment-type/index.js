@@ -34,7 +34,7 @@ import { truncateString, validateSeriesDataForEquipments } from '../../utils';
 import '../../style.css';
 import '../../styles.scss';
 
-const ExploreBySpace = (props) => {
+const ExploreByEquipmentType = (props) => {
     const {
         bldgId,
         selectedUnit,
@@ -484,4 +484,4 @@ const ExploreBySpace = (props) => {
     );
 };
 
-export default ExploreBySpace;
+export default ExploreByEquipmentType;
