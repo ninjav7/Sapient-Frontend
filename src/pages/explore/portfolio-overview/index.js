@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Spinner } from 'reactstrap';
+import { Row, Spinner } from 'reactstrap';
 import { Link } from 'react-router-dom';
 
 import { UserStore } from '../../../store/UserStore';
@@ -1001,8 +1001,8 @@ const ExplorePortfolioOverview = () => {
 
     return (
         <>
-            <Row className="d-flex justify-content-end">
-                <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
+            <Row className="d-flex justify-content-end m-0">
+                <div className="d-flex flex-column" style={{ gap: '0.75rem' }}>
                     <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
                         <Button
                             size={Button.Sizes.lg}
@@ -1030,8 +1030,10 @@ const ExplorePortfolioOverview = () => {
                 </div>
             </Row>
 
-            <Row>
-                <div className="explore-data-table-style p-2">
+            <Brick sizeInRem={1} />
+
+            <Row className="m-0">
+                <div className="explore-data-table-style">
                     {isFetchingChartData || isFetchingPastChartData ? (
                         <div className="explore-chart-wrapper">
                             <div className="explore-chart-loader">
@@ -1126,57 +1128,57 @@ const ExplorePortfolioOverview = () => {
                     )}
                 </div>
             </Row>
-            <Brick sizeInRem={0.75} />
-            <Row>
-                <div className="explore-data-table-style">
-                    <Col lg={12}>
-                        <DataTableWidget
-                            id="explore-by-building"
-                            isLoading={isExploreDataLoading}
-                            isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length + 1} noOfRows={10} />}
-                            isFilterLoading={isFilterFetching}
-                            onSearch={(e) => {
-                                setSearch(e);
-                                setCheckedAll(false);
-                            }}
-                            buttonGroupFilterOptions={[]}
-                            rows={currentRow()}
-                            searchResultRows={currentRow()}
-                            filterOptions={filterOptions}
-                            onDownload={() => handleDownloadCsv()}
-                            isCSVDownloading={isCSVDownloading}
-                            headers={tableHeader}
-                            customCheckAll={() => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="building1"
-                                    name="building1"
-                                    checked={checkedAll}
-                                    onChange={() => {
-                                        setCheckedAll(!checkedAll);
-                                    }}
-                                    disabled={!exploreBuildingsList || exploreBuildingsList.length > 20}
-                                />
-                            )}
-                            customCheckboxForCell={(record) => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="building_check"
-                                    name="building_check"
-                                    checked={selectedBldgIds.includes(record?.building_id)}
-                                    value={selectedBldgIds.includes(record?.building_id)}
-                                    onChange={(e) => {
-                                        handleBuildingStateChange(e.target.value, record, isInComparisonMode);
-                                    }}
-                                />
-                            )}
-                            totalCount={(() => {
-                                return totalItems;
-                            })()}
-                        />
-                    </Col>
+
+            <Brick sizeInRem={1} />
+
+            <Row className="m-0">
+                <div className="w-100">
+                    <DataTableWidget
+                        id="explore-by-building"
+                        isLoading={isExploreDataLoading}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={tableHeader.length + 1} noOfRows={10} />}
+                        isFilterLoading={isFilterFetching}
+                        onSearch={(e) => {
+                            setSearch(e);
+                            setCheckedAll(false);
+                        }}
+                        buttonGroupFilterOptions={[]}
+                        rows={currentRow()}
+                        searchResultRows={currentRow()}
+                        filterOptions={filterOptions}
+                        onDownload={() => handleDownloadCsv()}
+                        isCSVDownloading={isCSVDownloading}
+                        headers={tableHeader}
+                        customCheckAll={() => (
+                            <Checkbox
+                                label=""
+                                type="checkbox"
+                                id="building1"
+                                name="building1"
+                                checked={checkedAll}
+                                onChange={() => {
+                                    setCheckedAll(!checkedAll);
+                                }}
+                                disabled={!exploreBuildingsList || exploreBuildingsList.length > 20}
+                            />
+                        )}
+                        customCheckboxForCell={(record) => (
+                            <Checkbox
+                                label=""
+                                type="checkbox"
+                                id="building_check"
+                                name="building_check"
+                                checked={selectedBldgIds.includes(record?.building_id)}
+                                value={selectedBldgIds.includes(record?.building_id)}
+                                onChange={(e) => {
+                                    handleBuildingStateChange(e.target.value, record, isInComparisonMode);
+                                }}
+                            />
+                        )}
+                        totalCount={(() => {
+                            return totalItems;
+                        })()}
+                    />
                 </div>
             </Row>
         </>

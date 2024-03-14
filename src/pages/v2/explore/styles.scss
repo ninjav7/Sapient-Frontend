@@ -14,6 +14,13 @@
     background-color: $dataviz-background-2;
 }
 
+.explore-data-table-style {
+    background: $base-white;
+    box-sizing: border-box;
+    padding: 0rem;
+    width: 100%;
+}
+
 .explore-chart-loader {
     min-height: 50vh;
     display: flex;

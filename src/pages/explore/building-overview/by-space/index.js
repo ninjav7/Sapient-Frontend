@@ -23,7 +23,6 @@ import { handleUnitConverstion } from '../../../settings/general-settings/utils'
 import { EXPLORE_FILTER_TYPE } from '../../constants';
 import SkeletonLoader from '../../../../components/SkeletonLoader';
 
-import '../../style.css';
 import '../../styles.scss';
 
 const ExploreBySpace = (props) => {

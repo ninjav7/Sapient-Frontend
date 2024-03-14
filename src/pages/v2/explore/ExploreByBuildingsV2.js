@@ -39,7 +39,6 @@ import { getWeatherData } from '../../../services/weather';
 import { getExploreByBuildingTableCSVExport } from '../../../utils/tablesExport';
 import { fetchExploreByBuildingListV2, fetchExploreBuildingChart } from '../explore/services';
 
-import './style.css';
 import './styles.scss';
 
 const ExploreByBuildingsV2 = () => {
