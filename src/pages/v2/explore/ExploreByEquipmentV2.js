@@ -287,7 +287,7 @@ const ExploreByEquipmentV2 = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'Building View',
+                    label: 'Building Overview',
                     path: '/explore/building/overview',
                     active: true,
                 },
