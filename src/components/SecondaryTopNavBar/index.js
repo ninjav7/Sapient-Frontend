@@ -117,7 +117,12 @@ const SecondaryTopNavBar = () => {
         }
 
         if (path.includes('/explore/building/overview')) {
-            redirectToEndpoint(`/explore/building/overview/${record?.value}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`);
+            const filterType = path.split('/')[5];
+            redirectToEndpoint(
+                `/explore/building/overview/${record?.value}/${
+                    filterType ? filterType : EXPLORE_FILTER_TYPE.NO_GROUPING
+                }`
+            );
             return;
         }
 
@@ -239,7 +244,7 @@ const SecondaryTopNavBar = () => {
         <React.Fragment>
             <div className="fixed-secondary-nav buidling-switcher-container secondary-nav-style w-100">
                 <SecondaryNavBar
-                    onChangeBuilding={(e) => handleBldgSwitcherChange(e.value)}
+                    onChangeBuilding={(e) => handleBldgSwitcherChange(e?.value)}
                     buildings={buildingsList}
                     selectedBuilding={selectedBuilding}
                     breadCrumbsItems={breadcrumList}
