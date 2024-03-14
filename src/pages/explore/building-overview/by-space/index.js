@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import _ from 'lodash';
+import { Link } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { Row, UncontrolledTooltip, Progress, Spinner } from 'reactstrap';
 
@@ -17,6 +18,7 @@ import { Badge } from '../../../../sharedComponents/badge';
 import { Checkbox } from '../../../../sharedComponents/form/checkbox';
 import { DataTableWidget } from '../../../../sharedComponents/dataTableWidget';
 import { TrendsBadge } from '../../../../sharedComponents/trendsBadge';
+import useCSVDownload from '../../../../sharedComponents/hooks/useCSVDownload';
 import Typography from '../../../../sharedComponents/typography';
 
 import ExploreChart from '../../../../sharedComponents/exploreChart/ExploreChart';
@@ -28,8 +30,10 @@ import {
     formatXaxisForHighCharts,
     pageListSizes,
 } from '../../../../helpers/helpers';
+
+import { fetchSpaceListV2 } from '../../../spaces/services';
 import { UNITS } from '../../../../constants/units';
-import { truncateString, validateSeriesDataForEquipments } from '../../utils';
+import { getExploreByEquipmentTableCSVExport } from '../../../../utils/tablesExport';
 
 import '../../style.css';
 import '../../styles.scss';
@@ -44,16 +48,17 @@ const ExploreBySpace = (props) => {
         setComparisonMode,
     } = props;
 
+    const { download } = useCSVDownload();
+
     const [buildingListData] = useAtom(buildingData);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
-    const startTime = DateRangeStore.useState((s) => s.startTime);
-    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
+    const userPrefUnits = UserStore.useState((s) => s.unit);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
@@ -65,46 +70,86 @@ const ExploreBySpace = (props) => {
     const [totalItems, setTotalItems] = useState(0);
     const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
-    const [selectedEquipIds, setSelectedEquipIds] = useState([]);
-    const [filterObj, setFilterObj] = useState({});
-    const [filterOptions, setFilterOptions] = useState([]);
-    const [equipDataList, setEquipDataList] = useState([]);
+    const [spacesList, setSpacesList] = useState([]);
+    const [isDataFetching, setFetchingData] = useState([]);
 
-    const [seriesData, setSeriesData] = useState([]);
-    const [pastSeriesData, setPastSeriesData] = useState([]);
+    const [filterOptions, setFilterOptions] = useState([]);
 
     const [isFiltersFetching, setFiltersFetching] = useState(false);
     const [isFetchingChartData, setFetchingChartData] = useState(false);
     const [isFetchingPastChartData, setFetchingPastChartData] = useState(false);
-    const [isEquipDataFetching, setEquipDataFetching] = useState(false);
 
     const [checkedAll, setCheckedAll] = useState(false);
 
-    const [equipmentFilter, setEquipmentFilter] = useState({});
-
     const currentRow = () => {
-        return equipDataList;
+        return spacesList;
     };
+
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Building Overview',
+                    path: '/explore/building/overview',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'explore';
+        });
+    };
+
+    const handleDownloadCSV = async () => {
+        setDownloadingCSVData(true);
+
+        try {
+            if (spacesList && spacesList.length !== 0) {
+                download(
+                    `${bldgName}_Energy_Consumption_By_Space${new Date().toISOString().split('T')[0]}`,
+                    getExploreByEquipmentTableCSVExport(spacesList, headerProps)
+                );
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'CSV export completed successfully.';
+                    s.notificationType = 'success';
+                });
+            }
+        } catch {
+            UserStore.update((s) => {
+                s.showNotification = true;
+                s.notificationMessage = 'Data failed to export in CSV.';
+                s.notificationType = 'error';
+            });
+        }
+        setDownloadingCSVData(false);
+    };
+
+    const renderSpaceName = useCallback((row) => {
+        return (
+            <Link to={`/spaces/space/overview/${bldgId}/${row?.space_id}`}>
+                <p className="m-0">
+                    <u>{row?.space_name !== '' ? row?.space_name : '-'}</u>
+                </p>
+            </Link>
+        );
+    });
 
     const renderConsumption = useCallback((row) => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {`${formatConsumptionValue(Math.round(row?.consumption?.now / 1000))} ${UNITS.KWH}`}
+                    {`${formatConsumptionValue(Math.round(row?.consumption?.new / 1000))} ${UNITS.KWH}`}
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
-                <Progress multi className="custom-progress-bar">
+                <Progress multi className="custom-progress-bar" style={{ height: '6px' }}>
                     <Progress
                         bar
-                        value={row?.consumption?.now}
-                        max={row?.totalBldgUsage}
+                        value={row?.consumption?.new}
+                        max={row?.total_building_usage}
                         barClassName="custom-on-hour"
-                    />
-                    <Progress
-                        bar
-                        value={row?.consumption?.off_hours}
-                        max={row?.totalBldgUsage}
-                        barClassName="custom-off-hour"
+                        style={{ backgroundColor: row?.consumptionBarColor }}
                     />
                 </Progress>
             </>
@@ -112,60 +157,45 @@ const ExploreBySpace = (props) => {
     });
 
     const renderPerChange = useCallback((row) => {
+        const change = row?.consumption?.changes;
+
         return (
-            <TrendsBadge
-                value={Math.abs(Math.round(row?.consumption?.change))}
-                type={
-                    row?.consumption?.change === 0
-                        ? TrendsBadge.Type.NEUTRAL_TREND
-                        : row?.consumption?.now < row?.consumption?.old
-                        ? TrendsBadge.Type.DOWNWARD_TREND
-                        : TrendsBadge.Type.UPWARD_TREND
-                }
-            />
+            Number.isFinite(change) && (
+                <TrendsBadge
+                    value={Math.abs(Math.round(change))}
+                    type={
+                        change === 0
+                            ? TrendsBadge.Type.NEUTRAL_TREND
+                            : row?.consumption?.new < row?.consumption?.old
+                            ? TrendsBadge.Type.DOWNWARD_TREND
+                            : TrendsBadge.Type.UPWARD_TREND
+                    }
+                />
+            )
         );
     });
 
-    const renderBreakers = useCallback((row) => {
-        return (
-            <div className="breakers-row-content">
-                {row?.breaker_number.length === 0 ? (
-                    <Typography.Body>-</Typography.Body>
-                ) : (
-                    <Badge text={<span className="gray-950">{row?.breaker_number.join(', ')}</span>} />
-                )}
-            </div>
-        );
-    });
+    const renderSquareUnits = useCallback(
+        (row) => {
+            const formatSquareString = (string) => `${string} ${userPrefUnits === 'si' ? UNITS.SQ_M : UNITS.SQ_FT}`;
 
-    const renderNotes = useCallback((row) => {
-        let renderText = !row?.note || row?.note === '' ? '-' : row?.note;
-        if (renderText?.length > 50) renderText = truncateString(renderText);
-
-        return (
-            <div style={{ maxWidth: '15rem' }}>
+            return (
                 <Typography.Body size={Typography.Sizes.md}>
-                    {renderText}
-                    {row?.note?.length > 50 && (
-                        <>
-                            <div
-                                className="d-inline mouse-pointer"
-                                id={`notes-badge-${row?.equipment_id}`}>{` ...`}</div>
-                            <UncontrolledTooltip placement="top" target={`notes-badge-${row?.equipment_id}`}>
-                                {row?.note}
-                            </UncontrolledTooltip>
-                        </>
-                    )}
+                    {row?.square_footage
+                        ? formatSquareString(row?.square_footage.toLocaleString())
+                        : formatSquareString('0')}
                 </Typography.Body>
-            </div>
-        );
-    });
+            );
+        },
+        [userPrefUnits]
+    );
 
     const renderTags = useCallback((row) => {
-        const slicedArr = row?.tags.slice(1);
+        const slicedArr = row?.tag.slice(1);
+
         return (
             <div className="tag-row-content">
-                <Badge text={<span className="gray-950">{row?.tags[0] ? row?.tags[0] : 'none'}</span>} />
+                <Badge text={<span className="gray-950">{row?.tag[0] ? row.tag[0] : 'none'}</span>} />
                 {slicedArr?.length > 0 ? (
                     <>
                         <Badge
@@ -189,49 +219,11 @@ const ExploreBySpace = (props) => {
         );
     });
 
-    const renderEquipmentName = useCallback((row) => {
-        return (
-            <div style={{ fontSize: 0 }}>
-                <a
-                    className="typography-wrapper link mouse-pointer"
-                    onClick={() => {
-                        setEquipmentFilter({
-                            equipment_id: row?.equipment_id,
-                            equipment_name: row?.equipment_name,
-                            device_type: row?.device_type,
-                        });
-                        localStorage.setItem('exploreEquipName', row?.equipment_name);
-                    }}>
-                    {row?.equipment_name !== '' ? row?.equipment_name : '-'}
-                </a>
-                <Brick sizeInPixels={3} />
-            </div>
-        );
-    });
-
-    const updateBreadcrumbStore = () => {
-        BreadcrumbStore.update((bs) => {
-            let newList = [
-                {
-                    label: 'Building Overview',
-                    path: '/explore/building/overview',
-                    active: true,
-                },
-            ];
-            bs.items = newList;
-        });
-        ComponentStore.update((s) => {
-            s.parent = 'explore';
-        });
-    };
-
-    const handleEquipStateChange = () => {};
-
     const headerProps = [
         {
             name: 'Name',
-            accessor: 'equipment_name',
-            callbackValue: renderEquipmentName,
+            accessor: 'space_name',
+            callbackValue: renderSpaceName,
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
@@ -242,59 +234,72 @@ const ExploreBySpace = (props) => {
         },
         {
             name: '% Change',
-            accessor: 'change',
+            accessor: 'changes',
             callbackValue: renderPerChange,
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: 'Location',
-            accessor: 'location',
+            name: 'Floor',
+            accessor: 'floor_name',
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Space Type',
-            accessor: 'location_type',
+            accessor: 'space_type_name',
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: 'Equipment Type',
-            accessor: 'equipments_type',
+            name: 'Equipment Number',
+            accessor: 'equipment_count',
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: 'End Use Category',
-            accessor: 'end_user',
+            name: userPrefUnits === 'si' ? `Square Meters` : `Square Footage`,
+            accessor: 'square_footage',
+            callbackValue: renderSquareUnits,
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Tags',
-            accessor: 'tags',
+            accessor: 'tag',
             callbackValue: renderTags,
             onSort: (method, name) => setSortBy({ method, name }),
         },
-        {
-            name: 'Panel Name',
-            accessor: 'panel',
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Breakers',
-            accessor: 'breaker_number',
-            callbackValue: renderBreakers,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
-            name: 'Notes',
-            accessor: 'note',
-            callbackValue: renderNotes,
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
     ];
+
+    const fetchSpacesList = async () => {
+        setFetchingData(true);
+        setSpacesList([]);
+        setTotalItems(0);
+
+        const orderedBy = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
+        const sortedBy = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
+        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo: timeZone };
+
+        await fetchSpaceListV2(query)
+            .then((res) => {
+                const data = res;
+                if (data && data.length !== 0) {
+                    setSpacesList(data);
+                    setTotalItems(data.length);
+                }
+            })
+            .catch((err) => {})
+            .finally(() => {
+                setFetchingData(false);
+            });
+    };
 
     useEffect(() => {
         window.scrollTo(0, 0);
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        if (!bldgId || !startDate || !endDate) return;
+
+        fetchSpacesList();
+    }, [startDate, endDate, bldgId, search, sortBy, pageSize, pageNo, userPrefUnits]);
 
     useEffect(() => {
         if (pageNo !== 1 || pageSize !== 20) {
@@ -318,9 +323,6 @@ const ExploreBySpace = (props) => {
         }
     }, [bldgId, buildingListData]);
 
-    const dataToRenderOnChart = validateSeriesDataForEquipments(selectedEquipIds, equipDataList, seriesData);
-    const pastDataToRenderOnChart = validateSeriesDataForEquipments(selectedEquipIds, equipDataList, pastSeriesData);
-
     return (
         <React.Fragment>
             <Row className="m-0">
@@ -337,8 +339,8 @@ const ExploreBySpace = (props) => {
                                 <ExploreCompareChart
                                     title={''}
                                     subTitle={''}
-                                    data={dataToRenderOnChart}
-                                    pastData={pastDataToRenderOnChart}
+                                    data={[]}
+                                    pastData={[]}
                                     tooltipUnit={selectedUnit}
                                     tooltipLabel={selectedConsumptionLabel}
                                     timeIntervalObj={{
@@ -365,7 +367,7 @@ const ExploreBySpace = (props) => {
                                     tooltipValuesKey={'{point.y:.1f}'}
                                     tooltipUnit={selectedUnit}
                                     tooltipLabel={selectedConsumptionLabel}
-                                    data={dataToRenderOnChart}
+                                    data={[]}
                                     chartProps={{
                                         navigator: {
                                             outlineWidth: 0,
@@ -427,8 +429,8 @@ const ExploreBySpace = (props) => {
             <Row className="m-0">
                 <div className="w-100">
                     <DataTableWidget
-                        id="explore-by-equipment"
-                        isLoading={isEquipDataFetching}
+                        id="explore-by-spaces"
+                        isLoading={isDataFetching}
                         isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={20} />}
                         isFilterLoading={isFiltersFetching}
                         onSearch={(e) => {
@@ -439,10 +441,9 @@ const ExploreBySpace = (props) => {
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         filterOptions={filterOptions}
-                        onDownload={() => {}}
+                        onDownload={handleDownloadCSV}
                         isCSVDownloading={isCSVDownloading}
                         headers={headerProps}
-                        customExcludedHeaders={['Panel Name', 'Breakers', 'Notes']}
                         customCheckAll={() => (
                             <Checkbox
                                 label=""
@@ -453,7 +454,7 @@ const ExploreBySpace = (props) => {
                                 onChange={() => {
                                     setCheckedAll(!checkedAll);
                                 }}
-                                disabled={!equipDataList || equipDataList.length > 20 || isInComparisonMode}
+                                disabled={!spacesList || spacesList.length > 20 || isInComparisonMode}
                             />
                         )}
                         customCheckboxForCell={(record) => (
@@ -462,11 +463,11 @@ const ExploreBySpace = (props) => {
                                 type="checkbox"
                                 id="equip"
                                 name="equip"
-                                checked={selectedEquipIds.includes(record?.equipment_id)}
-                                value={selectedEquipIds.includes(record?.equipment_id)}
-                                onChange={(e) => {
-                                    handleEquipStateChange(e.target.value, record, isInComparisonMode);
-                                }}
+                                // checked={selectedEquipIds.includes(record?.equipment_id)}
+                                // value={selectedEquipIds.includes(record?.equipment_id)}
+                                // onChange={(e) => {
+                                //     handleEquipStateChange(e.target.value, record, isInComparisonMode);
+                                // }}
                             />
                         )}
                         pageSize={pageSize}
