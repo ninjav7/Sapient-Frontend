@@ -10,7 +10,7 @@ import { convertToUserLocalTime } from '../../helpers/helpers';
 import Button from '../../sharedComponents/button/Button';
 import { ReactComponent as TelescopeSVG } from '../../assets/icon/telescope-purple.svg';
 
-const Header = ({ type, title, showExplore = false }) => {
+const Header = ({ type, title, showExplore = false, showCalendar = true }) => {
     const filterPeriod = DateRangeStore.useState((s) => s.filterPeriod);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -85,30 +85,32 @@ const Header = ({ type, title, showExplore = false }) => {
             {type === 'page' && (
                 <div className="d-flex justify-content-between">
                     <div className="heading-style d-flex align-items-center">{title}</div>
-                    <div
-                        className="btn-group custom-button-group header-widget-styling"
-                        role="group"
-                        aria-label="Basic example">
-                        <div>
-                            <TimeFrameSelector
-                                onCustomDateChange={onCustomDateChange}
-                                onDateFilterChange={onDateFilterChange}
-                                rangeDate={rangeDate}
-                                timeOptions={customOptions}
-                                defaultValue={filterPeriod}
-                                isTimeSelectionEnabled={isTimeSelectionEnabled}
-                            />
+                    {showCalendar && (
+                        <div
+                            className="btn-group custom-button-group header-widget-styling"
+                            role="group"
+                            aria-label="Basic example">
+                            <div>
+                                <TimeFrameSelector
+                                    onCustomDateChange={onCustomDateChange}
+                                    onDateFilterChange={onDateFilterChange}
+                                    rangeDate={rangeDate}
+                                    timeOptions={customOptions}
+                                    defaultValue={filterPeriod}
+                                    isTimeSelectionEnabled={isTimeSelectionEnabled}
+                                />
+                            </div>
+                            {showExplore && (
+                                <Button
+                                    size={Button.Sizes.md}
+                                    type="secondary"
+                                    icon={<TelescopeSVG />}
+                                    label="Explore"
+                                    className="ml-2"
+                                />
+                            )}
                         </div>
-                        {showExplore && (
-                            <Button
-                                size={Button.Sizes.md}
-                                type="secondary"
-                                icon={<TelescopeSVG />}
-                                label="Explore"
-                                className="ml-2"
-                            />
-                        )}
-                    </div>
+                    )}
                 </div>
             )}
 
