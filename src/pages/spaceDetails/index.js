@@ -202,7 +202,7 @@ const SpaceDetails = () => {
 
         const alertObj = {};
 
-        if (!spaceObj?.name || spaceObj?.name === '') alertObj.name = `Please enter Space name. It cannot be empty.`;
+        if (!spaceObj?.name || spaceObj?.name === '') alertObj.name = `Please enter Space name. It can not be empty.`;
         if (!spaceObj?.type_id || spaceObj?.type_id === '') alertObj.type_id = { text: `Please select Type.` };
         if (Number(spaceObj?.square_footage) < 0)
             alertObj.square_footage = { text: `Please enter Square footage from 0.` };
@@ -391,7 +391,6 @@ const SpaceDetails = () => {
                     <ConfigurationTab
                         bldgId={bldgId}
                         spaceId={spaceId}
-                        metadata={metadata}
                         selectedFloorId={selectedFloorId}
                         spaceObj={spaceObj}
                         setSpaceObj={setSpaceObj}
