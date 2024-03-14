@@ -1,8 +1,8 @@
 import React from 'react';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import Typography from '../../../sharedComponents/typography';
-import colorPalette from '../../../assets/scss/_colors.scss';
-import { formatConsumptionValue } from '../../../helpers/explorehelpers';
+import Typography from '../../sharedComponents/typography';
+import colorPalette from '../../assets/scss/_colors.scss';
+import { formatConsumptionValue } from '../../helpers/explorehelpers';
 
 const MetadataContainer = ({ metadata = {}, isFetching = false }) => {
     return (

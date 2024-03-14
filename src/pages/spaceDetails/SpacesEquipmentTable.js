@@ -46,6 +46,7 @@ const SpacesEquipmentTable = () => {
         // const sortedBy = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
 
         try {
+            // work here for equipment list
             const data = await fetchExploreEquipmentList(
                 startDate,
                 endDate,
@@ -59,15 +60,10 @@ const SpacesEquipmentTable = () => {
                 1
             );
 
-            console.log(1);
-            console.log(data);
-
             if (data && Array.isArray(data) && data.length !== 0) {
                 setSpaces();
             }
-        } catch (error) {
-            console.log(2);
-            console.log(error);
+        } catch {
             setSpaces([]);
         }
 

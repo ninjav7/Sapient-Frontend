@@ -1,10 +1,10 @@
 import React from 'react';
 import moment from 'moment';
 import Skeleton from 'react-loading-skeleton';
-import { formatConsumptionValue } from '../../../helpers/explorehelpers';
-import { UserStore } from '../../../store/UserStore';
-import { DateRangeStore } from '../../../store/DateRangeStore';
-import Typography from '../../../sharedComponents/typography';
+import { formatConsumptionValue } from '../../helpers/explorehelpers';
+import { UserStore } from '../../store/UserStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
+import Typography from '../../sharedComponents/typography';
 
 const EnergyMetadataContainer = ({ metadata = {}, isFetching = false }) => {
     const { total_energy_consumption, peak_power = {} } = metadata;
