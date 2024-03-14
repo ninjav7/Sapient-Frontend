@@ -122,6 +122,8 @@ const ConfigurationTab = ({
 
                 const spaceObjFound = spaces.find((space) => space._id === spaceId);
 
+                spaceObjFound.square_footage = spaceObjFound?.square_footage ? spaceObjFound.square_footage : '0';
+
                 setSpaceObj(spaceObjFound);
             } else {
                 setSpacesList([]);

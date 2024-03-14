@@ -279,7 +279,7 @@ const SpaceDetails = () => {
     };
 
     const selectedMetricsTab = () => setSelectedTab(0);
-    const selectedConfiguresTab = () => setSelectedTab(1);
+    const selectedConfiguresTab = () => !metadataFetching && !chartDataFetching && setSelectedTab(1);
     const dynamicActiveClassTab = (selectedIdTab) => (selectedTab === selectedIdTab ? 'active-tab-style' : '');
     const handleSelect = (e) => setSelectedConsumption(e.value);
     const spaceName = metadata?.space_name && metadata.space_name;
@@ -376,6 +376,10 @@ const SpaceDetails = () => {
                                     />
                                 )}
                                 <Brick sizeInRem={2} />
+
+                                <Header title="Equipments" type="page" showExplore={false} showCalendar={false} />
+
+                                <Brick sizeInRem={1} />
 
                                 <SpacesEquipmentTable />
                             </Col>

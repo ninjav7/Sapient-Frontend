@@ -71,7 +71,7 @@ const SpacesEquipmentTable = () => {
     };
 
     useEffect(() => {
-        if (!bldgId || startDate === null || endDate === null) return;
+        if (!bldgId || !startDate || !endDate) return;
 
         fetchEquipDataList();
     }, [startDate, endDate, bldgId, search, sortBy, pageSize, pageNo, userPrefUnits]);
@@ -247,27 +247,25 @@ const SpacesEquipmentTable = () => {
     };
 
     return (
-        <Col lg={12}>
-            <DataTableWidget
-                id="explore-by-equipment"
-                isLoading={spacesLoading}
-                isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={20} />}
-                onSearch={handleSearch}
-                buttonGroupFilterOptions={[]}
-                rows={spaces}
-                searchResultRows={spaces}
-                filterOptions={[]}
-                headers={headerProps}
-                // pageSize={pageSize}
-                // currentPage={pageNo}
-                // onPageSize={setPageSize}
-                // onChangePage={setPageNo}
-                // pageListSizes={pageListSizes}
-                // totalCount={totalItems}
-                isCSVDownloading={isCSVDownloading}
-                onDownload={handleDownloadCSV}
-            />
-        </Col>
+        <DataTableWidget
+            id="explore-by-equipment"
+            isLoading={spacesLoading}
+            isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={20} />}
+            onSearch={handleSearch}
+            buttonGroupFilterOptions={[]}
+            rows={spaces}
+            searchResultRows={spaces}
+            filterOptions={[]}
+            headers={headerProps}
+            // pageSize={pageSize}
+            // currentPage={pageNo}
+            // onPageSize={setPageSize}
+            // onChangePage={setPageNo}
+            // pageListSizes={pageListSizes}
+            // totalCount={totalItems}
+            isCSVDownloading={isCSVDownloading}
+            onDownload={handleDownloadCSV}
+        />
     );
 };
 

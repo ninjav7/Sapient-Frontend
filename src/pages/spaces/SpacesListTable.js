@@ -16,8 +16,9 @@ import { fetchSpaceListV2 } from './services';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { Link } from 'react-router-dom';
+import Header from '../../components/Header';
 
-const SpacesListTable = ({ colorfulSpaces }) => {
+const SpacesListTable = () => {
     const { download } = useCSVDownload();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -48,20 +49,7 @@ const SpacesListTable = ({ colorfulSpaces }) => {
             const data = await fetchSpaceListV2(query);
 
             if (data && Array.isArray(data) && data.length !== 0) {
-                const updatedData = data.map((space) => {
-                    const identicalColorfulSpace = colorfulSpaces.find(
-                        (colorfulSpace) => colorfulSpace.space_id === space.space_id
-                    );
-
-                    const newSpaceData = {
-                        ...space,
-                        consumptionBarColor: identicalColorfulSpace?.color,
-                    };
-
-                    return newSpaceData;
-                });
-
-                setSpaces(updatedData);
+                setSpaces(data);
             }
         } catch {
             setSpaces([]);
@@ -74,7 +62,7 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         if (!bldgId || startDate === null || endDate === null) return;
 
         fetchEquipDataList();
-    }, [startDate, endDate, bldgId, search, sortBy, pageSize, pageNo, colorfulSpaces, userPrefUnits]);
+    }, [startDate, endDate, bldgId, search, sortBy, pageSize, pageNo, userPrefUnits]);
 
     const handleDownloadCSV = async () => {
         setDownloadingCSVData(true);
@@ -248,7 +236,11 @@ const SpacesListTable = ({ colorfulSpaces }) => {
     };
 
     return (
-        <Col lg={12}>
+        <>
+            <Header title="Spaces" type="page" showExplore={false} showCalendar={false} />
+
+            <Brick sizeInRem={1} />
+
             <DataTableWidget
                 id="explore-by-equipment"
                 isLoading={spacesLoading}
@@ -268,7 +260,7 @@ const SpacesListTable = ({ colorfulSpaces }) => {
                 isCSVDownloading={isCSVDownloading}
                 onDownload={handleDownloadCSV}
             />
-        </Col>
+        </>
     );
 };
 
