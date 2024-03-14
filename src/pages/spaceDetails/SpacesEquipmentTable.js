@@ -71,7 +71,7 @@ const SpacesEquipmentTable = () => {
     };
 
     useEffect(() => {
-        if (!bldgId || startDate === null || endDate === null) return;
+        if (!bldgId || !startDate || !endDate) return;
 
         fetchEquipDataList();
     }, [startDate, endDate, bldgId, search, sortBy, pageSize, pageNo, userPrefUnits]);
