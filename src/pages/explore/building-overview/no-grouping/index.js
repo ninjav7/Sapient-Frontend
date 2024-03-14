@@ -2,31 +2,30 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Spinner } from 'reactstrap';
 import { Link } from 'react-router-dom';
 
-import { UserStore } from '../../../store/UserStore';
-import { DateRangeStore } from '../../../store/DateRangeStore';
-import { ComponentStore } from '../../../store/ComponentStore';
-import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { UserStore } from '../../../../store/UserStore';
+import { DateRangeStore } from '../../../../store/DateRangeStore';
+import { ComponentStore } from '../../../../store/ComponentStore';
+import { BreadcrumbStore } from '../../../../store/BreadcrumbStore';
 
-import Brick from '../../../sharedComponents/brick';
-import Typography from '../../../sharedComponents/typography';
-import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
-import { Checkbox } from '../../../sharedComponents/form/checkbox';
-import ExploreChart from '../../../sharedComponents/exploreChart/ExploreChart';
-import { TinyBarChart } from '../../../sharedComponents/tinyBarChart';
-import { TrendsBadge } from '../../../sharedComponents/trendsBadge';
-import ExploreCompareChart from '../../../sharedComponents/exploreCompareChart/ExploreCompareChart';
+import Brick from '../../../../sharedComponents/brick';
+import Typography from '../../../../sharedComponents/typography';
+import { DataTableWidget } from '../../../../sharedComponents/dataTableWidget';
+import { Checkbox } from '../../../../sharedComponents/form/checkbox';
+import ExploreChart from '../../../../sharedComponents/exploreChart/ExploreChart';
+import { TinyBarChart } from '../../../../sharedComponents/tinyBarChart';
+import { TrendsBadge } from '../../../../sharedComponents/trendsBadge';
+import ExploreCompareChart from '../../../../sharedComponents/exploreCompareChart/ExploreCompareChart';
 
-import { getAverageValue } from '../../../helpers/AveragePercent';
-import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
-import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
-import { dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../../helpers/helpers';
-import { handleUnitConverstion } from '../../settings/general-settings/utils';
-import SkeletonLoader from '../../../components/SkeletonLoader';
+import { getAverageValue } from '../../../../helpers/AveragePercent';
+import { updateBuildingStore } from '../../../../helpers/updateBuildingStore';
+import { dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../../../helpers/helpers';
+import { handleUnitConverstion } from '../../../settings/general-settings/utils';
+import SkeletonLoader from '../../../../components/SkeletonLoader';
 
-import '../style.css';
-import '../styles.scss';
+import '../../style.css';
+import '../../styles.scss';
 
-const ExploreByEquipmentType = (props) => {
+const ExploreByNoGrouping = (props) => {
     const { selectedUnit, selectedConsumption, selectedConsumptionLabel, isInComparisonMode } = props;
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -142,7 +141,14 @@ const ExploreByEquipmentType = (props) => {
 
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
-            bs.items = [];
+            let newList = [
+                {
+                    label: 'Portfolio Level',
+                    path: '/explore-page/by-buildings',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
         });
         ComponentStore.update((s) => {
             s.parent = 'explore';
@@ -298,4 +304,4 @@ const ExploreByEquipmentType = (props) => {
     );
 };
 
-export default ExploreByEquipmentType;
+export default ExploreByNoGrouping;

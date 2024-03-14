@@ -26,7 +26,10 @@ import UserProfile from '../pages/settings/users/UserProfile';
 import SingleRole from '../pages/settings/roles/SingleRole';
 import SingleRoleNew from '../pages/settings/roles/SingleRoleNew';
 import IndividualUtilityMeter from '../pages/settings/utility-meters/IndividualUtilityMeter';
-import ExplorePage from '../pages/explore';
+
+// Explore Component
+const ExploreOverview = React.lazy(() => import('../pages/explore/portfolio-overview'));
+const ExplorePage = React.lazy(() => import('../pages/explore'));
 
 // Auth Components
 const Login = React.lazy(() => import('../pages/auth/Login'));
@@ -63,10 +66,6 @@ const AlertConfig = React.lazy(() => import('../pages/alerts/alert-config'));
 // Control Components
 const PlugRule = React.lazy(() => import('../pages/controls/PlugRule'));
 const PlugRules = React.lazy(() => import('../pages/controls/PlugRules'));
-
-// Explore Module V2
-const ExploreByEquipmentV2 = React.lazy(() => import('../pages/v2/explore/ExploreByEquipmentV2'));
-const ExploreByBuildingsV2 = React.lazy(() => import('../pages/v2/explore/ExploreByBuildingsV2'));
 
 // Super-user Components
 const Accounts = React.lazy(() => import('../pages/superUser/accounts'));
@@ -421,42 +420,23 @@ const settingsRoutes = {
     roles: ['Admin'],
 };
 
-// Explore Routes V2
-const exploreRoutesV2 = {
-    path: '/v2/explore-page/v2/by-buildings',
-    name: 'Explore',
-    visibility: true,
-    children: [
-        {
-            path: '/v2/explore-page/by-buildings',
-            name: 'Explore by Building',
-            component: ExploreByBuildingsV2,
-            route: PrivateRoute,
-            parent: 'explore',
-            visibility: false,
-        },
-        {
-            path: '/v2/explore-page/by-equipment/:bldgId',
-            name: 'Explore by Equipment',
-            component: ExploreByEquipmentV2,
-            route: PrivateRoute,
-            parent: 'explore',
-            visibility: false,
-        },
-    ],
-    icon: FeatherIcon.PieChart,
-    roles: ['Admin'],
-};
-
-// Explore Routes V3
+// Explore Routes
 const exploreRoutesV3 = {
-    path: '/explore/overview/:filterType?',
+    path: '/explore/portfolio/overview',
     name: 'Explore',
-    component: ExplorePage,
+    component: ExploreOverview,
     visibility: true,
     children: [
         {
-            path: '/explore/overview/:filterType?',
+            path: '/explore/portfolio/overview',
+            name: 'Explore',
+            component: ExploreOverview,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'explore',
+        },
+        {
+            path: '/explore/building/overview/:filterType?',
             name: 'Explore',
             component: ExplorePage,
             route: PrivateRoute,
