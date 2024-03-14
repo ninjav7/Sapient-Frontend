@@ -12,7 +12,7 @@ import Typography from '../../../sharedComponents/typography';
 
 import ExploreByNoGrouping from './no-grouping';
 import ExploreBySpace from './by-space';
-import ExploreBySpaceType from './by-spaceType';
+import ExploreBySpaceType from './by-space-type';
 
 import { UserStore } from '../../../store/UserStore';
 import { ExploreStore } from '../../../store/ExploreStore';
