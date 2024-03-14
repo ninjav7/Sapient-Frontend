@@ -421,7 +421,7 @@ const settingsRoutes = {
 };
 
 // Explore Routes
-const exploreRoutesV3 = {
+const exploreRoutes = {
     path: '/explore/portfolio/overview',
     name: 'Explore',
     component: ExploreOverview,
@@ -601,8 +601,7 @@ const allRoutes = [
     alertsRoutes,
     controlRoutes,
     carbonRoutes,
-    exploreRoutesV3,
-    // exploreRoutes,
+    exploreRoutes,
     adminRoutes,
     authRoutes,
 ];
@@ -614,8 +613,7 @@ const authProtectedRoutes = [
     alertsRoutes,
     carbonRoutes,
     controlRoutes,
-    exploreRoutesV3,
-    // exploreRoutes,
+    exploreRoutes,
     adminRoutes,
 ];
 

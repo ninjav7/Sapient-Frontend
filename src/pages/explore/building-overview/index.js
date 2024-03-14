@@ -44,7 +44,7 @@ const ExploreFilters = (props) => {
     );
 };
 
-const ExplorePage = () => {
+const ExploreBuildingOverview = () => {
     const { bldgId, filterType = EXPLORE_FILTER_TYPE.NO_GROUPING } = useParams();
     const history = useHistory();
 
@@ -158,4 +158,4 @@ const ExplorePage = () => {
     );
 };
 
-export default ExplorePage;
+export default ExploreBuildingOverview;

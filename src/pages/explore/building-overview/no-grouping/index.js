@@ -44,8 +44,13 @@ import '../../style.css';
 import '../../styles.scss';
 
 const ExploreByNoGrouping = (props) => {
-    const { selectedUnit, selectedConsumption, selectedConsumptionLabel, isInComparisonMode, setComparisonMode } =
-        props;
+    const {
+        selectedUnit,
+        selectedConsumption,
+        selectedConsumptionLabel,
+        isInComparisonMode = false,
+        setComparisonMode,
+    } = props;
 
     const { bldgId } = useParams();
     const { download } = useCSVDownload();
