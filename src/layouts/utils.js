@@ -6,10 +6,4 @@ export const deviceConfigRoutes = [
 ];
 
 export const secondaryNavBarNotRequiredRoutes = ['/login', '/super-user'];
-export const sideNavNotBarRequiredRoutes = [
-    '/explore-page/',
-    '/super-user/',
-    '/control/plug-rules/',
-    '/login',
-    '/spaces',
-];
+export const sideNavNotBarRequiredRoutes = ['/explore-page/', '/super-user/', '/control/plug-rules/', '/login'];

@@ -41,8 +41,9 @@ const ExploreBuildingPeak = React.lazy(() => import('../pages/peakDemand/Explore
 // Energy-Buildings Components
 const Building = React.lazy(() => import('../pages/buildings'));
 
-// Energy-Spaces Components
+// Spaces Components
 const Spaces = React.lazy(() => import('../pages/spaces'));
+const SpaceDetails = React.lazy(() => import('../pages/spaceDetails'));
 
 // Energy-End-uses Components
 const EndUses = React.lazy(() => import('../pages/endUses'));
@@ -171,27 +172,35 @@ const portfolioRoutes = {
 
 // Spaces Routes
 const spacesRoutes = {
-    path: '/spaces',
+    path: '/spaces/portfolio/overview',
     name: 'Spaces',
     component: Spaces,
     visibility: true,
     children: [
         {
-            path: '/spaces/:bldgId',
-            name: 'Spaces',
+            path: '/spaces/portfolio/overview',
+            name: 'Portfolio Overview',
             component: Spaces,
             route: PrivateRoute,
-            visibility: false,
-            parent: 'spaces',
+            visibility: true,
+            parent: 'spaces-portfolio',
         },
-        // {
-        //     path: '/carbon/building/overview/:bldgId',
-        //     name: 'Building Overview',
-        //     component: CarbonBuilding,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'carbon-buildings',
-        // },
+        {
+            path: '/spaces/building/overview/:bldgId',
+            name: 'Building Overview',
+            component: Spaces,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'spaces-building',
+        },
+        {
+            path: '/spaces/space/overview/:bldgId/:spaceId',
+            name: 'Space Details',
+            component: SpaceDetails,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'spaces-building',
+        },
     ],
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],

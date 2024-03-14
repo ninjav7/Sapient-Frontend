@@ -189,15 +189,18 @@ const SideNav = () => {
                 let str1 = item.path.split('/')[2];
                 let str2 = location.pathname.split('/')[2];
                 let active = str1.localeCompare(str2);
+
                 let className = active === 0 ? 'active' : '';
 
                 return (
-                    <div
-                        className={`side-nav-content mouse-pointer ${className}`}
-                        key={index}
-                        onClick={() => handleRouteChange(item)}>
-                        {item.name}
-                    </div>
+                    <>
+                        <div
+                            className={`side-nav-content mouse-pointer ${className}`}
+                            key={index}
+                            onClick={() => handleRouteChange(item)}>
+                            {item.name}
+                        </div>
+                    </>
                 );
             })}
         </div>

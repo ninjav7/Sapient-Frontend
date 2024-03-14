@@ -1013,7 +1013,7 @@ const BuildingOverview = () => {
                         dateFormat={dateFormat}
                         daysCount={daysCount}
                         isChartLoading={chartLoading}
-                        onMoreDetail={() => handleRouteChange('/energy/spaces')}
+                        onMoreDetail={() => handleRouteChange('/spaces/building/overview')}
                     />
                 </div>
 

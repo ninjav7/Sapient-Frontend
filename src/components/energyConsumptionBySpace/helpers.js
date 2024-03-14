@@ -23,9 +23,7 @@ export const fetchTopEnergyConsumptionBySpaceDataHelper = async ({ query }) => {
 
         data.forEach((data) => {
             if (index === 0) newSpacesColumnCategories.push(data?.time_stamp);
-            spaceColumnData.data.push(
-                isNaN(data?.consumption) ? data?.consumption : parseFloat((data?.consumption / 1000).toFixed(2))
-            );
+            spaceColumnData.data.push(isNaN(data?.consumption) ? 0 : parseFloat((data?.consumption / 1000).toFixed(2)));
         });
 
         newSpacesData.push(spaceData);
@@ -34,5 +32,6 @@ export const fetchTopEnergyConsumptionBySpaceDataHelper = async ({ query }) => {
     });
 
     const result = { newSpacesColumnCategories, newSpacesData, newSpacesColumnChartData, newSpacesDataCategories };
+
     return result;
 };
