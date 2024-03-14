@@ -11,11 +11,8 @@ import Toggles from '../../../sharedComponents/toggles/Toggles';
 import Typography from '../../../sharedComponents/typography';
 
 import ExploreByNoGrouping from './no-grouping';
-import ExploreByEndUse from './by-enduse';
 import ExploreBySpace from './by-space';
 import ExploreBySpaceType from './by-spaceType';
-import ExploreByFloor from './by-floor';
-import ExploreByEquipmentType from './by-equipment-type';
 
 import { UserStore } from '../../../store/UserStore';
 import { ExploreStore } from '../../../store/ExploreStore';
@@ -48,8 +45,8 @@ const ExploreFilters = (props) => {
 };
 
 const ExplorePage = () => {
+    const { bldgId, filterType = EXPLORE_FILTER_TYPE.NO_GROUPING } = useParams();
     const history = useHistory();
-    const { filterType = EXPLORE_FILTER_TYPE.NO_GROUPING } = useParams();
 
     const selectedFilter = ExploreStore.useState((s) => s.selectedFilter);
 
@@ -69,7 +66,7 @@ const ExplorePage = () => {
 
     const handleMenuItemClick = ({ key }) => {
         history.push({
-            pathname: `/explore/overview/${key}`,
+            pathname: `/explore/building/overview${bldgId}/${key}`,
         });
     };
 
@@ -139,15 +136,6 @@ const ExplorePage = () => {
                 />
             )}
 
-            {selectedFilter === EXPLORE_FILTER_TYPE.BY_ENDUSE && (
-                <ExploreByEndUse
-                    selectedUnit={selectedUnit}
-                    selectedConsumption={selectedConsumption}
-                    selectedConsumptionLabel={selectedConsumptionLabel}
-                    isInComparisonMode={isInComparisonMode}
-                />
-            )}
-
             {selectedFilter === EXPLORE_FILTER_TYPE.BY_SPACE && (
                 <ExploreBySpace
                     selectedUnit={selectedUnit}
@@ -159,24 +147,6 @@ const ExplorePage = () => {
 
             {selectedFilter === EXPLORE_FILTER_TYPE.BY_SPACE_TYPE && (
                 <ExploreBySpaceType
-                    selectedUnit={selectedUnit}
-                    selectedConsumption={selectedConsumption}
-                    selectedConsumptionLabel={selectedConsumptionLabel}
-                    isInComparisonMode={isInComparisonMode}
-                />
-            )}
-
-            {selectedFilter === EXPLORE_FILTER_TYPE.BY_FLOOR && (
-                <ExploreByFloor
-                    selectedUnit={selectedUnit}
-                    selectedConsumption={selectedConsumption}
-                    selectedConsumptionLabel={selectedConsumptionLabel}
-                    isInComparisonMode={isInComparisonMode}
-                />
-            )}
-
-            {selectedFilter === EXPLORE_FILTER_TYPE.BY_EQUIPMENT_TYPE && (
-                <ExploreByEquipmentType
                     selectedUnit={selectedUnit}
                     selectedConsumption={selectedConsumption}
                     selectedConsumptionLabel={selectedConsumptionLabel}
