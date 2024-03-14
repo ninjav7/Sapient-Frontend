@@ -13,6 +13,8 @@ import Typography from '../../../sharedComponents/typography';
 import ExploreByNoGrouping from './no-grouping';
 import ExploreBySpace from './by-space';
 import ExploreBySpaceType from './by-space-type';
+import ExploreByFloor from './by-floor';
+import ExploreByEquipmentType from './by-equipment-type';
 
 import { UserStore } from '../../../store/UserStore';
 import { ExploreStore } from '../../../store/ExploreStore';
@@ -160,8 +162,19 @@ const ExploreBuildingOverview = () => {
                 />
             )}
 
+            {selectedFilter === EXPLORE_FILTER_TYPE.BY_FLOOR && (
+                <ExploreByFloor
+                    bldgId={bldgId}
+                    selectedUnit={selectedUnit}
+                    selectedConsumption={selectedConsumption}
+                    selectedConsumptionLabel={selectedConsumptionLabel}
+                    isInComparisonMode={isInComparisonMode}
+                    setComparisonMode={setComparisonMode}
+                />
+            )}
+
             {selectedFilter === EXPLORE_FILTER_TYPE.BY_EQUIPMENT_TYPE && (
-                <ExploreBySpaceType
+                <ExploreByEquipmentType
                     bldgId={bldgId}
                     selectedUnit={selectedUnit}
                     selectedConsumption={selectedConsumption}
