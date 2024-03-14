@@ -1,11 +1,10 @@
 export const EXPLORE_FILTER_TYPE = Object.freeze({
     NO_GROUPING: 'no-grouping',
     BY_ENDUSE: 'by-enduse',
-    BY_BUILDING: 'by-building',
     BY_SPACE: 'by-space',
-    BY_SPACE_TYPE: 'by-spaceType',
+    BY_SPACE_TYPE: 'by-spacetype',
     BY_FLOOR: 'by-floor',
-    BY_EQUIPMENT_TYPE: 'by-equipmentType',
+    BY_EQUIPMENT_TYPE: 'by-equipmenttype',
 });
 
 export const exploreFiltersList = [

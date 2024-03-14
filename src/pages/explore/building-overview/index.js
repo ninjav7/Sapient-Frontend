@@ -66,7 +66,7 @@ const ExploreBuildingOverview = () => {
 
     const handleMenuItemClick = ({ key }) => {
         history.push({
-            pathname: `/explore/building/overview${bldgId}/${key}`,
+            pathname: `/explore/building/overview/${bldgId}/${key}`,
         });
     };
 
@@ -129,6 +129,7 @@ const ExploreBuildingOverview = () => {
             {/* Explore Page Body based on filter selected  */}
             {selectedFilter === EXPLORE_FILTER_TYPE.NO_GROUPING && (
                 <ExploreByNoGrouping
+                    bldgId={bldgId}
                     selectedUnit={selectedUnit}
                     selectedConsumption={selectedConsumption}
                     selectedConsumptionLabel={selectedConsumptionLabel}
@@ -139,6 +140,7 @@ const ExploreBuildingOverview = () => {
 
             {selectedFilter === EXPLORE_FILTER_TYPE.BY_SPACE && (
                 <ExploreBySpace
+                    bldgId={bldgId}
                     selectedUnit={selectedUnit}
                     selectedConsumption={selectedConsumption}
                     selectedConsumptionLabel={selectedConsumptionLabel}
@@ -148,6 +150,7 @@ const ExploreBuildingOverview = () => {
 
             {selectedFilter === EXPLORE_FILTER_TYPE.BY_SPACE_TYPE && (
                 <ExploreBySpaceType
+                    bldgId={bldgId}
                     selectedUnit={selectedUnit}
                     selectedConsumption={selectedConsumption}
                     selectedConsumptionLabel={selectedConsumptionLabel}

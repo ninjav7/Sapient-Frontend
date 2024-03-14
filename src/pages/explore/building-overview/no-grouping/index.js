@@ -45,6 +45,7 @@ import '../../styles.scss';
 
 const ExploreByNoGrouping = (props) => {
     const {
+        bldgId,
         selectedUnit,
         selectedConsumption,
         selectedConsumptionLabel,
@@ -52,7 +53,6 @@ const ExploreByNoGrouping = (props) => {
         setComparisonMode,
     } = props;
 
-    const { bldgId } = useParams();
     const { download } = useCSVDownload();
 
     const [buildingListData] = useAtom(buildingData);
