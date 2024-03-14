@@ -10,7 +10,6 @@ import Select from '../../sharedComponents/form/select';
 import Toggles from '../../sharedComponents/toggles/Toggles';
 import Typography from '../../sharedComponents/typography';
 
-import ExploreByBuildings from './by-building';
 import ExploreByNoGrouping from './building-overview/no-grouping';
 import ExploreByEndUse from './building-overview/by-enduse';
 import ExploreBySpace from './building-overview/by-space';
@@ -142,15 +141,6 @@ const ExplorePage = () => {
 
             {selectedFilter === EXPLORE_FILTER_TYPE.BY_ENDUSE && (
                 <ExploreByEndUse
-                    selectedUnit={selectedUnit}
-                    selectedConsumption={selectedConsumption}
-                    selectedConsumptionLabel={selectedConsumptionLabel}
-                    isInComparisonMode={isInComparisonMode}
-                />
-            )}
-
-            {selectedFilter === EXPLORE_FILTER_TYPE.BY_BUILDING && (
-                <ExploreByBuildings
                     selectedUnit={selectedUnit}
                     selectedConsumption={selectedConsumption}
                     selectedConsumptionLabel={selectedConsumptionLabel}
