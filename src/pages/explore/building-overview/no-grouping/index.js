@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import _ from 'lodash';
 import { useAtom } from 'jotai';
-import { useParams } from 'react-router-dom';
-import { Row, Col, UncontrolledTooltip, Progress, Spinner } from 'reactstrap';
+import { Row, UncontrolledTooltip, Progress, Spinner } from 'reactstrap';
 
 import { UserStore } from '../../../../store/UserStore';
 import { buildingData } from '../../../../store/globalState';
@@ -1147,9 +1146,9 @@ const ExploreByNoGrouping = (props) => {
     const pastDataToRenderOnChart = validateSeriesDataForEquipments(selectedEquipIds, equipDataList, pastSeriesData);
 
     return (
-        <>
-            <Row>
-                <div className="explore-data-table-style p-2">
+        <React.Fragment>
+            <Row className="m-0">
+                <div className="explore-data-table-style">
                     {isFetchingChartData || isFetchingPastChartData ? (
                         <div className="explore-chart-wrapper">
                             <div className="explore-chart-loader">
@@ -1247,64 +1246,62 @@ const ExploreByNoGrouping = (props) => {
                 </div>
             </Row>
 
-            <Brick sizeInRem={0.75} />
+            <Brick sizeInRem={1} />
 
-            <Row>
-                <div className="explore-data-table-style">
-                    <Col lg={12}>
-                        <DataTableWidget
-                            id="explore-by-equipment"
-                            isLoading={isEquipDataFetching}
-                            isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={20} />}
-                            isFilterLoading={isFiltersFetching}
-                            onSearch={(e) => {
-                                setSearch(e);
-                                setCheckedAll(false);
-                            }}
-                            buttonGroupFilterOptions={[]}
-                            rows={currentRow()}
-                            searchResultRows={currentRow()}
-                            filterOptions={filterOptions}
-                            onDownload={() => handleDownloadCsv()}
-                            isCSVDownloading={isCSVDownloading}
-                            headers={headerProps}
-                            customExcludedHeaders={['Panel Name', 'Breakers', 'Notes']}
-                            customCheckAll={() => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="equipment1"
-                                    name="equipment1"
-                                    checked={checkedAll}
-                                    onChange={() => {
-                                        setCheckedAll(!checkedAll);
-                                    }}
-                                    disabled={!equipDataList || equipDataList.length > 20 || isInComparisonMode}
-                                />
-                            )}
-                            customCheckboxForCell={(record) => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="equip"
-                                    name="equip"
-                                    checked={selectedEquipIds.includes(record?.equipment_id)}
-                                    value={selectedEquipIds.includes(record?.equipment_id)}
-                                    onChange={(e) => {
-                                        handleEquipStateChange(e.target.value, record, isInComparisonMode);
-                                    }}
-                                />
-                            )}
-                            pageSize={pageSize}
-                            currentPage={pageNo}
-                            onPageSize={setPageSize}
-                            onChangePage={setPageNo}
-                            pageListSizes={pageListSizes}
-                            totalCount={(() => {
-                                return totalItems;
-                            })()}
-                        />
-                    </Col>
+            <Row className="m-0">
+                <div className="w-100">
+                    <DataTableWidget
+                        id="explore-by-equipment"
+                        isLoading={isEquipDataFetching}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={20} />}
+                        isFilterLoading={isFiltersFetching}
+                        onSearch={(e) => {
+                            setSearch(e);
+                            setCheckedAll(false);
+                        }}
+                        buttonGroupFilterOptions={[]}
+                        rows={currentRow()}
+                        searchResultRows={currentRow()}
+                        filterOptions={filterOptions}
+                        onDownload={() => handleDownloadCsv()}
+                        isCSVDownloading={isCSVDownloading}
+                        headers={headerProps}
+                        customExcludedHeaders={['Panel Name', 'Breakers', 'Notes']}
+                        customCheckAll={() => (
+                            <Checkbox
+                                label=""
+                                type="checkbox"
+                                id="equipment1"
+                                name="equipment1"
+                                checked={checkedAll}
+                                onChange={() => {
+                                    setCheckedAll(!checkedAll);
+                                }}
+                                disabled={!equipDataList || equipDataList.length > 20 || isInComparisonMode}
+                            />
+                        )}
+                        customCheckboxForCell={(record) => (
+                            <Checkbox
+                                label=""
+                                type="checkbox"
+                                id="equip"
+                                name="equip"
+                                checked={selectedEquipIds.includes(record?.equipment_id)}
+                                value={selectedEquipIds.includes(record?.equipment_id)}
+                                onChange={(e) => {
+                                    handleEquipStateChange(e.target.value, record, isInComparisonMode);
+                                }}
+                            />
+                        )}
+                        pageSize={pageSize}
+                        currentPage={pageNo}
+                        onPageSize={setPageSize}
+                        onChangePage={setPageNo}
+                        pageListSizes={pageListSizes}
+                        totalCount={(() => {
+                            return totalItems;
+                        })()}
+                    />
                 </div>
             </Row>
 
@@ -1317,7 +1314,7 @@ const ExploreByNoGrouping = (props) => {
                 setSelectedTab={setSelectedModalTab}
                 activePage="explore"
             />
-        </>
+        </React.Fragment>
     );
 };
 

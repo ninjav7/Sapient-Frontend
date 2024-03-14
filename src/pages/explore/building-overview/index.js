@@ -96,7 +96,7 @@ const ExploreBuildingOverview = () => {
             <div className="d-flex justify-content-between align-items-center">
                 <ExploreFilters selectedFilter={selectedFilter} handleMenuItemClick={handleMenuItemClick} />
 
-                <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
+                <div className="d-flex flex-column" style={{ gap: '0.75rem' }}>
                     <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
                         <Button
                             size={Button.Sizes.lg}
@@ -124,7 +124,7 @@ const ExploreBuildingOverview = () => {
                 </div>
             </div>
 
-            <Brick sizeInRem={0.25} />
+            <Brick sizeInRem={1} />
 
             {/* Explore Page Body based on filter selected  */}
             {selectedFilter === EXPLORE_FILTER_TYPE.NO_GROUPING && (
