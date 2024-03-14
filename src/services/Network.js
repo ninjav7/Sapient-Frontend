@@ -71,8 +71,10 @@ export const singleUserPermissionDetail = '/api/user_role/user-permission-role/u
 export const serachUser = '/api/user_role/user-permission-role/all-member-users';
 
 // spaces
+export const getEnergyConsumptionBySpaceV2 = '/api/v2/metrics/space';
 export const getTopEnergyConsumptionBySpaceV2 = '/api/v2/metrics/space/top_space';
 export const getSpaceListV2 = '/api/v2/metrics/space/list';
+export const getSpaceMetadataV2 = '/api/v2/metrics/space';
 
 // end-uses
 export const energyEndUseInfo = '/api/energy/portfolio/end-uses-info';

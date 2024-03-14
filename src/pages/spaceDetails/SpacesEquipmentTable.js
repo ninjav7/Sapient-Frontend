@@ -12,15 +12,17 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { UserStore } from '../../store/UserStore';
 import { useParams } from 'react-router-dom';
-import { fetchSpaceListV2 } from './services';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { Link } from 'react-router-dom';
+import { fetchExploreEquipmentList } from '../explore/services';
 
-const SpacesListTable = ({ colorfulSpaces }) => {
+const SpacesEquipmentTable = () => {
     const { download } = useCSVDownload();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const userPrefUnits = UserStore.useState((s) => s.unit);
@@ -42,26 +44,24 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         setSpacesLoading(true);
         // const orderedBy = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
         // const sortedBy = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo: timeZone };
 
         try {
-            const data = await fetchSpaceListV2(query);
+            // work here for equipment list
+            const data = await fetchExploreEquipmentList(
+                startDate,
+                endDate,
+                startTime,
+                endTime,
+                timeZone,
+                bldgId,
+                'consumption',
+                'dce',
+                10,
+                1
+            );
 
             if (data && Array.isArray(data) && data.length !== 0) {
-                const updatedData = data.map((space) => {
-                    const identicalColorfulSpace = colorfulSpaces.find(
-                        (colorfulSpace) => colorfulSpace.space_id === space.space_id
-                    );
-
-                    const newSpaceData = {
-                        ...space,
-                        consumptionBarColor: identicalColorfulSpace?.color,
-                    };
-
-                    return newSpaceData;
-                });
-
-                setSpaces(updatedData);
+                setSpaces();
             }
         } catch {
             setSpaces([]);
@@ -74,7 +74,7 @@ const SpacesListTable = ({ colorfulSpaces }) => {
         if (!bldgId || startDate === null || endDate === null) return;
 
         fetchEquipDataList();
-    }, [startDate, endDate, bldgId, search, sortBy, pageSize, pageNo, colorfulSpaces, userPrefUnits]);
+    }, [startDate, endDate, bldgId, search, sortBy, pageSize, pageNo, userPrefUnits]);
 
     const handleDownloadCSV = async () => {
         setDownloadingCSVData(true);
@@ -124,7 +124,6 @@ const SpacesListTable = ({ colorfulSpaces }) => {
                         value={row?.consumption?.new}
                         max={row?.total_building_usage}
                         barClassName="custom-on-hour"
-                        style={{ backgroundColor: row?.consumptionBarColor }}
                     />
                 </Progress>
             </>
@@ -272,4 +271,4 @@ const SpacesListTable = ({ colorfulSpaces }) => {
     );
 };
 
-export default SpacesListTable;
+export default SpacesEquipmentTable;

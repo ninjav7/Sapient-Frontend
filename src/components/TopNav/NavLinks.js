@@ -41,7 +41,7 @@ const NavLinks = () => {
     const CONTROL_TAB = '/control/plug-rules';
     const EXPLORE_TAB = '/explore/portfolio/overview';
     const SUPER_USER_ROUTE = '/super-user/accounts';
-    const SPACES_TAB = '/spaces';
+    const SPACES_TAB = '/spaces/portfolio/overview';
 
     const configRoutes = [
         '/settings/general',
@@ -71,6 +71,12 @@ const NavLinks = () => {
         });
     };
 
+    const redirectToSpacesPage = () => {
+        history.push({
+            pathname: `/spaces/portfolio/overview`,
+        });
+    };
+
     const handleEnergyClick = () => {
         const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
 
@@ -83,6 +89,7 @@ const NavLinks = () => {
         if (
             location.pathname.includes('/explore/building/overview') ||
             location.pathname.includes('/control/plug-rules') ||
+            location.pathname.includes('/spaces/building/overview') ||
             location.pathname.includes('/carbon/building/overview')
         ) {
             history.push({
@@ -125,7 +132,7 @@ const NavLinks = () => {
 
         if (
             location.pathname.includes('/energy/building/overview') ||
-            location.pathname.includes('/energy/spaces') ||
+            location.pathname.includes('/spaces/building/overview') ||
             location.pathname.includes('/energy/end-uses') ||
             location.pathname.includes('/energy/time-of-day') ||
             location.pathname.includes('/control/plug-rules') ||
@@ -189,7 +196,7 @@ const NavLinks = () => {
 
         if (
             location.pathname.includes('/energy/building/overview') ||
-            location.pathname.includes('/energy/spaces') ||
+            location.pathname.includes('/spaces/building/overview') ||
             location.pathname.includes('/energy/end-uses') ||
             location.pathname.includes('/energy/time-of-day') ||
             location.pathname.includes('/control/plug-rules') ||
@@ -229,13 +236,44 @@ const NavLinks = () => {
     const handleSpacesClick = () => {
         const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
 
-        if (bldgObj?.active) {
+        if (!bldgObj?.active) {
+            redirectToSpacesPage();
+            updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
+            return;
+        }
+
+        if (
+            location.pathname.includes('/energy/building/overview') ||
+            location.pathname.includes('/explore-page/by-equipment') ||
+            location.pathname.includes('/control/plug-rules')
+        ) {
             history.push({
-                pathname: `/spaces/${bldgObj.building_id}`,
+                pathname: `/spaces/building/overview/${bldgId}`,
+            });
+            return;
+        }
+
+        if (location.pathname.includes('/settings')) {
+            configRoutes.forEach((record) => {
+                if (location.pathname.includes(record)) {
+                    history.push({
+                        pathname: `/spaces/${bldgId}`,
+                    });
+                    return;
+                }
+            });
+
+            configChildRoutes.forEach((record) => {
+                if (location.pathname.includes(record)) {
+                    history.push({
+                        pathname: `/spaces/${bldgId}`,
+                    });
+                    return;
+                }
             });
         } else {
+            redirectToSpacesPage();
             updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
-            redirectToPortfolioPage();
         }
     };
 

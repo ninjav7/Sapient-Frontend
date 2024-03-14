@@ -64,10 +64,16 @@ const SecondaryTopNavBar = () => {
             return;
         }
 
+        if (path.includes('/spaces')) {
+            redirectToEndpoint(`/spaces/portfolio/overview`);
+            return;
+        }
+
         if (path.includes('/explore/building/overview')) {
             redirectToEndpoint(`/explore/portfolio/overview`);
             return;
         }
+
         if (path.includes('/carbon')) {
             redirectToEndpoint(`/carbon/portfolio/overview`);
         }
@@ -135,6 +141,12 @@ const SecondaryTopNavBar = () => {
             redirectToEndpoint(`${pathName}/${record?.value}`);
             return;
         }
+
+        if (path.includes('/spaces')) {
+            redirectToEndpoint(`/spaces/building/overview/${record?.value}`);
+            return;
+        }
+
         if (path.includes('/carbon')) {
             redirectToEndpoint(`/carbon/building/overview/${record?.value}`);
         }
