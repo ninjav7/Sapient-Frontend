@@ -144,7 +144,7 @@ const Spaces = () => {
     }, []);
 
     useEffect(() => {
-        if (startDate === null || endDate === null) return;
+        if (!startDate || !endDate || !bldgId) return;
 
         let time_zone = 'US/Eastern';
 
@@ -220,7 +220,7 @@ const Spaces = () => {
 
             <Brick sizeInRem={4} />
 
-            <SpacesListTable colorfulSpaces={spacesData} />
+            <SpacesListTable />
         </>
     ) : (
         <></>
