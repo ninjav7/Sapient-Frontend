@@ -133,6 +133,7 @@ const ExplorePage = () => {
                     selectedConsumption={selectedConsumption}
                     selectedConsumptionLabel={selectedConsumptionLabel}
                     isInComparisonMode={isInComparisonMode}
+                    setComparisonMode={setComparisonMode}
                 />
             )}
 

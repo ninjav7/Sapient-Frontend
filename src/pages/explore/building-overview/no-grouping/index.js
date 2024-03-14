@@ -13,18 +13,14 @@ import { BreadcrumbStore } from '../../../../store/BreadcrumbStore';
 import { updateBuildingStore } from '../../../../helpers/updateBuildingStore';
 import useCSVDownload from '../../../../sharedComponents/hooks/useCSVDownload';
 
-import Header from '../../../../components/Header';
 import SkeletonLoader from '../../../../components/SkeletonLoader';
 import EquipChartModal from '../../../chartModal/EquipChartModal';
 import Brick from '../../../../sharedComponents/brick';
-import Select from '../../../../sharedComponents/form/select';
 import { Badge } from '../../../../sharedComponents/badge';
 import { Checkbox } from '../../../../sharedComponents/form/checkbox';
 import { DataTableWidget } from '../../../../sharedComponents/dataTableWidget';
 import { TrendsBadge } from '../../../../sharedComponents/trendsBadge';
 import Typography from '../../../../sharedComponents/typography';
-import { Button } from '../../../../sharedComponents/button';
-import Toggles from '../../../../sharedComponents/toggles/Toggles';
 
 import ExploreChart from '../../../../sharedComponents/exploreChart/ExploreChart';
 import ExploreCompareChart from '../../../../sharedComponents/exploreCompareChart/ExploreCompareChart';
@@ -47,7 +43,10 @@ import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilt
 import '../../style.css';
 import '../../styles.scss';
 
-const ExploreByNoGrouping = () => {
+const ExploreByNoGrouping = (props) => {
+    const { selectedUnit, selectedConsumption, selectedConsumptionLabel, isInComparisonMode, setComparisonMode } =
+        props;
+
     const { bldgId } = useParams();
     const { download } = useCSVDownload();
 
@@ -123,37 +122,6 @@ const ExploreByNoGrouping = () => {
 
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
-
-    const [isInComparisonMode, setComparisonMode] = useState(false);
-
-    // Chart metric
-    const metric = [
-        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy Consumption' },
-        { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power Consumption' },
-        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A', Consumption: 'Current Consumption' },
-    ];
-    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
-    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0]?.Consumption);
-    const [selectedConsumption, setConsumption] = useState(metric[0]?.value);
-
-    const toggleComparision = () => {
-        setComparisonMode(!isInComparisonMode);
-        UserStore.update((s) => {
-            s.showNotification = true;
-            s.notificationMessage = isInComparisonMode ? 'Comparison Mode turned OFF' : 'Comparison Mode turned ON';
-            s.notificationType = 'success';
-        });
-    };
-
-    const handleUnitChange = (value) => {
-        const obj = metric.find((record) => record?.value === value);
-        setSelectedUnit(obj?.unit);
-    };
-
-    const handleConsumptionChange = (value) => {
-        const obj = metric.find((record) => record?.value === value);
-        setSelectedConsumptionLabel(obj?.Consumption);
-    };
 
     const currentRow = () => {
         return equipDataList;
@@ -1175,45 +1143,6 @@ const ExploreByNoGrouping = () => {
 
     return (
         <>
-            <Row className="d-flex justify-content-end">
-                <div className="d-flex flex-column p-2" style={{ gap: '0.75rem' }}>
-                    <div className="d-flex align-items-center" style={{ gap: '0.75rem' }}>
-                        {/* PLT-1785: Functionality to be enabled with Custom Period selector
-                        {isInComparisonMode && (
-                            <TimeFrameSelector
-                            // onCustomDateChange={onCustomDateChange}
-                            // onDateFilterChange={onDateFilterChange}
-                            // rangeDate={rangeDate}
-                            // timeOptions={customOptions}
-                            // defaultValue={filterPeriod}
-                            />
-                        )} */}
-                        <Button
-                            size={Button.Sizes.lg}
-                            type={isInComparisonMode ? Button.Type.secondary : Button.Type.secondaryGrey}>
-                            <Toggles
-                                size={Toggles.Sizes.sm}
-                                isChecked={isInComparisonMode}
-                                onChange={toggleComparision}
-                            />
-                            <Typography.Subheader size={Typography.Sizes.lg} onClick={toggleComparision}>
-                                Compare
-                            </Typography.Subheader>
-                        </Button>
-                        <Select
-                            defaultValue={selectedConsumption}
-                            options={metric}
-                            onChange={(e) => {
-                                setConsumption(e.value);
-                                handleUnitChange(e.value);
-                                handleConsumptionChange(e.value);
-                            }}
-                        />
-                        <Header title="" type="page" />
-                    </div>
-                </div>
-            </Row>
-
             <Row>
                 <div className="explore-data-table-style p-2">
                     {isFetchingChartData || isFetchingPastChartData ? (
