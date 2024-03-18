@@ -16,6 +16,7 @@ import { fetchTopEnergyConsumptionBySpaceDataHelper } from '../../components/ene
 import SpacesListTable from './SpacesListTable';
 import { useHistory } from 'react-router-dom';
 import { Col } from 'reactstrap';
+import PieChartsSection from './PieChartsSection';
 
 const Spaces = () => {
     const { bldgId } = useParams();
@@ -30,13 +31,14 @@ const Spaces = () => {
 
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
+    const userPrefUnits = UserStore.useState((s) => s.unit);
 
-    const [chartLoading, setChartLoading] = useState(false);
+    const [chartLoading, setChartLoading] = useState(true);
     const [spacesData, setSpacesData] = useState([]);
     const [spacesDataCategories, setSpacesDataCategories] = useState([]);
     const [spacesColumnCategories, setSpacesColumnCategories] = useState([]);
     const [spacesColumnChartData, setSpacesColumnChartData] = useState([]);
-    const [yearlyChartLoading, setYearlyChartLoading] = useState(false);
+    const [yearlyChartLoading, setYearlyChartLoading] = useState(true);
     const [yearlySpacesData, setYearlySpacesData] = useState([]);
     const [yearlySpacesDataCategories, setYearlySpacesDataCategories] = useState([]);
     const [yearlySpacesColumnCategories, setYearlySpacesColumnCategories] = useState([]);
@@ -179,7 +181,7 @@ const Spaces = () => {
 
         fetchEnergyConsumptionBySpaceDataYearly(time_zone);
         fetchEnergyConsumptionBySpaceData(time_zone);
-    }, [startDate, endDate, bldgId]);
+    }, [startDate, endDate, bldgId, userPrefUnits]);
 
     return bldgId ? (
         <Col lg={12}>
@@ -218,6 +220,10 @@ const Spaces = () => {
                     half={true}
                 />
             </div>
+
+            <Brick sizeInRem={2} />
+
+            <PieChartsSection />
 
             <Brick sizeInRem={4} />
 

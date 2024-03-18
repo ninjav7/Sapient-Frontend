@@ -129,3 +129,8 @@
     border: 0.0625rem solid $primary-gray-450;
     border-radius: 0.375rem;
 }
+
+.fixed-labels-list {
+    max-height: 16.875rem;
+    overflow: scroll;
+}
