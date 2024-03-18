@@ -39,7 +39,7 @@ const NavLinks = () => {
     const ENERGY_TAB = '/energy/portfolio/overview';
     const CARBON_TAB = '/carbon/portfolio/overview';
     const CONTROL_TAB = '/control/plug-rules';
-    const EXPLORE_TAB = '/explore/portfolio/overview';
+    const EXPLORE_TAB = '/explore/portfolio/overview/by-buildings';
     const SUPER_USER_ROUTE = '/super-user/accounts';
     const SPACES_TAB = '/spaces/portfolio/overview';
 
@@ -188,7 +188,7 @@ const NavLinks = () => {
         const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
         if (!bldgObj?.active) {
             history.push({
-                pathname: `/explore/portfolio/overview`,
+                pathname: `/explore/portfolio/overview/by-buildings`,
             });
             updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
             return;
@@ -228,7 +228,7 @@ const NavLinks = () => {
             });
         } else {
             history.push({
-                pathname: '/explore/portfolio/overview',
+                pathname: '/explore/portfolio/overview/by-buildings',
             });
         }
     };

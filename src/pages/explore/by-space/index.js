@@ -4,39 +4,39 @@ import { Link } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { Row, UncontrolledTooltip, Progress, Spinner } from 'reactstrap';
 
-import { UserStore } from '../../../../store/UserStore';
-import { buildingData } from '../../../../store/globalState';
-import { DateRangeStore } from '../../../../store/DateRangeStore';
-import { BuildingStore } from '../../../../store/BuildingStore';
-import { ComponentStore } from '../../../../store/ComponentStore';
-import { BreadcrumbStore } from '../../../../store/BreadcrumbStore';
-import { updateBuildingStore } from '../../../../helpers/updateBuildingStore';
+import { UserStore } from '../../../store/UserStore';
+import { buildingData } from '../../../store/globalState';
+import { DateRangeStore } from '../../../store/DateRangeStore';
+import { BuildingStore } from '../../../store/BuildingStore';
+import { ComponentStore } from '../../../store/ComponentStore';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 
-import SkeletonLoader from '../../../../components/SkeletonLoader';
-import Brick from '../../../../sharedComponents/brick';
-import { Badge } from '../../../../sharedComponents/badge';
-import { Checkbox } from '../../../../sharedComponents/form/checkbox';
-import { DataTableWidget } from '../../../../sharedComponents/dataTableWidget';
-import { TrendsBadge } from '../../../../sharedComponents/trendsBadge';
-import useCSVDownload from '../../../../sharedComponents/hooks/useCSVDownload';
-import Typography from '../../../../sharedComponents/typography';
+import SkeletonLoader from '../../../components/SkeletonLoader';
+import Brick from '../../../sharedComponents/brick';
+import { Badge } from '../../../sharedComponents/badge';
+import { Checkbox } from '../../../sharedComponents/form/checkbox';
+import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
+import { TrendsBadge } from '../../../sharedComponents/trendsBadge';
+import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
+import Typography from '../../../sharedComponents/typography';
 
-import ExploreChart from '../../../../sharedComponents/exploreChart/ExploreChart';
-import ExploreCompareChart from '../../../../sharedComponents/exploreCompareChart/ExploreCompareChart';
+import ExploreChart from '../../../sharedComponents/exploreChart/ExploreChart';
+import ExploreCompareChart from '../../../sharedComponents/exploreCompareChart/ExploreCompareChart';
 
 import {
     dateTimeFormatForHighChart,
     formatConsumptionValue,
     formatXaxisForHighCharts,
     pageListSizes,
-} from '../../../../helpers/helpers';
+} from '../../../helpers/helpers';
 
-import { fetchSpaceListV2 } from '../../../spaces/services';
-import { UNITS } from '../../../../constants/units';
-import { getExploreByEquipmentTableCSVExport } from '../../../../utils/tablesExport';
+import { fetchSpaceListV2 } from '../../spaces/services';
+import { UNITS } from '../../../constants/units';
+import { getExploreByEquipmentTableCSVExport } from '../../../utils/tablesExport';
 
-import '../../style.css';
-import '../../styles.scss';
+import '../style.css';
+import '../styles.scss';
 
 const ExploreBySpace = (props) => {
     const {

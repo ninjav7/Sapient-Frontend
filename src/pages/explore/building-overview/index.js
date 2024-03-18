@@ -10,11 +10,8 @@ import Select from '../../../sharedComponents/form/select';
 import Toggles from '../../../sharedComponents/toggles/Toggles';
 import Typography from '../../../sharedComponents/typography';
 
-import ExploreByNoGrouping from './no-grouping';
-import ExploreBySpace from './by-space';
-import ExploreBySpaceType from './by-space-type';
-import ExploreByFloor from './by-floor';
-import ExploreByEquipmentType from './by-equipment-type';
+import ExploreByEquipments from '../by-equipments';
+import ExploreBySpace from '../by-space';
 
 import { UserStore } from '../../../store/UserStore';
 import { ExploreStore } from '../../../store/ExploreStore';
@@ -130,7 +127,7 @@ const ExploreBuildingOverview = () => {
 
             {/* Explore Page Body based on filter selected  */}
             {selectedFilter === EXPLORE_FILTER_TYPE.NO_GROUPING && (
-                <ExploreByNoGrouping
+                <ExploreByEquipments
                     bldgId={bldgId}
                     selectedUnit={selectedUnit}
                     selectedConsumption={selectedConsumption}
@@ -142,39 +139,6 @@ const ExploreBuildingOverview = () => {
 
             {selectedFilter === EXPLORE_FILTER_TYPE.BY_SPACE && (
                 <ExploreBySpace
-                    bldgId={bldgId}
-                    selectedUnit={selectedUnit}
-                    selectedConsumption={selectedConsumption}
-                    selectedConsumptionLabel={selectedConsumptionLabel}
-                    isInComparisonMode={isInComparisonMode}
-                    setComparisonMode={setComparisonMode}
-                />
-            )}
-
-            {selectedFilter === EXPLORE_FILTER_TYPE.BY_SPACE_TYPE && (
-                <ExploreBySpaceType
-                    bldgId={bldgId}
-                    selectedUnit={selectedUnit}
-                    selectedConsumption={selectedConsumption}
-                    selectedConsumptionLabel={selectedConsumptionLabel}
-                    isInComparisonMode={isInComparisonMode}
-                    setComparisonMode={setComparisonMode}
-                />
-            )}
-
-            {selectedFilter === EXPLORE_FILTER_TYPE.BY_FLOOR && (
-                <ExploreByFloor
-                    bldgId={bldgId}
-                    selectedUnit={selectedUnit}
-                    selectedConsumption={selectedConsumption}
-                    selectedConsumptionLabel={selectedConsumptionLabel}
-                    isInComparisonMode={isInComparisonMode}
-                    setComparisonMode={setComparisonMode}
-                />
-            )}
-
-            {selectedFilter === EXPLORE_FILTER_TYPE.BY_EQUIPMENT_TYPE && (
-                <ExploreByEquipmentType
                     bldgId={bldgId}
                     selectedUnit={selectedUnit}
                     selectedConsumption={selectedConsumption}

@@ -41,7 +41,7 @@ import SkeletonLoader from '../../../components/SkeletonLoader';
 import '../style.css';
 import '../styles.scss';
 
-const ExplorePortfolioOverview = () => {
+const ExploreByBuildings = () => {
     const { download } = useCSVDownload();
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -725,7 +725,7 @@ const ExplorePortfolioOverview = () => {
             let newList = [
                 {
                     label: 'Portfolio Overview',
-                    path: '/explore/portfolio/overview',
+                    path: '/explore/portfolio/overview/by-buildings',
                     active: true,
                 },
             ];
@@ -1185,4 +1185,4 @@ const ExplorePortfolioOverview = () => {
     );
 };
 
-export default ExplorePortfolioOverview;
+export default ExploreByBuildings;
