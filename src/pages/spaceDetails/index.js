@@ -24,7 +24,7 @@ import { dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../help
 import { defaultMetrics } from './constants';
 import { handleDataConversion } from './helper';
 
-import { fetchEnergyConsumptionBySpace, fetchSpaceMetadata } from './services';
+import { fetchEnergyConsumptionBySpace, fetchEnergyConsumptionSpaceByCategory, fetchSpaceMetadata } from './services';
 
 import MetadataContainer from './MetadataContainer';
 import EnergyMetadataContainer from './EnergyMetadataContainer';
@@ -75,6 +75,70 @@ const SpaceDetails = () => {
 
     const allParentSpaces = useRef([]);
 
+    const mapChartData = async (query) => {
+        const response = await fetchEnergyConsumptionBySpace(query);
+
+        if (!Array.isArray(response)) return;
+
+        const space = response[0];
+
+        if (!Array.isArray(space?.total_data)) return;
+
+        const mappedSpaceData = space.total_data.map((consumptionData) => ({
+            x: new Date(consumptionData?.time_stamp).getTime(),
+            y: handleDataConversion(consumptionData?.consumption, selectedConsumption),
+        }));
+
+        const spaceRecord = {
+            name: space.space_name,
+            data: mappedSpaceData,
+        };
+
+        setChartData([spaceRecord]);
+    };
+
+    const mapChartDataByCategory = async (query) => {
+        const response = await fetchEnergyConsumptionBySpace(query);
+
+        if (!Array.isArray(response)) return;
+
+        const space = response[0];
+
+        if (!Array.isArray(space?.total_data)) return;
+
+        const mappedSpaceData = space.total_data.map((consumptionData) => ({
+            x: new Date(consumptionData?.time_stamp).getTime(),
+            y: handleDataConversion(consumptionData?.consumption, selectedConsumption),
+        }));
+
+        const spaceRecord = {
+            name: space.space_name,
+            data: mappedSpaceData,
+        };
+
+        const responseByCategory = await fetchEnergyConsumptionSpaceByCategory('by_equipment', query);
+
+        const mappedEquipmentData = responseByCategory.map((equipmentData) => {
+            const mappedConsumptionData = equipmentData.consumption.map((equipmentConsumptionData) => ({
+                x: new Date(equipmentConsumptionData?.time_stamp).getTime(),
+                y: handleDataConversion(equipmentConsumptionData?.consumption, selectedConsumption),
+            }));
+
+            const equipmentRecord = {
+                name: equipmentData.equipment_name,
+                data: mappedConsumptionData,
+            };
+
+            return equipmentRecord;
+        });
+
+        spaceRecord.name = 'Total';
+
+        mappedEquipmentData.unshift(spaceRecord);
+
+        setChartData(mappedEquipmentData);
+    };
+
     const fetchChartData = async () => {
         setChartDataFetching(true);
         setChartData([]);
@@ -84,48 +148,10 @@ const SpaceDetails = () => {
 
             const isEquipment = selectedConsumption === metric[1].value;
 
-            if (isEquipment) query.equipment = true;
-
-            const resSpace = await fetchEnergyConsumptionBySpace(query);
-
-            if (!Array.isArray(resSpace)) return;
-
-            const space = resSpace[0];
-
-            if (!Array.isArray(space?.total_data)) return;
-
-            const mappedSpaceData = space.total_data.map((consumptionData) => ({
-                x: new Date(consumptionData?.time_stamp).getTime(),
-                y: handleDataConversion(consumptionData?.consumption, selectedConsumption),
-            }));
-
-            const spaceRecord = {
-                name: space.space_name,
-                data: mappedSpaceData,
-            };
-
-            if (!isEquipment) {
-                setChartData([spaceRecord]);
+            if (isEquipment) {
+                await mapChartDataByCategory(query);
             } else {
-                const mappedEquipmentData = space.equipment_data.map((equipmentData) => {
-                    const mappedConsumptionData = equipmentData.consumption.map((equipmentConsumptionData) => ({
-                        x: new Date(equipmentConsumptionData?.time_stamp).getTime(),
-                        y: handleDataConversion(equipmentConsumptionData?.consumption, selectedConsumption),
-                    }));
-
-                    const equipmentRecord = {
-                        name: equipmentData.equipment_name,
-                        data: mappedConsumptionData,
-                    };
-
-                    return equipmentRecord;
-                });
-
-                spaceRecord.name = 'Total';
-
-                mappedEquipmentData.unshift(spaceRecord);
-
-                setChartData(mappedEquipmentData);
+                await mapChartData(query);
             }
         } catch {
             setChartData([]);
