@@ -59,6 +59,7 @@ const Titles = ({ title, subtitle }) => {
 const DonutChartWidget = ({
     className = '',
     donutChartClass = '',
+    donutLabelsClass = '',
     id,
     type = DONUT_CHART_TYPES.HORIZONTAL,
     items: itemsProp,
@@ -69,6 +70,7 @@ const DonutChartWidget = ({
     convertData = false,
     computedTotal = 0,
     exportName = '',
+    isShowTrend = true,
     ...props
 }) => {
     const chartComponentRef = useRef(null);
@@ -218,12 +220,12 @@ const DonutChartWidget = ({
                         <div className={`chart-wrapper ${type}`}>{renderChart()}</div>
 
                         <div className="chart-labels">
-                            <div className="chart-labels">
+                            <div className={`chart-labels ${donutLabelsClass}`}>
                                 <DonutChartLabels
                                     onHover={(_, index) => hoverChart(index)}
                                     onMouseLeave={(_, index) => unHoverChart(index)}
                                     className={type}
-                                    isShowTrend
+                                    isShowTrend={isShowTrend}
                                     isShowValue
                                     labels={items}
                                 />

@@ -16,12 +16,7 @@ import { fetchTopEnergyConsumptionBySpaceDataHelper } from '../../components/ene
 import SpacesListTable from './SpacesListTable';
 import { useHistory } from 'react-router-dom';
 import { Col } from 'reactstrap';
-import DonutChartWidget, { DONUT_CHART_TYPES } from '../../sharedComponents/donutChartWidget';
-import { fetchKPISpaceV2 } from './services';
-import { percentageHandler } from '../../utils/helper';
-import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
-import { UNITS } from '../../constants/units';
-import { DATAVIZ_COLORS } from '../../constants/colors';
+import PieChartsSection from './PieChartsSection';
 
 const Spaces = () => {
     const { bldgId } = useParams();
@@ -48,14 +43,6 @@ const Spaces = () => {
     const [yearlySpacesDataCategories, setYearlySpacesDataCategories] = useState([]);
     const [yearlySpacesColumnCategories, setYearlySpacesColumnCategories] = useState([]);
     const [yearlySpacesColumnChartData, setYearlySpacesColumnChartData] = useState([]);
-
-    const [KPIEnergyData, setKPIEnergyData] = useState([]);
-    const [KPIEnergyDataTotal, setKPIEnergyDataTotal] = useState(0);
-    const [KPISquareData, setKPISquareData] = useState([]);
-    const [KPISquareTotal, setKPISquareTotal] = useState(0);
-    const [KPICountData, setKPICountData] = useState([]);
-    const [KPICountTotal, setKPICountTotal] = useState(0);
-    const [KPIFetching, setKPIFetching] = useState(true);
 
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
 
@@ -119,72 +106,6 @@ const Spaces = () => {
         }
 
         setYearlyChartLoading(false);
-    };
-
-    const fetchKPIPies = async (tzInfo) => {
-        setKPIFetching(true);
-
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo };
-
-        try {
-            const response = await fetchKPISpaceV2(query);
-
-            if (response.success) {
-                const data = response.data.space_type_usage;
-
-                let KPIEnergyTotal = 0;
-                let KPISquareTotal = 0;
-                const KPIEnergyData = [];
-                const KPISquareData = [];
-
-                console.log(data);
-
-                data.forEach((record, idx) => {
-                    const { name, on_hours_usage, total_square_footage } = record || {};
-
-                    const valueEnergyNew = Math.round((on_hours_usage?.new ?? 0) / 1000);
-                    const valueEnergyOld = Math.round((on_hours_usage?.old ?? 0) / 1000);
-                    const square = total_square_footage ?? 0;
-
-                    const label = name;
-                    KPIEnergyTotal += valueEnergyNew;
-                    KPISquareTotal += square;
-
-                    const trendType =
-                        valueEnergyNew <= valueEnergyOld
-                            ? TRENDS_BADGE_TYPES.DOWNWARD_TREND
-                            : TRENDS_BADGE_TYPES.UPWARD_TREND;
-
-                    const trendValue = percentageHandler(valueEnergyNew, valueEnergyOld);
-
-                    const color = DATAVIZ_COLORS[`datavizMain${idx + 1}`];
-
-                    KPIEnergyData.push({ unit: UNITS.KWH, color, label, value: valueEnergyNew, trendValue, trendType });
-                    KPISquareData.push({
-                        unit: userPrefUnits === 'si' ? UNITS.SQ_M : UNITS.SQ_FT,
-                        color,
-                        label,
-                        value: square,
-                        trendValue: null,
-                    });
-                });
-
-                setKPIEnergyData(KPIEnergyData);
-                setKPIEnergyDataTotal(KPIEnergyTotal);
-                setKPISquareData(KPISquareData);
-                setKPISquareTotal(KPISquareTotal);
-            }
-        } catch (e) {
-            console.log(e);
-            setKPIEnergyData([]);
-            setKPIEnergyDataTotal(0);
-            setKPISquareData([]);
-            setKPISquareTotal(0);
-            setKPICountData([]);
-            setKPICountTotal(0);
-        }
-
-        setKPIFetching(false);
     };
 
     const updateBreadcrumbStore = () => {
@@ -260,7 +181,6 @@ const Spaces = () => {
 
         fetchEnergyConsumptionBySpaceDataYearly(time_zone);
         fetchEnergyConsumptionBySpaceData(time_zone);
-        fetchKPIPies(time_zone);
     }, [startDate, endDate, bldgId, userPrefUnits]);
 
     return bldgId ? (
@@ -303,44 +223,7 @@ const Spaces = () => {
 
             <Brick sizeInRem={2} />
 
-            <div className="d-flex">
-                <Col lg={4}>
-                    <DonutChartWidget
-                        id="consumptionCountBySpaceTypeDonut"
-                        title="Space Count"
-                        subtitle="By Space Type"
-                        items={KPISquareData}
-                        type={DONUT_CHART_TYPES.VERTICAL}
-                        onMoreDetail={null}
-                        computedTotal={KPISquareTotal}
-                        isChartLoading={KPIFetching}
-                    />
-                </Col>
-                <Col lg={4}>
-                    <DonutChartWidget
-                        id="consumptionSquareBySpaceTypeDonut"
-                        title="Square Footage"
-                        subtitle="By Space Type"
-                        items={KPISquareData}
-                        type={DONUT_CHART_TYPES.VERTICAL}
-                        onMoreDetail={null}
-                        computedTotal={KPISquareTotal}
-                        isChartLoading={KPIFetching}
-                    />
-                </Col>
-                <Col lg={4}>
-                    <DonutChartWidget
-                        id="consumptionEnergyBySpaceTypeDonut"
-                        title="Energy Consumption"
-                        subtitle="By Space Type"
-                        items={KPIEnergyData}
-                        type={DONUT_CHART_TYPES.VERTICAL}
-                        onMoreDetail={null}
-                        computedTotal={KPIEnergyDataTotal}
-                        isChartLoading={KPIFetching}
-                    />
-                </Col>
-            </div>
+            <PieChartsSection />
 
             <Brick sizeInRem={4} />
 

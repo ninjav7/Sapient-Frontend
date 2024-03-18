@@ -15,9 +15,9 @@ export const fetchSpaceListV2 = async (query) => {
 };
 
 export const fetchKPISpaceV2 = async (query) => {
-    const { bldgId = '', dateFrom = '', dateTo = '', tzInfo = 'US/Eastern' } = query;
+    const { bldgId = '', dateFrom = '', dateTo = '', tzInfo = 'US/Eastern', orderedBy = 'consumption' } = query;
 
-    const params = `?building_id=${bldgId}&date_from=${dateFrom}&date_to=${dateTo}&tz_info=${tzInfo}`;
+    const params = `?building_id=${bldgId}&date_from=${dateFrom}&date_to=${dateTo}&tz_info=${tzInfo}&ordered_by=${orderedBy}`;
 
     return axiosInstance.get(`${getSpacesKPIV2}${params}`).then((res) => res?.data);
 };
