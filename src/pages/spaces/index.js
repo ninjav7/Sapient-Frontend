@@ -16,6 +16,12 @@ import { fetchTopEnergyConsumptionBySpaceDataHelper } from '../../components/ene
 import SpacesListTable from './SpacesListTable';
 import { useHistory } from 'react-router-dom';
 import { Col } from 'reactstrap';
+import DonutChartWidget, { DONUT_CHART_TYPES } from '../../sharedComponents/donutChartWidget';
+import { fetchKPISpaceV2 } from './services';
+import { percentageHandler } from '../../utils/helper';
+import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
+import { UNITS } from '../../constants/units';
+import { DATAVIZ_COLORS } from '../../constants/colors';
 
 const Spaces = () => {
     const { bldgId } = useParams();
@@ -31,16 +37,20 @@ const Spaces = () => {
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
 
-    const [chartLoading, setChartLoading] = useState(false);
+    const [chartLoading, setChartLoading] = useState(true);
     const [spacesData, setSpacesData] = useState([]);
     const [spacesDataCategories, setSpacesDataCategories] = useState([]);
     const [spacesColumnCategories, setSpacesColumnCategories] = useState([]);
     const [spacesColumnChartData, setSpacesColumnChartData] = useState([]);
-    const [yearlyChartLoading, setYearlyChartLoading] = useState(false);
+    const [yearlyChartLoading, setYearlyChartLoading] = useState(true);
     const [yearlySpacesData, setYearlySpacesData] = useState([]);
     const [yearlySpacesDataCategories, setYearlySpacesDataCategories] = useState([]);
     const [yearlySpacesColumnCategories, setYearlySpacesColumnCategories] = useState([]);
     const [yearlySpacesColumnChartData, setYearlySpacesColumnChartData] = useState([]);
+
+    const [KPIEnergyData, setKPIEnergyData] = useState([]);
+    const [KPIEnergyDataTotal, setKPIEnergyDataTotal] = useState(0);
+    const [KPIEnergyFetching, setKPIEnergyFetching] = useState(true);
 
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
 
@@ -104,6 +114,49 @@ const Spaces = () => {
         }
 
         setYearlyChartLoading(false);
+    };
+
+    const fetchKPIEnergy = async (tzInfo) => {
+        setKPIEnergyFetching(true);
+
+        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo };
+
+        try {
+            const response = await fetchKPISpaceV2(query);
+
+            if (response.success) {
+                const data = response.data.space_type_usage;
+
+                let total = 0;
+
+                const donutChartData = data.map((record, idx) => {
+                    const { name, on_hours_usage } = record || {};
+
+                    const valueNew = Math.round((on_hours_usage?.new ?? 0) / 1000);
+                    const valueOld = Math.round((on_hours_usage?.old ?? 0) / 1000);
+
+                    const label = name;
+                    total += valueNew;
+
+                    const trendType =
+                        valueNew <= valueOld ? TRENDS_BADGE_TYPES.DOWNWARD_TREND : TRENDS_BADGE_TYPES.UPWARD_TREND;
+
+                    const trendValue = percentageHandler(valueNew, valueOld);
+
+                    const color = DATAVIZ_COLORS[`datavizMain${idx + 1}`];
+
+                    return { unit: UNITS.KWH, color, label, value: valueNew, trendValue, trendType };
+                });
+
+                setKPIEnergyData(donutChartData);
+                setKPIEnergyDataTotal(total);
+            }
+        } catch {
+            setKPIEnergyData([]);
+            setKPIEnergyDataTotal(0);
+        }
+
+        setKPIEnergyFetching(false);
     };
 
     const updateBreadcrumbStore = () => {
@@ -179,6 +232,7 @@ const Spaces = () => {
 
         fetchEnergyConsumptionBySpaceDataYearly(time_zone);
         fetchEnergyConsumptionBySpaceData(time_zone);
+        fetchKPIEnergy(time_zone);
     }, [startDate, endDate, bldgId]);
 
     return bldgId ? (
@@ -218,6 +272,19 @@ const Spaces = () => {
                     half={true}
                 />
             </div>
+
+            <Brick sizeInRem={2} />
+
+            <DonutChartWidget
+                id="consumptionEnergyBySpaceTypeDonut"
+                title="Energy Consumption"
+                subtitle="By Space Type"
+                items={KPIEnergyData}
+                type={DONUT_CHART_TYPES.VERTICAL}
+                onMoreDetail={null}
+                computedTotal={KPIEnergyDataTotal}
+                isChartLoading={KPIEnergyFetching}
+            />
 
             <Brick sizeInRem={4} />
 
