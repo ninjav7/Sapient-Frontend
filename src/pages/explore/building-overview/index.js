@@ -10,8 +10,8 @@ import Select from '../../../sharedComponents/form/select';
 import Toggles from '../../../sharedComponents/toggles/Toggles';
 import Typography from '../../../sharedComponents/typography';
 
-import ExploreByEquipments from '../by-equipments';
-import ExploreBySpace from '../by-space';
+import ExploreBySpace from './by-space';
+import ExploreByEquipments from './by-equipments';
 
 import { UserStore } from '../../../store/UserStore';
 import { ExploreStore } from '../../../store/ExploreStore';
