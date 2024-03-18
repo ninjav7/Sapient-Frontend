@@ -12,13 +12,13 @@ export const fetchTopEnergyConsumptionBySpaceDataHelper = async ({ query }) => {
     const newSpacesDataCategories = [];
 
     spaces.forEach((space, index) => {
-        const { space_name, space_id } = space;
+        const { name, id } = space;
         let color = DATAVIZ_COLORS[`datavizMain${index + 1}`];
 
         if (!color) color = DATAVIZ_COLORS[`datavizMain${Math.floor(Math.random() * (9 - 1 + 1) + 1)}`];
 
-        const spaceData = { name: space_name, space_id, color };
-        const spaceColumnData = { name: space_name, data: [] };
+        const spaceData = { name, id, color };
+        const spaceColumnData = { name, data: [] };
         const data = space?.total_data && Array.isArray(space.total_data) ? space.total_data : [];
 
         data.forEach((data) => {
