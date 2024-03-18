@@ -21,6 +21,7 @@ import { TrendsBadge } from '../../../../sharedComponents/trendsBadge';
 import useCSVDownload from '../../../../sharedComponents/hooks/useCSVDownload';
 import Typography from '../../../../sharedComponents/typography';
 
+import SpaceConfiguration from './SpaceConfig';
 import ExploreChart from '../../../../sharedComponents/exploreChart/ExploreChart';
 import ExploreCompareChart from '../../../../sharedComponents/exploreCompareChart/ExploreCompareChart';
 
@@ -62,6 +63,13 @@ const ExploreBySpace = (props) => {
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
+    // Edit Space Modal
+    const [showSpaceConfigModal, setSpaceConfigModal] = useState(false);
+    const closeSpaceConfigModal = () => setSpaceConfigModal(false);
+    const openSpaceConfigModal = () => setSpaceConfigModal(true);
+
+    const [selectedSpaceObj, setSelectedSpaceObj] = useState(null);
+
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
 
@@ -83,6 +91,11 @@ const ExploreBySpace = (props) => {
 
     const currentRow = () => {
         return spacesList;
+    };
+
+    const handleSpaceEdit = (el) => {
+        openSpaceConfigModal();
+        setSelectedSpaceObj(el);
     };
 
     const updateBreadcrumbStore = () => {
@@ -128,7 +141,7 @@ const ExploreBySpace = (props) => {
 
     const renderSpaceName = useCallback((row) => {
         return (
-            <Link to={`/spaces/space/overview/${bldgId}/${row?.space_id}`}>
+            <Link to={`/explore/building/overview/by-spaces-equipments/${bldgId}/${row?.space_id}`}>
                 <p className="m-0">
                     <u>{row?.space_name !== '' ? row?.space_name : '-'}</u>
                 </p>
@@ -296,6 +309,10 @@ const ExploreBySpace = (props) => {
     }, []);
 
     useEffect(() => {
+        if (!showSpaceConfigModal) setSelectedSpaceObj(null);
+    }, [showSpaceConfigModal]);
+
+    useEffect(() => {
         if (!bldgId || !startDate || !endDate) return;
 
         fetchSpacesList();
@@ -431,7 +448,7 @@ const ExploreBySpace = (props) => {
                     <DataTableWidget
                         id="explore-by-spaces"
                         isLoading={isDataFetching}
-                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={20} />}
+                        isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 2} noOfRows={20} />}
                         isFilterLoading={isFiltersFetching}
                         onSearch={(e) => {
                             setSearch(e);
@@ -475,12 +492,20 @@ const ExploreBySpace = (props) => {
                         onPageSize={setPageSize}
                         onChangePage={setPageNo}
                         pageListSizes={pageListSizes}
+                        isEditable={() => true}
+                        onEditRow={(record, id, row) => handleSpaceEdit(row)}
                         totalCount={(() => {
                             return totalItems;
                         })()}
                     />
                 </div>
             </Row>
+
+            <SpaceConfiguration
+                showSpaceConfigModal={showSpaceConfigModal}
+                closeSpaceConfigModal={closeSpaceConfigModal}
+                selectedSpaceObj={selectedSpaceObj}
+            />
         </React.Fragment>
     );
 };
