@@ -587,8 +587,8 @@ const ExploreBySpace = (props) => {
                                     subTitle={''}
                                     data={dataToRenderOnChart}
                                     pastData={pastDataToRenderOnChart}
-                                    tooltipUnit={selectedUnit}
-                                    tooltipLabel={selectedConsumptionLabel}
+                                    tooltipUnit={''}
+                                    tooltipLabel={'Space'}
                                     timeIntervalObj={{
                                         startDate,
                                         endDate,
@@ -611,8 +611,8 @@ const ExploreBySpace = (props) => {
                                     isLoadingData={false}
                                     disableDefaultPlotBands={true}
                                     tooltipValuesKey={'{point.y:.1f}'}
-                                    tooltipUnit={selectedUnit}
-                                    tooltipLabel={selectedConsumptionLabel}
+                                    tooltipUnit={''}
+                                    tooltipLabel={'Space'}
                                     data={dataToRenderOnChart}
                                     chartProps={{
                                         navigator: {

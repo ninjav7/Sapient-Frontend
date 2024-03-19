@@ -109,15 +109,19 @@ const ExploreBuildingOverview = () => {
                                 Compare
                             </Typography.Subheader>
                         </Button>
-                        <Select
-                            defaultValue={selectedConsumption}
-                            options={exploreBldgMetrics}
-                            onChange={(e) => {
-                                setConsumption(e.value);
-                                handleUnitChange(e.value);
-                                handleConsumptionChange(e.value);
-                            }}
-                        />
+
+                        {selectedFilter !== EXPLORE_FILTER_TYPE.BY_SPACE && (
+                            <Select
+                                defaultValue={selectedConsumption}
+                                options={exploreBldgMetrics}
+                                onChange={(e) => {
+                                    setConsumption(e.value);
+                                    handleUnitChange(e.value);
+                                    handleConsumptionChange(e.value);
+                                }}
+                            />
+                        )}
+
                         <Header title="" type="page" />
                     </div>
                 </div>
