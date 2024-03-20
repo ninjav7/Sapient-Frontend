@@ -22,6 +22,7 @@ import ExploreChart from '../../../../sharedComponents/exploreChart/ExploreChart
 import ExploreCompareChart from '../../../../sharedComponents/exploreCompareChart/ExploreCompareChart';
 
 import { fetchExploreSpaceChart } from './services';
+import { handleDataConversion } from '../../../chartModal/helper';
 import { fetchSpaceListV2 } from '../../../spaces/services';
 
 import {
@@ -299,7 +300,7 @@ const ExploreBySpace = (props) => {
                             if (spaceResponseObj?.total_data) {
                                 newSpaceMappedData = spaceResponseObj?.total_data.map((el) => ({
                                     x: new Date(el?.time_stamp).getTime(),
-                                    y: el?.consumption === '' ? null : el?.consumption,
+                                    y: handleDataConversion(el?.consumption, selectedConsumption),
                                 }));
                             }
                         }
@@ -358,7 +359,7 @@ const ExploreBySpace = (props) => {
                         if (spaceResponseObj?.total_data) {
                             newSpaceMappedData = spaceResponseObj?.total_data.map((el) => ({
                                 x: new Date(el?.time_stamp).getTime(),
-                                y: el?.consumption === '' ? null : el?.consumption,
+                                y: handleDataConversion(el?.consumption, selectedConsumption),
                             }));
                         }
 
@@ -634,7 +635,7 @@ const ExploreBySpace = (props) => {
                                     subTitle={''}
                                     data={dataToRenderOnChart}
                                     pastData={pastDataToRenderOnChart}
-                                    tooltipUnit={''}
+                                    tooltipUnit={selectedUnit}
                                     tooltipLabel={'Space'}
                                     timeIntervalObj={{
                                         startDate,
@@ -658,8 +659,8 @@ const ExploreBySpace = (props) => {
                                     isLoadingData={false}
                                     disableDefaultPlotBands={true}
                                     tooltipValuesKey={'{point.y:.1f}'}
-                                    tooltipUnit={''}
-                                    tooltipLabel={'Space'}
+                                    tooltipUnit={selectedUnit}
+                                    tooltipLabel={selectedConsumptionLabel}
                                     data={dataToRenderOnChart}
                                     chartProps={{
                                         navigator: {

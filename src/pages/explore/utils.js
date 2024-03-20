@@ -16,6 +16,8 @@ export const exploreBldgMetrics = [
     },
 ];
 
+export const exploreSpaceMetrics = [{ value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' }];
+
 const unitTypesToBeConverted = ['energy', 'current', 'voltage', 'power'];
 
 export const calculateDataConvertion = (data, unit_type) =>
