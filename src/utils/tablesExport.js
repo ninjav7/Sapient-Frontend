@@ -161,6 +161,34 @@ export const getExploreByBuildingTableCSVExport = (tableData, columns, userPrefU
     return csv;
 };
 
+export const getSpaceTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+    tableData.forEach((tableRow) => {
+        let arr = [];
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'tags':
+                    const tags = tableRow['tags'];
+                    const tagsString = tags.join('; ');
+                    arr.push(tagsString);
+                    break;
+
+                default:
+                    arr.push(tableRow[columns[i]?.accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
 export const getSocketsForPlugRulePageTableCSVExport = (tableData, columns) => {
     let dataToExport = [];
     tableData.forEach((tableRow, index) => {

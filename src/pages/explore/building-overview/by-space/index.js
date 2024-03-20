@@ -34,7 +34,7 @@ import {
     pageListSizes,
 } from '../../../../helpers/helpers';
 import { validateSeriesDataForSpaces } from './utils';
-import { getExploreByEquipmentTableCSVExport } from '../../../../utils/tablesExport';
+import { getSpaceTableCSVExport } from '../../../../utils/tablesExport';
 import { UNITS } from '../../../../constants/units';
 
 import '../../style.css';
@@ -123,25 +123,50 @@ const ExploreBySpace = (props) => {
     const handleDownloadCSV = async () => {
         setDownloadingCSVData(true);
 
-        try {
-            if (spacesList && spacesList.length !== 0) {
-                download(
-                    `${bldgName}_Energy_Consumption_By_Space${new Date().toISOString().split('T')[0]}`,
-                    getExploreByEquipmentTableCSVExport(spacesList, headerProps)
-                );
+        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo: timeZone };
+
+        await fetchSpaceListV2(query)
+            .then((res) => {
+                const data = res;
+                if (data) {
+                    if (data.length !== 0) {
+                        data.forEach((el) => {
+                            el.changes = Math.round(el?.consumption?.changes);
+                            el.consumption = formatConsumptionValue(Math.round(el?.consumption?.new / 1000));
+                        });
+                    }
+                    download(
+                        `${bldgName}_Energy_Consumption_By_Space${new Date().toISOString().split('T')[0]}`,
+                        getSpaceTableCSVExport(data, headerProps)
+                    );
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'CSV export completed successfully.';
+                        s.notificationType = 'success';
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Data failed to export in CSV.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch((err) => {
                 UserStore.update((s) => {
                     s.showNotification = true;
-                    s.notificationMessage = 'CSV export completed successfully.';
-                    s.notificationType = 'success';
+                    s.notificationMessage = 'Data failed to export in CSV due to internal server error.';
+                    s.notificationType = 'error';
                 });
-            }
-        } catch {
-            UserStore.update((s) => {
-                s.showNotification = true;
-                s.notificationMessage = 'Data failed to export in CSV.';
-                s.notificationType = 'error';
+            })
+            .finally(() => {
+                setDownloadingCSVData(false);
             });
-        }
+
+        try {
+            if (spacesList && spacesList.length !== 0) {
+            }
+        } catch {}
         setDownloadingCSVData(false);
     };
 
@@ -268,7 +293,6 @@ const ExploreBySpace = (props) => {
 
                     promiseResponse.forEach((record, index) => {
                         const spaceObj = spacesList.find((el) => el?.space_id === spaceIDs[index]);
-                        console.log('SSR response => ', record);
                         let newSpaceMappedData = [];
 
                         if (record?.status === 200 && record?.data) {
@@ -289,8 +313,6 @@ const ExploreBySpace = (props) => {
                             data: newSpaceMappedData,
                         });
                     });
-
-                    console.log('SSR newResponse => ', newResponse);
 
                     requestType === 'currentData' ? setSeriesData(newResponse) : setPastSeriesData(newResponse);
                 }

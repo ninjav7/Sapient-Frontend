@@ -47,8 +47,6 @@ import EquipChartModal from '../../../chartModal/EquipChartModal';
 const ExploreEquipmentBySpace = () => {
     const { download } = useCSVDownload();
     const { bldgId, spaceId } = useParams();
-    console.log('SSR bldgId => ', bldgId);
-    console.log('SSR spaceId => ', spaceId);
 
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
@@ -325,7 +323,6 @@ const ExploreEquipmentBySpace = () => {
 
                     promiseResponse.forEach((record, index) => {
                         const spaceObj = spacesList.find((el) => el?.space_id === spaceIDs[index]);
-                        console.log('SSR response => ', record);
                         let newSpaceMappedData = [];
 
                         if (record?.status === 200 && record?.data) {
@@ -346,8 +343,6 @@ const ExploreEquipmentBySpace = () => {
                             data: newSpaceMappedData,
                         });
                     });
-
-                    console.log('SSR newResponse => ', newResponse);
 
                     requestType === 'currentData' ? setSeriesData(newResponse) : setPastSeriesData(newResponse);
                 }
