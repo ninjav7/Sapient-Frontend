@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Breadcrumb } from 'antd';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import { BuildingSwitcher } from '../buildingSwitcher';
 import SubNavBreadCrumbs from '../subNavBreadcrumbs';
@@ -21,8 +21,6 @@ const DynamicBreadCrumbs = ({ items = [] }) => {
 };
 
 const SecondaryNavBar = (props) => {
-    const location = useLocation();
-
     return (
         <div className="secondary-nav-bar-wrapper d-flex align-items-center borders-bottom">
             <BuildingSwitcher
@@ -32,11 +30,7 @@ const SecondaryNavBar = (props) => {
                 {...props}
             />
             <div className="secondary-nav-bar-vertical-line" />
-            {location.pathname.includes('/explore') ? (
-                <DynamicBreadCrumbs items={props.breadCrumbsItems} />
-            ) : (
-                <SubNavBreadCrumbs items={props.breadCrumbsItems} />
-            )}
+            <SubNavBreadCrumbs items={props.breadCrumbsItems} />
         </div>
     );
 };
