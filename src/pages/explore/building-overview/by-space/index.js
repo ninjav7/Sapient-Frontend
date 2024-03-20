@@ -147,7 +147,7 @@ const ExploreBySpace = (props) => {
 
     const renderSpaceName = useCallback((row) => {
         return (
-            <Link to={`/explore/building/overview/by-spaces-equipments/${bldgId}/${row?.space_id}`}>
+            <Link to={`/explore/building/overview/${bldgId}/by-spaces-equipments/${row?.space_id}`}>
                 <p className="m-0">
                     <u>{row?.space_name !== '' ? row?.space_name : '-'}</u>
                 </p>
@@ -403,7 +403,9 @@ const ExploreBySpace = (props) => {
 
         const orderedBy = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
         const sortedBy = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo: timeZone };
+        let query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo: timeZone, orderedBy, sortedBy };
+
+        if (search) query.search = encodeURIComponent(search);
 
         await fetchSpaceListV2(query)
             .then((res) => {
