@@ -7,7 +7,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import Typography from '../../sharedComponents/typography';
 
 const EnergyMetadataContainer = ({ metadata = {}, isFetching = false }) => {
-    const { total_energy_consumption, peak_power = {}, square_footage = 0 } = metadata;
+    const { total_energy_consumption, peak_power = {}, square_footage = 1 } = metadata;
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -18,6 +18,12 @@ const EnergyMetadataContainer = ({ metadata = {}, isFetching = false }) => {
     const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
     const totalConsumptionValue = total_energy_consumption
         ? formatConsumptionValue(total_energy_consumption / 1000, 0)
+        : 0;
+
+    const formattedSquareFootage = Number(square_footage) < 1 ? 1 : Number(square_footage);
+
+    const calculatedConsumptionPerSquare = total_energy_consumption
+        ? formatConsumptionValue(Number(total_energy_consumption / 1000) / formattedSquareFootage, 0)
         : 0;
 
     const powerConsumptionValue = peak_power?.power ? formatConsumptionValue(peak_power?.power / 1000000, 2) : 0;
@@ -82,9 +88,7 @@ const EnergyMetadataContainer = ({ metadata = {}, isFetching = false }) => {
                         <Skeleton count={1} />
                     ) : (
                         <div className="d-flex align-items-baseline" style={{ gap: '0.25rem' }}>
-                            <span className="ytd-value">
-                                {Number(totalConsumptionValue) / Number(square_footage ? square_footage : 1)}
-                            </span>
+                            <span className="ytd-value">{calculatedConsumptionPerSquare}</span>
                             <span className="ytd-unit">kWh</span>
                         </div>
                     )}

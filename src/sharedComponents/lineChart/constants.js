@@ -23,7 +23,12 @@ const preparedData = (data) => {
                 : {
                       linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
                       stops: [
-                          [0, DATAVIZ_COLORS[`datavizMain${index + 1}`]],
+                          [
+                              0,
+                              index + 1 <= 27
+                                  ? DATAVIZ_COLORS[`datavizMain${index + 1}`]
+                                  : DATAVIZ_COLORS['datavizMain1'],
+                          ],
                           [1, 'rgba(255,255,255,.01)'],
                       ],
                   },

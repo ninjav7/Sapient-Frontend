@@ -17,7 +17,7 @@ import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { Link } from 'react-router-dom';
 import { fetchExploreEquipmentList } from '../explore/services';
 
-const SpacesEquipmentTable = () => {
+const SpacesEquipmentTable = ({ spaceType }) => {
     const { download } = useCSVDownload();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -46,22 +46,28 @@ const SpacesEquipmentTable = () => {
         // const sortedBy = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
 
         try {
-            // work here for equipment list
-            const data = await fetchExploreEquipmentList(
+            const responseAxios = await fetchExploreEquipmentList(
                 startDate,
                 endDate,
                 startTime,
                 endTime,
                 timeZone,
-                bldgId,
-                'consumption',
-                'dce',
-                10,
-                1
+                bldgId
             );
 
+            const response = responseAxios.data;
+
+            const data = response.data;
+
             if (data && Array.isArray(data) && data.length !== 0) {
-                setSpaces();
+                const mappedData = data.map((equip) => {
+                    equip.space_type = spaceType;
+                    return equip;
+                });
+
+                // backend should add it
+
+                setSpaces(mappedData);
             }
         } catch {
             setSpaces([]);
@@ -101,28 +107,18 @@ const SpacesEquipmentTable = () => {
         setDownloadingCSVData(false);
     };
 
-    const renderSpaceName = useCallback((row) => {
-        return (
-            <Link to={`/spaces/space/overview/${bldgId}/${row?.space_id}`}>
-                <p className="m-0">
-                    <u>{row?.space_name !== '' ? row?.space_name : '-'}</u>
-                </p>
-            </Link>
-        );
-    });
-
     const renderConsumption = useCallback((row) => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {`${formatConsumptionValue(Math.round(row?.consumption?.new / 1000))} ${UNITS.KWH}`}
+                    {`${formatConsumptionValue(Math.round(row?.consumption?.now / 1000))} ${UNITS.KWH}`}
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
                 <Progress multi className="custom-progress-bar" style={{ height: '6px' }}>
                     <Progress
                         bar
-                        value={row?.consumption?.new}
-                        max={row?.total_building_usage}
+                        value={row?.consumption?.now}
+                        max={row?.consumption?.now} // row?.total_building_usage should be added
                         barClassName="custom-on-hour"
                     />
                 </Progress>
@@ -131,7 +127,7 @@ const SpacesEquipmentTable = () => {
     });
 
     const renderPerChange = useCallback((row) => {
-        const change = row?.consumption?.changes;
+        const change = row?.consumption?.change;
 
         return (
             Number.isFinite(change) && (
@@ -140,7 +136,7 @@ const SpacesEquipmentTable = () => {
                     type={
                         change === 0
                             ? TrendsBadge.Type.NEUTRAL_TREND
-                            : row?.consumption?.new < row?.consumption?.old
+                            : row?.consumption?.now < row?.consumption?.old
                             ? TrendsBadge.Type.DOWNWARD_TREND
                             : TrendsBadge.Type.UPWARD_TREND
                     }
@@ -149,27 +145,12 @@ const SpacesEquipmentTable = () => {
         );
     });
 
-    const renderSquareUnits = useCallback(
-        (row) => {
-            const formatSquareString = (string) => `${string} ${userPrefUnits === 'si' ? UNITS.SQ_M : UNITS.SQ_FT}`;
-
-            return (
-                <Typography.Body size={Typography.Sizes.md}>
-                    {row?.square_footage
-                        ? formatSquareString(row?.square_footage.toLocaleString())
-                        : formatSquareString('0')}
-                </Typography.Body>
-            );
-        },
-        [userPrefUnits]
-    );
-
     const renderTags = useCallback((row) => {
-        const slicedArr = row?.tag.slice(1);
+        const slicedArr = row?.tags.slice(1);
 
         return (
             <div className="tag-row-content">
-                <Badge text={<span className="gray-950">{row?.tag[0] ? row.tag[0] : 'none'}</span>} />
+                <Badge text={<span className="gray-950">{row?.tags[0] ? row.tags[0] : 'none'}</span>} />
                 {slicedArr?.length > 0 ? (
                     <>
                         <Badge
@@ -196,8 +177,7 @@ const SpacesEquipmentTable = () => {
     const headerProps = [
         {
             name: 'Name',
-            accessor: 'space_name',
-            callbackValue: renderSpaceName,
+            accessor: 'equipment_name',
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
@@ -213,24 +193,18 @@ const SpacesEquipmentTable = () => {
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: 'Floor',
-            accessor: 'floor_name',
-            onSort: (method, name) => setSortBy({ method, name }),
-        },
-        {
             name: 'Space Type',
-            accessor: 'space_type_name',
+            accessor: 'space_type',
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: 'Equipment Number',
-            accessor: 'equipment_count',
+            name: 'Equipment Type',
+            accessor: 'equipments_type',
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: userPrefUnits === 'si' ? `Square Meters` : `Square Footage`,
-            accessor: 'square_footage',
-            callbackValue: renderSquareUnits,
+            name: 'End Use Category',
+            accessor: 'end_user',
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
