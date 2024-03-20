@@ -23,7 +23,7 @@ const SecondaryTopNavBar = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const bldgTimeZone = BuildingStore.useState((s) => s.BldgTimeZone);
-    const breadcrumList = BreadcrumbStore.useState((bs) => bs.items);
+    const breadcrumbList = BreadcrumbStore.useState((s) => (s?.breadcrumbList ? JSON.parse(s?.breadcrumbList) : null));
 
     const [buildingListData] = useAtom(buildingData);
 
@@ -247,7 +247,7 @@ const SecondaryTopNavBar = () => {
                     onChangeBuilding={(e) => handleBldgSwitcherChange(e?.value)}
                     buildings={buildingsList}
                     selectedBuilding={selectedBuilding}
-                    breadCrumbsItems={breadcrumList}
+                    breadCrumbsItems={breadcrumbList}
                 />
             </div>
         </React.Fragment>

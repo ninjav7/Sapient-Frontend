@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Spinner } from 'reactstrap';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import { UserStore } from '../../../store/UserStore';
 import { DateRangeStore } from '../../../store/DateRangeStore';
@@ -42,6 +42,7 @@ import '../style.css';
 import '../styles.scss';
 
 const ExploreByBuildings = () => {
+    const history = useHistory();
     const { download } = useCSVDownload();
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -53,6 +54,10 @@ const ExploreByBuildings = () => {
     const userPrefUnits = UserStore.useState((s) => s.unit);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+
+    const breadcrumbList = BreadcrumbStore.useState((s) => (s?.breadcrumbList ? JSON.parse(s?.breadcrumbList) : null));
+
+    const [selectedBldg, setBuildingSelectedObj] = useState(null);
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
@@ -129,21 +134,19 @@ const ExploreByBuildings = () => {
         return exploreBuildingsList;
     };
 
-    const renderBuildingName = (row) => {
-        return (
-            <div style={{ fontSize: 0 }}>
-                <Link
-                    to={`/explore/building/overview/${row?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`}
-                    className="typography-wrapper link mouse-pointer"
-                    onClick={() => {
-                        updateBuildingStore(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);
-                    }}>
-                    {row?.building_name}
-                </Link>
-                <Brick sizeInPixels={3} />
-            </div>
-        );
-    };
+    const renderBuildingName = useCallback((row) => (
+        <div
+            className="typography-wrapper link mouse-pointer"
+            onClick={() => {
+                updateBuildingStore(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);
+                setBuildingSelectedObj({
+                    building_id: row?.building_id,
+                    building_name: row?.building_name,
+                });
+            }}>
+            {row?.building_name}
+        </div>
+    ));
 
     const renderSquareFootage = useCallback((row) => {
         const value = Math.round(handleUnitConverstion(row?.square_footage, row?.user_pref_units));
@@ -298,6 +301,7 @@ const ExploreByBuildings = () => {
                 if (responseData.length !== 0) {
                     responseData.forEach((el) => {
                         el.user_pref_units = userPrefUnits;
+                        el.breadcrumbList = breadcrumbList;
                     });
                 }
                 setExploreBuildingsList(responseData);
@@ -721,21 +725,19 @@ const ExploreByBuildings = () => {
     };
 
     const updateBreadcrumbStore = () => {
-        BreadcrumbStore.update((bs) => {
-            let newList = [
-                {
-                    label: 'Portfolio Overview',
-                    path: '/explore/overview/by-buildings',
-                    active: true,
-                },
-            ];
-            bs.items = newList;
-        });
         ComponentStore.update((s) => {
             s.parent = 'explore';
         });
-
         updateBuildingStore('portfolio', 'Portfolio', '');
+    };
+
+    const handleBreadcrumbUpdate = (breadcrumb_list) => {
+        const breadcrumbList_string = JSON.stringify(breadcrumb_list);
+
+        localStorage.setItem('breadcrumbList', breadcrumbList_string);
+        BreadcrumbStore.update((s) => {
+            s.breadcrumbList = breadcrumbList_string;
+        });
     };
 
     useEffect(() => {
@@ -978,6 +980,42 @@ const ExploreByBuildings = () => {
             setPastSeriesData([]);
         }
     }, [isInComparisonMode]);
+
+    const redirectToEndpoint = (path) => {
+        history.push({
+            pathname: `${path}`,
+        });
+    };
+
+    useEffect(() => {
+        if (selectedBldg) {
+            handleBreadcrumbUpdate([
+                {
+                    label: 'By Building',
+                    path: `/explore/overview/by-buildings`,
+                    active: false,
+                },
+                {
+                    label: selectedBldg?.building_name ?? 'Building',
+                    path: `/explore/building/overview/${selectedBldg?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
+                    active: true,
+                },
+            ]);
+            redirectToEndpoint(
+                `/explore/building/overview/${selectedBldg?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`
+            );
+        }
+    }, [selectedBldg]);
+
+    useEffect(() => {
+        handleBreadcrumbUpdate([
+            {
+                label: 'Portfolio Level',
+                path: '/explore/overview/by-buildings',
+                active: true,
+            },
+        ]);
+    }, []);
 
     const dataToRenderOnChart = validateSeriesDataForBuildings(selectedBldgIds, exploreBuildingsList, seriesData);
     const pastDataToRenderOnChart = validateSeriesDataForBuildings(

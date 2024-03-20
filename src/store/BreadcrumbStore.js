@@ -8,4 +8,5 @@ export const BreadcrumbStore = new Store({
             active: true,
         },
     ],
+    breadcrumbList: localStorage.getItem('breadcrumbList'),
 });
