@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import _ from 'lodash';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { Row, UncontrolledTooltip, Progress, Spinner } from 'reactstrap';
 
 import { UserStore } from '../../../../store/UserStore';
 import { DateRangeStore } from '../../../../store/DateRangeStore';
 import { BuildingStore } from '../../../../store/BuildingStore';
 import { ComponentStore } from '../../../../store/ComponentStore';
-import { BreadcrumbStore } from '../../../../store/BreadcrumbStore';
 
 import SkeletonLoader from '../../../../components/SkeletonLoader';
 import Brick from '../../../../sharedComponents/brick';
@@ -33,6 +32,8 @@ import {
     handleAPIRequestParams,
     pageListSizes,
 } from '../../../../helpers/helpers';
+import { EXPLORE_FILTER_TYPE } from '../../constants';
+import { updateBreadcrumbStore } from '../../../../helpers/updateBreadcrumbStore';
 import { validateSeriesDataForSpaces } from './utils';
 import { getSpaceTableCSVExport } from '../../../../utils/tablesExport';
 import { UNITS } from '../../../../constants/units';
@@ -50,6 +51,7 @@ const ExploreBySpace = (props) => {
         setComparisonMode,
     } = props;
 
+    const history = useHistory();
     const { download } = useCSVDownload();
 
     const bldgName = BuildingStore.useState((s) => s.BldgName);
@@ -64,6 +66,8 @@ const ExploreBySpace = (props) => {
     const userPrefUnits = UserStore.useState((s) => s.unit);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+
+    const [selectedSpaceToRedirect, setSelectedSpaceToRedirect] = useState(null);
 
     // Edit Space Modal
     const [showSpaceConfigModal, setSpaceConfigModal] = useState(false);
@@ -104,17 +108,7 @@ const ExploreBySpace = (props) => {
         setSelectedSpaceObj(el);
     };
 
-    const updateBreadcrumbStore = () => {
-        BreadcrumbStore.update((bs) => {
-            let newList = [
-                {
-                    label: 'Building Overview',
-                    path: '/explore/building/overview',
-                    active: true,
-                },
-            ];
-            bs.items = newList;
-        });
+    const updateStoreOnPageLoad = () => {
         ComponentStore.update((s) => {
             s.parent = 'explore';
         });
@@ -170,15 +164,18 @@ const ExploreBySpace = (props) => {
         setDownloadingCSVData(false);
     };
 
-    const renderSpaceName = useCallback((row) => {
-        return (
-            <Link to={`/explore/building/overview/${bldgId}/by-spaces-equipments/${row?.space_id}`}>
-                <p className="m-0">
-                    <u>{row?.space_name !== '' ? row?.space_name : '-'}</u>
-                </p>
-            </Link>
-        );
-    });
+    const renderSpaceName = useCallback((row) => (
+        <div
+            className="typography-wrapper link mouse-pointer"
+            onClick={() => {
+                setSelectedSpaceToRedirect({
+                    space_id: row?.space_id,
+                    space_name: row?.space_name,
+                });
+            }}>
+            {row?.space_name ?? '-'}
+        </div>
+    ));
 
     const renderConsumption = useCallback((row) => {
         return (
@@ -493,7 +490,7 @@ const ExploreBySpace = (props) => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        updateBreadcrumbStore();
+        updateStoreOnPageLoad();
     }, []);
 
     useEffect(() => {
@@ -579,6 +576,32 @@ const ExploreBySpace = (props) => {
             setPastSeriesData([]);
         }
     }, [isInComparisonMode]);
+
+    const redirectToEndpoint = (path) => {
+        history.push({
+            pathname: `${path}`,
+        });
+    };
+
+    useEffect(() => {
+        if (selectedSpaceToRedirect) {
+            updateBreadcrumbStore([
+                {
+                    label: 'By Location',
+                    path: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.BY_SPACE}`,
+                    active: false,
+                },
+                {
+                    label: selectedSpaceToRedirect?.space_name ?? 'Space',
+                    path: `/explore/building/overview/${bldgId}/by-spaces-equipments/${selectedSpaceToRedirect?.space_id}`,
+                    active: true,
+                },
+            ]);
+            redirectToEndpoint(
+                `/explore/building/overview/${bldgId}/by-spaces-equipments/${selectedSpaceToRedirect?.space_id}`
+            );
+        }
+    }, [selectedSpaceToRedirect]);
 
     useEffect(() => {
         const scrollToTop = () => {
