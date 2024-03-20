@@ -42,6 +42,7 @@ import Select from '../../../../sharedComponents/form/select';
 import Header from '../../../../components/Header';
 import { exploreBldgMetrics, truncateString, validateSeriesDataForEquipments } from '../../utils';
 import { fetchExploreEquipmentList } from '../../services';
+import EquipChartModal from '../../../chartModal/EquipChartModal';
 
 const ExploreEquipmentBySpace = () => {
     const { download } = useCSVDownload();
@@ -62,12 +63,14 @@ const ExploreEquipmentBySpace = () => {
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
 
-    // Edit Space Modal
-    const [showSpaceConfigModal, setSpaceConfigModal] = useState(false);
-    const closeSpaceConfigModal = () => setSpaceConfigModal(false);
-    const openSpaceConfigModal = () => setSpaceConfigModal(true);
+    // Equipment Chart Modal
+    const [showEquipmentChart, setShowEquipmentChart] = useState(false);
+    const handleChartOpen = () => setShowEquipmentChart(true);
+    const handleChartClose = () => setShowEquipmentChart(false);
 
     const [selectedSpaceObj, setSelectedSpaceObj] = useState(null);
+    const [equipmentFilter, setEquipmentFilter] = useState({});
+    const [selectedModalTab, setSelectedModalTab] = useState(0);
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
@@ -101,11 +104,6 @@ const ExploreEquipmentBySpace = () => {
         return spacesList;
     };
 
-    const handleSpaceEdit = (el) => {
-        openSpaceConfigModal();
-        setSelectedSpaceObj(el);
-    };
-
     const toggleComparision = () => {
         setComparisonMode(!isInComparisonMode);
         UserStore.update((s) => {
@@ -131,13 +129,13 @@ const ExploreEquipmentBySpace = () => {
                 <a
                     className="typography-wrapper link mouse-pointer"
                     onClick={() => {
-                        // setEquipmentFilter({
-                        //     equipment_id: row?.equipment_id,
-                        //     equipment_name: row?.equipment_name,
-                        //     device_type: row?.device_type,
-                        // });
+                        setEquipmentFilter({
+                            equipment_id: row?.equipment_id,
+                            equipment_name: row?.equipment_name,
+                            device_type: row?.device_type,
+                        });
                         localStorage.setItem('exploreEquipName', row?.equipment_name);
-                        // handleChartOpen();
+                        handleChartOpen();
                     }}>
                     {row?.equipment_name !== '' ? row?.equipment_name : '-'}
                 </a>
@@ -559,12 +557,6 @@ const ExploreEquipmentBySpace = () => {
     }, []);
 
     useEffect(() => {
-        if (!showSpaceConfigModal) {
-            setSelectedSpaceObj(null);
-        }
-    }, [showSpaceConfigModal]);
-
-    useEffect(() => {
         if (!bldgId || !startDate || !endDate) return;
 
         fetchEquipmentsList(bldgId, spaceId);
@@ -701,8 +693,8 @@ const ExploreEquipmentBySpace = () => {
                                     subTitle={''}
                                     data={dataToRenderOnChart}
                                     pastData={pastDataToRenderOnChart}
-                                    tooltipUnit={''}
-                                    tooltipLabel={''}
+                                    tooltipUnit={selectedUnit}
+                                    tooltipLabel={selectedConsumptionLabel}
                                     timeIntervalObj={{
                                         startDate,
                                         endDate,
@@ -716,7 +708,7 @@ const ExploreEquipmentBySpace = () => {
                                             ),
                                         },
                                     }}
-                                    chartType={''}
+                                    chartType={selectedConsumption}
                                 />
                             ) : (
                                 <ExploreChart
@@ -725,8 +717,8 @@ const ExploreEquipmentBySpace = () => {
                                     isLoadingData={false}
                                     disableDefaultPlotBands={true}
                                     tooltipValuesKey={'{point.y:.1f}'}
-                                    tooltipUnit={''}
-                                    tooltipLabel={''}
+                                    tooltipUnit={selectedUnit}
+                                    tooltipLabel={selectedConsumptionLabel}
                                     data={dataToRenderOnChart}
                                     chartProps={{
                                         navigator: {
@@ -751,7 +743,7 @@ const ExploreEquipmentBySpace = () => {
                                                     daysCount,
                                                     userPrefDateFormat,
                                                     userPrefTimeFormat,
-                                                    'energy'
+                                                    selectedConsumption
                                                 ),
                                             },
                                         },
@@ -789,7 +781,7 @@ const ExploreEquipmentBySpace = () => {
             <Row className="m-0">
                 <div className="w-100">
                     <DataTableWidget
-                        id="explore-by-spaces"
+                        id="explore-by-equipment-by-space"
                         isLoading={isEquipDataFetching}
                         isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 2} noOfRows={20} />}
                         isFilterLoading={isFiltersFetching}
@@ -804,6 +796,7 @@ const ExploreEquipmentBySpace = () => {
                         onDownload={handleDownloadCSV}
                         isCSVDownloading={isCSVDownloading}
                         headers={headerProps}
+                        customExcludedHeaders={['Panel Name', 'Breakers', 'Notes']}
                         customCheckAll={() => (
                             <Checkbox
                                 label=""
@@ -835,14 +828,22 @@ const ExploreEquipmentBySpace = () => {
                         onPageSize={setPageSize}
                         onChangePage={setPageNo}
                         pageListSizes={pageListSizes}
-                        isEditable={() => true}
-                        onEditRow={(record, id, row) => handleSpaceEdit(row)}
                         totalCount={(() => {
                             return totalItems;
                         })()}
                     />
                 </div>
             </Row>
+
+            <EquipChartModal
+                showEquipmentChart={showEquipmentChart}
+                handleChartClose={handleChartClose}
+                selectedEquipObj={equipmentFilter}
+                fetchEquipmentData={fetchEquipmentsList}
+                selectedTab={selectedModalTab}
+                setSelectedTab={setSelectedModalTab}
+                activePage="explore"
+            />
         </React.Fragment>
     );
 };
