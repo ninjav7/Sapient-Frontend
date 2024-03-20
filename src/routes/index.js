@@ -432,13 +432,13 @@ const settingsRoutes = {
 
 // Explore Routes
 const exploreRoutes = {
-    path: '/explore/portfolio/overview/by-buildings',
+    path: '/explore/overview/by-buildings',
     name: 'Explore',
     component: ExploreByBuildings,
     visibility: true,
     children: [
         {
-            path: '/explore/portfolio/overview/by-buildings',
+            path: '/explore/overview/by-buildings',
             name: 'Explore by Buildings',
             component: ExploreByBuildings,
             route: PrivateRoute,
@@ -446,7 +446,7 @@ const exploreRoutes = {
             parent: 'explore',
         },
         {
-            path: '/explore/building/overview/by-spaces-equipments/:bldgId/:spaceId',
+            path: '/explore/building/overview/:bldgId/by-spaces-equipments/:spaceId',
             name: 'Explore by Space Equipments',
             component: ExploreEquipmentBySpace,
             route: PrivateRoute,

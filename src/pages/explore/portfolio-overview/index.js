@@ -725,7 +725,7 @@ const ExploreByBuildings = () => {
             let newList = [
                 {
                     label: 'Portfolio Overview',
-                    path: '/explore/portfolio/overview/by-buildings',
+                    path: '/explore/overview/by-buildings',
                     active: true,
                 },
             ];

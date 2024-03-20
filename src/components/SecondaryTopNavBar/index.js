@@ -70,7 +70,7 @@ const SecondaryTopNavBar = () => {
         }
 
         if (path.includes('/explore/building/overview')) {
-            redirectToEndpoint(`/explore/portfolio/overview/by-buildings`);
+            redirectToEndpoint(`/explore/overview/by-buildings`);
             return;
         }
 
@@ -111,7 +111,7 @@ const SecondaryTopNavBar = () => {
             return;
         }
 
-        if (path === '/explore/portfolio/overview/by-buildings') {
+        if (path === '/explore/overview/by-buildings') {
             redirectToEndpoint(`/explore/building/overview/${record?.value}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`);
             return;
         }
