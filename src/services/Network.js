@@ -75,6 +75,8 @@ export const getEnergyConsumptionBySpaceV2 = '/api/v2/metrics/space';
 export const getTopEnergyConsumptionBySpaceV2 = '/api/v2/metrics/space/top_space';
 export const getSpaceListV2 = '/api/v2/metrics/space/list';
 export const getSpaceMetadataV2 = '/api/v2/metrics/space';
+export const getEnergyConsumptionSpaceByCategory = '/api/v2/metrics/space/group';
+export const getSpacesKPIV2 = '/api/v2/metrics/space_type';
 
 // end-uses
 export const energyEndUseInfo = '/api/energy/portfolio/end-uses-info';
