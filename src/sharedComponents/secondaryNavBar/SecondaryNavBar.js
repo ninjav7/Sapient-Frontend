@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Breadcrumb } from 'antd';
+import { Link, useLocation } from 'react-router-dom';
 
 import { BuildingSwitcher } from '../buildingSwitcher';
 import SubNavBreadCrumbs from '../subNavBreadcrumbs';
@@ -8,7 +10,19 @@ import { stringOrNumberPropTypes } from '../helpers/helper';
 
 import './SecondaryNavBar.scss';
 
+const DynamicBreadCrumbs = ({ items = [] }) => {
+    return (
+        <Breadcrumb separator=">">
+            {items.map(({ label = '', path = '#', active = false }, index) => (
+                <Breadcrumb.Item>{active ? label : <Link to={`${path}`}>{label}</Link>}</Breadcrumb.Item>
+            ))}
+        </Breadcrumb>
+    );
+};
+
 const SecondaryNavBar = (props) => {
+    const location = useLocation();
+
     return (
         <div className="secondary-nav-bar-wrapper d-flex align-items-center borders-bottom">
             <BuildingSwitcher
@@ -18,7 +32,11 @@ const SecondaryNavBar = (props) => {
                 {...props}
             />
             <div className="secondary-nav-bar-vertical-line" />
-            <SubNavBreadCrumbs items={props.breadCrumbsItems} />
+            {location.pathname.includes('/explore') ? (
+                <DynamicBreadCrumbs items={props.breadCrumbsItems} />
+            ) : (
+                <SubNavBreadCrumbs items={props.breadCrumbsItems} />
+            )}
         </div>
     );
 };
