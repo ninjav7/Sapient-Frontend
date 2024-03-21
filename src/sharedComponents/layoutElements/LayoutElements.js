@@ -122,7 +122,7 @@ const LayoutElements = (props) => {
                         confirmMove={confirmMove}
                         ableToBeMoved={ableToBeMoved}
                         onMoveClick={onMoveClick}
-                        childrenCallBackValue={(props) => ({ level: String(props.type_name), ...props })}
+                        childrenCallBackValue={(props) => ({ level: String(props?.type_name ?? ''), ...props })}
                         onChildrenClick={(space, restrictedActions) => {
                             const currentKey = key + 1;
                             // Preserve current's id and number of column

@@ -258,7 +258,7 @@ const SpaceLayout = (props) => {
         }
 
         if (spaceObj?.parent_space) {
-            const parent = spacesList.find((space) => space._id === spaceObj.parent_space);
+            const parent = spacesList.find((space) => space._id === spaceObj?.parent_space);
             setCurrentParent(parent?.name);
             return;
         } else if (spaceObj?.parents) {

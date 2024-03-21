@@ -17,6 +17,7 @@ import LayoutElements from '../../../sharedComponents/layoutElements/LayoutEleme
 import FloorLayout from './FloorLayout';
 import SpaceLayout from './SpaceLayout';
 import MoveSpaceLayout from './MoveSpaceLayout';
+import { mapSpacesList } from '../../../helpers/helpers';
 
 const LayoutPage = () => {
     const { bldgId } = useParams();
@@ -131,7 +132,12 @@ const LayoutPage = () => {
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
-                    if (response?.data.length !== 0) setSpacesList(sortedLayoutData(response?.data));
+                    if (response?.data.length !== 0) {
+                        const sortedList = sortedLayoutData(response.data);
+                        const mappedSpaceList = mapSpacesList(sortedList);
+
+                        setSpacesList(mappedSpaceList);
+                    }
                 } else {
                     notifyUser(Notification.Types.error, 'Failed to fetch Spaces.');
                 }
