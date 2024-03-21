@@ -403,11 +403,19 @@ const SpaceDetails = () => {
                                 )}
                                 <Brick sizeInRem={2} />
 
-                                <Header title="Equipments" type="page" showExplore={false} showCalendar={false} />
+                                <Header
+                                    title="Linked Equipments"
+                                    type="page"
+                                    showExplore={false}
+                                    showCalendar={false}
+                                />
 
                                 <Brick sizeInRem={1} />
 
-                                <SpacesEquipmentTable />
+{/* should me removed checking metadatFetching as soon as end-point is updated */}
+                                {!metadataFetching && (
+                                    <SpacesEquipmentTable spaceType={metadata?.space_type_name ?? ''} />
+                                )}
                             </Col>
                         </Row>
                     </div>
