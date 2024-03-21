@@ -32,10 +32,12 @@ import {
     getPastDateRange,
     pageListSizes,
 } from '../../../../helpers/helpers';
+import { EXPLORE_FILTER_TYPE } from '../../constants';
 import { UNITS } from '../../../../constants/units';
 import { isEmptyObject, truncateString, validateSeriesDataForEquipments } from '../../utils';
 import { getExploreByEquipmentTableCSVExport } from '../../../../utils/tablesExport';
 import { FILTER_TYPES } from '../../../../sharedComponents/dataTableWidget/constants';
+import { updateBreadcrumbStore } from '../../../../helpers/updateBreadcrumbStore';
 
 import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../../../explore/services';
 
@@ -255,7 +257,7 @@ const ExploreByEquipments = (props) => {
         );
     });
 
-    const updateBreadcrumbStore = () => {
+    const updateStoreOnPageLoad = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
@@ -714,7 +716,7 @@ const ExploreByEquipments = (props) => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        updateBreadcrumbStore();
+        updateStoreOnPageLoad();
     }, []);
 
     useEffect(() => {
@@ -1141,6 +1143,21 @@ const ExploreByEquipments = (props) => {
             setPastSeriesData([]);
         }
     }, [isInComparisonMode]);
+
+    useEffect(() => {
+        updateBreadcrumbStore([
+            {
+                label: 'By Building',
+                path: `/explore/overview/by-buildings`,
+                active: false,
+            },
+            {
+                label: bldgName ?? 'Building',
+                path: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
+                active: true,
+            },
+        ]);
+    }, [bldgId, bldgName]);
 
     const dataToRenderOnChart = validateSeriesDataForEquipments(selectedEquipIds, equipDataList, seriesData);
     const pastDataToRenderOnChart = validateSeriesDataForEquipments(selectedEquipIds, equipDataList, pastSeriesData);
