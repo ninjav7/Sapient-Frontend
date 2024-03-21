@@ -228,14 +228,20 @@ const SpaceConfiguration = (props) => {
             building_id: bldgId,
             name: spaceObj?.name,
             type_id: spaceObj?.type_id,
-            square_footage: spaceObj?.square_footage ?? null,
-            tags: spaceObj?.tags ?? [],
+            square_footage:
+                spaceObj?.square_footage || spaceObj?.square_footage === '0' ? spaceObj.square_footage : null,
             parents: spaceObj?.new_parents ? spaceObj?.new_parents : spaceObj?.parents,
             parent_space:
                 spaceObj?.new_parent_space || spaceObj?.new_parent_space === null
                     ? spaceObj?.new_parent_space
                     : spaceObj?.parent_space,
         };
+
+        if (Array.isArray(spaceObj?.tags)) {
+            payload.tags = spaceObj.tags.map((tag) => tag?.label ?? '');
+        } else {
+            payload.tags = [];
+        }
 
         await updateSpaceService(params, payload)
             .then((res) => {
@@ -274,13 +280,13 @@ const SpaceConfiguration = (props) => {
         const alertObj = {};
 
         if (!spaceObj?.name || spaceObj?.name === '') alertObj.name = `Please enter Space name. It can not be empty.`;
-        if (!spaceObj?.type_id || spaceObj?.type_id === '') alertObj.type_id = { text: `Please select Type.` };
-        if (Number(spaceObj?.square_footage) < 0)
-            alertObj.square_footage = { text: `Please enter Square footage from 0.` };
+        if (!spaceObj?.type_id || spaceObj?.type_id === '') alertObj.type_id = `Please select Type.`;
+        if (spaceObj?.square_footage && Number(spaceObj?.square_footage) < 0)
+            alertObj.square_footage = `Please enter Square starting from 0 or leave it empty.`;
 
         setErrorObj(alertObj);
 
-        if (!alertObj.name && !alertObj.type_id && Number(spaceObj.square_footage) >= 0) fetchEditSpace();
+        if (!alertObj.name && !alertObj.type_id && !alertObj.square_footage) fetchEditSpace();
     };
 
     useEffect(() => {
@@ -425,6 +431,7 @@ const SpaceConfiguration = (props) => {
                             notifyUser={notifyUser}
                             allParentSpaces={allParentSpaces}
                             errorObj={errorObj}
+                            setErrorObj={setErrorObj}
                         />
                     )}
                 </div>
