@@ -69,6 +69,13 @@ const SpaceConfiguration = (props) => {
     const handleSelect = (e) => setSelectedConsumption(e.value);
     const spaceName = metadata?.space_name && metadata.space_name;
 
+    const customModalStyle = {
+        modalContent: {
+            height: '90vh',
+            overflowY: 'auto', // Enable vertical scrolling when content exceeds the height
+        },
+    };
+
     const chartProps = {
         tooltip: {
             xDateFormat: dateTimeFormatForHighChart(userPrefDateFormat, userPrefTimeFormat),
@@ -284,8 +291,9 @@ const SpaceConfiguration = (props) => {
     }, [spaceId, startDate, endDate, selectedConsumption, bldgId]);
 
     return (
-        <Modal isOpen={showSpaceConfigModal} className="breaker-modal-fullscreen">
-            <div>
+        <Modal isOpen={showSpaceConfigModal} className="space-modal-fullscreen">
+            <div className="space-modal-container" style={customModalStyle.modalContent}>
+                {/* Modal Header  */}
                 <Row className="m-0">
                     <div className="space-modal-header d-flex justify-content-between" style={{ background: 'none' }}>
                         <div className="d-flex flex-column justify-content-between">
@@ -342,6 +350,7 @@ const SpaceConfiguration = (props) => {
                     </div>
                 </Row>
 
+                {/* Modal Body */}
                 <div style={{ padding: '2rem', paddingTop: '0rem' }}>
                     {selectedTab === 0 && (
                         <div className="lower-content-container">
