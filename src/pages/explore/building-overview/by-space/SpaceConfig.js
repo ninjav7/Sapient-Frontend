@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Row, Col, Modal, Spinner } from 'reactstrap';
+import Skeleton from 'react-loading-skeleton';
 
 import { UserStore } from '../../../../store/UserStore';
 import { BuildingStore } from '../../../../store/BuildingStore';
@@ -28,10 +29,13 @@ import { defaultMetrics } from '../../../spaceDetails/constants';
 import { handleDataConversion } from '../../../spaceDetails/helper';
 import { dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../../../helpers/helpers';
 
+import colorPalette from '../../../../assets/scss/_colors.scss';
+import 'react-loading-skeleton/dist/skeleton.css';
 import '../../../spaceDetails/styles.scss';
+import './styles.scss';
 
 const SpaceConfiguration = (props) => {
-    const { showSpaceConfigModal = false, closeSpaceConfigModal, bldgId, spaceId, selectedSpaceObj = {} } = props;
+    const { showSpaceConfigModal = false, closeSpaceConfigModal, bldgId, spaceId } = props;
 
     const metric = defaultMetrics;
 
@@ -62,9 +66,6 @@ const SpaceConfiguration = (props) => {
 
     const allParentSpaces = useRef([]);
 
-    const selectedMetricsTab = () => setSelectedTab(0);
-    const selectedConfiguresTab = () => !metadataFetching && !chartDataFetching && setSelectedTab(1);
-    const dynamicActiveClassTab = (selectedIdTab) => (selectedTab === selectedIdTab ? 'active-tab-style' : '');
     const handleSelect = (e) => setSelectedConsumption(e.value);
     const spaceName = metadata?.space_name && metadata.space_name;
 
@@ -83,6 +84,19 @@ const SpaceConfiguration = (props) => {
         yAxis: {
             gridLineWidth: 1,
         },
+    };
+
+    const handleModalClose = () => {
+        closeSpaceConfigModal();
+        setChartDataFetching(false);
+        setChartData([]);
+        setMetadataFetching(false);
+        setMetadata({});
+        setSelectedTab(0);
+        setErrorObj({});
+        setSelectedFloorId(null);
+        setSpaceObj({});
+        setUpdateSpaceFetching(false);
     };
 
     const mapChartData = async (query) => {
@@ -216,21 +230,35 @@ const SpaceConfiguration = (props) => {
                     : spaceObj?.parent_space,
         };
 
-        try {
-            const axiosResponse = await updateSpaceService(params, payload);
-            const response = axiosResponse?.data;
-
-            if (response?.success) {
-                notifyUser(Notification.Types.success, `Space updated successfully.`);
-            } else {
-                notifyUser(Notification.Types.error, response?.message);
-            }
-        } catch {
-            notifyUser(Notification.Types.error, `Failed to update Space.`);
-        }
-
-        setUpdateSpaceFetching(false);
-        allParentSpaces.current = [];
+        await updateSpaceService(params, payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Space updated successfully.';
+                        s.notificationType = 'success';
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message ?? 'Failed to update Space.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch((err) => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Failed to update Space.';
+                    s.notificationType = 'error';
+                });
+            })
+            .finally(() => {
+                handleModalClose();
+                setUpdateSpaceFetching(false);
+                allParentSpaces.current = [];
+            });
     };
 
     const handleEditSpace = () => {
@@ -257,114 +285,132 @@ const SpaceConfiguration = (props) => {
 
     return (
         <Modal isOpen={showSpaceConfigModal} className="breaker-modal-fullscreen">
-            <div style={{ padding: '2rem' }}>
-                <Row>
-                    <Col lg={12}>
-                        <div className="passive-header-wrapper d-flex justify-content-between upper-content-container">
-                            <div className="d-flex flex-column justify-content-between">
+            <div>
+                <Row className="m-0">
+                    <div className="space-modal-header d-flex justify-content-between" style={{ background: 'none' }}>
+                        <div className="d-flex flex-column justify-content-between">
+                            {metadataFetching ? (
+                                <Skeleton
+                                    baseColor={colorPalette.primaryGray150}
+                                    highlightColor={colorPalette.baseBackground}
+                                    count={1}
+                                    height={25}
+                                    width={175}
+                                />
+                            ) : (
                                 <Typography.Header size={Typography.Sizes.md}>{spaceName}</Typography.Header>
-                                <div className="d-flex justify-content-start mouse-pointer ">
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        className={`typography-wrapper mr-4 ${dynamicActiveClassTab(0)}`}
-                                        onClick={selectedMetricsTab}>
-                                        Metrics
-                                    </Typography.Subheader>
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        className={`typography-wrapper ${dynamicActiveClassTab(1)}`}
-                                        onClick={selectedConfiguresTab}>
-                                        Configure
-                                    </Typography.Subheader>
-                                </div>
-                            </div>
-                            <div className="d-flex align-items-center">
-                                <Button
-                                    label={updateSpaceFetcing ? 'Saving' : 'Save'}
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.primary}
-                                    onClick={handleEditSpace}
-                                    className="mr-2"
-                                    disabled={updateSpaceFetcing}
-                                />
-                                <Button
-                                    label="Close"
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.secondaryGrey}
-                                    // onClick={() => history.push(`/spaces/building/overview/${bldgId}`)}
-                                />
+                            )}
+
+                            <div className="d-flex justify-content-start mouse-pointer">
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    className={`typography-wrapper mr-4 ${selectedTab === 0 ? 'active-tab-style' : ''}`}
+                                    onClick={() => setSelectedTab(0)}>
+                                    {`Metrics`}
+                                </Typography.Subheader>
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    className={`typography-wrapper ${selectedTab === 1 ? 'active-tab-style' : ''}`}
+                                    onClick={() => setSelectedTab(1)}>
+                                    {`Configure`}
+                                </Typography.Subheader>
                             </div>
                         </div>
-                    </Col>
+                        <div className="d-flex">
+                            <div>
+                                <Button
+                                    label={selectedTab === 1 ? 'Cancel' : 'Close'}
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryGrey}
+                                    onClick={handleModalClose}
+                                />
+                            </div>
+
+                            {selectedTab === 1 && (
+                                <div>
+                                    <Button
+                                        label={updateSpaceFetcing ? 'Saving' : 'Save'}
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.primary}
+                                        onClick={handleEditSpace}
+                                        className="ml-2"
+                                        disabled={updateSpaceFetcing}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </Row>
 
-                {selectedTab === 0 && (
-                    <div className="lower-content-container">
-                        <Row>
-                            <Col xl={3}>
-                                <EnergyMetadataContainer metadata={metadata} isFetching={metadataFetching} />
+                <div style={{ padding: '2rem', paddingTop: '0rem' }}>
+                    {selectedTab === 0 && (
+                        <div className="lower-content-container">
+                            <Row>
+                                <Col xl={3}>
+                                    <EnergyMetadataContainer metadata={metadata} isFetching={metadataFetching} />
 
-                                <Brick sizeInRem={1} />
+                                    <Brick sizeInRem={1} />
 
-                                <MetadataContainer metadata={metadata} isFetching={metadataFetching} />
+                                    <MetadataContainer metadata={metadata} isFetching={metadataFetching} />
 
-                                <Brick sizeInRem={1} />
-                            </Col>
+                                    <Brick sizeInRem={1} />
+                                </Col>
 
-                            <Col xl={9}>
-                                <div className="select-by">
-                                    <div className="d-flex">
-                                        <div className="mr-2 select-by-type">
-                                            <Select
-                                                defaultValue={selectedConsumption}
-                                                options={metric}
-                                                onChange={handleSelect}
-                                            />
-                                        </div>
-                                        <Header type="page" />
-                                    </div>
-                                </div>
-
-                                {chartDataFetching ? (
-                                    <div className="line-chart-wrapper">
-                                        <div className="line-chart-loader">
-                                            <Spinner color="primary" />
+                                <Col xl={9}>
+                                    <div className="select-by">
+                                        <div className="d-flex">
+                                            <div className="mr-2 select-by-type">
+                                                <Select
+                                                    defaultValue={selectedConsumption}
+                                                    options={metric}
+                                                    onChange={handleSelect}
+                                                />
+                                            </div>
+                                            <Header type="page" />
                                         </div>
                                     </div>
-                                ) : (
-                                    <LineChart
-                                        title={''}
-                                        subTitle={''}
-                                        tooltipUnit={metric[0]?.unit}
-                                        tooltipLabel={metric[0]?.consumption}
-                                        data={chartData}
-                                        chartProps={chartProps}
-                                    />
-                                )}
-                                <Brick sizeInRem={2} />
 
-                                <Header title="Equipments" type="page" showExplore={false} showCalendar={false} />
+                                    {chartDataFetching ? (
+                                        <div className="line-chart-wrapper">
+                                            <div className="line-chart-loader">
+                                                <Spinner color="primary" />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <LineChart
+                                            title={''}
+                                            subTitle={''}
+                                            tooltipUnit={metric[0]?.unit}
+                                            tooltipLabel={metric[0]?.consumption}
+                                            data={chartData}
+                                            chartProps={chartProps}
+                                        />
+                                    )}
+                                    <Brick sizeInRem={2} />
 
-                                <Brick sizeInRem={1} />
+                                    <Header title="Equipments" type="page" showExplore={false} showCalendar={false} />
 
-                                <SpacesEquipmentTable />
-                            </Col>
-                        </Row>
-                    </div>
-                )}
+                                    <Brick sizeInRem={1} />
 
-                {selectedTab === 1 && (
-                    <ConfigurationTab
-                        bldgId={bldgId}
-                        spaceId={spaceId}
-                        selectedFloorId={selectedFloorId}
-                        spaceObj={spaceObj}
-                        setSpaceObj={setSpaceObj}
-                        notifyUser={notifyUser}
-                        allParentSpaces={allParentSpaces}
-                        errorObj={errorObj}
-                    />
-                )}
+                                    <SpacesEquipmentTable />
+                                </Col>
+                            </Row>
+                        </div>
+                    )}
+
+                    {selectedTab === 1 && (
+                        <ConfigurationTab
+                            bldgId={bldgId}
+                            spaceId={spaceId}
+                            selectedFloorId={selectedFloorId}
+                            spaceObj={spaceObj}
+                            setSpaceObj={setSpaceObj}
+                            notifyUser={notifyUser}
+                            allParentSpaces={allParentSpaces}
+                            errorObj={errorObj}
+                        />
+                    )}
+                </div>
             </div>
         </Modal>
     );

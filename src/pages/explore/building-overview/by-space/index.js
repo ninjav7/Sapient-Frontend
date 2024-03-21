@@ -76,7 +76,6 @@ const ExploreBySpace = (props) => {
     const openSpaceConfigModal = () => setSpaceConfigModal(true);
 
     const [spaceId, setSpaceId] = useState(null);
-    const [selectedSpaceObj, setSelectedSpaceObj] = useState(null);
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
@@ -108,7 +107,6 @@ const ExploreBySpace = (props) => {
     const handleSpaceEdit = (el) => {
         openSpaceConfigModal();
         setSpaceId(el?.space_id);
-        setSelectedSpaceObj(el);
     };
 
     const updateStoreOnPageLoad = () => {
@@ -499,7 +497,6 @@ const ExploreBySpace = (props) => {
     useEffect(() => {
         if (!showSpaceConfigModal) {
             setSpaceId(null);
-            setSelectedSpaceObj(null);
         }
     }, [showSpaceConfigModal]);
 
@@ -786,7 +783,6 @@ const ExploreBySpace = (props) => {
                 closeSpaceConfigModal={closeSpaceConfigModal}
                 bldgId={bldgId}
                 spaceId={spaceId}
-                selectedSpaceObj={selectedSpaceObj}
             />
         </React.Fragment>
     );
