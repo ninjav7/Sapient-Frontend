@@ -12,6 +12,7 @@ import { defaultDropdownSearch } from '../../sharedComponents/form/select/helper
 import MoveSpaceLayout from './MoveSpaceLayout';
 import { TagsInput } from 'react-tag-input-component';
 import { Notification } from '../../sharedComponents/notification';
+import { mapSpacesList } from '../../helpers/helpers';
 
 const ConfigurationTab = ({
     bldgId,
@@ -118,7 +119,10 @@ const ConfigurationTab = ({
                 if (Array.isArray(spaces) && spaces.length === 0)
                     throw new Error('zero elements in response.data array');
 
-                setSpacesList(sortedLayoutData(spaces));
+                const sortedList = sortedLayoutData(response.data);
+                const mappedSpaceList = mapSpacesList(sortedList);
+
+                setSpacesList(mappedSpaceList);
 
                 const spaceObjFound = spaces.find((space) => space._id === spaceId);
 

@@ -7,6 +7,7 @@ import Typography from '../../sharedComponents/typography';
 import LayoutElements from '../../sharedComponents/layoutElements/LayoutElements';
 import { getAllSpacesList } from '../settings/layout/services';
 import MoveLayout from '../settings/layout/MoveLayout';
+import { mapSpacesList } from '../../helpers/helpers';
 
 const MoveSpaceLayout = (props) => {
     const {
@@ -106,7 +107,12 @@ const MoveSpaceLayout = (props) => {
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
-                    if (response?.data.length !== 0) setSpacesList(sortedLayoutData(response?.data));
+                    if (response?.data.length !== 0) {
+                        const sortedList = sortedLayoutData(response.data);
+                        const mappedSpaceList = mapSpacesList(sortedList);
+
+                        setSpacesList(mappedSpaceList);
+                    }
                 } else {
                     notifyUser(Notification.Types.error, 'Failed to fetch Spaces.');
                 }

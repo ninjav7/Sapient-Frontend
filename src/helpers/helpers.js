@@ -491,3 +491,9 @@ export const downloadImage = async (node, exportName, exportExt) => {
 
     link.remove();
 };
+
+export const mapSpacesList = (spaces) =>
+    spaces.map((space) => {
+        if (!space?.parent_space || (space?.parent_space && space?.parent_space === 'None')) space.parent_space = null;
+        return space;
+    });
