@@ -47,8 +47,6 @@ import '../../styles.scss';
 const ExploreEquipmentBySpace = () => {
     const { download } = useCSVDownload();
     const { bldgId, spaceId } = useParams();
-    console.log('SSR bldgId => ', bldgId);
-    console.log('SSR spaceId => ', spaceId);
 
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
@@ -115,7 +113,6 @@ const ExploreEquipmentBySpace = () => {
     const [selectedEquipType, setSelectedEquipType] = useState([]);
     const [selectedEndUse, setSelectedEndUse] = useState([]);
     const [selectedSpaceType, setSelectedSpaceType] = useState([]);
-    console.log('SSR selectedSpaceType => ', selectedSpaceType);
     const [selectedTags, setSelectedTags] = useState([]);
     const [selectedPanels, setSelectedPanels] = useState([]);
     const [selectedBreakers, setSelectedBreakers] = useState([]);

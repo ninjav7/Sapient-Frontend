@@ -122,7 +122,6 @@ const SecondaryTopNavBar = () => {
 
         if (path.includes('/explore/building/overview')) {
             if (path.includes('/by-spaces-equipments')) {
-                console.log('SS ');
                 const bldgId = path.split('/')[4];
                 redirectToEndpoint(`/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.BY_SPACE}`);
                 return;
