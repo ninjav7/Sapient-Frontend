@@ -121,13 +121,20 @@ const SecondaryTopNavBar = () => {
         }
 
         if (path.includes('/explore/building/overview')) {
-            const filterType = path.split('/')[5];
-            redirectToEndpoint(
-                `/explore/building/overview/${record?.value}/${
-                    filterType ? filterType : EXPLORE_FILTER_TYPE.NO_GROUPING
-                }`
-            );
-            return;
+            if (path.includes('/by-spaces-equipments')) {
+                console.log('SS ');
+                const bldgId = path.split('/')[4];
+                redirectToEndpoint(`/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.BY_SPACE}`);
+                return;
+            } else {
+                const filterType = path.split('/')[5];
+                redirectToEndpoint(
+                    `/explore/building/overview/${record?.value}/${
+                        filterType ? filterType : EXPLORE_FILTER_TYPE.NO_GROUPING
+                    }`
+                );
+                return;
+            }
         }
 
         if (portfolioRoutes.includes(path)) {
