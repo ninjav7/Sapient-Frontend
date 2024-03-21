@@ -588,7 +588,7 @@ const ExploreBySpace = (props) => {
         if (selectedSpaceToRedirect) {
             updateBreadcrumbStore([
                 {
-                    label: 'By Location',
+                    label: 'By Space',
                     path: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.BY_SPACE}`,
                     active: false,
                 },
@@ -613,6 +613,21 @@ const ExploreBySpace = (props) => {
         scrollToTop();
         setCheckedAll(false);
     }, [pageNo, pageSize]);
+
+    useEffect(() => {
+        updateBreadcrumbStore([
+            {
+                label: 'By Building',
+                path: `/explore/overview/by-buildings`,
+                active: false,
+            },
+            {
+                label: bldgName ?? 'Building',
+                path: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
+                active: true,
+            },
+        ]);
+    }, [bldgId, bldgName]);
 
     const dataToRenderOnChart = validateSeriesDataForSpaces(selectedSpaceIds, spacesList, seriesData);
     const pastDataToRenderOnChart = validateSeriesDataForSpaces(selectedSpaceIds, spacesList, pastSeriesData);
