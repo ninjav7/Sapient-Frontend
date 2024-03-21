@@ -17,8 +17,6 @@ import MetadataContainer from '../../../spaceDetails/MetadataContainer';
 import SpacesEquipmentTable from '../../../spaceDetails/SpacesEquipmentTable';
 import EnergyMetadataContainer from '../../../spaceDetails/EnergyMetadataContainer';
 
-import { ReactComponent as RightArrow } from '../../../../assets/icon/arrow-space-details.svg';
-
 import {
     fetchEnergyConsumptionBySpace,
     fetchEnergyConsumptionSpaceByCategory,
@@ -264,11 +262,6 @@ const SpaceConfiguration = (props) => {
                     <Col lg={12}>
                         <div className="passive-header-wrapper d-flex justify-content-between upper-content-container">
                             <div className="d-flex flex-column justify-content-between">
-                                <div className="space-tree-info">
-                                    <Typography.Subheader size={Typography.Sizes.sm}>Spaces</Typography.Subheader>
-                                    <RightArrow className="ml-2 mr-2 w-16 h-16" />
-                                    <Typography.Subheader size={Typography.Sizes.sm}>{spaceName}</Typography.Subheader>
-                                </div>
                                 <Typography.Header size={Typography.Sizes.md}>{spaceName}</Typography.Header>
                                 <div className="d-flex justify-content-start mouse-pointer ">
                                     <Typography.Subheader
