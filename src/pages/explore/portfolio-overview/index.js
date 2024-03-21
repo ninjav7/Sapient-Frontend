@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Spinner } from 'reactstrap';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import { UserStore } from '../../../store/UserStore';
 import { DateRangeStore } from '../../../store/DateRangeStore';
@@ -36,12 +36,14 @@ import { handleUnitConverstion } from '../../settings/general-settings/utils';
 import { getExploreByBuildingTableCSVExport } from '../../../utils/tablesExport';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { EXPLORE_FILTER_TYPE } from '../constants';
+import { updateBreadcrumbStore } from '../../../helpers/updateBreadcrumbStore';
 import SkeletonLoader from '../../../components/SkeletonLoader';
 
 import '../style.css';
 import '../styles.scss';
 
-const ExplorePortfolioOverview = () => {
+const ExploreByBuildings = () => {
+    const history = useHistory();
     const { download } = useCSVDownload();
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -53,6 +55,10 @@ const ExplorePortfolioOverview = () => {
     const userPrefUnits = UserStore.useState((s) => s.unit);
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+
+    const breadcrumbList = BreadcrumbStore.useState((s) => (s?.breadcrumbList ? JSON.parse(s?.breadcrumbList) : null));
+
+    const [selectedBldgObj, setSelectedBuildingObj] = useState(null);
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
@@ -129,21 +135,19 @@ const ExplorePortfolioOverview = () => {
         return exploreBuildingsList;
     };
 
-    const renderBuildingName = (row) => {
-        return (
-            <div style={{ fontSize: 0 }}>
-                <Link
-                    to={`/explore/building/overview/${row?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`}
-                    className="typography-wrapper link mouse-pointer"
-                    onClick={() => {
-                        updateBuildingStore(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);
-                    }}>
-                    {row?.building_name}
-                </Link>
-                <Brick sizeInPixels={3} />
-            </div>
-        );
-    };
+    const renderBuildingName = useCallback((row) => (
+        <div
+            className="typography-wrapper link mouse-pointer"
+            onClick={() => {
+                updateBuildingStore(row?.building_id, row?.building_name, row?.timezone, row?.plug_only);
+                setSelectedBuildingObj({
+                    building_id: row?.building_id,
+                    building_name: row?.building_name,
+                });
+            }}>
+            {row?.building_name ?? '-'}
+        </div>
+    ));
 
     const renderSquareFootage = useCallback((row) => {
         const value = Math.round(handleUnitConverstion(row?.square_footage, row?.user_pref_units));
@@ -298,6 +302,7 @@ const ExplorePortfolioOverview = () => {
                 if (responseData.length !== 0) {
                     responseData.forEach((el) => {
                         el.user_pref_units = userPrefUnits;
+                        el.breadcrumbList = breadcrumbList;
                     });
                 }
                 setExploreBuildingsList(responseData);
@@ -720,27 +725,16 @@ const ExplorePortfolioOverview = () => {
         });
     };
 
-    const updateBreadcrumbStore = () => {
-        BreadcrumbStore.update((bs) => {
-            let newList = [
-                {
-                    label: 'Portfolio Overview',
-                    path: '/explore/portfolio/overview',
-                    active: true,
-                },
-            ];
-            bs.items = newList;
-        });
+    const updateStoreOnPageLoad = () => {
         ComponentStore.update((s) => {
             s.parent = 'explore';
         });
-
         updateBuildingStore('portfolio', 'Portfolio', '');
     };
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        updateBreadcrumbStore();
+        updateStoreOnPageLoad();
     }, []);
 
     useEffect(() => {
@@ -979,6 +973,42 @@ const ExplorePortfolioOverview = () => {
         }
     }, [isInComparisonMode]);
 
+    const redirectToEndpoint = (path) => {
+        history.push({
+            pathname: `${path}`,
+        });
+    };
+
+    useEffect(() => {
+        if (selectedBldgObj) {
+            updateBreadcrumbStore([
+                {
+                    label: 'By Building',
+                    path: `/explore/overview/by-buildings`,
+                    active: false,
+                },
+                {
+                    label: selectedBldgObj?.building_name ?? 'Building',
+                    path: `/explore/building/overview/${selectedBldgObj?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
+                    active: true,
+                },
+            ]);
+            redirectToEndpoint(
+                `/explore/building/overview/${selectedBldgObj?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`
+            );
+        }
+    }, [selectedBldgObj]);
+
+    useEffect(() => {
+        updateBreadcrumbStore([
+            {
+                label: 'Portfolio Level',
+                path: '/explore/overview/by-buildings',
+                active: true,
+            },
+        ]);
+    }, []);
+
     const dataToRenderOnChart = validateSeriesDataForBuildings(selectedBldgIds, exploreBuildingsList, seriesData);
     const pastDataToRenderOnChart = validateSeriesDataForBuildings(
         selectedBldgIds,
@@ -1185,4 +1215,4 @@ const ExplorePortfolioOverview = () => {
     );
 };
 
-export default ExplorePortfolioOverview;
+export default ExploreByBuildings;

@@ -739,7 +739,7 @@ const ExploreByBuildingsV2 = () => {
             let newList = [
                 {
                     label: 'Portfolio Level',
-                    path: '/explore/portfolio/overview',
+                    path: '/explore/overview/by-buildings',
                     active: true,
                 },
             ];

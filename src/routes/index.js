@@ -28,8 +28,9 @@ import SingleRoleNew from '../pages/settings/roles/SingleRoleNew';
 import IndividualUtilityMeter from '../pages/settings/utility-meters/IndividualUtilityMeter';
 
 // Explore Component
-const ExploreOverview = React.lazy(() => import('../pages/explore/portfolio-overview'));
+const ExploreByBuildings = React.lazy(() => import('../pages/explore/portfolio-overview'));
 const ExploreBuildingOverview = React.lazy(() => import('../pages/explore/building-overview'));
+const ExploreEquipmentBySpace = React.lazy(() => import('../pages/explore/building-overview/by-space-equipments'));
 
 // Auth Components
 const Login = React.lazy(() => import('../pages/auth/Login'));
@@ -431,22 +432,30 @@ const settingsRoutes = {
 
 // Explore Routes
 const exploreRoutes = {
-    path: '/explore/portfolio/overview',
+    path: '/explore/overview/by-buildings',
     name: 'Explore',
-    component: ExploreOverview,
+    component: ExploreByBuildings,
     visibility: true,
     children: [
         {
-            path: '/explore/portfolio/overview',
-            name: 'Explore',
-            component: ExploreOverview,
+            path: '/explore/overview/by-buildings',
+            name: 'Explore by Buildings',
+            component: ExploreByBuildings,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'explore',
+        },
+        {
+            path: '/explore/building/overview/:bldgId/by-spaces-equipments/:spaceId',
+            name: 'Explore by Space Equipments',
+            component: ExploreEquipmentBySpace,
             route: PrivateRoute,
             visibility: false,
             parent: 'explore',
         },
         {
             path: '/explore/building/overview/:bldgId/:filterType?',
-            name: 'Explore',
+            name: 'Explore by Filters',
             component: ExploreBuildingOverview,
             route: PrivateRoute,
             visibility: false,

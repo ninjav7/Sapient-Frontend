@@ -15,16 +15,16 @@ export const exploreFiltersList = [
         label: `By Space`,
         value: EXPLORE_FILTER_TYPE.BY_SPACE,
     },
-    {
-        label: `By Space Type`,
-        value: EXPLORE_FILTER_TYPE.BY_SPACE_TYPE,
-    },
-    {
-        label: `By Floor`,
-        value: EXPLORE_FILTER_TYPE.BY_FLOOR,
-    },
-    {
-        label: `By Equipment Type`,
-        value: EXPLORE_FILTER_TYPE.BY_EQUIPMENT_TYPE,
-    },
+    // {
+    //     label: `By Space Type`,
+    //     value: EXPLORE_FILTER_TYPE.BY_SPACE_TYPE,
+    // },
+    // {
+    //     label: `By Floor`,
+    //     value: EXPLORE_FILTER_TYPE.BY_FLOOR,
+    // },
+    // {
+    //     label: `By Equipment Type`,
+    //     value: EXPLORE_FILTER_TYPE.BY_EQUIPMENT_TYPE,
+    // },
 ];

@@ -23,7 +23,11 @@ const SecondaryTopNavBar = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const bldgTimeZone = BuildingStore.useState((s) => s.BldgTimeZone);
-    const breadcrumList = BreadcrumbStore.useState((bs) => bs.items);
+
+    const breadcrumbList = BreadcrumbStore.useState((s) => s?.items);
+    const exploreBreadcrumbList = BreadcrumbStore.useState((s) =>
+        s?.breadcrumbList ? JSON.parse(s?.breadcrumbList) : null
+    );
 
     const [buildingListData] = useAtom(buildingData);
 
@@ -70,7 +74,7 @@ const SecondaryTopNavBar = () => {
         }
 
         if (path.includes('/explore/building/overview')) {
-            redirectToEndpoint(`/explore/portfolio/overview`);
+            redirectToEndpoint(`/explore/overview/by-buildings`);
             return;
         }
 
@@ -111,19 +115,25 @@ const SecondaryTopNavBar = () => {
             return;
         }
 
-        if (path === '/explore/portfolio/overview') {
+        if (path === '/explore/overview/by-buildings') {
             redirectToEndpoint(`/explore/building/overview/${record?.value}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`);
             return;
         }
 
         if (path.includes('/explore/building/overview')) {
-            const filterType = path.split('/')[5];
-            redirectToEndpoint(
-                `/explore/building/overview/${record?.value}/${
-                    filterType ? filterType : EXPLORE_FILTER_TYPE.NO_GROUPING
-                }`
-            );
-            return;
+            if (path.includes('/by-spaces-equipments')) {
+                const bldgId = path.split('/')[4];
+                redirectToEndpoint(`/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.BY_SPACE}`);
+                return;
+            } else {
+                const filterType = path.split('/')[5];
+                redirectToEndpoint(
+                    `/explore/building/overview/${record?.value}/${
+                        filterType ? filterType : EXPLORE_FILTER_TYPE.NO_GROUPING
+                    }`
+                );
+                return;
+            }
         }
 
         if (portfolioRoutes.includes(path)) {
@@ -240,6 +250,8 @@ const SecondaryTopNavBar = () => {
         setSelectedBuilding(bldgObj);
     }, [bldgId, bldgName, bldgTimeZone]);
 
+    const breadCrumbsItems = location.pathname.includes('/explore/') ? exploreBreadcrumbList : breadcrumbList;
+
     return (
         <React.Fragment>
             <div className="fixed-secondary-nav buidling-switcher-container secondary-nav-style w-100">
@@ -247,7 +259,7 @@ const SecondaryTopNavBar = () => {
                     onChangeBuilding={(e) => handleBldgSwitcherChange(e?.value)}
                     buildings={buildingsList}
                     selectedBuilding={selectedBuilding}
-                    breadCrumbsItems={breadcrumList}
+                    breadCrumbsItems={breadCrumbsItems}
                 />
             </div>
         </React.Fragment>

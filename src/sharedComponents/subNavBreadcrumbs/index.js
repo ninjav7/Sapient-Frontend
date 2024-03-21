@@ -24,36 +24,39 @@ const DropdownIndicator = ({ listItem, ...props }) => {
 const SubNavBreadCrumbs = ({ items = [] }) => {
     return (
         <Breadcrumb className="custom-breadcrumb-style subnav-breadcrumbs-wrapper">
-            {items.map((item, index) => {
-                if (!item.label) {
-                    return null;
-                }
+            {items &&
+                items.map((item, index) => {
+                    if (!item.label) {
+                        return null;
+                    }
 
-                const renderItem = (props) => (
-                    <BreadcrumbItem
-                        {...props}
-                        tag={item.dropDownMenu && 'div'}
-                        active={item.active}
-                        key={index}
-                        onClick={item.onClick}>
-                        {!item.active && item.path ? <Link to={item.path}>{item.label}</Link> : item.label}
-                    </BreadcrumbItem>
-                );
+                    const renderItem = (props) => (
+                        <BreadcrumbItem
+                            {...props}
+                            tag={item.dropDownMenu && 'div'}
+                            active={item.active}
+                            key={index}
+                            onClick={item.onClick}>
+                            {!item.active && item.path ? <Link to={item.path}>{item.label}</Link> : item.label}
+                        </BreadcrumbItem>
+                    );
 
-                return item.dropDownMenu ? (
-                    <BreadcrumbItem>
-                        <Select
-                            options={item.dropDownMenu}
-                            components={{
-                                DropdownIndicator: (props) => <DropdownIndicator {...props} listItem={renderItem()} />,
-                                Control,
-                            }}
-                        />
-                    </BreadcrumbItem>
-                ) : (
-                    renderItem()
-                );
-            })}
+                    return item.dropDownMenu ? (
+                        <BreadcrumbItem>
+                            <Select
+                                options={item.dropDownMenu}
+                                components={{
+                                    DropdownIndicator: (props) => (
+                                        <DropdownIndicator {...props} listItem={renderItem()} />
+                                    ),
+                                    Control,
+                                }}
+                            />
+                        </BreadcrumbItem>
+                    ) : (
+                        renderItem()
+                    );
+                })}
         </Breadcrumb>
     );
 };
