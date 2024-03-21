@@ -60,6 +60,8 @@ const SpaceLayout = (props) => {
     const closeDeleteSpacePopup = () => setShowDeleteSpace(false);
     const openDeleteSpacePopup = () => setShowDeleteSpace(true);
 
+    const [changedTags, setChangedTags] = useState(false);
+
     const handleCreateSpace = async (space_obj, bldg_id) => {
         if (!bldg_id || !space_obj?.parents) return;
 
@@ -67,6 +69,8 @@ const SpaceLayout = (props) => {
 
         if (!space_obj?.name || space_obj?.name === '') alertObj.name = `Please enter Space name. It cannot be empty.`;
         if (!space_obj?.type_id || space_obj?.type_id === '') alertObj.type_id = { text: `Please select Type.` };
+        if (spaceObj?.square_footage && Number(spaceObj?.square_footage) < 0)
+            alertObj.square_footage = `Please enter Square starting from 0 or leave it empty.`;
 
         setErrorObj(alertObj);
 
@@ -74,6 +78,9 @@ const SpaceLayout = (props) => {
             if (Array.isArray(space_obj?.tags)) {
                 space_obj.tags = space_obj.tags.map((tag) => tag?.label ?? '');
             }
+
+            space_obj.square_footage =
+                space_obj?.square_footage || space_obj?.square_footage === '0' ? space_obj.square_footage : null;
 
             setProcessing(true);
 
@@ -100,6 +107,7 @@ const SpaceLayout = (props) => {
                     setSpaceObj({});
                     setNewStack({});
                     setSpaceObjParent({});
+                    setChangedTags(false);
                     setSpaceObj((spaceObj) => {
                         const newSpaceObj = { ...spaceObj };
                         delete newSpaceObj.new_parents;
@@ -121,14 +129,20 @@ const SpaceLayout = (props) => {
             building_id: bldgId,
             name: spaceObj?.name,
             type_id: spaceObj?.type_id,
-            square_footage: spaceObj?.square_footage ?? null,
-            tags: spaceObj?.tags ?? [],
+            square_footage:
+                spaceObj?.square_footage || spaceObj?.square_footage === '0' ? spaceObj.square_footage : null,
             parents: spaceObj?.new_parents ? spaceObj?.new_parents : spaceObj?.parents,
             parent_space:
                 spaceObj?.new_parent_space || spaceObj?.new_parent_space === null
                     ? spaceObj?.new_parent_space
                     : spaceObj?.parent_space,
         };
+
+        if (Array.isArray(spaceObj?.tags)) {
+            payload.tags = spaceObj.tags.map((tag) => tag?.label ?? '');
+        } else {
+            payload.tags = [];
+        }
 
         updateSpaceService(params, payload)
             .then((res) => {
@@ -146,11 +160,13 @@ const SpaceLayout = (props) => {
                 notifyUser(Notification.Types.error, `Failed to update Space.`);
             })
             .finally(() => {
+                fetchAllTags();
                 setProcessing(false);
                 closeModal();
                 setSpaceObj({});
                 setNewStack({});
                 setSpaceObjParent({});
+                setChangedTags(false);
                 setSpaceObj((spaceObj) => {
                     const newSpaceObj = { ...spaceObj };
                     delete newSpaceObj.new_parents;
@@ -169,10 +185,14 @@ const SpaceLayout = (props) => {
 
         if (!spaceObj?.name || spaceObj?.name === '') alertObj.name = `Please enter Space name. It cannot be empty.`;
         if (!spaceObj?.type_id || spaceObj?.type_id === '') alertObj.type_id = { text: `Please select Type.` };
+        if (spaceObj?.square_footage && Number(spaceObj?.square_footage) < 0)
+            alertObj.square_footage = `Please enter Square starting from 0 or leave it empty.`;
 
         setErrorObj(alertObj);
 
-        if (!alertObj.name && !alertObj.type) fetchEditSpace();
+        if (!alertObj.name && !alertObj.type && !alertObj.square_footage) {
+            fetchEditSpace();
+        }
     };
 
     const handleDeleteSpace = async () => {
@@ -202,6 +222,7 @@ const SpaceLayout = (props) => {
                 setSpaceObj({});
                 setNewStack({});
                 setSpaceObjParent({});
+                setChangedTags(false);
                 setSpaceObj((spaceObj) => {
                     const newSpaceObj = { ...spaceObj };
                     delete newSpaceObj.new_parents;
@@ -279,6 +300,11 @@ const SpaceLayout = (props) => {
         if (!isModalOpen) setErrorObj(defaultErrorObj);
     }, [isModalOpen]);
 
+    const extractTags = () => spaceObj.tags.map((tag) => ({ label: tag.name, value: tag._id }));
+
+    const getTags = () =>
+        Array.isArray(spaceObj?.tags) && spaceObj.tags.length > 0 ? (changedTags ? spaceObj.tags : extractTags()) : [];
+
     return (
         <>
             <Modal show={isModalOpen} backdrop="static" keyboard={false} size="md" centered>
@@ -319,44 +345,35 @@ const SpaceLayout = (props) => {
                         />
                     </div>
                     <Brick sizeInRem={1.25} />
-                    {operationType === 'ADD' && (
-                        <>
-                            <div>
-                                <Typography.Body size={Typography.Sizes.md}>{`Square Footage`}</Typography.Body>
-                                <Brick sizeInRem={0.25} />
-                                <InputTooltip
-                                    placeholder="Enter Square Footage"
-                                    labelSize={Typography.Sizes.md}
-                                    value={spaceObj?.square_footage}
-                                    error={errorObj?.square_footage}
-                                    onChange={(e) => {
-                                        handleChange('square_footage', e.target.value);
-                                        if (!Number.isInteger(+e.target.value)) {
-                                            setErrorObj((errObj) => ({
-                                                ...errObj,
-                                                square_footage: 'Value should be a number',
-                                            }));
-                                        }
-                                    }}
-                                />
-                            </div>
-                            <Brick sizeInRem={1.25} />
-                            <div>
-                                <Typography.Body size={Typography.Sizes.md}>{`Tags`}</Typography.Body>
-                                <Brick sizeInRem={0.25} />
-                                <MultiSelect
-                                    className="multi-select-tags"
-                                    options={tagOptions}
-                                    value={spaceObj?.tags ? spaceObj.tags : []}
-                                    onChange={(tag) => {
-                                        handleChange('tags', tag);
-                                    }}
-                                    isCreatable
-                                />
-                            </div>
-                            <Brick sizeInRem={1.25} />
-                        </>
-                    )}
+                    <div>
+                        <Typography.Body size={Typography.Sizes.md}>{`Square Footage`}</Typography.Body>
+                        <Brick sizeInRem={0.25} />
+                        <InputTooltip
+                            placeholder="Enter Square Footage"
+                            labelSize={Typography.Sizes.md}
+                            value={spaceObj?.square_footage}
+                            error={errorObj?.square_footage}
+                            onChange={(e) => {
+                                handleChange('square_footage', e.target.value);
+                            }}
+                        />
+                    </div>
+                    <Brick sizeInRem={1.25} />
+                    <div>
+                        <Typography.Body size={Typography.Sizes.md}>{`Tags`}</Typography.Body>
+                        <Brick sizeInRem={0.25} />
+                        <MultiSelect
+                            className="multi-select-tags"
+                            options={tagOptions}
+                            value={getTags()}
+                            onChange={(tag) => {
+                                if (!changedTags) setChangedTags(true);
+                                handleChange('tags', tag);
+                            }}
+                            isCreatable
+                        />
+                    </div>
+                    <Brick sizeInRem={1.25} />
                     {operationType === 'EDIT' && (
                         <>
                             <Typography.Body size={Typography.Sizes.md}>{`Parent`}</Typography.Body>

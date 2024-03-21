@@ -322,7 +322,7 @@ const LayoutPage = () => {
                                       parents: args?.parents,
                                       parent_space: args?.parent_space,
                                       square_footage: args?.square_footage,
-                                      tags: args?.tag,
+                                      tags: args?.tags,
                                   };
                                   createNewOldStack(spacesList, floorsList, selectedObj);
                                   setSelectedSpaceObj(selectedObj);
@@ -408,6 +408,8 @@ const LayoutPage = () => {
                 setNewStack={setNewStack}
                 allParentSpaces={allParentSpaces}
                 openMoveSpacePopup={openMoveSpacePopup}
+                tagOptions={tagOptions}
+                fetchAllTags={fetchAllTags}
             />
 
             <MoveSpaceLayout

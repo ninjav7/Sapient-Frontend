@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Brick from '../../sharedComponents/brick';
 import _ from 'lodash';
-import { getAllFloorsList, getAllSpaceTypes, getAllSpacesList } from '../settings/layout/services';
+import { getAllFloorsList, getAllSpaceTypes, getAllSpacesList, getAllTags } from '../settings/layout/services';
 import Skeleton from 'react-loading-skeleton';
 import Typography from '../../sharedComponents/typography';
 import { Col, Row } from 'reactstrap';
@@ -10,9 +10,9 @@ import Select from '../../sharedComponents/form/select';
 import { Button } from '../../sharedComponents/button';
 import { defaultDropdownSearch } from '../../sharedComponents/form/select/helpers';
 import MoveSpaceLayout from './MoveSpaceLayout';
-import { TagsInput } from 'react-tag-input-component';
 import { Notification } from '../../sharedComponents/notification';
 import { mapSpacesList } from '../../helpers/helpers';
+import { MultiSelect } from 'react-multi-select-component';
 
 const ConfigurationTab = ({
     bldgId,
@@ -37,6 +37,8 @@ const ConfigurationTab = ({
     const [spaceObjParent, setSpaceObjParent] = useState(null);
     const [spaceFetching, setSpaceFetching] = useState(false);
 
+    const [tagOptions, setTagOptions] = useState([]);
+
     const sortedLayoutData = (dataList) => {
         const sortedList = _.sortBy(dataList, (obj) => {
             const name = obj?.name.toLowerCase();
@@ -50,6 +52,18 @@ const ConfigurationTab = ({
         });
 
         return sortedList;
+    };
+
+    const fetchAllTags = async () => {
+        try {
+            const tags = await getAllTags();
+
+            const mappedTags = tags.data.map((tag) => ({ label: tag.name, value: tag.id }));
+
+            setTagOptions(mappedTags);
+        } catch {
+            setTagOptions([]);
+        }
     };
 
     const fetchAllFloorData = async () => {
@@ -126,7 +140,8 @@ const ConfigurationTab = ({
 
                 const spaceObjFound = spaces.find((space) => space._id === spaceId);
 
-                spaceObjFound.square_footage = spaceObjFound?.square_footage ? spaceObjFound.square_footage : '0';
+                if (Array.isArray(spaceObjFound?.tags) && spaceObjFound.tags.length > 0)
+                    spaceObjFound.tags = extractTags(spaceObjFound);
 
                 setSpaceObj(spaceObjFound);
             } else {
@@ -146,6 +161,7 @@ const ConfigurationTab = ({
 
         fetchSpaceTypes();
         fetchAllFloorData();
+        fetchAllTags();
     }, [spaceId, bldgId]);
 
     useEffect(() => {
@@ -153,6 +169,8 @@ const ConfigurationTab = ({
 
         fetchAllSpaceData();
     }, [selectedFloorId]);
+
+    const extractTags = (spaceObj) => spaceObj.tags.map((tag) => ({ label: tag.name, value: tag._id }));
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, spaceObj);
@@ -280,7 +298,7 @@ const ConfigurationTab = ({
                                 <InputTooltip
                                     placeholder="Enter Square Footage"
                                     labelSize={Typography.Sizes.md}
-                                    error={errorObj?.square_footage?.text}
+                                    error={errorObj?.square_footage}
                                     value={spaceObj?.square_footage}
                                     onChange={(e) => {
                                         handleChange('square_footage', e.target.value);
@@ -296,14 +314,14 @@ const ConfigurationTab = ({
                                 {spaceFetching ? (
                                     <Skeleton count={1} style={{ minHeight: '30px' }} />
                                 ) : (
-                                    <TagsInput
-                                        classNames="h-5"
-                                        placeholder="Tags"
-                                        value={spaceObj?.tag ?? []}
-                                        onChange={(value) => {
-                                            handleChange('tag', value);
+                                    <MultiSelect
+                                        className="multi-select-tags"
+                                        options={tagOptions}
+                                        value={spaceObj?.tags ?? []}
+                                        onChange={(tag) => {
+                                            handleChange('tags', tag);
                                         }}
-                                        placeHolder="Add Tag"
+                                        isCreatable
                                     />
                                 )}
                             </div>
