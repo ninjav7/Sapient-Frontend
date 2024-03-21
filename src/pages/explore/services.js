@@ -48,7 +48,8 @@ export function fetchExploreEquipmentList(
     maxConValue,
     perAPIFlag,
     minPerValue,
-    maxPerValue
+    maxPerValue,
+    selectedSpace
 ) {
     let params = `?consumption=energy&building_id=${bldgId}`;
 
@@ -76,6 +77,7 @@ export function fetchExploreEquipmentList(
 
     if (selectedEquipType && selectedEquipType.length !== 0) payload['equipment_types'] = selectedEquipType;
     if (selectedEndUse && selectedEndUse.length !== 0) payload['end_use'] = selectedEndUse;
+    if (selectedSpace && selectedSpace.length !== 0) payload['location'] = selectedSpace;
     if (selectedSpaceType && selectedSpaceType.length !== 0) payload['space_type'] = selectedSpaceType;
     if (selectedTags && selectedTags.length !== 0) payload['tags'] = selectedTags;
     if (selectedPanels && selectedPanels.length !== 0) payload['panel'] = selectedPanels;
@@ -116,7 +118,8 @@ export function fetchExploreFilter(
     maxConValue,
     perAPIFlag,
     minPerValue,
-    maxPerValue
+    maxPerValue,
+    selectedSpace
 ) {
     const params = `?building_id=${bldgId}&consumption=energy`;
     const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
@@ -140,6 +143,7 @@ export function fetchExploreFilter(
 
     if (selectedEquipType && selectedEquipType.length !== 0) payload['equipment_types'] = selectedEquipType;
     if (selectedEndUse && selectedEndUse.length !== 0) payload['end_use'] = selectedEndUse;
+    if (selectedSpace && selectedSpace.length !== 0) payload['location'] = selectedSpace;
     if (selectedSpaceType && selectedSpaceType.length !== 0) payload['space_type'] = selectedSpaceType;
     if (selectedTags && selectedTags.length !== 0) payload['tags'] = selectedTags;
     if (selectedPanels && selectedPanels.length !== 0) payload['panel'] = selectedPanels;
