@@ -5,7 +5,7 @@ import { Button } from '../../../../sharedComponents/button';
 import Typography from '../../../../sharedComponents/typography';
 
 const SpaceConfiguration = (props) => {
-    const { showSpaceConfigModal = false, closeSpaceConfigModal, selectedSpaceObj = {} } = props;
+    const { showSpaceConfigModal = false, closeSpaceConfigModal, bldgId, spaceId, selectedSpaceObj = {} } = props;
 
     const [activeTab, setActiveTab] = useState('metrics');
 
