@@ -15,9 +15,9 @@ import { useParams } from 'react-router-dom';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { Link } from 'react-router-dom';
-import { fetchExploreEquipmentList } from '../explore/services';
+import { fetchEquipmentBySpace } from './services';
 
-const SpacesEquipmentTable = ({ spaceType }) => {
+const SpacesEquipmentTable = ({ spaceType, spaceId }) => {
     const { download } = useCSVDownload();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -46,19 +46,10 @@ const SpacesEquipmentTable = ({ spaceType }) => {
         // const sortedBy = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
 
         try {
-            const responseAxios = await fetchExploreEquipmentList(
-                startDate,
-                endDate,
-                startTime,
-                endTime,
-                timeZone,
-                bldgId
-            );
+            const query = { bldgId, dateFrom: startDate, dateTo: endDate, timeZone };
+            const responseAxios = await fetchEquipmentBySpace(query, spaceId);
 
-            const response = responseAxios.data;
-
-            const data = response.data;
-
+            const data = responseAxios;
             if (data && Array.isArray(data) && data.length !== 0) {
                 const mappedData = data.map((equip) => {
                     equip.space_type = spaceType;
@@ -111,23 +102,26 @@ const SpacesEquipmentTable = ({ spaceType }) => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {`${formatConsumptionValue(Math.round(row?.consumption?.now / 1000))} ${UNITS.KWH}`}
+                    {`${formatConsumptionValue(Math.round(row?.total_consumption?.now / 1000))} ${UNITS.KWH}`}
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
                 <Progress multi className="custom-progress-bar" style={{ height: '6px' }}>
                     <Progress
                         bar
-                        value={row?.consumption?.now}
-                        max={row?.consumption?.now} // row?.total_building_usage should be added
+                        value={row?.total_consumption?.now}
+                        max={row?.total_consumption?.now}
                         barClassName="custom-on-hour"
                     />
                 </Progress>
             </>
         );
     });
+    const calculatePercentageChange = (oldValue, newValue) => {
+        return ((newValue - oldValue) / oldValue) * 100;
+    };
 
     const renderPerChange = useCallback((row) => {
-        const change = row?.consumption?.change;
+        const change = calculatePercentageChange(row?.total_consumption?.old, row?.total_consumption?.now);
 
         return (
             Number.isFinite(change) && (
@@ -136,7 +130,7 @@ const SpacesEquipmentTable = ({ spaceType }) => {
                     type={
                         change === 0
                             ? TrendsBadge.Type.NEUTRAL_TREND
-                            : row?.consumption?.now < row?.consumption?.old
+                            : row?.total_consumption?.now < row?.total_consumption?.old
                             ? TrendsBadge.Type.DOWNWARD_TREND
                             : TrendsBadge.Type.UPWARD_TREND
                     }
@@ -146,32 +140,9 @@ const SpacesEquipmentTable = ({ spaceType }) => {
     });
 
     const renderTags = useCallback((row) => {
-        const slicedArr = row?.tags.slice(1);
+        const slicedArr = row?.tags?.slice(1);
 
-        return (
-            <div className="tag-row-content">
-                <Badge text={<span className="gray-950">{row?.tags[0] ? row.tags[0] : 'none'}</span>} />
-                {slicedArr?.length > 0 ? (
-                    <>
-                        <Badge
-                            text={
-                                <span className="gray-950" id={`tags-badge-${row?.equipment_id}`}>
-                                    +{slicedArr.length} more
-                                </span>
-                            }
-                        />
-                        <UncontrolledTooltip
-                            placement="top"
-                            target={`tags-badge-${row?.equipment_id}`}
-                            className="tags-tooltip">
-                            {slicedArr.map((el) => {
-                                return <Badge text={<span className="gray-950">{el}</span>} />;
-                            })}
-                        </UncontrolledTooltip>
-                    </>
-                ) : null}
-            </div>
-        );
+        return <></>;
     });
 
     const headerProps = [
@@ -194,17 +165,17 @@ const SpacesEquipmentTable = ({ spaceType }) => {
         },
         {
             name: 'Space Type',
-            accessor: 'space_type',
+            accessor: 'space_type_name',
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Equipment Type',
-            accessor: 'equipments_type',
+            accessor: 'equipment_name',
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'End Use Category',
-            accessor: 'end_user',
+            accessor: 'end_use_name',
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
