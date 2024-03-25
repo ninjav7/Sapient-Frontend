@@ -3,6 +3,7 @@ import {
     getEnergyConsumptionBySpaceV2,
     getEnergyConsumptionSpaceByCategory,
     getSpaceMetadataV2,
+    getEquipmentBySpace,
 } from '../../services/Network';
 
 export const fetchEnergyConsumptionSpaceByCategory = async (category, query) => {
@@ -27,4 +28,11 @@ export const fetchSpaceMetadata = async (query, spaceId) => {
     const params = `?building_id=${bldgId}&date_from=${dateFrom}&date_to=${dateTo}&tz_info=${tzInfo}`;
 
     return axiosInstance.get(`${getSpaceMetadataV2}/${spaceId}${params}`).then((res) => res?.data);
+};
+
+export const fetchEquipmentBySpace = async (query, spaceId) => {
+    const { bldgId = '', dateFrom = '', dateTo = '', tzInfo = 'US/Eastern' } = query;
+    const params = `?building_id=${bldgId}&space_ids=${spaceId}&ordered_by=consumption&date_from=${dateFrom}&date_to=${dateTo}&tz_info=${tzInfo}`;
+
+    return axiosInstance.get(`${getEquipmentBySpace}${params}`).then((res) => res?.data);
 };

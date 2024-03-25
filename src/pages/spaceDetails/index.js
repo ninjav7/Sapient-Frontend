@@ -24,7 +24,11 @@ import { dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../help
 import { defaultMetrics } from './constants';
 import { handleDataConversion } from './helper';
 
-import { fetchEnergyConsumptionBySpace, fetchEnergyConsumptionSpaceByCategory, fetchSpaceMetadata } from './services';
+import {
+    fetchEnergyConsumptionBySpace,
+    fetchEnergyConsumptionSpaceByCategory,
+    fetchEquipmentBySpace,
+} from './services';
 
 import MetadataContainer from './MetadataContainer';
 import EnergyMetadataContainer from './EnergyMetadataContainer';
@@ -167,7 +171,7 @@ const SpaceDetails = () => {
         try {
             const query = { bldgId, dateFrom: startDate, dateTo: endDate, timeZone };
 
-            const res = await fetchSpaceMetadata(query, spaceId);
+            const res = await fetchEquipmentBySpace(query, spaceId);
 
             if (res) {
                 setMetadata(res);
@@ -420,7 +424,10 @@ const SpaceDetails = () => {
 
                                 {/* should me removed checking metadatFetching as soon as end-point is updated */}
                                 {!metadataFetching && (
-                                    <SpacesEquipmentTable spaceType={metadata?.space_type_name ?? ''} />
+                                    <SpacesEquipmentTable
+                                        spaceType={metadata?.space_type_name ?? ''}
+                                        spaceId={spaceId}
+                                    />
                                 )}
                             </Col>
                         </Row>
