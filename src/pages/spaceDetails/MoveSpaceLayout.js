@@ -23,7 +23,6 @@ const MoveSpaceLayout = (props) => {
         sortedLayoutData,
         notifyUser,
         openModal,
-        openEditSpacePopup,
         newStack,
         setNewStack,
         allParentSpaces,
@@ -165,7 +164,6 @@ const MoveSpaceLayout = (props) => {
         handleChanges(changes);
         setShowMoveSpace(false);
         closeModal();
-        openEditSpacePopup();
     };
 
     const onClickForAllItems = async ({ nativeHandler, data }) => {
@@ -252,7 +250,6 @@ const MoveSpaceLayout = (props) => {
                             className="w-100"
                             onClick={() => {
                                 closeModal();
-                                openEditSpacePopup();
                             }}
                         />
                     </div>
