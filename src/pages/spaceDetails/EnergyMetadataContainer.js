@@ -5,6 +5,7 @@ import { formatConsumptionValue } from '../../helpers/explorehelpers';
 import { UserStore } from '../../store/UserStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import Typography from '../../sharedComponents/typography';
+import { UNITS } from '../../constants/units';
 
 const EnergyMetadataContainer = ({ metadata = {}, isFetching = false }) => {
     const { total_energy_consumption, peak_power = {}, square_footage = 1 } = metadata;
@@ -14,6 +15,7 @@ const EnergyMetadataContainer = ({ metadata = {}, isFetching = false }) => {
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+    const userPrefUnits = UserStore.useState((s) => s.unit);
 
     const dateFormat = userPrefDateFormat === `DD-MM-YYYY` ? `D MMM` : `MMM D`;
     const totalConsumptionValue = total_energy_consumption
@@ -79,9 +81,9 @@ const EnergyMetadataContainer = ({ metadata = {}, isFetching = false }) => {
 
                 <div>
                     <Typography.Subheader size={Typography.Sizes.lg}>
-                        {`Average Energy Per Square Foot (${moment(startDate).format(dateFormat)} to ${moment(
-                            endDate
-                        ).format(dateFormat)})`}
+                        {`Average Energy Per Square ${userPrefUnits === 'si' ? 'Meter' : 'Foot'} (${moment(
+                            startDate
+                        ).format(dateFormat)} to ${moment(endDate).format(dateFormat)})`}
                     </Typography.Subheader>
 
                     {isFetching ? (

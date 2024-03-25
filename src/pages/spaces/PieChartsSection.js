@@ -167,7 +167,7 @@ const PieChartsSection = () => {
     }, [startDate, endDate, bldgId, userPrefUnits]);
 
     return (
-        <div className="d-flex">
+        <div style={{ display: 'flex', margin: '0 -12px' }}>
             <Col lg={4}>
                 <DonutChartWidget
                     id="consumptionCountBySpaceTypeDonut"

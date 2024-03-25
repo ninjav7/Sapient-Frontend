@@ -3,8 +3,13 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import Typography from '../../sharedComponents/typography';
 import colorPalette from '../../assets/scss/_colors.scss';
 import { formatConsumptionValue } from '../../helpers/explorehelpers';
+import { UserStore } from '../../store/UserStore';
+import { UNITS } from '../../constants/units';
 
 const MetadataContainer = ({ metadata = {}, isFetching = false }) => {
+    const userPrefUnits = UserStore.useState((s) => s.unit);
+    console.log(userPrefUnits);
+
     return (
         <>
             <div className="d-flex flex-column w-auto h-auto metadata-container">
@@ -49,11 +54,14 @@ const MetadataContainer = ({ metadata = {}, isFetching = false }) => {
                             </div>
 
                             <div className="d-flex" style={{ gap: '0.5rem' }}>
-                                <Typography.Subheader size={Typography.Sizes.md}>Square Footage:</Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.md}>{`Square ${
+                                    userPrefUnits === 'si' ? 'Meter' : 'Footage'
+                                }:`}</Typography.Subheader>
                                 <Typography.Subheader size={Typography.Sizes.lg}>
                                     {metadata?.square_footage
-                                        ? formatConsumptionValue(metadata.square_footage) + ' m^2'
-                                        : '0 m^2'}
+                                        ? formatConsumptionValue(metadata.square_footage) +
+                                          ` ${userPrefUnits === 'si' ? 'm^2' : 'ft^2'}`
+                                        : `0 ${userPrefUnits === 'si' ? 'm^2' : 'ft^2'}`}
                                 </Typography.Subheader>
                             </div>
                         </div>

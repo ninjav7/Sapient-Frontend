@@ -24,11 +24,7 @@ import { dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../help
 import { defaultMetrics } from './constants';
 import { handleDataConversion } from './helper';
 
-import {
-    fetchEnergyConsumptionBySpace,
-    fetchEnergyConsumptionSpaceByCategory,
-    fetchEquipmentBySpace,
-} from './services';
+import { fetchEnergyConsumptionBySpace, fetchEnergyConsumptionSpaceByCategory, fetchSpaceMetadata } from './services';
 
 import MetadataContainer from './MetadataContainer';
 import EnergyMetadataContainer from './EnergyMetadataContainer';
@@ -60,6 +56,7 @@ const SpaceDetails = () => {
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
+    const userPrefUnits = UserStore.useState((s) => s.unit);
 
     const [chartDataFetching, setChartDataFetching] = useState(false);
     const [chartData, setChartData] = useState([]);
@@ -171,7 +168,9 @@ const SpaceDetails = () => {
         try {
             const query = { bldgId, dateFrom: startDate, dateTo: endDate, timeZone };
 
-            const res = await fetchEquipmentBySpace(query, spaceId);
+            const res = await fetchSpaceMetadata(query, spaceId);
+
+            console.log(res);
 
             if (res) {
                 setMetadata(res);
@@ -253,7 +252,7 @@ const SpaceDetails = () => {
 
         fetchChartData();
         fetchMetadata();
-    }, [spaceId, startDate, endDate, selectedConsumption, bldgId]);
+    }, [spaceId, startDate, endDate, selectedConsumption, bldgId, userPrefUnits]);
 
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {

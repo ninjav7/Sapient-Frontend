@@ -7,9 +7,23 @@ export const fetchSpaceListV2 = async (query) => {
     //     setTimeout(() => res(mockData), 1000);
     // });
 
-    const { bldgId = '', dateFrom = '', dateTo = '', tzInfo = 'US/Eastern', search = '', orderedBy, sortedBy } = query;
+    const {
+        bldgId = '',
+        dateFrom = '',
+        dateTo = '',
+        tzInfo = 'US/Eastern',
+        search = '',
+        orderedBy,
+        sortedBy,
+        page = 1,
+        size = 20,
+    } = query;
 
     let params = `?building_id=${bldgId}&date_from=${dateFrom}&date_to=${dateTo}&tz_info=${tzInfo}`;
+
+    if (page) params += `&page_no=${page}`;
+
+    if (size) params += `&page_size=${size}`;
 
     if (search) params += `&search=${search}`;
 

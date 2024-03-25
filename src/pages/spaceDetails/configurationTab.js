@@ -13,6 +13,7 @@ import MoveSpaceLayout from './MoveSpaceLayout';
 import { Notification } from '../../sharedComponents/notification';
 import { mapSpacesList } from '../../helpers/helpers';
 import { MultiSelect } from 'react-multi-select-component';
+import { UserStore } from '../../store/UserStore';
 
 const ConfigurationTab = ({
     bldgId,
@@ -24,6 +25,8 @@ const ConfigurationTab = ({
     allParentSpaces,
     errorObj,
 }) => {
+    const userPrefUnits = UserStore.useState((s) => s.unit);
+
     const openModal = () => setModal(true);
     const closeModal = () => setModal(false);
 
@@ -290,13 +293,15 @@ const ConfigurationTab = ({
 
                     <div className="d-flex justify-content-between">
                         <div className="w-100">
-                            <Typography.Body size={Typography.Sizes.md}>{`Square Footage`}</Typography.Body>
+                            <Typography.Body size={Typography.Sizes.md}>{`Square ${
+                                userPrefUnits === 'si' ? 'Meter' : 'Footage'
+                            }`}</Typography.Body>
                             <Brick sizeInRem={0.25} />
                             {spaceFetching ? (
                                 <Skeleton count={1} style={{ minHeight: '30px' }} />
                             ) : (
                                 <InputTooltip
-                                    placeholder="Enter Square Footage"
+                                    placeholder={`Enter Square ${userPrefUnits === 'si' ? 'Meter' : 'Footage'}`}
                                     labelSize={Typography.Sizes.md}
                                     error={errorObj?.square_footage}
                                     value={spaceObj?.square_footage}

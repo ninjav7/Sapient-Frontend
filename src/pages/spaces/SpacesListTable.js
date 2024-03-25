@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Brick from '../../sharedComponents/brick';
-import { Col, UncontrolledTooltip, Progress } from 'reactstrap';
+import { UncontrolledTooltip, Progress } from 'reactstrap';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import SkeletonLoader from '../../components/SkeletonLoader';
 import { formatConsumptionValue, pageListSizes } from '../../helpers/helpers';
@@ -30,29 +30,39 @@ const SpacesListTable = () => {
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
-    const [checkedAll, setCheckedAll] = useState(false);
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
-    const [totalItems, setTotalItems] = useState(0);
-    const [equipmentFilter, setEquipmentFilter] = useState({});
+    const [totalSpaces, setTotalSpaces] = useState(0);
     const [spaces, setSpaces] = useState([]);
     const [spacesLoading, setSpacesLoading] = useState([]);
     const [isCSVDownloading, setDownloadingCSVData] = useState(false);
+    // const [equipmentFilter, setEquipmentFilter] = useState({});
+    // const [checkedAll, setCheckedAll] = useState(false);
 
     const fetchEquipDataList = async () => {
         setSpacesLoading(true);
         // const orderedBy = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
         // const sortedBy = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo: timeZone };
+        const query = {
+            bldgId,
+            dateFrom: startDate,
+            dateTo: endDate,
+            tzInfo: timeZone,
+            search,
+            page: pageNo,
+            size: pageSize,
+        };
 
         try {
             const data = await fetchSpaceListV2(query);
 
             if (data && Array.isArray(data) && data.length !== 0) {
                 setSpaces(data);
+                setTotalSpaces(data.length);
             }
         } catch {
             setSpaces([]);
+            setTotalSpaces(0);
         }
 
         setSpacesLoading(false);
@@ -212,7 +222,7 @@ const SpacesListTable = () => {
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: 'Equipment Number',
+            name: 'Equipment Count',
             accessor: 'equipment_count',
             onSort: (method, name) => setSortBy({ method, name }),
         },
@@ -232,7 +242,7 @@ const SpacesListTable = () => {
 
     const handleSearch = (e) => {
         setSearch(e);
-        setCheckedAll(false);
+        // setCheckedAll(false);
     };
 
     return (
@@ -251,12 +261,12 @@ const SpacesListTable = () => {
                 searchResultRows={spaces}
                 filterOptions={[]}
                 headers={headerProps}
-                // pageSize={pageSize}
-                // currentPage={pageNo}
-                // onPageSize={setPageSize}
-                // onChangePage={setPageNo}
-                // pageListSizes={pageListSizes}
-                // totalCount={totalItems}
+                pageSize={pageSize}
+                currentPage={pageNo}
+                onPageSize={setPageSize}
+                onChangePage={setPageNo}
+                pageListSizes={pageListSizes}
+                totalCount={totalSpaces}
                 isCSVDownloading={isCSVDownloading}
                 onDownload={handleDownloadCSV}
             />
