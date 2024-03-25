@@ -15,7 +15,7 @@ import LineChart from '../../../../sharedComponents/lineChart/LineChart';
 
 import ConfigurationTab from '../../../spaceDetails/configurationTab';
 import MetadataContainer from '../../../spaceDetails/MetadataContainer';
-import SpacesEquipmentTable from '../../../spaceDetails/SpacesEquipmentTable';
+import EquipmentTable from '../../../spaceDetails/EquipmentTable';
 import EnergyMetadataContainer from '../../../spaceDetails/EnergyMetadataContainer';
 
 import {
@@ -412,10 +412,7 @@ const SpaceConfiguration = (props) => {
 
                                     <Brick sizeInRem={1} />
 
-                                    {/* should me removed checking metadatFetching as soon as end-point is updated */}
-                                    {!metadataFetching && (
-                                        <SpacesEquipmentTable spaceType={metadata?.space_type_name ?? ''} />
-                                    )}
+                                    <EquipmentTable spaceId={spaceId} />
                                 </Col>
                             </Row>
                         </div>

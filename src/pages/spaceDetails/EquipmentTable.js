@@ -1,28 +1,25 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Brick from '../../sharedComponents/brick';
-import { Col, UncontrolledTooltip, Progress } from 'reactstrap';
+import { Progress, UncontrolledTooltip } from 'reactstrap';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import SkeletonLoader from '../../components/SkeletonLoader';
 import { formatConsumptionValue, pageListSizes } from '../../helpers/helpers';
 import Typography from '../../sharedComponents/typography';
 import { UNITS } from '../../constants/units';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
-import { Badge } from '../../sharedComponents/badge';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { UserStore } from '../../store/UserStore';
 import { useParams } from 'react-router-dom';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
-import { Link } from 'react-router-dom';
 import { fetchEquipmentBySpace } from './services';
+import { Badge } from '../../sharedComponents/badge';
 
-const SpacesEquipmentTable = ({ spaceType, spaceId }) => {
+const EquipmentTable = ({ spaceId }) => {
     const { download } = useCSVDownload();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
-    const startTime = DateRangeStore.useState((s) => s.startTime);
-    const endTime = DateRangeStore.useState((s) => s.endTime);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const userPrefUnits = UserStore.useState((s) => s.unit);
@@ -31,40 +28,54 @@ const SpacesEquipmentTable = ({ spaceType, spaceId }) => {
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
-    const [checkedAll, setCheckedAll] = useState(false);
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [totalItems, setTotalItems] = useState(0);
-    const [equipmentFilter, setEquipmentFilter] = useState({});
-    const [spaces, setSpaces] = useState([]);
-    const [spacesLoading, setSpacesLoading] = useState([]);
+    const [equipments, setEquipments] = useState([]);
+    const [equipmentsLoading, setEquipmentsLoading] = useState([]);
     const [isCSVDownloading, setDownloadingCSVData] = useState(false);
 
+    // const [checkedAll, setCheckedAll] = useState(false);
+    // const [equipmentFilter, setEquipmentFilter] = useState({});
+
     const fetchEquipDataList = async () => {
-        setSpacesLoading(true);
+        setEquipmentsLoading(true);
         // const orderedBy = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
         // const sortedBy = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
 
         try {
-            const query = { bldgId, dateFrom: startDate, dateTo: endDate, timeZone };
+            const query = {
+                bldgId,
+                dateFrom: startDate,
+                dateTo: endDate,
+                timeZone,
+                page: pageNo,
+                size: pageSize,
+                search,
+            };
             const responseAxios = await fetchEquipmentBySpace(query, spaceId);
 
             const data = responseAxios;
             if (data && Array.isArray(data) && data.length !== 0) {
-                const mappedData = data.map((equip) => {
-                    equip.space_type = spaceType;
-                    return equip;
+                // should be done on backend
+                const totalConsumption = data.reduce((reducer, equipment) => {
+                    return reducer + Math.round(equipment?.total_consumption?.now);
+                }, 0);
+
+                const mappedData = data.map((equipment) => {
+                    equipment.total_all_consumption = totalConsumption;
+                    return equipment;
                 });
 
-                // backend should add it
-
-                setSpaces(mappedData);
+                setTotalItems(mappedData.length);
+                setEquipments(mappedData);
             }
         } catch {
-            setSpaces([]);
+            setEquipments([]);
+            setTotalItems(0);
         }
 
-        setSpacesLoading(false);
+        setEquipmentsLoading(false);
     };
 
     useEffect(() => {
@@ -77,10 +88,10 @@ const SpacesEquipmentTable = ({ spaceType, spaceId }) => {
         setDownloadingCSVData(true);
 
         try {
-            if (spaces.length !== 0) {
+            if (equipments.length !== 0) {
                 download(
                     `${bldgName}_Energy_Consumption_By_Space${new Date().toISOString().split('T')[0]}`,
-                    getExploreByEquipmentTableCSVExport(spaces, headerProps)
+                    getExploreByEquipmentTableCSVExport(equipments, headerProps)
                 );
                 UserStore.update((s) => {
                     s.showNotification = true;
@@ -109,15 +120,19 @@ const SpacesEquipmentTable = ({ spaceType, spaceId }) => {
                     <Progress
                         bar
                         value={row?.total_consumption?.now}
-                        max={row?.total_consumption?.now}
+                        max={row?.total_all_consumption}
                         barClassName="custom-on-hour"
                     />
                 </Progress>
             </>
         );
     });
+
     const calculatePercentageChange = (oldValue, newValue) => {
-        return ((newValue - oldValue) / oldValue) * 100;
+        const calculatedOldValue = oldValue > 0 ? oldValue : 1;
+        const calculatedNewValue = newValue > 0 ? newValue : 1;
+
+        return ((calculatedNewValue - calculatedOldValue) / calculatedOldValue) * 100;
     };
 
     const renderPerChange = useCallback((row) => {
@@ -140,9 +155,33 @@ const SpacesEquipmentTable = ({ spaceType, spaceId }) => {
     });
 
     const renderTags = useCallback((row) => {
-        const slicedArr = row?.tags?.slice(1);
+        const tag = [];
+        const slicedArr = tag.slice(1);
 
-        return <></>;
+        return (
+            <div className="tag-row-content">
+                <Badge text={<span className="gray-950">{tag[0] ? tag[0] : 'none'}</span>} />
+                {slicedArr?.length > 0 ? (
+                    <>
+                        <Badge
+                            text={
+                                <span className="gray-950" id={`tags-badge-${row?.equipment_id}`}>
+                                    +{slicedArr.length} more
+                                </span>
+                            }
+                        />
+                        <UncontrolledTooltip
+                            placement="top"
+                            target={`tags-badge-${row?.equipment_id}`}
+                            className="tags-tooltip">
+                            {slicedArr.map((el) => {
+                                return <Badge text={<span className="gray-950">{el}</span>} />;
+                            })}
+                        </UncontrolledTooltip>
+                    </>
+                ) : null}
+            </div>
+        );
     });
 
     const headerProps = [
@@ -188,30 +227,30 @@ const SpacesEquipmentTable = ({ spaceType, spaceId }) => {
 
     const handleSearch = (e) => {
         setSearch(e);
-        setCheckedAll(false);
+        // setCheckedAll(false);
     };
 
     return (
         <DataTableWidget
             id="explore-by-equipment"
-            isLoading={spacesLoading}
+            isLoading={equipmentsLoading}
             isLoadingComponent={<SkeletonLoader noOfColumns={headerProps.length + 1} noOfRows={20} />}
             onSearch={handleSearch}
             buttonGroupFilterOptions={[]}
-            rows={spaces}
-            searchResultRows={spaces}
+            rows={equipments}
+            searchResultRows={equipments}
             filterOptions={[]}
             headers={headerProps}
-            // pageSize={pageSize}
-            // currentPage={pageNo}
-            // onPageSize={setPageSize}
-            // onChangePage={setPageNo}
-            // pageListSizes={pageListSizes}
-            // totalCount={totalItems}
+            pageSize={pageSize}
+            onPageSize={setPageSize}
+            currentPage={pageNo}
+            onChangePage={setPageNo}
+            pageListSizes={pageListSizes}
+            totalCount={totalItems}
             isCSVDownloading={isCSVDownloading}
             onDownload={handleDownloadCSV}
         />
     );
 };
 
-export default SpacesEquipmentTable;
+export default EquipmentTable;

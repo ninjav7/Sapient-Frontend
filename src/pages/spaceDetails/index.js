@@ -39,7 +39,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import '../settings/passive-devices/styles.scss';
 import './styles.scss';
 import _ from 'lodash';
-import SpacesEquipmentTable from './SpacesEquipmentTable';
+import EquipmentTable from './EquipmentTable';
 import ConfigurationTab from './configurationTab';
 import { updateSpaceService } from '../settings/layout/services';
 import { Notification } from '../../sharedComponents/notification';
@@ -422,13 +422,7 @@ const SpaceDetails = () => {
 
                                 <Brick sizeInRem={1} />
 
-                                {/* should me removed checking metadatFetching as soon as end-point is updated */}
-                                {!metadataFetching && (
-                                    <SpacesEquipmentTable
-                                        spaceType={metadata?.space_type_name ?? ''}
-                                        spaceId={spaceId}
-                                    />
-                                )}
+                                <EquipmentTable spaceId={spaceId} />
                             </Col>
                         </Row>
                     </div>
