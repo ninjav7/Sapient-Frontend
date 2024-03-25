@@ -31,8 +31,8 @@ export const fetchSpaceMetadata = async (query, spaceId) => {
 };
 
 export const fetchEquipmentBySpace = async (query, spaceId) => {
-    const { bldgId = '', dateFrom = '', dateTo = '', tzInfo = 'US/Eastern' } = query;
-    const params = `?building_id=${bldgId}&space_ids=${spaceId}&ordered_by=consumption&date_from=${dateFrom}&date_to=${dateTo}&tz_info=${tzInfo}`;
+    const { bldgId = '', dateFrom = '', dateTo = '', tzInfo = 'US/Eastern', page = 1, size = 20, search } = query;
+    const params = `?building_id=${bldgId}&space_ids=${spaceId}&ordered_by=consumption&date_from=${dateFrom}&date_to=${dateTo}&tz_info=${tzInfo}&page_no=${page}&page_size=${size}&search=${search}`;
 
     return axiosInstance.get(`${getEquipmentBySpace}${params}`).then((res) => res?.data);
 };
