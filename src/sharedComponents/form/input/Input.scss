@@ -36,7 +36,7 @@
         &:focus {
             border: 0.125rem solid $dataviz-blue-600;
             box-shadow: 0 0.0625rem 0.125rem rgba(16, 24, 40, 0.05), 0 0 0 0.25rem $dataviz-blue-100;
-            // letter-spacing: 0.009375rem; // Comment because of issue reported by user with ticket: PLT-1980
+            // letter-spacing: 0.009375rem; // Commented style due to issue reported by user with ticket: PLT-1980
             color: $primary-gray-800;
         }
     }
