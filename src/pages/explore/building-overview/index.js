@@ -67,7 +67,7 @@ const ExploreBuildingOverview = () => {
 
     const handleMenuItemClick = ({ key }) => {
         history.push({
-            pathname: `/explore/building/overview/${bldgId}/${key}`,
+            pathname: `/explore/building/${bldgId}/${key}`,
         });
     };
 

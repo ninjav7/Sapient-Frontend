@@ -989,13 +989,11 @@ const ExploreByBuildings = () => {
                 },
                 {
                     label: selectedBldgObj?.building_name ?? 'Building',
-                    path: `/explore/building/overview/${selectedBldgObj?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
+                    path: `/explore/building/${selectedBldgObj?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
                     active: true,
                 },
             ]);
-            redirectToEndpoint(
-                `/explore/building/overview/${selectedBldgObj?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`
-            );
+            redirectToEndpoint(`/explore/building/${selectedBldgObj?.building_id}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`);
         }
     }, [selectedBldgObj]);
 

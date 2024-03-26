@@ -41,13 +41,14 @@ import { getWeatherData } from '../../services/weather';
 import Brick from '../../sharedComponents/brick';
 import EnergyConsumptionChart from './energy-consumption/EnergyConsumptionChart';
 import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
-import colorPalette from '../../assets/scss/_colors.scss';
-import './style.css';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { getEnergyConsumptionCSVExport } from '../../utils/tablesExport';
 import EnergyConsumptionBySpaceChart from '../../components/energyConsumptionBySpace';
 import { fetchTopEnergyConsumptionBySpaceDataHelper } from '../../components/energyConsumptionBySpace/helpers';
+import { EXPLORE_FILTER_TYPE } from '../explore/constants';
+import 'react-loading-skeleton/dist/skeleton.css';
+import colorPalette from '../../assets/scss/_colors.scss';
+import './style.css';
 
 const BuildingOverview = () => {
     const { download } = useCSVDownload();
@@ -874,7 +875,16 @@ const BuildingOverview = () => {
 
     return (
         <React.Fragment>
-            <Header title="Building Overview" type="page" showExplore={true} />
+            <Header
+                title="Building Overview"
+                type="page"
+                showExplore={true}
+                onExploreClick={() => {
+                    history.push({
+                        pathname: `/explore/building/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
+                    });
+                }}
+            />
 
             <Brick sizeInRem={1.5} />
 

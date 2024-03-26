@@ -446,7 +446,7 @@ const exploreRoutes = {
             parent: 'explore',
         },
         {
-            path: '/explore/building/overview/:bldgId/by-spaces-equipments/:spaceId',
+            path: '/explore/building/:bldgId/by-spaces-equipments/:spaceId',
             name: 'Explore by Space Equipments',
             component: ExploreEquipmentBySpace,
             route: PrivateRoute,
@@ -454,7 +454,7 @@ const exploreRoutes = {
             parent: 'explore',
         },
         {
-            path: '/explore/building/overview/:bldgId/:filterType?',
+            path: '/explore/building/:bldgId/:filterType?',
             name: 'Explore by Filters',
             component: ExploreBuildingOverview,
             route: PrivateRoute,

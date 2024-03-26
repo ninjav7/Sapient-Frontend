@@ -262,7 +262,7 @@ const ExploreByEquipments = (props) => {
             let newList = [
                 {
                     label: 'Building Overview',
-                    path: '/explore/building/overview',
+                    path: '/explore/building',
                     active: true,
                 },
             ];
@@ -1153,7 +1153,7 @@ const ExploreByEquipments = (props) => {
             },
             {
                 label: bldgName ?? 'Building',
-                path: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
+                path: `/explore/building/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
                 active: true,
             },
         ]);
