@@ -10,7 +10,7 @@ import { convertToUserLocalTime } from '../../helpers/helpers';
 import Button from '../../sharedComponents/button/Button';
 import { ReactComponent as TelescopeSVG } from '../../assets/icon/telescope-purple.svg';
 
-const Header = ({ type, title, showExplore = false, showCalendar = true, onExploreClick = () => {} }) => {
+const Header = ({ type, title, showExplore = false, showCalendar = true, onExploreClick }) => {
     const filterPeriod = DateRangeStore.useState((s) => s.filterPeriod);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
