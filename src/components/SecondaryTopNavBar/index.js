@@ -73,7 +73,7 @@ const SecondaryTopNavBar = () => {
             return;
         }
 
-        if (path.includes('/explore/building/overview')) {
+        if (path.includes('/explore/building')) {
             redirectToEndpoint(`/explore/overview/by-buildings`);
             return;
         }
@@ -116,21 +116,19 @@ const SecondaryTopNavBar = () => {
         }
 
         if (path === '/explore/overview/by-buildings') {
-            redirectToEndpoint(`/explore/building/overview/${record?.value}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`);
+            redirectToEndpoint(`/explore/building/${record?.value}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`);
             return;
         }
 
-        if (path.includes('/explore/building/overview')) {
+        if (path.includes('/explore/building')) {
             if (path.includes('/by-spaces-equipments')) {
                 const bldgId = path.split('/')[4];
-                redirectToEndpoint(`/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.BY_SPACE}`);
+                redirectToEndpoint(`/explore/building/${bldgId}/${EXPLORE_FILTER_TYPE.BY_SPACE}`);
                 return;
             } else {
                 const filterType = path.split('/')[5];
                 redirectToEndpoint(
-                    `/explore/building/overview/${record?.value}/${
-                        filterType ? filterType : EXPLORE_FILTER_TYPE.NO_GROUPING
-                    }`
+                    `/explore/building/${record?.value}/${filterType ? filterType : EXPLORE_FILTER_TYPE.NO_GROUPING}`
                 );
                 return;
             }

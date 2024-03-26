@@ -170,14 +170,6 @@ const SpaceConfiguration = (props) => {
         setChartData(mappedEquipmentData);
     };
 
-    const notifyUser = (notifyType, notifyMessage) => {
-        UserStore.update((s) => {
-            s.showNotification = true;
-            s.notificationMessage = notifyMessage;
-            s.notificationType = notifyType;
-        });
-    };
-
     const fetchChartData = async () => {
         setChartDataFetching(true);
         setChartData([]);
@@ -217,6 +209,14 @@ const SpaceConfiguration = (props) => {
         }
 
         setMetadataFetching(false);
+    };
+
+    const notifyUser = (notifyType, notifyMessage) => {
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = notifyMessage;
+            s.notificationType = notifyType;
+        });
     };
 
     const fetchEditSpace = async () => {
@@ -401,6 +401,7 @@ const SpaceConfiguration = (props) => {
                                             chartProps={chartProps}
                                         />
                                     )}
+
                                     <Brick sizeInRem={2} />
 
                                     <Header

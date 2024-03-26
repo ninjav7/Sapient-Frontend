@@ -87,7 +87,7 @@ const NavLinks = () => {
         }
 
         if (
-            location.pathname.includes('/explore/building/overview') ||
+            location.pathname.includes('/explore/building') ||
             location.pathname.includes('/control/plug-rules') ||
             location.pathname.includes('/spaces/building/overview') ||
             location.pathname.includes('/carbon/building/overview')
@@ -136,7 +136,7 @@ const NavLinks = () => {
             location.pathname.includes('/energy/end-uses') ||
             location.pathname.includes('/energy/time-of-day') ||
             location.pathname.includes('/control/plug-rules') ||
-            location.pathname.includes('/explore/building/overview')
+            location.pathname.includes('/explore/building')
         ) {
             history.push({
                 pathname: `/carbon/building/overview/${bldgId}`,
@@ -203,7 +203,7 @@ const NavLinks = () => {
             location.pathname.includes('/carbon/building/overview')
         ) {
             history.push({
-                pathname: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
+                pathname: `/explore/building/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
             });
             return;
         }
@@ -212,7 +212,7 @@ const NavLinks = () => {
             configRoutes.forEach((record) => {
                 if (location.pathname.includes(record)) {
                     history.push({
-                        pathname: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
+                        pathname: `/explore/building/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
                     });
                     return;
                 }
@@ -221,7 +221,7 @@ const NavLinks = () => {
             configChildRoutes.forEach((record) => {
                 if (location.pathname.includes(record)) {
                     history.push({
-                        pathname: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
+                        pathname: `/explore/building/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
                     });
                     return;
                 }

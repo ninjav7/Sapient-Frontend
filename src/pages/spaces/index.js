@@ -17,6 +17,7 @@ import SpacesListTable from './SpacesListTable';
 import { useHistory } from 'react-router-dom';
 import { Col } from 'reactstrap';
 import PieChartsSection from './PieChartsSection';
+import { EXPLORE_FILTER_TYPE } from '../explore/constants';
 
 const Spaces = () => {
     const { bldgId } = useParams();
@@ -185,7 +186,16 @@ const Spaces = () => {
 
     return bldgId ? (
         <Col lg={12}>
-            <Header title="Building Overview" type="page" showExplore={true} />
+            <Header
+                title="Building Overview"
+                type="page"
+                showExplore={true}
+                onExploreClick={() => {
+                    history.push({
+                        pathname: `/explore/building/${bldgId}/${EXPLORE_FILTER_TYPE.BY_SPACE}`,
+                    });
+                }}
+            />
 
             <Brick sizeInRem={2} />
 

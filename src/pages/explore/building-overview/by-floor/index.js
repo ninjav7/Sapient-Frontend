@@ -214,7 +214,7 @@ const ExploreByFloor = (props) => {
             let newList = [
                 {
                     label: 'Building Overview',
-                    path: '/explore/building/overview',
+                    path: '/explore/building',
                     active: true,
                 },
             ];

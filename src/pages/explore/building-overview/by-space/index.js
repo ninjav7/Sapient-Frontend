@@ -589,18 +589,16 @@ const ExploreBySpace = (props) => {
             updateBreadcrumbStore([
                 {
                     label: 'By Space',
-                    path: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.BY_SPACE}`,
+                    path: `/explore/building/${bldgId}/${EXPLORE_FILTER_TYPE.BY_SPACE}`,
                     active: false,
                 },
                 {
                     label: selectedSpaceToRedirect?.space_name ?? 'Space',
-                    path: `/explore/building/overview/${bldgId}/by-spaces-equipments/${selectedSpaceToRedirect?.space_id}`,
+                    path: `/explore/building/${bldgId}/by-spaces-equipments/${selectedSpaceToRedirect?.space_id}`,
                     active: true,
                 },
             ]);
-            redirectToEndpoint(
-                `/explore/building/overview/${bldgId}/by-spaces-equipments/${selectedSpaceToRedirect?.space_id}`
-            );
+            redirectToEndpoint(`/explore/building/${bldgId}/by-spaces-equipments/${selectedSpaceToRedirect?.space_id}`);
         }
     }, [selectedSpaceToRedirect]);
 
@@ -623,7 +621,7 @@ const ExploreBySpace = (props) => {
             },
             {
                 label: bldgName ?? 'Building',
-                path: `/explore/building/overview/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
+                path: `/explore/building/${bldgId}/${EXPLORE_FILTER_TYPE.NO_GROUPING}`,
                 active: true,
             },
         ]);
