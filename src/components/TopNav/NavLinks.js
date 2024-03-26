@@ -257,7 +257,7 @@ const NavLinks = () => {
             configRoutes.forEach((record) => {
                 if (location.pathname.includes(record)) {
                     history.push({
-                        pathname: `/spaces/${bldgId}`,
+                        pathname: `/spaces/building/overview/${bldgId}`,
                     });
                     return;
                 }
@@ -266,7 +266,7 @@ const NavLinks = () => {
             configChildRoutes.forEach((record) => {
                 if (location.pathname.includes(record)) {
                     history.push({
-                        pathname: `/spaces/${bldgId}`,
+                        pathname: `/spaces/building/overview/${bldgId}`,
                     });
                     return;
                 }
