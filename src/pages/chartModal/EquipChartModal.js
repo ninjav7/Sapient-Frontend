@@ -398,8 +398,9 @@ const EquipChartModal = ({
         if (originalEquipData?.serial !== equipData?.serial) obj.serial = equipData?.serial;
 
         if (originalEquipData?.location_id !== equipData?.location_id) obj.space_id = equipData?.location_id;
+
         if (originalEquipData?.location_served !== equipData?.location_served)
-            obj.location_served = equipData?.location_served;
+            obj.location_served = equipData?.location_served ? [`${equipData?.location_served}`] : [];
 
         if (originalEquipData?.equipments_type_id !== equipData?.equipments_type_id) {
             obj.equipment_type = equipData?.equipments_type_id;
@@ -625,6 +626,7 @@ const EquipChartModal = ({
             .then((res) => {
                 const { success: isSuccessful, data } = res?.data;
                 if (isSuccessful && data && data?.equipments_id) {
+                    if (data?.location_served) data.location_served = data.location_served[0] ?? null;
                     setOriginalEquipData(data);
                     setEquipData(data);
                     setEquipBreakerLink(data?.breaker_link);
@@ -1153,7 +1155,7 @@ const EquipChartModal = ({
                                                         <Typography.Body
                                                             size={Typography.Sizes.xs}
                                                             className="input-error-label text-primary font-bold float-right mouse-pointer"
-                                                            onClick={() => handleDataChange('location_served', '')}>
+                                                            onClick={() => handleDataChange('location_served', null)}>
                                                             {`Reset Location Served`}
                                                         </Typography.Body>
                                                     </>
