@@ -308,6 +308,7 @@ const ConfigurationTab = ({
                                     onChange={(e) => {
                                         handleChange('square_footage', e.target.value);
                                     }}
+                                    type="number"
                                 />
                             )}
                         </div>
