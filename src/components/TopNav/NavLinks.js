@@ -90,6 +90,7 @@ const NavLinks = () => {
             location.pathname.includes('/explore/building') ||
             location.pathname.includes('/control/plug-rules') ||
             location.pathname.includes('/spaces/building/overview') ||
+            location.pathname.includes('/spaces/space/overview') ||
             location.pathname.includes('/carbon/building/overview')
         ) {
             history.push({
@@ -133,6 +134,7 @@ const NavLinks = () => {
         if (
             location.pathname.includes('/energy/building/overview') ||
             location.pathname.includes('/spaces/building/overview') ||
+            location.pathname.includes('/spaces/space/overview') ||
             location.pathname.includes('/energy/end-uses') ||
             location.pathname.includes('/energy/time-of-day') ||
             location.pathname.includes('/control/plug-rules') ||
@@ -197,6 +199,7 @@ const NavLinks = () => {
         if (
             location.pathname.includes('/energy/building/overview') ||
             location.pathname.includes('/spaces/building/overview') ||
+            location.pathname.includes('/spaces/space/overview') ||
             location.pathname.includes('/energy/end-uses') ||
             location.pathname.includes('/energy/time-of-day') ||
             location.pathname.includes('/control/plug-rules') ||
@@ -244,8 +247,9 @@ const NavLinks = () => {
 
         if (
             location.pathname.includes('/energy/building/overview') ||
-            location.pathname.includes('/explore-page/by-equipment') ||
-            location.pathname.includes('/control/plug-rules')
+            location.pathname.includes('/explore/building') ||
+            location.pathname.includes('/control/plug-rules') ||
+            location.pathname.includes('/carbon/building/overview')
         ) {
             history.push({
                 pathname: `/spaces/building/overview/${bldgId}`,
