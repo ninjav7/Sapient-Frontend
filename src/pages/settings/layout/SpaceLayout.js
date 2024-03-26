@@ -16,6 +16,7 @@ import { addSpaceService, updateSpaceService, deleteSpaceService, getAllSpaceTyp
 import DeleteLayout from './DeleteLayout';
 import { defaultDropdownSearch } from '../../../sharedComponents/form/select/helpers';
 import { MultiSelect } from 'react-multi-select-component';
+import { UserStore } from '../../../store/UserStore';
 
 const SpaceLayout = (props) => {
     const {
@@ -48,6 +49,8 @@ const SpaceLayout = (props) => {
         name: null,
         type_id: null,
     };
+
+    const userPrefUnits = UserStore.useState((s) => s.unit);
 
     const [errorObj, setErrorObj] = useState(defaultErrorObj);
 
@@ -150,7 +153,7 @@ const SpaceLayout = (props) => {
                 if (response?.success) {
                     notifyUser(Notification.Types.success, `Space updated successfully.`);
                     fetchAllFloorData(bldgId);
-                    // here
+
                     fetchAllSpaceData(selectedFloorId, bldgId);
                 } else {
                     notifyUser(Notification.Types.error, response?.message);
@@ -346,16 +349,19 @@ const SpaceLayout = (props) => {
                     </div>
                     <Brick sizeInRem={1.25} />
                     <div>
-                        <Typography.Body size={Typography.Sizes.md}>{`Square Footage`}</Typography.Body>
+                        <Typography.Body size={Typography.Sizes.md}>{`Square ${
+                            userPrefUnits === 'si' ? 'Meter' : 'Footage'
+                        }`}</Typography.Body>
                         <Brick sizeInRem={0.25} />
                         <InputTooltip
-                            placeholder="Enter Square Footage"
+                            placeholder={`Enter Square ${userPrefUnits === 'si' ? 'Meter' : 'Footage'}`}
                             labelSize={Typography.Sizes.md}
                             value={spaceObj?.square_footage}
                             error={errorObj?.square_footage}
                             onChange={(e) => {
                                 handleChange('square_footage', e.target.value);
                             }}
+                            type="number"
                         />
                     </div>
                     <Brick sizeInRem={1.25} />
