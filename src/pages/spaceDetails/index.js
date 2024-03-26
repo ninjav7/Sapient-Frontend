@@ -39,6 +39,7 @@ import EquipmentTable from './EquipmentTable';
 import ConfigurationTab from './configurationTab';
 import { updateSpaceService } from '../settings/layout/services';
 import { Notification } from '../../sharedComponents/notification';
+import Skeleton from 'react-loading-skeleton';
 
 const SpaceDetails = () => {
     const history = useHistory();
@@ -312,10 +313,16 @@ const SpaceDetails = () => {
     };
 
     const selectedMetricsTab = () => setSelectedTab(0);
+
     const selectedConfiguresTab = () => !metadataFetching && !chartDataFetching && setSelectedTab(1);
+
     const dynamicActiveClassTab = (selectedIdTab) => (selectedTab === selectedIdTab ? 'active-tab-style' : '');
+
     const handleSelect = (e) => setSelectedConsumption(e.value);
-    const spaceName = metadata?.space_name && metadata.space_name;
+
+    const routeSpaces = () => history.push(`/spaces/building/overview/${bldgId}`);
+
+    const spaceName = metadata?.space_name ? metadata.space_name : 'No name';
 
     return (
         <div>
@@ -325,11 +332,26 @@ const SpaceDetails = () => {
                         <div className="passive-header-wrapper d-flex justify-content-between upper-content-container">
                             <div className="d-flex flex-column justify-content-between">
                                 <div className="space-tree-info">
-                                    <Typography.Subheader size={Typography.Sizes.sm}>Spaces</Typography.Subheader>
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.sm}
+                                        onClick={routeSpaces}
+                                        className="spaces-breadcrumb">
+                                        Spaces
+                                    </Typography.Subheader>
                                     <RightArrow className="ml-2 mr-2 w-16 h-16" />
-                                    <Typography.Subheader size={Typography.Sizes.sm}>{spaceName}</Typography.Subheader>
+                                    {metadataFetching ? (
+                                        <Skeleton count={1} width="3rem" />
+                                    ) : (
+                                        <Typography.Subheader size={Typography.Sizes.sm}>
+                                            {spaceName}
+                                        </Typography.Subheader>
+                                    )}
                                 </div>
-                                <Typography.Header size={Typography.Sizes.md}>{spaceName}</Typography.Header>
+                                {metadataFetching ? (
+                                    <Skeleton count={1} />
+                                ) : (
+                                    <Typography.Header size={Typography.Sizes.md}>{spaceName}</Typography.Header>
+                                )}
                                 <div className="d-flex justify-content-start mouse-pointer ">
                                     <Typography.Subheader
                                         size={Typography.Sizes.md}
@@ -358,7 +380,7 @@ const SpaceDetails = () => {
                                     label="Close"
                                     size={Button.Sizes.md}
                                     type={Button.Type.secondaryGrey}
-                                    onClick={() => history.push(`/spaces/building/overview/${bldgId}`)}
+                                    onClick={routeSpaces}
                                 />
                             </div>
                         </div>
