@@ -191,9 +191,7 @@ const Spaces = () => {
                 type="page"
                 showExplore={true}
                 onExploreClick={() => {
-                    history.push({
-                        pathname: `/explore/building/${bldgId}/${EXPLORE_FILTER_TYPE.BY_SPACE}`,
-                    });
+                    history.push(`/explore/building/${bldgId}/${EXPLORE_FILTER_TYPE.BY_SPACE}`);
                 }}
             />
 
