@@ -170,8 +170,6 @@ const SpaceDetails = () => {
 
             const res = await fetchSpaceMetadata(query, spaceId);
 
-            console.log(res);
-
             if (res) {
                 setMetadata(res);
                 setSelectedFloorId(res.floor_id);

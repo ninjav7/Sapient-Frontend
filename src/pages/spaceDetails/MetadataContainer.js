@@ -8,7 +8,6 @@ import { UNITS } from '../../constants/units';
 
 const MetadataContainer = ({ metadata = {}, isFetching = false }) => {
     const userPrefUnits = UserStore.useState((s) => s.unit);
-    console.log(userPrefUnits);
 
     return (
         <>
