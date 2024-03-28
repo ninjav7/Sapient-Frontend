@@ -5,7 +5,6 @@ import { formatConsumptionValue } from '../../helpers/explorehelpers';
 import { UserStore } from '../../store/UserStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import Typography from '../../sharedComponents/typography';
-import { UNITS } from '../../constants/units';
 
 const EnergyMetadataContainer = ({ metadata = {}, isFetching = false }) => {
     const { total_energy_consumption, peak_power = {}, square_footage = 1 } = metadata;
