@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRef, useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useRef, useState, useEffect} from 'react';
 import styles from './Home.module.css';
 import axios from 'axios';
 import Popup from 'reactjs-popup';
@@ -7,59 +7,18 @@ import 'reactjs-popup/dist/index.css';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import dayjs, { Dayjs } from 'dayjs';
+import Select from '@mui/material/Select';
+import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Close, CommentSolid } from './icons';
-
-const visObjList = [];
-const TEXT_FORMAT = '1';
-const TEXT_TABLE_FORMAT = '2';
-const TEXT_PIECHART_FORMAT = '3';
-const TEXT_BARCHART_FORMAT = '4';
-const STATIC_ANSWER = '1';
-const GENERAL_ANSWER = '2';
-const API_ANSWER = '3';
-const API_DROPDOWN_END_USE = 'end_use';
-const API_DROPDOWN_EQUIPMENT = 'equipment';
-const API_DROPDOWN_EQUIPMENT_TYPE = 'equipment_type';
-const API_DROPDOWN_SPACE_TYPE = 'space_type';
-const API_DROPDOWN_CIRCUIT = 'circuit_type';
-const API_DROPDOWN_BUILDING = 'building';
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-    PaperProps: {
-        style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-            width: 250,
-            border: 0,
-        },
-    },
-};
-const UID = Math.random().toString(36).substring(2, 9);
-
-const StartMSG = [
-    'Your energy usage is constantly changing. Would you like to learn more about those trends?',
-
-    'New data has been recorded for your building. What would you like to learn about today?',
-
-    "It's good to see you again! How can I help you today?",
-
-    "Hello! I'm your Energy Helper. How can I help you analyze your energy data?",
-
-    "Welcome to the Energy Metering Solution Chatbot! 📊 Ready to take control of your energy usage and costs? I'm here to guide you through our cutting-edge metering technology and help you make informed decisions. How can I assist you today?",
-
-    "With data that evolves constantly and new energy trends emerging, we're here to help you stay ahead. How can I assist you today?",
-
-    "In a world of ever-changing energy data and emerging trends, we're here to keep you informed and in control. How can I assist you today?",
-
-    "As energy data evolves continuously and new trends emerge, we're here to empower you. How can I help you today?",
-
-    "In a landscape of ever-changing energy data and emerging trends, we're here to be your resource. How can I facilitate your needs today?",
-];
+import { UserStore } from '../../store/UserStore';
+import { StartMSG, TEXT_FORMAT, STATIC_ANSWER, 
+    GENERAL_ANSWER, API_ANSWER, 
+    API_DROPDOWN_END_USE, API_DROPDOWN_EQUIPMENT, 
+    API_DROPDOWN_EQUIPMENT_TYPE, API_DROPDOWN_SPACE_TYPE, 
+    API_DROPDOWN_CIRCUIT, API_DROPDOWN_BUILDING, MenuProps} from "../../utils/constant";
 
 export default function ChatBox(props) {
     const [query, setQuery] = useState('');
@@ -107,8 +66,7 @@ export default function ChatBox(props) {
     const textAreaRef = useRef(null);
 
     const backendAPI = axios.create({
-        baseURL: 'https://sback.kneeshaw-developments.com',
-        // baseURL : "http://localhost:5000"
+        baseURL: 'https://backend.sapientchatbot.com'
     });
     backendAPI.defaults.headers.common['Content-Type'] = 'application/json';
     backendAPI.defaults.headers.common['User-Agent'] = 'XY';
@@ -159,18 +117,6 @@ export default function ChatBox(props) {
     }, [dropdownCategory]);
 
     const clearHistory = () => {
-        // setQuery("");
-        // setLoading(false);
-        // setError(null);
-        // setMessageState({
-        //   messages: [
-        //     {
-        //       message: 'Hello, are you looking to buy or sell today?',
-        //       type: 'apiMessage',
-        //     },
-        //   ],
-        //   history: [],
-        // });
     };
 
     // chat box open button action
@@ -346,8 +292,11 @@ export default function ChatBox(props) {
         setError(null);
 
         if (!query) {
-            // props.showToast("Please fill out the content", "warning");
-            alert('Please fill out the content');
+            UserStore.update((s) => {
+                s.showNotification = true;
+                s.notificationMessage = 'Please fill out the content';
+                s.notificationType = 'error';
+            });
             return 'Notify!';
         }
 
@@ -451,7 +400,11 @@ export default function ChatBox(props) {
 
         if (senderEmail == '') {
             // props.showToast("Please fill out your email", "warning");
-            alert('Please fill out your email');
+            UserStore.update((s) => {
+                s.showNotification = true;
+                s.notificationMessage = 'Please fill out your email';
+                s.notificationType = 'error';
+            });
             // toast.warning("Please fill out your email", {position: toast.POSITION.BOTTOM_RIGHT});
             return 'Notify!';
         }
@@ -470,15 +423,20 @@ export default function ChatBox(props) {
             email: senderEmail,
         });
         const data = await response.data;
+        let notifyMSG = "";
+        let notifyType = "";
         if (data.result == 'success') {
-            // toast.success("Thanks. Successfully sent!", {position: toast.POSITION.BOTTOM_RIGHT});
-            // props.showToast("Thanks. Successfully sent!", "success");
-            alert('Thanks. Successfully sent!');
+            notifyMSG = "Thanks, Successfully sent!";
+            notifyType = "success";
         } else {
-            // toast.warning("Sorry, Please try again later", {position: toast.POSITION.BOTTOM_RIGHT});
-            // props.showToast("Sorry, Please try again later", "warning");
-            alert('Sorry, Please try again later');
+            notifyMSG = "Sorry, Plesae try again later";
+            notifyType = "error";
         }
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = notifyMSG;
+            s.notificationType = notifyType;
+        });
     };
 
     const clickRateMyData = (rate) => {
@@ -657,35 +615,11 @@ export default function ChatBox(props) {
                     </div>
                     <div ref={messageListRef} className={styles.messagelist}>
                         {messages.map((message, index) => {
-                            let icon;
-                            let graph;
                             let dropdown;
                             let className;
                             if (message.type === 'apiMessage') {
-                                icon = (
-                                    <img
-                                        key={index}
-                                        src="/bot-image.png"
-                                        alt="AI"
-                                        width="25"
-                                        height="25"
-                                        className={styles.boticon}
-                                        priority
-                                    />
-                                );
                                 className = styles.apimessage;
                             } else {
-                                icon = (
-                                    <img
-                                        key={index}
-                                        src="/usericon.png"
-                                        alt="Me"
-                                        width="20"
-                                        height="20"
-                                        className={styles.usericon}
-                                        priority
-                                    />
-                                );
                                 // The latest message sent by the user will be animated while waiting for a response
                                 className =
                                     loading && index === messages.length - 1

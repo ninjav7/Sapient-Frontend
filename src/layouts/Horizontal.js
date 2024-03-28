@@ -108,7 +108,8 @@ const HorizontalLayout = (props) => {
                         </div>
                     ) : null}
 
-                    {isSuperUser && <ChatBox chatHistory={setChatHistory}></ChatBox>}
+                    {/* {isSuperUser && <ChatBox chatHistory={setChatHistory}></ChatBox>} */}
+                    <ChatBox chatHistory={setChatHistory}></ChatBox>
                 </div>
             </div>
         </React.Fragment>
