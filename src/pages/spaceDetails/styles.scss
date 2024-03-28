@@ -72,3 +72,42 @@
 .spaces-breadcrumb:hover {
     cursor: pointer;
 }
+
+.modal-backdrop {
+    opacity: 0.5;
+    background-color: $base-black;
+}
+
+.space-layout-container {
+    max-width: none;
+    height: auto;
+    margin: 0;
+    overflow-x: auto; /* Enable horizontal scrolling */
+    max-width: 100%; /* Adjust as needed based on your layout */
+}
+
+/* Customize the scrollbar track */
+.space-layout-container::-webkit-scrollbar {
+    width: 0.525rem;
+    height: 0.725rem; /* For horizontal scrollbar */
+}
+
+.space-layout-container::-webkit-scrollbar-track {
+    background-color: $success-25;
+}
+
+/* Customize the scrollbar thumb */
+.space-layout-container::-webkit-scrollbar-thumb {
+    background-color: $primary-gray-400;
+    border-radius: 0.3125rem;
+}
+
+/* On hover, customize the scrollbar thumb */
+.space-layout-container::-webkit-scrollbar-thumb:hover {
+    background-color: $primary-gray-500;
+}
+
+/* On active, customize the scrollbar thumb */
+.space-layout-container::-webkit-scrollbar-thumb:active {
+    background-color: $primary-gray-600;
+}

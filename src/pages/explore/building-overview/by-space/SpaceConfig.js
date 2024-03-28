@@ -69,6 +69,10 @@ const SpaceConfiguration = (props) => {
     const handleSelect = (e) => setSelectedConsumption(e.value);
     const spaceName = metadata?.space_name && metadata.space_name;
 
+    const [modal, setModal] = useState(false);
+    const openModal = () => setModal(true);
+    const closeModal = () => setModal(false);
+
     const customModalStyle = {
         modalContent: {
             height: '90vh',
@@ -297,7 +301,10 @@ const SpaceConfiguration = (props) => {
     }, [spaceId, startDate, endDate, selectedConsumption, bldgId]);
 
     return (
-        <Modal isOpen={showSpaceConfigModal} className="space-modal-fullscreen">
+        <Modal
+            isOpen={showSpaceConfigModal}
+            className="space-modal-fullscreen"
+            style={{ opacity: modal ? '0.5' : '1' }}>
             <div className="space-modal-container" style={customModalStyle.modalContent}>
                 {/* Modal Header  */}
                 <Row className="m-0">
@@ -430,6 +437,9 @@ const SpaceConfiguration = (props) => {
                             allParentSpaces={allParentSpaces}
                             errorObj={errorObj}
                             setErrorObj={setErrorObj}
+                            modal={modal}
+                            openModal={openModal}
+                            closeModal={closeModal}
                         />
                     )}
                 </div>
