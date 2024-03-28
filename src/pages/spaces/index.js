@@ -211,6 +211,7 @@ const Spaces = () => {
                     daysCount={daysCount}
                     isChartLoading={yearlyChartLoading}
                     half={true}
+                    byYear={true}
                 />
 
                 <EnergyConsumptionBySpaceChart
