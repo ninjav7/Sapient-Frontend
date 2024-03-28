@@ -117,6 +117,8 @@ const ExploreByEquipments = (props) => {
     const [selectedEndUse, setSelectedEndUse] = useState([]);
     const [selectedSpaceType, setSelectedSpaceType] = useState([]);
     const [selectedTags, setSelectedTags] = useState([]);
+    const [selectedFloors, setSelectedFloors] = useState([]);
+    const [selectedSpaces, setSelectedSpaces] = useState([]);
     const [selectedPanels, setSelectedPanels] = useState([]);
     const [selectedBreakers, setSelectedBreakers] = useState([]);
     const [selectedNotes, setSelectedNotes] = useState([]);
@@ -328,6 +330,8 @@ const ExploreByEquipments = (props) => {
             selectedEndUse,
             selectedSpaceType,
             selectedTags,
+            selectedFloors,
+            selectedSpaces,
             selectedPanels,
             selectedBreakers,
             selectedNotes,
@@ -573,6 +577,8 @@ const ExploreByEquipments = (props) => {
             selectedEndUse,
             selectedSpaceType,
             selectedTags,
+            selectedFloors,
+            selectedSpaces,
             selectedPanels,
             selectedBreakers,
             selectedNotes,
@@ -759,6 +765,8 @@ const ExploreByEquipments = (props) => {
         selectedEndUse,
         selectedSpaceType,
         selectedTags,
+        selectedFloors,
+        selectedSpaces,
         selectedPanels,
         selectedBreakers,
         selectedNotes,
@@ -780,6 +788,8 @@ const ExploreByEquipments = (props) => {
         selectedEndUse,
         selectedSpaceType,
         selectedTags,
+        selectedFloors,
+        selectedSpaces,
         selectedPanels,
         selectedBreakers,
         selectedNotes,
@@ -920,7 +930,7 @@ const ExploreByEquipments = (props) => {
                     },
                 },
                 {
-                    label: 'End Uses',
+                    label: 'End Use',
                     value: 'end_users',
                     placeholder: 'All End Uses',
                     filterType: FILTER_TYPES.MULTISELECT,
@@ -945,6 +955,61 @@ const ExploreByEquipments = (props) => {
                     onDelete: () => {
                         setPageNo(1);
                         setSelectedEndUse([]);
+                    },
+                },
+
+                {
+                    label: 'Floor',
+                    value: 'floor',
+                    placeholder: 'All Floors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: _.chain(filterObj?.floors)
+                        .sortBy('floor_name')
+                        .map((filterItem) => ({
+                            value: filterItem?.floor_id,
+                            label: filterItem?.floor_name,
+                        }))
+                        .value(),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let sensors = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                sensors.push(opt[i].value);
+                            }
+                            setSelectedFloors(sensors);
+                        }
+                    },
+                    onDelete: () => {
+                        setPageNo(1);
+                        setSelectedFloors([]);
+                    },
+                },
+                {
+                    label: 'Space',
+                    value: 'space',
+                    placeholder: 'All Spaces',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: _.chain(filterObj?.spaces)
+                        .sortBy('space_name')
+                        .map((filterItem) => ({
+                            value: filterItem?.space_id,
+                            label: filterItem?.space_name,
+                        }))
+                        .value(),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let sensors = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                sensors.push(opt[i].value);
+                            }
+                            setSelectedSpaces(sensors);
+                        }
+                    },
+                    onDelete: () => {
+                        setPageNo(1);
+                        setSelectedSpaces([]);
                     },
                 },
                 {

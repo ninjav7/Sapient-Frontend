@@ -40,6 +40,8 @@ export function fetchExploreEquipmentList(
     selectedEndUse,
     selectedSpaceType,
     selectedTags,
+    selectedFloors,
+    selectedSpaces,
     selectedPanels,
     selectedBreakers,
     selectedNotes,
@@ -80,6 +82,8 @@ export function fetchExploreEquipmentList(
     if (selectedSpace && selectedSpace.length !== 0) payload['location'] = selectedSpace;
     if (selectedSpaceType && selectedSpaceType.length !== 0) payload['space_type'] = selectedSpaceType;
     if (selectedTags && selectedTags.length !== 0) payload['tags'] = selectedTags;
+    if (selectedFloors && selectedFloors.length !== 0) payload['floor'] = selectedFloors;
+    if (selectedSpaces && selectedSpaces.length !== 0) payload['location'] = selectedSpaces;
     if (selectedPanels && selectedPanels.length !== 0) payload['panel'] = selectedPanels;
     if (selectedBreakers && selectedBreakers.length !== 0) payload['breaker_number'] = selectedBreakers;
     if (selectedNotes && selectedNotes.length === 1) payload['has_note'] = selectedNotes[0];
@@ -110,6 +114,8 @@ export function fetchExploreFilter(
     selectedEndUse,
     selectedSpaceType,
     selectedTags,
+    selectedFloors,
+    selectedSpaces,
     selectedPanels,
     selectedBreakers,
     selectedNotes,
@@ -146,6 +152,8 @@ export function fetchExploreFilter(
     if (selectedSpace && selectedSpace.length !== 0) payload['location'] = selectedSpace;
     if (selectedSpaceType && selectedSpaceType.length !== 0) payload['space_type'] = selectedSpaceType;
     if (selectedTags && selectedTags.length !== 0) payload['tags'] = selectedTags;
+    if (selectedFloors && selectedFloors.length !== 0) payload['floor'] = selectedFloors;
+    if (selectedSpaces && selectedSpaces.length !== 0) payload['location'] = selectedSpaces;
     if (selectedPanels && selectedPanels.length !== 0) payload['panel'] = selectedPanels;
     if (selectedBreakers && selectedBreakers.length !== 0) payload['breaker_number'] = selectedBreakers;
     if (selectedNotes && selectedNotes.length === 1) payload['has_note'] = selectedNotes[0];
