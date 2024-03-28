@@ -42,6 +42,7 @@ const EnergyConsumptionBySpaceChart = (props) => {
         upperLegendsProps = {},
         onMoreDetail,
         half = false,
+        byYear = false,
     } = props;
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
@@ -50,7 +51,9 @@ const EnergyConsumptionBySpaceChart = (props) => {
     const chartComponentRef = useRef(null);
 
     const formatXaxis = ({ value }) => {
-        return moment.utc(value).format(`${dateFormat}`);
+        const format = byYear ? 'MM-YYYY' : dateFormat;
+
+        return moment.utc(value).format(`${format}`);
     };
 
     const toolTipFormatter = ({ value }) => {
@@ -171,6 +174,7 @@ EnergyConsumptionBySpaceChart.propTypes = {
     propTitle: PropTypes.string.isRequired,
     propSubTitle: PropTypes.string.isRequired,
     half: PropTypes.bool.isRequired,
+    byYear: PropTypes.bool,
 };
 
 EnergyConsumptionBySpaceCategories.propTypes = {
