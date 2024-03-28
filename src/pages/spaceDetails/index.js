@@ -20,7 +20,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { buildingData } from '../../store/globalState';
 
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-import { dateTimeFormatForHighChart, formatXaxisForHighCharts } from '../../helpers/helpers';
+import { dateTimeFormatForHighChart, formatXaxisForHighCharts, handleAPIRequestParams } from '../../helpers/helpers';
 import { defaultMetrics } from './constants';
 import { handleDataConversion } from './helper';
 
@@ -53,6 +53,8 @@ const SpaceDetails = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefDateFormat = UserStore.useState((s) => s.dateFormat);
@@ -146,7 +148,15 @@ const SpaceDetails = () => {
         setChartData([]);
 
         try {
-            const query = { spaceId, bldgId, dateFrom: startDate, dateTo: endDate, timeZone };
+            const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+
+            const query = {
+                spaceId,
+                bldgId,
+                dateFrom: encodeURIComponent(dateFrom),
+                dateTo: encodeURIComponent(dateTo),
+                timeZone,
+            };
 
             const isEquipment = selectedConsumption === metric[1].value;
 
@@ -167,7 +177,14 @@ const SpaceDetails = () => {
         setMetadata({});
 
         try {
-            const query = { bldgId, dateFrom: startDate, dateTo: endDate, timeZone };
+            const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+
+            const query = {
+                bldgId,
+                dateFrom: encodeURIComponent(dateFrom),
+                dateTo: encodeURIComponent(dateTo),
+                timeZone,
+            };
 
             const res = await fetchSpaceMetadata(query, spaceId);
 
@@ -251,7 +268,7 @@ const SpaceDetails = () => {
 
         fetchChartData();
         fetchMetadata();
-    }, [spaceId, startDate, endDate, selectedConsumption, bldgId, userPrefUnits]);
+    }, [spaceId, startDate, endDate, startTime, endTime, selectedConsumption, bldgId, userPrefUnits]);
 
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
@@ -293,7 +310,7 @@ const SpaceDetails = () => {
                 );
             }
         }
-    }, [startDate, endDate, bldgId]);
+    }, [startDate, endDate, startTime, endTime, bldgId]);
 
     const chartProps = {
         tooltip: {

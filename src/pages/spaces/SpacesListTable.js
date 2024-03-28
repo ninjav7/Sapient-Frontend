@@ -3,7 +3,7 @@ import Brick from '../../sharedComponents/brick';
 import { UncontrolledTooltip, Progress } from 'reactstrap';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import SkeletonLoader from '../../components/SkeletonLoader';
-import { formatConsumptionValue, pageListSizes } from '../../helpers/helpers';
+import { formatConsumptionValue, handleAPIRequestParams, pageListSizes } from '../../helpers/helpers';
 import Typography from '../../sharedComponents/typography';
 import { UNITS } from '../../constants/units';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
@@ -22,6 +22,9 @@ const SpacesListTable = () => {
     const { download } = useCSVDownload();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
+
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const userPrefUnits = UserStore.useState((s) => s.unit);
@@ -39,14 +42,17 @@ const SpacesListTable = () => {
     // const [equipmentFilter, setEquipmentFilter] = useState({});
     // const [checkedAll, setCheckedAll] = useState(false);
 
-    const fetchEquipDataList = async () => {
+    const fetchSpaceDataList = async () => {
         setSpacesLoading(true);
         // const orderedBy = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
         // const sortedBy = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
+
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+
         const query = {
             bldgId,
-            dateFrom: startDate,
-            dateTo: endDate,
+            dateFrom: encodeURIComponent(dateFrom),
+            dateTo: encodeURIComponent(dateTo),
             tzInfo: timeZone,
             search,
             page: pageNo,
@@ -71,8 +77,8 @@ const SpacesListTable = () => {
     useEffect(() => {
         if (!bldgId || startDate === null || endDate === null) return;
 
-        fetchEquipDataList();
-    }, [startDate, endDate, bldgId, search, sortBy, pageSize, pageNo, userPrefUnits]);
+        fetchSpaceDataList();
+    }, [startDate, endDate, startTime, endTime, bldgId, search, sortBy, pageSize, pageNo, userPrefUnits]);
 
     const handleDownloadCSV = async () => {
         setDownloadingCSVData(true);
