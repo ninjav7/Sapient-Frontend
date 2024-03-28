@@ -9,6 +9,8 @@ import { getAllSpacesList } from '../settings/layout/services';
 import MoveLayout from '../settings/layout/MoveLayout';
 import { mapSpacesList } from '../../helpers/helpers';
 
+import './styles.scss';
+
 const MoveSpaceLayout = (props) => {
     const {
         isModalOpen = false,
@@ -34,6 +36,13 @@ const MoveSpaceLayout = (props) => {
 
     const [formattedOldValue, setFormattedOldValue] = useState('');
     const [formattedNewValue, setFormattedNewValue] = useState('');
+
+    const customModalStyle = {
+        modalContent: {
+            height: '90vh',
+            overflowY: 'auto', // Enable vertical scrolling when content exceeds the height
+        },
+    };
 
     const formatStack = (stack, isNew) => {
         let res = '';
@@ -214,10 +223,16 @@ const MoveSpaceLayout = (props) => {
 
     return (
         <>
-            <Modal show={isModalOpen} backdrop="static" keyboard={false} size="lg" centered>
-                <div className="p-4">
+            <Modal
+                show={isModalOpen}
+                backdrop="static"
+                keyboard={false}
+                size="lg"
+                centered
+                backdropClassName="modal-backdrop">
+                <div className="p-4 space-layout-container" style={customModalStyle.modalContent}>
                     <Typography.Header size={Typography.Sizes.lg} style={{ marginBottom: '8px' }}>
-                        Move Space: {spaceObj?.name}
+                        Move Space1: {spaceObj?.name}
                     </Typography.Header>
                     <Typography.Body size={Typography.Sizes.md} style={{ fontWeight: 500 }}>
                         Current Location: {formattedOldValue}

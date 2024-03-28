@@ -71,6 +71,10 @@ const SpaceDetails = () => {
 
     const [errorObj, setErrorObj] = useState({});
 
+    const [modal, setModal] = useState(false);
+    const openModal = () => setModal(true);
+    const closeModal = () => setModal(false);
+
     const [selectedFloorId, setSelectedFloorId] = useState(null);
     const [spaceObj, setSpaceObj] = useState({});
     const [updateSpaceFetcing, setUpdateSpaceFetching] = useState(false);
@@ -458,6 +462,9 @@ const SpaceDetails = () => {
                         allParentSpaces={allParentSpaces}
                         errorObj={errorObj}
                         setErrorObj={setErrorObj}
+                        modal={modal}
+                        openModal={openModal}
+                        closeModal={closeModal}
                     />
                 )}
             </div>

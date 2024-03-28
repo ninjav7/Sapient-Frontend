@@ -24,13 +24,12 @@ const ConfigurationTab = ({
     notifyUser,
     allParentSpaces,
     errorObj,
+    modal,
+    openModal,
+    closeModal,
 }) => {
     const userPrefUnits = UserStore.useState((s) => s.unit);
 
-    const openModal = () => setModal(true);
-    const closeModal = () => setModal(false);
-
-    const [modal, setModal] = useState(false);
     const [oldStack, setOldStack] = useState({});
     const [newStack, setNewStack] = useState({});
 
