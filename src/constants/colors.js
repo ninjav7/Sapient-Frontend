@@ -4,6 +4,8 @@ export const COLOR_SCHEME_BY_DEVICE = Object.freeze({
     Plug: '#59BAA4',
     Process: '#82EAF0',
     Other: '#D70040',
+    Refrigeration: '#983E6D',
+    Charging: '#567600',
 });
 
 export const DATAVIZ_COLORS = Object.freeze({
