@@ -10,12 +10,16 @@ import { percentageHandler } from '../../utils/helper';
 import { Col } from 'reactstrap';
 import DonutChartWidget, { DONUT_CHART_TYPES } from '../../sharedComponents/donutChartWidget';
 import useColors from '../../sharedComponents/hooks/useColors';
+import { handleAPIRequestParams } from '../../helpers/helpers';
 
 const PieChartsSection = () => {
     const { bldgId } = useParams();
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
+
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const userPrefUnits = UserStore.useState((s) => s.unit);
 
@@ -34,7 +38,15 @@ const PieChartsSection = () => {
     const fetchKPICount = async (tzInfo) => {
         setKPICountFetching(true);
 
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo, orderedBy: 'space_count' };
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+
+        const query = {
+            bldgId,
+            dateFrom: encodeURIComponent(dateFrom),
+            dateTo: encodeURIComponent(dateTo),
+            tzInfo,
+            orderedBy: 'space_count',
+        };
 
         try {
             const response = await fetchKPISpaceV2(query);
@@ -74,7 +86,15 @@ const PieChartsSection = () => {
     const fetchKPISquare = async (tzInfo) => {
         setKPISquareFetching(true);
 
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo, orderedBy: 'total_square_footage' };
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+
+        const query = {
+            bldgId,
+            dateFrom: encodeURIComponent(dateFrom),
+            dateTo: encodeURIComponent(dateTo),
+            tzInfo,
+            orderedBy: 'total_square_footage',
+        };
 
         try {
             const response = await fetchKPISpaceV2(query);
@@ -117,7 +137,15 @@ const PieChartsSection = () => {
     const fetchKPIEnergy = async (tzInfo) => {
         setKPIEnergyFetching(true);
 
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo, orderedBy: 'consumption' };
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+
+        const query = {
+            bldgId,
+            dateFrom: encodeURIComponent(dateFrom),
+            dateTo: encodeURIComponent(dateTo),
+            tzInfo,
+            orderedBy: 'consumption',
+        };
 
         try {
             const response = await fetchKPISpaceV2(query);
@@ -166,7 +194,7 @@ const PieChartsSection = () => {
         fetchKPIEnergy(timeZone);
         fetchKPISquare(timeZone);
         fetchKPICount(timeZone);
-    }, [startDate, endDate, bldgId, userPrefUnits]);
+    }, [startDate, endDate, startTime, endTime, bldgId, userPrefUnits]);
 
     return (
         <div style={{ display: 'flex', margin: '0 -12px' }}>

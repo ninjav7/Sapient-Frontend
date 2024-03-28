@@ -4,7 +4,6 @@ import Typography from '../../sharedComponents/typography';
 import colorPalette from '../../assets/scss/_colors.scss';
 import { formatConsumptionValue } from '../../helpers/explorehelpers';
 import { UserStore } from '../../store/UserStore';
-import { UNITS } from '../../constants/units';
 
 const MetadataContainer = ({ metadata = {}, isFetching = false }) => {
     const userPrefUnits = UserStore.useState((s) => s.unit);

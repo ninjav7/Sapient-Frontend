@@ -3,7 +3,7 @@ import Brick from '../../sharedComponents/brick';
 import { Progress, UncontrolledTooltip } from 'reactstrap';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import SkeletonLoader from '../../components/SkeletonLoader';
-import { formatConsumptionValue, pageListSizes } from '../../helpers/helpers';
+import { formatConsumptionValue, handleAPIRequestParams, pageListSizes } from '../../helpers/helpers';
 import Typography from '../../sharedComponents/typography';
 import { UNITS } from '../../constants/units';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
@@ -20,6 +20,9 @@ const EquipmentTable = ({ spaceId }) => {
     const { download } = useCSVDownload();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
+
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const userPrefUnits = UserStore.useState((s) => s.unit);
@@ -44,15 +47,18 @@ const EquipmentTable = ({ spaceId }) => {
         // const sortedBy = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
 
         try {
+            const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+
             const query = {
                 bldgId,
-                dateFrom: startDate,
-                dateTo: endDate,
+                dateFrom: encodeURIComponent(dateFrom),
+                dateTo: encodeURIComponent(dateTo),
                 timeZone,
                 page: pageNo,
                 size: pageSize,
                 search,
             };
+
             const responseAxios = await fetchEquipmentBySpace(query, spaceId);
 
             const data = responseAxios;
@@ -82,7 +88,7 @@ const EquipmentTable = ({ spaceId }) => {
         if (!bldgId || !startDate || !endDate) return;
 
         fetchEquipDataList();
-    }, [startDate, endDate, bldgId, search, sortBy, pageSize, pageNo, userPrefUnits]);
+    }, [startDate, endDate, startTime, endTime, bldgId, search, sortBy, pageSize, pageNo, userPrefUnits]);
 
     const handleDownloadCSV = async () => {
         setDownloadingCSVData(true);

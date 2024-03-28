@@ -18,6 +18,7 @@ import { useHistory } from 'react-router-dom';
 import { Col } from 'reactstrap';
 import PieChartsSection from './PieChartsSection';
 import { EXPLORE_FILTER_TYPE } from '../explore/constants';
+import { handleAPIRequestParams } from '../../helpers/helpers';
 
 const Spaces = () => {
     const { bldgId } = useParams();
@@ -28,6 +29,8 @@ const Spaces = () => {
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startTime = DateRangeStore.useState((s) => s.startTime);
+    const endTime = DateRangeStore.useState((s) => s.endTime);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const userPrefTimeFormat = UserStore.useState((s) => s.timeFormat);
@@ -66,7 +69,15 @@ const Spaces = () => {
     const fetchEnergyConsumptionBySpaceData = async (tzInfo) => {
         setChartLoading(true);
 
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo, yearly: false };
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
+
+        const query = {
+            bldgId,
+            dateFrom: encodeURIComponent(dateFrom),
+            dateTo: encodeURIComponent(dateTo),
+            tzInfo,
+            yearly: false,
+        };
 
         try {
             const data = await fetchTopEnergyConsumptionBySpaceDataHelper({ query });
@@ -88,8 +99,15 @@ const Spaces = () => {
     const fetchEnergyConsumptionBySpaceDataYearly = async (tzInfo) => {
         setYearlyChartLoading(true);
 
-        const query = { bldgId, dateFrom: startDate, dateTo: endDate, tzInfo, yearly: true };
+        const { dateFrom, dateTo } = handleAPIRequestParams(startDate, endDate, startTime, endTime);
 
+        const query = {
+            bldgId,
+            dateFrom: encodeURIComponent(dateFrom),
+            dateTo: encodeURIComponent(dateTo),
+            tzInfo,
+            yearly: true,
+        };
         try {
             const data = await fetchTopEnergyConsumptionBySpaceDataHelper({ query });
 
@@ -182,7 +200,7 @@ const Spaces = () => {
 
         fetchEnergyConsumptionBySpaceDataYearly(time_zone);
         fetchEnergyConsumptionBySpaceData(time_zone);
-    }, [startDate, endDate, bldgId, userPrefUnits]);
+    }, [startDate, endDate, startTime, endTime, bldgId, userPrefUnits]);
 
     return bldgId ? (
         <Col lg={12}>
